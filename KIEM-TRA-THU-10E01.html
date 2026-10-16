@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Kiểm tra thử 10E01</title>
+<style>
+:root{--ink:#1a1a2e;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--bad:#c5221f;--sel:#e7f0ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:18px}
+.screen{display:none;min-height:100vh;padding:24px 16px}
+.screen.on{display:block}
+.card{background:var(--card);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);max-width:720px;margin:0 auto;padding:24px}
+h1{font-size:26px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 12px}
+label{display:block;font-weight:600;margin:18px 0 6px}
+select,input{width:100%;font-size:20px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.sbd{display:flex;align-items:center;gap:8px}
+.sbd .pre{font-size:22px;font-weight:700;padding:12px 14px;background:var(--bg);border-radius:12px;letter-spacing:1px}
+.sbd input{width:110px;text-align:center;letter-spacing:3px}
+button{font-size:19px;font-weight:600;border:0;border-radius:12px;padding:14px 20px;cursor:pointer;font-family:inherit;color:var(--ink)}
+button:disabled{opacity:.4}
+.btn{background:var(--pri);color:#fff;width:100%;margin-top:22px}
+.btn2{background:#fff;border:2px solid var(--line)}
+.msg{margin-top:14px;min-height:24px;font-weight:600}
+.err{color:var(--bad)}
+.who{margin-top:18px;padding:16px;border:2px dashed var(--pri);border-radius:12px;display:none;text-align:center}
+.who .ten{font-size:26px;font-weight:800;margin:6px 0}
+.top{max-width:720px;margin:0 auto 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.timer{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.grid{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto 14px}
+.grid button{width:50px;height:50px;padding:0;background:#fff;border:2px solid var(--line)}
+.grid button.done{background:var(--sel);border-color:var(--pri)}
+.grid button.cur{outline:3px solid var(--ink)}
+.socau{font-weight:700;color:var(--pri);margin-bottom:8px}
+.q{font-size:21px;line-height:1.5;margin:0 0 14px}
+.fig{text-align:center;margin:6px 0 14px}
+.opt{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:#fff;border:2px solid var(--line);margin-bottom:12px;padding:16px;font-weight:500;line-height:1.4}
+.opt .l{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800}
+.opt.sel{border-color:var(--pri);background:var(--sel)}
+.opt.sel .l{background:var(--pri);color:#fff;border-color:var(--pri)}
+.nav{display:flex;gap:12px;margin-top:10px}
+.nav button{flex:1}
+.nop{background:var(--ok);color:#fff}
+.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,12,25,.88);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ov.on{display:flex}
+.ov .card{max-width:460px;width:100%;text-align:center}
+.big{font-size:56px;font-weight:800;margin:6px 0}
+.row2{display:flex;gap:12px}
+.row2 button{flex:1;margin-top:18px}
+</style>
+</head>
+<body>
+
+<!-- MAN DANG NHAP -->
+<div class="screen" id="scrLogin">
+  <div class="card">
+    <h1>Kiểm tra thử – Hóa 10</h1>
+    <p class="sub">Bài chạy thử hệ thống: 6 câu · 10 phút</p>
+    <label for="lop">Lớp</label>
+    <select id="lop"><option value="">– Chọn lớp –</option></select>
+    <label for="sbd">Số báo danh (nhập 2 số cuối)</label>
+    <div class="sbd"><span class="pre" id="pre">------</span><input id="sbd" inputmode="numeric" maxlength="2" autocomplete="off"></div>
+    <label for="magv">Mã giáo viên</label>
+    <input id="magv" type="password" inputmode="numeric" autocomplete="off">
+    <button class="btn" id="btnTim">Tìm tên</button>
+    <div class="msg" id="msg"></div>
+    <div class="who" id="who">
+      <div>Em có phải là</div>
+      <div class="ten" id="tenhs"></div>
+      <div class="sub">SBD <span id="mahs"></span></div>
+      <button class="btn" id="btnBatDau">Đúng tên – Bắt đầu làm bài</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAN LAM BAI -->
+<div class="screen" id="scrQuiz">
+  <div class="top">
+    <div><b id="tenTop"></b><br><span class="sub">Đã làm <span id="dalam"></span></span></div>
+    <div class="timer" id="gio">--:--</div>
+  </div>
+  <div class="grid" id="luoi"></div>
+  <div class="card">
+    <div class="socau" id="socau"></div>
+    <div class="q" id="noidung"></div>
+    <div class="fig" id="hinh"></div>
+    <div id="pa"></div>
+    <div class="nav">
+      <button class="btn2" id="truoc">◀ Câu trước</button>
+      <button class="btn2" id="sau">Câu sau ▶</button>
+    </div>
+    <button class="btn nop" id="btnNop">Nộp bài</button>
+  </div>
+</div>
+
+<!-- MAN DANG GUI -->
+<div class="screen" id="scrGui">
+  <div class="card" style="text-align:center">
+    <h1>Nộp bài</h1>
+    <p class="msg" id="guiMsg">Đang nộp bài...</p>
+    <button class="btn" id="guiLai" style="display:none">Gửi lại</button>
+  </div>
+</div>
+
+<!-- MAN KET QUA -->
+<div class="screen" id="scrKQ">
+  <div class="card" style="text-align:center">
+    <h1>Đã nộp bài thành công</h1>
+    <p class="sub" id="kqTen"></p>
+    <div class="big" id="kqDiem"></div>
+    <p id="kqCau"></p>
+    <button class="btn btn2" id="btnThoat">Thoát</button>
+  </div>
+</div>
+
+<!-- KHOA KHI ROI MAN HINH -->
+<div class="ov" id="ovKhoa">
+  <div class="card">
+    <h1>Bài đã bị khóa</h1>
+    <p>Em đã rời khỏi màn hình làm bài. Hãy báo giáo viên để mở khóa.<br><b>Nếu rời màn hình lần nữa, bài sẽ tự động nộp.</b></p>
+    <input id="makhoa" type="password" inputmode="numeric" placeholder="Mã mở khóa" autocomplete="off">
+    <button class="btn" id="btnMoKhoa">Mở khóa</button>
+    <div class="msg err" id="khoaMsg"></div>
+  </div>
+</div>
+
+<!-- XAC NHAN NOP -->
+<div class="ov" id="ovNop">
+  <div class="card">
+    <h1>Nộp bài?</h1>
+    <p id="nopMsg"></p>
+    <div class="row2">
+      <button class="btn2" id="nopKhong">Làm tiếp</button>
+      <button class="btn nop" id="nopCo">Nộp bài</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ===== CAU HINH (thay doi o day) =====
+  var CH = {
+    madot: 'THU-10E01',
+    thoiGianPhut: 10,
+    maMo: '7070',        // ban chinh thuc se chuyen ma vao Google Drive
+    maMoKhoa: '7979',
+    lop: [
+      { ten: '10E01', tiento: '261001', url: 'https://script.google.com/macros/s/AKfycbyyJbdbnq02jY1fSWdaMNEIWr-q9VH2rWVyBLlNTfUEtvFq3IoYYsJ5IJlIL42YoUVNTw/exec' }
+      // 4 lop con lai them vao day
+    ]
+  };
+
+  var HINH_O = '<svg viewBox="0 0 200 200" width="210" height="210" xmlns="http://www.w3.org/2000/svg">' +
+    '<defs><pattern id="gach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="1.5"/></pattern></defs>' +
+    '<circle cx="100" cy="100" r="42" fill="none" stroke="#000" stroke-width="1.5" stroke-dasharray="5 4"/>' +
+    '<circle cx="100" cy="100" r="78" fill="none" stroke="#000" stroke-width="1.5" stroke-dasharray="5 4"/>' +
+    '<circle cx="100" cy="100" r="18" fill="url(#gach)" stroke="#000" stroke-width="2"/>' +
+    '<g fill="#000"><circle cx="142" cy="100" r="6"/><circle cx="58" cy="100" r="6"/>' +
+    '<circle cx="167.5" cy="61" r="6"/><circle cx="100" cy="22" r="6"/><circle cx="32.5" cy="61" r="6"/>' +
+    '<circle cx="32.5" cy="139" r="6"/><circle cx="100" cy="178" r="6"/><circle cx="167.5" cy="139" r="6"/></g></svg>';
+
+  var DE = [
+    { cau: 1, hoi: 'Hạt mang điện tích dương trong hạt nhân nguyên tử là', pa: { A: 'electron', B: 'proton', C: 'neutron', D: 'ion' }, da: 'B' },
+    { cau: 2, hoi: 'Nguyên tử X có 11 proton và 12 neutron. Số khối của X là', pa: { A: '11', B: '12', C: '23', D: '34' }, da: 'C' },
+    { cau: 3, hoi: 'Cấu hình electron của nguyên tử Na (Z = 11) là', pa: { A: '1s<sup>2</sup>2s<sup>2</sup>2p<sup>6</sup>3s<sup>1</sup>', B: '1s<sup>2</sup>2s<sup>2</sup>2p<sup>6</sup>', C: '1s<sup>2</sup>2s<sup>2</sup>2p<sup>6</sup>3s<sup>2</sup>', D: '1s<sup>2</sup>2s<sup>2</sup>2p<sup>5</sup>3s<sup>2</sup>' }, da: 'A' },
+    { cau: 4, hoi: 'Nguyên tố có Z = 17 thuộc vị trí nào trong bảng tuần hoàn?', pa: { A: 'Chu kì 3, nhóm VIIA', B: 'Chu kì 2, nhóm VIIA', C: 'Chu kì 3, nhóm VIIB', D: 'Chu kì 4, nhóm IA' }, da: 'A' },
+    { cau: 5, hoi: 'Số electron tối đa trên một phân lớp p là', pa: { A: '2', B: '6', C: '10', D: '14' }, da: 'B' },
+    { cau: 6, hoi: 'Hình bên mô tả sự phân bố electron trên các lớp của một nguyên tử (chấm đen là electron). Đó là nguyên tử của nguyên tố nào?', hinh: HINH_O, pa: { A: 'Carbon (Z = 6)', B: 'Nitrogen (Z = 7)', C: 'Oxygen (Z = 8)', D: 'Fluorine (Z = 9)' }, da: 'C' }
+  ];
+
+  // ===== XU LY =====
+  var KEY = 'kt_' + CH.madot, KEY_GUI = 'ktgui_' + CH.madot;
+  var S = null, lopChon = null, hocSinh = null, dongHo = null, dangGui = false;
+
+  function $(id) { return document.getElementById(id); }
+  function luu() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function doc(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function xoa(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function tron(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function man(id) { var ds = document.querySelectorAll('.screen'); for (var i = 0; i < ds.length; i++) ds[i].classList.remove('on'); $(id).classList.add('on'); window.scrollTo(0, 0); }
+  function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
+
+  // --- Dang nhap ---
+  CH.lop.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
+  function anTen() { $('who').style.display = 'none'; hocSinh = null; }
+  $('lop').onchange = function () { lopChon = CH.lop[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; anTen(); };
+  $('sbd').oninput = anTen;
+
+  $('btnTim').onclick = function () {
+    $('msg').className = 'msg'; $('msg').textContent = '';
+    if (!lopChon) return loi('Em chưa chọn lớp.');
+    var s2 = $('sbd').value.trim();
+    if (!/^\d{2}$/.test(s2)) return loi('Hãy nhập đúng 2 số cuối của SBD.');
+    if ($('magv').value.trim() !== CH.maMo) return loi('Mã giáo viên chưa đúng.');
+    var ma = lopChon.tiento + s2;
+    $('msg').textContent = 'Đang tìm tên...';
+    $('btnTim').disabled = true;
+    fetch(lopChon.url + '?mahs=' + encodeURIComponent(ma))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        $('btnTim').disabled = false;
+        if (j.ok) {
+          hocSinh = { lop: lopChon.ten, url: lopChon.url, mahs: ma, hoten: j.hoten };
+          $('tenhs').textContent = j.hoten; $('mahs').textContent = ma;
+          $('who').style.display = 'block'; $('msg').textContent = '';
+        } else loi('Không tìm thấy SBD ' + ma + ' trong danh sách lớp.');
+      })
+      .catch(function () { $('btnTim').disabled = false; loi('Không kết nối được. Kiểm tra mạng rồi bấm lại.'); });
+  };
+
+  $('btnBatDau').onclick = function () {
+    if (!hocSinh) return;
+    S = { hs: hocSinh, thuTu: tron(DE.map(function (_, i) { return i; })), xao: DE.map(function () { return tron(['A', 'B', 'C', 'D']); }),
+          chon: {}, batDau: Date.now(), roi: 0, khoa: false, vt: 0, daNop: false };
+    luu(); vaoBai();
+  };
+
+  // --- Lam bai ---
+  function vaoBai() {
+    man('scrQuiz'); $('tenTop').textContent = S.hs.hoten + ' – ' + S.hs.lop;
+    veLuoi(); veCau(); chayGio();
+    if (S.khoa) $('ovKhoa').classList.add('on');
+  }
+  function veLuoi() {
+    var g = $('luoi'); g.innerHTML = '';
+    S.thuTu.forEach(function (qi, k) {
+      var b = document.createElement('button'); b.textContent = k + 1;
+      if (S.chon[DE[qi].cau]) b.classList.add('done');
+      if (k === S.vt) b.classList.add('cur');
+      b.onclick = function () { S.vt = k; luu(); veLuoi(); veCau(); };
+      g.appendChild(b);
+    });
+    $('dalam').textContent = Object.keys(S.chon).length + '/' + DE.length + ' câu';
+  }
+  function veCau() {
+    var k = S.vt, qi = S.thuTu[k], q = DE[qi];
+    $('socau').textContent = 'Câu ' + (k + 1) + ' / ' + DE.length;
+    $('noidung').innerHTML = q.hoi;
+    $('hinh').innerHTML = q.hinh || '';
+    var box = $('pa'); box.innerHTML = '';
+    S.xao[qi].forEach(function (goc, j) {
+      var b = document.createElement('button');
+      b.className = 'opt' + (S.chon[q.cau] === goc ? ' sel' : '');
+      b.innerHTML = '<span class="l">' + 'ABCD'[j] + '</span><span>' + q.pa[goc] + '</span>';
+      b.onclick = function () { S.chon[q.cau] = goc; luu(); veCau(); veLuoi(); };
+      box.appendChild(b);
+    });
+    $('truoc').disabled = k === 0; $('sau').disabled = k === DE.length - 1;
+  }
+  $('truoc').onclick = function () { if (S.vt > 0) { S.vt--; luu(); veLuoi(); veCau(); } };
+  $('sau').onclick = function () { if (S.vt < DE.length - 1) { S.vt++; luu(); veLuoi(); veCau(); } };
+
+  function conLai() { return CH.thoiGianPhut * 60 - Math.floor((Date.now() - S.batDau) / 1000); }
+  function chayGio() {
+    clearInterval(dongHo);
+    var f = function () {
+      var t = conLai();
+      if (t <= 0) { $('gio').textContent = '00:00'; clearInterval(dongHo); nopBai(); return; }
+      var m = Math.floor(t / 60), s = t % 60;
+      $('gio').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      $('gio').classList.toggle('low', t <= 60);
+    };
+    f(); dongHo = setInterval(f, 1000);
+  }
+
+  // --- Roi man hinh: lan 1 khoa, lan 2 tu nop ---
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      if (!S || S.daNop || !$('scrQuiz').classList.contains('on')) return;
+      S.roi++;
+      if (S.roi >= 2) { luu(); nopBai(); return; }
+      S.khoa = true; luu(); $('ovKhoa').classList.add('on');
+    } else {
+      var cho = doc(KEY_GUI);
+      if (cho && !dangGui) guiBai(cho);
+    }
+  });
+  $('btnMoKhoa').onclick = function () {
+    if ($('makhoa').value.trim() === CH.maMoKhoa) {
+      S.khoa = false; luu(); $('makhoa').value = ''; $('khoaMsg').textContent = '';
+      $('ovKhoa').classList.remove('on');
+    } else $('khoaMsg').textContent = 'Mã chưa đúng.';
+  };
+
+  // --- Nop bai ---
+  $('btnNop').onclick = function () {
+    var con = DE.length - Object.keys(S.chon).length;
+    $('nopMsg').textContent = con > 0 ? 'Em còn ' + con + ' câu chưa làm. Em chắc chắn muốn nộp bài?' : 'Em đã làm hết các câu. Nộp bài ngay?';
+    $('ovNop').classList.add('on');
+  };
+  $('nopKhong').onclick = function () { $('ovNop').classList.remove('on'); };
+  $('nopCo').onclick = function () { nopBai(); };
+
+  function nopBai() {
+    if (!S || S.daNop) return;
+    S.daNop = true; clearInterval(dongHo);
+    $('ovNop').classList.remove('on'); $('ovKhoa').classList.remove('on');
+    var dung = 0;
+    var chitiet = DE.map(function (q) {
+      var c = S.chon[q.cau] || '', d = c === q.da; if (d) dung++;
+      return { cau: q.cau, chon: c, dapan: q.da, dung: d };
+    });
+    var tg = Math.min(Math.round((Date.now() - S.batDau) / 1000), CH.thoiGianPhut * 60);
+    var cho = {
+      url: S.hs.url, hoten: S.hs.hoten,
+      goi: { loai: 'bailam', madot: CH.madot, mahs: S.hs.mahs, made: 'XAO', diem: Math.round(dung / DE.length * 1000) / 100,
+             socaudung: dung, tongsocau: DE.length, thoigianlam: tg, chitiet: chitiet }
+    };
+    try { localStorage.setItem(KEY_GUI, JSON.stringify(cho)); } catch (e) {}
+    xoa(KEY);
+    guiBai(cho);
+  }
+
+  function ngu(giay) { return new Promise(function (r) { setTimeout(r, giay * 1000); }); }
+  function guiBai(cho) {
+    if (dangGui) return;
+    dangGui = true;
+    man('scrGui'); $('guiMsg').className = 'msg'; $('guiMsg').textContent = 'Đang nộp bài...'; $('guiLai').style.display = 'none';
+    var cho2 = [0, 2, 3, 5, 8, 10, 15, 20], i = 0;
+    function thu() {
+      if (i >= cho2.length) {
+        dangGui = false;
+        $('guiMsg').className = 'msg err';
+        $('guiMsg').textContent = 'Chưa nộp được. Bài làm vẫn được giữ trong máy. Hãy báo giáo viên và bấm "Gửi lại".';
+        $('guiLai').style.display = 'block';
+        return;
+      }
+      var doi = cho2[i];
+      if (doi) $('guiMsg').textContent = 'Mạng đang bận, tự gửi lại (lần ' + (i + 1) + ')...';
+      i++;
+      ngu(doi).then(function () {
+        return fetch(cho.url, { method: 'POST', body: JSON.stringify(cho.goi) });
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (j.ok) { xoa(KEY_GUI); dangGui = false; ketQua(cho); }
+        else if (/Ma HS/.test(j.msg || '')) { i = cho2.length; thu(); }
+        else thu();
+      }).catch(function () { thu(); });
+    }
+    thu();
+  }
+  $('guiLai').onclick = function () { var cho = doc(KEY_GUI); if (cho) guiBai(cho); };
+
+  function ketQua(cho) {
+    man('scrKQ');
+    $('kqTen').textContent = cho.hoten + ' – SBD ' + cho.goi.mahs;
+    $('kqDiem').textContent = cho.goi.diem + ' điểm';
+    $('kqCau').textContent = 'Đúng ' + cho.goi.socaudung + '/' + cho.goi.tongsocau + ' câu';
+    S = null;
+  }
+  $('btnThoat').onclick = function () { location.replace('about:blank'); };
+
+  // --- Khi mo trang: gui bai con treo / lam tiep bai dang do ---
+  var treo = doc(KEY_GUI);
+  if (treo) guiBai(treo);
+  else {
+    var s = doc(KEY);
+    if (s && !s.daNop) { S = s; if (conLai() <= 0) { vaoBai(); nopBai(); } else vaoBai(); }
+    else man('scrLogin');
+  }
+})();
+</script>
+</body>
+</html>
