@@ -13,7 +13,7 @@ const TAB_BL = 'BAI LAM';
 const TAB_HD = 'HOAT DONG';
 const THU_MUC_GOC = 'BAI LAM HOC SINH';
 
-const HEAD_BL = ['ThoiGianNop','MaDot','MaHS','HoTen','MaDe','Diem','SoCauDung','TongSoCau','ThoiGianLam_giay','ChiTiet','FileBaiLam'];
+const HEAD_BL = ['ThoiGianNop','MaDot','MaHS','HoTen','MaDe','Diem','SoCauDung','TongSoCau','ThoiGianLam_giay','ChiTiet','FileBaiLam','LanLam'];
 const HEAD_HD = ['ThoiGian','MaHoatDong','MaHS','HoTen','CauHoi','SoLanThu','DungSai','ThoiGian_giay'];
 
 // ---------------------------------------------------------------------
@@ -60,11 +60,20 @@ function batDau(d) {
   if (String(d.magv || '').trim() !== docMa().gv) return {ok: false, loi: 'magv', msg: 'Ma giao vien chua dung'};
   const c = timDot(d.madot);
   if (!c || !c.mo || !hopLop(c)) return {ok: false, msg: 'Bai kiem tra nay chua mo hoac da dong'};
-  if (timBaiDaNop(c.madot, ma)) return {ok: false, loi: 'danop', msg: 'Em da nop bai dot nay'};
+  const cu = timBaiDaNop(c.madot, ma);
+  let lan = 1;
+  if (cu) {
+    const mll = String(d.malamlai || '').trim();
+    if (!mll) return {ok: false, loi: 'danop', msg: 'Em da nop bai dot nay', lan: cu.lan};
+    const dung = docMa().lamlai;
+    if (!dung) return {ok: false, loi: 'malamlai', msg: 'Tab MA chua co dong MaLamLai'};
+    if (mll !== dung) return {ok: false, loi: 'malamlai', msg: 'Ma cho lam lai chua dung'};
+    lan = cu.lan + 1;
+  }
   const de = docDe(c.madot).map(function (q) {
     return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh)};
   });
-  return {ok: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, cau: de};
+  return {ok: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan, cau: de};
 }
 
 // ---------------------------------------------------------------------
@@ -75,8 +84,9 @@ function nopBai(d) {
   const hs = timHS(ma);
   if (!hs) return {ok: false, msg: 'Ma HS khong co trong danh sach'};
   const madot = String(d.madot || '').trim();
+  const lan = Math.max(1, Number(d.lan) || 1);
   const cu = timBaiDaNop(madot, ma);
-  if (cu) return {ok: true, hoten: hs.ten, diem: cu.diem, socaudung: cu.socaudung, tongsocau: cu.tongsocau, danop: true};
+  if (cu && cu.lan >= lan) return {ok: true, hoten: hs.ten, diem: cu.diem, socaudung: cu.socaudung, tongsocau: cu.tongsocau, danop: true};
 
   const c = timDot(madot) || {madot: madot, ten: madot};
   const de = docDe(madot);
@@ -94,19 +104,19 @@ function nopBai(d) {
   const now = new Date();
 
   const thuMuc = layThuMucDot(lopNay(), madot, c, de);
-  const url = luuPDFBaiLam(thuMuc, c, ma, hs.ten, now, giay, diem, dung, tong, ct);
+  const url = luuPDFBaiLam(thuMuc, c, ma, hs.ten, now, giay, diem, dung, tong, ct, lan);
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
     const cu2 = timBaiDaNop(madot, ma);
-    if (cu2) return {ok: true, hoten: hs.ten, diem: cu2.diem, socaudung: cu2.socaudung, tongsocau: cu2.tongsocau, danop: true};
+    if (cu2 && cu2.lan >= lan) return {ok: true, hoten: hs.ten, diem: cu2.diem, socaudung: cu2.socaudung, tongsocau: cu2.tongsocau, danop: true};
     layTab(TAB_BL, HEAD_BL).appendRow([now, madot, ma, hs.ten, 'XAO', diem, dung, tong, giay,
-      ct.map(function (x) { return x.chon || '-'; }).join(','), url]);
+      ct.map(function (x) { return x.chon || '-'; }).join(','), url, lan]);
   } finally {
     lock.releaseLock();
   }
-  return {ok: true, hoten: hs.ten, diem: diem, socaudung: dung, tongsocau: tong};
+  return {ok: true, hoten: hs.ten, diem: diem, socaudung: dung, tongsocau: tong, lan: lan};
 }
 
 // ---------------------------------------------------------------------
@@ -124,7 +134,7 @@ function xemLai(d) {
     const chon = String(bai.chitiet || '').split(',');
     const de = docDe(c.madot);
     ketqua.push({
-      madot: c.madot, ten: c.ten, diem: bai.diem, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
+      madot: c.madot, ten: c.ten + (bai.lan > 1 ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
       cau: de.map(function (q, i) {
         const x = chon[i] && chon[i] !== '-' ? chon[i] : '';
         return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chon: x, dapan: q.da, dung: x !== '' && x === q.da};
@@ -174,11 +184,11 @@ function hopLop(c) {
   const l = khongDau(lopNay());
   return c.lop.split(',').map(function (s) { return s.trim(); }).indexOf(l) >= 0;
 }
-// Tab MA: cot A ten ma, cot B gia tri (MaGV, MaMoKhoa)
+// Tab MA: cot A ten ma, cot B gia tri (MaGV, MaMoKhoa, MaLamLai)
 function docMa() {
   const m = {};
   kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[String(r[0]).trim()] = String(r[1]).trim(); });
-  return {gv: m['MaGV'] || '', mokhoa: m['MaMoKhoa'] || ''};
+  return {gv: m['MaGV'] || '', mokhoa: m['MaMoKhoa'] || '', lamlai: m['MaLamLai'] || ''};
 }
 // Tab <MaDot>: Cau | NoiDung | A | B | C | D | DapAn | Hinh
 function docDe(madot) {
@@ -233,7 +243,7 @@ function timBaiDaNop(madot, ma) {
   const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues();
   for (let i = v.length - 1; i >= 0; i--) {
     if (String(v[i][1]).trim() === madot && String(v[i][2]).trim() === ma) {
-      return {diem: v[i][5], socaudung: v[i][6], tongsocau: v[i][7], chitiet: v[i][9]};
+      return {diem: v[i][5], socaudung: v[i][6], tongsocau: v[i][7], chitiet: v[i][9], lan: Number(v[i][11]) || 1};
     }
   }
   return null;
@@ -290,18 +300,19 @@ function htmlDeGoc(c, de) {
     '<h2>ĐỀ GỐC – ' + esc(c.ten) + '</h2><p style="text-align:center">Mã đợt: ' + esc(c.madot) + ' · ' + de.length + ' câu</p>' +
     de.map(function (q) { return htmlCau(q, false); }).join('') + '</body></html>';
 }
-function luuPDFBaiLam(thuMuc, c, ma, ten, now, giay, diem, dung, tong, ct) {
+function luuPDFBaiLam(thuMuc, c, ma, ten, now, giay, diem, dung, tong, ct, lan) {
+  lan = lan || 1;
   const tz = Session.getScriptTimeZone();
   const html = '<html><head><meta charset="utf-8"><style>' + CSS_PDF + '</style></head><body>' +
     '<h2>BÀI LÀM KIỂM TRA</h2><table class="tt">' +
     '<tr><td><b>Lớp:</b> ' + esc(lopNay()) + '</td><td><b>Bài:</b> ' + esc(c.ten) + ' (' + esc(c.madot) + ')</td></tr>' +
-    '<tr><td><b>Học sinh:</b> ' + esc(ten) + '</td><td><b>Mã HS:</b> ' + esc(ma) + '</td></tr>' +
+    '<tr><td><b>Học sinh:</b> ' + esc(ten) + (lan > 1 ? ' (làm lần ' + lan + ')' : '') + '</td><td><b>Mã HS:</b> ' + esc(ma) + '</td></tr>' +
     '<tr><td><b>Nộp lúc:</b> ' + Utilities.formatDate(now, tz, 'dd/MM/yyyy HH:mm:ss') + '</td>' +
     '<td><b>Thời gian làm:</b> ' + Math.floor(giay / 60) + ' phút ' + (giay % 60) + ' giây</td></tr>' +
     '<tr><td colspan="2"><b>Điểm: ' + esc(diem) + '</b> (' + dung + '/' + tong + ' câu đúng). ' +
     'Câu sai: ' + (ct.filter(function (x) { return !x.dung; }).map(function (x) { return x.cau; }).join(', ') || 'không có') + '</td></tr>' +
     '</table>' + ct.map(function (q) { return htmlCau(q, true); }).join('') + '</body></html>';
-  const tenFile = c.madot + '_' + ma + '_' + ten + '_' + Utilities.formatDate(now, tz, 'HHmmss') + '.pdf';
+  const tenFile = c.madot + '_' + ma + '_' + ten + (lan > 1 ? '_lan' + lan : '') + '_' + Utilities.formatDate(now, tz, 'HHmmss') + '.pdf';
   return thuMuc.createFile(htmlSangPDF(html, tenFile)).getUrl();
 }
 
@@ -315,7 +326,9 @@ function khongDau(s) {
 function layTab(ten, head) {
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(ten) || ss.insertSheet(ten);
-  if (sh.getLastRow() <= 1) sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold');
+  if (sh.getLastRow() <= 1 || String(sh.getRange(1, head.length).getValue()) !== head[head.length - 1]) {
+    sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold');
+  }
   return sh;
 }
 function esc(s) {
@@ -359,7 +372,7 @@ function taoKhoDeMau() {
   }
   const ma = tab('MA');
   if (ma.getLastRow() < 1) {
-    ma.getRange(1, 1, 3, 2).setNumberFormat('@').setValues([['Ten', 'Ma'], ['MaGV', '7070'], ['MaMoKhoa', '7979']]);
+    ma.getRange(1, 1, 4, 2).setNumberFormat('@').setValues([['Ten', 'Ma'], ['MaGV', '7070'], ['MaMoKhoa', '7979'], ['MaLamLai', '8080']]);
     ma.getRange('A1:B1').setFontWeight('bold');
   }
   const de = tab('THU-02');

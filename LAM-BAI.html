@@ -73,6 +73,11 @@ button:disabled{opacity:.4}
       <label for="dot">Bài kiểm tra</label>
       <select id="dot"></select>
       <button class="btn" id="btnBatDau">Đúng tên – Bắt đầu làm bài</button>
+      <div id="lamLai" style="display:none">
+        <label for="malamlai">Giáo viên nhập mã cho làm lại</label>
+        <input id="malamlai" type="password" inputmode="numeric" autocomplete="off">
+        <button class="btn" id="btnLamLai">Cho làm lại</button>
+      </div>
     </div>
   </div>
 </div>
@@ -156,7 +161,7 @@ button:disabled{opacity:.4}
 
   // ---------- Dang nhap ----------
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
-  function anTen() { $('who').style.display = 'none'; hocSinh = null; }
+  function anTen() { $('who').style.display = 'none'; $('lamLai').style.display = 'none'; hocSinh = null; }
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; anTen(); };
   $('sbd').oninput = anTen;
 
@@ -184,26 +189,37 @@ button:disabled{opacity:.4}
       .catch(function () { $('btnTim').disabled = false; loi('Không kết nối được. Kiểm tra mạng rồi bấm lại.'); });
   };
 
-  $('btnBatDau').onclick = function () {
+  $('dot').onchange = function () { $('lamLai').style.display = 'none'; };
+  $('btnBatDau').onclick = function () { batDau(''); };
+  $('btnLamLai').onclick = function () {
+    var m = $('malamlai').value.trim();
+    if (!m) return loi('Giáo viên chưa nhập mã cho làm lại.');
+    batDau(m);
+  };
+  function batDau(malamlai) {
     if (!hocSinh) return;
-    var b = $('btnBatDau'); b.disabled = true; b.textContent = 'Đang tải đề...';
-    goi(hocSinh.url, { action: 'batdau', mahs: hocSinh.mahs, madot: $('dot').value, magv: $('magv').value.trim() })
+    var b = malamlai ? $('btnLamLai') : $('btnBatDau'), chu = b.textContent;
+    $('msg').className = 'msg'; $('msg').textContent = '';
+    b.disabled = true; b.textContent = 'Đang tải đề...';
+    goi(hocSinh.url, { action: 'batdau', mahs: hocSinh.mahs, madot: $('dot').value, magv: $('magv').value.trim(), malamlai: malamlai })
       .then(function (j) {
-        b.disabled = false; b.textContent = 'Đúng tên – Bắt đầu làm bài';
+        b.disabled = false; b.textContent = chu;
         if (!j.ok) {
           if (j.loi === 'magv') return loi('Mã giáo viên chưa đúng.');
-          if (j.loi === 'danop') return loi('Em đã nộp bài này rồi.');
+          if (j.loi === 'danop') { $('lamLai').style.display = 'block'; return loi('Em đã nộp bài này (lần ' + (j.lan || 1) + '). Nếu được giáo viên cho làm lại, giáo viên nhập mã bên dưới.'); }
+          if (j.loi === 'malamlai') { $('malamlai').value = ''; return loi('Mã cho làm lại chưa đúng.'); }
           return loi('Chưa vào được bài: ' + (j.msg || ''));
         }
-        S = { hs: hocSinh, madot: j.madot, ten: j.ten, phut: j.phut, de: j.cau,
+        $('malamlai').value = ''; $('lamLai').style.display = 'none';
+        S = { hs: hocSinh, madot: j.madot, ten: j.ten + (j.lan > 1 ? ' (lần ' + j.lan + ')' : ''), lan: j.lan || 1, phut: j.phut, de: j.cau,
               thuTu: tron(j.cau.map(function (_, i) { return i; })),
               xao: j.cau.map(function () { return tron(['A', 'B', 'C', 'D']); }),
               chon: {}, batDau: Date.now(), roi: 0, khoa: false, vt: 0, daNop: false };
         $('magv').value = '';
         luu(); vaoBai();
       })
-      .catch(function () { b.disabled = false; b.textContent = 'Đúng tên – Bắt đầu làm bài'; loi('Không tải được đề. Kiểm tra mạng rồi bấm lại.'); });
-  };
+      .catch(function () { b.disabled = false; b.textContent = chu; loi('Không tải được đề. Kiểm tra mạng rồi bấm lại.'); });
+  }
 
   // ---------- Lam bai ----------
   function vaoBai() {
@@ -294,7 +310,7 @@ button:disabled{opacity:.4}
     $('ovNop').classList.remove('on'); $('ovKhoa').classList.remove('on');
     var tg = Math.min(Math.round((Date.now() - S.batDau) / 1000), S.phut * 60);
     var cho = { url: S.hs.url, hoten: S.hs.hoten,
-                goi: { action: 'nop', madot: S.madot, mahs: S.hs.mahs, chon: S.chon, thoigianlam: tg } };
+                goi: { action: 'nop', madot: S.madot, mahs: S.hs.mahs, lan: S.lan || 1, chon: S.chon, thoigianlam: tg } };
     ghi(KEY_GUI, cho);
     xoa(KEY);
     guiBai(cho);
