@@ -5,7 +5,7 @@
 // Dan toan bo file nay vao Tien ich -> Apps Script cua tung file SO THEO DOI.
 // =====================================================================
 
-// ID cua file KHO DE HOA 10 (doan giua /d/ va /edit trong duong link)
+// ID cua file KHO DE (dung chung moi khoi; cot Lop trong tab CAU HINH chon lop duoc lam)
 const KHO_DE_ID = 'DAN_ID_KHO_DE_VAO_DAY';
 
 const TAB_DS = 'DANHSACH';
