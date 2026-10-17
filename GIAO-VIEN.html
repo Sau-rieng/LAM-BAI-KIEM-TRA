@@ -92,7 +92,11 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   function man(id) { ['scrLogin', 'scrDot', 'scrTheo'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function chuan(s) { return String(s || '').toUpperCase().replace(/\s+/g, ''); }
-  function goi(url, du) { return fetch(url, { method: 'POST', body: JSON.stringify(du) }).then(function (r) { return r.json(); }); }
+  // Doi toi da 30 giay moi lop; qua thoi gian thi bao loi thay vi treo "Dang tai..."
+  function goi(url, du) {
+    var hetGio = new Promise(function (_, loi) { setTimeout(function () { loi(new Error('quá 30 giây không trả lời')); }, 30000); });
+    return Promise.race([fetch(url, { method: 'POST', body: JSON.stringify(du) }).then(function (r) { return r.json(); }), hetGio]);
+  }
   // Dot/kho de dung chung: goi lan luot cac lop den khi co lop tra loi
   function goiBatKy(du, i) {
     i = i || 0;
@@ -194,7 +198,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     $('capNhat').textContent = 'Đang tải...';
     Promise.all(lops.map(function (l) {
       return goi(l.url, { action: 'gv_theodoi', ma: MA, madot: d.madot }).then(function (j) { j.tenLop = l.ten; j.tiento = l.tiento; return j; })
-        .catch(function () { return { ok: false, tenLop: l.ten, msg: 'không kết nối được' }; });
+        .catch(function (e) { return { ok: false, tenLop: l.ten, msg: 'Không kết nối được (' + e.message + ')' }; });
     })).then(function (kq) {
       box.innerHTML = '';
       kq.forEach(function (j) { box.appendChild(veLop(j)); });
@@ -206,7 +210,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   var THU_TU = { danglam: 0, chua: 1, danop: 2 };
   function veLop(j) {
     var el = document.createElement('div'); el.className = 'card';
-    if (!j.ok) { el.innerHTML = '<h2>Lớp ' + esc(j.tenLop) + '</h2><div class="loi">' + esc(j.msg || 'Lỗi') + ' – sổ theo dõi lớp này đã dán mã mới và triển khai phiên bản mới chưa?</div>'; return el; }
+    if (!j.ok) { el.innerHTML = '<h2>Lớp ' + esc(j.tenLop) + '</h2><div class="loi">' + (/hop le/i.test(j.msg || '') ? 'Sổ theo dõi lớp này chưa có mã Khối 3: dán SoTheoDoi.gs mới rồi Triển khai → Quản lý → ✎ → Phiên bản mới.' : esc(j.msg || 'Lỗi')) + '</div>'; return el; }
     var dem = { danop: 0, danglam: 0, chua: 0 }, tong = 0;
     j.hs.forEach(function (h) { dem[h.tt]++; if (h.tt === 'danop') tong += Number(h.diem) || 0; });
     var tb = dem.danop ? Math.round(tong / dem.danop * 100) / 100 : '–';
