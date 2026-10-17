@@ -509,17 +509,23 @@ function taoKhoDeMau() {
   if (thua && ss.getSheets().length > 1 && thua.getLastRow() === 0) ss.deleteSheet(thua);
 }
 
-// 3) Thu: doc de, tao 1 PDF bai lam thu (khong ghi vao Sheet)
+// 3) Kiem tra ket noi: ten kho de, cac dot, ma GV; tao 1 PDF bai lam thu (co hinh) trong thu muc THU
 function kiemTra() {
-  const de = docDe('THU-02');
-  Logger.log('Doc duoc ' + de.length + ' cau. Ma GV: ' + (docMa().gv ? 'co' : 'CHUA CO'));
-  const c = timDot('THU-02');
-  const ct = de.map(function (q, i) {
-    const x = i % 2 ? q.da : 'A';
-    return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: q.hinh, chon: x, dapan: q.da, dung: x === q.da};
-  });
-  const tm = layThuMucDot(lopNay(), 'THU-02', c, de);
-  Logger.log(luuPDFBaiLam(tm, c, 'THU', 'Bai thu', new Date(), 75, 0, 0, de.length, ct));
+  const ss = kho();
+  Logger.log('Kho de dang dung: ' + ss.getName());
+  const ds = docCauHinh();
+  Logger.log('CAU HINH co ' + ds.length + ' dot: ' + ds.map(function (c) { return c.madot; }).join(', '));
+  Logger.log('Ma GV: ' + (docMa().gv ? 'co' : 'CHUA CO') + ' · Ma cho lam lai: ' + (docMa().lamlai ? 'co' : 'CHUA CO'));
+  const coTab = ds.filter(function (c) { return ss.getSheetByName(c.madot); });
+  const thieu = ds.filter(function (c) { return !ss.getSheetByName(c.madot); });
+  if (thieu.length) Logger.log('CANH BAO - chua co tab de cho: ' + thieu.map(function (c) { return c.madot; }).join(', '));
+  if (!coTab.length) throw new Error('Kho de chua co tab de nao khop voi CAU HINH');
+  const c = coTab.filter(function (c) { return /<img/i.test(JSON.stringify(ss.getSheetByName(c.madot).getDataRange().getValues())); })[0] || coTab[0];
+  const de = docDe(c.madot);
+  Logger.log('De thu: ' + c.madot + ' (' + de.length + ' cau)');
+  const kq = chamBai(de, function (q) { return q.loai === 'TN' ? q.da : q.loai === 'DS' ? 'DSDS' : '1'; });
+  const tm = layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), 'THU');
+  Logger.log('PDF thu (mo de xem hinh): ' + luuPDFBaiLam(tm, c, 'THU', 'Bai thu', new Date(), 75, kq.diem, kq.dung, de.length, kq.ct, 1));
 }
 
 const HINH_MAU = '<svg viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg">' +
