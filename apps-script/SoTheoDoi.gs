@@ -47,6 +47,7 @@ function doPost(e) {
       case 'mokhoa': return json({ok: String(d.ma || '').trim() === docMa().mokhoa});
       case 'nop':    return json(nopBai(d));
       case 'chobai': return json(trangThaiDot(d.madot));
+      case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
       case 'gv_dot':
       case 'gv_dat':
@@ -82,10 +83,15 @@ function batDau(d) {
     if (mll !== dung) return {ok: false, loi: 'malamlai', msg: 'Ma cho lam lai chua dung'};
     lan = cu.lan + 1;
   }
-  // Phong cho: GV chua bam "Bat dau" -> ghi nhan HS dang cho, chua gui de
+  // Phong cho: GV chua bam "Bat dau" -> ghi nhan HS dang cho va gui truoc de DA KHOA MA.
+  // Khi GV bam Bat dau, iPad chi can nhan "chia khoa" nho de mo de -> khong don tai vao Google.
   if (c.cho) {
     ghiDong(TAB_PC, HEAD_PC, [new Date(), c.madot, ma]);
-    return {ok: true, cho: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan};
+    const deKhoa = docDe(c.madot).map(function (q) {
+      return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh)};
+    });
+    return {ok: true, cho: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan,
+      goi: maHoa(deKhoa, khoaDot(c.madot))};
   }
   // Gio ket thuc chung = luc GV bam Bat dau + thoi gian lam bai (lan lam lai: tinh rieng)
   let hetLuc = 0;
@@ -267,12 +273,39 @@ function gvTheoDoi(d) {
 function trangThaiDot(madot) {
   madot = String(madot || '').trim();
   const cache = CacheService.getScriptCache();
+  let r = null;
   const daCo = cache.get('tt_' + madot);
-  if (daCo) return JSON.parse(daCo);
-  const c = timDot(madot);
-  const r = {ok: true, tt: c ? c.tt : 'DONG'};
-  try { cache.put('tt_' + madot, JSON.stringify(r), 5); } catch (e) {}
+  if (daCo) r = JSON.parse(daCo);
+  else {
+    const c = timDot(madot);
+    r = {ok: true, tt: c ? c.tt : 'DONG', hetLuc: c && c.batdauluc ? c.batdauluc + c.phut * 60000 : 0};
+    try { cache.put('tt_' + madot, JSON.stringify(r), 3); } catch (e) {}
+  }
+  if (r.tt === 'MO') r.khoa = khoaDot(madot);
+  r.bayGio = Date.now();
   return r;
+}
+// HS da mo de tu phong cho -> ghi "dang lam" cho trang giao vien
+function ghiVaoBai(d) {
+  const ma = String(d.mahs || '').trim();
+  if (!timHS(ma)) return {ok: false};
+  ghiDong(TAB_BD, HEAD_BD, [new Date(), String(d.madot || '').trim(), ma, Math.max(1, Number(d.lan) || 1)]);
+  return {ok: true};
+}
+// Chia khoa rieng cho moi dot (luu trong Script Properties cua so theo doi)
+function khoaDot(madot) {
+  const p = PropertiesService.getScriptProperties();
+  let k = p.getProperty('khoa_' + madot);
+  if (!k) { k = Utilities.getUuid().replace(/-/g, ''); p.setProperty('khoa_' + madot, k); }
+  return k;
+}
+// Ma hoa XOR don gian: chi de HS khong doc duoc de truoc gio bat dau
+function maHoa(obj, khoa) {
+  const b = Utilities.newBlob(JSON.stringify(obj)).getBytes();
+  const k = [];
+  for (let i = 0; i < khoa.length; i += 2) k.push(parseInt(khoa.substr(i, 2), 16));
+  const out = b.map(function (x, i) { let v = ((x & 255) ^ k[i % k.length]) & 255; return v > 127 ? v - 256 : v; });
+  return Utilities.base64Encode(out);
 }
 
 function ghiDong(tab, head, row) {

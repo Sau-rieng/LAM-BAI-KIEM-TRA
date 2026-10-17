@@ -256,10 +256,22 @@ button:disabled{opacity:.4}
     $('choTen').textContent = j.hoten + ' – SBD ' + hocSinh.mahs;
     $('choBai').textContent = j.ten + ' · ' + j.phut + ' phút';
     $('choMsg').textContent = 'Em đã vào phòng chờ. Hãy đợi giáo viên bấm bắt đầu – đề sẽ tự hiện, không cần bấm gì.';
+    $('choBai').textContent = j.ten + ' · ' + j.phut + ' phút' + (j.goi ? ' · ✓ Đề đã tải sẵn về máy' : '');
     var dangVao = false;
     function hoi() {
       clearTimeout(henCho);
       goi(hocSinh.url, { action: 'chobai', madot: madot }).then(function (t) {
+        // De da tai san (khoa ma): chi can chia khoa la mo ngay, khong tai lai tu Google
+        if (t.tt === 'MO' && t.khoa && j.goi && !dangVao) {
+          var de = giaiMa(j.goi, t.khoa);
+          if (de) {
+            dangVao = true;
+            vaoTuDe({ madot: madot, ten: j.ten, lan: j.lan, phut: j.phut, cau: de,
+                      hetLuc: (j.lan || 1) === 1 ? t.hetLuc : 0, bayGio: t.bayGio });
+            goi(hocSinh.url, { action: 'vaobai', mahs: hocSinh.mahs, madot: madot, lan: j.lan || 1 }).catch(function () {});
+            return;
+          }
+        }
         if (t.tt === 'MO' && !dangVao) {
           dangVao = true;
           $('choMsg').textContent = 'Bắt đầu! Đang tải đề...';
@@ -271,10 +283,18 @@ button:disabled{opacity:.4}
           });
         }
         if (t.tt === 'DONG') { man('scrLogin'); loi('Giáo viên đã đóng bài kiểm tra này.'); return; }
-        henCho = setTimeout(hoi, 4000 + Math.random() * 3000);
-      }).catch(function () { dangVao = false; henCho = setTimeout(hoi, 5000); });
+        henCho = setTimeout(hoi, 3000 + Math.random() * 2000);
+      }).catch(function () { dangVao = false; henCho = setTimeout(hoi, 4000); });
     }
     henCho = setTimeout(hoi, 2000 + Math.random() * 2000);
+  }
+  function giaiMa(goi, khoa) {
+    try {
+      var b = atob(goi), k = [], u = new Uint8Array(b.length);
+      for (var i = 0; i < khoa.length; i += 2) k.push(parseInt(khoa.substr(i, 2), 16));
+      for (var j = 0; j < b.length; j++) u[j] = b.charCodeAt(j) ^ k[j % k.length];
+      return JSON.parse(new TextDecoder('utf-8').decode(u));
+    } catch (e) { return null; }
   }
   function vaoTuDe(j) {
     S = { hs: hocSinh, madot: j.madot, ten: j.ten + (j.lan > 1 ? ' (lần ' + j.lan + ')' : ''), lan: j.lan || 1, phut: j.phut, de: j.cau,
