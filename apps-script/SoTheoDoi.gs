@@ -365,13 +365,13 @@ const CSS_PDF = 'body{font-family:Arial,sans-serif;font-size:11.5pt;color:#000}'
 function htmlCau(q, coBaiLam) {
   const hinh = q.hinh ? anhDataUri(q.hinh) : '';
   const da = q.dapan || q.da;
-  let s = '<div class="q"><div><b>' + nhanCau(q) + '.</b> ' + q.hoi;
+  let s = '<div class="q"><div><b>' + nhanCau(q) + '.</b> ';
   if (coBaiLam) {
     let kq = q.chon === '' ? '[ Bỏ trống ]' : (q.dung ? '[ ✓ Đúng ]' : '[ ✗ Sai ]');
     if (q.loai === 'DS' && q.chon !== '') kq = '[ ' + (q.dung ? '✓ ' : '') + 'Đúng ' + q.soY + '/4 ý ]';
-    s += ' &nbsp; <span class="kq">' + kq + '</span>';
+    s += '<span class="kq">' + kq + '</span> ';
   }
-  s += '</div>';
+  s += q.hoi + '</div>';
   if (hinh) s += '<img src="' + hinh + '">';
   if (q.loai === 'DS') {
     ['A', 'B', 'C', 'D'].forEach(function (k, j) {
