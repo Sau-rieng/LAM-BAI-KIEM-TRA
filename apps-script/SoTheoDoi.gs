@@ -135,6 +135,7 @@ function xemLai(d) {
     const de = docDe(c.madot);
     ketqua.push({
       madot: c.madot, ten: c.ten + (bai.lan > 1 ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
+      goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
       cau: de.map(function (q, i) {
         const x = chon[i] && chon[i] !== '-' ? chon[i] : '';
         return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chon: x, dapan: q.da, dung: x !== '' && x === q.da};

@@ -45,6 +45,11 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
 .pa .n{font-weight:700;white-space:nowrap;font-size:15px}
 .pa.da{border-color:var(--ok);background:var(--okbg)}
 .pa.chonsai{border-color:var(--bad);background:var(--badbg)}
+.goiy{border:2px solid var(--pri);background:#eef4fd;border-radius:12px;padding:14px 16px;margin:6px 0 12px}
+.goiy .gh{font-weight:800;color:var(--pri);margin-bottom:6px}
+.goiy p{margin:0 0 6px;line-height:1.5}
+.goiy ul{margin:0 0 6px;padding-left:22px;line-height:1.5}
+.goiy .gc{font-size:14px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -78,6 +83,12 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     <h2 style="margin-top:14px" id="tenBai"></h2>
     <div class="diem" id="diemBai"></div>
     <p class="sub" id="tomTat"></p>
+    <div class="goiy hidden" id="goiY">
+      <div class="gh">🤖 Gợi ý ôn tập dành cho em</div>
+      <p id="goiYNX"></p>
+      <ul id="goiYDS"></ul>
+      <div class="gc">Gợi ý do AI soạn, giáo viên đã xem trước khi gửi em.</div>
+    </div>
     <div class="bar"><label><input type="checkbox" id="chiSai"> Chỉ xem câu sai và câu bỏ trống</label></div>
   </div>
   <div id="dsCau"></div>
@@ -137,6 +148,13 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     $('diemBai').textContent = b.diem + ' điểm';
     var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { return q.cau; });
     $('tomTat').textContent = 'Đúng ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
+    var g = b.goiy;
+    $('goiY').classList.toggle('hidden', !(g && g.nhanxet));
+    if (g && g.nhanxet) {
+      $('goiYNX').textContent = g.nhanxet;
+      var ul = $('goiYDS'); ul.innerHTML = '';
+      (g.canon || []).forEach(function (t) { var li = document.createElement('li'); li.textContent = 'Ôn lại: ' + t; ul.appendChild(li); });
+    }
     veCau();
     man('scrBai');
   }
