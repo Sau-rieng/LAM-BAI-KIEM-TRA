@@ -268,8 +268,9 @@ function hopLop(c) {
 // Tab MA: cot A ten ma, cot B gia tri (MaGV, MaMoKhoa, MaLamLai)
 function docMa() {
   const m = {};
-  kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[String(r[0]).trim()] = String(r[1]).trim(); });
-  return {gv: m['MaGV'] || '', mokhoa: m['MaMoKhoa'] || '', lamlai: m['MaLamLai'] || '', quanly: m['MaQuanLy'] || ''};
+  // ten ma khong phan biet hoa/thuong, dau cach (MaQuanLy = maquanly = Ma Quan Ly)
+  kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[khongDau(r[0]).replace(/\s+/g, '')] = String(r[1]).trim(); });
+  return {gv: m['MAGV'] || '', mokhoa: m['MAMOKHOA'] || '', lamlai: m['MALAMLAI'] || '', quanly: m['MAQUANLY'] || ''};
 }
 // Tab <MaDot>: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai (TN/DS/TLN) | Diem
 //   TN : trac nghiem 4 phuong an, DapAn = A/B/C/D
