@@ -255,8 +255,7 @@ button:disabled{opacity:.4}
     man('scrCho');
     $('choTen').textContent = j.hoten + ' – SBD ' + hocSinh.mahs;
     $('choBai').textContent = j.ten + ' · ' + j.phut + ' phút';
-    $('choMsg').textContent = 'Em đã vào phòng chờ. Hãy đợi giáo viên bấm bắt đầu – đề sẽ tự hiện, không cần bấm gì.';
-    $('choBai').textContent = j.ten + ' · ' + j.phut + ' phút' + (j.goi ? ' · ✓ Đề đã tải sẵn về máy' : '');
+    $('choMsg').textContent = 'Chờ giáo viên phát đề';
     var dangVao = false;
     function hoi() {
       clearTimeout(henCho);
