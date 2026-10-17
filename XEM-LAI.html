@@ -190,7 +190,7 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
         the.innerHTML = h; box.appendChild(the); return;
       }
       if (q.loai === 'TLN') {
-        h += '<div class="pa da"><span class="t">Đáp án: <b>' + String(q.dapan).replace(/</g, '&lt;') + '</b></span></div>';
+        h += '<div class="pa da"><span class="t">Đáp án: <b>' + String(q.dapan).split(';')[0].trim().replace(/</g, '&lt;') + '</b></span></div>';
         h += '<div class="pa' + (q.chon ? (q.dung ? ' da' : ' chonsai') : '') + '"><span class="t">Em trả lời: <b>' +
           (q.chon ? String(q.chon).replace(/</g, '&lt;') + (q.dung ? ' ✓' : ' ✗') : 'bỏ trống') + '</b></span></div>';
         the.innerHTML = h; box.appendChild(the); return;

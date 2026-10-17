@@ -369,8 +369,11 @@ button:disabled{opacity:.4}
     }
     if (q.loai === 'TLN') {
       var w = document.createElement('div'); w.className = 'tln';
-      w.innerHTML = '<input type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="Nhập đáp án">' +
-        '<p>Chỉ ghi kết quả (số). Phần thập phân dùng dấu phẩy, ví dụ 18,36.</p>';
+      w.innerHTML = q.chu
+        ? '<input type="text" inputmode="text" autocomplete="off" autocapitalize="off" maxlength="30" placeholder="Nhập câu trả lời">' +
+          '<p>Ghi ngắn gọn câu trả lời (một từ hoặc cụm từ).</p>'
+        : '<input type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="Nhập đáp án">' +
+          '<p>Chỉ ghi kết quả (số). Phần thập phân dùng dấu phẩy, ví dụ 18,36.</p>';
       var o = w.querySelector('input');
       o.value = S.chon[q.cau] || '';
       o.oninput = function () {
