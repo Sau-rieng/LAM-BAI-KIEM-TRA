@@ -38,6 +38,13 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .dot .theo{margin-top:10px;width:100%;background:var(--ink);color:#fff}
 .chip{display:inline-block;font-size:13px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--off);color:var(--muted);white-space:nowrap}
 .chip.mo{background:var(--okbg);color:var(--ok)}
+.chip.cho{background:var(--warnbg);color:var(--warn)}
+.sw button.chinh{border-color:var(--pri);background:#eaf1fc}
+.sw button.chinh b{color:var(--pri)}
+.sw button.batdau{border-width:3px}
+.dem{margin-top:10px;font-size:18px;text-align:center;background:var(--bg);border-radius:10px;padding:8px}
+.dem b{font-size:24px;font-variant-numeric:tabular-nums}
+.tt.dangcho{color:var(--pri)}
 .tk{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px}
 .tk div{background:var(--bg);border-radius:10px;padding:8px;text-align:center}
 .tk b{display:block;font-size:24px}
@@ -87,7 +94,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 <script>
 (function () {
   var DS = window.DS_LOP || [];
-  var MA = '', DOT = [], loc = 'mo', dotXem = null, hen = null;
+  var MA = '', DOT = [], loc = 'mo', dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
   function man(id) { ['scrLogin', 'scrDot', 'scrTheo'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -133,7 +140,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
         man('scrLogin'); return;
       }
       MA = m; try { sessionStorage.setItem('gv_ma', m); } catch (e) {}
-      $('ma').value = ''; DOT = j.dot; veDot(); man('scrDot');
+      $('ma').value = ''; DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); veDot(); man('scrDot');
     }).catch(function (e) { $('btnVao').disabled = false; $('btnVao').textContent = 'Vào'; $('msg').textContent = e.message; man('scrLogin'); });
   }
   $('btnRa').onclick = function () { MA = ''; try { sessionStorage.removeItem('gv_ma'); } catch (e) {} man('scrLogin'); };
@@ -142,24 +149,47 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   [].forEach.call($('locDot').children, function (b) {
     b.onclick = function () { loc = b.getAttribute('data-l'); [].forEach.call($('locDot').children, function (x) { x.classList.toggle('on', x === b); }); veDot(); };
   });
+  function conLaiDe(d) {
+    if (d.tt !== 'MO' || !d.batdauluc) return null;
+    return Math.round((d.batdauluc + d.phut * 60000 - (Date.now() + LECH)) / 1000);
+  }
+  function mmss(g) { g = Math.max(0, g); return Math.floor(g / 60) + ':' + ('0' + g % 60).slice(-2); }
   function nutCongTac(d, coNutTheo) {
-    var h = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div>' +
-      '<span class="chip' + (d.mo ? ' mo' : '') + '">' + (d.mo ? 'ĐANG MỞ' : 'Đóng') + '</span></div>' +
-      '<div class="sw"><button data-t="mo" class="' + (d.mo ? 'bat' : '') + '"><b>' + (d.mo ? '● Đang mở' : '○ Đang đóng') + '</b>' + (d.mo ? 'Bấm để đóng đề' : 'Bấm để mở cho HS làm') + '</button>' +
-      '<button data-t="xemlai" class="' + (d.xemlai ? 'bat' : '') + '"><b>' + (d.xemlai ? '● Cho xem lại' : '○ Chưa cho xem lại') + '</b>' + (d.xemlai ? 'Bấm để tắt' : 'Bấm khi các lớp đã thi xong') + '</button></div>';
-    if (d.mo && d.xemlai) h += '<div class="canh">⚠ Đề đang mở và đang cho xem lại cùng lúc: học sinh đã nộp có thể xem đáp án trong khi bạn khác còn làm.</div>';
-    if (coNutTheo) h += '<button class="theo">Theo dõi nộp bài ▶</button>';
+    var chip = d.tt === 'MO' ? '<span class="chip mo">ĐANG LÀM BÀI</span>' : d.tt === 'CHO' ? '<span class="chip cho">PHÒNG CHỜ</span>' : '<span class="chip">Đóng</span>';
+    var h = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div>' + chip + '</div>';
+    var g = conLaiDe(d);
+    if (g !== null) h += '<div class="dem" data-madot="' + esc(d.madot) + '">' + (g > 0 ? 'Còn lại <b>' + mmss(g) + '</b>' : '<b>Đã hết giờ</b> – bấm Đóng đề') + '</div>';
+    h += '<div class="sw">';
+    if (d.tt === 'DONG') {
+      h += '<button data-gt="CHO" class="chinh"><b>① Mở phòng chờ</b>HS điền thông tin rồi đợi</button>' +
+           '<button data-gt="MO"><b>Bắt đầu ngay</b>Không qua phòng chờ</button>';
+    } else if (d.tt === 'CHO') {
+      h += '<button data-gt="MO" class="chinh batdau"><b>② ▶ Bắt đầu làm bài</b>Tất cả HS đang chờ vào cùng lúc</button>' +
+           '<button data-gt="DONG"><b>Hủy phòng chờ</b>Đóng lại</button>';
+    } else {
+      h += '<button data-gt="DONG" class="bat"><b>③ ■ Đóng đề</b>Không cho vào thêm</button>';
+    }
+    h += '<button data-t="xemlai" class="' + (d.xemlai ? 'bat' : '') + '"><b>' + (d.xemlai ? '● Cho xem lại' : '○ Chưa cho xem lại') + '</b>' + (d.xemlai ? 'Bấm để tắt' : 'Bấm khi các lớp đã thi xong') + '</button></div>';
+    if (d.tt !== 'DONG' && d.xemlai) h += '<div class="canh">⚠ Đề đang mở và đang cho xem lại cùng lúc: học sinh đã nộp có thể xem đáp án trong khi bạn khác còn làm.</div>';
+    if (coNutTheo) h += '<button class="theo">Theo dõi ' + (d.tt === 'CHO' ? 'phòng chờ' : 'nộp bài') + ' ▶</button>';
     return h;
   }
   function ganCongTac(el, d, sau) {
     [].forEach.call(el.querySelectorAll('.sw button'), function (b) {
       b.onclick = function () {
-        var t = b.getAttribute('data-t'), gt = t === 'mo' ? !d.mo : !d.xemlai;
+        var du;
+        if (b.getAttribute('data-t') === 'xemlai') du = { truong: 'xemlai', giatri: !d.xemlai };
+        else {
+          var gt = b.getAttribute('data-gt');
+          if (gt === 'MO' && !confirm('Bắt đầu làm bài "' + d.ten + '"?\nĐồng hồ ' + d.phut + ' phút bắt đầu chạy cho tất cả học sinh.')) return;
+          if (gt === 'DONG' && d.tt === 'MO' && !confirm('Đóng đề? Học sinh chưa vào sẽ không vào được nữa (em đang làm vẫn nộp được).')) return;
+          du = { truong: 'trangthai', giatri: gt };
+        }
         [].forEach.call(el.querySelectorAll('.sw button'), function (x) { x.disabled = true; });
         b.querySelector('b').textContent = 'Đang lưu...';
-        goiBatKy({ action: 'gv_dat', ma: MA, madot: d.madot, truong: t, giatri: gt }).then(function (j) {
+        goiBatKy({ action: 'gv_dat', ma: MA, madot: d.madot, truong: du.truong, giatri: du.giatri }).then(function (j) {
           if (!j.ok) { alertLoi(el, j.msg); return; }
-          DOT = j.dot; sau();
+          DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); sau();
         }).catch(function (e) { alertLoi(el, e.message); });
       };
     });
@@ -170,8 +200,8 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   }
   function veDot() {
     var box = $('dsDot'); box.innerHTML = '';
-    var ds = DOT.filter(function (d) { return loc === 'all' || d.mo; });
-    $('soDot').textContent = DOT.length + ' đề · ' + DOT.filter(function (d) { return d.mo; }).length + ' đang mở';
+    var ds = DOT.filter(function (d) { return loc === 'all' || d.tt !== 'DONG'; });
+    $('soDot').textContent = DOT.length + ' đề · ' + DOT.filter(function (d) { return d.tt !== 'DONG'; }).length + ' đang mở';
     if (!ds.length) box.innerHTML = '<div class="card sub">Không có đề nào đang mở. Chọn "Tất cả" để mở một đề.</div>';
     ds.forEach(function (d) {
       var el = document.createElement('div'); el.className = 'card dot';
@@ -187,7 +217,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   function veDauTheo() {
     var d = dotHienTai(), el = $('theoDot');
     el.innerHTML = nutCongTac(d, false);
-    ganCongTac(el, d, veDauTheo);
+    ganCongTac(el, d, function () { veDauTheo(); taiTheoDoi(); });
   }
   function moTheoDoi() { man('scrTheo'); veDauTheo(); $('dsLop').innerHTML = ''; taiTheoDoi(); }
   function taiTheoDoi() {
@@ -203,26 +233,29 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
       box.innerHTML = '';
       kq.forEach(function (j) { box.appendChild(veLop(j)); });
       var n = new Date();
-      $('capNhat').textContent = 'Cập nhật lúc ' + gio(n.toISOString()) + ':' + ('0' + n.getSeconds()).slice(-2) + ' · tự làm mới mỗi 20 giây';
-      if (!document.hidden && !$('scrTheo').classList.contains('hidden')) hen = setTimeout(taiTheoDoi, 20000);
+      var chuKy = dotHienTai().tt === 'CHO' ? 8 : 20;
+      $('capNhat').textContent = 'Cập nhật lúc ' + gio(n.toISOString()) + ':' + ('0' + n.getSeconds()).slice(-2) + ' · tự làm mới mỗi ' + chuKy + ' giây';
+      if (!document.hidden && !$('scrTheo').classList.contains('hidden')) hen = setTimeout(taiTheoDoi, chuKy * 1000);
     });
   }
-  var THU_TU = { danglam: 0, chua: 1, danop: 2 };
+  var THU_TU = { dangcho: 0, danglam: 1, chua: 2, danop: 3 };
   function veLop(j) {
     var el = document.createElement('div'); el.className = 'card';
     if (!j.ok) { el.innerHTML = '<h2>Lớp ' + esc(j.tenLop) + '</h2><div class="loi">' + (/hop le/i.test(j.msg || '') ? 'Sổ theo dõi lớp này chưa có mã Khối 3: dán SoTheoDoi.gs mới rồi Triển khai → Quản lý → ✎ → Phiên bản mới.' : esc(j.msg || 'Lỗi')) + '</div>'; return el; }
-    var dem = { danop: 0, danglam: 0, chua: 0 }, tong = 0;
+    var dem = { danop: 0, danglam: 0, chua: 0, dangcho: 0 }, tong = 0;
     j.hs.forEach(function (h) { dem[h.tt]++; if (h.tt === 'danop') tong += Number(h.diem) || 0; });
     var tb = dem.danop ? Math.round(tong / dem.danop * 100) / 100 : '–';
     var now = new Date(j.bayGio).getTime();
     var hs = j.hs.slice().sort(function (a, b) { return THU_TU[a.tt] - THU_TU[b.tt] || (a.mahs < b.mahs ? -1 : 1); });
     var h = '<h2>Lớp ' + esc(j.tenLop) + '</h2><div class="tk">' +
-      '<div><b>' + dem.danop + '</b><span>Đã nộp</span></div><div><b>' + dem.danglam + '</b><span>Đang làm</span></div>' +
+      (dem.dangcho || dotHienTai().tt === 'CHO' ? '<div><b>' + dem.dangcho + '</b><span>Đang chờ</span></div>' : '<div><b>' + dem.danop + '</b><span>Đã nộp</span></div>') +
+      '<div><b>' + dem.danglam + '</b><span>Đang làm</span></div>' +
       '<div><b>' + dem.chua + '</b><span>Chưa vào</span></div><div><b>' + diem(tb) + '</b><span>Điểm TB</span></div></div>';
     hs.forEach(function (x) {
       var so = String(x.mahs).slice(-2), tt = '';
       if (x.tt === 'danop') tt = '<a href="' + esc(x.pdf) + '" target="_blank" rel="noopener">' + diem(x.diem) + ' đ</a> · nộp ' + gio(x.luc);
       else if (x.tt === 'danglam') tt = 'Đang làm · ' + Math.max(0, Math.round((now - new Date(x.batdau).getTime()) / 60000)) + ' phút';
+      else if (x.tt === 'dangcho') tt = 'Đang chờ · vào lúc ' + gio(x.vaocho);
       else tt = 'Chưa vào';
       h += '<div class="hs"><span class="so">' + so + '</span><span class="ten">' + esc(x.hoten) + (x.lan > 1 ? '<span class="lan">lần ' + x.lan + '</span>' : '') +
         '</span><span class="tt ' + x.tt + '">' + tt + '</span></div>';
@@ -230,6 +263,13 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     el.innerHTML = h;
     return el;
   }
+  setInterval(function () {
+    [].forEach.call(document.querySelectorAll('.dem'), function (el) {
+      var d = DOT.filter(function (x) { return x.madot === el.getAttribute('data-madot'); })[0]; if (!d) return;
+      var g = conLaiDe(d); if (g === null) return;
+      el.innerHTML = g > 0 ? 'Còn lại <b>' + mmss(g) + '</b>' : '<b>Đã hết giờ</b> – bấm Đóng đề';
+    });
+  }, 1000);
   $('btnLamMoi').onclick = taiTheoDoi;
   $('btnLai').onclick = function () { clearTimeout(hen); man('scrDot'); veDot(); };
   document.addEventListener('visibilitychange', function () {

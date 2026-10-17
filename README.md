@@ -8,7 +8,7 @@ Hệ thống kiểm tra trên iPad: học sinh làm bài trên trang web (GitHub
 | --- | --- | --- |
 | 1 | Trang làm bài (chọn lớp, SBD 2 số cuối, xáo câu/đáp án, khóa khi rời màn hình, tự gửi lại) | Đã làm (`LAM-BAI.html`) |
 | 2 | Kho đề KHO DE HOA 10 + chấm trên Google, PDF đầy đủ, DE GOC, trang xem lại bài (`LAM-BAI.html`, `XEM-LAI.html`, `apps-script/SoTheoDoi.gs`) | Đã làm |
-| 3 | Trang giáo viên `GIAO-VIEN.html`: mở/đóng đề, bật xem lại, theo dõi HS đang làm/đã nộp/chưa vào (cần dòng `MaQuanLy` trong tab MA) | Đã làm |
+| 3 | Trang giáo viên `GIAO-VIEN.html`: phòng chờ → bắt đầu cùng lúc (giờ kết thúc chung) → đóng đề; bật xem lại; theo dõi HS đang chờ/đang làm/đã nộp/chưa vào (cần dòng `MaQuanLy` trong tab MA; TrangThai DONG/CHO/MO, cột G `BatDauLuc`) | Đã làm |
 | 4 | Thống kê + AI (Gemini): tỉ lệ đúng từng câu, AI phân tích lỗ hổng, soạn đề ôn tập, gợi ý từng HS hiện ở trang xem lại (`apps-script/PhanTichAI.gs`, xem `HUONG-DAN-AI.md`) | Đã làm |
 | 5 | Hồ sơ học sinh: lịch sử điểm và link PDF từng bài | Chưa làm |
 

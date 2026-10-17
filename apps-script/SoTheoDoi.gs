@@ -17,6 +17,8 @@ const HEAD_BL = ['ThoiGianNop','MaDot','MaHS','HoTen','MaDe','Diem','SoCauDung',
 const HEAD_HD = ['ThoiGian','MaHoatDong','MaHS','HoTen','CauHoi','SoLanThu','DungSai','ThoiGian_giay'];
 const TAB_BD = 'BAT DAU';
 const HEAD_BD = ['ThoiGian','MaDot','MaHS','LanLam'];
+const TAB_PC = 'PHONG CHO';
+const HEAD_PC = ['ThoiGian','MaDot','MaHS'];
 
 // ---------------------------------------------------------------------
 // Cong vao
@@ -28,8 +30,8 @@ function doGet(e) {
     if (!ma) return json({ok: true, msg: 'So theo doi ' + lopNay() + ' dang hoat dong'});
     const hs = timHS(ma);
     if (!hs) return json({ok: false, msg: 'Khong tim thay ma HS'});
-    const dot = docCauHinh().filter(function (c) { return c.mo && hopLop(c); })
-      .map(function (c) { return {madot: c.madot, ten: c.ten, phut: c.phut}; });
+    const dot = docCauHinh().filter(function (c) { return (c.mo || c.cho) && hopLop(c); })
+      .map(function (c) { return {madot: c.madot, ten: c.ten, phut: c.phut, tt: c.tt}; });
     return json({ok: true, hoten: hs.ten, dot: dot});
   } catch (err) {
     return json({ok: false, msg: String(err.message || err)});
@@ -44,6 +46,7 @@ function doPost(e) {
       case 'batdau': return json(batDau(d));
       case 'mokhoa': return json({ok: String(d.ma || '').trim() === docMa().mokhoa});
       case 'nop':    return json(nopBai(d));
+      case 'chobai': return json(trangThaiDot(d.madot));
       case 'xemlai': return json(xemLai(d));
       case 'gv_dot':
       case 'gv_dat':
@@ -68,7 +71,7 @@ function batDau(d) {
   if (!hs) return {ok: false, msg: 'Khong tim thay ma HS'};
   if (String(d.magv || '').trim() !== docMa().gv) return {ok: false, loi: 'magv', msg: 'Ma giao vien chua dung'};
   const c = timDot(d.madot);
-  if (!c || !c.mo || !hopLop(c)) return {ok: false, msg: 'Bai kiem tra nay chua mo hoac da dong'};
+  if (!c || !(c.mo || c.cho) || !hopLop(c)) return {ok: false, loi: 'dong', msg: 'Bai kiem tra nay chua mo hoac da dong'};
   const cu = timBaiDaNop(c.madot, ma);
   let lan = 1;
   if (cu) {
@@ -79,11 +82,23 @@ function batDau(d) {
     if (mll !== dung) return {ok: false, loi: 'malamlai', msg: 'Ma cho lam lai chua dung'};
     lan = cu.lan + 1;
   }
+  // Phong cho: GV chua bam "Bat dau" -> ghi nhan HS dang cho, chua gui de
+  if (c.cho) {
+    ghiDong(TAB_PC, HEAD_PC, [new Date(), c.madot, ma]);
+    return {ok: true, cho: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan};
+  }
+  // Gio ket thuc chung = luc GV bam Bat dau + thoi gian lam bai (lan lam lai: tinh rieng)
+  let hetLuc = 0;
+  if (lan === 1 && c.batdauluc) {
+    hetLuc = c.batdauluc + c.phut * 60000;
+    if (Date.now() > hetLuc) return {ok: false, loi: 'hetgio', msg: 'Da het gio lam bai'};
+  }
   const de = docDe(c.madot).map(function (q) {
     return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh)};
   });
   ghiDong(TAB_BD, HEAD_BD, [new Date(), c.madot, ma, lan]);
-  return {ok: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan, cau: de};
+  return {ok: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan, cau: de,
+    hetLuc: hetLuc, bayGio: Date.now()};
 }
 
 // ---------------------------------------------------------------------
@@ -175,9 +190,11 @@ function gvDot() {
   const v = kho().getSheetByName('CAU HINH').getDataRange().getValues();
   v.shift();
   return {ok: true, lop: lopNay(), dot: v.filter(function (r) { return String(r[0]).trim() !== ''; }).map(function (r) {
+    const tt = ['MO', 'CHO'].indexOf(khongDau(r[3])) >= 0 ? khongDau(r[3]) : 'DONG';
     return {madot: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), phut: Number(r[2]) || 15,
-      mo: khongDau(r[3]) === 'MO', xemlai: khongDau(r[4]) === 'CO', lop: String(r[5] || 'TAT CA').trim()};
-  })};
+      tt: tt, mo: tt === 'MO', xemlai: khongDau(r[4]) === 'CO', lop: String(r[5] || 'TAT CA').trim(),
+      batdauluc: r[6] instanceof Date ? r[6].getTime() : 0};
+  }), bayGio: Date.now()};
 }
 // Doi TrangThai (MO/DONG) hoac ChoXemLai (CO/KHONG) cua 1 dot trong KHO DE
 function gvDat(d) {
@@ -185,7 +202,15 @@ function gvDat(d) {
   const v = sh.getRange(1, 1, sh.getLastRow(), 1).getValues();
   for (let i = 1; i < v.length; i++) {
     if (String(v[i][0]).trim() === String(d.madot || '').trim()) {
-      if (d.truong === 'mo') sh.getRange(i + 1, 4).setValue(d.giatri ? 'MO' : 'DONG');
+      if (d.truong === 'trangthai') {
+        const g = ['MO', 'CHO'].indexOf(String(d.giatri)) >= 0 ? String(d.giatri) : 'DONG';
+        sh.getRange(i + 1, 4).setValue(g);
+        if (g === 'MO') {
+          if (!String(sh.getRange(1, 7).getValue()).trim()) sh.getRange(1, 7).setValue('BatDauLuc').setFontWeight('bold');
+          sh.getRange(i + 1, 7).setValue(new Date());
+        }
+        try { CacheService.getScriptCache().remove('tt_' + d.madot); } catch (e) {}
+      } else if (d.truong === 'mo') sh.getRange(i + 1, 4).setValue(d.giatri ? 'MO' : 'DONG');
       else if (d.truong === 'xemlai') sh.getRange(i + 1, 5).setValue(d.giatri ? 'CO' : 'KHONG');
       else return {ok: false, msg: 'Truong khong hop le'};
       SpreadsheetApp.flush();
@@ -218,16 +243,36 @@ function gvTheoDoi(d) {
       if (!bd[ma] || lan >= bd[ma].lan) bd[ma] = {lan: lan, luc: r[0]};
     });
   }
+  const cho = {};
+  const pc = ss.getSheetByName(TAB_PC);
+  if (pc && pc.getLastRow() > 1) {
+    pc.getRange(2, 1, pc.getLastRow() - 1, 3).getValues().forEach(function (r) {
+      if (String(r[1]).trim() === madot) cho[String(r[2]).trim()] = r[0];
+    });
+  }
   const ngay = function (x) { return x instanceof Date ? x.toISOString() : ''; };
   const hs = ds.map(function (r) {
     const ma = String(r[0]).trim(), n = nop[ma], s = bd[ma];
     const o = {mahs: ma, hoten: String(r[1]).trim()};
     if (s && (!n || s.lan > n.lan)) { o.tt = 'danglam'; o.batdau = ngay(s.luc); o.lan = s.lan; }
     else if (n) { o.tt = 'danop'; o.diem = n.diem; o.dung = n.dung; o.tong = n.tong; o.luc = ngay(n.luc); o.giay = n.giay; o.lan = n.lan; o.pdf = n.pdf; }
+    else if (cho[ma]) { o.tt = 'dangcho'; o.vaocho = ngay(cho[ma]); }
     else o.tt = 'chua';
     return o;
   });
   return {ok: true, lop: lopNay(), madot: madot, bayGio: new Date().toISOString(), hs: hs};
+}
+
+// HS o phong cho hoi trang thai (cache 5 giay de do tai)
+function trangThaiDot(madot) {
+  madot = String(madot || '').trim();
+  const cache = CacheService.getScriptCache();
+  const daCo = cache.get('tt_' + madot);
+  if (daCo) return JSON.parse(daCo);
+  const c = timDot(madot);
+  const r = {ok: true, tt: c ? c.tt : 'DONG'};
+  try { cache.put('tt_' + madot, JSON.stringify(r), 5); } catch (e) {}
+  return r;
 }
 
 function ghiDong(tab, head, row) {
@@ -252,8 +297,10 @@ function docCauHinh() {
   return v.filter(function (r) { return String(r[0]).trim() !== ''; }).map(function (r) {
     return {
       madot: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), phut: Number(r[2]) || 15,
-      mo: khongDau(r[3]) === 'MO', xemlai: khongDau(r[4]) === 'CO',
-      lop: khongDau(r[5]) || 'TAT CA'
+      tt: ['MO', 'CHO'].indexOf(khongDau(r[3])) >= 0 ? khongDau(r[3]) : 'DONG',
+      mo: khongDau(r[3]) === 'MO', cho: khongDau(r[3]) === 'CHO', xemlai: khongDau(r[4]) === 'CO',
+      lop: khongDau(r[5]) || 'TAT CA',
+      batdauluc: r[6] instanceof Date ? r[6].getTime() : 0
     };
   });
 }

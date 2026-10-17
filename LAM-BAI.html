@@ -53,6 +53,8 @@ button:disabled{opacity:.4}
 .tln input{font-size:26px;text-align:center;letter-spacing:1px}
 .tln p{color:var(--muted);font-size:15px;margin:8px 0 0}
 .grid button.part{background:#fff7e0;border-color:#c99a00}
+.cho-vong{width:64px;height:64px;margin:22px auto;border-radius:50%;border:6px solid var(--line);border-top-color:var(--pri);animation:quay 1.1s linear infinite}
+@keyframes quay{to{transform:rotate(360deg)}}
 .nav{display:flex;gap:12px;margin-top:10px}
 .nav button{flex:1}
 .nop{background:var(--ok);color:#fff}
@@ -113,6 +115,16 @@ button:disabled{opacity:.4}
   </div>
 </div>
 
+<div class="screen" id="scrCho">
+  <div class="card" style="text-align:center">
+    <h1>Phòng chờ</h1>
+    <p class="sub" id="choTen"></p>
+    <div class="cho-vong"></div>
+    <p class="msg" id="choMsg" style="color:var(--ink)">Em đã vào phòng chờ. Hãy đợi giáo viên bấm bắt đầu – đề sẽ tự hiện, không cần bấm gì.</p>
+    <p class="sub" id="choBai"></p>
+  </div>
+</div>
+
 <div class="screen" id="scrGui">
   <div class="card" style="text-align:center">
     <h1>Nộp bài</h1>
@@ -157,7 +169,7 @@ button:disabled{opacity:.4}
 (function () {
   var DS = window.DS_LOP || [];
   var KEY = 'lambai_dang_lam', KEY_GUI = 'lambai_cho_gui';
-  var S = null, lopChon = null, hocSinh = null, dongHo = null, dangGui = false;
+  var S = null, lopChon = null, hocSinh = null, dongHo = null, dangGui = false, maGV = '', henCho = null;
 
   function $(id) { return document.getElementById(id); }
   function luu() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -195,7 +207,7 @@ button:disabled{opacity:.4}
         hocSinh = { lop: lopChon.ten, url: lopChon.url, mahs: ma, hoten: j.hoten };
         $('tenhs').textContent = j.hoten; $('mahs').textContent = ma;
         $('dot').innerHTML = '';
-        j.dot.forEach(function (d) { var o = document.createElement('option'); o.value = d.madot; o.textContent = d.ten + ' (' + d.phut + ' phút)'; $('dot').appendChild(o); });
+        j.dot.forEach(function (d) { var o = document.createElement('option'); o.value = d.madot; o.textContent = d.ten + ' (' + d.phut + ' phút)' + (d.tt === 'CHO' ? ' – chờ bắt đầu' : ''); $('dot').appendChild(o); });
         $('who').style.display = 'block'; $('msg').textContent = '';
       })
       .catch(function () { $('btnTim').disabled = false; loi('Không kết nối được. Kiểm tra mạng rồi bấm lại.'); });
@@ -213,10 +225,14 @@ button:disabled{opacity:.4}
     var b = malamlai ? $('btnLamLai') : $('btnBatDau'), chu = b.textContent;
     $('msg').className = 'msg'; $('msg').textContent = '';
     b.disabled = true; b.textContent = 'Đang tải đề...';
-    goi(hocSinh.url, { action: 'batdau', mahs: hocSinh.mahs, madot: $('dot').value, magv: $('magv').value.trim(), malamlai: malamlai })
+    if ($('magv').value.trim()) maGV = $('magv').value.trim();
+    var madot = $('dot').value;
+    goi(hocSinh.url, { action: 'batdau', mahs: hocSinh.mahs, madot: madot, magv: maGV, malamlai: malamlai })
       .then(function (j) {
         b.disabled = false; b.textContent = chu;
+        if (j.ok && j.cho) { $('magv').value = ''; vaoPhongCho(j, madot, malamlai); return; }
         if (!j.ok) {
+          if (j.loi === 'hetgio') return loi('Đã hết giờ làm bài này.');
           if (j.loi === 'magv') return loi('Mã giáo viên chưa đúng.');
           if (j.loi === 'danop') { $('lamLai').style.display = 'block'; return loi('Em đã nộp bài này (lần ' + (j.lan || 1) + '). Nếu được giáo viên cho làm lại, giáo viên nhập mã bên dưới.'); }
           if (j.loi === 'malamlai') { $('malamlai').value = ''; return loi('Mã cho làm lại chưa đúng.'); }
@@ -226,11 +242,47 @@ button:disabled{opacity:.4}
         S = { hs: hocSinh, madot: j.madot, ten: j.ten + (j.lan > 1 ? ' (lần ' + j.lan + ')' : ''), lan: j.lan || 1, phut: j.phut, de: j.cau,
               thuTu: xepThuTu(j.cau),
               xao: j.cau.map(function (q) { return q.loai && q.loai !== 'TN' ? ['A', 'B', 'C', 'D'] : tron(['A', 'B', 'C', 'D']); }),
-              chon: {}, batDau: Date.now(), roi: 0, khoa: false, vt: 0, daNop: false };
+              chon: {}, batDau: Date.now(), roi: 0, khoa: false, vt: 0, daNop: false,
+              hetLuc: j.hetLuc || 0, lech: (j.bayGio || Date.now()) - Date.now() };
         $('magv').value = '';
         luu(); vaoBai();
       })
       .catch(function () { b.disabled = false; b.textContent = chu; loi('Không tải được đề. Kiểm tra mạng rồi bấm lại.'); });
+  }
+
+  // ---------- Phong cho: doi GV bam "Bat dau" roi tu vao bai ----------
+  function vaoPhongCho(j, madot, malamlai) {
+    man('scrCho');
+    $('choTen').textContent = j.hoten + ' – SBD ' + hocSinh.mahs;
+    $('choBai').textContent = j.ten + ' · ' + j.phut + ' phút';
+    $('choMsg').textContent = 'Em đã vào phòng chờ. Hãy đợi giáo viên bấm bắt đầu – đề sẽ tự hiện, không cần bấm gì.';
+    var dangVao = false;
+    function hoi() {
+      clearTimeout(henCho);
+      goi(hocSinh.url, { action: 'chobai', madot: madot }).then(function (t) {
+        if (t.tt === 'MO' && !dangVao) {
+          dangVao = true;
+          $('choMsg').textContent = 'Bắt đầu! Đang tải đề...';
+          return goi(hocSinh.url, { action: 'batdau', mahs: hocSinh.mahs, madot: madot, magv: maGV, malamlai: malamlai }).then(function (k) {
+            if (k.ok && !k.cho) { vaoTuDe(k); return; }
+            dangVao = false;
+            if (k.ok && k.cho) { henCho = setTimeout(hoi, 3000); return; }
+            man('scrLogin'); loi('Chưa vào được bài: ' + (k.msg || ''));
+          });
+        }
+        if (t.tt === 'DONG') { man('scrLogin'); loi('Giáo viên đã đóng bài kiểm tra này.'); return; }
+        henCho = setTimeout(hoi, 4000 + Math.random() * 3000);
+      }).catch(function () { dangVao = false; henCho = setTimeout(hoi, 5000); });
+    }
+    henCho = setTimeout(hoi, 2000 + Math.random() * 2000);
+  }
+  function vaoTuDe(j) {
+    S = { hs: hocSinh, madot: j.madot, ten: j.ten + (j.lan > 1 ? ' (lần ' + j.lan + ')' : ''), lan: j.lan || 1, phut: j.phut, de: j.cau,
+          thuTu: xepThuTu(j.cau),
+          xao: j.cau.map(function (q) { return q.loai && q.loai !== 'TN' ? ['A', 'B', 'C', 'D'] : tron(['A', 'B', 'C', 'D']); }),
+          chon: {}, batDau: Date.now(), roi: 0, khoa: false, vt: 0, daNop: false,
+          hetLuc: j.hetLuc || 0, lech: (j.bayGio || Date.now()) - Date.now() };
+    luu(); vaoBai();
   }
 
   // ---------- Lam bai ----------
@@ -323,7 +375,11 @@ button:disabled{opacity:.4}
   $('truoc').onclick = function () { if (S.vt > 0) { S.vt--; luu(); veLuoi(); veCau(); } };
   $('sau').onclick = function () { if (S.vt < S.de.length - 1) { S.vt++; luu(); veLuoi(); veCau(); } };
 
-  function conLai() { return S.phut * 60 - Math.floor((Date.now() - S.batDau) / 1000); }
+  // Co gio ket thuc chung (GV bam Bat dau) thi dem nguoc theo gio do; khong thi tinh tu luc em vao bai
+  function conLai() {
+    if (S.hetLuc) return Math.floor((S.hetLuc - (Date.now() + (S.lech || 0))) / 1000);
+    return S.phut * 60 - Math.floor((Date.now() - S.batDau) / 1000);
+  }
   function chayGio() {
     clearInterval(dongHo);
     var f = function () {
