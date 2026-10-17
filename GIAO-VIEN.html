@@ -60,6 +60,30 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .lan{font-size:12px;font-weight:700;color:var(--warn);margin-left:6px}
 .capnhat{font-size:13px;color:var(--muted);text-align:center;margin:6px 0}
 .loi{color:var(--bad);font-weight:600;margin-top:8px}
+/* Khoi 5 - ho so */
+.nutTop{display:flex;gap:8px}
+.bang{overflow-x:auto;margin:10px -16px 0;padding:0 16px;-webkit-overflow-scrolling:touch}
+.bang table{border-collapse:separate;border-spacing:0;font-size:15px;min-width:100%}
+.bang th,.bang td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bang th{font-size:13px;color:var(--muted);position:sticky;top:0;background:var(--card)}
+.bang .tn{position:sticky;left:0;background:var(--card);text-align:left;max-width:170px;overflow:hidden;text-overflow:ellipsis;z-index:1}
+.bang .tn button{padding:0;background:none;font-weight:600;color:var(--pri);text-align:left;font-size:15px;border-radius:0}
+.bang td a{color:var(--ink);text-decoration:none;font-weight:700}
+.bang td.thap a{color:var(--bad);text-decoration:underline}
+.bang td.tb{font-weight:800;background:var(--bg)}
+.bang tr.tblop td{font-weight:700;color:var(--muted);border-bottom:0}
+.bang .lan2{font-size:10px;color:var(--warn);vertical-align:super}
+.chuthich{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.5}
+.chuthich b{color:var(--ink)}
+.tk3{grid-template-columns:repeat(3,1fr)}
+.bai{display:flex;gap:10px;align-items:center;padding:10px 2px;border-top:1px solid var(--line)}
+.bai .tb2{flex:1;min-width:0}
+.bai .tb2 div{font-size:14px;color:var(--muted)}
+.bai .d{flex:none;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.bai .d.thap{color:var(--bad)}
+.bai a.pdf{flex:none;font-size:14px;font-weight:700;color:var(--pri);border:2px solid var(--line);border-radius:10px;padding:6px 10px;text-decoration:none}
+.bieudo svg{width:100%;height:auto;display:block}
+.ghiOK{color:var(--ok);font-weight:600;margin-top:8px}
 </style>
 </head>
 <body>
@@ -75,7 +99,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 </section>
 
 <section id="scrDot" class="hidden">
-  <div class="top"><div><h1>Các đề kiểm tra</h1><p class="sub" id="soDot"></p></div><button class="btn2" id="btnRa">Thoát</button></div>
+  <div class="top"><div><h1>Các đề kiểm tra</h1><p class="sub" id="soDot"></p></div><div class="nutTop"><button class="btn2" id="btnHoSo">📋 Hồ sơ HS</button><button class="btn2" id="btnRa">Thoát</button></div></div>
   <div class="loc" id="locDot">
     <button data-l="mo" class="on">Đang mở</button><button data-l="all">Tất cả</button>
   </div>
@@ -89,6 +113,21 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   <div id="dsLop"></div>
 </section>
 
+<section id="scrHoSo" class="hidden">
+  <div class="top"><button class="btn2" id="btnLai2">◀ Các đề</button><button class="btn2" id="btnTaiHS">↻ Làm mới</button></div>
+  <div class="card">
+    <h1>Hồ sơ học sinh</h1>
+    <p class="sub">Bảng điểm từng lớp. Bấm vào tên để xem tiến bộ của em đó, bấm vào điểm để mở bài làm (PDF).</p>
+    <div class="loc" id="locLop" style="margin-top:12px"></div>
+  </div>
+  <div id="hoSo"></div>
+</section>
+
+<section id="scrMotHS" class="hidden">
+  <div class="top"><button class="btn2" id="btnLai3">◀ Bảng điểm</button></div>
+  <div id="motHS"></div>
+</section>
+
 </main>
 <script src="cau-hinh-lop.js"></script>
 <script>
@@ -96,7 +135,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   var DS = window.DS_LOP || [];
   var MA = '', DOT = [], loc = 'mo', dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
-  function man(id) { ['scrLogin', 'scrDot', 'scrTheo'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrDot', 'scrTheo', 'scrHoSo', 'scrMotHS'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function chuan(s) { return String(s || '').toUpperCase().replace(/\s+/g, ''); }
   // Doi toi da 30 giay moi lop; qua thoi gian thi bao loi thay vi treo "Dang tai..."
@@ -275,6 +314,139 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden && !$('scrTheo').classList.contains('hidden')) taiTheoDoi();
   });
+
+  // ---------- Khoi 5: Ho so hoc sinh ----------
+  var HS_LOP = null, HS_DL = null, HS_CACHE = {};
+  function ngay(iso) { if (!iso) return ''; var d = new Date(iso); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); }
+  function phutGiay(g) { g = Number(g) || 0; return Math.floor(g / 60) + ' phút ' + ('0' + g % 60).slice(-2) + ' giây'; }
+  function lam2(x) { return Math.round(x * 100) / 100; }
+  function sauCung(bai) {
+    var m = {};
+    bai.forEach(function (b) { var k = b.mahs + '|' + b.madot; if (!m[k] || b.lan > m[k].lan || (b.lan === m[k].lan && b.luc > m[k].luc)) m[k] = b; });
+    return m;
+  }
+  $('btnHoSo').onclick = function () {
+    var box = $('locLop'); box.innerHTML = '';
+    DS.forEach(function (l) {
+      var b = document.createElement('button'); b.textContent = l.ten;
+      b.onclick = function () { HS_LOP = l; [].forEach.call(box.children, function (x) { x.classList.toggle('on', x === b); }); taiHoSo(false); };
+      box.appendChild(b);
+      if (!HS_LOP || HS_LOP.ten === l.ten) { HS_LOP = l; }
+    });
+    [].forEach.call(box.children, function (x) { x.classList.toggle('on', x.textContent === HS_LOP.ten); });
+    man('scrHoSo'); taiHoSo(false);
+  };
+  $('btnLai2').onclick = function () { man('scrDot'); veDot(); };
+  $('btnTaiHS').onclick = function () { taiHoSo(true); };
+  $('btnLai3').onclick = function () { man('scrHoSo'); };
+  function taiHoSo(moi) {
+    var l = HS_LOP, box = $('hoSo');
+    if (!moi && HS_CACHE[l.ten]) { HS_DL = HS_CACHE[l.ten]; veBangDiem(); return; }
+    box.innerHTML = '<div class="card sub">Đang tải hồ sơ lớp ' + esc(l.ten) + '...</div>';
+    goi(l.url, { action: 'gv_hoso', ma: MA }).then(function (j) {
+      if (HS_LOP !== l) return;
+      if (!j.ok) {
+        box.innerHTML = '<div class="card"><div class="loi">' + (/hop le/i.test(j.msg || '') ? 'Sổ theo dõi lớp ' + esc(l.ten) + ' chưa có mã Khối 5: dán SoTheoDoi.gs mới rồi Triển khai → Quản lý → ✎ → Phiên bản mới.' : esc(j.msg || 'Lỗi')) + '</div></div>';
+        return;
+      }
+      HS_CACHE[l.ten] = HS_DL = j; veBangDiem();
+    }).catch(function (e) { if (HS_LOP === l) box.innerHTML = '<div class="card"><div class="loi">Không kết nối được lớp ' + esc(l.ten) + ' (' + esc(e.message) + ').</div></div>'; });
+  }
+  function veBangDiem() {
+    var j = HS_DL, box = $('hoSo'), m = sauCung(j.bai);
+    var card = document.createElement('div'); card.className = 'card';
+    if (!j.dot.length) {
+      box.innerHTML = '<div class="card"><h2>Lớp ' + esc(j.lop) + '</h2><p class="sub" style="margin-top:8px">Lớp này chưa có bài nộp nào.</p></div>'; return;
+    }
+    var tongTB = 0, soTB = 0, duoi5 = 0;
+    var h = '<table><thead><tr><th class="tn">Học sinh</th>';
+    j.dot.forEach(function (d, i) { h += '<th title="' + esc(d.ten) + '">Bài ' + (i + 1) + '</th>'; });
+    h += '<th>TB</th></tr></thead><tbody>';
+    j.hs.forEach(function (x) {
+      var t = 0, n = 0;
+      h += '<tr><td class="tn"><button data-ma="' + esc(x.mahs) + '">' + String(x.mahs).slice(-2) + '. ' + esc(x.hoten) + '</button></td>';
+      j.dot.forEach(function (d) {
+        var b = m[x.mahs + '|' + d.madot];
+        if (!b) { h += '<td>–</td>'; return; }
+        t += b.diem; n++;
+        h += '<td class="' + (b.diem < 5 ? 'thap' : '') + '"><a href="' + esc(b.pdf) + '" target="_blank" rel="noopener">' + diem(b.diem) + '</a>' + (b.lan > 1 ? '<span class="lan2">L' + b.lan + '</span>' : '') + '</td>';
+      });
+      var tb = n ? lam2(t / n) : null;
+      if (tb !== null) { tongTB += tb; soTB++; if (tb < 5) duoi5++; }
+      h += '<td class="tb">' + (tb === null ? '–' : diem(tb)) + '</td></tr>';
+    });
+    h += '<tr class="tblop"><td class="tn">TB lớp</td>';
+    j.dot.forEach(function (d) {
+      var t = 0, n = 0;
+      j.hs.forEach(function (x) { var b = m[x.mahs + '|' + d.madot]; if (b) { t += b.diem; n++; } });
+      h += '<td>' + (n ? diem(lam2(t / n)) : '–') + '</td>';
+    });
+    h += '<td></td></tr></tbody></table>';
+    var ct = j.dot.map(function (d, i) { return '<b>Bài ' + (i + 1) + '</b>: ' + esc(d.ten) + ' (' + ngay(d.luc) + ')'; }).join('<br>');
+    card.innerHTML = '<h2>Lớp ' + esc(j.lop) + '</h2>' +
+      '<div class="tk tk3"><div><b>' + j.hs.length + '</b><span>Học sinh</span></div><div><b>' + j.dot.length + '</b><span>Bài kiểm tra</span></div>' +
+      '<div><b>' + (soTB ? diem(lam2(tongTB / soTB)) : '–') + '</b><span>Điểm TB lớp</span></div></div>' +
+      (duoi5 ? '<p class="sub">' + duoi5 + ' em có điểm trung bình dưới 5 (điểm dưới 5 được gạch chân).</p>' : '') +
+      '<div class="bang">' + h + '</div>' +
+      '<div class="chuthich">' + ct + '<br>Điểm tính theo lần làm sau cùng; <span style="color:var(--warn)">L2</span> = làm lại lần 2.</div>' +
+      '<button class="btn" id="btnGhiBD">Ghi bảng điểm vào Google Sheet (tab BANG DIEM)</button><div id="kqGhi"></div>';
+    box.innerHTML = ''; box.appendChild(card);
+    [].forEach.call(card.querySelectorAll('.tn button'), function (b) { b.onclick = function () { veMotHS(b.getAttribute('data-ma')); }; });
+    $('btnGhiBD').onclick = function () {
+      var nut = this, l = HS_LOP; nut.disabled = true; nut.textContent = 'Đang ghi...'; $('kqGhi').innerHTML = '';
+      goi(l.url, { action: 'gv_bangdiem', ma: MA }).then(function (r) {
+        nut.disabled = false; nut.textContent = 'Ghi bảng điểm vào Google Sheet (tab BANG DIEM)';
+        $('kqGhi').innerHTML = r.ok ? '<div class="ghiOK">✓ Đã ghi tab BANG DIEM trong sổ SO THEO DOI ' + esc(r.lop) + ' (' + r.soHS + ' HS, ' + r.soBai + ' bài).</div>' : '<div class="loi">' + esc(r.msg || 'Lỗi') + '</div>';
+      }).catch(function (e) { nut.disabled = false; nut.textContent = 'Ghi bảng điểm vào Google Sheet (tab BANG DIEM)'; $('kqGhi').innerHTML = '<div class="loi">' + esc(e.message) + '</div>'; });
+    };
+  }
+  function bieuDo(ds) {
+    // ds: [{nhan, diem}] theo thoi gian; truc 0-10, vach 5 net dut
+    var W = 600, H = 230, L = 34, R = 14, T = 14, B = 34, n = ds.length;
+    var P = 30, x = function (i) { return n === 1 ? (L + W - R) / 2 : L + P + i * (W - L - R - 2 * P) / (n - 1); };
+    var y = function (v) { return T + (10 - v) * (H - T - B) / 10; };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Biểu đồ điểm">';
+    [0, 5, 10].forEach(function (v) {
+      s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#c9cdd8" stroke-width="1"' + (v === 5 ? ' stroke-dasharray="6 5"' : '') + '/>' +
+        '<text x="' + (L - 8) + '" y="' + (y(v) + 5) + '" font-size="14" text-anchor="end" fill="#5b6175">' + v + '</text>';
+    });
+    if (n > 1) s += '<polyline fill="none" stroke="#1f5fbf" stroke-width="3" points="' + ds.map(function (d, i) { return x(i) + ',' + y(d.diem); }).join(' ') + '"/>';
+    ds.forEach(function (d, i) {
+      s += '<circle cx="' + x(i) + '" cy="' + y(d.diem) + '" r="6" fill="' + (d.diem < 5 ? '#fff' : '#1f5fbf') + '" stroke="#1f5fbf" stroke-width="3"/>' +
+        '<text x="' + x(i) + '" y="' + (y(d.diem) - 12) + '" font-size="14" font-weight="700" text-anchor="middle" fill="#1a1a2e">' + diem(d.diem) + '</text>' +
+        '<text x="' + x(i) + '" y="' + (H - 10) + '" font-size="13" text-anchor="middle" fill="#5b6175">' + esc(d.nhan) + '</text>';
+    });
+    return s + '</svg>';
+  }
+  function veMotHS(ma) {
+    var j = HS_DL, x = j.hs.filter(function (h) { return h.mahs === ma; })[0];
+    var soBai = {}; j.dot.forEach(function (d, i) { soBai[d.madot] = i + 1; });
+    var ten = {}; j.dot.forEach(function (d) { ten[d.madot] = d.ten; });
+    var cua = j.bai.filter(function (b) { return b.mahs === ma; }).sort(function (a, b) { return a.luc < b.luc ? -1 : 1; });
+    var m = sauCung(cua), tinh = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return soBai[a.madot] - soBai[b.madot]; });
+    var tong = tinh.reduce(function (t, b) { return t + b.diem; }, 0);
+    var cao = tinh.length ? Math.max.apply(null, tinh.map(function (b) { return b.diem; })) : null;
+    var thap = tinh.length ? Math.min.apply(null, tinh.map(function (b) { return b.diem; })) : null;
+    var chuaLam = j.dot.filter(function (d) { return !m[ma + '|' + d.madot]; }).map(function (d) { return 'Bài ' + soBai[d.madot]; });
+    var h = '<div class="card"><h1>' + esc(x.hoten) + '</h1><p class="sub">SBD ' + esc(ma) + ' · Lớp ' + esc(j.lop) + '</p>' +
+      '<div class="tk"><div><b>' + tinh.length + '/' + j.dot.length + '</b><span>Bài đã làm</span></div>' +
+      '<div><b>' + (tinh.length ? diem(lam2(tong / tinh.length)) : '–') + '</b><span>Điểm TB</span></div>' +
+      '<div><b>' + (cao === null ? '–' : diem(cao)) + '</b><span>Cao nhất</span></div>' +
+      '<div><b>' + (thap === null ? '–' : diem(thap)) + '</b><span>Thấp nhất</span></div></div>' +
+      (chuaLam.length ? '<p class="sub">Chưa làm: ' + chuaLam.join(', ') + '.</p>' : '') + '</div>';
+    if (tinh.length) h += '<div class="card bieudo"><h2>Tiến bộ qua các bài</h2><p class="sub">Đường nét đứt là mốc 5 điểm; chấm rỗng là điểm dưới 5.</p>' +
+      bieuDo(tinh.map(function (b) { return { nhan: 'Bài ' + soBai[b.madot], diem: b.diem }; })) + '</div>';
+    h += '<div class="card"><h2>Các lần làm bài</h2>';
+    if (!cua.length) h += '<p class="sub" style="margin-top:8px">Em này chưa nộp bài nào.</p>';
+    cua.slice().reverse().forEach(function (b) {
+      h += '<div class="bai"><div class="d' + (b.diem < 5 ? ' thap' : '') + '">' + diem(b.diem) + '</div><div class="tb2"><b>Bài ' + soBai[b.madot] + ' · ' + esc(ten[b.madot]) + '</b>' +
+        (b.lan > 1 ? '<span class="lan">lần ' + b.lan + '</span>' : '') +
+        '<div>' + ngay(b.luc) + ' lúc ' + gio(b.luc) + ' · đúng ' + b.dung + '/' + b.tong + ' câu · làm ' + phutGiay(b.giay) + '</div></div>' +
+        (b.pdf ? '<a class="pdf" href="' + esc(b.pdf) + '" target="_blank" rel="noopener">PDF</a>' : '') + '</div>';
+    });
+    $('motHS').innerHTML = h + '</div>';
+    man('scrMotHS');
+  }
 
   if (MA) vao(MA); else man('scrLogin');
 })();

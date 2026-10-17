@@ -54,6 +54,10 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
 .goiy p{margin:0 0 6px;line-height:1.5}
 .goiy ul{margin:0 0 6px;padding-left:22px;line-height:1.5}
 .goiy .gc{font-size:14px;color:var(--muted)}
+.tienbo{background:var(--bg);border-radius:12px;padding:12px 14px;margin:4px 0 6px}
+.tienbo .so{display:flex;gap:18px;flex-wrap:wrap;font-size:16px;color:var(--muted)}
+.tienbo .so b{font-size:24px;color:var(--ink);margin-right:4px}
+.tienbo svg{width:100%;height:auto;display:block;margin-top:6px}
 </style>
 </head>
 <body>
@@ -75,6 +79,7 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
 <section id="scrDS" class="hidden">
   <div class="card">
     <h1 id="tenhs"></h1>
+    <div class="tienbo hidden" id="tienBo"></div>
     <p class="sub">Chọn bài kiểm tra để xem lại.</p>
     <div id="dsBai"></div>
     <button class="btn btn2" id="btnRa1">Thoát</button>
@@ -135,21 +140,50 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     $('tenhs').textContent = duLieu.hoten;
     var box = $('dsBai'); box.innerHTML = '';
     if (!duLieu.bai.length) box.innerHTML = '<p class="sub">Chưa có bài nào được giáo viên mở cho xem lại.</p>';
+    veTienBo();
     duLieu.bai.forEach(function (b, i) {
       var nut = document.createElement('button'); nut.className = 'dot';
       nut.innerHTML = '<b></b><span></span>';
       nut.querySelector('b').textContent = b.ten;
-      nut.querySelector('span').textContent = b.diem + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
+      nut.querySelector('span').textContent = String(b.diem).replace('.', ',') + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
       nut.onclick = function () { baiDangXem = b; veBai(); };
       box.appendChild(nut);
     });
     man('scrDS');
   }
 
+  function veTienBo() {
+    var ds = duLieu.bai.map(function (b) { return { ten: b.ten, diem: Number(String(b.diem).replace(',', '.')) || 0, luc: b.luc || '' }; })
+      .sort(function (a, b) { return a.luc < b.luc ? -1 : a.luc > b.luc ? 1 : 0; });
+    var el = $('tienBo');
+    el.classList.toggle('hidden', !ds.length);
+    if (!ds.length) return;
+    var tb = Math.round(ds.reduce(function (t, d) { return t + d.diem; }, 0) / ds.length * 100) / 100;
+    var vn = function (x) { return String(x).replace('.', ','); };
+    var h = '<div class="so"><span><b>' + ds.length + '</b>bài</span><span><b>' + vn(tb) + '</b>điểm trung bình</span></div>';
+    if (ds.length > 1) {
+      var W = 600, H = 170, L = 30, R = 14, T = 22, B = 26, n = ds.length;
+      var P = 30, x = function (i) { return L + P + i * (W - L - R - 2 * P) / (n - 1); }, y = function (v) { return T + (10 - v) * (H - T - B) / 10; };
+      h += '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Điểm các bài">';
+      [0, 5, 10].forEach(function (v) {
+        h += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#c9cdd8"' + (v === 5 ? ' stroke-dasharray="6 5"' : '') + '/>' +
+          '<text x="' + (L - 8) + '" y="' + (y(v) + 5) + '" font-size="14" text-anchor="end" fill="#5b6175">' + v + '</text>';
+      });
+      h += '<polyline fill="none" stroke="#1f5fbf" stroke-width="3" points="' + ds.map(function (d, i) { return x(i) + ',' + y(d.diem); }).join(' ') + '"/>';
+      ds.forEach(function (d, i) {
+        h += '<circle cx="' + x(i) + '" cy="' + y(d.diem) + '" r="6" fill="' + (d.diem < 5 ? '#fff' : '#1f5fbf') + '" stroke="#1f5fbf" stroke-width="3"/>' +
+          '<text x="' + x(i) + '" y="' + (y(d.diem) - 11) + '" font-size="14" font-weight="700" text-anchor="middle" fill="#1a1a2e">' + vn(d.diem) + '</text>' +
+          '<text x="' + x(i) + '" y="' + (H - 6) + '" font-size="13" text-anchor="middle" fill="#5b6175">Bài ' + (i + 1) + '</text>';
+      });
+      h += '</svg>';
+    }
+    el.innerHTML = h;
+  }
+
   function veBai() {
     var b = baiDangXem;
     $('tenBai').textContent = b.ten;
-    $('diemBai').textContent = b.diem + ' điểm';
+    $('diemBai').textContent = String(b.diem).replace('.', ',') + ' điểm';
     var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { var n = nhan(q); return (n.phan ? n.phan + '.' : '') + n.so; });
     $('tomTat').textContent = 'Đúng hoàn toàn ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
     var g = b.goiy;

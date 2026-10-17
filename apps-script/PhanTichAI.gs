@@ -39,6 +39,8 @@ function onOpen() {
     .addItem('⭐ Làm tất cả 3 bước', 'menuTatCa')
     .addSeparator()
     .addItem('Kiểm tra kết nối AI', 'kiemTraAI')
+    .addSeparator()
+    .addItem('📋 Cập nhật bảng điểm (tab BANG DIEM)', 'menuBangDiem')
     .addToUi();
 }
 
