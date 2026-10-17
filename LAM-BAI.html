@@ -41,6 +41,18 @@ button:disabled{opacity:.4}
 .opt .l{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800}
 .opt.sel{border-color:var(--pri);background:var(--sel)}
 .opt.sel .l{background:var(--pri);color:#fff;border-color:var(--pri)}
+.q img,.opt img,.dsy img{max-width:100%;height:auto;vertical-align:middle}
+.q img{display:block;margin:8px auto;max-height:340px}
+.phan{display:inline-block;font-size:15px;font-weight:700;color:var(--muted);margin-left:8px}
+.dsy{border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.dsy .t{line-height:1.45;margin-bottom:10px}
+.dsy .t b{margin-right:6px}
+.dsy .nut{display:flex;gap:10px}
+.dsy .nut button{flex:1;background:#fff;border:2px solid var(--line);padding:12px}
+.dsy .nut button.sel{background:var(--pri);border-color:var(--pri);color:#fff}
+.tln input{font-size:26px;text-align:center;letter-spacing:1px}
+.tln p{color:var(--muted);font-size:15px;margin:8px 0 0}
+.grid button.part{background:#fff7e0;border-color:#c99a00}
 .nav{display:flex;gap:12px;margin-top:10px}
 .nav button{flex:1}
 .nop{background:var(--ok);color:#fff}
@@ -212,8 +224,8 @@ button:disabled{opacity:.4}
         }
         $('malamlai').value = ''; $('lamLai').style.display = 'none';
         S = { hs: hocSinh, madot: j.madot, ten: j.ten + (j.lan > 1 ? ' (lần ' + j.lan + ')' : ''), lan: j.lan || 1, phut: j.phut, de: j.cau,
-              thuTu: tron(j.cau.map(function (_, i) { return i; })),
-              xao: j.cau.map(function () { return tron(['A', 'B', 'C', 'D']); }),
+              thuTu: xepThuTu(j.cau),
+              xao: j.cau.map(function (q) { return q.loai && q.loai !== 'TN' ? ['A', 'B', 'C', 'D'] : tron(['A', 'B', 'C', 'D']); }),
               chon: {}, batDau: Date.now(), roi: 0, khoa: false, vt: 0, daNop: false };
         $('magv').value = '';
         luu(); vaoBai();
@@ -227,23 +239,77 @@ button:disabled{opacity:.4}
     veLuoi(); veCau(); chayGio();
     if (S.khoa) $('ovKhoa').classList.add('on');
   }
+  // Xao cau trong tung phan (I, II, III), giu thu tu cac phan
+  function phanCua(q) { var m = String(q.cau).match(/^(I{1,3})\./); return m ? m[1] : (q.loai === 'DS' ? 'II' : q.loai === 'TLN' ? 'III' : 'I'); }
+  function xepThuTu(de) {
+    var nhom = {}, thuTuPhan = [];
+    de.forEach(function (q, i) { var p = phanCua(q); if (!nhom[p]) { nhom[p] = []; thuTuPhan.push(p); } nhom[p].push(i); });
+    return thuTuPhan.reduce(function (kq, p) { return kq.concat(tron(nhom[p])); }, []);
+  }
+  // 2 = da lam xong, 1 = lam do (DS chua du 4 y), 0 = chua lam
+  function trangThai(q) {
+    var x = S.chon[q.cau];
+    if (!x) return 0;
+    if (q.loai === 'DS') { var n = String(x).replace(/-/g, '').length; return n === 4 ? 2 : n ? 1 : 0; }
+    return String(x).trim() ? 2 : 0;
+  }
+  function soDaLam() { return S.de.filter(function (q) { return trangThai(q) === 2; }).length; }
+  var TEN_LOAI = { I: 'Phần I · Trắc nghiệm', II: 'Phần II · Đúng/Sai', III: 'Phần III · Trả lời ngắn' };
   function veLuoi() {
     var g = $('luoi'); g.innerHTML = '';
     S.thuTu.forEach(function (qi, k) {
       var b = document.createElement('button'); b.textContent = k + 1;
-      if (S.chon[S.de[qi].cau]) b.classList.add('done');
+      var tt = trangThai(S.de[qi]);
+      if (tt === 2) b.classList.add('done'); else if (tt === 1) b.classList.add('part');
       if (k === S.vt) b.classList.add('cur');
       b.onclick = function () { S.vt = k; luu(); veLuoi(); veCau(); };
       g.appendChild(b);
     });
-    $('dalam').textContent = Object.keys(S.chon).length + '/' + S.de.length + ' câu';
+    $('dalam').textContent = soDaLam() + '/' + S.de.length + ' câu';
   }
   function veCau() {
     var k = S.vt, qi = S.thuTu[k], q = S.de[qi];
-    $('socau').textContent = 'Câu ' + (k + 1) + ' / ' + S.de.length;
+    $('socau').innerHTML = 'Câu ' + (k + 1) + ' / ' + S.de.length + '<span class="phan">' + TEN_LOAI[phanCua(q)] + '</span>';
     $('noidung').innerHTML = q.hoi;
     $('hinh').innerHTML = q.hinh ? '<img src="' + q.hinh + '" alt="Hình câu hỏi">' : '';
     var box = $('pa'); box.innerHTML = '';
+    $('truoc').disabled = k === 0; $('sau').disabled = k === S.de.length - 1;
+    if (q.loai === 'DS') {
+      var cur = String(S.chon[q.cau] || '----');
+      ['A', 'B', 'C', 'D'].forEach(function (goc, y) {
+        var dong = document.createElement('div'); dong.className = 'dsy';
+        dong.innerHTML = '<div class="t"><b>' + 'abcd'[y] + ')</b>' + q.pa[goc] + '</div><div class="nut"></div>';
+        ['D', 'S'].forEach(function (v) {
+          var b = document.createElement('button');
+          b.textContent = v === 'D' ? 'Đúng' : 'Sai';
+          if (cur[y] === v) b.className = 'sel';
+          b.onclick = function () {
+            var a = String(S.chon[q.cau] || '----').split('');
+            a[y] = a[y] === v ? '-' : v;
+            S.chon[q.cau] = a.join('');
+            if (S.chon[q.cau] === '----') delete S.chon[q.cau];
+            luu(); veCau(); veLuoi();
+          };
+          dong.querySelector('.nut').appendChild(b);
+        });
+        box.appendChild(dong);
+      });
+      return;
+    }
+    if (q.loai === 'TLN') {
+      var w = document.createElement('div'); w.className = 'tln';
+      w.innerHTML = '<input type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="Nhập đáp án">' +
+        '<p>Chỉ ghi kết quả (số). Phần thập phân dùng dấu phẩy, ví dụ 18,36.</p>';
+      var o = w.querySelector('input');
+      o.value = S.chon[q.cau] || '';
+      o.oninput = function () {
+        var v = o.value.replace(/\|/g, '').trim();
+        if (v) S.chon[q.cau] = v; else delete S.chon[q.cau];
+        luu(); veLuoi();
+      };
+      box.appendChild(w);
+      return;
+    }
     var j = 0;
     S.xao[qi].forEach(function (goc) {
       if (String(q.pa[goc]).trim() === '') return;
@@ -253,7 +319,6 @@ button:disabled{opacity:.4}
       b.onclick = function () { S.chon[q.cau] = goc; luu(); veCau(); veLuoi(); };
       box.appendChild(b);
     });
-    $('truoc').disabled = k === 0; $('sau').disabled = k === S.de.length - 1;
   }
   $('truoc').onclick = function () { if (S.vt > 0) { S.vt--; luu(); veLuoi(); veCau(); } };
   $('sau').onclick = function () { if (S.vt < S.de.length - 1) { S.vt++; luu(); veLuoi(); veCau(); } };
@@ -297,8 +362,8 @@ button:disabled{opacity:.4}
 
   // ---------- Nop bai ----------
   $('btnNop').onclick = function () {
-    var con = S.de.length - Object.keys(S.chon).length;
-    $('nopMsg').textContent = con > 0 ? 'Em còn ' + con + ' câu chưa làm. Em chắc chắn muốn nộp bài?' : 'Em đã làm hết các câu. Nộp bài ngay?';
+    var con = S.de.length - soDaLam();
+    $('nopMsg').textContent = con > 0 ? 'Em còn ' + con + ' câu chưa làm xong. Em chắc chắn muốn nộp bài?' : 'Em đã làm hết các câu. Nộp bài ngay?';
     $('ovNop').classList.add('on');
   };
   $('nopKhong').onclick = function () { $('ovNop').classList.remove('on'); };

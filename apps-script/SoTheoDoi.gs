@@ -71,7 +71,7 @@ function batDau(d) {
     lan = cu.lan + 1;
   }
   const de = docDe(c.madot).map(function (q) {
-    return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh)};
+    return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh)};
   });
   return {ok: true, hoten: hs.ten, madot: c.madot, ten: c.ten, phut: c.phut, lan: lan, cau: de};
 }
@@ -91,15 +91,8 @@ function nopBai(d) {
   const c = timDot(madot) || {madot: madot, ten: madot};
   const de = docDe(madot);
   const chon = d.chon || {};
-  let dung = 0;
-  const ct = de.map(function (q) {
-    const x = String(chon[q.cau] || '').toUpperCase();
-    const ok = x !== '' && x === q.da;
-    if (ok) dung++;
-    return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: q.hinh, chon: x, dapan: q.da, dung: ok};
-  });
-  const tong = de.length;
-  const diem = Math.round(dung / tong * 1000) / 100;
+  const kq = chamBai(de, function (q) { return chon[q.cau]; });
+  const ct = kq.ct, dung = kq.dung, tong = de.length, diem = kq.diem;
   const giay = Math.max(0, Math.round(Number(d.thoigianlam) || 0));
   const now = new Date();
 
@@ -112,7 +105,7 @@ function nopBai(d) {
     const cu2 = timBaiDaNop(madot, ma);
     if (cu2 && cu2.lan >= lan) return {ok: true, hoten: hs.ten, diem: cu2.diem, socaudung: cu2.socaudung, tongsocau: cu2.tongsocau, danop: true};
     layTab(TAB_BL, HEAD_BL).appendRow([now, madot, ma, hs.ten, 'XAO', diem, dung, tong, giay,
-      ct.map(function (x) { return x.chon || '-'; }).join(','), url, lan]);
+      ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|'), url, lan]);
   } finally {
     lock.releaseLock();
   }
@@ -131,14 +124,15 @@ function xemLai(d) {
     if (!c.xemlai || !hopLop(c)) return;
     const bai = timBaiDaNop(c.madot, ma);
     if (!bai) return;
-    const chon = String(bai.chitiet || '').split(',');
+    const chon = tachChiTiet(bai.chitiet);
     const de = docDe(c.madot);
+    const kq = chamBai(de, function (q, i) { return chon[i]; });
     ketqua.push({
       madot: c.madot, ten: c.ten + (bai.lan > 1 ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
       goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
-      cau: de.map(function (q, i) {
-        const x = chon[i] && chon[i] !== '-' ? chon[i] : '';
-        return {cau: q.cau, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chon: x, dapan: q.da, dung: x !== '' && x === q.da};
+      cau: kq.ct.map(function (q) {
+        return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chon: q.chon, dapan: q.dapan,
+          dung: q.dung, soY: q.soY, diem: q.diemCau, toiDa: q.w};
       })
     });
   });
@@ -191,20 +185,106 @@ function docMa() {
   kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[String(r[0]).trim()] = String(r[1]).trim(); });
   return {gv: m['MaGV'] || '', mokhoa: m['MaMoKhoa'] || '', lamlai: m['MaLamLai'] || ''};
 }
-// Tab <MaDot>: Cau | NoiDung | A | B | C | D | DapAn | Hinh
+// Tab <MaDot>: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai (TN/DS/TLN) | Diem
+//   TN : trac nghiem 4 phuong an, DapAn = A/B/C/D
+//   DS : dung/sai, A-D la 4 y a)-d), DapAn = 4 chu D/S (vd DDSD)
+//   TLN: tra loi ngan, DapAn = so/chu (18,36 = 18.36)
+//   Diem: diem toi da cua cau (de trong: TN 0,25 · DS 1 · TLN 0,25). Tong diem duoc quy ve thang 10.
 function docDe(madot) {
   const sh = kho().getSheetByName(String(madot || '').trim());
   if (!sh) throw new Error('Kho de chua co tab ' + madot);
   const v = sh.getDataRange().getValues();
   v.shift();
   return v.filter(function (r) { return String(r[1]).trim() !== ''; }).map(function (r, i) {
+    const loai = ['DS', 'TLN'].indexOf(khongDau(r[8])) >= 0 ? khongDau(r[8]) : 'TN';
+    let da = String(r[6]).trim();
+    if (loai === 'TN') da = da.toUpperCase();
+    if (loai === 'DS') da = chuanDS(da);
     return {
-      cau: Number(r[0]) || i + 1, hoi: String(r[1]),
+      cau: String(r[0]).trim() || String(i + 1), hoi: String(r[1]), loai: loai,
       pa: {A: String(r[2]), B: String(r[3]), C: String(r[4]), D: String(r[5])},
-      da: String(r[6]).trim().toUpperCase(), hinh: String(r[7] || '').trim()
+      da: da, hinh: String(r[7] || '').trim(),
+      w: Number(String(r[9]).replace(',', '.')) || (loai === 'DS' ? 1 : 0.25)
     };
   });
 }
+// ---------------------------------------------------------------------
+// Cham diem theo loai cau (thang diem cua Bo: DS dung 1/2/3/4 y = 0,1/0,25/0,5/1)
+// ---------------------------------------------------------------------
+const THANG_DS = [0, 0.1, 0.25, 0.5, 1];
+function chuanDS(s) {
+  s = khongDau(s).replace(/[^DS-]/g, '');
+  return (s + '----').slice(0, 4);
+}
+function chuanTLN(s) {
+  s = String(s === undefined || s === null ? '' : s).trim().toLowerCase().replace(/\s+/g, '').replace(/,/g, '.');
+  return s;
+}
+function chamCau(q, x) {
+  x = x === undefined || x === null ? '' : String(x).trim();
+  if (x === '-') x = '';
+  if (q.loai === 'DS') {
+    x = x ? chuanDS(x) : '';
+    let soY = 0;
+    for (let k = 0; k < 4; k++) if (x[k] && x[k] === q.da[k]) soY++;
+    return {chon: x.replace(/-+$/, '') ? x : '', dung: soY === 4, soY: soY, diemCau: THANG_DS[soY] * q.w};
+  }
+  if (q.loai === 'TLN') {
+    x = x.replace(/\|/g, '/').slice(0, 30);
+    const a = chuanTLN(x), b = chuanTLN(q.da);
+    const ok = a !== '' && (a === b || (!isNaN(Number(a)) && !isNaN(Number(b)) && Number(a) === Number(b)));
+    return {chon: x, dung: ok, soY: ok ? 1 : 0, diemCau: ok ? q.w : 0};
+  }
+  x = x.toUpperCase();
+  const ok = x !== '' && x === q.da;
+  return {chon: x, dung: ok, soY: ok ? 1 : 0, diemCau: ok ? q.w : 0};
+}
+// layChon(q, i) -> lua chon cua HS cho cau q
+function chamBai(de, layChon) {
+  let tongW = 0, tongDiem = 0, dung = 0;
+  const ct = de.map(function (q, i) {
+    const r = chamCau(q, layChon(q, i));
+    tongW += q.w; tongDiem += r.diemCau;
+    if (r.dung) dung++;
+    return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: q.hinh, w: q.w,
+      chon: r.chon, dapan: q.da, dung: r.dung, soY: r.soY, diemCau: Math.round(r.diemCau * 100) / 100};
+  });
+  return {ct: ct, dung: dung, diem: tongW ? Math.round(tongDiem / tongW * 1000) / 100 : 0};
+}
+// Cot ChiTiet: ban moi ngan cach bang |, ban cu bang dau phay
+function tachChiTiet(s) {
+  s = String(s || '');
+  return (s.indexOf('|') >= 0 ? s.split('|') : s.split(',')).map(function (x) { x = String(x).trim(); return x === '-' ? '' : x; });
+}
+function nhanCau(q) {
+  const m = String(q.cau).match(/^(I{1,3})\.(\d+)$/);
+  return m ? 'Câu ' + m[2] : 'Câu ' + q.cau;
+}
+function phanCua(q) {
+  const m = String(q.cau).match(/^(I{1,3})\./);
+  return m ? m[1] : '';
+}
+const TEN_PHAN = {I: 'PHẦN I. Trắc nghiệm nhiều phương án lựa chọn', II: 'PHẦN II. Trắc nghiệm đúng sai', III: 'PHẦN III. Trắc nghiệm trả lời ngắn'};
+
+// Anh trong noi dung (<img src="https://...">) -> nhung vao PDF
+function nhungAnh(html) {
+  return String(html).replace(/(<img[^>]*src=")(https?:\/\/[^"]+)(")/gi, function (m, a, url, c) {
+    try {
+      const cache = CacheService.getScriptCache();
+      const key = 'u_' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, url));
+      let uri = cache.get(key);
+      if (!uri) {
+        const b = UrlFetchApp.fetch(url).getBlob();
+        uri = 'data:' + b.getContentType() + ';base64,' + Utilities.base64Encode(b.getBytes());
+        try { cache.put(key, uri, 21600); } catch (e) {}
+      }
+      return a + uri + c;
+    } catch (e) {
+      return a + url + c;
+    }
+  });
+}
+
 // Cot Hinh: link/ID file anh tren Drive, hoac ma <svg>. Tra ve data URI.
 function anhDataUri(h) {
   if (!h) return '';
@@ -213,6 +293,7 @@ function anhDataUri(h) {
   const daCo = cache.get(key);
   if (daCo) return daCo;
   let uri = '';
+  if (/^https?:\/\//i.test(h)) return h;
   if (/^<svg/i.test(h)) {
     uri = 'data:image/svg+xml;base64,' + Utilities.base64Encode(h, Utilities.Charset.UTF_8);
   } else {
@@ -270,7 +351,7 @@ function layThuMuc(cha, ten) {
   return it.hasNext() ? it.next() : cha.createFolder(ten);
 }
 function htmlSangPDF(html, ten) {
-  return Utilities.newBlob(html, 'text/html', 'tam.html').getAs('application/pdf').setName(ten);
+  return Utilities.newBlob(nhungAnh(html), 'text/html', 'tam.html').getAs('application/pdf').setName(ten);
 }
 
 const CSS_PDF = 'body{font-family:Arial,sans-serif;font-size:11.5pt;color:#000}' +
@@ -278,17 +359,40 @@ const CSS_PDF = 'body{font-family:Arial,sans-serif;font-size:11.5pt;color:#000}'
   '.tt{width:100%;border-collapse:collapse;margin-bottom:10px}.tt td{padding:2px 4px}' +
   '.q{border:1px solid #000;padding:6px 10px;margin:8px 0;page-break-inside:avoid}' +
   '.kq{font-weight:bold}.pa{margin:2px 0 2px 14px}.dung{font-weight:bold}' +
-  'img{max-width:260px;max-height:200px;display:block;margin:4px 0}';
+  'img{max-width:330px;max-height:220px;margin:4px 0;vertical-align:middle}.pa img{max-width:150px;max-height:110px}' +
+  'h3{font-size:12pt;margin:12px 0 4px}';
 
 function htmlCau(q, coBaiLam) {
   const hinh = q.hinh ? anhDataUri(q.hinh) : '';
-  let s = '<div class="q"><div><b>Câu ' + esc(q.cau) + '.</b> ' + q.hoi;
-  if (coBaiLam) s += ' &nbsp; <span class="kq">' + (q.chon === '' ? '[ Bỏ trống ]' : (q.dung ? '[ ✓ Đúng ]' : '[ ✗ Sai ]')) + '</span>';
+  const da = q.dapan || q.da;
+  let s = '<div class="q"><div><b>' + nhanCau(q) + '.</b> ' + q.hoi;
+  if (coBaiLam) {
+    let kq = q.chon === '' ? '[ Bỏ trống ]' : (q.dung ? '[ ✓ Đúng ]' : '[ ✗ Sai ]');
+    if (q.loai === 'DS' && q.chon !== '') kq = '[ ' + (q.dung ? '✓ ' : '') + 'Đúng ' + q.soY + '/4 ý ]';
+    s += ' &nbsp; <span class="kq">' + kq + '</span>';
+  }
   s += '</div>';
   if (hinh) s += '<img src="' + hinh + '">';
+  if (q.loai === 'DS') {
+    ['A', 'B', 'C', 'D'].forEach(function (k, j) {
+      const dd = da[j] === 'D' ? 'Đúng' : 'Sai';
+      let nhan = ' &nbsp;← Đáp án: <b>' + dd + '</b>';
+      if (coBaiLam) {
+        const x = (q.chon || '')[j];
+        nhan += x === 'D' || x === 'S' ? ' · Em chọn: ' + (x === 'D' ? 'Đúng' : 'Sai') + (x === da[j] ? ' ✓' : ' ✗') : ' · Em bỏ trống';
+      }
+      s += '<div class="pa">' + 'abcd'[j] + ') ' + q.pa[k] + nhan + '</div>';
+    });
+    return s + '</div>';
+  }
+  if (q.loai === 'TLN') {
+    s += '<div class="pa dung">Đáp án: ' + esc(da) + '</div>';
+    if (coBaiLam) s += '<div class="pa">Em trả lời: ' + (q.chon ? esc(q.chon) + (q.dung ? ' ✓' : ' ✗') : 'bỏ trống') + '</div>';
+    return s + '</div>';
+  }
   ['A', 'B', 'C', 'D'].forEach(function (k) {
     if (String(q.pa[k]).trim() === '') return;
-    const laDung = k === (q.dapan || q.da);
+    const laDung = k === da;
     let nhan = '';
     if (laDung) nhan += ' &nbsp;← Đáp án';
     if (coBaiLam && q.chon === k) nhan += ' &nbsp;← Em chọn';
@@ -299,7 +403,17 @@ function htmlCau(q, coBaiLam) {
 function htmlDeGoc(c, de) {
   return '<html><head><meta charset="utf-8"><style>' + CSS_PDF + '</style></head><body>' +
     '<h2>ĐỀ GỐC – ' + esc(c.ten) + '</h2><p style="text-align:center">Mã đợt: ' + esc(c.madot) + ' · ' + de.length + ' câu</p>' +
-    de.map(function (q) { return htmlCau(q, false); }).join('') + '</body></html>';
+    theoPhan(de, function (q) { return htmlCau(q, false); }) + '</body></html>';
+}
+function theoPhan(ds, ve) {
+  let truoc = null, s = '';
+  ds.forEach(function (q) {
+    const p = phanCua(q);
+    if (p && p !== truoc) s += '<h3>' + TEN_PHAN[p] + '</h3>';
+    truoc = p;
+    s += ve(q);
+  });
+  return s;
 }
 function luuPDFBaiLam(thuMuc, c, ma, ten, now, giay, diem, dung, tong, ct, lan) {
   lan = lan || 1;
@@ -311,8 +425,8 @@ function luuPDFBaiLam(thuMuc, c, ma, ten, now, giay, diem, dung, tong, ct, lan) 
     '<tr><td><b>Nộp lúc:</b> ' + Utilities.formatDate(now, tz, 'dd/MM/yyyy HH:mm:ss') + '</td>' +
     '<td><b>Thời gian làm:</b> ' + Math.floor(giay / 60) + ' phút ' + (giay % 60) + ' giây</td></tr>' +
     '<tr><td colspan="2"><b>Điểm: ' + esc(diem) + '</b> (' + dung + '/' + tong + ' câu đúng). ' +
-    'Câu sai: ' + (ct.filter(function (x) { return !x.dung; }).map(function (x) { return x.cau; }).join(', ') || 'không có') + '</td></tr>' +
-    '</table>' + ct.map(function (q) { return htmlCau(q, true); }).join('') + '</body></html>';
+    'Câu chưa đúng: ' + (ct.filter(function (x) { return !x.dung; }).map(function (x) { return x.cau; }).join(', ') || 'không có') + '</td></tr>' +
+    '</table>' + theoPhan(ct, function (q) { return htmlCau(q, true); }) + '</body></html>';
   const tenFile = c.madot + '_' + ma + '_' + ten + (lan > 1 ? '_lan' + lan : '') + '_' + Utilities.formatDate(now, tz, 'HHmmss') + '.pdf';
   return thuMuc.createFile(htmlSangPDF(html, tenFile)).getUrl();
 }
@@ -322,7 +436,7 @@ function luuPDFBaiLam(thuMuc, c, ma, ten, now, giay, diem, dung, tong, ct, lan) 
 // ---------------------------------------------------------------------
 function lopNay() { return SpreadsheetApp.getActive().getName().replace('SO THEO DOI', '').trim() || 'LOP'; }
 function khongDau(s) {
-  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').trim().toUpperCase();
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').trim().toUpperCase();
 }
 function layTab(ten, head) {
   const ss = SpreadsheetApp.getActive();

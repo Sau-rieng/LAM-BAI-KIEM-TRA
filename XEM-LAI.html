@@ -45,6 +45,10 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
 .pa .n{font-weight:700;white-space:nowrap;font-size:15px}
 .pa.da{border-color:var(--ok);background:var(--okbg)}
 .pa.chonsai{border-color:var(--bad);background:var(--badbg)}
+.nd img,.pa img{max-width:100%;height:auto;vertical-align:middle}
+.nd img{display:block;margin:6px auto 10px;max-height:300px}
+.ph{font-size:20px;font-weight:800;margin:20px 4px 8px;color:var(--muted)}
+.tag.mot{color:#a06b00}
 .goiy{border:2px solid var(--pri);background:#eef4fd;border-radius:12px;padding:14px 16px;margin:6px 0 12px}
 .goiy .gh{font-weight:800;color:var(--pri);margin-bottom:6px}
 .goiy p{margin:0 0 6px;line-height:1.5}
@@ -146,8 +150,8 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     var b = baiDangXem;
     $('tenBai').textContent = b.ten;
     $('diemBai').textContent = b.diem + ' điểm';
-    var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { return q.cau; });
-    $('tomTat').textContent = 'Đúng ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
+    var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { var n = nhan(q); return (n.phan ? n.phan + '.' : '') + n.so; });
+    $('tomTat').textContent = 'Đúng hoàn toàn ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
     var g = b.goiy;
     $('goiY').classList.toggle('hidden', !(g && g.nhanxet));
     if (g && g.nhanxet) {
@@ -159,16 +163,38 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     man('scrBai');
   }
 
+  var TEN_PHAN = { I: 'Phần I · Trắc nghiệm', II: 'Phần II · Đúng/Sai', III: 'Phần III · Trả lời ngắn' };
+  function nhan(q) { var m = String(q.cau).match(/^(I{1,3})\.(\d+)$/); return m ? { phan: m[1], so: m[2] } : { phan: '', so: q.cau }; }
   function veCau() {
     var box = $('dsCau'); box.innerHTML = '';
-    var chiSai = $('chiSai').checked;
+    var chiSai = $('chiSai').checked, phanTruoc = null;
     baiDangXem.cau.forEach(function (q) {
       if (chiSai && q.dung) return;
+      var n = nhan(q);
+      if (n.phan && n.phan !== phanTruoc) { var t = document.createElement('div'); t.className = 'ph'; t.textContent = TEN_PHAN[n.phan]; box.appendChild(t); }
+      phanTruoc = n.phan;
       var trangThai = q.chon === '' ? 'bo' : (q.dung ? 'dung' : 'sai');
-      var the = document.createElement('div'); the.className = 'card q ' + (trangThai === 'dung' ? 'dung' : 'sai');
-      var h = '<div class="qh"><b>Câu ' + q.cau + '</b><span class="tag ' + trangThai + '">' +
-        (trangThai === 'dung' ? '✓ Đúng' : trangThai === 'sai' ? '✗ Sai' : '– Bỏ trống') + '</span></div>' +
+      var chu = trangThai === 'dung' ? '✓ Đúng' : trangThai === 'sai' ? '✗ Sai' : '– Bỏ trống';
+      if (q.loai === 'DS' && trangThai !== 'bo') { chu = (q.dung ? '✓ ' : '') + 'Đúng ' + q.soY + '/4 ý'; if (!q.dung && q.soY > 0) trangThai = 'mot'; }
+      var the = document.createElement('div'); the.className = 'card q ' + (q.dung ? 'dung' : 'sai');
+      var h = '<div class="qh"><b>Câu ' + n.so + '</b><span class="tag ' + trangThai + '">' + chu + '</span></div>' +
         '<div class="nd">' + q.hoi + '</div>' + (q.hinh ? '<img src="' + q.hinh + '" alt="Hình câu hỏi">' : '');
+      if (q.loai === 'DS') {
+        ['A', 'B', 'C', 'D'].forEach(function (k, y) {
+          var da = q.dapan[y], x = (q.chon || '')[y];
+          var chon = x === 'D' || x === 'S';
+          var lop = chon ? (x === da ? ' da' : ' chonsai') : '';
+          var nhanY = 'Đáp án: ' + (da === 'D' ? 'Đúng' : 'Sai') + (chon ? (x === da ? ' · ✓ Em chọn đúng' : ' · ✗ Em chọn ' + (x === 'D' ? 'Đúng' : 'Sai')) : ' · Em bỏ trống');
+          h += '<div class="pa' + lop + '"><span class="l">' + 'abcd'[y] + ')</span><span class="t">' + q.pa[k] + '<br><b style="font-size:15px">' + nhanY + '</b></span></div>';
+        });
+        the.innerHTML = h; box.appendChild(the); return;
+      }
+      if (q.loai === 'TLN') {
+        h += '<div class="pa da"><span class="t">Đáp án: <b>' + String(q.dapan).replace(/</g, '&lt;') + '</b></span></div>';
+        h += '<div class="pa' + (q.chon ? (q.dung ? ' da' : ' chonsai') : '') + '"><span class="t">Em trả lời: <b>' +
+          (q.chon ? String(q.chon).replace(/</g, '&lt;') + (q.dung ? ' ✓' : ' ✗') : 'bỏ trống') + '</b></span></div>';
+        the.innerHTML = h; box.appendChild(the); return;
+      }
       ['A', 'B', 'C', 'D'].forEach(function (k) {
         if (String(q.pa[k]).trim() === '') return;
         var laDa = k === q.dapan, laChon = k === q.chon;

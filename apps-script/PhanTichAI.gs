@@ -105,7 +105,7 @@ function docBaiNop(madot) {
     const lan = Number(r[11]) || 1;
     if (!theoHS[ma] || lan >= theoHS[ma].lan) {
       theoHS[ma] = {mahs: ma, hoten: String(r[3]).trim(), diem: Number(r[5]) || 0, lan: lan,
-        chon: String(r[9] || '').split(',').map(function (x) { x = String(x).trim().toUpperCase(); return x === '-' ? '' : x; })};
+        chon: tachChiTiet(r[9])};
     }
   });
   return Object.keys(theoHS).map(function (k) { return theoHS[k]; });
@@ -117,12 +117,27 @@ function thongKeDot(madot) {
   const c = timDot(madot) || {madot: madot, ten: madot};
   const cau = de.map(function (q, i) {
     const dem = {A: 0, B: 0, C: 0, D: 0, bo: 0};
-    bai.forEach(function (b) { const x = b.chon[i] || ''; if (dem[x] !== undefined && x) dem[x]++; else dem.bo++; });
     const n = bai.length || 1;
-    let saiNhieu = '', soSaiNhieu = 0;
-    ['A', 'B', 'C', 'D'].forEach(function (k) { if (k !== q.da && dem[k] > soSaiNhieu) { saiNhieu = k; soSaiNhieu = dem[k]; } });
-    return {stt: i, cau: q.cau, hoi: boThe(q.hoi), pa: {A: boThe(q.pa.A), B: boThe(q.pa.B), C: boThe(q.pa.C), D: boThe(q.pa.D)},
-      da: q.da, dem: dem, tiLeDung: Math.round(dem[q.da] / n * 100), saiNhieu: saiNhieu, soSaiNhieu: soSaiNhieu};
+    let soDung = 0, saiNhieu = '', soSaiNhieu = 0;
+    if (q.loai === 'TN') {
+      bai.forEach(function (b) { const x = (b.chon[i] || '').toUpperCase(); if (dem[x] !== undefined && x) dem[x]++; else dem.bo++; });
+      soDung = dem[q.da] || 0;
+      ['A', 'B', 'C', 'D'].forEach(function (k) { if (k !== q.da && dem[k] > soSaiNhieu) { saiNhieu = k; soSaiNhieu = dem[k]; } });
+    } else {
+      // DS: dem so HS sai tung y a-d; TLN: dem dap an sai pho bien nhat
+      const saiY = [0, 0, 0, 0], saiTLN = {};
+      bai.forEach(function (b) {
+        const r = chamCau(q, b.chon[i]);
+        if (r.chon === '') { dem.bo++; return; }
+        if (r.dung) soDung++;
+        if (q.loai === 'DS') for (let k = 0; k < 4; k++) { if (r.chon[k] !== q.da[k]) saiY[k]++; }
+        else if (!r.dung) saiTLN[r.chon] = (saiTLN[r.chon] || 0) + 1;
+      });
+      if (q.loai === 'DS') saiY.forEach(function (v, k) { if (v > soSaiNhieu) { soSaiNhieu = v; saiNhieu = 'ý ' + 'abcd'[k]; } });
+      else Object.keys(saiTLN).forEach(function (k) { if (saiTLN[k] > soSaiNhieu) { soSaiNhieu = saiTLN[k]; saiNhieu = '"' + k + '"'; } });
+    }
+    return {stt: i, cau: q.cau, loai: q.loai, hoi: boThe(q.hoi), pa: {A: boThe(q.pa.A), B: boThe(q.pa.B), C: boThe(q.pa.C), D: boThe(q.pa.D)},
+      da: q.da, dem: dem, tiLeDung: Math.round(soDung / n * 100), saiNhieu: saiNhieu, soSaiNhieu: soSaiNhieu};
   });
   const diem = bai.map(function (b) { return b.diem; });
   const muc = MUC_DIEM.map(function (m, k) {
@@ -131,7 +146,7 @@ function thongKeDot(madot) {
   });
   bai.forEach(function (b) {
     b.cauSai = [];
-    de.forEach(function (q, i) { if (b.chon[i] !== q.da) b.cauSai.push({cau: q.cau, chon: b.chon[i] || 'bỏ trống'}); });
+    de.forEach(function (q, i) { if (!chamCau(q, b.chon[i]).dung) b.cauSai.push({cau: q.cau, chon: b.chon[i] || 'bỏ trống'}); });
   });
   return {
     lop: lopNay(), madot: madot, ten: c.ten, soCau: de.length, soBai: bai.length,
@@ -187,7 +202,8 @@ function aiPhanTichLop(tk) {
     lop: tk.lop, bai: tk.ten, so_bai_nop: tk.soBai, diem_tb: tk.tb, cao_nhat: tk.cao, thap_nhat: tk.thap,
     phan_bo_muc: tk.muc, lich_su_cac_dot: tk.lichSu,
     cau_hoi: tk.cau.map(function (q) {
-      return {cau: q.cau, noi_dung: q.hoi, A: q.pa.A, B: q.pa.B, C: q.pa.C, D: q.pa.D, dap_an: q.da,
+      return {cau: q.cau, loai: q.loai === 'DS' ? 'đúng/sai (A-D là ý a-d, đáp án D=đúng S=sai)' : q.loai === 'TLN' ? 'trả lời ngắn' : 'trắc nghiệm',
+        noi_dung: q.hoi, A: q.pa.A, B: q.pa.B, C: q.pa.C, D: q.pa.D, dap_an: q.da,
         ti_le_dung: q.tiLeDung + '%', so_hs_chon: q.dem, phuong_an_sai_chon_nhieu: q.saiNhieu};
     })
   };
@@ -252,10 +268,10 @@ function taoDeOnTap(tk, ch) {
   const ma = tk.madot + '-OT';
   const sh = ss.getSheetByName(ma) || ss.insertSheet(ma);
   sh.clear();
-  const v = [['Cau', 'NoiDung', 'A', 'B', 'C', 'D', 'DapAn', 'Hinh']];
-  ch.forEach(function (q, i) { v.push([i + 1, q.noi_dung, q.A, q.B, q.C, q.D, String(q.dap_an).trim().toUpperCase(), '']); });
-  sh.getRange(1, 1, v.length, 8).setNumberFormat('@').setValues(v);
-  sh.getRange('A1:H1').setFontWeight('bold');
+  const v = [['Cau', 'NoiDung', 'A', 'B', 'C', 'D', 'DapAn', 'Hinh', 'Loai', 'Diem']];
+  ch.forEach(function (q, i) { v.push([i + 1, q.noi_dung, q.A, q.B, q.C, q.D, String(q.dap_an).trim().toUpperCase(), '', 'TN', '']); });
+  sh.getRange(1, 1, v.length, 10).setNumberFormat('@').setValues(v);
+  sh.getRange('A1:J1').setFontWeight('bold');
   const cfg = ss.getSheetByName('CAU HINH');
   const daCo = cfg.getDataRange().getValues().some(function (r) { return String(r[0]).trim() === ma; });
   if (!daCo) cfg.appendRow([ma, 'Ôn tập (AI) – ' + tk.ten, 15, 'DONG', 'CO', tk.lop]);
@@ -267,7 +283,7 @@ function taoDeOnTap(tk, ch) {
 // ---------------------------------------------------------------------
 function aiGoiYHocSinh(tk) {
   const deTomTat = tk.cau.map(function (q) {
-    return {cau: q.cau, noi_dung: rutGon(q.hoi, 160), dap_an: q.da + '. ' + rutGon(q.pa[q.da], 60)};
+    return {cau: q.cau, noi_dung: rutGon(q.hoi, 160), dap_an: q.loai === 'TN' ? q.da + '. ' + rutGon(q.pa[q.da], 60) : q.da};
   });
   const hs = tk.bai.map(function (b) {
     return {ma: b.mahs, diem: b.diem, cau_sai: b.cauSai.map(function (s) { return s.cau + '(chọn ' + s.chon + ')'; }).join(', ')};
