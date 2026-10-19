@@ -58,6 +58,12 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
 .tienbo .so{display:flex;gap:18px;flex-wrap:wrap;font-size:16px;color:var(--muted)}
 .tienbo .so b{font-size:24px;color:var(--ink);margin-right:4px}
 .tienbo svg{width:100%;height:auto;display:block;margin-top:6px}
+/* Chong sao chep: khong boi den/luu anh/in; hinh mo ten HS */
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+img{-webkit-user-drag:none;pointer-events:none}
+#wm{position:fixed;inset:0;pointer-events:none;z-index:50;background-repeat:repeat;opacity:.09;display:none}
+@media print{body>*{display:none!important}body:after{content:"Trang này không được in.";display:block;font:20px sans-serif;padding:40px}}
 </style>
 </head>
 <body>
@@ -148,7 +154,20 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     thu();
   };
 
+  // Hinh mo ten + SBD cua HS phu len trang (anh chup man hinh van mang ten em)
+  function hinhMo(chu) {
+    var el = document.getElementById('wm');
+    if (!el) { el = document.createElement('div'); el.id = 'wm'; document.body.appendChild(el); }
+    if (!chu) { el.style.display = 'none'; return; }
+    var t = String(chu).replace(/[<>&"]/g, '');
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="200"><text x="20" y="120" transform="rotate(-24 180 100)" font-family="sans-serif" font-size="20" font-weight="700" fill="#000">' + t + '</text></svg>';
+    el.style.backgroundImage = 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
+    el.style.display = 'block';
+  }
+  document.addEventListener('contextmenu', function (e) { if (e.target.tagName !== 'INPUT') e.preventDefault(); });
+  document.addEventListener('copy', function (e) { e.preventDefault(); });
   function veDanhSach() {
+    hinhMo(duLieu.hoten + ' · ' + duLieu.mahs);
     $('tenhs').textContent = duLieu.hoten;
     var box = $('dsBai'); box.innerHTML = '';
     if (!duLieu.bai.length) box.innerHTML = '<p class="sub">Chưa có bài nào được giáo viên mở cho xem lại.</p>';
