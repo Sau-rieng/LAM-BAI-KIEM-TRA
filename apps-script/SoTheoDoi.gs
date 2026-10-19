@@ -101,7 +101,7 @@ function batDau(d) {
   let hetLuc = 0;
   if (lan === 1 && c.batdauluc) {
     hetLuc = c.batdauluc + c.phut * 60000;
-    if (Date.now() > hetLuc) return {ok: false, loi: 'hetgio', msg: 'Da het gio lam bai'};
+    if (Date.now() > hetLuc - 60000) return {ok: false, loi: 'hetgio', msg: 'Da het gio lam bai'};
   }
   const de = docDe(c.madot).map(function (q) {
     return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chu: laTLNChu(q)};
@@ -219,6 +219,8 @@ function gvDat(d) {
           if (!String(sh.getRange(1, 7).getValue()).trim()) sh.getRange(1, 7).setValue('BatDauLuc').setFontWeight('bold');
           sh.getRange(i + 1, 7).setValue(new Date());
         }
+        // Mo phong cho cho ca moi: xoa gio bat dau cua ca truoc de khong ai nhan nham gio ket thuc cu
+        if (g === 'CHO') sh.getRange(i + 1, 7).setValue('');
         try { CacheService.getScriptCache().remove('tt_' + d.madot); } catch (e) {}
       } else if (d.truong === 'mo') sh.getRange(i + 1, 4).setValue(d.giatri ? 'MO' : 'DONG');
       else if (d.truong === 'xemlai') sh.getRange(i + 1, 5).setValue(d.giatri ? 'CO' : 'KHONG');

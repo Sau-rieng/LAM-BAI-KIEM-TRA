@@ -125,15 +125,27 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     if (!mx) return loi('Em chưa nhập mã xem bài.');
     $('msg').textContent = 'Đang tải bài...';
     $('btnXem').disabled = true;
-    fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'xemlai', mahs: lopChon.tiento + s2, maxem: mx }) })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        $('btnXem').disabled = false;
-        if (!j.ok) return loi('SBD hoặc mã xem bài chưa đúng.');
-        duLieu = j; $('maxem').value = ''; $('msg').textContent = '';
-        veDanhSach();
-      })
-      .catch(function () { $('btnXem').disabled = false; loi('Không kết nối được. Kiểm tra mạng rồi bấm lại.'); });
+    var du = { action: 'xemlai', mahs: lopChon.tiento + s2, maxem: mx }, url = lopChon.url, lan = 0;
+    // Nhieu ban cung xem mot luc, Google co the bao ban: tu thu lai sau vai giay (toi da 5 lan)
+    function thu() {
+      lan++;
+      fetch(url, { method: 'POST', body: JSON.stringify(du) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j.ok && /SBD hoac ma xem/i.test(j.msg || '')) { $('btnXem').disabled = false; return loi('SBD hoặc mã xem bài chưa đúng.'); }
+          if (!j.ok) throw new Error(j.msg || 'loi');
+          $('btnXem').disabled = false;
+          duLieu = j; $('maxem').value = ''; $('msg').textContent = '';
+          veDanhSach();
+        })
+        .catch(function () {
+          if (lan < 5) {
+            $('msg').className = 'msg'; $('msg').textContent = 'Nhiều bạn đang xem cùng lúc, đang thử lại (' + lan + ')...';
+            setTimeout(thu, 3000 + Math.random() * 5000 * lan);
+          } else { $('btnXem').disabled = false; loi('Hệ thống đang bận. Em đợi 1–2 phút rồi bấm "Xem bài" lại.'); }
+        });
+    }
+    thu();
   };
 
   function veDanhSach() {

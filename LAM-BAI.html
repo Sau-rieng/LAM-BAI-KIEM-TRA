@@ -238,6 +238,7 @@ button:disabled{opacity:.4}
           if (j.loi === 'malamlai') { $('malamlai').value = ''; return loi('Mã cho làm lại chưa đúng.'); }
           return loi('Chưa vào được bài: ' + (j.msg || ''));
         }
+        if (j.hetLuc && j.hetLuc - (j.bayGio || Date.now()) < 60000) return loi('Bài này đã hết giờ. Em báo giáo viên mở phòng chờ cho ca của em.');
         $('malamlai').value = ''; $('lamLai').style.display = 'none';
         S = { hs: hocSinh, madot: j.madot, ten: j.ten + (j.lan > 1 ? ' (lần ' + j.lan + ')' : ''), lan: j.lan || 1, phut: j.phut, de: j.cau,
               thuTu: xepThuTu(j.cau),
@@ -260,6 +261,11 @@ button:disabled{opacity:.4}
     function hoi() {
       clearTimeout(henCho);
       goi(hocSinh.url, { action: 'chobai', madot: madot }).then(function (t) {
+        // Gio ket thuc da qua / gan het (thuong la gio cua ca truoc): khong vao bai, tiep tuc cho
+        if (t.tt === 'MO' && (j.lan || 1) === 1 && t.hetLuc && t.hetLuc - (t.bayGio || Date.now()) < 60000) {
+          $('choMsg').textContent = 'Chờ giáo viên phát đề';
+          henCho = setTimeout(hoi, 4000 + Math.random() * 2000); return;
+        }
         // De da tai san (khoa ma): chi can chia khoa la mo ngay, khong tai lai tu Google
         if (t.tt === 'MO' && t.khoa && j.goi && !dangVao) {
           var de = giaiMa(j.goi, t.khoa);
@@ -406,12 +412,22 @@ button:disabled{opacity:.4}
     clearInterval(dongHo);
     var f = function () {
       var t = conLai();
-      if (t <= 0) { $('gio').textContent = '00:00'; clearInterval(dongHo); nopBai(); return; }
+      if (t <= 0) {
+        $('gio').textContent = '00:00'; clearInterval(dongHo);
+        if (soDaLam() === 0 && Date.now() - S.batDau < 20000) { huyVaoBai(); return; }
+        nopBai(); return;
+      }
       var m = Math.floor(t / 60), s = t % 60;
       $('gio').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
       $('gio').classList.toggle('low', t <= 60);
     };
     f(); dongHo = setInterval(f, 1000);
+  }
+
+  // Vao bai nham luc da het gio (vd gio cua ca truoc): khong ghi bai 0 diem, cho em vao lai ca sau
+  function huyVaoBai() {
+    S = null; xoa(KEY); man('scrLogin');
+    loi('Bài này đã hết giờ nên em chưa vào làm được (không bị tính điểm). Em báo giáo viên.');
   }
 
   // ---------- Roi man hinh: lan 1 khoa, lan 2 tu nop ----------
