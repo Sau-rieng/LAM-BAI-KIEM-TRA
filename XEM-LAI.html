@@ -135,7 +135,7 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
           if (!j.ok && /SBD hoac ma xem/i.test(j.msg || '')) { $('btnXem').disabled = false; return loi('SBD hoặc mã xem bài chưa đúng.'); }
           if (!j.ok) throw new Error(j.msg || 'loi');
           $('btnXem').disabled = false;
-          duLieu = j; $('maxem').value = ''; $('msg').textContent = '';
+          duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; $('maxem').value = ''; $('msg').textContent = '';
           veDanhSach();
         })
         .catch(function () {
@@ -192,8 +192,16 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
     el.innerHTML = h;
   }
 
+  // Ghi nhan em da mo xem bai nay (gui ngam, khong anh huong neu loi)
+  var daGhi = {};
+  function ghiDaXem(b) {
+    if (daGhi[b.madot] || !lopChon || !duLieu) return;
+    daGhi[b.madot] = 1;
+    try { fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'daxem', mahs: duLieu.mahs, maxem: duLieu.maxem, madot: b.madot }) }).catch(function () {}); } catch (e) {}
+  }
   function veBai() {
     var b = baiDangXem;
+    ghiDaXem(b);
     $('tenBai').textContent = b.ten;
     $('diemBai').textContent = String(b.diem).replace('.', ',') + ' điểm';
     var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { var n = nhan(q); return (n.phan ? n.phan + '.' : '') + n.so; });

@@ -58,6 +58,8 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .tt.chua{color:var(--muted);font-weight:500}
 .tt a{color:inherit}
 .lan{font-size:12px;font-weight:700;color:var(--warn);margin-left:6px}
+.xem{font-size:12px;font-weight:600;color:var(--ok)}
+.xem.chua{color:var(--muted)}
 .capnhat{font-size:13px;color:var(--muted);text-align:center;margin:6px 0}
 .loi{color:var(--bad);font-weight:600;margin-top:8px}
 /* Khoi 5 - ho so */
@@ -160,6 +162,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   }
   function gio(iso) { if (!iso) return ''; var d = new Date(iso); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
   function diem(x) { return String(x).replace('.', ','); }
+  function ngayGio(iso) { if (!iso) return ''; var d = new Date(iso); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + gio(iso); }
 
   // ---------- Dang nhap ----------
   try { MA = sessionStorage.getItem('gv_ma') || ''; } catch (e) {}
@@ -284,15 +287,18 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     var dem = { danop: 0, danglam: 0, chua: 0, dangcho: 0 }, tong = 0;
     j.hs.forEach(function (h) { dem[h.tt]++; if (h.tt === 'danop') tong += Number(h.diem) || 0; });
     var tb = dem.danop ? Math.round(tong / dem.danop * 100) / 100 : '–';
+    var soXem = j.hs.filter(function (h) { return h.daxem; }).length;
     var now = new Date(j.bayGio).getTime();
     var hs = j.hs.slice().sort(function (a, b) { return THU_TU[a.tt] - THU_TU[b.tt] || (a.mahs < b.mahs ? -1 : 1); });
     var h = '<h2>Lớp ' + esc(j.tenLop) + '</h2><div class="tk">' +
       (dem.dangcho || dotHienTai().tt === 'CHO' ? '<div><b>' + dem.dangcho + '</b><span>Đang chờ</span></div>' : '<div><b>' + dem.danop + '</b><span>Đã nộp</span></div>') +
       '<div><b>' + dem.danglam + '</b><span>Đang làm</span></div>' +
-      '<div><b>' + dem.chua + '</b><span>Chưa vào</span></div><div><b>' + diem(tb) + '</b><span>Điểm TB</span></div></div>';
+      (dotHienTai().xemlai ? '<div><b>' + soXem + '/' + dem.danop + '</b><span>Đã xem lại</span></div>' : '<div><b>' + dem.chua + '</b><span>Chưa vào</span></div>') +
+      '<div><b>' + diem(tb) + '</b><span>Điểm TB</span></div></div>';
     hs.forEach(function (x) {
       var so = String(x.mahs).slice(-2), tt = '';
-      if (x.tt === 'danop') tt = '<a href="' + esc(x.pdf) + '" target="_blank" rel="noopener">' + diem(x.diem) + ' đ</a> · nộp ' + gio(x.luc);
+      if (x.tt === 'danop') tt = '<a href="' + esc(x.pdf) + '" target="_blank" rel="noopener">' + diem(x.diem) + ' đ</a> · nộp ' + gio(x.luc) +
+        (dotHienTai().xemlai ? (x.daxem ? '<br><span class="xem">✓ đã xem lại ' + ngayGio(x.xemluc) + '</span>' : '<br><span class="xem chua">chưa xem lại</span>') : '');
       else if (x.tt === 'danglam') tt = 'Đang làm · ' + Math.max(0, Math.round((now - new Date(x.batdau).getTime()) / 60000)) + ' phút';
       else if (x.tt === 'dangcho') tt = 'Đang chờ · vào lúc ' + gio(x.vaocho);
       else tt = 'Chưa vào';

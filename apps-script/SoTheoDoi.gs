@@ -19,6 +19,8 @@ const TAB_BD = 'BAT DAU';
 const HEAD_BD = ['ThoiGian','MaDot','MaHS','LanLam'];
 const TAB_PC = 'PHONG CHO';
 const HEAD_PC = ['ThoiGian','MaDot','MaHS'];
+const TAB_XL = 'XEM LAI';
+const HEAD_XL = ['ThoiGian','MaDot','MaHS','HoTen'];
 
 // ---------------------------------------------------------------------
 // Cong vao
@@ -49,6 +51,7 @@ function doPost(e) {
       case 'chobai': return json(trangThaiDot(d.madot));
       case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
+      case 'daxem':  return json(ghiDaXem(d));
       case 'gv_dot':
       case 'gv_dat':
       case 'gv_theodoi':
@@ -174,6 +177,15 @@ function xemLai(d) {
   return {ok: true, hoten: hs.ten, bai: ketqua};
 }
 
+// HS mo xem 1 bai o trang xem lai -> ghi tab XEM LAI de GV biet em nao da xem
+function ghiDaXem(d) {
+  const ma = String(d.mahs || '').trim();
+  const hs = timHS(ma);
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false};
+  ghiDong(TAB_XL, HEAD_XL, [new Date(), String(d.madot || '').trim(), ma, hs.ten]);
+  return {ok: true};
+}
+
 function ghiHoatDong(d) {
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);
@@ -262,6 +274,17 @@ function gvTheoDoi(d) {
       if (String(r[1]).trim() === madot) cho[String(r[2]).trim()] = r[0];
     });
   }
+  const xem = {};
+  const xl = ss.getSheetByName(TAB_XL);
+  if (xl && xl.getLastRow() > 1) {
+    xl.getRange(2, 1, xl.getLastRow() - 1, 3).getValues().forEach(function (r) {
+      if (String(r[1]).trim() !== madot) return;
+      const ma = String(r[2]).trim();
+      xem[ma] = xem[ma] || {lan: 0, luc: null};
+      xem[ma].lan++;
+      if (r[0] instanceof Date && (!xem[ma].luc || r[0] > xem[ma].luc)) xem[ma].luc = r[0];
+    });
+  }
   const ngay = function (x) { return x instanceof Date ? x.toISOString() : ''; };
   const hs = ds.map(function (r) {
     const ma = String(r[0]).trim(), n = nop[ma], s = bd[ma];
@@ -270,6 +293,7 @@ function gvTheoDoi(d) {
     else if (n) { o.tt = 'danop'; o.diem = n.diem; o.dung = n.dung; o.tong = n.tong; o.luc = ngay(n.luc); o.giay = n.giay; o.lan = n.lan; o.pdf = n.pdf; }
     else if (cho[ma]) { o.tt = 'dangcho'; o.vaocho = ngay(cho[ma]); }
     else o.tt = 'chua';
+    if (xem[ma]) { o.daxem = xem[ma].lan; o.xemluc = ngay(xem[ma].luc); }
     return o;
   });
   return {ok: true, lop: lopNay(), madot: madot, bayGio: new Date().toISOString(), hs: hs};
