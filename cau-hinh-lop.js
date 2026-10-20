@@ -15,7 +15,8 @@ window.DS_LOP_DEMO = [
 window.LAM_DEMO = /[?&]demo(=|&|$)/i.test(location.search);
 if (window.LAM_DEMO) {
   window.DS_LOP = window.DS_LOP_DEMO;
-  (function () {
+  var _the = document.currentScript;
+  if (!(_the && _the.getAttribute('data-banner') === 'khong')) (function () {
     var b = document.createElement('div');
     b.textContent = 'BẢN DÙNG THỬ · lớp DEMO · không ảnh hưởng các lớp thật';
     b.style.cssText = 'position:sticky;top:0;z-index:60;background:#a06b00;color:#fff;text-align:center;font:600 14px -apple-system,Segoe UI,Arial,sans-serif;padding:6px 10px';

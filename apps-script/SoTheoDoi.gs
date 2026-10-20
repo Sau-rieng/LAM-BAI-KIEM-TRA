@@ -334,11 +334,23 @@ function hoSoLop() {
         giay: Number(r[8]) || 0, luc: luc ? new Date(luc).toISOString() : '', pdf: String(r[10] || ''), lan: Number(r[11]) || 1});
     });
   }
+  // Luot choi tro choi (cac tro choi gui ket qua "dung/tong" vao tab HOAT DONG)
+  const choi = [];
+  const hd = ss.getSheetByName(TAB_HD);
+  if (hd && hd.getLastRow() > 1) {
+    hd.getRange(2, 1, hd.getLastRow() - 1, HEAD_HD.length).getValues().forEach(function (r) {
+      const m = /^(\d+(?:[.,]\d+)?)\/(\d+)$/.exec(String(r[6]).trim());
+      if (!m) return;
+      choi.push({mahs: String(r[2]).trim(), tro: String(r[1]).trim(), ten: String(r[4] || r[1]).trim(),
+        dung: Number(m[1].replace(',', '.')), tong: Number(m[2]), diem: r[5], giay: Number(r[7]) || 0,
+        luc: r[0] instanceof Date ? r[0].toISOString() : ''});
+    });
+  }
   const vang = docVang();
   vang.forEach(function (v) { if (!(v.madot in dauTien)) { dauTien[v.madot] = v.luc ? new Date(v.luc).getTime() : 0; } });
   const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : ''}; });
-  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, bayGio: new Date().toISOString()};
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, bayGio: new Date().toISOString()};
 }
 // Lop nay da thi nhung dot nao, bao nhieu em da nop (de trang GV ghi "Da thi: 12G01 (38)")
 function gvDaThi() {

@@ -591,7 +591,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     var tongTB = 0, soTB = 0, duoi5 = 0;
     var h = '<table><thead><tr><th class="tn">Học sinh</th>';
     j.dot.forEach(function (d, i) { h += '<th title="' + esc(d.ten) + '">Bài ' + (i + 1) + '</th>'; });
-    h += '<th>TB</th></tr></thead><tbody>';
+    h += '<th>TB</th><th title="Số lượt chơi trò chơi luyện tập">🎮</th></tr></thead><tbody>';
     j.hs.forEach(function (x) {
       var t = 0, n = 0;
       h += '<tr><td class="tn"><button data-ma="' + esc(x.mahs) + '">' + String(x.mahs).slice(-2) + '. ' + esc(x.hoten) + '</button></td>';
@@ -603,7 +603,8 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
       });
       var tb = n ? lam2(t / n) : null;
       if (tb !== null) { tongTB += tb; soTB++; if (tb < 5) duoi5++; }
-      h += '<td class="tb">' + (tb === null ? '–' : diem(tb)) + '</td></tr>';
+      var nc = (j.choi || []).filter(function (c) { return c.mahs === x.mahs; }).length;
+      h += '<td class="tb">' + (tb === null ? '–' : diem(tb)) + '</td><td>' + (nc || '–') + '</td></tr>';
     });
     h += '<tr class="tblop"><td class="tn">TB lớp</td>';
     j.dot.forEach(function (d) {
@@ -611,14 +612,14 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
       j.hs.forEach(function (x) { var b = m[x.mahs + '|' + d.madot]; if (b) { t += b.diem; n++; } });
       h += '<td>' + (n ? diem(lam2(t / n)) : '–') + '</td>';
     });
-    h += '<td></td></tr></tbody></table>';
+    h += '<td></td><td>' + ((j.choi || []).length || '') + '</td></tr></tbody></table>';
     var ct = j.dot.map(function (d, i) { return '<b>Bài ' + (i + 1) + '</b>: ' + esc(d.ten) + ' (' + ngay(d.luc) + ')'; }).join('<br>');
     card.innerHTML = '<h2>Lớp ' + esc(j.lop) + '</h2>' +
       '<div class="tk tk3"><div><b>' + j.hs.length + '</b><span>Học sinh</span></div><div><b>' + j.dot.length + '</b><span>Bài kiểm tra</span></div>' +
       '<div><b>' + (soTB ? diem(lam2(tongTB / soTB)) : '–') + '</b><span>Điểm TB lớp</span></div></div>' +
       (duoi5 ? '<p class="sub">' + duoi5 + ' em có điểm trung bình dưới 5. Điểm ≤ 3,5 màu đỏ, dưới 5 màu vàng.</p>' : '') +
       '<div class="bang">' + h + '</div>' +
-      '<div class="chuthich">' + ct + '<br>Điểm tính theo lần làm sau cùng; <span style="color:var(--warn)">L2</span> = làm lại lần 2; <b style="color:var(--warn)">V</b> = vắng thi (bấm tên em để ghi/bỏ vắng).' +
+      '<div class="chuthich">' + ct + '<br>Điểm tính theo lần làm sau cùng; <span style="color:var(--warn)">L2</span> = làm lại lần 2; <b style="color:var(--warn)">V</b> = vắng thi (bấm tên em để ghi/bỏ vắng); 🎮 = số lượt chơi trò chơi luyện tập.' +
       (function () { var n = (j.vang || []).filter(function (v) { return !m[v.mahs + '|' + v.madot]; }).length; return n ? '<br><b style="color:var(--warn)">' + n + ' lượt vắng chưa thi bù.</b>' : ''; })() + '</div>' +
       '<button class="btn" id="btnGhiBD">Ghi bảng điểm vào Google Sheet (tab BANG DIEM)</button><div id="kqGhi"></div>';
     box.innerHTML = ''; box.appendChild(card);
@@ -679,6 +680,19 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     }
     if (tinh.length) h += '<div class="card bieudo"><h2>Tiến bộ qua các bài</h2><p class="sub">Đường nét đứt là mốc 5 điểm; chấm rỗng là điểm dưới 5.</p>' +
       bieuDo(tinh.map(function (b) { return { nhan: 'Bài ' + soBai[b.madot], diem: b.diem }; })) + '</div>';
+    var choi = (j.choi || []).filter(function (c) { return c.mahs === ma; }).sort(function (a, b) { return a.luc < b.luc ? 1 : -1; });
+    if (choi.length) {
+      var tl = choi.reduce(function (t, c) { return t + (c.tong ? c.dung / c.tong : 0); }, 0) / choi.length;
+      var cacTro = {}; choi.forEach(function (c) { cacTro[c.ten] = (cacTro[c.ten] || 0) + 1; });
+      h += '<div class="card"><h2>🎮 Trò chơi luyện tập</h2><p class="sub">' + choi.length + ' lượt chơi · trung bình đúng ' + Math.round(tl * 100) + '% · ' +
+        Object.keys(cacTro).map(function (t) { return esc(t) + ' (' + cacTro[t] + ')'; }).join(', ') + '</p>';
+      choi.forEach(function (c) {
+        var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0;
+        h += '<div class="bai"><div class="d ' + (p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '" style="font-size:18px">' + c.dung + '/' + c.tong + '</div><div class="tb2"><b>' + esc(c.ten) + '</b>' +
+          '<div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · đúng ' + p + '%' + (c.giay ? ' · chơi ' + phutGiay(c.giay) : '') + '</div></div></div>';
+      });
+      h += '</div>';
+    }
     h += '<div class="card"><h2>Các lần làm bài</h2>';
     if (!cua.length) h += '<p class="sub" style="margin-top:8px">Em này chưa nộp bài nào.</p>';
     cua.slice().reverse().forEach(function (b) {
