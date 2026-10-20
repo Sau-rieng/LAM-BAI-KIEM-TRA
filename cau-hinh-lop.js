@@ -7,3 +7,18 @@ window.DS_LOP = [
   { ten: '9D01',  tiento: '260901', url: 'https://script.google.com/macros/s/AKfycbx_eessoVe_9zu32-LHHVtqOFGShs4mlv36YdSlXRRQCaRXA_3PesfFlMHKVvhKtZY/exec' },
   { ten: '9D03',  tiento: '260903', url: 'https://script.google.com/macros/s/AKfycbyEViQtxxKc8hxAGypHW3QBAKneChPupD9PF-KZi136plRvNIycQ6HT-B5Ge-geM0MMXw/exec' }
 ];
+
+// ---- LOP DUNG THU (DEMO): kho de ban sao + so theo doi rieng, bo ma rieng; mo trang voi ?demo ----
+window.DS_LOP_DEMO = [
+  { ten: 'DEMO', tiento: '269999', url: 'CHUA_CO_LINK_DEMO' }
+];
+window.LAM_DEMO = /[?&]demo(=|&|$)/i.test(location.search);
+if (window.LAM_DEMO) {
+  window.DS_LOP = window.DS_LOP_DEMO;
+  (function () {
+    var b = document.createElement('div');
+    b.textContent = 'BẢN DÙNG THỬ · lớp DEMO · không ảnh hưởng các lớp thật';
+    b.style.cssText = 'position:sticky;top:0;z-index:60;background:#a06b00;color:#fff;text-align:center;font:600 14px -apple-system,Segoe UI,Arial,sans-serif;padding:6px 10px';
+    document.body.insertBefore(b, document.body.firstChild);
+  })();
+}

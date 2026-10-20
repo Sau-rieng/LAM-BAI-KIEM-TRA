@@ -175,7 +175,7 @@ img{-webkit-user-drag:none;pointer-events:none}
 <script>
 (function () {
   var DS = window.DS_LOP || [];
-  var KEY = 'lambai_dang_lam', KEY_GUI = 'lambai_cho_gui';
+  var SFX = window.LAM_DEMO ? '_demo' : '', KEY = 'lambai_dang_lam' + SFX, KEY_GUI = 'lambai_cho_gui' + SFX;
   var S = null, lopChon = null, hocSinh = null, dongHo = null, dangGui = false, maGV = '', henCho = null;
 
   function $(id) { return document.getElementById(id); }

@@ -819,6 +819,20 @@ function json(o) {
 // =====================================================================
 
 // 1) Tao cot MAXEM (cot D) va ma xem bai 4 so ngau nhien cho HS chua co ma
+// Chi dung cho file "SO THEO DOI DEMO": tao 10 tai khoan dung thu, SBD 26999901..10, ma xem 1101..1110
+function taoHocSinhThu() {
+  if (lopNay().toUpperCase() !== 'DEMO') throw new Error('Chi chay ham nay trong file ten "SO THEO DOI DEMO" (de khong xoa danh sach lop that).');
+  const sh = layTab(TAB_DS, ['MAHS', 'HO TEN', 'GHI CHU', 'MAXEM']);
+  sh.clear();
+  const v = [['MAHS', 'HO TEN', 'GHI CHU', 'MAXEM']];
+  for (let i = 1; i <= 10; i++) {
+    const so = ('0' + i).slice(-2);
+    v.push(['269999' + so, 'Học sinh thử ' + so, 'Tài khoản dùng thử', '11' + so]);
+  }
+  sh.getRange(1, 1, v.length, 4).setNumberFormat('@').setValues(v);
+  sh.getRange(1, 1, 1, 4).setFontWeight('bold');
+  Logger.log('Da tao 10 tai khoan dung thu: SBD 01-10, ma xem 1101-1110.');
+}
 function taoMaXem() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_DS);
   sh.getRange('D1').setValue('MAXEM').setFontWeight('bold');

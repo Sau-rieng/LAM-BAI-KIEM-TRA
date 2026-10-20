@@ -221,7 +221,8 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   function ngayGio(iso) { if (!iso) return ''; var d = new Date(iso); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + gio(iso); }
 
   // ---------- Dang nhap ----------
-  try { MA = sessionStorage.getItem('gv_ma') || ''; } catch (e) {}
+  var KMA = 'gv_ma' + (window.LAM_DEMO ? '_demo' : '');
+  try { MA = sessionStorage.getItem(KMA) || ''; } catch (e) {}
   $('btnVao').onclick = function () {
     var m = $('ma').value.trim();
     if (!m) { $('msg').textContent = 'Thầy/cô chưa nhập mã.'; return; }
@@ -233,15 +234,15 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     goiBatKy({ action: 'gv_dot', ma: m }).then(function (j) {
       $('btnVao').disabled = false; $('btnVao').textContent = 'Vào';
       if (!j.ok) {
-        try { sessionStorage.removeItem('gv_ma'); } catch (e) {}
+        try { sessionStorage.removeItem(KMA); } catch (e) {}
         $('msg').textContent = j.loi === 'ma' ? 'Mã quản lý chưa đúng.' : 'Lỗi: ' + (j.msg || '') + '. Sổ theo dõi đã cập nhật mã mới chưa?';
         man('scrLogin'); return;
       }
-      MA = m; try { sessionStorage.setItem('gv_ma', m); } catch (e) {}
+      MA = m; try { sessionStorage.setItem(KMA, m); } catch (e) {}
       $('ma').value = ''; DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); veDot(); man('scrDot'); taiDaThi();
     }).catch(function (e) { $('btnVao').disabled = false; $('btnVao').textContent = 'Vào'; $('msg').textContent = e.message; man('scrLogin'); });
   }
-  $('btnRa').onclick = function () { MA = ''; try { sessionStorage.removeItem('gv_ma'); } catch (e) {} man('scrLogin'); };
+  $('btnRa').onclick = function () { MA = ''; try { sessionStorage.removeItem(KMA); } catch (e) {} man('scrLogin'); };
 
   // ---------- Danh sach de ----------
   function conLaiDe(d) {
