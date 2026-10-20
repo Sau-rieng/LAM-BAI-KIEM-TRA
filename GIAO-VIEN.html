@@ -111,6 +111,15 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .ptc .ct .bar{flex:none;width:90px;height:10px;background:var(--off);border-radius:5px;margin-top:5px;overflow:hidden}
 .ptc .ct .bar i{display:block;height:100%;background:#9aa3b5}
 .ptc .ct .op.dung .bar i{background:var(--ok)}
+.nhCard h2{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nhTv{font-size:14px;color:var(--muted);margin:2px 0 6px}
+.nhTv b{color:var(--ink);font-weight:600}
+.nhSua{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 12px;margin:8px 0;font-size:15px}
+@media (max-width:480px){.nhSua{grid-template-columns:1fr}}
+.nhSua label{display:flex;gap:8px;align-items:center;margin:0;font-weight:400}
+.nhSua input{width:20px;height:20px}
+.nhSua small{color:var(--muted)}
+.nhTong td,.nhTong th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:15px}
 .pd{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 8px}
 .pd div{border:2px solid var(--line);border-radius:10px;padding:6px 4px;text-align:center}
 .pd b{display:block;font-size:19px}
@@ -177,6 +186,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     <h1>Hồ sơ học sinh</h1>
     <p class="sub">Bảng điểm từng lớp. Bấm vào tên để xem tiến bộ của em đó, bấm vào điểm để mở bài làm (PDF).</p>
     <div class="loc" id="locLop" style="margin-top:12px"></div>
+    <div class="loc" id="cheDo"><button data-c="hs" class="on">👤 Học sinh</button><button data-c="nhom">👥 Nhóm (trò chơi nhóm)</button></div>
   </div>
   <div id="hoSo"></div>
 </section>
@@ -568,10 +578,75 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   };
   $('btnLai2').onclick = function () { man('scrDot'); veDot(); };
   $('btnTaiHS').onclick = function () { taiHoSo(true); };
-  $('btnLai3').onclick = function () { veBangDiem(); man('scrHoSo'); };
+  $('btnLai3').onclick = function () { veHoSo(); man('scrHoSo'); };
+  var HS_CHE = 'hs';
+  [].forEach.call($('cheDo').children, function (b) {
+    b.onclick = function () { HS_CHE = b.getAttribute('data-c'); [].forEach.call($('cheDo').children, function (x) { x.classList.toggle('on', x === b); }); if (HS_DL) veHoSo(); };
+  });
+  function veHoSo() { if (HS_CHE === 'nhom') veNhom(); else veBangDiem(); }
+  function soNhom(n) { var m = /(\d+)/.exec(n); return m ? Number(m[1]) : 999; }
+  // ---------- Ho so nhom ----------
+  var NH_SUA = null, NH_THEM = [];
+  function veNhom() {
+    var j = HS_DL, box = $('hoSo'), tv = j.nhom || {}, choi = j.choiNhom || [];
+    var ten = {}; j.hs.forEach(function (x) { ten[x.mahs] = x.hoten; });
+    var cac = {}; choi.forEach(function (c) { cac[c.nhom] = 1; }); Object.keys(tv).forEach(function (ma) { cac[tv[ma]] = 1; }); NH_THEM.forEach(function (n) { cac[n] = 1; });
+    var ds = Object.keys(cac).sort(function (a, b) { return soNhom(a) - soNhom(b); });
+    var h = '<div class="card"><h2>Hồ sơ nhóm · Lớp ' + esc(j.lop) + '</h2><p class="sub">Kết quả các trò chơi nhóm (Chim đưa thư, Đua xe F1, Ruộng lúa…). Ghi thành viên để kết quả nhóm hiện cả trong hồ sơ từng em.</p>';
+    if (ds.length) {
+      h += '<table class="nhTong"><tr><th>Nhóm</th><th>Thành viên</th><th>Lượt</th><th>TB đúng</th></tr>';
+      ds.forEach(function (n) {
+        var cc = choi.filter(function (c) { return c.nhom === n; }), sv = Object.keys(tv).filter(function (ma) { return tv[ma] === n; });
+        var tb = cc.length ? Math.round(cc.reduce(function (t, c) { return t + (c.tong ? c.dung / c.tong : 0); }, 0) / cc.length * 100) + '%' : '–';
+        h += '<tr><td><b>' + esc(n) + '</b></td><td>' + (sv.length || '<span style="color:var(--muted)">chưa ghi</span>') + '</td><td>' + cc.length + '</td><td>' + tb + '</td></tr>';
+      });
+      h += '</table>';
+    } else h += '<p class="sub">Lớp này chưa có lượt chơi nhóm nào.</p>';
+    h += '<div class="vgBtns"><input id="nhMoi" inputmode="numeric" placeholder="Số nhóm, vd 7" style="max-width:160px"><button id="nhThem">＋ Thêm nhóm để ghi thành viên</button></div></div>';
+    ds.forEach(function (n) {
+      var cc = choi.filter(function (c) { return c.nhom === n; }).sort(function (a, b) { return a.luc < b.luc ? 1 : -1; });
+      var sv = Object.keys(tv).filter(function (ma) { return tv[ma] === n; }).sort();
+      h += '<div class="card nhCard" data-nhom="' + esc(n) + '"><h2><span>👥 ' + esc(n) + '</span><button class="btn2 nhBtn" style="padding:6px 12px;font-size:14px">✎ Sửa thành viên</button></h2>' +
+        '<div class="nhTv">' + (sv.length ? 'Thành viên: <b>' + sv.map(function (ma) { return esc(String(ma).slice(-2) + '. ' + (ten[ma] || ma)); }).join(', ') + '</b>' : 'Chưa ghi thành viên.') + '</div>';
+      if (NH_SUA === n) {
+        h += '<div class="nhSua">' + j.hs.map(function (x) {
+          var o = tv[x.mahs];
+          return '<label><input type="checkbox" value="' + esc(x.mahs) + '"' + (o === n ? ' checked' : '') + '>' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + (o && o !== n ? ' <small>(' + esc(o) + ')</small>' : '') + '</label>';
+        }).join('') + '</div><div class="vgBtns"><button class="nhLuu" style="border-color:var(--pri);color:var(--pri)">Lưu thành viên</button><button class="nhHuy">Hủy</button></div><div class="loi nhLoi"></div>';
+      }
+      if (!cc.length) h += '<p class="sub">Chưa có lượt chơi.</p>';
+      cc.forEach(function (c) {
+        var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0;
+        h += '<div class="bai"><div class="d ' + (p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '" style="font-size:18px">' + c.dung + '/' + c.tong + '</div><div class="tb2"><b>' + esc(c.ten) + '</b>' +
+          '<div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · điểm ' + diem(c.diem) + ' · đúng ' + p + '%' + (c.giay ? ' · chơi ' + phutGiay(c.giay) : '') + '</div></div></div>';
+      });
+      h += '</div>';
+    });
+    box.innerHTML = h;
+    $('nhThem').onclick = function () { var v = $('nhMoi').value.replace(/\D/g, ''); if (!v) return; NH_SUA = 'Nhóm ' + Number(v); if (NH_THEM.indexOf(NH_SUA) < 0) NH_THEM.push(NH_SUA); veNhom(); };
+    [].forEach.call(box.querySelectorAll('.nhCard'), function (el) {
+      var n = el.getAttribute('data-nhom');
+      el.querySelector('.nhBtn').onclick = function () { NH_SUA = NH_SUA === n ? null : n; veNhom(); };
+      var luu = el.querySelector('.nhLuu');
+      if (luu) {
+        el.querySelector('.nhHuy').onclick = function () { NH_SUA = null; veNhom(); };
+        luu.onclick = function () {
+          var chon = [].map.call(el.querySelectorAll('.nhSua input:checked'), function (x) { return x.value; });
+          luu.disabled = true; luu.textContent = 'Đang lưu...';
+          goi(HS_LOP.url, { action: 'gv_nhom', ma: MA, nhom: n, ds: chon }).then(function (r) {
+            if (!r.ok) throw new Error(r.msg || 'lỗi');
+            HS_DL.nhom = r.nhom; NH_SUA = null; veNhom();
+          }).catch(function (e) {
+            luu.disabled = false; luu.textContent = 'Lưu thành viên';
+            el.querySelector('.nhLoi').textContent = /hop le/i.test(e.message) ? 'Sổ lớp này chưa có mã mới (hồ sơ nhóm): dán SoTheoDoi.gs mới rồi Triển khai phiên bản mới.' : 'Chưa lưu được: ' + e.message;
+          });
+        };
+      }
+    });
+  }
   function taiHoSo(moi) {
     var l = HS_LOP, box = $('hoSo');
-    if (!moi && HS_CACHE[l.ten]) { HS_DL = HS_CACHE[l.ten]; veBangDiem(); return; }
+    if (!moi && HS_CACHE[l.ten]) { HS_DL = HS_CACHE[l.ten]; veHoSo(); return; }
     box.innerHTML = '<div class="card sub">Đang tải hồ sơ lớp ' + esc(l.ten) + '...</div>';
     goi(l.url, { action: 'gv_hoso', ma: MA }).then(function (j) {
       if (HS_LOP !== l) return;
@@ -579,7 +654,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
         box.innerHTML = '<div class="card"><div class="loi">' + (/hop le/i.test(j.msg || '') ? 'Sổ theo dõi lớp ' + esc(l.ten) + ' chưa có mã Khối 5: dán SoTheoDoi.gs mới rồi Triển khai → Quản lý → ✎ → Phiên bản mới.' : esc(j.msg || 'Lỗi')) + '</div></div>';
         return;
       }
-      HS_CACHE[l.ten] = HS_DL = j; veBangDiem();
+      HS_CACHE[l.ten] = HS_DL = j; NH_SUA = null; NH_THEM = []; veHoSo();
     }).catch(function (e) { if (HS_LOP === l) box.innerHTML = '<div class="card"><div class="loi">Không kết nối được lớp ' + esc(l.ten) + ' (' + esc(e.message) + ').</div></div>'; });
   }
   function veBangDiem() {
@@ -690,6 +765,17 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
         var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0;
         h += '<div class="bai"><div class="d ' + (p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '" style="font-size:18px">' + c.dung + '/' + c.tong + '</div><div class="tb2"><b>' + esc(c.ten) + '</b>' +
           '<div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · đúng ' + p + '%' + (c.giay ? ' · chơi ' + phutGiay(c.giay) : '') + '</div></div></div>';
+      });
+      h += '</div>';
+    }
+    var nhEm = (j.nhom || {})[ma];
+    if (nhEm) {
+      var cn = (j.choiNhom || []).filter(function (c) { return c.nhom === nhEm; }).sort(function (a, b) { return a.luc < b.luc ? 1 : -1; });
+      var ban = Object.keys(j.nhom).filter(function (m2) { return j.nhom[m2] === nhEm && m2 !== ma; }).map(function (m2) { var y = j.hs.filter(function (q) { return q.mahs === m2; })[0]; return y ? y.hoten : m2; });
+      h += '<div class="card"><h2>👥 Trò chơi nhóm · ' + esc(nhEm) + '</h2><p class="sub">' + (ban.length ? 'Cùng nhóm: ' + ban.map(esc).join(', ') + '. ' : '') + cn.length + ' lượt chơi.</p>';
+      cn.forEach(function (c) {
+        var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0;
+        h += '<div class="bai"><div class="d ' + (p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '" style="font-size:18px">' + c.dung + '/' + c.tong + '</div><div class="tb2"><b>' + esc(c.ten) + '</b><div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · điểm ' + diem(c.diem) + '</div></div></div>';
       });
       h += '</div>';
     }

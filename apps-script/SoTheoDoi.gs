@@ -23,6 +23,10 @@ const TAB_XL = 'XEM LAI';
 const HEAD_XL = ['ThoiGian','MaDot','MaHS','HoTen'];
 const TAB_VG = 'VANG THI';
 const HEAD_VG = ['ThoiGian','MaDot','MaHS','HoTen','GhiChu','TrangThai'];
+const TAB_CN = 'TRO CHOI NHOM';
+const HEAD_CN = ['ThoiGian','MaTro','TenTro','Nhom','Diem','DungSai','ThoiGian_giay','MaLuot'];
+const TAB_NH = 'NHOM';
+const HEAD_NH = ['Nhom','MaHS','HoTen','CapNhat'];
 
 // ---------------------------------------------------------------------
 // Cong vao
@@ -46,6 +50,7 @@ function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
     if (d.loai === 'hoatdong') return json(ghiHoatDong(d));
+    if (d.loai === 'nhom') return json(ghiChoiNhom(d));
     switch (d.action) {
       case 'batdau': return json(batDau(d));
       case 'mokhoa': return json({ok: String(d.ma || '').trim() === docMa().mokhoa});
@@ -62,6 +67,7 @@ function doPost(e) {
       case 'gv_vang':
       case 'gv_dathi':
       case 'gv_cau':
+      case 'gv_nhom':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -70,6 +76,7 @@ function doPost(e) {
         if (d.action === 'gv_vang') return json(gvVang(d));
         if (d.action === 'gv_dathi') return json(gvDaThi());
         if (d.action === 'gv_cau') return json(gvCau(d));
+        if (d.action === 'gv_nhom') return json(gvNhom(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -192,6 +199,47 @@ function ghiDaXem(d) {
   if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false};
   ghiDong(TAB_XL, HEAD_XL, [new Date(), String(d.madot || '').trim(), ma, hs.ten]);
   return {ok: true};
+}
+
+// Tro choi nhom gui ket qua: 1 dong / luot choi (bo qua neu MaLuot da co)
+function chuanNhom(s) { const m = /(\d+)/.exec(String(s || '')); return m ? 'Nhóm ' + Number(m[1]) : String(s || '').trim(); }
+function ghiChoiNhom(d) {
+  const nhom = chuanNhom(d.nhom);
+  if (!nhom) return {ok: false, msg: 'Thieu nhom'};
+  const ml = String(d.maluot || '').trim();
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const sh = layTab(TAB_CN, HEAD_CN);
+    if (ml && sh.getLastRow() > 1 && sh.getRange(2, 8, sh.getLastRow() - 1, 1).getValues().some(function (r) { return String(r[0]) === ml; })) return {ok: true, trung: true};
+    sh.appendRow([new Date(), String(d.matro || ''), String(d.tentro || d.matro || ''), nhom, d.diem, String(d.dungsai || ''), Number(d.thoigian) || '', ml]);
+  } finally { lock.releaseLock(); }
+  return {ok: true};
+}
+// GV luu thanh vien 1 nhom (moi em chi o 1 nhom: luu nhom nay thi em bi go khoi nhom cu)
+function docNhom() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_NH);
+  const m = {};
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) {
+    if (String(r[1]).trim()) m[String(r[1]).trim()] = chuanNhom(r[0]);
+  });
+  return m;
+}
+function gvNhom(d) {
+  const nhom = chuanNhom(d.nhom), ds = (d.ds || []).map(function (x) { return String(x).trim(); });
+  if (!nhom) return {ok: false, msg: 'Thieu nhom'};
+  const m = docNhom();
+  Object.keys(m).forEach(function (ma) { if (m[ma] === nhom || ds.indexOf(ma) >= 0) delete m[ma]; });
+  ds.forEach(function (ma) { m[ma] = nhom; });
+  const ten = {};
+  const dsSh = SpreadsheetApp.getActive().getSheetByName(TAB_DS);
+  dsSh.getRange(2, 1, Math.max(dsSh.getLastRow() - 1, 1), 2).getValues().forEach(function (r) { ten[String(r[0]).trim()] = String(r[1]).trim(); });
+  const rows = Object.keys(m).sort(function (a, b) { return (m[a] + a).localeCompare(m[b] + b); })
+    .map(function (ma) { return [m[ma], ma, ten[ma] || '', new Date()]; });
+  const sh = layTab(TAB_NH, HEAD_NH);
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_NH.length).clearContent();
+  if (rows.length) sh.getRange(2, 1, rows.length, HEAD_NH.length).setValues(rows);
+  return {ok: true, nhom: m};
 }
 
 function ghiHoatDong(d) {
@@ -346,11 +394,21 @@ function hoSoLop() {
         luc: r[0] instanceof Date ? r[0].toISOString() : ''});
     });
   }
+  const choiNhom = [];
+  const cn = ss.getSheetByName(TAB_CN);
+  if (cn && cn.getLastRow() > 1) {
+    cn.getRange(2, 1, cn.getLastRow() - 1, HEAD_CN.length).getValues().forEach(function (r) {
+      const m = /^(\d+(?:[.,]\d+)?)\/(\d+)$/.exec(String(r[5]).trim());
+      choiNhom.push({nhom: chuanNhom(r[3]), tro: String(r[1]), ten: String(r[2] || r[1]), diem: r[4],
+        dung: m ? Number(m[1].replace(',', '.')) : 0, tong: m ? Number(m[2]) : 0, giay: Number(r[6]) || 0,
+        luc: r[0] instanceof Date ? r[0].toISOString() : ''});
+    });
+  }
   const vang = docVang();
   vang.forEach(function (v) { if (!(v.madot in dauTien)) { dauTien[v.madot] = v.luc ? new Date(v.luc).getTime() : 0; } });
   const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : ''}; });
-  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, bayGio: new Date().toISOString()};
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), bayGio: new Date().toISOString()};
 }
 // Lop nay da thi nhung dot nao, bao nhieu em da nop (de trang GV ghi "Da thi: 12G01 (38)")
 function gvDaThi() {
