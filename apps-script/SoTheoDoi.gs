@@ -21,6 +21,8 @@ const TAB_PC = 'PHONG CHO';
 const HEAD_PC = ['ThoiGian','MaDot','MaHS'];
 const TAB_XL = 'XEM LAI';
 const HEAD_XL = ['ThoiGian','MaDot','MaHS','HoTen'];
+const TAB_VG = 'VANG THI';
+const HEAD_VG = ['ThoiGian','MaDot','MaHS','HoTen','GhiChu','TrangThai'];
 
 // ---------------------------------------------------------------------
 // Cong vao
@@ -57,11 +59,13 @@ function doPost(e) {
       case 'gv_theodoi':
       case 'gv_hoso':
       case 'gv_bangdiem':
+      case 'gv_vang':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
+        if (d.action === 'gv_vang') return json(gvVang(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -285,6 +289,8 @@ function gvTheoDoi(d) {
       if (r[0] instanceof Date && (!xem[ma].luc || r[0] > xem[ma].luc)) xem[ma].luc = r[0];
     });
   }
+  const vang = {};
+  docVang().forEach(function (v) { if (v.madot === madot) vang[v.mahs] = v; });
   const ngay = function (x) { return x instanceof Date ? x.toISOString() : ''; };
   const hs = ds.map(function (r) {
     const ma = String(r[0]).trim(), n = nop[ma], s = bd[ma];
@@ -294,6 +300,7 @@ function gvTheoDoi(d) {
     else if (cho[ma]) { o.tt = 'dangcho'; o.vaocho = ngay(cho[ma]); }
     else o.tt = 'chua';
     if (xem[ma]) { o.daxem = xem[ma].lan; o.xemluc = ngay(xem[ma].luc); }
+    if (vang[ma]) o.vang = vang[ma].ghichu || 'Vắng';
     return o;
   });
   return {ok: true, lop: lopNay(), madot: madot, bayGio: new Date().toISOString(), hs: hs};
@@ -323,9 +330,32 @@ function hoSoLop() {
         giay: Number(r[8]) || 0, luc: luc ? new Date(luc).toISOString() : '', pdf: String(r[10] || ''), lan: Number(r[11]) || 1});
     });
   }
-  const dot = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
+  const vang = docVang();
+  vang.forEach(function (v) { if (!(v.madot in dauTien)) { dauTien[v.madot] = v.luc ? new Date(v.luc).getTime() : 0; } });
+  const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : ''}; });
-  return {ok: true, lop: lopNay(), hs: hs, dot: dot, bai: bai, bayGio: new Date().toISOString()};
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, bayGio: new Date().toISOString()};
+}
+// GV ghi HS vang thi 1 dot (kem ghi chu: co phep / khong phep / thi bu ngay...). Dong sau cung thang.
+function gvVang(d) {
+  const ma = String(d.mahs || '').trim(), madot = String(d.madot || '').trim();
+  const hs = timHS(ma);
+  if (!hs || !madot) return {ok: false, msg: 'Thieu ma HS hoac ma dot'};
+  ghiDong(TAB_VG, HEAD_VG, [new Date(), madot, ma, hs.ten, String(d.ghichu || '').slice(0, 200), d.xoa ? 'XOA' : 'VANG']);
+  return {ok: true, vang: docVang()};
+}
+// {mahs|madot: {ghichu, luc}} - chi cac em dang bi ghi vang
+function docVang() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_VG);
+  const m = {};
+  if (!sh || sh.getLastRow() < 2) return [];
+  sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_VG.length).getValues().forEach(function (r) {
+    const k = String(r[2]).trim() + '|' + String(r[1]).trim();
+    if (String(r[5]).trim() === 'XOA') delete m[k];
+    else m[k] = {mahs: String(r[2]).trim(), madot: String(r[1]).trim(), ghichu: String(r[4] || ''),
+      luc: r[0] instanceof Date ? r[0].toISOString() : ''};
+  });
+  return Object.keys(m).map(function (k) { return m[k]; });
 }
 // Diem tinh vao bang diem = lan lam sau cung (lan lam lai do GV cho phep)
 function diemSauCung(bai) {
@@ -340,12 +370,14 @@ function diemSauCung(bai) {
 function ghiBangDiem() {
   const h = hoSoLop();
   const m = diemSauCung(h.bai);
+  const vg = {};
+  (h.vang || []).forEach(function (v) { vg[v.mahs + '|' + v.madot] = 1; });
   const head = ['STT', 'MaHS', 'Ho ten'].concat(h.dot.map(function (d) { return d.ten; })).concat(['So bai', 'Diem TB']);
   const rows = h.hs.map(function (x, i) {
     let tong = 0, n = 0;
     const o = [i + 1, x.mahs, x.hoten].concat(h.dot.map(function (d) {
       const b = m[x.mahs + '|' + d.madot];
-      if (!b) return '';
+      if (!b) return vg[x.mahs + '|' + d.madot] ? 'V' : '';
       tong += b.diem; n++;
       return b.diem;
     }));
@@ -363,7 +395,7 @@ function ghiBangDiem() {
   sh.getRange(1, 1, all.length, head.length).setValues(all);
   sh.getRange(1, 1, 1, head.length).setFontWeight('bold').setWrap(true);
   sh.getRange(all.length, 1, 1, head.length).setFontWeight('bold');
-  sh.getRange(1, 4, 1, 1).setNote('Diem moi bai = lan lam sau cung. Ma dot: ' + h.dot.map(function (d) { return d.madot; }).join(', '));
+  sh.getRange(1, 4, 1, 1).setNote('Diem moi bai = lan lam sau cung; V = vang thi (xem tab VANG THI). Ma dot: ' + h.dot.map(function (d) { return d.madot; }).join(', '));
   sh.setFrozenRows(1); sh.setFrozenColumns(3);
   SpreadsheetApp.flush();
   return {ok: true, lop: h.lop, soHS: h.hs.length, soBai: h.dot.length};
