@@ -60,12 +60,14 @@ function doPost(e) {
       case 'gv_hoso':
       case 'gv_bangdiem':
       case 'gv_vang':
+      case 'gv_dathi':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
         if (d.action === 'gv_vang') return json(gvVang(d));
+        if (d.action === 'gv_dathi') return json(gvDaThi());
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -335,6 +337,21 @@ function hoSoLop() {
   const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : ''}; });
   return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, bayGio: new Date().toISOString()};
+}
+// Lop nay da thi nhung dot nao, bao nhieu em da nop (de trang GV ghi "Da thi: 12G01 (38)")
+function gvDaThi() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
+  const m = {};
+  if (sh && sh.getLastRow() > 1) {
+    sh.getRange(2, 2, sh.getLastRow() - 1, 2).getValues().forEach(function (r) {
+      const d = String(r[0]).trim(), ma = String(r[1]).trim();
+      if (!d || !ma) return;
+      (m[d] = m[d] || {})[ma] = 1;
+    });
+  }
+  const dathi = {};
+  Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
+  return {ok: true, lop: lopNay(), dathi: dathi};
 }
 // GV ghi HS vang thi 1 dot (kem ghi chu: co phep / khong phep / thi bu ngay...). Dong sau cung thang.
 function gvVang(d) {
