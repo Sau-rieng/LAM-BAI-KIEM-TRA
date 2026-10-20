@@ -61,6 +61,7 @@ function doPost(e) {
       case 'gv_bangdiem':
       case 'gv_vang':
       case 'gv_dathi':
+      case 'gv_cau':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -68,6 +69,7 @@ function doPost(e) {
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
         if (d.action === 'gv_vang') return json(gvVang(d));
         if (d.action === 'gv_dathi') return json(gvDaThi());
+        if (d.action === 'gv_cau') return json(gvCau(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -352,6 +354,35 @@ function gvDaThi() {
   const dathi = {};
   Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
   return {ok: true, lop: lopNay(), dathi: dathi};
+}
+// Thong ke tung cau cua 1 dot trong lop nay (lan lam sau cung moi em): % sai, cac lua chon
+function gvCau(d) {
+  const madot = String(d.madot || '').trim();
+  const de = docDe(madot);
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
+  const bai = {};
+  if (sh && sh.getLastRow() > 1) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+      if (String(r[1]).trim() !== madot) return;
+      const ma = String(r[2]).trim(), lan = Number(r[11]) || 1;
+      if (!bai[ma] || lan >= bai[ma].lan) bai[ma] = {lan: lan, ct: r[9]};
+    });
+  }
+  const ds = Object.keys(bai), n = ds.length;
+  const tk = de.map(function (q) {
+    return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, dapan: q.da, sai: 0, bo: 0, dem: {}, saiY: [0, 0, 0, 0]};
+  });
+  ds.forEach(function (ma) {
+    const chon = tachChiTiet(bai[ma].ct);
+    chamBai(de, function (q, i) { return chon[i]; }).ct.forEach(function (r, i) {
+      const t = tk[i];
+      if (!r.chon) t.bo++;
+      if (!r.dung) t.sai++;
+      if (t.loai === 'DS') { for (let k = 0; k < 4; k++) if ((r.chon || '')[k] !== t.dapan[k]) t.saiY[k]++; }
+      else { const c = r.chon ? String(r.chon) : '(bỏ trống)'; t.dem[c] = (t.dem[c] || 0) + 1; }
+    });
+  });
+  return {ok: true, lop: lopNay(), madot: madot, soBai: n, cau: tk};
 }
 // GV ghi HS vang thi 1 dot (kem ghi chu: co phep / khong phep / thi bu ngay...). Dong sau cung thang.
 function gvVang(d) {
