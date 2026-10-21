@@ -10,7 +10,7 @@ window.DS_LOP = [
 
 // ---- LOP DUNG THU (DEMO): kho de ban sao + so theo doi rieng, bo ma rieng; mo trang voi ?demo ----
 window.DS_LOP_DEMO = [
-  { ten: 'DEMO', tiento: '269999', url: 'CHUA_CO_LINK_DEMO' }
+  { ten: 'DEMO', tiento: '269999', url: 'https://script.google.com/macros/s/AKfycbyT80yY5dwc3I2dMCx-7KuycNLGc7sYFSk7NdohDdjiOT0Li6vd7YSyzLuboFOtAA/exec' }
 ];
 window.LAM_DEMO = /[?&]demo(=|&|$)/i.test(location.search);
 if (window.LAM_DEMO) {
