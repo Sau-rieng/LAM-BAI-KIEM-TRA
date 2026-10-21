@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hướng dẫn Ban giám khảo</title>
+<style>
+:root{--ink:#111;--muted:#555;--line:#222;--soft:#ddd;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:#eee;color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.42}
+.to{background:var(--bg);max-width:210mm;margin:12px auto;padding:12mm 13mm}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:3px solid var(--line);padding-bottom:8px;margin-bottom:10px}
+h1{font-size:23px;margin:0 0 2px;line-height:1.2}
+.sub{margin:0;color:var(--muted)}
+.thoigian{border:2px solid var(--line);border-radius:10px;padding:6px 10px;text-align:center;white-space:nowrap;font-weight:700}
+.thoigian small{display:block;font-weight:400;color:var(--muted)}
+.vai{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px;font-size:14px}
+.vai span{border:1.5px solid var(--line);border-radius:999px;padding:2px 10px}
+.vai b{font-weight:700}
+.buoc{display:grid;grid-template-columns:44px 1fr 92px;gap:10px;align-items:start;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px;break-inside:avoid}
+.buoc.khong-qr{grid-template-columns:44px 1fr}
+.so{width:40px;height:40px;border-radius:50%;background:#111;color:#fff;font-size:21px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ai{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border:1.5px solid var(--line);border-radius:6px;padding:0 6px;margin-right:6px;vertical-align:2px}
+.ai.gv{background:#111;color:#fff}
+.buoc h2{font-size:17px;margin:0 0 3px}
+.buoc p{margin:2px 0}
+.thay{margin-top:4px;padding-left:10px;border-left:3px dashed var(--line);font-style:italic}
+code{font-family:inherit;font-weight:800;border:1.5px solid var(--line);border-radius:5px;padding:0 5px;white-space:nowrap}
+.qr{width:92px;text-align:center;font-size:11px;color:var(--muted)}
+.qr div{width:88px;height:88px;margin:0 auto 2px}
+.qr img,.qr canvas{width:88px!important;height:88px!important}
+.hai{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.hop{border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;break-inside:avoid}
+.hop h3{font-size:15px;margin:0 0 4px;text-transform:uppercase;letter-spacing:.03em}
+.hop ul{margin:0;padding-left:18px}
+.hop li{margin:2px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td{border-bottom:1px solid var(--soft);padding:3px 2px;vertical-align:top}
+td:last-child{text-align:right}
+.chuan-bi{border:1.5px dashed var(--line);border-radius:12px;padding:6px 12px;margin-bottom:10px;font-size:14px}
+.nut-in{position:fixed;right:16px;bottom:16px;background:#111;color:#fff;border:0;border-radius:999px;padding:12px 18px;font-size:16px;font-weight:700}
+@media (max-width:640px){
+  .to{padding:14px 16px;margin:0}
+  header{flex-direction:column}
+  .buoc{grid-template-columns:40px 1fr}
+  .qr{grid-column:2;width:auto;text-align:left}
+  .qr div{margin:0 0 2px}
+  .hai{grid-template-columns:1fr}
+}
+@media print{
+  @page{size:A4;margin:7mm}
+  body{background:#fff;font-size:12px;line-height:1.3}
+  h1{font-size:19px}
+  header{padding-bottom:5px;margin-bottom:6px}
+  .vai{margin-bottom:6px;font-size:12px}
+  .chuan-bi{padding:4px 10px;margin-bottom:6px;font-size:12px}
+  .buoc{grid-template-columns:36px 1fr 74px;padding:4px 8px;margin-bottom:4px;gap:8px}
+  .buoc.khong-qr{grid-template-columns:36px 1fr}
+  .so{width:32px;height:32px;font-size:17px}
+  .buoc h2{font-size:14.5px;margin:0 0 1px}
+  .buoc p{margin:1px 0}
+  .qr{width:74px;font-size:10px}
+  .qr div,.qr img,.qr canvas{width:70px!important;height:70px!important}
+  .hai{margin-top:6px;gap:8px}
+  .hop{padding:5px 10px}
+  .hop h3{font-size:13px}
+  .hop li{margin:1px 0}
+  table{font-size:12px}
+  td{padding:2px}
+  .to{margin:0;padding:0;max-width:none}
+  .nut-in,.chi-man-hinh{display:none}
+  .so,.ai.gv{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="to">
+  <header>
+    <div>
+      <h1>Trải nghiệm hệ thống kiểm tra &amp; luyện tập Hóa học trên iPad</h1>
+      <p class="sub">Hướng dẫn dành cho Ban giám khảo · dùng lớp thử <b>DEMO</b>, không ảnh hưởng dữ liệu học sinh thật</p>
+    </div>
+    <div class="thoigian">≈ 5 phút<small>7 bước</small></div>
+  </header>
+
+  <div class="vai">
+    <span><span class="ai gv">GV</span><b>Giáo viên</b> – người trình bày cầm iPad giáo viên</span>
+    <span><span class="ai">HS</span><b>Học sinh</b> – mỗi giám khảo một iPad</span>
+  </div>
+
+  <div class="chuan-bi"><b>Người trình bày đã chuẩn bị sẵn:</b> iPad giáo viên mở trang Giáo viên (mã <code>4444</code>), chọn một đề ngắn và bấm <b>① Mở phòng chờ</b>.</div>
+
+  <div class="buoc">
+    <div class="so">1</div>
+    <div>
+      <h2><span class="ai">HS</span>Vào phòng thi</h2>
+      <p>Quét mã → chọn lớp <code>DEMO</code> → gõ <b>số báo danh</b> (mỗi người một số từ <code>01</code> đến <code>10</code>) → mã giáo viên <code>1111</code> → <b>Tìm tên</b> → chọn bài → <b>Đúng tên – Bắt đầu làm bài</b>.</p>
+      <p class="thay">Thấy: màn hình “Chờ giáo viên phát đề”. Đề đã tải sẵn về máy nhưng còn khóa.</p>
+    </div>
+    <div class="qr"><div data-qr="LAM-BAI.html?demo"></div>Làm bài</div>
+  </div>
+
+  <div class="buoc khong-qr">
+    <div class="so">2</div>
+    <div>
+      <h2><span class="ai gv">GV</span>Phát đề cho cả lớp cùng lúc</h2>
+      <p>Bấm <b>Theo dõi phòng chờ ▶</b> để thấy tên các giám khảo đã vào → bấm <b>② ▶ Bắt đầu làm bài</b>.</p>
+      <p class="thay">Thấy: mọi iPad cùng hiện đề, cùng một đồng hồ đếm ngược. Câu hỏi và phương án được xáo khác nhau trên từng máy.</p>
+    </div>
+  </div>
+
+  <div class="buoc khong-qr">
+    <div class="so">3</div>
+    <div>
+      <h2><span class="ai">HS</span>Làm bài và thử “gian lận”</h2>
+      <p>Trả lời vài câu. Thử <b>thoát ra màn hình chính</b> hoặc chuyển ứng dụng rồi quay lại → iPad bị khóa, giáo viên mở bằng mã <code>2222</code>. Thử chép chữ hoặc in đề → không được, trên đề có hình mờ tên người làm.</p>
+      <p>Bấm <b>Nộp bài</b> (nút giữa Câu trước – Câu sau).</p>
+      <p class="thay">Thấy: điểm hiện ngay; bài được chấm tự động và lưu thành file PDF.</p>
+    </div>
+  </div>
+
+  <div class="buoc khong-qr">
+    <div class="so">4</div>
+    <div>
+      <h2><span class="ai gv">GV</span>Xem kết quả cả lớp</h2>
+      <p>Bấm <b>③ ■ Đóng đề</b>, rồi xem mục <b>Theo dõi</b>: ai đã nộp, điểm từng người, tỉ lệ điểm ≤3,5 · ≥5 · ≥6,5 · ≥8 · ≥9. Bấm <b>📊 Câu sai nhiều nhất</b>.</p>
+      <p class="thay">Thấy: các câu xếp từ sai nhiều đến sai ít, kèm % và phương án học sinh hay chọn nhầm – để giáo viên biết cần giảng lại chỗ nào.</p>
+    </div>
+  </div>
+
+  <div class="buoc">
+    <div class="so">5</div>
+    <div>
+      <h2><span class="ai">HS</span>Chơi trò chơi luyện tập</h2>
+      <p>Quét mã → chọn lớp <code>DEMO</code>, <b>cùng số báo danh</b> như bước 1, gõ họ tên bất kỳ, mã vào chơi <code>1111</code> → trả lời vài câu trong khung cảnh Đại Nội 3D.</p>
+      <p>Muốn chơi nhóm: mở <b>Chim đưa thư – nhóm</b> trên trang Dùng thử.</p>
+    </div>
+    <div class="qr"><div data-qr-tro="DAINOI-HOA10.html?demo"></div>Trò chơi</div>
+  </div>
+
+  <div class="buoc khong-qr">
+    <div class="so">6</div>
+    <div>
+      <h2><span class="ai gv">GV</span>Mở hồ sơ học sinh</h2>
+      <p><b>📋 Hồ sơ HS</b> → bấm tên một giám khảo (vd “Học sinh thử 01”). Bấm <b>👥 Nhóm</b> để xem kết quả theo nhóm.</p>
+      <p class="thay">Thấy: trong một hồ sơ có điểm kiểm tra, biểu đồ tiến bộ, kết quả trò chơi vừa chơi, ghi chú vắng thi và kết quả nhóm.</p>
+    </div>
+  </div>
+
+  <div class="buoc">
+    <div class="so">7</div>
+    <div>
+      <h2><span class="ai">HS</span>Xem lại bài ở nhà</h2>
+      <p>Giáo viên bấm <b>○ Chưa cho xem lại</b> để chuyển thành <b>● Cho xem lại</b>. Học sinh quét mã → số báo danh → mã xem <code>11</code> + số báo danh (vd SBD <code>01</code> → <code>1101</code>).</p>
+      <p class="thay">Thấy: câu đúng, câu sai, đáp án đúng. Trang giáo viên ghi “✓ đã xem lại” kèm giờ xem.</p>
+    </div>
+    <div class="qr"><div data-qr="XEM-LAI.html?demo"></div>Xem lại</div>
+  </div>
+
+  <div class="hai">
+    <div class="hop">
+      <h3>Điểm mới của sản phẩm</h3>
+      <ul>
+        <li>Cả lớp làm cùng lúc trên iPad, chấm và lưu bài tự động.</li>
+        <li>Chống gian lận: khóa khi thoát trang, xáo câu, không chép hay in được đề.</li>
+        <li>Thống kê câu sai giúp giáo viên dạy lại đúng chỗ.</li>
+        <li>Một hồ sơ gồm kiểm tra, trò chơi cá nhân và trò chơi nhóm.</li>
+        <li>Học sinh tự xem lại bài ở nhà; giáo viên biết ai đã xem.</li>
+        <li>Dùng miễn phí: Google Trang tính + trang web trên GitHub.</li>
+      </ul>
+    </div>
+    <div class="hop">
+      <h3>Mã dùng thử</h3>
+      <table>
+        <tr><td>Lớp</td><td><code>DEMO</code></td></tr>
+        <tr><td>Số báo danh</td><td><code>01</code> – <code>10</code></td></tr>
+        <tr><td>Mã giáo viên / vào trò chơi</td><td><code>1111</code></td></tr>
+        <tr><td>Mã mở khóa iPad</td><td><code>2222</code></td></tr>
+        <tr><td>Trang giáo viên</td><td><code>4444</code></td></tr>
+        <tr><td>Mã xem lại bài</td><td><code>11</code> + SBD</td></tr>
+      </table>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:5px"><div class="qr" style="width:78px"><div data-qr="DUNG-THU.html"></div></div><div style="font-size:12px"><b>Trang Dùng thử</b>: đủ trang Giáo viên, Học sinh, Xem lại và 6 trò chơi.<br><span id="duongdan" style="color:var(--muted);word-break:break-all"></span></div></div>
+    </div>
+  </div>
+</div>
+
+<button class="nut-in" onclick="window.print()">🖨 In trang này</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  var goc = 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/';
+  var tro = 'https://sau-rieng.github.io/TRO--CHOI-IPAD/';
+  document.getElementById('duongdan').textContent = goc + 'DUNG-THU.html';
+  function ve(box, url) {
+    try { new QRCode(box, { text: url, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.M }); }
+    catch (e) {
+      var im = new Image(); im.alt = 'Mã QR';
+      im.src = 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&margin=0&data=' + encodeURIComponent(url);
+      box.appendChild(im);
+    }
+  }
+  document.querySelectorAll('[data-qr]').forEach(function (b) { ve(b, goc + b.getAttribute('data-qr')); });
+  document.querySelectorAll('[data-qr-tro]').forEach(function (b) { ve(b, tro + b.getAttribute('data-qr-tro')); });
+})();
+</script>
+</body>
+</html>
