@@ -65,6 +65,10 @@ button:disabled{opacity:.4}
 .big{font-size:56px;font-weight:800;margin:6px 0}
 .row2{display:flex;gap:12px}
 .row2 button{flex:1;margin-top:18px}
+.qrLop{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--ink);color:#fff;border-radius:14px;padding:14px 18px;margin:16px 0 4px}
+.qrLop b{font-size:30px;letter-spacing:.5px}
+.qrLop span{font-size:15px;opacity:.8;text-align:right}
+.deChon{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--sel);font-weight:700;text-align:center}
 /* Chong sao chep: khong boi den/luu anh/in; hinh mo ten HS */
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
@@ -79,11 +83,11 @@ img{-webkit-user-drag:none;pointer-events:none}
   <div class="card">
     <h1>Làm bài kiểm tra – Hóa học</h1>
     <p class="sub">Chọn lớp, nhập SBD và mã giáo viên cho.</p>
-    <label for="lop">Lớp</label>
+    <label for="lop" id="nhanLop">Lớp</label>
     <select id="lop"><option value="">– Chọn lớp –</option></select>
     <label for="sbd">Số báo danh (nhập 2 số cuối)</label>
     <div class="sbd"><span class="pre" id="pre">------</span><input id="sbd" inputmode="numeric" maxlength="2" autocomplete="off"></div>
-    <label for="magv">Mã giáo viên</label>
+    <label for="magv" id="nhanMaGV">Mã giáo viên</label>
     <input id="magv" type="password" inputmode="numeric" autocomplete="off">
     <button class="btn" id="btnTim">Tìm tên</button>
     <div class="msg" id="msg"></div>
@@ -91,7 +95,7 @@ img{-webkit-user-drag:none;pointer-events:none}
       <div style="text-align:center">Em có phải là</div>
       <div class="ten" id="tenhs"></div>
       <div class="sub" style="text-align:center">SBD <span id="mahs"></span></div>
-      <label for="dot">Bài kiểm tra</label>
+      <label for="dot" id="nhanDot">Bài kiểm tra</label>
       <select id="dot"></select>
       <button class="btn" id="btnBatDau">Đúng tên – Bắt đầu làm bài</button>
       <div id="lamLai" style="display:none">
@@ -195,13 +199,38 @@ img{-webkit-user-drag:none;pointer-events:none}
   function anTen() { $('who').style.display = 'none'; $('lamLai').style.display = 'none'; hocSinh = null; }
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; anTen(); };
   $('sbd').oninput = anTen;
+  $('sbd').onkeydown = function (e) { if (e.key === 'Enter') $('btnTim').click(); };
+
+  // ---------- Vao bang ma QR giao vien chieu: lop + de chon san, ma GV kem theo (giu trong tab khi tai lai trang) ----------
+  var KQR = 'qr_vao' + SFX, QR = { lop: '', dot: '', k: '' };
+  (function () {
+    var p = new URLSearchParams(location.search);
+    if (p.get('lop')) {
+      QR.lop = p.get('lop'); QR.dot = p.get('dot') || '';
+      try { var k = p.get('k'); if (k) QR.k = atob(k.replace(/-/g, '+').replace(/_/g, '/')).split('').reverse().join(''); } catch (e) {}
+      try { sessionStorage.setItem(KQR, JSON.stringify(QR)); } catch (e) {}
+      try { history.replaceState(null, '', location.pathname + (window.LAM_DEMO ? '?demo' : '')); } catch (e) {}
+    } else { try { QR = JSON.parse(sessionStorage.getItem(KQR)) || QR; } catch (e) {} }
+  })();
+  function chuanTen(x) { return String(x || '').toUpperCase().replace(/\s+/g, ''); }
+  var iQR = -1;
+  DS.forEach(function (l, i) { if (QR.lop && chuanTen(l.ten) === chuanTen(QR.lop)) iQR = i; });
+  if (iQR >= 0) {
+    $('lop').value = iQR; $('lop').onchange();
+    $('lop').style.display = 'none'; $('nhanLop').style.display = 'none';
+    var bang = document.createElement('div'); bang.className = 'qrLop';
+    bang.innerHTML = '<b>Lớp ' + DS[iQR].ten.replace(/[<>&]/g, '') + '</b><span>' + (QR.dot ? 'Mã đề ' + QR.dot.replace(/[<>&]/g, '') : '') + '</span>';
+    $('nhanLop').parentNode.insertBefore(bang, $('nhanLop'));
+    document.querySelector('#scrLogin .sub').textContent = 'Gõ 2 số cuối số báo danh rồi bấm Tìm tên.';
+    if (QR.k) { $('magv').value = QR.k; $('magv').style.display = 'none'; $('nhanMaGV').style.display = 'none'; }
+  }
 
   $('btnTim').onclick = function () {
     $('msg').className = 'msg'; $('msg').textContent = '';
     if (!lopChon) return loi('Em chưa chọn lớp.');
     var s2 = $('sbd').value.trim();
     if (!/^\d{2}$/.test(s2)) return loi('Hãy nhập đúng 2 số cuối của SBD.');
-    if (!$('magv').value.trim()) return loi('Em chưa nhập mã giáo viên.');
+    if (!$('magv').value.trim() && !QR.k) return loi('Em chưa nhập mã giáo viên.');
     var ma = lopChon.tiento + s2;
     $('msg').textContent = 'Đang tìm tên...';
     $('btnTim').disabled = true;
@@ -215,6 +244,14 @@ img{-webkit-user-drag:none;pointer-events:none}
         $('tenhs').textContent = j.hoten; $('mahs').textContent = ma;
         $('dot').innerHTML = '';
         j.dot.forEach(function (d) { var o = document.createElement('option'); o.value = d.madot; o.textContent = d.ten + ' (' + d.phut + ' phút)' + (d.tt === 'CHO' ? ' – chờ bắt đầu' : ''); $('dot').appendChild(o); });
+        var cu = document.getElementById('deChon'); if (cu) cu.parentNode.removeChild(cu);
+        $('dot').style.display = ''; $('nhanDot').style.display = '';
+        var deQR = QR.dot ? j.dot.filter(function (d) { return d.madot === QR.dot; })[0] : null;
+        if (deQR) {
+          $('dot').value = deQR.madot; $('dot').style.display = 'none'; $('nhanDot').style.display = 'none';
+          var dc = document.createElement('div'); dc.id = 'deChon'; dc.className = 'deChon'; dc.textContent = deQR.ten + ' · ' + deQR.phut + ' phút';
+          $('dot').parentNode.insertBefore(dc, $('dot'));
+        }
         $('who').style.display = 'block'; $('msg').textContent = '';
       })
       .catch(function () { $('btnTim').disabled = false; loi('Không kết nối được. Kiểm tra mạng rồi bấm lại.'); });
@@ -232,7 +269,7 @@ img{-webkit-user-drag:none;pointer-events:none}
     var b = malamlai ? $('btnLamLai') : $('btnBatDau'), chu = b.textContent;
     $('msg').className = 'msg'; $('msg').textContent = '';
     b.disabled = true; b.textContent = 'Đang tải đề...';
-    if ($('magv').value.trim()) maGV = $('magv').value.trim();
+    if ($('magv').value.trim()) maGV = $('magv').value.trim(); else if (QR.k) maGV = QR.k;
     var madot = $('dot').value;
     goi(hocSinh.url, { action: 'batdau', mahs: hocSinh.mahs, madot: madot, magv: maGV, malamlai: malamlai })
       .then(function (j) {
@@ -240,7 +277,10 @@ img{-webkit-user-drag:none;pointer-events:none}
         if (j.ok && j.cho) { $('magv').value = ''; vaoPhongCho(j, madot, malamlai); return; }
         if (!j.ok) {
           if (j.loi === 'hetgio') return loi('Đã hết giờ làm bài này.');
-          if (j.loi === 'magv') return loi('Mã giáo viên chưa đúng.');
+          if (j.loi === 'magv') {
+            if (QR.k) { QR.k = ''; maGV = ''; $('magv').value = ''; $('magv').style.display = ''; $('nhanMaGV').style.display = ''; try { sessionStorage.setItem(KQR, JSON.stringify(QR)); } catch (e) {} return loi('Mã trong QR chưa đúng. Em hỏi giáo viên mã rồi nhập vào ô Mã giáo viên.'); }
+            return loi('Mã giáo viên chưa đúng.');
+          }
           if (j.loi === 'danop') { $('lamLai').style.display = 'block'; return loi('Em đã nộp bài này (lần ' + (j.lan || 1) + '). Nếu được giáo viên cho làm lại, giáo viên nhập mã bên dưới.'); }
           if (j.loi === 'malamlai') { $('malamlai').value = ''; return loi('Mã cho làm lại chưa đúng.'); }
           return loi('Chưa vào được bài: ' + (j.msg || ''));

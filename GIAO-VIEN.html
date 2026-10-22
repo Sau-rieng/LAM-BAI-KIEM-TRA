@@ -152,6 +152,55 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .vgBtns input{flex:1;min-width:150px;font-size:15px;padding:8px 10px;border-radius:10px}
 .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--warn);background:var(--warnbg);border-radius:20px;padding:2px 8px;margin-left:6px}
 .btnVang{margin-left:8px;border:2px solid var(--line);padding:3px 8px;font-size:12px;border-radius:8px}
+/* Man hinh PHAT DE (chieu len may chieu) */
+body.rong main{max-width:1200px}
+.phatBtn{width:100%;margin-top:12px;background:var(--pri);color:#fff;font-size:17px;padding:14px}
+.phNhanh{flex:none;padding:9px 14px;font-size:14px;background:var(--pri);color:#fff;border-radius:10px}
+.phDau{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;background:var(--ink);color:#fff;border-radius:18px;padding:18px 22px;margin-bottom:12px}
+.phDau h1{font-size:28px;margin:4px 0 0;line-height:1.2}
+.phMa{font-size:13px;opacity:.7;letter-spacing:.6px;text-transform:uppercase;font-weight:700}
+.phLuoi{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:820px){.phLuoi{grid-template-columns:1fr}}
+.phQR{text-align:center;padding:16px 22px}
+.phLopTo{font-size:18px;color:var(--muted);font-weight:600}
+.phLopTo b{display:block;font-size:44px;color:var(--ink);line-height:1.05;letter-spacing:.5px}
+.phMaQR{width:min(420px,100%,calc(100vh - 460px));min-width:min(260px,100%);aspect-ratio:1/1;margin:14px auto 6px;padding:14px;background:#fff;border:3px solid var(--ink);border-radius:18px}
+.phMaQR img,.phMaQR canvas{width:100%!important;height:auto!important;display:block}
+.phMaQR.tat{aspect-ratio:auto;min-height:120px;width:min(400px,100%);display:flex;align-items:center;justify-content:center;color:var(--muted);border:3px dashed var(--line);font-size:17px;padding:24px}
+.phBuoc{text-align:left;margin:8px auto 0;max-width:430px;padding:0;list-style:none;counter-reset:b}
+.phBuoc li{counter-increment:b;display:flex;gap:10px;align-items:baseline;margin:9px 0;font-size:17px;line-height:1.35}
+.phBuoc li:before{content:counter(b);flex:none;width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.phMaGV{margin-top:14px;font-size:14px;color:var(--muted)}
+.phMaGV button{padding:5px 10px;font-size:13px;border:2px solid var(--line);margin-left:6px}
+.phMaGV.thieu{color:var(--warn);background:var(--warnbg);border-radius:10px;padding:8px 10px}
+.phMaGV input{width:140px;font-size:16px;padding:6px 10px;margin-left:6px}
+.phTre{border:2px solid var(--line);font-size:15px;margin-top:10px}
+.phTT{padding:20px}
+.phTrang{display:inline-block;font-weight:800;font-size:14px;letter-spacing:.5px;padding:6px 12px;border-radius:999px}
+.phTrang.cho{background:var(--warnbg);color:var(--warn)}
+.phTrang.mo{background:var(--okbg);color:var(--ok)}
+.phTrang.tat{background:var(--off);color:var(--muted)}
+.phSo{display:flex;align-items:baseline;gap:10px;margin:14px 0 4px}
+.phSo b{font-size:76px;line-height:1;font-variant-numeric:tabular-nums}
+.phSo span{font-size:20px;color:var(--muted)}
+.phGio{font-size:88px;font-weight:800;line-height:1;margin:14px 0 4px;font-variant-numeric:tabular-nums}
+.phGio.it{color:var(--bad)}
+.phGio.het{font-size:34px;color:var(--bad)}
+.phBa{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.phBa div{background:var(--bg);border-radius:12px;padding:10px 6px;text-align:center}
+.phBa b{display:block;font-size:30px;font-variant-numeric:tabular-nums}
+.phBa span{font-size:13px;color:var(--muted)}
+.phChip{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;max-height:300px;overflow:auto}
+.phChip span{font-size:14px;border:2px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff}
+.phChip span.xong{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.phChip span b{margin-right:4px;font-variant-numeric:tabular-nums}
+.phNut{width:100%;margin-top:14px;font-size:21px;padding:18px;border-radius:14px;color:#fff;background:var(--pri)}
+.phNut.batdau{background:var(--ok)}
+.phNut.dongde{background:var(--bad)}
+.phNut:disabled,.phNut2:disabled{opacity:.5}
+.phNut2{width:100%;margin-top:10px;border:2px solid var(--line);font-size:16px}
+.phCap{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+.phRong{color:var(--muted);font-size:16px;margin:8px 0}
 </style>
 </head>
 <body>
@@ -180,6 +229,16 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
   <div id="dsLop"></div>
 </section>
 
+<section id="scrPhat" class="hidden">
+  <div class="top"><button class="btn2" id="phLai">◀ Các đề</button><button class="btn2" id="phToan">⛶ Toàn màn hình</button></div>
+  <div class="phDau" id="phDau"></div>
+  <div class="loc" id="phLop"></div>
+  <div class="phLuoi">
+    <div class="card phQR" id="phQR"></div>
+    <div class="card phTT" id="phTT"></div>
+  </div>
+</section>
+
 <section id="scrHoSo" class="hidden">
   <div class="top"><button class="btn2" id="btnLai2">◀ Các đề</button><button class="btn2" id="btnTaiHS">↻ Làm mới</button></div>
   <div class="card">
@@ -197,13 +256,17 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 </section>
 
 </main>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="cau-hinh-lop.js"></script>
 <script>
 (function () {
   var DS = window.DS_LOP || [];
   var MA = '', DOT = [], dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
-  function man(id) { ['scrLogin', 'scrDot', 'scrTheo', 'scrHoSo', 'scrMotHS'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) {
+    ['scrLogin', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
+    document.body.classList.toggle('rong', id === 'scrPhat'); window.scrollTo(0, 0);
+  }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function chuan(s) { return String(s || '').toUpperCase().replace(/\s+/g, ''); }
   // Doi toi da 30 giay moi lop; qua thoi gian thi bao loi thay vi treo "Dang tai..."
@@ -322,6 +385,10 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
       (gon ? '<button class="thuGon">▴ Thu gọn</button>' : '');
     if (gon) { var x = document.createElement('button'); x.className = 'dongX'; x.title = 'Thu gọn'; x.textContent = '✕'; x.onclick = function () { moRong = null; veDot(); }; el.insertBefore(x, el.firstChild); }
     ganCongTac(el, d, veDot);
+    var pb = document.createElement('button'); pb.className = 'phatBtn';
+    pb.textContent = d.tt === 'DONG' ? '📱 Phát đề · mở phòng chờ và hiện mã QR' : '📱 Màn hình phát đề (mã QR, đồng hồ)';
+    pb.onclick = function () { phat(d); };
+    el.insertBefore(pb, el.querySelector('.sw'));
     el.querySelector('.theo').onclick = function () { dotXem = d.madot; moTheoDoi(); };
     if (gon) el.querySelector('.thuGon').onclick = function () { moRong = null; veDot(); };
     return el;
@@ -356,10 +423,11 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
       var khung = document.createElement('div'); khung.className = 'dsGon';
       dd.forEach(function (d) {
         if (moRong === d.madot) { khung.appendChild(theDot(d, true)); return; }
-        var r = document.createElement('button'); r.className = 'dong';
+        var r = document.createElement('div'); r.className = 'dong'; r.setAttribute('role', 'button');
         r.innerHTML = '<span class="tt2"><b>' + esc(tenNgan(d)) + '</b><span class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · ' + esc(d.lop) +
-          (d.xemlai ? ' · <span style="color:var(--ok)">đang cho xem lại</span>' : '') + '</span>' + dathiHtml(d) + '</span><span class="mui">▸</span>';
+          (d.xemlai ? ' · <span style="color:var(--ok)">đang cho xem lại</span>' : '') + '</span>' + dathiHtml(d) + '</span><button class="phNhanh">▶ Phát đề</button><span class="mui">▸</span>';
         r.onclick = function () { moRong = d.madot; veDot(); };
+        r.querySelector('.phNhanh').onclick = function (e) { e.stopPropagation(); phat(d); };
         khung.appendChild(r);
       });
       box.appendChild(khung);
@@ -392,6 +460,8 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     var d = dotHienTai(), el = $('theoDot');
     el.innerHTML = nutCongTac(d, false);
     ganCongTac(el, d, function () { veDauTheo(); taiTheoDoi(); });
+    var pb = document.createElement('button'); pb.className = 'phatBtn'; pb.textContent = '📱 Màn hình phát đề (mã QR, đồng hồ)';
+    pb.onclick = function () { clearTimeout(hen); phat(d); }; el.insertBefore(pb, el.querySelector('.sw'));
   }
   function moTheoDoi() { man('scrTheo'); veDauTheo(); $('dsLop').innerHTML = ''; taiTheoDoi(); }
   function taiTheoDoi() {
@@ -807,6 +877,154 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
     });
     man('scrMotHS');
   }
+
+  // ---------- PHAT DE: man hinh chieu len may chieu – ma QR cho HS vao thang lop + de ----------
+  var PH = { madot: null, lop: null, hen: null, dl: null, luc: 0, luu: null, loi: '', hienQR: false, suaMa: false, luot: 0 };
+  var KQR = 'gv_maqr' + (window.LAM_DEMO ? '_demo' : ''), MAQR = '';
+  try { MAQR = localStorage.getItem(KQR) || ''; } catch (e) {}
+  if (!MAQR && window.LAM_DEMO) MAQR = '1111';
+  function phDe() { return DOT.filter(function (d) { return d.madot === PH.madot; })[0]; }
+  function phLopHT() { var d = phDe(); return d ? lopCuaDot(d).filter(function (l) { return l.ten === PH.lop; })[0] : null; }
+  function linkQR(d, l) {
+    var goc = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, ''), k = '';
+    try { if (MAQR) k = btoa(MAQR.split('').reverse().join('')); } catch (e) {}
+    return goc + 'LAM-BAI.html?' + (window.LAM_DEMO ? 'demo&' : '') + 'lop=' + encodeURIComponent(l.ten) + '&dot=' + encodeURIComponent(d.madot) + (k ? '&k=' + encodeURIComponent(k) : '');
+  }
+  function veQR(box, text) {
+    box.innerHTML = '';
+    if (window.QRCode) { try { new QRCode(box, { text: text, width: 480, height: 480, correctLevel: QRCode.CorrectLevel.M }); return; } catch (e) { box.innerHTML = ''; } }
+    var im = new Image(); im.alt = 'Mã QR vào bài';
+    im.src = 'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=0&data=' + encodeURIComponent(text);
+    box.appendChild(im);
+  }
+  function phat(d) {
+    PH.madot = d.madot; PH.dl = null; PH.loi = ''; PH.hienQR = false; PH.suaMa = false;
+    var lops = lopCuaDot(d);
+    if (!lops.some(function (l) { return l.ten === PH.lop; })) PH.lop = ((lops.filter(function (l) { return l.ten === lopTheo; })[0]) || lops[0] || {}).ten;
+    man('scrPhat'); vePhat();
+    if (d.tt === 'DONG') phDat('CHO'); else taiPhat();
+  }
+  function phDat(gt) {
+    var d = phDe(); if (!d) return;
+    if (gt === 'MO' && !confirm('Bắt đầu làm bài "' + d.ten + '"?\nĐồng hồ ' + d.phut + ' phút chạy cho tất cả học sinh.')) return;
+    if (gt === 'DONG' && d.tt === 'MO' && !confirm('Đóng đề? Học sinh chưa vào sẽ không vào được nữa (em đang làm vẫn nộp được).')) return;
+    PH.luu = gt; PH.loi = ''; veTT();
+    goiBatKy({ action: 'gv_dat', ma: MA, madot: d.madot, truong: 'trangthai', giatri: gt }).then(function (j) {
+      PH.luu = null;
+      if (!j.ok) { PH.loi = 'Chưa lưu được: ' + (j.msg || '') + '. Bấm lại.'; veTT(); return; }
+      DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now();
+      PH.hienQR = false; vePhat(); taiPhat();
+    }).catch(function (e) { PH.luu = null; PH.loi = 'Chưa lưu được: ' + e.message + '. Bấm lại.'; veTT(); });
+  }
+  function taiPhat() {
+    clearTimeout(PH.hen);
+    var d = phDe(), l = phLopHT(), luot = ++PH.luot;
+    if (!d || !l || $('scrPhat').classList.contains('hidden')) return;
+    goi(l.url, { action: 'gv_theodoi', ma: MA, madot: d.madot }).then(function (j) {
+      if (luot !== PH.luot) return;
+      PH.dl = j.ok ? j : { loi: j.msg || 'Lỗi' }; PH.luc = Date.now(); veTT();
+    }).catch(function (e) { if (luot === PH.luot && !PH.dl) { PH.dl = { loi: 'Không kết nối được (' + e.message + ')' }; veTT(); } }).then(function () {
+      var dd = phDe();
+      var conLam = PH.dl && PH.dl.hs && PH.dl.hs.some(function (x) { return x.tt === 'danglam'; });
+      if (luot !== PH.luot || !dd || (dd.tt === 'DONG' && !conLam) || document.hidden || $('scrPhat').classList.contains('hidden')) return;
+      PH.hen = setTimeout(taiPhat, dd.tt === 'CHO' ? 5000 : dd.tt === 'MO' ? 10000 : 15000);
+    });
+  }
+  function vePhat() {
+    var d = phDe(); if (!d) return;
+    var lops = lopCuaDot(d), l = phLopHT();
+    $('phDau').innerHTML = '<div><div class="phMa">' + esc(d.madot) + ' · ' + d.phut + ' phút</div><h1>' + esc(d.ten) + '</h1></div>';
+    var tb = $('phLop'); tb.innerHTML = '';
+    if (lops.length > 1) lops.forEach(function (x) {
+      var b = document.createElement('button'); b.textContent = 'Lớp ' + x.ten; b.className = x.ten === PH.lop ? 'on' : '';
+      b.onclick = function () { if (PH.lop === x.ten) return; PH.lop = x.ten; PH.dl = null; try { localStorage.setItem('gv_lop', x.ten); } catch (e) {} vePhat(); taiPhat(); };
+      tb.appendChild(b);
+    });
+    var q = $('phQR');
+    if (!l) { q.innerHTML = '<div class="loi">Cột Lop của đề này không khớp lớp nào trong danh sách lớp.</div>'; veTT(); return; }
+    var hien = d.tt === 'CHO' || (d.tt === 'MO' && PH.hienQR);
+    var h = '<div class="phLopTo">Học sinh lớp<b>' + esc(l.ten) + '</b></div>';
+    if (hien) h += '<div class="phMaQR" id="phMaQR"></div>';
+    else if (d.tt === 'MO') h += '<div class="phMaQR tat">Đang làm bài · mã QR đã ẩn</div><button class="btn2 phTre" id="phTre">Hiện mã QR cho em vào trễ</button>';
+    else h += '<div class="phMaQR tat">Mã QR hiện khi phòng chờ mở</div>';
+    if (hien) h += '<ol class="phBuoc"><li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Gõ <b>2 số cuối</b> số báo danh → <b>Tìm tên</b></span></li><li><span>Bấm <b>Đúng tên – Bắt đầu làm bài</b> rồi chờ giáo viên phát đề</span></li></ol>' +
+      (d.tt === 'MO' ? '<button class="btn2 phTre" id="phTre">Ẩn mã QR</button>' : '');
+    if (PH.suaMa) h += '<div class="phMaGV">Mã giáo viên gắn vào QR <input id="phMaMoi" type="password" inputmode="numeric" autocomplete="off"><button id="phMaLuu">Lưu</button><button id="phMaHuy">Hủy</button>' +
+      '<div style="margin-top:6px">Mã lưu trên máy này, không hiện lên màn hình. Để trống = học sinh tự gõ mã.</div></div>';
+    else h += MAQR ? '<div class="phMaGV">🔑 Đã gắn mã giáo viên vào QR – học sinh không cần gõ mã<button id="phMaDoi">Đổi</button></div>'
+                   : '<div class="phMaGV thieu">Chưa gắn mã giáo viên: học sinh quét xong vẫn phải gõ mã.<button id="phMaDoi">Gắn mã</button></div>';
+    q.innerHTML = h;
+    if (hien) veQR($('phMaQR'), linkQR(d, l));
+    if ($('phTre')) $('phTre').onclick = function () { PH.hienQR = !PH.hienQR; vePhat(); };
+    if ($('phMaDoi')) $('phMaDoi').onclick = function () { PH.suaMa = true; vePhat(); $('phMaMoi').focus(); };
+    if ($('phMaHuy')) $('phMaHuy').onclick = function () { PH.suaMa = false; vePhat(); };
+    if ($('phMaLuu')) {
+      $('phMaMoi').onkeydown = function (e) { if (e.key === 'Enter') $('phMaLuu').click(); };
+      $('phMaLuu').onclick = function () {
+        MAQR = $('phMaMoi').value.trim(); try { if (MAQR) localStorage.setItem(KQR, MAQR); else localStorage.removeItem(KQR); } catch (e) {}
+        PH.suaMa = false; vePhat();
+      };
+    }
+    veTT();
+  }
+  function phGioHtml(d) {
+    var g = conLaiDe(d);
+    if (g === null) return '';
+    return g > 0 ? '<div class="phGio' + (g <= 60 ? ' it' : '') + '" data-ph="1">' + mmss(g) + '</div>' : '<div class="phGio het" data-ph="1">Hết giờ – bấm Đóng đề</div>';
+  }
+  function veTT() {
+    var d = phDe(), box = $('phTT'); if (!d) return;
+    var j = PH.dl, hs = j && j.hs ? j.hs : null;
+    var dem = { dangcho: 0, danglam: 0, danop: 0, chua: 0 };
+    if (hs) hs.forEach(function (x) { dem[x.tt] = (dem[x.tt] || 0) + 1; });
+    var si = hs ? hs.length : 0, h = '';
+    function chip(ds, xong) {
+      return ds.length ? '<div class="phChip">' + ds.map(function (x) {
+        return '<span class="' + (xong(x) ? 'xong' : '') + '"><b>' + esc(String(x.mahs).slice(-2)) + '</b>' + esc(String(x.hoten).split(' ').slice(-2).join(' ')) + (xong(x) ? ' ✓' : '') + '</span>';
+      }).join('') + '</div>' : '';
+    }
+    var sx = function (a, b) { return a.mahs < b.mahs ? -1 : 1; };
+    if (PH.luu) {
+      h = '<span class="phTrang tat">ĐANG LƯU…</span><p class="phRong">' + (PH.luu === 'CHO' ? 'Đang mở phòng chờ…' : PH.luu === 'MO' ? 'Đang phát đề…' : 'Đang đóng đề…') + '</p>';
+    } else if (d.tt === 'CHO') {
+      h = '<span class="phTrang cho">● PHÒNG CHỜ ĐANG MỞ</span>' +
+        '<div class="phSo"><b>' + (hs ? dem.dangcho : '…') + '</b><span>' + (hs ? '/ ' + si + ' em đã vào' : 'đang tải danh sách…') + '</span></div>' +
+        (hs ? (dem.dangcho ? chip(hs.filter(function (x) { return x.tt === 'dangcho'; }).sort(sx), function () { return false; }) : '<p class="phRong">Chưa có em nào vào. Học sinh quét mã QR bên cạnh.</p>') : '') +
+        (dem.danop ? '<p class="phRong">' + dem.danop + ' em đã nộp ở ca trước.</p>' : '') +
+        '<button class="phNut batdau" data-gt="MO">▶ Bắt đầu làm bài · ' + d.phut + ' phút</button>' +
+        '<button class="phNut2" data-gt="DONG">Hủy phòng chờ</button>';
+    } else if (d.tt === 'MO') {
+      h = '<span class="phTrang mo">● ĐANG LÀM BÀI</span>' + phGioHtml(d) +
+        '<div class="phBa"><div><b>' + (hs ? dem.danglam : '…') + '</b><span>Đang làm</span></div><div><b>' + (hs ? dem.danop : '…') + '</b><span>Đã nộp</span></div><div><b>' + (hs ? dem.chua + dem.dangcho : '…') + '</b><span>Chưa vào</span></div></div>' +
+        (hs ? chip(hs.filter(function (x) { return x.tt === 'danglam' || x.tt === 'danop'; }).sort(sx), function (x) { return x.tt === 'danop'; }) : '') +
+        '<button class="phNut dongde" data-gt="DONG">■ Đóng đề</button>' +
+        '<button class="phNut2" id="phKQ">Xem điểm và phân tích câu sai ▶</button>';
+    } else {
+      h = '<span class="phTrang tat">○ ĐỀ ĐANG ĐÓNG</span>' +
+        (hs && (dem.danop || dem.danglam) ? '<div class="phBa"><div><b>' + dem.danop + '</b><span>Đã nộp</span></div><div><b>' + dem.danglam + '</b><span>Đang làm (vẫn nộp được)</span></div><div><b>' + (dem.chua + dem.dangcho) + '</b><span>Chưa vào</span></div></div>'
+          : '<p class="phRong">Phòng chờ chưa mở – học sinh chưa vào được đề này.</p>') +
+        '<button class="phNut" data-gt="CHO">① Mở phòng chờ' + (hs && dem.danop ? ' cho ca tiếp theo' : '') + '</button>' +
+        '<button class="phNut2" id="phKQ">Xem điểm và phân tích câu sai ▶</button>';
+    }
+    if (j && j.loi) h += '<div class="loi">' + (/hop le/i.test(j.loi) ? 'Sổ lớp này chưa có mã mới: dán SoTheoDoi.gs mới rồi Triển khai phiên bản mới.' : esc(j.loi)) + '</div>';
+    if (PH.loi) h += '<div class="loi">' + esc(PH.loi) + '</div>';
+    if (PH.luc && (d.tt !== 'DONG' || dem.danglam)) { var n = new Date(PH.luc); h += '<div class="phCap">Cập nhật ' + gio(n.toISOString()) + ':' + ('0' + n.getSeconds()).slice(-2) + ' · tự làm mới mỗi ' + (d.tt === 'CHO' ? 5 : d.tt === 'MO' ? 10 : 15) + ' giây</div>'; }
+    box.innerHTML = h;
+    [].forEach.call(box.querySelectorAll('[data-gt]'), function (b) { b.onclick = function () { phDat(b.getAttribute('data-gt')); }; });
+    if ($('phKQ')) $('phKQ').onclick = function () { clearTimeout(PH.hen); PH.luot++; dotXem = d.madot; if (PH.lop) lopTheo = PH.lop; moTheoDoi(); };
+  }
+  setInterval(function () {
+    var el = document.querySelector('#phTT [data-ph]'), d = phDe(); if (!el || !d) return;
+    var g = conLaiDe(d); if (g === null) return;
+    el.className = 'phGio' + (g <= 0 ? ' het' : g <= 60 ? ' it' : '');
+    el.textContent = g > 0 ? mmss(g) : 'Hết giờ – bấm Đóng đề';
+  }, 1000);
+  $('phLai').onclick = function () { clearTimeout(PH.hen); PH.luot++; if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); man('scrDot'); veDot(); taiDaThi(); };
+  if (!document.documentElement.requestFullscreen) $('phToan').style.display = 'none';
+  $('phToan').onclick = function () {
+    if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(function () {});
+  };
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && !$('scrPhat').classList.contains('hidden')) taiPhat(); });
 
   if (MA) vao(MA); else man('scrLogin');
 })();
