@@ -4,11 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Giáo viên – Kiểm tra</title>
+<title>Giáo viên – Kiểm tra Hóa học</title>
+<link rel="manifest" href="manifest-gv.json">
+<link rel="apple-touch-icon" href="hinh/app/icon-180.png">
+<link rel="icon" type="image/png" href="hinh/app/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kiểm tra Hóa">
+<meta name="theme-color" content="#172033">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1a1a2e;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--okbg:#e8f5ec;--warn:#a06b00;--warnbg:#fff4d6;--bad:#c5221f;--off:#eceef3}
+:root{--chi:#b8235a;--ink:#172033;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--okbg:#e8f5ec;--warn:#a06b00;--warnbg:#fff4d6;--bad:#c5221f;--off:#eceef3}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:17px}
+body{margin:0;font-family:"Be Vietnam Pro",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:17px}
 main{max-width:760px;margin:0 auto;padding:16px 16px 40px}
 .hidden{display:none!important}
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);padding:16px;margin-bottom:12px}
@@ -152,6 +160,68 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .vgBtns input{flex:1;min-width:150px;font-size:15px;padding:8px 10px;border-radius:10px}
 .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--warn);background:var(--warnbg);border-radius:20px;padding:2px 8px;margin-left:6px}
 .btnVang{margin-left:8px;border:2px solid var(--line);padding:3px 8px;font-size:12px;border-radius:8px}
+/* Thanh ung dung + trang chu */
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.appbar{position:sticky;top:0;z-index:30;background:var(--ink);color:#fff}
+.ab{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;flex:none;background:none;color:#fff;padding:0;border-radius:8px;text-align:left}
+.brand svg{display:block;width:38px;height:38px}
+.brand b{display:block;font-size:17px;line-height:1.15}
+.brand small{display:block;font-size:12px;opacity:.65;font-weight:500}
+.nav{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto}
+.nav button{background:none;color:#fff;opacity:.7;font-size:15px;padding:9px 12px;border-radius:10px;white-space:nowrap}
+.nav button.on{opacity:1;background:rgba(255,255,255,.13)}
+.abPhai{display:flex;gap:8px;flex:none}
+.abQR{background:var(--chi);color:#fff;font-size:15px;padding:9px 14px}
+.abRa{background:none;color:#fff;border:1.5px solid rgba(255,255,255,.35);font-size:14px;padding:8px 12px}
+.raNho{display:none;margin:22px auto 0;border:2px solid var(--line);font-size:15px}
+@media (max-width:760px){.raNho{display:block}.brand span{display:none}.ab{gap:8px;padding:8px 10px}.nav button{padding:8px 8px;font-size:14px}.abRa{display:none}}
+.dangNhap{max-width:440px;margin:7vh auto 0}
+.dangNhap .brandL{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.dangNhap .brandL svg{width:48px;height:48px}
+.dangNhap .brandL svg rect:first-child{fill:var(--ink)} .dangNhap .brandL svg text{fill:#fff}
+.dangNhap .brandL b{font-size:20px;display:block}
+.dangNhap .brandL span{font-size:14px;color:var(--muted)}
+.chao h1{font-size:30px;margin:10px 0 2px;letter-spacing:-.3px}
+.homeLuoi{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;margin-top:16px;align-items:stretch}
+@media (max-width:760px){.homeLuoi{grid-template-columns:1fr}}
+.oQR{display:flex;align-items:center;gap:22px;text-align:left;background:var(--chi);color:#fff;border-radius:20px;padding:24px;min-height:184px;width:100%}
+.oQR svg{width:118px;height:118px;flex:none;background:#fff;border-radius:14px;padding:10px}
+.oQR b{display:block;font-size:30px;line-height:1.12;letter-spacing:-.3px}
+.oQR i{display:block;font-style:normal;font-size:16px;opacity:.92;margin-top:8px;font-weight:500;line-height:1.45}
+@media (max-width:480px){.oQR{gap:14px;padding:18px}.oQR svg{width:84px;height:84px}.oQR b{font-size:24px}}
+.homeMo{margin:0}
+.homeMo h2{font-size:17px;margin-bottom:6px}
+.moRow{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border-radius:0;padding:12px 0;border-top:1px solid var(--line);font-weight:400}
+.moRow .t{flex:1;min-width:0}
+.moRow .t b{display:block;font-size:15px}
+.moRow .t span{font-size:13px;color:var(--muted)}
+.homeH{font-size:18px;margin:28px 2px 10px}
+.oLuoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.o{position:relative;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px;min-height:156px;display:flex;flex-direction:column;font-weight:400;text-decoration:none;color:var(--ink)}
+.o:hover{border-color:var(--ink)}
+.o .so{position:absolute;top:12px;right:14px;font-size:13px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.o .kh{font-size:40px;font-weight:800;line-height:1;margin:6px 0 14px;letter-spacing:-.5px}
+.o .ten{font-weight:700;font-size:16px}
+.o .mt{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.o.chi .kh{color:var(--chi)}
+/* Khung ma QR toan man hinh */
+.ovQR{position:fixed;inset:0;z-index:100;background:#fff;display:flex;flex-direction:column}
+.ovQR[hidden]{display:none}
+.ovBar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--bg);border-radius:12px;padding:4px}
+.seg button{background:none;font-size:15px;padding:8px 14px;border-radius:9px}
+.seg button.on{background:var(--ink);color:#fff}
+.ovBar .nutO{border:2px solid var(--line);font-size:15px;padding:8px 12px;margin-left:6px}
+.ovThan{flex:1;display:flex;align-items:center;justify-content:center;gap:5vw;padding:20px;min-height:0}
+.ovMa{width:min(70vh,50vw);aspect-ratio:1/1;flex:none}
+.ovMa img,.ovMa canvas{width:100%!important;height:auto!important;display:block}
+.ovChu{max-width:460px}
+.ovChu h2{font-size:clamp(28px,3.6vw,48px);line-height:1.12;margin:0 0 14px;letter-spacing:-.4px}
+.ovChu .phBuoc{margin:0}
+.ovChu .phBuoc li{font-size:clamp(17px,1.7vw,23px)}
+.ovLink{font-size:15px;color:var(--muted);margin-top:18px;word-break:break-all}
+@media (orientation:portrait),(max-width:760px){.ovThan{flex-direction:column;gap:18px;justify-content:flex-start}.ovMa{width:min(84vw,56vh)}.ovChu{text-align:center}.ovChu .phBuoc{margin:0 auto;display:inline-block}}
 /* Man hinh PHAT DE (chieu len may chieu) */
 body.rong main{max-width:1200px}
 .phatBtn{width:100%;margin-top:12px;background:var(--pri);color:#fff;font-size:17px;padding:14px}
@@ -201,22 +271,42 @@ body.rong main{max-width:1200px}
 .phNut2{width:100%;margin-top:10px;border:2px solid var(--line);font-size:16px}
 .phCap{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
 .phRong{color:var(--muted);font-size:16px;margin:8px 0}
+@media (max-width:480px){.nav button[data-di=home]{display:none}.oLuoi{grid-template-columns:1fr 1fr}.o{min-height:140px;padding:14px}.o .kh{font-size:34px}.o .mt{font-size:12.5px}}
 </style>
 </head>
 <body>
+<header class="appbar hidden" id="appbar">
+  <div class="ab">
+    <button class="brand" data-di="home" title="Trang chủ"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><rect x="1" y="1" width="38" height="38" rx="8" fill="none" stroke="#fff" stroke-width="2"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><span><b>Kiểm tra Hóa học</b><small>Trang giáo viên</small></span></button>
+    <nav class="nav" aria-label="Chuyển trang"><button data-di="home">Trang chủ</button><button data-di="dot">Đề kiểm tra</button><button data-di="hoso" id="btnHoSo">Hồ sơ HS</button></nav>
+    <div class="abPhai"><button class="abQR" id="abQR">Mã QR</button><button class="abRa" id="btnRa">Thoát</button></div>
+  </div>
+</header>
 <main>
 
-<section id="scrLogin" class="card">
-  <h1>Trang giáo viên</h1>
-  <p class="sub">Mở/đóng đề, cho xem lại bài và theo dõi học sinh nộp bài.</p>
+<section id="scrLogin" class="card dangNhap">
+  <div class="brandL"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><rect x="1" y="1" width="38" height="38" rx="8" fill="none" stroke="#fff" stroke-width="2"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><div><b>Kiểm tra Hóa học</b><span>Trang giáo viên</span></div></div>
+  <h1>Đăng nhập</h1>
+  <p class="sub">Nhập mã quản lý để mở phòng chờ, phát đề và xem kết quả.</p>
   <label for="ma">Mã quản lý</label>
   <input id="ma" type="password" inputmode="numeric" autocomplete="off">
   <button class="btn" id="btnVao">Vào</button>
   <div class="msg" id="msg"></div>
 </section>
 
+<section id="scrHome" class="hidden">
+  <div class="chao"><h1>Chào thầy/cô</h1><p class="sub" id="chaoNgay"></p></div>
+  <div class="homeLuoi">
+    <button class="oQR" id="oQR"><svg viewBox="0 0 29 29" aria-hidden="true" shape-rendering="crispEdges"><path fill="#172033" d="M0 0h7v7H0zM22 0h7v7h-7zM0 22h7v7H0z"/><path fill="#fff" d="M1 1h5v5H1zM23 1h5v5h-5zM1 23h5v5H1z"/><path fill="#172033" d="M2 2h3v3H2zM24 2h3v3h-3zM2 24h3v3H2zM9 0h2v2H9zM13 1h3v2h-3zM9 4h4v2H9zM17 3h2v4h-2zM9 9h3v3H9zM14 8h2v2h-2zM18 9h4v2h-4zM24 9h2v3h-2zM0 9h2v2H0zM3 12h3v2H3zM12 13h4v3h-4zM19 14h3v3h-3zM25 15h4v2h-4zM9 17h2v4H9zM14 19h3v2h-3zM22 20h3v3h-3zM9 24h4v2H9zM15 23h2v4h-2zM19 25h3v4h-3zM25 26h4v3h-4z"/></svg><span><b>Mã QR vào thi</b><i>Chiếu lên cho học sinh quét: các em vào trang chọn lớp và điền thông tin như mọi khi.</i></span></button>
+    <div class="card homeMo" id="homeMo"></div>
+  </div>
+  <h2 class="homeH">Công việc</h2>
+  <div class="oLuoi" id="oLuoi"></div>
+  <button class="raNho" id="raNho">Thoát tài khoản</button>
+</section>
+
 <section id="scrDot" class="hidden">
-  <div class="top"><div><h1>Các đề kiểm tra</h1><p class="sub" id="soDot"></p></div><div class="nutTop"><button class="btn2" id="btnHoSo">📋 Hồ sơ HS</button><button class="btn2" id="btnRa">Thoát</button></div></div>
+  <div class="top"><div><h1>Các đề kiểm tra</h1><p class="sub" id="soDot"></p></div></div>
   <div class="loc khoi" id="locDot"></div>
   <div id="dsDot"></div>
 </section>
@@ -240,7 +330,7 @@ body.rong main{max-width:1200px}
 </section>
 
 <section id="scrHoSo" class="hidden">
-  <div class="top"><button class="btn2" id="btnLai2">◀ Các đề</button><button class="btn2" id="btnTaiHS">↻ Làm mới</button></div>
+  <div class="top"><button class="btn2" id="btnLai2">◀ Trang chủ</button><button class="btn2" id="btnTaiHS">↻ Làm mới</button></div>
   <div class="card">
     <h1>Hồ sơ học sinh</h1>
     <p class="sub">Bảng điểm từng lớp. Bấm vào tên để xem tiến bộ của em đó, bấm vào điểm để mở bài làm (PDF).</p>
@@ -256,6 +346,17 @@ body.rong main{max-width:1200px}
 </section>
 
 </main>
+
+<div class="ovQR" id="ovQR" hidden role="dialog" aria-modal="true" aria-label="Mã QR cho học sinh">
+  <div class="ovBar">
+    <div class="seg" id="qrSeg"><button data-q="lam" class="on">Vào làm bài</button><button data-q="xem">Xem lại bài</button></div>
+    <div><button class="nutO" id="qrToan">⛶ Toàn màn hình</button><button class="nutO" id="qrDong">✕ Đóng</button></div>
+  </div>
+  <div class="ovThan">
+    <div class="ovMa" id="qrMa"></div>
+    <div class="ovChu"><h2 id="qrTieuDe"></h2><ol class="phBuoc" id="qrBuoc"></ol><p class="ovLink" id="qrLink"></p></div>
+  </div>
+</div>
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="cau-hinh-lop.js"></script>
 <script>
@@ -264,8 +365,11 @@ body.rong main{max-width:1200px}
   var MA = '', DOT = [], dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
   function man(id) {
-    ['scrLogin', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
-    document.body.classList.toggle('rong', id === 'scrPhat'); window.scrollTo(0, 0);
+    ['scrLogin', 'scrHome', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
+    document.body.classList.toggle('rong', id === 'scrPhat' || id === 'scrHome'); window.scrollTo(0, 0);
+    $('appbar').classList.toggle('hidden', id === 'scrLogin');
+    var muc = id === 'scrHome' ? 'home' : /scrHoSo|scrMotHS/.test(id) ? 'hoso' : 'dot';
+    [].forEach.call(document.querySelectorAll('.nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-di') === muc); });
   }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function chuan(s) { return String(s || '').toUpperCase().replace(/\s+/g, ''); }
@@ -312,10 +416,18 @@ body.rong main{max-width:1200px}
         man('scrLogin'); return;
       }
       MA = m; try { sessionStorage.setItem(KMA, m); } catch (e) {}
-      $('ma').value = ''; DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); veDot(); man('scrDot'); taiDaThi();
+      $('ma').value = ''; DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); man('scrHome'); veHome(); taiDaThi();
     }).catch(function (e) { $('btnVao').disabled = false; $('btnVao').textContent = 'Vào'; $('msg').textContent = e.message; man('scrLogin'); });
   }
   $('btnRa').onclick = function () { MA = ''; try { sessionStorage.removeItem(KMA); } catch (e) {} man('scrLogin'); };
+  $('raNho').onclick = function () { $('btnRa').click(); };
+  function diDen(k) {
+    clearTimeout(hen); if (typeof PH !== 'undefined') { clearTimeout(PH.hen); PH.luot++; }
+    if (k === 'home') { man('scrHome'); veHome(); }
+    else if (k === 'dot') { man('scrDot'); veDot(); if (!DATHI) taiDaThi(); }
+    else $('btnHoSo').onclick();
+  }
+  [].forEach.call(document.querySelectorAll('[data-di]'), function (b) { if (b.id !== 'btnHoSo') b.onclick = function () { diDen(b.getAttribute('data-di')); }; });
 
   // ---------- Danh sach de ----------
   function conLaiDe(d) {
@@ -386,7 +498,7 @@ body.rong main{max-width:1200px}
     if (gon) { var x = document.createElement('button'); x.className = 'dongX'; x.title = 'Thu gọn'; x.textContent = '✕'; x.onclick = function () { moRong = null; veDot(); }; el.insertBefore(x, el.firstChild); }
     ganCongTac(el, d, veDot);
     var pb = document.createElement('button'); pb.className = 'phatBtn';
-    pb.textContent = d.tt === 'DONG' ? '📱 Phát đề · mở phòng chờ và hiện mã QR' : '📱 Màn hình phát đề (mã QR, đồng hồ)';
+    pb.textContent = '📺 Màn hình chiếu: mã QR riêng của đề + đồng hồ';
     pb.onclick = function () { phat(d); };
     el.insertBefore(pb, el.querySelector('.sw'));
     el.querySelector('.theo').onclick = function () { dotXem = d.madot; moTheoDoi(); };
@@ -423,11 +535,10 @@ body.rong main{max-width:1200px}
       var khung = document.createElement('div'); khung.className = 'dsGon';
       dd.forEach(function (d) {
         if (moRong === d.madot) { khung.appendChild(theDot(d, true)); return; }
-        var r = document.createElement('div'); r.className = 'dong'; r.setAttribute('role', 'button');
+        var r = document.createElement('button'); r.className = 'dong';
         r.innerHTML = '<span class="tt2"><b>' + esc(tenNgan(d)) + '</b><span class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · ' + esc(d.lop) +
-          (d.xemlai ? ' · <span style="color:var(--ok)">đang cho xem lại</span>' : '') + '</span>' + dathiHtml(d) + '</span><button class="phNhanh">▶ Phát đề</button><span class="mui">▸</span>';
+          (d.xemlai ? ' · <span style="color:var(--ok)">đang cho xem lại</span>' : '') + '</span>' + dathiHtml(d) + '</span><span class="mui">▸</span>';
         r.onclick = function () { moRong = d.madot; veDot(); };
-        r.querySelector('.phNhanh').onclick = function (e) { e.stopPropagation(); phat(d); };
         khung.appendChild(r);
       });
       box.appendChild(khung);
@@ -460,7 +571,7 @@ body.rong main{max-width:1200px}
     var d = dotHienTai(), el = $('theoDot');
     el.innerHTML = nutCongTac(d, false);
     ganCongTac(el, d, function () { veDauTheo(); taiTheoDoi(); });
-    var pb = document.createElement('button'); pb.className = 'phatBtn'; pb.textContent = '📱 Màn hình phát đề (mã QR, đồng hồ)';
+    var pb = document.createElement('button'); pb.className = 'phatBtn'; pb.textContent = '📺 Màn hình chiếu: mã QR riêng của đề + đồng hồ';
     pb.onclick = function () { clearTimeout(hen); phat(d); }; el.insertBefore(pb, el.querySelector('.sw'));
   }
   function moTheoDoi() { man('scrTheo'); veDauTheo(); $('dsLop').innerHTML = ''; taiTheoDoi(); }
@@ -646,7 +757,7 @@ body.rong main{max-width:1200px}
     [].forEach.call(box.children, function (x) { x.classList.toggle('on', x.textContent === HS_LOP.ten); });
     man('scrHoSo'); taiHoSo(false);
   };
-  $('btnLai2').onclick = function () { man('scrDot'); veDot(); };
+  $('btnLai2').onclick = function () { diDen('home'); };
   $('btnTaiHS').onclick = function () { taiHoSo(true); };
   $('btnLai3').onclick = function () { veHoSo(); man('scrHoSo'); };
   var HS_CHE = 'hs';
@@ -878,6 +989,63 @@ body.rong main{max-width:1200px}
     man('scrMotHS');
   }
 
+
+  // ---------- Trang chu ----------
+  function veHome() {
+    var n = new Date(), THU = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+    $('chaoNgay').textContent = THU[n.getDay()] + ', ' + ('0' + n.getDate()).slice(-2) + '/' + ('0' + (n.getMonth() + 1)).slice(-2) + '/' + n.getFullYear() + (window.LAM_DEMO ? ' · bản dùng thử' : '');
+    var mo = DOT.filter(function (d) { return d.tt !== 'DONG'; }), box = $('homeMo');
+    if (!mo.length) box.innerHTML = '<h2>Đề đang mở</h2><p class="sub">Chưa có đề nào mở. Vào Đề kiểm tra, chọn đề rồi bấm ① Mở phòng chờ.</p><button class="btn2" style="margin-top:12px" id="homeDe">Mở danh sách đề</button>';
+    else {
+      box.innerHTML = '<h2>Đề đang mở (' + mo.length + ')</h2>';
+      mo.forEach(function (d) {
+        var r = document.createElement('button'); r.className = 'moRow';
+        r.innerHTML = '<span class="t"><b>' + esc(tenNgan(d)) + '</b><span>' + esc(d.madot) + ' · Lớp ' + esc(d.lop) + '</span></span>' + chipTT(d);
+        r.onclick = function () { khoiChon = khoiCua(d); moRong = null; diDen('dot'); };
+        box.appendChild(r);
+      });
+    }
+    if ($('homeDe')) $('homeDe').onclick = function () { diDen('dot'); };
+    var O = [
+      { kh: 'Đề', ten: 'Đề kiểm tra', mt: 'Mở phòng chờ, phát đề, đóng đề, cho xem lại, theo dõi nộp bài', so: DOT.length + ' đề', di: 'dot' },
+      { kh: 'Hs', ten: 'Hồ sơ học sinh', mt: 'Bảng điểm, tiến bộ, vắng thi, trò chơi cá nhân và nhóm', so: DS.length + ' lớp', di: 'hoso' },
+      { kh: 'Xm', ten: 'Mã QR xem lại bài', mt: 'Cho học sinh quét để xem lại bài ở nhà', qr: 'xem', chi: 1 },
+      { kh: 'Tc', ten: 'Trò chơi', mt: 'Mục lục trò chơi iPad; kết quả vào hồ sơ học sinh', href: 'https://sau-rieng.github.io/TRO--CHOI-IPAD/MUCLUC.html' },
+      { kh: 'Dt', ten: 'Dùng thử', mt: 'Lớp DEMO cho đồng nghiệp và ban giám khảo', href: 'DUNG-THU.html' }
+    ];
+    var g = $('oLuoi'); g.innerHTML = '';
+    O.forEach(function (o) {
+      var el = document.createElement(o.href ? 'a' : 'button'); el.className = 'o' + (o.chi ? ' chi' : '');
+      if (o.href) { el.href = o.href; el.target = '_blank'; el.rel = 'noopener'; }
+      el.innerHTML = (o.so ? '<span class="so">' + o.so + '</span>' : '') + '<span class="kh">' + o.kh + '</span><span class="ten">' + o.ten + '</span><span class="mt">' + o.mt + '</span>';
+      if (o.di) el.onclick = function () { diDen(o.di); };
+      if (o.qr) el.onclick = function () { moQR(o.qr); };
+      g.appendChild(el);
+    });
+  }
+  // ---------- Ma QR chung: HS quet vao trang chon lop / xem lai ----------
+  var QR_KIEU = 'lam';
+  function moQR(kieu) {
+    QR_KIEU = kieu || 'lam';
+    var goc = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '');
+    var url = goc + (QR_KIEU === 'xem' ? 'XEM-LAI.html' : 'LAM-BAI.html') + (window.LAM_DEMO ? '?demo' : '');
+    [].forEach.call($('qrSeg').children, function (b) { b.classList.toggle('on', b.getAttribute('data-q') === QR_KIEU); });
+    $('qrTieuDe').textContent = QR_KIEU === 'xem' ? 'Quét mã để xem lại bài' : 'Quét mã để vào làm bài';
+    $('qrBuoc').innerHTML = QR_KIEU === 'xem'
+      ? '<li><span>Mở <b>Camera</b> trên iPad hoặc điện thoại, quét mã</span></li><li><span>Chọn lớp, gõ <b>số báo danh</b> và <b>mã xem bài</b></span></li><li><span>Bấm vào bài để xem câu đúng, câu sai</span></li>'
+      : '<li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Chọn <b>lớp</b>, gõ <b>2 số cuối</b> số báo danh và <b>mã giáo viên</b></span></li><li><span>Bấm <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b></span></li>';
+    $('qrLink').textContent = url.replace(/^https?:\/\//, '');
+    $('ovQR').hidden = false; veQR($('qrMa'), url);
+    $('qrDong').focus();
+  }
+  function dongQR() { $('ovQR').hidden = true; if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); }
+  $('oQR').onclick = function () { moQR('lam'); };
+  $('abQR').onclick = function () { moQR('lam'); };
+  $('qrDong').onclick = dongQR;
+  [].forEach.call($('qrSeg').children, function (b) { b.onclick = function () { moQR(b.getAttribute('data-q')); }; });
+  if (!document.documentElement.requestFullscreen) $('qrToan').style.display = 'none';
+  $('qrToan').onclick = function () { if (document.fullscreenElement) document.exitFullscreen(); else $('ovQR').requestFullscreen().catch(function () {}); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('ovQR').hidden) dongQR(); });
   // ---------- PHAT DE: man hinh chieu len may chieu – ma QR cho HS vao thang lop + de ----------
   var PH = { madot: null, lop: null, hen: null, dl: null, luc: 0, luu: null, loi: '', hienQR: false, suaMa: false, luot: 0 };
   var KQR = 'gv_maqr' + (window.LAM_DEMO ? '_demo' : ''), MAQR = '';
@@ -901,8 +1069,7 @@ body.rong main{max-width:1200px}
     PH.madot = d.madot; PH.dl = null; PH.loi = ''; PH.hienQR = false; PH.suaMa = false;
     var lops = lopCuaDot(d);
     if (!lops.some(function (l) { return l.ten === PH.lop; })) PH.lop = ((lops.filter(function (l) { return l.ten === lopTheo; })[0]) || lops[0] || {}).ten;
-    man('scrPhat'); vePhat();
-    if (d.tt === 'DONG') phDat('CHO'); else taiPhat();
+    man('scrPhat'); vePhat(); taiPhat();
   }
   function phDat(gt) {
     var d = phDe(); if (!d) return;
@@ -942,11 +1109,10 @@ body.rong main{max-width:1200px}
     });
     var q = $('phQR');
     if (!l) { q.innerHTML = '<div class="loi">Cột Lop của đề này không khớp lớp nào trong danh sách lớp.</div>'; veTT(); return; }
-    var hien = d.tt === 'CHO' || (d.tt === 'MO' && PH.hienQR);
+    var hien = d.tt !== 'MO' || PH.hienQR;
     var h = '<div class="phLopTo">Học sinh lớp<b>' + esc(l.ten) + '</b></div>';
     if (hien) h += '<div class="phMaQR" id="phMaQR"></div>';
     else if (d.tt === 'MO') h += '<div class="phMaQR tat">Đang làm bài · mã QR đã ẩn</div><button class="btn2 phTre" id="phTre">Hiện mã QR cho em vào trễ</button>';
-    else h += '<div class="phMaQR tat">Mã QR hiện khi phòng chờ mở</div>';
     if (hien) h += '<ol class="phBuoc"><li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Gõ <b>2 số cuối</b> số báo danh → <b>Tìm tên</b></span></li><li><span>Bấm <b>Đúng tên – Bắt đầu làm bài</b> rồi chờ giáo viên phát đề</span></li></ol>' +
       (d.tt === 'MO' ? '<button class="btn2 phTre" id="phTre">Ẩn mã QR</button>' : '');
     if (PH.suaMa) h += '<div class="phMaGV">Mã giáo viên gắn vào QR <input id="phMaMoi" type="password" inputmode="numeric" autocomplete="off"><button id="phMaLuu">Lưu</button><button id="phMaHuy">Hủy</button>' +

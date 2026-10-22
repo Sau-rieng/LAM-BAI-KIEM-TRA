@@ -1,0 +1,13 @@
+{
+  "name": "Kiểm tra Hóa học – Giáo viên",
+  "short_name": "Kiểm tra Hóa",
+  "start_url": "GIAO-VIEN.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f9",
+  "theme_color": "#172033",
+  "icons": [
+    { "src": "hinh/app/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "hinh/app/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
