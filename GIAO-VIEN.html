@@ -1146,7 +1146,7 @@ body.rong main{max-width:1200px}
     var si = hs ? hs.length : 0, h = '';
     function chip(ds, xong) {
       return ds.length ? '<div class="phChip">' + ds.map(function (x) {
-        return '<span class="' + (xong(x) ? 'xong' : '') + '"><b>' + esc(String(x.mahs).slice(-2)) + '</b>' + esc(String(x.hoten).split(' ').slice(-2).join(' ')) + (xong(x) ? ' ✓' : '') + '</span>';
+        return '<span class="' + (xong(x) ? 'xong' : '') + '"><b>' + esc(String(x.mahs).slice(-2)) + '</b>' + esc(String(x.hoten).length <= 18 ? x.hoten : String(x.hoten).split(' ').slice(-2).join(' ')) + (xong(x) ? ' ✓' : '') + '</span>';
       }).join('') + '</div>' : '';
     }
     var sx = function (a, b) { return a.mahs < b.mahs ? -1 : 1; };

@@ -3,107 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dùng thử – Kiểm tra Hóa học trên iPad</title>
+<title>Dùng thử – Kiểm tra Hóa học</title>
+<link rel="icon" type="image/png" href="hinh/app/icon-192.png">
+<link rel="apple-touch-icon" href="hinh/app/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1a1a2e;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--warn:#a06b00;--warnbg:#fff4d6}
+:root{--ink:#172033;--muted:#5b6175;--line:#dbe0e8;--bg:#f4f5f9;--card:#fff;--pri:#1d5bc4;--chi:#b8235a}
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.5}
-main{max-width:860px;margin:0 auto;padding:20px 16px 40px}
-h1{font-size:26px;margin:4px 0}
-h2{font-size:20px;margin:0 0 8px}
-.sub{color:var(--muted);margin:0 0 14px}
-.card{background:var(--card);border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);padding:16px 18px;margin-bottom:14px}
-.vai{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media (max-width:700px){.vai{grid-template-columns:1fr}}
-.vai a{display:block;text-decoration:none;color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:14px;background:#fff}
-.vai a b{display:block;font-size:19px;color:var(--pri)}
-.vai a span{font-size:15px;color:var(--muted)}
-table{border-collapse:collapse;width:100%;font-size:16px}
-th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
-th{font-size:14px;color:var(--muted)}
-code{background:var(--bg);border-radius:6px;padding:1px 6px;font-weight:700;font-size:16px}
+body{margin:0;font-family:"Be Vietnam Pro",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.5}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.dau{background:var(--ink);color:#fff}
+.dau .trong{max-width:980px;margin:0 auto;padding:22px 16px 26px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;opacity:.9}
+.brand svg{width:34px;height:34px;flex:none}
+.dau h1{font-size:clamp(26px,4vw,38px);line-height:1.15;margin:16px 0 6px;letter-spacing:-.4px;max-width:20ch}
+.dau p{margin:0;opacity:.8;max-width:60ch}
+.dau .gk{display:inline-block;margin-top:16px;background:var(--chi);color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:11px 16px}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h2{font-size:20px;margin:26px 2px 10px}
+.luoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.o{position:relative;display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px;min-height:150px}
+.o:hover{border-color:var(--ink)}
+.o .so{position:absolute;top:12px;right:14px;font-size:13px;font-weight:700;color:var(--muted)}
+.o .kh{font-size:38px;font-weight:800;line-height:1;margin:4px 0 12px;letter-spacing:-.5px}
+.o b{font-size:16px}
+.o span.mt{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.o.chi .kh{color:var(--chi)}
+.card{background:#fff;border-radius:16px;border:2px solid var(--line);padding:18px}
+.hai{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.hai{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-size:15.5px}
+td{border-bottom:1px solid var(--line);padding:8px 4px;vertical-align:top}
+td:last-child{text-align:right}
+code{font-family:inherit;font-weight:800;background:var(--bg);border-radius:6px;padding:1px 7px;white-space:nowrap}
 ol{margin:0;padding-left:22px}
-ol li{margin:6px 0}
-.chu{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:15px}
-.qr{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-#qr{width:170px;height:170px;background:#fff;padding:8px;border:2px solid var(--line);border-radius:10px}
+ol li{margin:7px 0}
+.qr{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px}
+#qr{width:150px;height:150px;background:#fff;padding:8px;border:2px solid var(--line);border-radius:12px}
 #qr img,#qr canvas{width:100%!important;height:auto!important}
-.sbd{display:flex;flex-wrap:wrap;gap:6px}
-.sbd span{border:2px solid var(--line);border-radius:8px;padding:2px 8px;font-size:15px;background:#fff}
-@media print{.vai a{border-color:#999}.card{box-shadow:none;border:1px solid #ccc}}
+.ghi{color:var(--muted);font-size:14.5px;margin-top:14px}
+@media print{.dau{background:#fff;color:var(--ink);border-bottom:3px solid var(--ink)}.dau .gk{display:none}.o,.card{break-inside:avoid}}
 </style>
 </head>
 <body>
-<main>
+<header class="dau"><div class="trong">
+  <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><span>Kiểm tra Hóa học</span></div>
   <h1>Dùng thử hệ thống kiểm tra Hóa học trên iPad</h1>
-  <p class="sub">Lớp <b>DEMO</b> là lớp dùng thử riêng: có kho đề bản sao và mã riêng, mọi thao tác ở đây không ảnh hưởng đến các lớp thật.</p>
-  <p class="sub"><a href="GIAM-KHAO.html" style="font-weight:700;color:var(--pri)">📄 Hướng dẫn 7 bước cho Ban giám khảo (in được)</a></p>
+  <p>Lớp DEMO là lớp dùng thử riêng, có kho đề bản sao và mã riêng. Mọi thao tác ở đây không ảnh hưởng đến các lớp thật.</p>
+  <a class="gk" href="GIAM-KHAO.html">Hướng dẫn 7 bước cho Ban giám khảo (in được)</a>
+</div></header>
 
-  <div class="card">
-    <h2>Mở trang</h2>
-    <div class="vai">
-      <a href="LAM-BAI.html?demo"><b>① Học sinh làm bài</b><span>Chọn lớp DEMO, nhập SBD và mã giáo viên</span></a>
-      <a href="GIAO-VIEN.html?demo"><b>② Giáo viên điều khiển</b><span>Mở phòng chờ, bắt đầu, theo dõi, thống kê</span></a>
-      <a href="XEM-LAI.html?demo"><b>③ Học sinh xem lại bài</b><span>Câu đúng, câu sai, đáp án, tiến bộ</span></a>
+<main>
+  <h2>Ứng dụng</h2>
+  <div class="luoi">
+    <a class="o chi" href="GIAO-VIEN.html?demo"><span class="so">mã 4444</span><span class="kh">Gv</span><b>Giáo viên</b><span class="mt">Trang chủ, mã QR, phòng chờ, phát đề, thống kê, hồ sơ</span></a>
+    <a class="o" href="LAM-BAI.html?demo"><span class="so">SBD 01–10</span><span class="kh">Lb</span><b>Học sinh làm bài</b><span class="mt">Chọn lớp DEMO, nhập SBD và mã giáo viên</span></a>
+    <a class="o" href="XEM-LAI.html?demo"><span class="so">mã 11+SBD</span><span class="kh">Xm</span><b>Học sinh xem lại bài</b><span class="mt">Câu đúng, câu sai, đáp án, biểu đồ tiến bộ</span></a>
+  </div>
+
+  <h2>Trò chơi luyện tập · kết quả vào hồ sơ học sinh</h2>
+  <div class="luoi">
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-HOA10.html?demo"><span class="so">cá nhân</span><span class="kh">Đn</span><b>Đại Nội – Hóa 10</b><span class="mt">Tham quan Đại Nội 3D, trả lời câu hỏi</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-KHTN9.html?demo"><span class="so">cá nhân</span><span class="kh">Đn</span><b>Đại Nội – KHTN 9</b><span class="mt">Cùng trò chơi, nội dung KHTN 9</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/POLYMER-F1.html?demo"><span class="so">cá nhân</span><span class="kh">Pf</span><b>Đua xe Polymer F1</b><span class="mt">Đua xe trả lời câu hỏi Hóa 12</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-CHIMDUATHU-NHOM.html?demo"><span class="so">nhóm</span><span class="kh">Cd</span><b>Chim đưa thư</b><span class="mt">Chọn lớp DEMO và số nhóm; kết quả vào hồ sơ nhóm</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-DUAXEF1-NHOM.html?demo"><span class="so">nhóm</span><span class="kh">F1</span><b>Đua xe F1</b><span class="mt">Hóa 10, chơi theo nhóm</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/RUONGLUA-CHUKI-NHOM.html?demo"><span class="so">nhóm</span><span class="kh">Ru</span><b>Ruộng lúa Chu kì</b><span class="mt">Hóa 10, chơi theo nhóm</span></a>
+  </div>
+
+  <div class="hai" style="margin-top:26px">
+    <div class="card">
+      <h2 style="margin-top:0">Chơi thử trong 5 phút</h2>
+      <ol>
+        <li><b>Giáo viên</b> mở ứng dụng (mã <code>4444</code>) → <b>Đề kiểm tra</b> → chọn đề ngắn → <b>📺 Màn hình chiếu</b> → <b>① Mở phòng chờ</b>.</li>
+        <li><b>Học sinh</b> quét mã QR trên màn hình, gõ SBD <code>01</code>–<code>10</code> → <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b>. Tên hiện lên màn hình chiếu.</li>
+        <li>Giáo viên bấm <b>▶ Bắt đầu làm bài</b>: mọi máy cùng thấy đề, đồng hồ to đếm ngược.</li>
+        <li>Thử thoát khỏi trang khi đang làm: iPad bị khóa, giáo viên mở bằng mã <code>2222</code>. Nộp bài thì điểm hiện ngay.</li>
+        <li>Giáo viên bấm <b>■ Đóng đề</b> → <b>Xem điểm và phân tích câu sai</b>.</li>
+        <li>Học sinh chơi một trò chơi bằng cùng SBD → menu <b>Hồ sơ HS</b>, bấm tên: thấy điểm kiểm tra cạnh kết quả trò chơi.</li>
+        <li>Giáo viên bật <b>Cho xem lại</b>, bấm <b>Mã QR → Xem lại bài</b>; học sinh quét, nhập mã xem <code>11</code>+SBD.</li>
+      </ol>
     </div>
-    <div class="vai" style="margin-top:12px">
-      <a href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-HOA10.html?demo"><b>④ Trò chơi Đại Nội – Hóa 10</b><span>Tham quan Đại Nội 3D, trả lời câu hỏi; kết quả vào hồ sơ HS</span></a>
-      <a href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-KHTN9.html?demo"><b>⑤ Trò chơi Đại Nội – KHTN 9</b><span>Cùng trò chơi, nội dung KHTN 9</span></a>
-      <a href="https://sau-rieng.github.io/TRO--CHOI-IPAD/POLYMER-F1.html?demo"><b>⑥ Đua xe Polymer F1</b><span>Đua xe trả lời câu hỏi Hóa 12</span></a>
+    <div class="card">
+      <h2 style="margin-top:0">Mã dùng thử</h2>
+      <table>
+        <tr><td>Lớp</td><td><code>DEMO</code></td></tr>
+        <tr><td>Học sinh (10 tài khoản)</td><td>SBD <code>01</code> – <code>10</code></td></tr>
+        <tr><td>Mã giáo viên (học sinh nhập khi vào bài)</td><td><code>1111</code></td></tr>
+        <tr><td>Mã mở khóa iPad</td><td><code>2222</code></td></tr>
+        <tr><td>Mã cho làm lại</td><td><code>3333</code></td></tr>
+        <tr><td>Trang giáo viên</td><td><code>4444</code></td></tr>
+        <tr><td>Mã xem bài</td><td><code>11</code> + SBD, vd <code>1107</code></td></tr>
+        <tr><td>Trò chơi: vào chơi / mở khóa</td><td><code>1111</code> / <code>2222</code></td></tr>
+      </table>
+      <div class="qr"><div id="qr"></div><div><b>Quét để mở trang này</b><br><span class="ghi" id="link" style="word-break:break-all"></span></div></div>
     </div>
-    <div class="vai" style="margin-top:12px">
-      <a href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-CHIMDUATHU-NHOM.html?demo"><b>⑦ Chim đưa thư – chơi nhóm</b><span>Chọn lớp DEMO và số nhóm; kết quả vào hồ sơ nhóm</span></a>
-      <a href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-DUAXEF1-NHOM.html?demo"><b>⑧ Đua xe F1 – chơi nhóm</b><span>Hóa 10, chơi theo nhóm</span></a>
-      <a href="https://sau-rieng.github.io/TRO--CHOI-IPAD/RUONGLUA-CHUKI-NHOM.html?demo"><b>⑨ Ruộng lúa Chu kì – nhóm</b><span>Hóa 10, chơi theo nhóm</span></a>
-    </div>
   </div>
 
-  <div class="card">
-    <h2>Tài khoản và mã dùng thử</h2>
-    <table>
-      <tr><th>Dùng cho</th><th>Thông tin</th></tr>
-      <tr><td>Học sinh (10 tài khoản)</td><td>Lớp <code>DEMO</code> · SBD 2 số cuối từ <code>01</code> đến <code>10</code>
-        <div class="sbd" style="margin-top:6px"><span>01 · Học sinh thử 01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span></div></td></tr>
-      <tr><td>Mã giáo viên (học sinh nhập khi vào bài)</td><td><code>1111</code></td></tr>
-      <tr><td>Mã quản lý (trang giáo viên)</td><td><code>4444</code></td></tr>
-      <tr><td>Mã mở khóa (khi iPad bị khóa vì thoát trang)</td><td><code>2222</code></td></tr>
-      <tr><td>Mã cho làm lại</td><td><code>3333</code></td></tr>
-      <tr><td>Trò chơi (④–⑨)</td><td>Lớp <code>DEMO</code>, họ tên tùy ý, SBD 01–10 (trò nhóm: chọn số nhóm) · mã vào chơi <code>1111</code> · mã mở khóa <code>2222</code></td></tr>
-      <tr><td>Mã xem bài (trang xem lại)</td><td><code>11</code> + SBD, ví dụ SBD <code>01</code> → <code>1101</code>, SBD <code>07</code> → <code>1107</code></td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2>Chơi thử trong 5 phút</h2>
-    <ol>
-      <li><b>Giáo viên</b> mở trang ② (mã <code>4444</code>), chọn khối, bấm một đề → <b>① Mở phòng chờ</b>.</li>
-      <li><b>Học sinh</b> (mỗi người một máy) mở trang ①, chọn lớp <b>DEMO</b>, gõ SBD 01–10, mã GV <code>1111</code> → <b>Bắt đầu</b>. Màn hình hiện “Chờ giáo viên phát đề”.</li>
-      <li>Giáo viên bấm <b>Theo dõi phòng chờ</b> để thấy ai đã vào, rồi bấm <b>② Bắt đầu làm bài</b>: cả nhóm cùng thấy đề, cùng một đồng hồ.</li>
-      <li>Thử thoát khỏi trang khi đang làm: iPad bị khóa, giáo viên mở bằng mã <code>2222</code>.</li>
-      <li>Nộp bài → điểm hiện ngay; bài được chấm và lưu PDF tự động.</li>
-      <li>Giáo viên xem <b>tỉ lệ điểm</b>, <b>📊 Câu sai nhiều nhất</b>, <b>📋 Hồ sơ HS</b> (bảng điểm, biểu đồ tiến bộ), thử <b>Ghi vắng</b>.</li>
-      <li>Học sinh chơi trò chơi ④/⑤/⑥ bằng cùng SBD → giáo viên mở <b>📋 Hồ sơ HS</b>, bấm tên em: mục <b>🎮 Trò chơi luyện tập</b> hiện ngay kết quả bên cạnh điểm kiểm tra.</li>
-      <li>Chơi một trò nhóm ⑦/⑧/⑨ → <b>📋 Hồ sơ HS → 👥 Nhóm</b>: thấy kết quả từng nhóm; bấm <b>✎ Sửa thành viên</b> chọn các em trong nhóm, kết quả nhóm hiện luôn trong hồ sơ từng em.</li>
-      <li>Giáo viên bật <b>Cho xem lại</b> → học sinh mở trang ③ (mã xem <code>11</code>+SBD) xem câu sai; trang giáo viên ghi “✓ đã xem lại”.</li>
-    </ol>
-  </div>
-
-  <div class="card qr">
-    <div id="qr"></div>
-    <div><b>Quét mã để mở trang này trên iPad / điện thoại</b><br><span class="sub" id="link"></span></div>
-  </div>
-
-  <p class="chu">Sau mỗi buổi dùng thử, giáo viên phụ trách có thể xóa các dòng trong tab BAI LAM của sổ “SO THEO DOI DEMO” để làm lại từ đầu.</p>
+  <p class="ghi">Sau mỗi buổi dùng thử, giáo viên phụ trách có thể xóa các dòng trong tab BAI LAM của sổ “SO THEO DOI DEMO” để làm lại từ đầu.</p>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
   var url = location.href.split('#')[0].split('?')[0];
-  document.getElementById('link').textContent = url;
+  document.getElementById('link').textContent = url.replace(/^https?:\/\//, '');
   var box = document.getElementById('qr');
   try { new QRCode(box, { text: url, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M }); }
-  catch (e) { // du phong: anh QR tu dich vu tao ma QR
-    var im = new Image(); im.alt = 'Mã QR'; im.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(url);
+  catch (e) {
+    var im = new Image(); im.alt = 'Mã QR';
+    im.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(url);
     im.onerror = function () { box.style.display = 'none'; }; box.appendChild(im);
   }
 })();

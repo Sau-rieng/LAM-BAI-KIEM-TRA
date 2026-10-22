@@ -4,14 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hướng dẫn Ban giám khảo</title>
+<link rel="icon" type="image/png" href="hinh/app/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#111;--muted:#555;--line:#222;--soft:#ddd;--bg:#fff}
+:root{--ink:#172033;--muted:#555;--line:#222;--soft:#ddd;--bg:#fff}
 *{box-sizing:border-box}
-body{margin:0;background:#eee;color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.42}
+body{margin:0;background:#eee;color:var(--ink);font-family:"Be Vietnam Pro",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.42}
 .to{background:var(--bg);max-width:210mm;margin:12px auto;padding:12mm 13mm}
 header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:3px solid var(--line);padding-bottom:8px;margin-bottom:10px}
 h1{font-size:23px;margin:0 0 2px;line-height:1.2}
 .sub{margin:0;color:var(--muted)}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--muted);margin-bottom:4px}.logo{width:26px;height:26px;flex:none}
+.duPhong{display:flex;gap:8px;align-items:center;margin-top:6px}
 .thoigian{border:2px solid var(--line);border-radius:10px;padding:6px 10px;text-align:center;white-space:nowrap;font-weight:700}
 .thoigian small{display:block;font-weight:400;color:var(--muted)}
 .vai{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px;font-size:14px}
@@ -77,6 +82,7 @@ td:last-child{text-align:right}
 <div class="to">
   <header>
     <div>
+      <div class="brand"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Kiểm tra Hóa học</span></div>
       <h1>Trải nghiệm hệ thống kiểm tra &amp; luyện tập Hóa học trên iPad</h1>
       <p class="sub">Hướng dẫn dành cho Ban giám khảo · dùng lớp thử <b>DEMO</b>, không ảnh hưởng dữ liệu học sinh thật</p>
     </div>
@@ -84,28 +90,27 @@ td:last-child{text-align:right}
   </header>
 
   <div class="vai">
-    <span><span class="ai gv">GV</span><b>Giáo viên</b> – người trình bày cầm iPad giáo viên</span>
+    <span><span class="ai gv">GV</span><b>Giáo viên</b> – người trình bày, chiếu màn hình lên máy chiếu/tivi</span>
     <span><span class="ai">HS</span><b>Học sinh</b> – mỗi giám khảo một iPad</span>
   </div>
 
-  <div class="chuan-bi"><b>Người trình bày đã chuẩn bị sẵn:</b> iPad giáo viên mở trang Giáo viên (mã <code>4444</code>), chọn một đề ngắn và bấm <b>① Mở phòng chờ</b>.</div>
+  <div class="chuan-bi"><b>Người trình bày đã chuẩn bị sẵn:</b> mở ứng dụng Kiểm tra Hóa bản dùng thử (mã <code>4444</code>) → <b>Đề kiểm tra</b> → chọn một đề ngắn → <b>📺 Màn hình chiếu</b> → <b>① Mở phòng chờ</b>, chiếu lên màn hình lớn.</div>
 
-  <div class="buoc">
+  <div class="buoc khong-qr">
     <div class="so">1</div>
     <div>
-      <h2><span class="ai">HS</span>Vào phòng thi</h2>
-      <p>Quét mã → chọn lớp <code>DEMO</code> → gõ <b>số báo danh</b> (mỗi người một số từ <code>01</code> đến <code>10</code>) → mã giáo viên <code>1111</code> → <b>Tìm tên</b> → chọn bài → <b>Đúng tên – Bắt đầu làm bài</b>.</p>
-      <p class="thay">Thấy: màn hình “Chờ giáo viên phát đề”. Đề đã tải sẵn về máy nhưng còn khóa.</p>
+      <h2><span class="ai">HS</span>Quét mã trên màn hình chiếu</h2>
+      <p>Mở <b>Camera</b> trên iPad, quét mã QR đang chiếu → gõ <b>2 số cuối số báo danh</b> (mỗi người một số từ <code>01</code> đến <code>10</code>) → <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b>.</p>
+      <p class="thay">Thấy: lớp DEMO và đề đã chọn sẵn, không cần gõ mã giáo viên. Tên mình hiện ngay trên màn hình chiếu; iPad báo “Chờ giáo viên phát đề”.</p>
     </div>
-    <div class="qr"><div data-qr="LAM-BAI.html?demo"></div>Làm bài</div>
   </div>
 
   <div class="buoc khong-qr">
     <div class="so">2</div>
     <div>
       <h2><span class="ai gv">GV</span>Phát đề cho cả lớp cùng lúc</h2>
-      <p>Bấm <b>Theo dõi phòng chờ ▶</b> để thấy tên các giám khảo đã vào → bấm <b>② ▶ Bắt đầu làm bài</b>.</p>
-      <p class="thay">Thấy: mọi iPad cùng hiện đề, cùng một đồng hồ đếm ngược. Câu hỏi và phương án được xáo khác nhau trên từng máy.</p>
+      <p>Đủ người thì bấm nút xanh <b>▶ Bắt đầu làm bài</b> trên màn hình chiếu.</p>
+      <p class="thay">Thấy: mọi iPad cùng hiện đề; màn hình chiếu ẩn mã QR, hiện đồng hồ đếm ngược thật to. Câu hỏi và phương án xáo khác nhau trên từng máy.</p>
     </div>
   </div>
 
@@ -115,7 +120,7 @@ td:last-child{text-align:right}
       <h2><span class="ai">HS</span>Làm bài và thử “gian lận”</h2>
       <p>Trả lời vài câu. Thử <b>thoát ra màn hình chính</b> hoặc chuyển ứng dụng rồi quay lại → iPad bị khóa, giáo viên mở bằng mã <code>2222</code>. Thử chép chữ hoặc in đề → không được, trên đề có hình mờ tên người làm.</p>
       <p>Bấm <b>Nộp bài</b> (nút giữa Câu trước – Câu sau).</p>
-      <p class="thay">Thấy: điểm hiện ngay; bài được chấm tự động và lưu thành file PDF.</p>
+      <p class="thay">Thấy: điểm hiện ngay; số “Đã nộp” trên màn hình chiếu tăng lên; bài được chấm tự động và lưu thành file PDF.</p>
     </div>
   </div>
 
@@ -123,7 +128,7 @@ td:last-child{text-align:right}
     <div class="so">4</div>
     <div>
       <h2><span class="ai gv">GV</span>Xem kết quả cả lớp</h2>
-      <p>Bấm <b>③ ■ Đóng đề</b>, rồi xem mục <b>Theo dõi</b>: ai đã nộp, điểm từng người, tỉ lệ điểm ≤3,5 · ≥5 · ≥6,5 · ≥8 · ≥9. Bấm <b>📊 Câu sai nhiều nhất</b>.</p>
+      <p>Bấm <b>■ Đóng đề</b> → <b>Xem điểm và phân tích câu sai</b>: ai đã nộp, điểm từng người, tỉ lệ điểm ≤3,5 · ≥5 · ≥6,5 · ≥8 · ≥9. Bấm <b>📊 Câu sai nhiều nhất</b>.</p>
       <p class="thay">Thấy: các câu xếp từ sai nhiều đến sai ít, kèm % và phương án học sinh hay chọn nhầm – để giáo viên biết cần giảng lại chỗ nào.</p>
     </div>
   </div>
@@ -142,31 +147,31 @@ td:last-child{text-align:right}
     <div class="so">6</div>
     <div>
       <h2><span class="ai gv">GV</span>Mở hồ sơ học sinh</h2>
-      <p><b>📋 Hồ sơ HS</b> → bấm tên một giám khảo (vd “Học sinh thử 01”). Bấm <b>👥 Nhóm</b> để xem kết quả theo nhóm.</p>
+      <p>Menu <b>Hồ sơ HS</b> → bấm tên một giám khảo (vd “Học sinh thử 01”). Bấm <b>👥 Nhóm</b> để xem kết quả theo nhóm.</p>
       <p class="thay">Thấy: trong một hồ sơ có điểm kiểm tra, biểu đồ tiến bộ, kết quả trò chơi vừa chơi, ghi chú vắng thi và kết quả nhóm.</p>
     </div>
   </div>
 
-  <div class="buoc">
+  <div class="buoc khong-qr">
     <div class="so">7</div>
     <div>
       <h2><span class="ai">HS</span>Xem lại bài ở nhà</h2>
-      <p>Giáo viên bấm <b>○ Chưa cho xem lại</b> để chuyển thành <b>● Cho xem lại</b>. Học sinh quét mã → số báo danh → mã xem <code>11</code> + số báo danh (vd SBD <code>01</code> → <code>1101</code>).</p>
+      <p>Giáo viên bấm <b>○ Chưa cho xem lại</b> để chuyển thành <b>● Cho xem lại</b>, rồi bấm nút <b>Mã QR</b> → <b>Xem lại bài</b>. Học sinh quét mã → chọn lớp <code>DEMO</code>, số báo danh, mã xem <code>11</code> + số báo danh (vd SBD <code>01</code> → <code>1101</code>).</p>
       <p class="thay">Thấy: câu đúng, câu sai, đáp án đúng. Trang giáo viên ghi “✓ đã xem lại” kèm giờ xem.</p>
     </div>
-    <div class="qr"><div data-qr="XEM-LAI.html?demo"></div>Xem lại</div>
   </div>
 
   <div class="hai">
     <div class="hop">
       <h3>Điểm mới của sản phẩm</h3>
       <ul>
+        <li>Giáo viên một chạm hiện mã QR; học sinh quét là vào đúng lớp, đúng đề.</li>
         <li>Cả lớp làm cùng lúc trên iPad, chấm và lưu bài tự động.</li>
         <li>Chống gian lận: khóa khi thoát trang, xáo câu, không chép hay in được đề.</li>
         <li>Thống kê câu sai giúp giáo viên dạy lại đúng chỗ.</li>
         <li>Một hồ sơ gồm kiểm tra, trò chơi cá nhân và trò chơi nhóm.</li>
         <li>Học sinh tự xem lại bài ở nhà; giáo viên biết ai đã xem.</li>
-        <li>Dùng miễn phí: Google Trang tính + trang web trên GitHub.</li>
+        <li>Cài như ứng dụng trên iPad, máy tính; dùng miễn phí (Google Trang tính + GitHub).</li>
       </ul>
     </div>
     <div class="hop">
@@ -179,7 +184,8 @@ td:last-child{text-align:right}
         <tr><td>Trang giáo viên</td><td><code>4444</code></td></tr>
         <tr><td>Mã xem lại bài</td><td><code>11</code> + SBD</td></tr>
       </table>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:5px"><div class="qr" style="width:78px"><div data-qr="DUNG-THU.html"></div></div><div style="font-size:12px"><b>Trang Dùng thử</b>: đủ trang Giáo viên, Học sinh, Xem lại và 6 trò chơi.<br><span id="duongdan" style="color:var(--muted);word-break:break-all"></span></div></div>
+      <div class="duPhong"><div class="qr"><div data-qr="DUNG-THU.html"></div>Dùng thử</div><div class="qr"><div data-qr="LAM-BAI.html?demo"></div>Làm bài (dự phòng)</div>
+        <div style="font-size:12px"><b>Dùng thử</b>: đủ trang Giáo viên, Học sinh, Xem lại và 6 trò chơi.<br><b>Dự phòng</b> khi không có máy chiếu: chọn lớp DEMO, mã giáo viên <code>1111</code>.</div></div>
     </div>
   </div>
 </div>
@@ -191,7 +197,6 @@ td:last-child{text-align:right}
 (function () {
   var goc = 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/';
   var tro = 'https://sau-rieng.github.io/TRO--CHOI-IPAD/';
-  document.getElementById('duongdan').textContent = goc + 'DUNG-THU.html';
   function ve(box, url) {
     try { new QRCode(box, { text: url, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.M }); }
     catch (e) {
