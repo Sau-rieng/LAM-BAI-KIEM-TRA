@@ -224,6 +224,13 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 @media (orientation:portrait),(max-width:760px){.ovThan{flex-direction:column;gap:18px;justify-content:flex-start}.ovMa{width:min(84vw,56vh)}.ovChu{text-align:center}.ovChu .phBuoc{margin:0 auto;display:inline-block}}
 /* Man hinh PHAT DE (chieu len may chieu) */
 body.rong main{max-width:1200px}
+.chonBai{border:2px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:14px}
+.chonBai .dauCB{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.chonBai .dauCB button{border:2px solid var(--line);padding:6px 12px;font-size:14px}
+.chonBai label{display:flex;gap:10px;align-items:flex-start;margin:0;padding:8px 2px;border-top:1px solid var(--line);font-weight:400;cursor:pointer}
+.chonBai label:first-of-type{border-top:0}
+.chonBai input{width:20px;height:20px;flex:none;margin-top:2px}
+.chonBai small{display:block;color:var(--muted);font-size:13px}
 .btnVn{width:100%;margin-top:8px;border:2px solid var(--line);background:#fff}
 .vnBox{border:2px solid var(--ok);border-radius:14px;padding:14px;margin-top:10px;background:#fbfefc}
 .vnBox h3{margin:0 0 6px;font-size:17px}
@@ -851,43 +858,56 @@ body.rong main{max-width:1200px}
   }
   // Ca lop, moi bai mot cot (tu Ho so HS). Cac ma de cung bai (cung tien to + cung chu so dau ma de) gop 1 cot
   function nhomBai(madot) { var m = /^(.*)-(\d)\d\d$/.exec(madot); return m ? m[1] + '-' + m[2] : madot; }
-  function xuatLop() {
-    var j = HS_DL, nhom = [], theo = {};
+  function cacBai(j) {
+    var nhom = [], theo = {};
     j.dot.forEach(function (d) {
-      var k = nhomBai(d.madot);
-      if (!theo[k]) { theo[k] = { k: k, ma: [], ten: tenBaiGon(d.ten), luc: d.luc }; nhom.push(theo[k]); }
+      var k = d.madot;
+      if (!theo[k]) { theo[k] = { k: k, ma: [], ten: tenNgan(d), luc: d.luc }; nhom.push(theo[k]); }
       theo[k].ma.push(d.madot);
     });
+    return nhom;
+  }
+  var CHON_BAI = {}; // lop -> {key: true}
+  function xuatLop() {
+    var j = HS_DL, tatCa = cacBai(j), chon = CHON_BAI[j.lop] || {};
+    var nhom = tatCa.filter(function (g) { return chon[g.k] !== false; });
+    if (!nhom.length) { alert('Thầy/cô chưa tích bài nào.'); return; }
+    var coTB = nhom.length >= 2, laTatCa = nhom.length === tatCa.length;
     var cuoi = {};
     j.bai.forEach(function (b) {
-      var k = nhomBai(b.madot), key = b.mahs + '|' + k, c = cuoi[key];
+      var k = b.madot, key = b.mahs + '|' + k, c = cuoi[key];
       if (!c || b.lan > c.lan || (b.lan === c.lan && b.luc > c.luc)) cuoi[key] = b;
     });
     var daDung = {};
-    var dau = ['STT', 'Mã HS (SBD)', 'Họ và tên'].concat(nhom.map(function (g) { var t = g.ten || g.k; daDung[t] = (daDung[t] || 0) + 1; return daDung[t] > 1 ? t + ' (' + daDung[t] + ')' : t; }), ['Ghi chú']);
+    var dau = ['STT', 'Mã HS (SBD)', 'Họ và tên'].concat(nhom.map(function (g) { return 'Bài ' + (tatCa.indexOf(g) + 1) + ' · ' + g.k; }), coTB ? ['Điểm TB'] : [], ['Ghi chú']);
     var dong = [dau];
     j.hs.slice().sort(function (a, b) { return a.mahs < b.mahs ? -1 : 1; }).forEach(function (x) {
-      var r = [{ v: Number(String(x.mahs).slice(-2)), s: 3 }, String(x.mahs), x.hoten], chu = [];
+      var r = [{ v: Number(String(x.mahs).slice(-2)), s: 3 }, String(x.mahs), x.hoten], chu = [], tong = 0, du = true;
       nhom.forEach(function (g, i) {
         var b = cuoi[x.mahs + '|' + g.k];
         r.push(b ? { v: lam1(b.diem), s: 2 } : '');
+        if (b) tong += Number(String(b.diem).replace(',', '.')); else du = false;
         var v = (j.vang || []).filter(function (q) { return q.mahs === x.mahs && g.ma.indexOf(q.madot) >= 0; })[0];
-        if (!b) chu.push('Bài ' + (i + 1) + ': ' + (v ? ghiVangChu(v.ghichu) : 'chưa làm'));
-        else if (v) chu.push('Bài ' + (i + 1) + ': thi bù');
-        else if (b.lan > 1) chu.push('Bài ' + (i + 1) + ': làm lại lần ' + b.lan);
+        var sb = 'Bài ' + (tatCa.indexOf(g) + 1);
+        if (!b) chu.push(sb + ': ' + (v ? ghiVangChu(v.ghichu) : 'chưa làm'));
+        else if (v) chu.push(sb + ': thi bù');
+        else if (b.lan > 1) chu.push(sb + ': làm lại lần ' + b.lan);
       });
+      if (coTB) { r.push(du ? { v: lam1(tong / nhom.length), s: 2 } : ''); if (!du) chu.unshift('Chưa đủ bài, chưa tính TB'); }
       r.push(chu.join('; ')); dong.push(r);
     });
-    var ct = [['Bài', 'Tên bài', 'Mã đợt (gộp chung một cột)', 'Ngày thi', 'Số bài', 'Điểm TB']];
+    var ct = [['Bài', 'Tên bài', 'Mã đợt', 'Ngày thi', 'Số bài nộp', 'Điểm TB']];
     nhom.forEach(function (g, i) {
       var ds = j.hs.map(function (x) { return cuoi[x.mahs + '|' + g.k]; }).filter(Boolean);
       var tb = ds.length ? lam1(ds.reduce(function (t, b) { return t + Number(b.diem); }, 0) / ds.length) : '';
-      ct.push(['Bài ' + (i + 1), g.ten, g.ma.join(', '), ngay(g.luc), { v: ds.length, s: 3 }, tb === '' ? '' : { v: tb, s: 2 }]);
+      ct.push(['Bài ' + (tatCa.indexOf(g) + 1), g.ten, g.ma.join(', '), ngay(g.luc), { v: ds.length, s: 3 }, tb === '' ? '' : { v: tb, s: 2 }]);
     });
-    ct.push([]); ct.push(['Ghi chú', 'Điểm làm tròn 1 chữ số thập phân, lấy lần làm sau cùng. Ô trống = vắng hoặc chưa làm (xem cột Ghi chú). Ngày tải ' + homNay() + '.']);
-    taiVe(taoXlsx([{ ten: 'Bang diem ' + j.lop, rong: [6, 14, 28].concat(nhom.map(function () { return 16; }), [40]), dong: dong },
+    ct.push([]); ct.push(['Ghi chú', 'Điểm làm tròn 1 chữ số thập phân, lấy lần làm sau cùng. Ô trống = vắng hoặc chưa làm (xem cột Ghi chú).' +
+      (coTB ? ' Điểm TB = trung bình cộng các bài đã chọn, chỉ tính khi em làm đủ các bài.' : '') + ' Ngày tải ' + homNay() + '.']);
+    var tenF = laTatCa ? 'tat-ca' : nhom.length === 1 ? tenFile(nhom[0].k) : nhom.length + '-bai';
+    taiVe(taoXlsx([{ ten: 'Bang diem ' + j.lop, rong: [6, 14, 28].concat(nhom.map(function () { return 16; }), coTB ? [10] : [], [40]), dong: dong },
                    { ten: 'Cac bai', rong: [8, 48, 34, 12, 8, 9], dong: ct }]),
-          'BangDiem_' + tenFile(j.lop) + '_ca-lop_' + tenFile(homNay()) + '.xlsx');
+          'BangDiem_' + tenFile(j.lop) + '_' + tenF + '_' + tenFile(homNay()) + '.xlsx');
   }
 
   // ---------- Dan diem vao so vnEdu: doc file mau vnEdu, xep diem dung thu tu, sao chep 1 cot ----------
@@ -1135,10 +1155,12 @@ body.rong main{max-width:1200px}
       '<div class="bang">' + h + '</div>' +
       '<div class="chuthich">' + ct + '<br>Điểm tính theo lần làm sau cùng; <span style="color:var(--warn)">L2</span> = làm lại lần 2; <b style="color:var(--warn)">V</b> = vắng thi (bấm tên em để ghi/bỏ vắng); 🎮 = số lượt chơi trò chơi luyện tập.' +
       (function () { var n = (j.vang || []).filter(function (v) { return !m[v.mahs + '|' + v.madot]; }).length; return n ? '<br><b style="color:var(--warn)">' + n + ' lượt vắng chưa thi bù.</b>' : ''; })() + '</div>' +
-      '<button class="btn" id="btnTaiLop" style="background:var(--ok)">⬇ Tải bảng điểm cả lớp (Excel, mỗi bài một cột)</button>' +
+      '<div class="chonBai" id="chonBai"></div>' +
+      '<button class="btn" id="btnTaiLop" style="background:var(--ok)"></button>' +
       '<button class="btn" id="btnGhiBD">Ghi bảng điểm vào Google Sheet (tab BANG DIEM)</button><div id="kqGhi"></div>';
     box.innerHTML = ''; box.appendChild(card);
     [].forEach.call(card.querySelectorAll('.tn button'), function (b) { b.onclick = function () { veMotHS(b.getAttribute('data-ma')); }; });
+    veChonBai();
     $('btnTaiLop').onclick = xuatLop;
     $('btnGhiBD').onclick = function () {
       var nut = this, l = HS_LOP; nut.disabled = true; nut.textContent = 'Đang ghi...'; $('kqGhi').innerHTML = '';
@@ -1147,6 +1169,20 @@ body.rong main{max-width:1200px}
         $('kqGhi').innerHTML = r.ok ? '<div class="ghiOK">✓ Đã ghi tab BANG DIEM trong sổ SO THEO DOI ' + esc(r.lop) + ' (' + r.soHS + ' HS, ' + r.soBai + ' bài).</div>' : '<div class="loi">' + esc(r.msg || 'Lỗi') + '</div>';
       }).catch(function (e) { nut.disabled = false; nut.textContent = 'Ghi bảng điểm vào Google Sheet (tab BANG DIEM)'; $('kqGhi').innerHTML = '<div class="loi">' + esc(e.message) + '</div>'; });
     };
+  }
+  function veChonBai() {
+    var j = HS_DL, ds = cacBai(j), chon = CHON_BAI[j.lop] = CHON_BAI[j.lop] || {}, box = $('chonBai');
+    var soChon = ds.filter(function (g) { return chon[g.k] !== false; }).length;
+    box.innerHTML = '<div class="dauCB"><b>Chọn bài để tải (' + soChon + '/' + ds.length + ')</b><span><button data-c="1">Chọn tất cả</button> <button data-c="0">Bỏ chọn</button></span></div>' +
+      ds.map(function (g, i) {
+        return '<label><input type="checkbox" value="' + esc(g.k) + '"' + (chon[g.k] !== false ? ' checked' : '') + '><span><b>Bài ' + (i + 1) + '</b>: ' + esc(g.ten || g.k) +
+          '<small>' + esc(g.k) + (g.luc ? ' · thi ' + ngay(g.luc) : '') + '</small></span></label>';
+      }).join('');
+    $('btnTaiLop').textContent = soChon === 0 ? 'Tích ít nhất một bài để tải' :
+      '⬇ Tải bảng điểm ' + (soChon === ds.length ? 'tất cả ' + ds.length + ' bài' : soChon + ' bài đã chọn') + (soChon >= 2 ? ' + điểm TB' : '') + ' (Excel)';
+    $('btnTaiLop').disabled = soChon === 0;
+    [].forEach.call(box.querySelectorAll('input'), function (c) { c.onchange = function () { chon[c.value] = c.checked; veChonBai(); }; });
+    [].forEach.call(box.querySelectorAll('[data-c]'), function (b) { b.onclick = function () { var v = b.getAttribute('data-c') === '1'; ds.forEach(function (g) { chon[g.k] = v; }); veChonBai(); }; });
   }
   function bieuDo(ds) {
     // ds: [{nhan, diem}] theo thoi gian; truc 0-10, vach 5 net dut
