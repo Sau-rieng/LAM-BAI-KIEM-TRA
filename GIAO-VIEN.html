@@ -224,6 +224,23 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 @media (orientation:portrait),(max-width:760px){.ovThan{flex-direction:column;gap:18px;justify-content:flex-start}.ovMa{width:min(84vw,56vh)}.ovChu{text-align:center}.ovChu .phBuoc{margin:0 auto;display:inline-block}}
 /* Man hinh PHAT DE (chieu len may chieu) */
 body.rong main{max-width:1200px}
+.btnVn{width:100%;margin-top:8px;border:2px solid var(--line);background:#fff}
+.vnBox{border:2px solid var(--ok);border-radius:14px;padding:14px;margin-top:10px;background:#fbfefc}
+.vnBox h3{margin:0 0 6px;font-size:17px}
+.vnBox .b{margin:10px 0 4px;font-weight:700}
+.vnBox input[type=file]{font-size:15px;padding:8px;border-style:dashed}
+.vnHang{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.vnHang select{font:inherit;font-size:16px;padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:#fff}
+.vnTom{margin:10px 0;font-size:15px}
+.vnTom .canhbao{color:var(--warn);font-weight:600}
+.vnBang{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.vnBang table{border-collapse:collapse;width:100%;font-size:14px}
+.vnBang th,.vnBang td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
+.vnBang th{position:sticky;top:0;background:#f6f7fa;font-size:13px;color:var(--muted)}
+.vnBang td.d{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.vnBang tr.loi td{background:#fff6e0}
+.vnSao{width:100%;margin-top:12px;background:var(--ok);color:#fff;font-size:18px;padding:14px}
+.vnHD{margin-top:10px;font-size:15px;line-height:1.5}
 .btnTai{width:100%;margin-top:10px;border:2px solid var(--ok);color:var(--ok);background:var(--okbg)}
 .phatBtn{width:100%;margin-top:12px;background:var(--pri);color:#fff;font-size:17px;padding:14px}
 .phNhanh{flex:none;padding:9px 14px;font-size:14px;background:var(--pri);color:#fff;border-radius:10px}
@@ -360,6 +377,7 @@ body.rong main{max-width:1200px}
 </div>
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="cau-hinh-lop.js"></script>
+<script src="doc-excel.js"></script>
 <script>
 (function () {
   var DS = window.DS_LOP || [];
@@ -692,6 +710,7 @@ body.rong main{max-width:1200px}
       (dotHienTai().xemlai || soXem ? '<div><b>' + soXem + '/' + dem.danop + '</b><span>Đã xem lại</span></div>' : '<div><b>' + dem.chua + '</b><span>Chưa vào</span></div>') +
       '<div><b>' + diem(tb) + '</b><span>Điểm TB</span></div></div>' + phanBo(j.hs) +
       '<button class="btnTai">⬇ Tải bảng điểm lớp ' + esc(j.tenLop) + ' – đợt này (Excel)</button>' +
+      '<button class="btnVn">📋 Dán điểm vào sổ vnEdu (xếp đúng thứ tự vnEdu)</button><div class="vnCho"></div>' +
       (dem.danop ? '<button class="ptBtn">📊 Câu sai nhiều nhất (bấm để xem)</button><div class="pt"></div>' : '');
     hs.forEach(function (x) {
       var so = String(x.mahs).slice(-2), tt = '';
@@ -706,6 +725,9 @@ body.rong main{max-width:1200px}
     });
     el.innerHTML = h;
     el.querySelector('.btnTai').onclick = function () { xuatDot(j); };
+    var vk = VN[j.tenLop + '|' + dotXem];
+    el.querySelector('.btnVn').onclick = function () { var st = VN[j.tenLop + '|' + dotXem]; if (st && st.mo) { st.mo = false; st.node.remove(); } else moVn(el, j); };
+    if (vk && vk.mo) moVn(el, j);
     var pb = el.querySelector('.ptBtn');
     if (pb) {
       var key = j.tenLop + '|' + dotXem;
@@ -866,6 +888,108 @@ body.rong main{max-width:1200px}
     taiVe(taoXlsx([{ ten: 'Bang diem ' + j.lop, rong: [6, 14, 28].concat(nhom.map(function () { return 16; }), [40]), dong: dong },
                    { ten: 'Cac bai', rong: [8, 48, 34, 12, 8, 9], dong: ct }]),
           'BangDiem_' + tenFile(j.lop) + '_ca-lop_' + tenFile(homNay()) + '.xlsx');
+  }
+
+  // ---------- Dan diem vao so vnEdu: doc file mau vnEdu, xep diem dung thu tu, sao chep 1 cot ----------
+  var VN = {}; // theo key lop|dot: {node, file, cot, dau}
+  var KDAU = 'gv_vn_dau';
+  function boDau(x) { return String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D'); }
+  function chuanTen(x) { return String(x || '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim(); }
+  function phanTichVn(o) {
+    var h = -1, cTen = -1;
+    for (var r = 0; r < Math.min(o.length, 30) && h < 0; r++) (o[r] || []).forEach(function (v, c) { if (h < 0 && /^h[ọo] v[àa] t[êe]n$/i.test(chuanTen(v))) { h = r; cTen = c; } });
+    if (h < 0) throw new Error('Không thấy dòng tiêu đề "Họ và tên" – có đúng file sổ điểm tải từ vnEdu không?');
+    var dong1 = o[h] || [], dong2 = o[h + 1] || [], cot = [];
+    var cTen2 = dong1[cTen + 1] === undefined || dong1[cTen + 1] === null ? cTen + 1 : -1;
+    for (var c = cTen + 1; c < Math.max(dong1.length, dong2.length); c++) {
+      var nhan = String(dong2[c] || '').trim();
+      if (/^(TX|GK|CK)\s*\d*$/i.test(nhan) || /^(TX|GK|CK)\d*$/i.test(nhan.replace(/\s/g, ''))) cot.push({ c: c, nhan: nhan.toUpperCase() });
+    }
+    if (!cot.length) throw new Error('Không thấy các cột TX1, TX2…, GK, CK trong file.');
+    var cStt = 0, hs = [];
+    for (var r2 = h + 2; r2 < o.length; r2++) {
+      var row = o[r2] || [], stt = row[cStt];
+      if (typeof stt !== 'number') { if (hs.length) break; else continue; }
+      var ten = String(row[cTen] || '').trim() + (cTen2 >= 0 && row[cTen2] ? ' ' + String(row[cTen2]).trim() : '');
+      hs.push({ r: r2, stt: stt, ten: ten.replace(/\s+/g, ' '), cu: cot.map(function (k) { return row[k.c]; }) });
+    }
+    var lop = '';
+    for (var r3 = 0; r3 < h; r3++) (o[r3] || []).forEach(function (v) { var m = /L[ớo]p\s*([0-9A-Za-z]+)/.exec(String(v || '')); if (m && !lop) lop = m[1]; });
+    return { h: h, cot: cot, hs: hs, lop: lop };
+  }
+  function oExcel(r, c) { var s = ''; c++; while (c) { var m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s + (r + 1); }
+  function ghepVn(f, j) {
+    // ghep theo ho ten day du; neu khong khop thi thu bo dau
+    var cuaTa = {}, cuaTa2 = {};
+    j.hs.forEach(function (x) { var k = chuanTen(x.hoten), k2 = boDau(k); (cuaTa[k] = cuaTa[k] || []).push(x); (cuaTa2[k2] = cuaTa2[k2] || []).push(x); });
+    var dung = {};
+    var kq = f.hs.map(function (v) {
+      var k = chuanTen(v.ten), ds = cuaTa[k] || cuaTa2[boDau(k)] || [];
+      var x = ds.length === 1 ? ds[0] : null;
+      if (x) dung[x.mahs] = 1;
+      return { v: v, x: x, trung: ds.length > 1 };
+    });
+    var thua = j.hs.filter(function (x) { return !dung[x.mahs]; });
+    return { kq: kq, thua: thua };
+  }
+  function soVn(x, phay) { var t = (Math.round(Number(x) * 10 + 1e-7) / 10).toFixed(1).replace(/\.0$/, ''); return phay ? t.replace('.', ',') : t; }
+  function veVn(st, j) {
+    var box = st.node, f = st.file;
+    var h = '<h3>📋 Dán điểm vào sổ vnEdu · lớp ' + esc(j.tenLop) + '</h3>' +
+      '<div class="b">1. Chọn file sổ điểm tải từ vnEdu của lớp ' + esc(j.tenLop) + '</div><input type="file" class="vnFile" accept=".xls,.xlsx">' +
+      (f ? '<div class="sub">Đã đọc: ' + esc(st.tenFile) + ' · ' + f.hs.length + ' học sinh' + (f.lop ? ' · lớp ' + esc(f.lop) : '') + '</div>' : '') +
+      (st.loi ? '<div class="loi">' + esc(st.loi) + '</div>' : '');
+    if (f) {
+      if (f.lop && chuan(f.lop) !== chuan(j.tenLop)) h += '<div class="loi">File này là của lớp ' + esc(f.lop) + ', không phải lớp ' + esc(j.tenLop) + '.</div>';
+      var g = ghepVn(f, j), ci = Math.min(st.cot, f.cot.length - 1), phay = st.dau === 'phay';
+      var diem = {}; j.hs.forEach(function (x) { if (x.tt === 'danop') diem[x.mahs] = Number(String(x.diem).replace(',', '.')); });
+      var dong = [], khac = [], giu = 0, moi = 0, trong = 0;
+      g.kq.forEach(function (k) {
+        var cu = k.v.cu[ci], coCu = cu !== undefined && cu !== null && String(cu).trim() !== '';
+        var ta = k.x && diem[k.x.mahs] !== undefined ? diem[k.x.mahs] : null, ra = '', ghi = '';
+        if (coCu) { ra = typeof cu === 'number' ? soVn(cu, phay) : String(cu); giu++; if (ta !== null && Math.abs(Number(String(cu).replace(',', '.')) - Math.round(ta * 10) / 10) > 0.001) { ghi = 'Giữ điểm cũ ' + ra + ', hệ thống: ' + soVn(ta, phay); khac.push(k.v.ten); } else ghi = 'Ô đã có điểm – giữ nguyên'; }
+        else if (ta !== null) { ra = soVn(ta, phay); moi++; }
+        else { trong++; ghi = k.trung ? 'Trùng tên – kiểm tra tay' : !k.x ? 'Không tìm thấy trên hệ thống' : k.x.vang ? 'Vắng' : k.x.tt === 'danglam' ? 'Đang làm' : 'Chưa làm'; }
+        dong.push({ stt: k.v.stt, ten: k.v.ten, ra: ra, ghi: ghi, loi: !k.x || k.trung || khac.indexOf(k.v.ten) >= 0 });
+      });
+      st.dong = dong;
+      h += '<div class="b">2. Chọn cột cần điền</div><div class="vnHang"><select class="vnCot">' +
+        f.cot.map(function (k, i) { var co = f.hs.filter(function (v) { return v.cu[i] !== undefined && v.cu[i] !== null && String(v.cu[i]).trim() !== ''; }).length; return '<option value="' + i + '"' + (i === ci ? ' selected' : '') + '>' + esc(k.nhan) + (co ? ' (đã có ' + co + ' điểm)' : ' (trống)') + '</option>'; }).join('') +
+        '</select><select class="vnDau"><option value="cham"' + (phay ? '' : ' selected') + '>Dấu thập phân: chấm (7.8)</option><option value="phay"' + (phay ? ' selected' : '') + '>Dấu thập phân: phẩy (7,8)</option></select></div>' +
+        '<div class="vnTom">Điền mới <b>' + moi + '</b> điểm · giữ nguyên <b>' + giu + '</b> ô đã có · để trống <b>' + trong + '</b> em' +
+        (khac.length ? '<br><span class="canhbao">⚠ ' + khac.length + ' em có điểm cũ khác điểm hệ thống (giữ điểm cũ): ' + khac.map(esc).join(', ') + '</span>' : '') +
+        (g.thua.length ? '<br><span class="canhbao">⚠ ' + g.thua.length + ' em trên hệ thống không tìm thấy trong file vnEdu: ' + g.thua.map(function (x) { return esc(x.hoten) + (x.tt === 'danop' ? ' (' + diem2(x.diem) + ')' : ''); }).join(', ') + ' – nhập tay.</span>' : '') + '</div>' +
+        '<div class="vnBang"><table><tr><th>STT</th><th>Họ và tên (vnEdu)</th><th>Điểm dán</th><th>Ghi chú</th></tr>' +
+        dong.map(function (d) { return '<tr' + (d.loi ? ' class="loi"' : '') + '><td>' + d.stt + '</td><td>' + esc(d.ten) + '</td><td class="d">' + esc(d.ra) + '</td><td>' + esc(d.ghi) + '</td></tr>'; }).join('') + '</table></div>' +
+        '<button class="vnSao">📋 Sao chép cột ' + esc(f.cot[ci].nhan) + ' (' + dong.length + ' dòng)</button>' +
+        '<div class="vnHD"><b>3. Dán vào file:</b> mở file vnEdu bằng Excel → bấm ô <b>' + oExcel(f.hs[0].r, f.cot[ci].c) + '</b> (cột ' + esc(f.cot[ci].nhan) + ', em STT ' + f.hs[0].stt + ') → <b>Ctrl + V</b> → Lưu → nhập file lại vào vnEdu.<br>' +
+        '<span class="sub">Nếu dán xong điểm bị lệch sang trái hoặc thành ngày tháng: bấm Ctrl + Z, đổi dấu thập phân ở trên rồi sao chép lại.</span></div>';
+    }
+    box.innerHTML = h;
+    box.querySelector('.vnFile').onchange = function () {
+      var tep = this.files[0]; if (!tep) return;
+      st.loi = ''; st.tenFile = tep.name;
+      tep.arrayBuffer().then(docExcel).then(function (x) {
+        st.file = phanTichVn(x.o);
+        var trong = st.file.cot.findIndex(function (k, i) { return /^TX/.test(k.nhan) && st.file.hs.every(function (v) { return v.cu[i] === undefined || v.cu[i] === null || String(v.cu[i]).trim() === ''; }); });
+        st.cot = trong >= 0 ? trong : 0; veVn(st, j);
+      }).catch(function (e) { st.file = null; st.loi = 'Không đọc được file: ' + e.message; veVn(st, j); });
+    };
+    if (!f) return;
+    box.querySelector('.vnCot').onchange = function () { st.cot = +this.value; veVn(st, j); };
+    box.querySelector('.vnDau').onchange = function () { st.dau = this.value; try { localStorage.setItem(KDAU, st.dau); } catch (e) {} veVn(st, j); };
+    box.querySelector('.vnSao').onclick = function () {
+      var nut = this, txt = st.dong.map(function (d) { return d.ra; }).join('\r\n');
+      function xong() { nut.textContent = '✓ Đã sao chép – mở Excel, bấm ô ' + oExcel(f.hs[0].r, f.cot[st.cot].c) + ' rồi Ctrl + V'; }
+      function cu() { var t = document.createElement('textarea'); t.value = txt; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); xong(); } catch (e) { nut.textContent = 'Trình duyệt chặn sao chép'; } t.remove(); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(xong, cu); else cu();
+    };
+  }
+  function diem2(x) { return String(x).replace('.', ','); }
+  function moVn(el, j) {
+    var key = j.tenLop + '|' + dotXem, st = VN[key];
+    if (!st) { st = VN[key] = { node: document.createElement('div'), cot: 0, dau: 'cham' }; st.node.className = 'vnBox'; try { st.dau = localStorage.getItem(KDAU) || 'cham'; } catch (e) {} }
+    st.mo = true; el.querySelector('.vnCho').appendChild(st.node); veVn(st, j);
   }
   // ---------- Khoi 5: Ho so hoc sinh ----------
   var HS_LOP = null, HS_DL = null, HS_CACHE = {};
