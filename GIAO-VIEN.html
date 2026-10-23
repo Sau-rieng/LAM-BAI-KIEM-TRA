@@ -224,6 +224,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 @media (orientation:portrait),(max-width:760px){.ovThan{flex-direction:column;gap:18px;justify-content:flex-start}.ovMa{width:min(84vw,56vh)}.ovChu{text-align:center}.ovChu .phBuoc{margin:0 auto;display:inline-block}}
 /* Man hinh PHAT DE (chieu len may chieu) */
 body.rong main{max-width:1200px}
+.btnTai{width:100%;margin-top:10px;border:2px solid var(--ok);color:var(--ok);background:var(--okbg)}
 .phatBtn{width:100%;margin-top:12px;background:var(--pri);color:#fff;font-size:17px;padding:14px}
 .phNhanh{flex:none;padding:9px 14px;font-size:14px;background:var(--pri);color:#fff;border-radius:10px}
 .phDau{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;background:var(--ink);color:#fff;border-radius:18px;padding:18px 22px;margin-bottom:12px}
@@ -690,6 +691,7 @@ body.rong main{max-width:1200px}
       '<div><b>' + dem.danglam + '</b><span>Đang làm</span></div>' +
       (dotHienTai().xemlai || soXem ? '<div><b>' + soXem + '/' + dem.danop + '</b><span>Đã xem lại</span></div>' : '<div><b>' + dem.chua + '</b><span>Chưa vào</span></div>') +
       '<div><b>' + diem(tb) + '</b><span>Điểm TB</span></div></div>' + phanBo(j.hs) +
+      '<button class="btnTai">⬇ Tải bảng điểm lớp ' + esc(j.tenLop) + ' – đợt này (Excel)</button>' +
       (dem.danop ? '<button class="ptBtn">📊 Câu sai nhiều nhất (bấm để xem)</button><div class="pt"></div>' : '');
     hs.forEach(function (x) {
       var so = String(x.mahs).slice(-2), tt = '';
@@ -703,6 +705,7 @@ body.rong main{max-width:1200px}
         '</span><span class="tt ' + x.tt + '">' + tt + '</span></div>';
     });
     el.innerHTML = h;
+    el.querySelector('.btnTai').onclick = function () { xuatDot(j); };
     var pb = el.querySelector('.ptBtn');
     if (pb) {
       var key = j.tenLop + '|' + dotXem;
@@ -732,6 +735,138 @@ body.rong main{max-width:1200px}
     if (!document.hidden && !$('scrTheo').classList.contains('hidden')) taiTheoDoi();
   });
 
+
+  // ---------- Xuat bang diem Excel (.xlsx tu tao, khong can thu vien) ----------
+  var CRC = (function () { var t = []; for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(u) { var c = 0xFFFFFFFF; for (var i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function nenZip(files) {
+    var enc = new TextEncoder(), phan = [], muc = [], off = 0;
+    files.forEach(function (f) {
+      var ten = enc.encode(f.ten), d = enc.encode(f.noi), crc = crc32(d);
+      var h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true);
+      h.setUint32(14, crc, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, ten.length, true);
+      phan.push(new Uint8Array(h.buffer), ten, d);
+      var c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true);
+      c.setUint32(16, crc, true); c.setUint32(20, d.length, true); c.setUint32(24, d.length, true); c.setUint16(28, ten.length, true); c.setUint32(42, off, true);
+      muc.push(new Uint8Array(c.buffer), ten);
+      off += 30 + ten.length + d.length;
+    });
+    var dai = muc.reduce(function (t, x) { return t + x.length; }, 0);
+    var e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, dai, true); e.setUint32(16, off, true);
+    return new Blob(phan.concat(muc, [new Uint8Array(e.buffer)]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  function xmlEsc(v) { return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); }
+  function cot(i) { var s = ''; i++; while (i) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+  // sheets: [{ten, rong:[do rong cot], dong:[[o,...]]}]; o: chuoi | so | {v, s} ; s: 1 dam, 2 so 0.0, 3 so nguyen
+  function taoXlsx(sheets) {
+    var f = [], ws = '';
+    sheets.forEach(function (sh, i) {
+      var x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+        '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>' +
+        sh.rong.map(function (w, k) { return '<col min="' + (k + 1) + '" max="' + (k + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols><sheetData>';
+      sh.dong.forEach(function (r, ri) {
+        x += '<row r="' + (ri + 1) + '">';
+        r.forEach(function (o, ci) {
+          if (o === null || o === undefined || o === '') return;
+          var v = o, st = ri === 0 ? 1 : 0;
+          if (typeof o === 'object') { v = o.v; st = o.s || 0; if (v === null || v === undefined || v === '') return; }
+          var ref = cot(ci) + (ri + 1);
+          x += typeof v === 'number' ? '<c r="' + ref + '"' + (st ? ' s="' + st + '"' : '') + '><v>' + v + '</v></c>'
+                                     : '<c r="' + ref + '" t="inlineStr"' + (st ? ' s="' + st + '"' : '') + '><is><t xml:space="preserve">' + xmlEsc(v) + '</t></is></c>';
+        });
+        x += '</row>';
+      });
+      x += '</sheetData></worksheet>';
+      f.push({ ten: 'xl/worksheets/sheet' + (i + 1) + '.xml', noi: x });
+      ws += '<sheet name="' + xmlEsc(String(sh.ten).replace(/[\[\]:*?\/\\]/g, '-').slice(0, 31)) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>';
+    });
+    var n = sheets.length;
+    f.unshift(
+      { ten: '[Content_Types].xml', noi: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+        sheets.map(function (_, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>' },
+      { ten: '_rels/.rels', noi: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+      { ten: 'xl/workbook.xml', noi: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + ws + '</sheets></workbook>' },
+      { ten: 'xl/_rels/workbook.xml.rels', noi: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        sheets.map(function (_, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') +
+        '<Relationship Id="rId' + (n + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+      { ten: 'xl/styles.xml', noi: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.0"/></numFmts>' +
+        '<fonts count="2"><font><sz val="11"/><name val="Times New Roman"/></font><font><b/><sz val="11"/><name val="Times New Roman"/></font></fonts>' +
+        '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+        '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="1" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>' }
+    );
+    return nenZip(f);
+  }
+  function taiVe(blob, ten) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = ten;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  function lam1(x) { return Math.round(Number(String(x).replace(',', '.')) * 10 + 1e-7) / 10; }
+  function soDiem(x) { var v = Number(String(x).replace(',', '.')); return isNaN(v) ? null : v; }
+  function ghiVangChu(g) { g = String(g || '').trim(); return 'Vắng' + (g && g !== 'Vắng' ? ': ' + g.replace(/^Vắng\s*[:–-]?\s*/i, '') : ''); }
+  function homNay() { var n = new Date(); return ('0' + n.getDate()).slice(-2) + '/' + ('0' + (n.getMonth() + 1)).slice(-2) + '/' + n.getFullYear(); }
+  function tenFile(x) { return String(x).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^A-Za-z0-9_-]+/g, '_'); }
+  function tenBaiGon(ten) { return String(ten || '').replace(/^H[óo]a\s*\d+\s*[–-]\s*/i, '').replace(/\s*[–-]\s*Mã\s*\d+\s*$/i, '').trim(); }
+  // 1 dot, 1 lop (tu trang Theo doi)
+  function xuatDot(j) {
+    var d = dotHienTai(), hs = j.hs.slice().sort(function (a, b) { return a.mahs < b.mahs ? -1 : 1; });
+    var dong = [['STT', 'Mã HS (SBD)', 'Họ và tên', 'Điểm', 'Điểm gốc', 'Số câu đúng', 'Ghi chú']], tong = 0, n = 0;
+    hs.forEach(function (x) {
+      var nop = x.tt === 'danop', g = nop ? soDiem(x.diem) : null, chu = [];
+      if (nop) { tong += g; n++; if (x.lan > 1) chu.push('Làm lại lần ' + x.lan); if (x.vang) chu.push('Thi bù'); }
+      else chu.push(x.vang ? ghiVangChu(x.vang) : x.tt === 'danglam' ? 'Đang làm, chưa nộp' : 'Chưa làm');
+      dong.push([{ v: Number(String(x.mahs).slice(-2)), s: 3 }, String(x.mahs), x.hoten, nop ? { v: lam1(g), s: 2 } : '', nop ? g : '',
+                 nop && x.tong ? x.dung + '/' + x.tong : '', chu.join('; ')]);
+    });
+    var tt = [['Thông tin', ''], ['Lớp', j.tenLop], ['Bài kiểm tra', d.ten], ['Mã đợt', d.madot], ['Thời gian làm', d.phut + ' phút'],
+              ['Số bài đã nộp', n + '/' + hs.length], ['Điểm trung bình', n ? lam1(tong / n) : ''], ['Ngày tải', homNay()],
+              ['Ghi chú', 'Cột Điểm làm tròn 1 chữ số thập phân; cột Điểm gốc là điểm máy chấm để đối chiếu. Em vắng/chưa làm để trống điểm.']];
+    taiVe(taoXlsx([{ ten: 'Bang diem', rong: [6, 14, 28, 8, 10, 12, 30], dong: dong }, { ten: 'Thong tin', rong: [18, 70], dong: tt }]),
+          'BangDiem_' + tenFile(j.tenLop) + '_' + tenFile(d.madot) + '.xlsx');
+  }
+  // Ca lop, moi bai mot cot (tu Ho so HS). Cac ma de cung bai (cung tien to + cung chu so dau ma de) gop 1 cot
+  function nhomBai(madot) { var m = /^(.*)-(\d)\d\d$/.exec(madot); return m ? m[1] + '-' + m[2] : madot; }
+  function xuatLop() {
+    var j = HS_DL, nhom = [], theo = {};
+    j.dot.forEach(function (d) {
+      var k = nhomBai(d.madot);
+      if (!theo[k]) { theo[k] = { k: k, ma: [], ten: tenBaiGon(d.ten), luc: d.luc }; nhom.push(theo[k]); }
+      theo[k].ma.push(d.madot);
+    });
+    var cuoi = {};
+    j.bai.forEach(function (b) {
+      var k = nhomBai(b.madot), key = b.mahs + '|' + k, c = cuoi[key];
+      if (!c || b.lan > c.lan || (b.lan === c.lan && b.luc > c.luc)) cuoi[key] = b;
+    });
+    var daDung = {};
+    var dau = ['STT', 'Mã HS (SBD)', 'Họ và tên'].concat(nhom.map(function (g) { var t = g.ten || g.k; daDung[t] = (daDung[t] || 0) + 1; return daDung[t] > 1 ? t + ' (' + daDung[t] + ')' : t; }), ['Ghi chú']);
+    var dong = [dau];
+    j.hs.slice().sort(function (a, b) { return a.mahs < b.mahs ? -1 : 1; }).forEach(function (x) {
+      var r = [{ v: Number(String(x.mahs).slice(-2)), s: 3 }, String(x.mahs), x.hoten], chu = [];
+      nhom.forEach(function (g, i) {
+        var b = cuoi[x.mahs + '|' + g.k];
+        r.push(b ? { v: lam1(b.diem), s: 2 } : '');
+        var v = (j.vang || []).filter(function (q) { return q.mahs === x.mahs && g.ma.indexOf(q.madot) >= 0; })[0];
+        if (!b) chu.push('Bài ' + (i + 1) + ': ' + (v ? ghiVangChu(v.ghichu) : 'chưa làm'));
+        else if (v) chu.push('Bài ' + (i + 1) + ': thi bù');
+        else if (b.lan > 1) chu.push('Bài ' + (i + 1) + ': làm lại lần ' + b.lan);
+      });
+      r.push(chu.join('; ')); dong.push(r);
+    });
+    var ct = [['Bài', 'Tên bài', 'Mã đợt (gộp chung một cột)', 'Ngày thi', 'Số bài', 'Điểm TB']];
+    nhom.forEach(function (g, i) {
+      var ds = j.hs.map(function (x) { return cuoi[x.mahs + '|' + g.k]; }).filter(Boolean);
+      var tb = ds.length ? lam1(ds.reduce(function (t, b) { return t + Number(b.diem); }, 0) / ds.length) : '';
+      ct.push(['Bài ' + (i + 1), g.ten, g.ma.join(', '), ngay(g.luc), { v: ds.length, s: 3 }, tb === '' ? '' : { v: tb, s: 2 }]);
+    });
+    ct.push([]); ct.push(['Ghi chú', 'Điểm làm tròn 1 chữ số thập phân, lấy lần làm sau cùng. Ô trống = vắng hoặc chưa làm (xem cột Ghi chú). Ngày tải ' + homNay() + '.']);
+    taiVe(taoXlsx([{ ten: 'Bang diem ' + j.lop, rong: [6, 14, 28].concat(nhom.map(function () { return 16; }), [40]), dong: dong },
+                   { ten: 'Cac bai', rong: [8, 48, 34, 12, 8, 9], dong: ct }]),
+          'BangDiem_' + tenFile(j.lop) + '_ca-lop_' + tenFile(homNay()) + '.xlsx');
+  }
   // ---------- Khoi 5: Ho so hoc sinh ----------
   var HS_LOP = null, HS_DL = null, HS_CACHE = {};
   function ngay(iso) { if (!iso) return ''; var d = new Date(iso); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); }
@@ -877,9 +1012,11 @@ body.rong main{max-width:1200px}
       '<div class="bang">' + h + '</div>' +
       '<div class="chuthich">' + ct + '<br>Điểm tính theo lần làm sau cùng; <span style="color:var(--warn)">L2</span> = làm lại lần 2; <b style="color:var(--warn)">V</b> = vắng thi (bấm tên em để ghi/bỏ vắng); 🎮 = số lượt chơi trò chơi luyện tập.' +
       (function () { var n = (j.vang || []).filter(function (v) { return !m[v.mahs + '|' + v.madot]; }).length; return n ? '<br><b style="color:var(--warn)">' + n + ' lượt vắng chưa thi bù.</b>' : ''; })() + '</div>' +
+      '<button class="btn" id="btnTaiLop" style="background:var(--ok)">⬇ Tải bảng điểm cả lớp (Excel, mỗi bài một cột)</button>' +
       '<button class="btn" id="btnGhiBD">Ghi bảng điểm vào Google Sheet (tab BANG DIEM)</button><div id="kqGhi"></div>';
     box.innerHTML = ''; box.appendChild(card);
     [].forEach.call(card.querySelectorAll('.tn button'), function (b) { b.onclick = function () { veMotHS(b.getAttribute('data-ma')); }; });
+    $('btnTaiLop').onclick = xuatLop;
     $('btnGhiBD').onclick = function () {
       var nut = this, l = HS_LOP; nut.disabled = true; nut.textContent = 'Đang ghi...'; $('kqGhi').innerHTML = '';
       goi(l.url, { action: 'gv_bangdiem', ma: MA }).then(function (r) {
