@@ -182,7 +182,7 @@ img{-webkit-user-drag:none;pointer-events:none}
       var nut = document.createElement('button'); nut.className = 'dot';
       nut.innerHTML = '<b></b><span></span>';
       nut.querySelector('b').textContent = b.ten;
-      nut.querySelector('span').textContent = String(b.diem).replace('.', ',') + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
+      nut.querySelector('span').textContent = String(b.diem).replace(',', '.') + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
       nut.onclick = function () { baiDangXem = b; veBai(); };
       box.appendChild(nut);
     });
@@ -196,7 +196,7 @@ img{-webkit-user-drag:none;pointer-events:none}
     el.classList.toggle('hidden', !ds.length);
     if (!ds.length) return;
     var tb = Math.round(ds.reduce(function (t, d) { return t + d.diem; }, 0) / ds.length * 100) / 100;
-    var vn = function (x) { return String(x).replace('.', ','); };
+    var vn = function (x) { return String(x).replace(',', '.'); };
     var h = '<div class="so"><span><b>' + ds.length + '</b>bài</span><span><b>' + vn(tb) + '</b>điểm trung bình</span></div>';
     if (ds.length > 1) {
       var W = 600, H = 170, L = 30, R = 14, T = 22, B = 26, n = ds.length;
@@ -228,7 +228,7 @@ img{-webkit-user-drag:none;pointer-events:none}
     var b = baiDangXem;
     ghiDaXem(b);
     $('tenBai').textContent = b.ten;
-    $('diemBai').textContent = String(b.diem).replace('.', ',') + ' điểm';
+    $('diemBai').textContent = String(b.diem).replace(',', '.') + ' điểm';
     var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { var n = nhan(q); return (n.phan ? n.phan + '.' : '') + n.so; });
     $('tomTat').textContent = 'Đúng hoàn toàn ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
     var g = b.goiy;
