@@ -68,6 +68,8 @@ function doPost(e) {
       case 'gv_dathi':
       case 'gv_cau':
       case 'gv_nhom':
+      case 'gv_kienthuc':
+      case 'gv_ainx':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -77,6 +79,8 @@ function doPost(e) {
         if (d.action === 'gv_dathi') return json(gvDaThi());
         if (d.action === 'gv_cau') return json(gvCau(d));
         if (d.action === 'gv_nhom') return json(gvNhom(d));
+        if (d.action === 'gv_kienthuc') return json(gvKienThuc(d));
+        if (d.action === 'gv_ainx') return json(gvAINhanXet(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -453,6 +457,70 @@ function gvCau(d) {
     });
   });
   return {ok: true, lop: lopNay(), madot: madot, soBai: n, cau: tk};
+}
+// ---------------------------------------------------------------------
+// Danh gia kien thuc: tab KIEN THUC trong kho de (MaDot | Cau | KienThuc | MucDo)
+// gvKienThuc: ket qua tung em tung cau (0..1; cau dung/sai chia theo so y dung/4) cua 1 dot hoac tat ca dot lop da lam
+// ---------------------------------------------------------------------
+function docKienThuc() {
+  const sh = kho().getSheetByName('KIEN THUC'), m = {};
+  if (!sh || sh.getLastRow() < 2) return m;
+  sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+    if (String(r[0]).trim() === '') return;
+    m[String(r[0]).trim() + '|' + String(r[1]).trim()] = {kt: String(r[2] || '').trim(), md: String(r[3] || '').trim()};
+  });
+  return m;
+}
+function gvKienThuc(d) {
+  const madot = String(d.madot || '').trim();
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
+  const bai = {}, thuTu = [], dau = {};
+  if (sh && sh.getLastRow() > 1) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+      const md = String(r[1]).trim(), ma = String(r[2]).trim(), lan = Number(r[11]) || 1;
+      if (!md || !ma || (madot && md !== madot)) return;
+      if (!bai[md]) { bai[md] = {}; thuTu.push(md); }
+      const luc = r[0] instanceof Date ? r[0].getTime() : 0;
+      if (!(md in dau) || (luc && luc < dau[md])) dau[md] = luc;
+      if (!bai[md][ma] || lan >= bai[md][ma].lan) bai[md][ma] = {lan: lan, ct: r[9]};
+    });
+  }
+  if (madot && !bai[madot]) { bai[madot] = {}; thuTu.push(madot); }
+  const kt = docKienThuc(), ten = {};
+  try { docCauHinh().forEach(function (c) { ten[c.madot] = c.ten; }); } catch (e) {}
+  const dot = [];
+  thuTu.forEach(function (md) {
+    let de;
+    try { de = docDe(md); } catch (e) { return; }
+    const kq = {};
+    Object.keys(bai[md]).forEach(function (ma) {
+      const chon = tachChiTiet(bai[md][ma].ct);
+      kq[ma] = chamBai(de, function (q, i) { return chon[i]; }).ct.map(function (r) { return r.loai === 'DS' ? r.soY / 4 : (r.dung ? 1 : 0); });
+    });
+    dot.push({madot: md, ten: ten[md] || md, luc: dau[md] ? new Date(dau[md]).toISOString() : '', kq: kq,
+      cau: de.map(function (q) { const x = kt[md + '|' + q.cau] || {}; return {cau: q.cau, loai: q.loai, kt: x.kt || '', md: x.md || ''}; })});
+  });
+  const dsh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), hs = [];
+  if (dsh && dsh.getLastRow() > 1) dsh.getRange(2, 1, dsh.getLastRow() - 1, 2).getValues().forEach(function (r) {
+    if (String(r[0]).trim()) hs.push({mahs: String(r[0]).trim(), hoten: String(r[1]).trim()});
+  });
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot, coNhan: Object.keys(kt).length > 0};
+}
+// AI nhan xet: nhan so lieu tong hop (khong co ten hoc sinh), tra loi nhan xet + goi y day lai
+function gvAINhanXet(d) {
+  const t = d.tk || {};
+  const dong = (t.kt || []).slice(0, 15).map(function (k) {
+    return '- ' + k.kt + ' [' + (k.md || '?') + ']: ' + k.sai + '% sai, ' + k.cau + ' câu, ' + k.yeu + ' em yếu';
+  }).join('\n');
+  const yeuCau = 'Lớp ' + (t.lop || lopNay()) + ', bài: ' + (t.ten || '') + '. Số bài nộp: ' + (t.soBai || 0) + ', điểm trung bình ' + (t.tb || '?') + '/10.\n' +
+    'Tỉ lệ làm sai theo từng kiến thức (yêu cầu cần đạt, mức độ Biết/Hiểu/Vận dụng), xếp từ sai nhiều đến ít:\n' + dong + '\n' +
+    (t.mucDo ? 'Tỉ lệ sai theo mức độ: ' + t.mucDo + '.\n' : '') +
+    'Số em cần hỗ trợ (đúng dưới 65% ở ít nhất một kiến thức): ' + (t.soYeu || 0) + '.\n' +
+    'Viết nhận xét ngắn gọn, cụ thể cho giáo viên Hóa học bằng tiếng Việt. Trả về JSON đúng dạng: ' +
+    '{"tong_quan": "3-4 câu nhận xét chung", "kien_thuc": [{"ten": "tên kiến thức yếu", "vi_sao": "nguyên nhân học sinh hay sai", "day_lai": "gợi ý cách dạy lại, 1-2 hoạt động cụ thể"}], "nhom_yeu": "gợi ý hỗ trợ nhóm học sinh yếu", "on_tap": "gợi ý 3-5 dạng câu hỏi ôn tập"}. ' +
+    'Chỉ đưa 3-5 kiến thức yếu nhất vào kien_thuc.';
+  const kq = goiAI(yeuCau);
+  return {ok: true, nx: kq};
 }
 // GV ghi HS vang thi 1 dot (kem ghi chu: co phep / khong phep / thi bu ngay...). Dong sau cung thang.
 function gvVang(d) {
