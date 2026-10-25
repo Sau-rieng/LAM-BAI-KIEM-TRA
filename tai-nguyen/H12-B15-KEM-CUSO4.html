@@ -1,0 +1,504 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kẽm trong CuSO₄</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lexend:wght@500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: lab bench — 3D stage with controls on the left, worksheet panel (các giai đoạn + câu hỏi) on the right; stacks on phones */
+:root{
+  --bg:#eef2f3; --surface:#ffffff; --ink:#17242b; --muted:#5b6b73; --line:#d5dfe2;
+  --accent:#a8482a; --accent-ink:#ffffff; --stage-a:#f7fafb; --stage-b:#dbe5e8; --table:#c9d3d6;
+  --chip:#e6eef0; --step-on:#fbeee8;
+  --f-display:"Lexend","Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10181c; --surface:#18232a; --ink:#e4ecef; --muted:#93a4ab; --line:#2a3a42;
+  --accent:#e0794a; --accent-ink:#1a0d06; --stage-a:#1d2a31; --stage-b:#0f171b; --table:#2b383e;
+  --chip:#22313a; --step-on:#33231c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10181c; --surface:#18232a; --ink:#e4ecef; --muted:#93a4ab; --line:#2a3a42;
+  --accent:#e0794a; --accent-ink:#1a0d06; --stage-a:#1d2a31; --stage-b:#0f171b; --table:#2b383e;
+  --chip:#22313a; --step-on:#33231c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:20px 32px}
+.wrap{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+header h1{font-family:var(--f-display);font-size:clamp(22px,3.2vw,32px);line-height:1.2;margin:.2em 0 .25em;text-wrap:balance;font-weight:700}
+header p{margin:0;color:var(--muted);max-width:72ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.stage-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+#stage{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;background:radial-gradient(120% 90% at 50% 20%,var(--stage-a),var(--stage-b));touch-action:none}
+#stage canvas{display:block;width:100%;height:100%;cursor:grab}
+#stage canvas:active{cursor:grabbing}
+.hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
+.status{position:absolute;left:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none;max-width:calc(100% - 24px)}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.pill b{color:var(--accent);font-variant-numeric:tabular-nums}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:14px;border-top:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;width:100%}
+button{font:inherit;font-weight:600;border-radius:9px;padding:9px 16px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ctl{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
+.ctl input[type=range]{width:110px;accent-color:var(--accent)}
+.ctl input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.bar{flex:1 1 140px;min-width:120px;height:6px;background:var(--chip);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent)}
+aside{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.panel h2{font-family:var(--f-display);font-size:16px;margin:0 0 10px;font-weight:700}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:10px;padding:8px 10px;border-radius:10px;border:1px solid transparent;transition:background .3s,border-color .3s}
+ol.steps li::before{content:counter(s);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--chip);color:var(--muted)}
+ol.steps li.on{background:var(--step-on);border-color:var(--accent)}
+ol.steps li.on::before{background:var(--accent);color:var(--accent-ink)}
+ol.steps p{margin:0;font-size:14px}
+.eqi{font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;font-size:13px;align-items:center;margin-top:12px}
+.legend span{display:flex;align-items:center;gap:7px;min-width:0}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:none}
+.note{font-size:12px;color:var(--muted);margin:10px 0 0}
+details{border-top:1px solid var(--line);padding:10px 0}
+details:first-of-type{border-top:0;padding-top:2px}
+summary{cursor:pointer;font-weight:600}
+summary span{color:var(--muted);font-weight:400}
+.ans{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.eq{font-family:var(--f-mono);font-size:14px;background:var(--chip);padding:8px 10px;border-radius:8px;overflow-x:auto;white-space:nowrap}
+.ans p{margin:0}
+.k{color:var(--accent);font-weight:600}
+@media (prefers-reduced-motion: reduce){ol.steps li{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Hoá học 12 · Bài 15 · Cặp oxi hoá – khử</div>
+    <h1>Nhúng thanh kẽm vào dung dịch copper(II) sulfate</h1>
+    <p>Trong dung dịch có các phân tử nước cùng ion Cu²⁺ và SO₄²⁻. Bấm <b>Nhúng thanh kẽm</b>, rồi chọn <b>Cận cảnh bề mặt</b> để thấy nguyên tử Zn nhường electron, electron chuyển sang ion Cu²⁺ tạo Cu bám lên thanh kẽm. Kéo để xoay, cuộn để phóng to.</p>
+  </header>
+
+  <div class="grid">
+    <section class="stage-card">
+      <div id="stage">
+        <div class="status">
+          <span class="pill">Thời gian: <b id="tLbl">0 phút</b></span>
+          <span class="pill">Cu²⁺ đã bị khử: <b id="nLbl">0</b></span>
+          <span class="pill" id="phase">Chưa nhúng</span>
+        </div>
+        <div class="hint">Kéo để xoay · cuộn để phóng to</div>
+      </div>
+      <div class="controls">
+        <div class="row">
+          <button class="primary" id="dipBtn">Nhúng thanh kẽm</button>
+          <button id="viewAll" aria-pressed="true">Toàn cảnh</button>
+          <button id="viewClose" aria-pressed="false">Cận cảnh bề mặt</button>
+          <button id="resetBtn">Làm lại</button>
+        </div>
+        <div class="row">
+          <label class="ctl" for="speed">Tốc độ <input type="range" id="speed" min="1" max="6" step="1" value="2"></label>
+          <label class="ctl" for="water"><input type="checkbox" id="water" checked> Phân tử H₂O</label>
+          <label class="ctl" for="ions"><input type="checkbox" id="ions" checked> Ion và electron</label>
+          <label class="ctl" for="labels"><input type="checkbox" id="labels" checked> Nhãn</label>
+          <div class="bar" title="Mức độ phản ứng"><i id="prog"></i></div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2>Các giai đoạn</h2>
+        <ol class="steps" id="steps">
+          <li><p>Trong dung dịch, CuSO₄ phân li thành ion: <span class="eqi">CuSO₄ → Cu²⁺ + SO₄²⁻</span>. Các ion nằm xen giữa các phân tử nước.</p></li>
+          <li><p>Nhúng thanh kẽm: nguyên tử Zn ở bề mặt nhường electron, tạo ion Zn²⁺ đi vào dung dịch: <span class="eqi">Zn → Zn²⁺ + 2e</span></p></li>
+          <li><p>Electron chuyển qua thanh kim loại tới ion Cu²⁺ ở sát bề mặt: <span class="eqi">Cu²⁺ + 2e → Cu</span>. Nguyên tử Cu bám lên thanh kẽm.</p></li>
+          <li><p>Lớp đồng dày dần, thanh kẽm có màu nâu đỏ. Ion Cu²⁺ ít dần nên dung dịch nhạt màu xanh.</p></li>
+        </ol>
+        <div class="legend">
+          <span><i class="dot" style="background:#1f7fbf"></i>Ion Cu²⁺</span>
+          <span><i class="dot" style="background:#e0c341;box-shadow:inset 0 0 0 3px #d2453a"></i>Ion SO₄²⁻</span>
+          <span><i class="dot" style="background:#d2453a;box-shadow:3px -3px 0 -2px #fff"></i>Phân tử H₂O</span>
+          <span><i class="dot" style="background:#b8c2c8;border:1px solid #6f7b80"></i>Ion Zn²⁺</span>
+          <span><i class="dot" style="background:#ffd23a;width:8px;height:8px"></i>Electron (e)</span>
+          <span><i class="dot" style="background:#8f3f22"></i>Nguyên tử Cu bám</span>
+        </div>
+        <p class="note">Các hạt được phóng to và số lượng giảm bớt để dễ quan sát, không theo đúng tỉ lệ thực.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Câu hỏi và gợi ý đáp án</h2>
+        <details>
+          <summary>1. Phương trình ion rút gọn <span>(bấm để xem)</span></summary>
+          <div class="ans">
+            <div class="eq">Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu</div>
+            <p>Phương trình phân tử: Zn + CuSO₄ → ZnSO₄ + Cu</p>
+          </div>
+        </details>
+        <details>
+          <summary>2. Quá trình oxi hoá và quá trình khử <span>(bấm để xem)</span></summary>
+          <div class="ans">
+            <p><span class="k">Quá trình oxi hoá</span> nguyên tử Zn:</p>
+            <div class="eq">Zn → Zn<sup>2+</sup> + 2e</div>
+            <p>Zn là dạng khử, Zn<sup>2+</sup> là dạng oxi hoá.</p>
+            <p><span class="k">Quá trình khử</span> ion Cu<sup>2+</sup>:</p>
+            <div class="eq">Cu<sup>2+</sup> + 2e → Cu</div>
+            <p>Cu<sup>2+</sup> là dạng oxi hoá, Cu là dạng khử.</p>
+          </div>
+        </details>
+        <details>
+          <summary>3. Biểu diễn cặp oxi hoá – khử <span>(bấm để xem)</span></summary>
+          <div class="ans">
+            <div class="eq">Zn<sup>2+</sup>/Zn &nbsp;&nbsp;&nbsp; Cu<sup>2+</sup>/Cu</div>
+            <p>Dạng oxi hoá viết trước, dạng khử viết sau dấu gạch chéo.</p>
+          </div>
+        </details>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  const V3 = THREE.Vector3;
+  const stage = document.getElementById('stage');
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.prepend(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 4/3, 0.05, 100);
+  const HOME_POS = new V3(2.2, 4.2, 8.2), HOME_TGT = new V3(0, 1.9, 0);
+  camera.position.copy(HOME_POS);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.copy(HOME_TGT);
+  controls.enableDamping = true; controls.enablePan = false;
+  controls.minDistance = 0.8; controls.maxDistance = 14;
+  controls.maxPolarAngle = Math.PI * 0.53;
+  controls.update();
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8899a0, 0.8));
+  const key = new THREE.DirectionalLight(0xffffff, 0.8);
+  key.position.set(4, 9, 6); key.castShadow = true;
+  key.shadow.mapSize.set(1024,1024);
+  key.shadow.camera.left=-4; key.shadow.camera.right=4; key.shadow.camera.top=8; key.shadow.camera.bottom=-2;
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0xcfe6ff, 0.35); rim.position.set(-5, 4, -4); scene.add(rim);
+
+  const tableMat = new THREE.MeshStandardMaterial({color:0xc9d3d6, roughness:0.9});
+  const table = new THREE.Mesh(new THREE.CircleGeometry(7, 64), tableMat);
+  table.rotation.x = -Math.PI/2; table.receiveShadow = true; scene.add(table);
+
+  // Beaker
+  const BH = 3, BR = 1.3, LEVEL = 1.9;
+  const glassMat = new THREE.MeshPhongMaterial({color:0xffffff, transparent:true, opacity:0.14, shininess:120, specular:0xffffff, side:THREE.DoubleSide, depthWrite:false});
+  const beaker = new THREE.Mesh(new THREE.CylinderGeometry(BR, BR-0.05, BH, 64, 1, true), glassMat);
+  beaker.position.y = BH/2; scene.add(beaker);
+  const base = new THREE.Mesh(new THREE.CircleGeometry(BR-0.05, 64), glassMat);
+  base.rotation.x = -Math.PI/2; base.position.y = 0.02; scene.add(base);
+  const rimRing = new THREE.Mesh(new THREE.TorusGeometry(BR, 0.035, 12, 80), new THREE.MeshPhongMaterial({color:0xffffff, transparent:true, opacity:0.5}));
+  rimRing.rotation.x = Math.PI/2; rimRing.position.y = BH; scene.add(rimRing);
+  const markMat = new THREE.MeshBasicMaterial({color:0x7d8c92, transparent:true, opacity:0.6});
+  for(let i=1;i<=5;i++){ const m = new THREE.Mesh(new THREE.PlaneGeometry(i%2?0.35:0.22, 0.018), markMat); m.position.set(-0.55, i*0.5, BR+0.005); scene.add(m); }
+
+  // Solution
+  const BLUE = new THREE.Color(0x3a97c8), PALE = new THREE.Color(0xc4e0de);
+  const liqMat = new THREE.MeshPhongMaterial({color:BLUE.clone(), transparent:true, opacity:0.32, shininess:60, depthWrite:false});
+  const liquid = new THREE.Mesh(new THREE.CylinderGeometry(BR-0.06, BR-0.1, LEVEL, 64), liqMat);
+  liquid.position.y = LEVEL/2 + 0.03; liquid.renderOrder = 2; scene.add(liquid);
+
+  // ---------- Zinc strip ----------
+  const SW=0.7, SH=4.2, SD=0.05;
+  const tc = document.createElement('canvas'); tc.width=128; tc.height=512;
+  const g = tc.getContext('2d');
+  const tex = new THREE.CanvasTexture(tc);
+  const zincBase = document.createElement('canvas'); zincBase.width=128; zincBase.height=512;
+  (function(){ const z = zincBase.getContext('2d'); z.fillStyle='#9aa3a8'; z.fillRect(0,0,128,512);
+    for(let i=0;i<220;i++){ z.fillStyle = `rgba(${Math.random()<.5?255:60},${Math.random()<.5?255:70},${Math.random()<.5?255:80},${0.04+Math.random()*0.05})`;
+      z.fillRect(Math.random()*128, Math.random()*512, 1+Math.random()*2, 10+Math.random()*60); } })();
+  const SUB = LEVEL - 0.3;                 // submerged length of strip
+  const SUB_FRAC = SUB / SH;
+  const yTop = Math.round(512*(1-SUB_FRAC));
+  const blotches = [];
+  const CU_COLS = ['#7a351d','#8f3f22','#64291a','#9c4a2b','#6f2f1b'];
+  for(let i=0;i<650;i++){ const t=Math.random(); blotches.push({x:Math.random()*128, y:yTop+6+Math.pow(t,0.8)*(512-yTop-6), r:3+Math.random()*9, c:CU_COLS[i%CU_COLS.length]}); }
+  let drawnP = -1;
+  function drawStrip(p){
+    g.globalAlpha=1; g.drawImage(zincBase,0,0);
+    if(p>0){
+      g.globalAlpha = Math.min(1, p*1.25)*0.8; g.fillStyle='#7f3a20'; g.fillRect(0, yTop+8, 128, 512-yTop-8);
+      const n = Math.floor(p*blotches.length);
+      for(let i=0;i<n;i++){ const b=blotches[i]; g.globalAlpha=0.85; g.fillStyle=b.c; g.beginPath(); g.ellipse(b.x,b.y,b.r,b.r*0.8,0,0,Math.PI*2); g.fill(); }
+    }
+    g.globalAlpha=1; tex.needsUpdate = true; drawnP = p;
+  }
+  drawStrip(0);
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(SW, SH, SD), new THREE.MeshStandardMaterial({map:tex, roughness:0.5, metalness:0.5}));
+  strip.castShadow = true;
+  const stripGroup = new THREE.Group(); stripGroup.add(strip);
+  stripGroup.rotation.z = 0.12; stripGroup.rotation.y = -0.35;
+  scene.add(stripGroup);
+  const Y_IN = 0.3 + SH/2, Y_UP = BH + SH/2 + 0.6;
+  let stripY = Y_UP; stripGroup.position.set(0.15, stripY, 0);
+  const LY0 = -SH/2 + 0.15, LY1 = -SH/2 + SUB - 0.12;  // local y range under liquid
+
+  // ---------- Labels ----------
+  function makeLabel(text){
+    const c = document.createElement('canvas'); c.width=160; c.height=72;
+    const x = c.getContext('2d');
+    x.font = "700 40px 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif";
+    const w = Math.min(150, x.measureText(text).width + 26);
+    x.fillStyle='rgba(255,255,255,0.88)'; x.strokeStyle='rgba(23,36,43,0.35)'; x.lineWidth=2;
+    const r=16, x0=(160-w)/2; x.beginPath(); x.moveTo(x0+r,6); x.arcTo(x0+w,6,x0+w,66,r); x.arcTo(x0+w,66,x0,66,r); x.arcTo(x0,66,x0,6,r); x.arcTo(x0,6,x0+w,6,r); x.fill(); x.stroke();
+    x.fillStyle='#17242b'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(text, 80, 38);
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c), depthTest:false, transparent:true}));
+    s.scale.set(0.26, 0.117, 1); s.renderOrder = 10; s.position.y = 0.13;
+    return s;
+  }
+  const labelSprites = [];
+  function addLabel(obj, text){ const s = makeLabel(text); obj.add(s); labelSprites.push(s); return s; }
+
+  // ---------- Particles ----------
+  const ionLayer = new THREE.Group(), waterLayer = new THREE.Group();
+  scene.add(ionLayer); scene.add(waterLayer);
+  const mats = {
+    cu: new THREE.MeshStandardMaterial({color:0x1f7fbf, emissive:0x0a2a40, roughness:0.35}),
+    s:  new THREE.MeshStandardMaterial({color:0xe0c341, roughness:0.4}),
+    o:  new THREE.MeshStandardMaterial({color:0xd2453a, roughness:0.4}),
+    h:  new THREE.MeshStandardMaterial({color:0xf4f6f7, roughness:0.4}),
+    zn: new THREE.MeshStandardMaterial({color:0xb8c2c8, emissive:0x1c2226, roughness:0.3, metalness:0.2}),
+    e:  new THREE.MeshBasicMaterial({color:0xffd23a}),
+    cuAtom: new THREE.MeshStandardMaterial({color:0x8f3f22, roughness:0.45, metalness:0.4})
+  };
+  const geo = {
+    cu: new THREE.SphereGeometry(0.07, 16, 12),
+    zn: new THREE.SphereGeometry(0.068, 16, 12),
+    s:  new THREE.SphereGeometry(0.045, 12, 10),
+    o:  new THREE.SphereGeometry(0.034, 10, 8),
+    wo: new THREE.SphereGeometry(0.04, 10, 8),
+    h:  new THREE.SphereGeometry(0.025, 8, 6),
+    e:  new THREE.SphereGeometry(0.03, 10, 8),
+    cuAtom: new THREE.SphereGeometry(0.06, 12, 10)
+  };
+  function randInLiquid(v){ const a=Math.random()*Math.PI*2, r=Math.sqrt(Math.random())*1.08; return v.set(Math.cos(a)*r, 0.15+Math.random()*(LEVEL-0.3), Math.sin(a)*r); }
+  function randVel(v,s){ return v.set(Math.random()-.5, Math.random()-.5, Math.random()-.5).multiplyScalar(s); }
+  function contain(p, v){
+    const r = Math.hypot(p.x,p.z);
+    if(r>1.1){ p.x*=1.1/r; p.z*=1.1/r; v.x*=-1; v.z*=-1; }
+    if(p.y<0.12){ p.y=0.12; v.y=Math.abs(v.y); }
+    if(p.y>LEVEL-0.08){ p.y=LEVEL-0.08; v.y=-Math.abs(v.y); }
+  }
+
+  const N_CU = 40, N_ZN = 40, N_W = 110, N_E = 24, N_DEP = 70;
+  const cu = [], so4 = [], water = [], zn = [], elec = [], dep = [];
+  for(let i=0;i<N_CU;i++){ const m=new THREE.Mesh(geo.cu,mats.cu); ionLayer.add(m); const o={m, v:new V3(), st:'free'}; if(i<3) addLabel(m,'Cu²⁺'); cu.push(o); }
+  const TET = [new V3(1,1,1),new V3(1,-1,-1),new V3(-1,1,-1),new V3(-1,-1,1)].map(v=>v.normalize().multiplyScalar(0.068));
+  for(let i=0;i<N_CU;i++){ const grp=new THREE.Group(); grp.add(new THREE.Mesh(geo.s,mats.s));
+    TET.forEach(t=>{ const o=new THREE.Mesh(geo.o,mats.o); o.position.copy(t); grp.add(o); });
+    ionLayer.add(grp); if(i<3) addLabel(grp,'SO₄²⁻'); so4.push({m:grp, v:new V3(), w:new V3()}); }
+  const HA = 52.25*Math.PI/180, HD = 0.055;
+  for(let i=0;i<N_W;i++){ const grp=new THREE.Group(); grp.add(new THREE.Mesh(geo.wo,mats.o));
+    [-1,1].forEach(sx=>{ const h=new THREE.Mesh(geo.h,mats.h); h.position.set(sx*Math.sin(HA)*HD, -Math.cos(HA)*HD, 0); grp.add(h); });
+    waterLayer.add(grp); if(i<3) addLabel(grp,'H₂O'); water.push({m:grp, v:new V3(), w:new V3()}); }
+  for(let i=0;i<N_ZN;i++){ const m=new THREE.Mesh(geo.zn,mats.zn); m.visible=false; ionLayer.add(m); const lb=addLabel(m,'Zn²⁺'); zn.push({m, v:new V3(), on:false, born:0, lb}); }
+  for(let i=0;i<N_E;i++){ const m=new THREE.Mesh(geo.e,mats.e); m.visible=false; ionLayer.add(m); const lb=addLabel(m,'e'); lb.scale.set(0.16,0.072,1); lb.position.y=0.08; elec.push({m, busy:false}); }
+  for(let i=0;i<N_DEP;i++){ const m=new THREE.Mesh(geo.cuAtom,mats.cuAtom); m.visible=false; stripGroup.add(m); dep.push(m); }
+  let depIdx = 0;
+
+  function resetParticles(){
+    cu.forEach(o=>{ randInLiquid(o.m.position); randVel(o.v,0.25); o.st='free'; o.m.visible=true; o.ev=null; });
+    so4.forEach(o=>{ randInLiquid(o.m.position); randVel(o.v,0.25); randVel(o.w,2); o.m.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6); });
+    water.forEach(o=>{ randInLiquid(o.m.position); randVel(o.v,0.3); randVel(o.w,3); o.m.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6); });
+    zn.forEach(o=>{ o.on=false; o.m.visible=false; });
+    elec.forEach(e=>{ e.busy=false; e.m.visible=false; });
+    dep.forEach(m=>{ m.visible=false; }); depIdx=0;
+    events.length = 0; reduced = 0;
+  }
+
+  // ---------- Electron-transfer events ----------
+  const events = []; let reduced = 0;
+  const tmp = new V3(), tmp2 = new V3();
+  function surfacePoint(side){ return new V3((Math.random()-.5)*SW*0.8, LY0 + Math.random()*(LY1-LY0), side*(SD/2+0.012)); }
+  function startEvent(now){
+    const free = cu.filter(o=>o.st==='free'); if(!free.length) return false;
+    const e1 = elec.find(e=>!e.busy); if(!e1) return false; e1.busy=true;
+    const e2 = elec.find(e=>!e.busy); if(!e2){ e1.busy=false; return false; } e2.busy=true;
+    const z = zn.find(q=>!q.on); if(!z){ e1.busy=e2.busy=false; return false; }
+    // pick a Cu2+ that is close to the strip
+    const sc = new V3(0,(LY0+LY1)/2,0); stripGroup.localToWorld(sc);
+    free.sort((a,b)=>a.m.position.distanceToSquared(sc)-b.m.position.distanceToSquared(sc));
+    const o = free[(Math.random()*Math.min(6,free.length))|0];
+    const side = Math.random()<0.8 ? 1 : -1;
+    const p1 = surfacePoint(side);
+    let p2; do { p2 = surfacePoint(side); } while(p2.distanceTo(p1)<0.35 || p2.distanceTo(p1)>1.0);
+    // Zn atom at p1 leaves as Zn2+
+    z.on=true; z.m.visible=true; z.born=now;
+    z.m.position.copy(p1); stripGroup.localToWorld(z.m.position);
+    const nrm = new V3(0,0,side).applyQuaternion(stripGroup.quaternion);
+    z.v.copy(nrm).multiplyScalar(0.45); z.v.y += (Math.random()-.5)*0.1; z.leaving = 1.2;
+    o.st='mig';
+    const ev = {o, p1, p2, side, nrm, e:[e1,e2], t:[0,-0.25], arrived:false};
+    o.ev = ev;
+    [e1,e2].forEach(e=>{ e.m.visible=true; e.m.position.copy(p1); stripGroup.localToWorld(e.m.position); });
+    events.push(ev);
+    return true;
+  }
+  function cancelEvents(){
+    events.forEach(ev=>{ ev.e.forEach(e=>{ e.busy=false; e.m.visible=false; }); ev.o.st='free'; ev.o.ev=null; });
+    events.length = 0;
+  }
+
+  // ---------- UI ----------
+  let state='up', progress=0;
+  const DURATION = 70;
+  const $ = id=>document.getElementById(id);
+  const dipBtn=$('dipBtn'), speedEl=$('speed');
+  const tLbl=$('tLbl'), nLbl=$('nLbl'), phase=$('phase'), prog=$('prog');
+  const steps=[...document.querySelectorAll('#steps li')];
+  function setButton(){ dipBtn.textContent = (state==='up'||state==='raising') ? (progress>0?'Nhúng lại':'Nhúng thanh kẽm') : 'Nhấc thanh kẽm ra'; }
+  dipBtn.addEventListener('click',()=>{
+    if(state==='up'||state==='raising') state='lowering'; else { state='raising'; cancelEvents(); }
+    setButton();
+  });
+  $('resetBtn').addEventListener('click',()=>{
+    state='up'; progress=0; stripY=Y_UP; stripGroup.position.y=stripY; drawStrip(0); liqMat.color.copy(BLUE); resetParticles(); setButton(); updateText(); goView('all');
+  });
+  $('ions').addEventListener('change',e=>{ ionLayer.visible = e.target.checked; });
+  $('water').addEventListener('change',e=>{ waterLayer.visible = e.target.checked; });
+  $('labels').addEventListener('change',e=>{ labelSprites.forEach(s=>s.visible=e.target.checked); });
+
+  // Camera views
+  let camTween = null;
+  function goView(which){
+    $('viewAll').setAttribute('aria-pressed', which==='all');
+    $('viewClose').setAttribute('aria-pressed', which==='close');
+    let pos, tgt;
+    if(which==='all'){ pos=HOME_POS.clone(); tgt=HOME_TGT.clone(); }
+    else {
+      const sy = (state==='in'||state==='lowering') ? Y_IN : stripY;
+      const savedY = stripGroup.position.y; stripGroup.position.y = sy; stripGroup.updateMatrixWorld();
+      tgt = new V3(0, (LY0+LY1)/2 + 0.15, 0); stripGroup.localToWorld(tgt);
+      const nrm = new V3(0,0,1).applyQuaternion(stripGroup.quaternion);
+      pos = tgt.clone().addScaledVector(nrm, 2.0).add(new V3(0.25,0.35,0));
+      stripGroup.position.y = savedY; stripGroup.updateMatrixWorld();
+    }
+    camTween = {t:0, p0:camera.position.clone(), t0:controls.target.clone(), p1:pos, t1:tgt};
+  }
+  $('viewAll').addEventListener('click',()=>goView('all'));
+  $('viewClose').addEventListener('click',()=>goView('close'));
+
+  function updateText(){
+    tLbl.textContent = Math.round(progress*20) + ' phút';
+    nLbl.textContent = reduced;
+    prog.style.width = (progress*100).toFixed(1)+'%';
+    phase.textContent = state==='lowering' ? 'Đang nhúng…' : state==='raising' ? 'Đang nhấc ra…' : state==='in' ? (progress>=1?'Phản ứng gần hết':'Đang phản ứng') : (progress>0?'Đã nhấc ra – thanh kẽm màu nâu đỏ':'Chưa nhúng');
+    let on;
+    if(state==='up' && progress===0 || state==='lowering' && progress===0) on=[0];
+    else if(state==='in' && progress<0.6) on=[1,2];
+    else on=[3];
+    steps.forEach((li,i)=>li.classList.toggle('on', on.includes(i)));
+  }
+  setButton(); resetParticles(); updateText();
+
+  function syncTheme(){ const v = getComputedStyle(document.documentElement).getPropertyValue('--table').trim(); try{ tableMat.color.set(v||'#c9d3d6'); }catch(e){} }
+  syncTheme();
+  try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme); }catch(e){}
+  new MutationObserver(syncTheme).observe(document.documentElement,{attributes:true, attributeFilter:['data-theme']});
+
+  function resize(){ const w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  new ResizeObserver(resize).observe(stage); resize();
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clock = new THREE.Clock(); let now = 0, textTimer = 0;
+  function brown(o, dt, speed, maxV){
+    const j = 0.7*dt*Math.min(speed,4);
+    o.v.x += (Math.random()-.5)*j; o.v.y += (Math.random()-.5)*j; o.v.z += (Math.random()-.5)*j;
+    o.v.clampLength(0, maxV);
+    o.m.position.addScaledVector(o.v, dt*(0.35+0.25*Math.min(speed,4)));
+    contain(o.m.position, o.v);
+  }
+
+  function loop(){
+    const dt = Math.min(clock.getDelta(), 0.05); now += dt;
+    const speed = +speedEl.value;
+
+    if(state==='lowering'){ stripY -= dt*1.6; if(stripY<=Y_IN){ stripY=Y_IN; state='in'; setButton(); } }
+    if(state==='raising'){ stripY += dt*1.8; if(stripY>=Y_UP){ stripY=Y_UP; state='up'; setButton(); } }
+    stripGroup.position.y = stripY; stripGroup.updateMatrixWorld();
+
+    if(state==='in' && progress<1) progress = Math.min(1, progress + dt*speed/DURATION);
+    if(progress - drawnP > 0.006 || (progress===1 && drawnP<1)) drawStrip(progress);
+    liqMat.color.copy(BLUE).lerp(PALE, progress*0.85);
+
+    // start new electron-transfer events to keep up with progress
+    if(state==='in'){
+      const target = Math.round(N_CU*0.88*progress);
+      const maxActive = 2 + speed;
+      if(reduced + events.length < target && events.length < maxActive) startEvent(now);
+    }
+
+    // free particles
+    cu.forEach(o=>{ if(o.st==='free') brown(o,dt,speed,0.35); });
+    so4.forEach(o=>{ brown(o,dt,speed,0.35); o.m.rotation.x+=o.w.x*dt; o.m.rotation.y+=o.w.y*dt; });
+    if(waterLayer.visible) water.forEach(o=>{ brown(o,dt,speed,0.45); o.m.rotation.x+=o.w.x*dt; o.m.rotation.y+=o.w.y*dt; o.m.rotation.z+=o.w.z*dt; });
+    zn.forEach(z=>{
+      if(!z.on) return;
+      if(z.leaving>0){ z.leaving-=dt; z.m.position.addScaledVector(z.v, dt*0.5); contain(z.m.position, z.v); }
+      else brown(z,dt,speed,0.4);
+      if(z.lb) z.lb.material.opacity = Math.max(0, Math.min(1, 3.5-(now-z.born)));
+    });
+
+    // events
+    const eSpeed = 0.35 + 0.1*speed;
+    for(let i=events.length-1;i>=0;i--){
+      const ev = events[i];
+      const dist = ev.p1.distanceTo(ev.p2);
+      let eDone = true;
+      ev.e.forEach((e,k)=>{
+        ev.t[k] = Math.min(1, ev.t[k] + dt*eSpeed/dist);
+        const t = Math.max(0, ev.t[k]);
+        tmp.lerpVectors(ev.p1, ev.p2, t);
+        tmp.z += ev.side*(0.02 + 0.03*Math.sin(Math.PI*t));
+        if(t>=1){ tmp.x += Math.cos(now*9+k*3)*0.04; tmp.y += Math.sin(now*9+k*3)*0.04; }
+        stripGroup.localToWorld(e.m.position.copy(tmp));
+        if(ev.t[k]<1) eDone=false;
+      });
+      tmp2.copy(ev.p2); tmp2.z += ev.side*0.09; stripGroup.localToWorld(tmp2);
+      const o = ev.o;
+      tmp.subVectors(tmp2, o.m.position); const d = tmp.length();
+      if(d>0.02) o.m.position.addScaledVector(tmp.normalize(), Math.min(d, dt*(0.35+0.15*speed)));
+      else ev.arrived = true;
+      if(ev.arrived && eDone){
+        ev.e.forEach(e=>{ e.busy=false; e.m.visible=false; });
+        o.st='gone'; o.m.visible=false; o.ev=null;
+        const a = dep[depIdx % N_DEP]; depIdx++;
+        a.position.copy(ev.p2); a.position.z = ev.side*(SD/2+0.035); a.visible=true; a.scale.setScalar(1.6); a.userData.pop=0.4;
+        reduced++;
+        events.splice(i,1);
+      }
+    }
+    dep.forEach(a=>{ if(a.userData.pop>0){ a.userData.pop-=dt; a.scale.setScalar(1+Math.max(0,a.userData.pop)*1.5); } });
+
+    if(camTween){
+      camTween.t = Math.min(1, camTween.t + dt/(reduceMotion?0.01:1.2));
+      const k = camTween.t<.5 ? 2*camTween.t*camTween.t : 1-Math.pow(-2*camTween.t+2,2)/2;
+      camera.position.lerpVectors(camTween.p0, camTween.p1, k);
+      controls.target.lerpVectors(camTween.t0, camTween.t1, k);
+      if(camTween.t>=1) camTween=null;
+    }
+
+    textTimer += dt; if(textTimer>0.2){ textTimer=0; updateText(); }
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+
+</body></html>

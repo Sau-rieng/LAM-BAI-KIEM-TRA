@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lai hóa sp3, sp2, sp của carbon</title>
+<style>
+:root{--text-primary:#1f1e1d;--text-secondary:#5f5e5a;--text-muted:#888780;--text-accent:#185FA5;--border-accent:#378ADD;--border-stronger:rgba(0,0,0,.4);--surface-1:#f6f5f2;--bg:#ffffff}
+@media (prefers-color-scheme: dark){:root{--text-primary:#f1efe8;--text-secondary:#b4b2a9;--text-muted:#888780;--text-accent:#85B7EB;--border-accent:#378ADD;--border-stronger:rgba(255,255,255,.45);--surface-1:#262624;--bg:#1a1a19}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:960px;margin:0 auto;padding:24px 16px}
+h1{font-size:22px;font-weight:500;margin:0 0 6px}
+.sub{font-size:14px;color:var(--text-secondary);margin:0 0 16px}
+button,select{font:inherit;font-size:15px;color:var(--text-primary);background:transparent;border:1px solid var(--border-stronger);border-radius:8px;padding:7px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+.tb.on{border:2px solid var(--border-accent);color:var(--text-accent)}
+.bx{display:inline-flex;width:36px;height:36px;border:1px solid var(--border-stronger);align-items:center;justify-content:center;font-size:19px;margin-left:-1px;color:var(--text-primary)}
+.lb{font-size:14px;color:var(--text-secondary);margin:0 6px 0 12px}
+.m{background:var(--surface-1);border-radius:8px;padding:8px 12px}
+.m small{display:block;font-size:12px;color:var(--text-muted)}
+.m b{font-size:16px;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);margin-right:16px}
+.sw{width:13px;height:13px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.35)}
+#cap{font-size:15px;color:var(--text-secondary);line-height:1.6;margin:10px 0 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Các trạng thái lai hóa của nguyên tử carbon</h1>
+<p class="sub">Số AO lai hóa = số liên kết σ của C; AO p không lai hóa tạo liên kết π.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">
+<button class="tb" data-k="0">sp3 · CH3–CH3</button>
+<button class="tb" data-k="1">sp2 · CH2=CH2</button>
+<button class="tb" data-k="2">sp · CH≡CH</button>
+</div>
+<div id="boxes" style="display:flex;align-items:center;flex-wrap:wrap;min-height:40px;margin-bottom:10px"></div>
+<div id="info" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px"></div>
+<canvas id="cv" style="width:100%;height:460px;display:block;cursor:grab;touch-action:none;background:var(--surface-1);border-radius:12px"></canvas>
+<div id="legend" style="margin:10px 0 4px;display:flex;flex-wrap:wrap"></div>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:8px">
+<label style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><input type="checkbox" id="auto" checked> Tự quay</label>
+<label id="pWrap" style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><input type="checkbox" id="showP" checked> AO p (liên kết π)</label>
+<select id="view"><option value="orb">Xen phủ orbital</option><option value="ball">Mô hình que – cầu</option></select>
+<span id="dihWrap" style="display:flex;align-items:center;gap:8px;flex:1;min-width:240px"><span style="font-size:14px;color:var(--text-secondary);white-space:nowrap">Quay quanh C–C</span><input type="range" id="dih" min="0" max="120" step="1" value="60" style="flex:1"><span id="dihOut" style="font-size:14px;min-width:44px">60°</span></span>
+</div>
+<p id="cap"></p>
+<p style="font-size:13px;color:var(--text-muted);margin:10px 0 0">Kéo chuột (hoặc vuốt) để xoay mô hình. Phím 1, 2, 3 để chuyển phân tử.</p>
+</main>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');let W=600,H=460;
+function size(){const d=window.devicePixelRatio||1,r=cv.getBoundingClientRect();W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+size();window.addEventListener('resize',size);
+let yaw=0.6,pitch=0.4,mol=0,dih=60,view='orb',drag=null;
+const COL={a:[29,158,117],b:[127,119,221],h:[239,159,39],p:[216,90,48],p2:[212,83,126],c:[95,94,90],hw:[211,209,199]};
+const INFO=[[['Lai hóa','sp3'],['Góc liên kết','≈ 109,5°'],['Hình dạng quanh C','Tứ diện'],['Liên kết','7σ'],['C–C','đơn: 1σ']],
+[['Lai hóa','sp2'],['Góc liên kết','≈ 120°'],['Hình dạng','Phẳng'],['Liên kết','5σ + 1π'],['C=C','đôi: 1σ + 1π']],
+[['Lai hóa','sp'],['Góc liên kết','180°'],['Hình dạng','Thẳng hàng'],['Liên kết','3σ + 2π'],['C≡C','ba: 1σ + 2π']]];
+const CAPS=['Mỗi C liên kết với 4 nguyên tử → cần 4 AO σ: 1 AO s + 3 AO p → 4 AO sp3 hướng về 4 đỉnh tứ diện (≈ 109,5°). Không còn AO p nên không có liên kết π. Liên kết đơn C–C chỉ là σ nên hai nhóm CH3 quay tự do được quanh trục C–C.',
+'Mỗi C liên kết với 3 nguyên tử → cần 3 AO σ: 1 AO s + 2 AO p → 3 AO sp2 cùng mặt phẳng (120°), phân tử phẳng. AO p còn lại vuông góc mặt phẳng; hai AO p của hai C xen phủ bên tạo liên kết π. Liên kết đôi = 1σ + 1π, không quay tự do được.',
+'Mỗi C liên kết với 2 nguyên tử → cần 2 AO σ: 1 AO s + 1 AO p → 2 AO sp thẳng hàng (180°), phân tử thẳng. Còn 2 AO p vuông góc nhau; mỗi cặp AO p cùng phương xen phủ bên tạo 1 liên kết π. Liên kết ba = 1σ + 2π.'];
+function bx(t){return '<span class="bx">'+t+'</span>'}
+function lbl(t){return '<span class="lb">'+t+'</span>'}
+function chip(c,t){return '<span class="chip"><span class="sw" style="background:rgb('+c.join(',')+')"></span>'+t+'</span>'}
+function ui(){document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',+b.dataset.k==mol));
+ const up=bx('↑');let h=lbl('C*');
+ h+=mol==0?lbl('sp3')+up+up+up+up:mol==1?lbl('sp2')+up+up+up+lbl('p')+up:lbl('sp')+up+up+lbl('p')+up+up;
+ document.getElementById('boxes').innerHTML=h;
+ document.getElementById('info').innerHTML=INFO[mol].map(x=>'<div class="m"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
+ document.getElementById('cap').textContent=CAPS[mol];
+ document.getElementById('dihWrap').style.display=mol==0?'flex':'none';
+ document.getElementById('pWrap').style.display=mol==0?'none':'flex';legend()}
+function legend(){let h;const hy=['sp3','sp2','sp'][mol];
+ if(view=='ball')h=chip(COL.c,'C')+chip(COL.hw,'H');
+ else{h=chip(COL.a,'AO '+hy+' của C thứ nhất')+chip(COL.b,'AO '+hy+' của C thứ hai')+chip(COL.h,'AO 1s của H');
+  if(mol==1)h+=chip(COL.p,'AO p không lai hóa → π');
+  if(mol==2)h+=chip(COL.p,'cặp AO py → π thứ nhất')+chip(COL.p2,'cặp AO pz → π thứ hai')}
+ document.getElementById('legend').innerHTML=h}
+document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>{mol=+b.dataset.k;ui()});
+document.addEventListener('keydown',e=>{if(['1','2','3'].includes(e.key)&&e.target.tagName!='INPUT'){mol=+e.key-1;ui()}});
+document.getElementById('view').onchange=e=>{view=e.target.value;legend()};
+document.getElementById('dih').oninput=e=>{dih=+e.target.value;document.getElementById('dihOut').textContent=dih+'°'};
+cv.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw+=(e.clientX-drag[0])*0.01;pitch+=(e.clientY-drag[1])*0.01;pitch=Math.max(-1.5,Math.min(1.5,pitch));drag=[e.clientX,e.clientY]});
+cv.addEventListener('pointerup',()=>{drag=null;cv.style.cursor='grab'});
+function rot(p){const c=Math.cos(yaw),s=Math.sin(yaw);const x=c*p[0]+s*p[2],z=-s*p[0]+c*p[2];const c2=Math.cos(pitch),s2=Math.sin(pitch);return [x,c2*p[1]-s2*z,s2*p[1]+c2*z]}
+let S=80,prims=[];
+function shade(c,z){const k=0.72+0.34*Math.max(0,Math.min(1,(z+2)/4));return 'rgb('+c.map(v=>Math.min(255,Math.round(v*k))).join(',')+')'}
+function ball(p,r,c,hl){const q=rot(p);const X=W/2+q[0]*S,Y=H/2-q[1]*S,R=r*S;
+ prims.push({z:q[2]-1e-4,f:()=>{ctx.beginPath();ctx.arc(X,Y,R+1.3,0,7);ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fill()}});
+ prims.push({z:q[2],f:()=>{ctx.beginPath();ctx.arc(X,Y,R,0,7);ctx.fillStyle=shade(c,q[2]);ctx.fill();if(hl){ctx.beginPath();ctx.arc(X-R*0.35,Y-R*0.35,R*0.28,0,7);ctx.fillStyle='rgba(255,255,255,0.35)';ctx.fill()}}})}
+function lobe(o,d,L,R,c){const n=18;for(let i=0;i<n;i++){const t=0.04+0.93*i/(n-1);const r=R*Math.pow(t,0.6)*Math.pow(1-t,0.4)/0.51;if(r<0.02)continue;ball([o[0]+d[0]*L*t,o[1]+d[1]*L*t,o[2]+d[2]*L*t],r,c,false)}}
+function add(a,b,k){return a.map((v,i)=>v+b[i]*(k==null?1:k))}
+function bond(a,b,off){const p=rot(add(a,off||[0,0,0])),q=rot(add(b,off||[0,0,0]));const z=(p[2]+q[2])/2,w=off?0.065:0.09;prims.push({z:z-0.3,f:()=>{ctx.lineCap='round';ctx.beginPath();ctx.moveTo(W/2+p[0]*S,H/2-p[1]*S);ctx.lineTo(W/2+q[0]*S,H/2-q[1]*S);ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=(w+0.04)*S;ctx.stroke();ctx.strokeStyle='rgb(180,178,169)';ctx.lineWidth=w*S;ctx.stroke()}})}
+function build(){const showP=document.getElementById('showP').checked;let a,ch,d1,d2,ps=[];
+ if(mol==0){a=0.77;ch=1.09;const s8=Math.sqrt(8)/3;d1=[[1,0,0]];d2=[[-1,0,0]];
+  for(let k=0;k<3;k++){const f=k*2*Math.PI/3,g=f+dih*Math.PI/180;d1.push([-1/3,s8*Math.cos(f),s8*Math.sin(f)]);d2.push([1/3,s8*Math.cos(g),s8*Math.sin(g)])}}
+ else if(mol==1){a=0.67;ch=1.09;d1=[[1,0,0],[-0.5,0.866,0],[-0.5,-0.866,0]];d2=d1.map(d=>[-d[0],d[1],d[2]]);ps=[[[0,0,1],COL.p]]}
+ else{a=0.6;ch=1.06;d1=[[1,0,0],[-1,0,0]];d2=[[-1,0,0],[1,0,0]];ps=[[[0,1,0],COL.p],[[0,0,1],COL.p2]]}
+ const C1=[-a,0,0],C2=[a,0,0];
+ const H1=d1.slice(1).map(d=>add(C1,d,ch)),H2=d2.slice(1).map(d=>add(C2,d,ch));
+ if(view=='orb'){
+  d1.forEach((d,i)=>lobe(C1,d,i?ch-0.17:a+0.18,0.36,COL.a));d2.forEach((d,i)=>lobe(C2,d,i?ch-0.17:a+0.18,0.36,COL.b));
+  H1.concat(H2).forEach(h=>ball(h,0.3,COL.h,true));
+  if(showP)ps.forEach(([d,c])=>[C1,C2].forEach(C=>{lobe(C,d,1.05,0.52,c);lobe(C,d.map(x=>-x),1.05,0.52,c)}));
+  ball(C1,0.07,COL.c,false);ball(C2,0.07,COL.c,false)}
+ else{const offs=mol==0?[null]:mol==1?[[0,0,0.1],[0,0,-0.1]]:[[0,0.13,0],[0,-0.065,0.113],[0,-0.065,-0.113]];
+  offs.forEach(o=>bond(C1,C2,o));H1.forEach(h=>bond(C1,h));H2.forEach(h=>bond(C2,h));
+  ball(C1,0.34,COL.c,true);ball(C2,0.34,COL.c,true);H1.concat(H2).forEach(h=>ball(h,0.22,COL.hw,true))}}
+function frame(){if(!drag&&document.getElementById('auto').checked)yaw+=0.006;
+ ctx.clearRect(0,0,W,H);prims=[];S=Math.min(W/4.6,H/3.6);build();
+ prims.sort((p,q)=>p.z-q.z).forEach(p=>p.f());requestAnimationFrame(frame)}
+ui();frame();
+</script>
+</body>
+</html>

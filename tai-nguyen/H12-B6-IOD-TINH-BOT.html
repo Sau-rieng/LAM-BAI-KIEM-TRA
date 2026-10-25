@@ -1,0 +1,472 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phức Iodine – Tinh bột 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 3D viewport bên trái là "cốc thí nghiệm", cột bên phải là bảng điều khiển + giải thích; xếp chồng trên điện thoại */
+:root{
+  --bg:#f5f4f8; --surface:#ffffff; --fg:#1d1a2b; --muted:#5f5a72; --line:#dddae7;
+  --accent:#4a37c9; --accent-soft:#ece9fb; --warm:#a3611d;
+  --f-display:"Literata", Georgia, "Times New Roman", serif;
+  --f-body:"Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121019; --surface:#1b1825; --fg:#ebe8f5; --muted:#a29db6; --line:#2e2a3d;
+  --accent:#a597ff; --accent-soft:#272143; --warm:#e0a35a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121019; --surface:#1b1825; --fg:#ebe8f5; --muted:#a29db6; --line:#2e2a3d;
+  --accent:#a597ff; --accent-soft:#272143; --warm:#e0a35a; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:22px 40px;display:grid;gap:18px}
+header{display:grid;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,3.4vw,34px);line-height:1.15;margin:0;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:70ch}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:18px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+
+.stage{position:relative;border-radius:14px;overflow:hidden;background:#0d1218;min-height:520px;height:min(72vh,680px)}
+@media (max-width:900px){.stage{height:auto;aspect-ratio:1/1.05;min-height:0;max-width:100%}}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+.ov{position:absolute;pointer-events:none;color:#e6e3f2;font-size:12.5px}
+.ov-top{top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.pill{background:rgba(10,10,20,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);padding:5px 11px;border-radius:999px;font-weight:600;display:inline-flex;gap:7px;align-items:center}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:#9d8cff;box-shadow:0 0 8px #9d8cff}
+.temp-pill{font-family:var(--f-mono);font-weight:500}
+.ov-legend{left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:6px 12px;background:rgba(10,10,20,.55);backdrop-filter:blur(6px);padding:7px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.12);max-width:calc(100% - 24px)}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:50%}
+.hint{right:12px;bottom:12px;opacity:.7;font-size:11.5px}
+@media (max-width:560px){.hint{display:none}}
+
+.panel{display:grid;gap:14px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 16px;display:grid;gap:11px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:500;font-size:17px;margin:0}
+.lbl{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-size:14px;font-weight:600;border-radius:9px;padding:8px 13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.temp-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.beaker{width:62px;height:76px;border:2px solid var(--muted);border-top:none;border-radius:0 0 16px 16px;position:relative;overflow:hidden}
+.beaker .liq{position:absolute;left:0;right:0;bottom:0;height:72%;background:#eef3f6;transition:background .4s}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;font-size:13.5px}
+.kv span:nth-child(odd){color:var(--muted)}
+.meter{height:6px;border-radius:4px;background:var(--line);overflow:hidden;grid-column:1/-1}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.explain p{margin:0}
+.explain #exTitle{font-weight:600}
+.spec svg{width:100%;height:auto;display:block}
+.note{font-size:13.5px;color:var(--muted);display:grid;gap:6px}
+.note b{color:var(--fg);font-weight:600}
+sub,sup{font-size:.72em;line-height:0}
+@media (prefers-reduced-motion: reduce){.beaker .liq,.meter i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Hóa học 12 · Bài 6: Tinh bột và cellulose · Mô phỏng 3D</div>
+    <h1>Vì sao iodine làm tinh bột hóa xanh tím?</h1>
+    <p class="lede">Mạch amylose trong tinh bột cuộn thành xoắn ốc. Phân tử iodine chui vào lòng xoắn, xếp thành chuỗi và hấp thụ ánh sáng vàng – cam, nên ta thấy màu xanh tím. Kéo để xoay mô hình, thử nhỏ thêm iodine và đun nóng.</p>
+  </header>
+
+  <div class="main">
+    <div class="stage" id="stage">
+      <div class="ov ov-top">
+        <span class="pill"><span class="dot" id="stDot"></span><span id="stText">Đang tạo phức</span></span>
+        <span class="pill temp-pill" id="tempPill">25 °C</span>
+      </div>
+      <div class="ov ov-legend">
+        <span class="lg"><span class="sw" style="background:#e9e3d3"></span>Đơn vị glucose</span>
+        <span class="lg"><span class="sw" style="background:#d0533f"></span>Cầu O (liên kết glycoside)</span>
+        <span class="lg"><span class="sw" style="background:#8a5a3c"></span>I<sub>2</sub> tự do</span>
+        <span class="lg"><span class="sw" style="background:#b39bff;box-shadow:0 0 6px #8f6bff"></span>Chuỗi iodine trong xoắn</span>
+      </div>
+      <div class="ov hint">Kéo để xoay · cuộn/chụm để phóng to</div>
+    </div>
+
+    <aside class="panel">
+      <section class="card">
+        <span class="lbl">Thí nghiệm</span>
+        <div class="btns">
+          <button class="primary" id="btnAdd">Nhỏ thêm dung dịch I<sub>2</sub></button>
+          <button id="btnReset">Làm lại</button>
+        </div>
+        <div class="temp-row">
+          <label for="temp" class="lbl" style="margin:0">Nhiệt độ</label>
+          <input type="range" id="temp" min="20" max="95" step="1" value="25">
+          <span class="mono" id="tempVal">25 °C</span>
+        </div>
+        <div class="btns">
+          <button id="btnHeat">Đun nóng (85 °C)</button>
+          <button id="btnCool">Để nguội (25 °C)</button>
+        </div>
+        <div class="btns">
+          <button id="btnChan" aria-pressed="true">Hiện lòng xoắn</button>
+          <button id="btnRot" aria-pressed="true">Tự xoay</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <span class="lbl">Ống nghiệm</span>
+        <div class="stats">
+          <div class="beaker" aria-hidden="true"><div class="liq" id="liq"></div></div>
+          <div class="kv">
+            <span>Phân tử I<sub>2</sub> tự do</span><span class="mono" id="kFree">0</span>
+            <span>Nguyên tử I trong xoắn</span><span class="mono" id="kBound">0 / 16</span>
+            <span>Màu quan sát</span><span id="kColor">–</span>
+            <div class="meter"><i id="meter"></i></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card explain" aria-live="polite">
+        <span class="lbl">Điều đang xảy ra</span>
+        <p id="exTitle"></p>
+        <p id="exBody"></p>
+      </section>
+
+      <section class="card spec">
+        <span class="lbl">Phổ hấp thụ (mô phỏng)</span>
+        <svg id="spec" viewBox="0 0 320 128" role="img" aria-label="Độ hấp thụ ánh sáng theo bước sóng 400 đến 700 nm"></svg>
+        <p class="note" style="margin:0">Phức hấp thụ mạnh vùng khoảng 600 nm (vàng – cam). Mắt nhìn thấy phần ánh sáng còn lại: <b>màu xanh tím</b>.</p>
+      </section>
+
+      <section class="card note">
+        <span class="lbl">Ghi nhớ</span>
+        <span><b>Nhận biết:</b> dung dịch iodine là thuốc thử nhận biết tinh bột, và ngược lại hồ tinh bột dùng để nhận biết iodine.</span>
+        <span><b>Đun nóng mất màu, để nguội màu trở lại:</b> nhiệt phá các liên kết hydrogen giữ dạng xoắn, iodine thoát ra; khi nguội xoắn cuộn lại và giữ iodine.</span>
+        <span><b>Trong phòng thí nghiệm</b> thường dùng I<sub>2</sub> hòa tan trong KI, nên chuỗi trong xoắn gồm các ion I<sub>3</sub><sup>−</sup>, I<sub>5</sub><sup>−</sup> nối tiếp nhau.</span>
+        <span><b>Amylopectin</b> phân nhánh, đoạn xoắn ngắn nên chỉ cho màu tím đỏ nhạt hơn.</span>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stage = document.getElementById('stage');
+const $ = id => document.getElementById(id);
+
+/* ---------- Thông số mô hình (1 Å ≈ 0,2 đơn vị) ---------- */
+const N_UNITS = 36, PER_TURN = 6, PITCH = 1.6, R = 1.35;
+const H = N_UNITS / PER_TURN * PITCH;           // 6 vòng xoắn
+const SLOTS = 16, GAP = H / SLOTS;
+const slotY = k => -H/2 + (k + 0.5) * GAP;
+// thứ tự lấp đầy: từ giữa ra hai đầu, xen kẽ đầu dưới (-1) / đầu trên (+1)
+const PAIRS = [[6,7,-1],[8,9,1],[4,5,-1],[10,11,1],[2,3,-1],[12,13,1],[0,1,-1],[14,15,1]];
+const pairOwner = PAIRS.map(() => null);
+
+/* ---------- Three.js ---------- */
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0d1218');
+scene.fog = new THREE.Fog(scene.background, 18, 34);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+camera.position.set(10, 3.5, 10);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.minDistance = 6; controls.maxDistance = 30;
+controls.autoRotate = !reduce; controls.autoRotateSpeed = 0.7; controls.enablePan = false;
+
+scene.add(new THREE.HemisphereLight('#dfe6ff', '#2a2030', 0.75));
+const dl = new THREE.DirectionalLight('#ffffff', 0.85); dl.position.set(6, 10, 7); scene.add(dl);
+const glowLight = new THREE.PointLight('#7d5cff', 0, 9); scene.add(glowLight);
+
+/* Glucose + cầu O */
+const gGeo = new THREE.CylinderGeometry(0.44, 0.44, 0.17, 6);
+const gMat = new THREE.MeshStandardMaterial({color:'#e9e3d3', roughness:.55, metalness:.02, flatShading:true});
+const bGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 8);
+const bMat = new THREE.MeshStandardMaterial({color:'#9aa0ad', roughness:.6});
+const oGeo = new THREE.SphereGeometry(0.12, 14, 10);
+const oMat = new THREE.MeshStandardMaterial({color:'#d0533f', roughness:.4});
+const units = [], bonds = [], oxys = [];
+const rnd = () => Math.random()*2 - 1;
+for (let i = 0; i < N_UNITS; i++){
+  const m = new THREE.Mesh(gGeo, gMat); scene.add(m);
+  units.push({m, jr:rnd(), jy:rnd(), jt:rnd(), tv:new THREE.Vector3(rnd(),rnd(),rnd()).normalize()});
+  if (i < N_UNITS-1){
+    const b = new THREE.Mesh(bGeo, bMat); scene.add(b); bonds.push(b);
+    const o = new THREE.Mesh(oGeo, oMat); scene.add(o); oxys.push(o);
+  }
+}
+/* Lòng xoắn kị nước */
+const chan = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, H, 40, 1, true),
+  new THREE.MeshBasicMaterial({color:'#8fb6ff', transparent:true, opacity:.09, side:THREE.DoubleSide, depthWrite:false}));
+scene.add(chan);
+
+const Y = new THREE.Vector3(0,1,0), tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
+function placeBond(mesh, a, b){
+  tmp.subVectors(b, a); const len = tmp.length();
+  mesh.position.copy(a).addScaledVector(tmp, .5);
+  mesh.scale.set(1, len, 1);
+  mesh.quaternion.setFromUnitVectors(Y, tmp.normalize());
+}
+const uPos = units.map(() => new THREE.Vector3());
+function layoutHelix(u){
+  for (let i = 0; i < N_UNITS; i++){
+    const U = units[i];
+    const th = -i * 2*Math.PI/PER_TURN * (1 - 0.72*u) + u*U.jt*0.9;   // dấu âm: xoắn trái
+    const r = R*(1 + 1.1*u) + u*U.jr*1.1;
+    const y = (-H/2 + (i+.5)*PITCH/PER_TURN)*(1 + 0.45*u) + u*U.jy*0.9;
+    uPos[i].set(r*Math.cos(th), y, r*Math.sin(th));
+    U.m.position.copy(uPos[i]);
+    tmp2.set(Math.cos(th), 0, Math.sin(th)).addScaledVector(U.tv, u*1.4).normalize();
+    U.m.quaternion.setFromUnitVectors(Y, tmp2);
+  }
+  for (let i = 0; i < N_UNITS-1; i++){
+    placeBond(bonds[i], uPos[i], uPos[i+1]);
+    oxys[i].position.copy(uPos[i]).lerp(uPos[i+1], .5);
+  }
+  chan.material.opacity = showChan ? 0.09*(1-u) : 0;
+}
+
+/* Iodine */
+const iGeo = new THREE.SphereGeometry(0.3, 22, 16);
+const freeMat = new THREE.MeshStandardMaterial({color:'#8a5a3c', emissive:'#2a1206', roughness:.35, metalness:.2});
+const boundMat = new THREE.MeshStandardMaterial({color:'#b39bff', emissive:'#5b2fe0', emissiveIntensity:.9, roughness:.25, metalness:.1});
+const HALF = 0.27;
+const mols = [];
+function spawn(n){
+  for (let k = 0; k < n && mols.length < 26; k++){
+    const a = Math.random()*Math.PI*2, r = 3 + Math.random()*3.2;
+    const mol = {
+      atoms:[new THREE.Mesh(iGeo, freeMat), new THREE.Mesh(iGeo, freeMat)],
+      pos:new THREE.Vector3(r*Math.cos(a), 6.5 + Math.random()*1.5, r*Math.sin(a)),
+      vel:new THREE.Vector3(rnd()*.4, -1.6 - Math.random(), rnd()*.4),
+      dir:new THREE.Vector3(rnd(),rnd(),rnd()).normalize(),
+      state:'free', pair:-1, phase:0
+    };
+    mol.atoms.forEach(m => scene.add(m));
+    mols.push(mol);
+  }
+}
+function clearMols(){ mols.forEach(m => m.atoms.forEach(a => scene.remove(a))); mols.length = 0; pairOwner.fill(null); }
+
+const entry = side => new THREE.Vector3(0, side*(H/2 + 1.4), 0);
+function moveTo(mol, target, speed, dt){
+  tmp.subVectors(target, mol.pos); const d = tmp.length();
+  if (d < 1e-3) return true;
+  mol.pos.addScaledVector(tmp, Math.min(1, speed*dt/d));
+  return d <= speed*dt;
+}
+
+/* ---------- Trạng thái ---------- */
+let T = 25, uCur = 0, showChan = true, bindTimer = 0, relTimer = 0;
+const smooth = (a,b,x) => { const t = Math.min(1, Math.max(0, (x-a)/(b-a))); return t*t*(3-2*t); };
+
+function step(dt){
+  const uTarget = smooth(50, 82, T);
+  uCur += (uTarget - uCur) * Math.min(1, dt*1.6);
+  layoutHelix(uCur);
+
+  // gán phân tử tự do vào xoắn khi nguội
+  bindTimer -= dt; relTimer -= dt;
+  if (uCur < 0.2 && bindTimer <= 0){
+    const p = pairOwner.indexOf(null);
+    const cand = mols.filter(m => m.state === 'free' && m.pos.y < 6);
+    if (p >= 0 && cand.length){
+      const side = PAIRS[p][2], e = entry(side);
+      cand.sort((a,b) => a.pos.distanceTo(e) - b.pos.distanceTo(e));
+      const mol = cand[0]; mol.state = 'enter'; mol.phase = 0; mol.pair = p; pairOwner[p] = mol;
+      bindTimer = 0.55;
+    }
+  }
+  // giải phóng khi đun nóng (đầu ngoài trước)
+  if (uCur > 0.35 && relTimer <= 0){
+    for (let p = PAIRS.length-1; p >= 0; p--){
+      const mol = pairOwner[p];
+      if (mol && (mol.state === 'bound' || mol.state === 'enter')){
+        mol.state = 'leave'; mol.phase = 0; relTimer = 0.22; break;
+      }
+    }
+  }
+
+  for (const mol of mols){
+    if (mol.state === 'free'){
+      mol.vel.x += rnd()*dt*2.2; mol.vel.y += rnd()*dt*2.2; mol.vel.z += rnd()*dt*2.2;
+      mol.vel.multiplyScalar(Math.pow(0.55, dt));
+      mol.pos.addScaledVector(mol.vel, dt);
+      const rxz = Math.hypot(mol.pos.x, mol.pos.z);
+      if (rxz > 7){ mol.pos.x *= 7/rxz; mol.pos.z *= 7/rxz; mol.vel.x *= -.5; mol.vel.z *= -.5; }
+      if (mol.pos.y > 8) mol.vel.y -= dt*3;
+      if (mol.pos.y < -6.5) mol.vel.y += dt*3;
+      const wall = R*(1+1.1*uCur) + 0.9;
+      if (rxz < wall && Math.abs(mol.pos.y) < H/2*(1+.45*uCur) + .6 && rxz > 0.01){
+        mol.vel.x += mol.pos.x/rxz*dt*6; mol.vel.z += mol.pos.z/rxz*dt*6;
+      }
+      mol.dir.x += rnd()*dt*1.5; mol.dir.y += rnd()*dt*1.5; mol.dir.z += rnd()*dt*1.5; mol.dir.normalize();
+    } else if (mol.state === 'enter'){
+      const [a,b,side] = PAIRS[mol.pair];
+      if (mol.phase === 0){ if (moveTo(mol, entry(side), 3.6, dt)) mol.phase = 1; }
+      else {
+        if (moveTo(mol, tmp2.set(0, (slotY(a)+slotY(b))/2, 0), 2.6, dt)){
+          mol.state = 'bound'; mol.atoms.forEach(m => m.material = boundMat);
+        }
+      }
+      mol.dir.lerp(Y, Math.min(1, dt*3)).normalize();
+    } else if (mol.state === 'leave'){
+      const side = PAIRS[mol.pair][2];
+      mol.atoms.forEach(m => m.material = freeMat);
+      if (moveTo(mol, entry(side), 3.2, dt)){
+        pairOwner[mol.pair] = null; mol.pair = -1; mol.state = 'free';
+        const a = Math.random()*Math.PI*2;
+        mol.vel.set(Math.cos(a)*2.4, side*1.2, Math.sin(a)*2.4);
+      }
+    }
+    // đặt vị trí nguyên tử
+    if (mol.state === 'bound'){
+      const [a,b] = PAIRS[mol.pair];
+      mol.pos.set(0, (slotY(a)+slotY(b))/2, 0);
+      mol.atoms[0].position.lerp(tmp.set(0, slotY(a), 0), Math.min(1, dt*6));
+      mol.atoms[1].position.lerp(tmp.set(0, slotY(b), 0), Math.min(1, dt*6));
+    } else {
+      mol.atoms[0].position.copy(mol.pos).addScaledVector(mol.dir, HALF);
+      mol.atoms[1].position.copy(mol.pos).addScaledVector(mol.dir, -HALF);
+    }
+  }
+}
+
+/* ---------- Màu dung dịch, số liệu, phổ ---------- */
+const cWater = new THREE.Color('#eef3f6'), cAmber = new THREE.Color('#c98a35'), cViolet = new THREE.Color('#2a1f8f');
+const bgBase = new THREE.Color('#0d1218'), bgAmber = new THREE.Color('#2a1a0b'), bgViolet = new THREE.Color('#150f45');
+const cTmp = new THREE.Color(), cBg = new THREE.Color();
+let last = {};
+function setText(id, v){ if (last[id] !== v){ last[id] = v; $(id).innerHTML = v; } }
+
+const EX = {
+  starch:['Chỉ có hồ tinh bột','Mạch amylose cuộn thành xoắn ốc trái, mỗi vòng khoảng 6 đơn vị glucose. Các nhóm –OH quay ra ngoài, nên lòng xoắn (rộng khoảng 0,5 nm) kém phân cực. Dung dịch gần như không màu.'],
+  free:['I₂ tự do trong dung dịch','Iodine tan một phần, dung dịch có màu vàng nâu. Các phân tử I₂ chuyển động hỗn loạn và dần tìm tới hai đầu xoắn.'],
+  filling:['Iodine chui vào lòng xoắn','Phân tử iodine không phân cực nên "ưa" lòng xoắn kị nước. Chúng xếp nối tiếp thành chuỗi thẳng dọc trục xoắn. Electron có thể dịch chuyển dọc chuỗi này, làm chuỗi hấp thụ ánh sáng vùng khoảng 600 nm → ta thấy màu xanh tím.'],
+  full:['Lòng xoắn đã đầy iodine','Chuỗi polyiodide chạy suốt chiều dài đoạn xoắn, màu xanh tím đậm nhất. Iodine thừa vẫn ở ngoài dung dịch.'],
+  heat:['Đun nóng: xoắn duỗi ra','Nhiệt độ cao phá các liên kết hydrogen giữ mạch amylose ở dạng xoắn. Mạch duỗi ra, lòng xoắn biến mất nên iodine thoát ra ngoài. Màu xanh tím nhạt dần, chỉ còn màu vàng nâu của iodine. Để nguội, màu xanh tím xuất hiện trở lại.']
+};
+
+const specEl = $('spec');
+const NS = 'http://www.w3.org/2000/svg';
+const sx = l => 18 + (l-400)/300*292, base = 96, top = 12;
+specEl.innerHTML = `
+  <defs><linearGradient id="vis" x1="0" x2="1">
+    <stop offset="0" stop-color="#7a2cff"/><stop offset=".17" stop-color="#3048ff"/><stop offset=".33" stop-color="#14b4d8"/>
+    <stop offset=".47" stop-color="#2fc23c"/><stop offset=".6" stop-color="#e6e21a"/><stop offset=".72" stop-color="#ff9a1a"/>
+    <stop offset="1" stop-color="#d81a1a"/></linearGradient></defs>
+  <line x1="18" x2="310" y1="${base}" y2="${base}" stroke="var(--line)"/>
+  <line x1="18" x2="18" y1="${top}" y2="${base}" stroke="var(--line)"/>
+  <rect x="18" y="${base+4}" width="292" height="8" rx="2" fill="url(#vis)"/>
+  ${[400,500,600,700].map(l=>`<text x="${sx(l)}" y="125" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="JetBrains Mono, monospace">${l}</text>`).join('')}
+  <text x="10" y="${top+8}" font-size="10" fill="var(--muted)" font-family="JetBrains Mono, monospace" text-anchor="middle">A</text>
+  <path id="specFree" fill="none" stroke="var(--warm)" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <path id="specArea" fill="var(--accent)" fill-opacity=".18" stroke="none"/>
+  <path id="specLine" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+  <text id="specPeak" font-size="10.5" fill="var(--accent)" font-family="JetBrains Mono, monospace" text-anchor="middle"></text>
+  <text x="306" y="22" font-size="10" fill="var(--warm)" text-anchor="end" font-family="Be Vietnam Pro, sans-serif">- - I₂ tự do</text>
+  <text x="306" y="35" font-size="10" fill="var(--accent)" text-anchor="end" font-family="Be Vietnam Pro, sans-serif">— phức với tinh bột</text>`;
+const pFree = $('specFree'), pLine = $('specLine'), pArea = $('specArea'), tPeak = $('specPeak');
+const gauss = (l,c,w) => Math.exp(-(((l-c)/w)**2));
+function drawSpec(a, b){
+  let dF = '', dL = '';
+  for (let l = 400; l <= 700; l += 5){
+    const fy = base - (base-top)*0.55*a*gauss(l,455,48);
+    const ly = base - (base-top)*0.95*b*gauss(l,610,58);
+    dF += (l===400?'M':'L') + sx(l).toFixed(1) + ' ' + fy.toFixed(1);
+    dL += (l===400?'M':'L') + sx(l).toFixed(1) + ' ' + ly.toFixed(1);
+  }
+  pFree.setAttribute('d', dF); pLine.setAttribute('d', dL);
+  pArea.setAttribute('d', dL + `L${sx(700)} ${base} L${sx(400)} ${base} Z`);
+  if (b > 0.08){ tPeak.textContent = '≈ 610 nm'; tPeak.setAttribute('x', sx(610)); tPeak.setAttribute('y', base-(base-top)*0.95*b - 6); }
+  else tPeak.textContent = '';
+}
+
+let specT = 0, bVis = 0, aVis = 0;
+function updateUI(dt){
+  const free = mols.filter(m => m.state === 'free').length;
+  const boundAtoms = mols.filter(m => m.state === 'bound').length * 2;
+  const bTarget = Math.min(1, boundAtoms / SLOTS * 1.25);
+  const aTarget = Math.min(1, free / 9);
+  bVis += (bTarget - bVis) * Math.min(1, dt*2.5);
+  aVis += (aTarget - aVis) * Math.min(1, dt*2.5);
+
+  cTmp.copy(cWater).lerp(cAmber, aVis*0.85).lerp(cViolet, bVis*0.95);
+  $('liq').style.background = '#' + cTmp.getHexString();
+  cBg.copy(bgBase).lerp(bgAmber, aVis*0.8).lerp(bgViolet, bVis);
+  scene.background.copy(cBg); scene.fog.color.copy(cBg);
+  glowLight.intensity = bVis * 1.6;
+
+  setText('kFree', String(free));
+  setText('kBound', boundAtoms + ' / ' + SLOTS);
+  $('meter').style.width = (boundAtoms/SLOTS*100) + '%';
+  const colorName = bVis > 0.55 ? 'xanh tím đậm' : bVis > 0.15 ? 'xanh tím nhạt' : aVis > 0.12 ? 'vàng nâu' : 'không màu';
+  setText('kColor', colorName);
+
+  let key;
+  if (uCur > 0.3) key = 'heat';
+  else if (boundAtoms === SLOTS) key = 'full';
+  else if (boundAtoms > 0 || mols.some(m => m.state === 'enter')) key = 'filling';
+  else if (free > 0) key = 'free';
+  else key = 'starch';
+  setText('exTitle', EX[key][0]); setText('exBody', EX[key][1]);
+  const pill = {starch:'Chỉ có tinh bột', free:'I₂ tự do', filling:'Đang tạo phức', full:'Phức xanh tím', heat:'Xoắn đang duỗi'}[key];
+  setText('stText', pill);
+  $('stDot').style.background = key==='heat' ? '#ff8a3d' : key==='free' ? '#c98a35' : key==='starch' ? '#9aa0ad' : '#9d8cff';
+  $('stDot').style.boxShadow = '0 0 8px ' + $('stDot').style.background;
+
+  specT -= dt; if (specT <= 0){ drawSpec(aVis, bVis); specT = 0.12; }
+}
+
+/* ---------- Điều khiển ---------- */
+const tempEl = $('temp');
+function setTemp(v){ T = +v; tempEl.value = T; $('tempVal').textContent = T + ' °C'; $('tempPill').textContent = T + ' °C'; }
+let tempAnim = null;
+function rampTemp(to){
+  tempAnim = {to};
+}
+tempEl.addEventListener('input', e => { tempAnim = null; setTemp(e.target.value); });
+$('btnHeat').onclick = () => rampTemp(85);
+$('btnCool').onclick = () => rampTemp(25);
+$('btnAdd').onclick = () => spawn(4);
+$('btnReset').onclick = () => { clearMols(); tempAnim = null; setTemp(25); uCur = 0; spawn(6); };
+$('btnChan').onclick = e => { showChan = !showChan; e.currentTarget.setAttribute('aria-pressed', showChan); };
+$('btnRot').onclick = e => { controls.autoRotate = !controls.autoRotate; e.currentTarget.setAttribute('aria-pressed', controls.autoRotate); };
+$('btnRot').setAttribute('aria-pressed', controls.autoRotate);
+
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w/h;
+  camera.position.setLength(w < 520 ? 17 : 14.5);
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+/* Trạng thái ban đầu: đã có một ít iodine, quá trình tạo phức đang diễn ra */
+spawn(6);
+for (let i = 0; i < 6; i++) mols[i].pos.y = rnd()*4, mols[i].pos.x *= 1.1;
+layoutHelix(0);
+
+let prev = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - prev)/1000); prev = now;
+  if (tempAnim){
+    const d = tempAnim.to - T;
+    if (Math.abs(d) < 1) { setTemp(tempAnim.to); tempAnim = null; }
+    else setTemp(Math.round(T + Math.sign(d)*Math.max(1, Math.abs(d)*dt*2.2)));
+  }
+  step(dt); updateUI(dt);
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>

@@ -1,0 +1,429 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lớp điện kép điện cực kẽm</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: một sân khấu 3D lớn ở trên, thanh điều khiển ngay dưới, chú giải và giải thích chia hai cột */
+:root {
+  --bg: #f3f6f6;
+  --surface: #ffffff;
+  --stage: #e8eff0;
+  --fg: #13262b;
+  --muted: #4d6368;
+  --line: #cbd9db;
+  --accent: #0e6b74;
+  --accent-fg: #ffffff;
+  --tank-edge: #4f8794;
+  --plate-edge: #5d6872;
+  --label-bg: rgba(255,255,255,.88);
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e191c; --surface: #15252a; --stage: #0a1316; --fg: #e3eef0; --muted: #96abb0;
+    --line: #293d43; --accent: #5cc4cc; --accent-fg: #07181b; --tank-edge: #6ea6b2;
+    --plate-edge: #a3adb6; --label-bg: rgba(15,28,32,.88); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e191c; --surface: #15252a; --stage: #0a1316; --fg: #e3eef0; --muted: #96abb0;
+  --line: #293d43; --accent: #5cc4cc; --accent-fg: #07181b; --tank-edge: #6ea6b2;
+  --plate-edge: #a3adb6; --label-bg: rgba(15,28,32,.88); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); line-height: 1.6;
+  padding-block: 24px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+header { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+h1 { margin: 0; font-size: clamp(22px, 4.5vw, 32px); line-height: 1.2; text-wrap: balance; font-weight: 700; }
+header p { margin: 0; color: var(--muted); font-size: 14px; max-width: 65ch; }
+
+.stage {
+  position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 10px;
+  height: clamp(340px, 62vw, 560px); overflow: hidden; touch-action: none;
+}
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+canvas:active { cursor: grabbing; }
+.tag {
+  position: absolute; left: 0; top: 0; pointer-events: none; white-space: nowrap;
+  font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+  background: var(--label-bg); border: 1px solid var(--line); color: var(--fg);
+}
+.tag.minor { font-weight: 500; font-size: 12px; color: var(--muted); }
+.hint {
+  position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--muted);
+  background: var(--label-bg); padding: 2px 8px; border-radius: 4px; pointer-events: none;
+}
+
+.bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button {
+  font: inherit; font-size: 13px; padding: 7px 12px; border: 0; background: transparent; color: var(--fg);
+  cursor: pointer; border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.toggles { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.toggles label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.toggles input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: start; }
+@media (max-width: 720px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.panel h2 { margin: 0; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.legend { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center; font-size: 14px; }
+.dot {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; font-size: 12px; font-weight: 700; border: 1.5px solid rgba(0,0,0,.35);
+}
+.dot.zn2 { background: radial-gradient(circle at 35% 30%, #f4a070, #c24f1a); }
+.dot.e { background: radial-gradient(circle at 35% 30%, #6b9cf0, #1f55b8); }
+.dot.so4 { background: radial-gradient(circle at 35% 30%, #a98ee3, #6140a8); }
+.dot.zn { background: radial-gradient(circle at 35% 30%, #a3adb7, #4a525b); }
+.eq { font-size: 18px; font-weight: 600; text-align: center; padding: 8px; border: 1px dashed var(--line); border-radius: 8px; }
+.readout { font-family: var(--font-mono); font-size: 13px; display: grid; gap: 4px; font-variant-numeric: tabular-nums; }
+.readout div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.steps li { font-size: 14px; max-width: 65ch; }
+.steps b { color: var(--accent); }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Hình 15.5 · Em có biết</span>
+    <h1>Mô hình lớp điện kép của điện cực kẽm</h1>
+    <p>Thanh Zn nhúng trong dung dịch ZnSO<sub>4</sub>. Kéo chuột để xoay, cuộn để phóng to, hoặc chọn một góc nhìn bên dưới.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="Mô hình 3D lớp điện kép trên điện cực kẽm"></canvas>
+    <div id="labels"></div>
+    <div class="hint">Kéo để xoay · Cuộn để thu phóng</div>
+  </div>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Góc nhìn">
+      <button type="button" data-view="section" aria-pressed="false">Mặt cắt (như hình sách)</button>
+      <button type="button" data-view="persp" aria-pressed="true">Góc 3D</button>
+      <button type="button" data-view="top" aria-pressed="false">Nhìn từ trên</button>
+    </div>
+    <div class="toggles">
+      <label for="t-rot"><input type="checkbox" id="t-rot" checked> Tự xoay</label>
+      <label for="t-eq"><input type="checkbox" id="t-eq" checked> Cân bằng động</label>
+      <label for="t-free"><input type="checkbox" id="t-free" checked> Ion tự do</label>
+      <label for="t-lab"><input type="checkbox" id="t-lab" checked> Nhãn</label>
+    </div>
+  </div>
+
+  <div class="cols">
+    <section class="panel">
+      <h2>Chú giải</h2>
+      <div class="legend">
+        <span class="dot zn2">2+</span><span>Ion Zn<sup>2+</sup> trong dung dịch</span>
+        <span class="dot e">−</span><span>Electron dư trên thanh kẽm</span>
+        <span class="dot zn">Zn</span><span>Nguyên tử Zn bám vào điện cực</span>
+        <span class="dot so4">2−</span><span>Ion SO<sub>4</sub><sup>2−</sup> tự do</span>
+      </div>
+      <div class="eq">Zn<sup>2+</sup> + 2e ⇌ Zn</div>
+      <div class="readout">
+        <div><span>Ion Zn²⁺ trong lớp kép</span><span id="r-ion">48</span></div>
+        <div><span>Electron dư trong lớp kép</span><span id="r-e">96</span></div>
+        <div><span>Điện tích lớp (+) / lớp (−)</span><span>+96 / −96</span></div>
+        <div><span>Ion đang bám vào điện cực</span><span id="r-att">0</span></div>
+        <div><span>E° (Zn²⁺/Zn), điều kiện chuẩn</span><span>−0,76 V</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Nguyên nhân xuất hiện thế điện cực</h2>
+      <ol class="steps">
+        <li><b>Nhúng kim loại vào dung dịch.</b> Một số nguyên tử Zn nhường electron thành ion Zn<sup>2+</sup> đi vào dung dịch. Các electron ở lại trên thanh kẽm.</li>
+        <li><b>Hai lớp điện tích trái dấu.</b> Ion Zn<sup>2+</sup> bị electron dư hút nên nằm sát bề mặt. Ở ranh giới kim loại và dung dịch có lớp electron (−) và lớp ion (+) rất gần nhau. Đó là lớp điện kép.</li>
+        <li><b>Cân bằng và thế điện cực.</b> Khi cân bằng Zn<sup>2+</sup> + 2e ⇌ Zn được thiết lập, lớp điện kép tạo ra sự chênh lệch điện thế. Chênh lệch này là thế điện cực của điện cực kẽm. Bật “Cân bằng động” để thấy ion bám vào rồi rời khỏi thanh kẽm liên tục.</li>
+      </ol>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var THREE = window.THREE;
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('cv');
+  var labelsEl = document.getElementById('labels');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  var root = new THREE.Group();
+  scene.add(root);
+
+  /* ---------- sprite textures (hạt cầu có nhãn) ---------- */
+  function tex(label, c1, c2, fs) {
+    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var g = c.getContext('2d');
+    var gr = g.createRadialGradient(46, 42, 8, 64, 64, 62);
+    gr.addColorStop(0, c1); gr.addColorStop(1, c2);
+    g.beginPath(); g.arc(64, 64, 60, 0, Math.PI * 2); g.fillStyle = gr; g.fill();
+    g.lineWidth = 5; g.strokeStyle = 'rgba(0,0,0,.4)'; g.stroke();
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '700 ' + fs + 'px Arial, sans-serif';
+    g.fillText(label, 64, 68);
+    return new THREE.CanvasTexture(c);
+  }
+  function mat(t) { return new THREE.SpriteMaterial({ map: t, alphaTest: 0.3 }); }
+  var M = {
+    zn2: mat(tex('2+', '#f4a070', '#c24f1a', 62)),
+    e: mat(tex('−', '#6b9cf0', '#1f55b8', 96)),
+    so4: mat(tex('2−', '#a98ee3', '#6140a8', 62)),
+    zn: mat(tex('Zn', '#a3adb7', '#4a525b', 56))
+  };
+  function sprite(m, size) {
+    var s = new THREE.Sprite(m); s.scale.set(size, size, 1); root.add(s); return s;
+  }
+
+  /* ---------- bể dung dịch và thanh kẽm ---------- */
+  var TANK = { w: 12, h: 5.4, d: 7, cy: -0.7 };
+  var water = new THREE.Mesh(
+    new THREE.BoxGeometry(TANK.w, TANK.h, TANK.d),
+    new THREE.MeshBasicMaterial({ color: 0x3d8fa6, transparent: true, opacity: 0.13, depthWrite: false, side: THREE.DoubleSide })
+  );
+  water.position.y = TANK.cy; water.renderOrder = 100; root.add(water);
+  var tankEdges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(TANK.w, TANK.h, TANK.d)),
+    new THREE.LineBasicMaterial({ color: 0x4f8794 })
+  );
+  tankEdges.position.y = TANK.cy; root.add(tankEdges);
+
+  var PLATE = { w: 0.5, h: 6.8, d: 4.4, cy: 0.1 };
+  var plate = new THREE.Mesh(
+    new THREE.BoxGeometry(PLATE.w, PLATE.h, PLATE.d),
+    new THREE.MeshBasicMaterial({ color: 0x8d97a1, transparent: true, opacity: 0.45, depthWrite: false })
+  );
+  plate.position.y = PLATE.cy; plate.renderOrder = 50; root.add(plate);
+  var plateEdges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(PLATE.w, PLATE.h, PLATE.d)),
+    new THREE.LineBasicMaterial({ color: 0x5d6872 })
+  );
+  plateEdges.position.y = PLATE.cy; root.add(plateEdges);
+
+  /* ---------- lớp điện kép ---------- */
+  var rowsY = [], i, j;
+  for (i = 0; i < 6; i++) rowsY.push(-2.2 + i * 0.75);
+  var ions = [], elecs = [];
+  [-1, 1].forEach(function (side) {
+    for (i = 0; i < 6; i++) {
+      for (j = 0; j < 4; j++) {
+        var s = sprite(M.zn2, 0.66);
+        var base = new THREE.Vector3(side * 1.05, rowsY[i], -1.5 + j);
+        s.position.copy(base);
+        ions.push({ s: s, base: base, side: side, st: 0, t: 0, ph: Math.random() * 6.28 });
+      }
+      for (j = 0; j < 8; j++) {
+        var e = sprite(M.e, 0.3);
+        var eb = new THREE.Vector3(side * 0.14, rowsY[i], -1.75 + j * 0.5);
+        e.position.copy(eb);
+        elecs.push({ s: e, base: eb, ph: Math.random() * 6.28 });
+      }
+    }
+  });
+
+  /* ---------- ion tự do ---------- */
+  var free = [];
+  function addFree(m, size, side) {
+    var s = sprite(m, size);
+    var p = new THREE.Vector3(side * (2.2 + Math.random() * 3.3), -3 + Math.random() * 4.7, -3 + Math.random() * 6);
+    s.position.copy(p);
+    free.push({ s: s, side: side,
+      v: new THREE.Vector3(Math.random() - .5, Math.random() - .5, Math.random() - .5).multiplyScalar(0.7) });
+  }
+  for (i = 0; i < 16; i++) { var sd = i % 2 ? 1 : -1; addFree(M.zn2, 0.66, sd); addFree(M.so4, 0.82, -sd); }
+
+  /* ---------- nhãn HTML gắn với điểm 3D ---------- */
+  var tagDefs = [
+    { t: 'Zn', p: [0, 4.0, 0], c: '' },
+    { t: 'ZnSO₄(aq)', p: [5.0, 2.0, 3.5], c: '' },
+    { t: 'Lớp ion Zn²⁺ (+)', p: [1.2, 2.55, 0], c: 'minor' },
+    { t: 'Lớp electron dư (−)', p: [-1.2, 2.95, 0], c: 'minor' }
+  ];
+  var tags = tagDefs.map(function (d) {
+    var el = document.createElement('div');
+    el.className = 'tag ' + d.c; el.textContent = d.t; labelsEl.appendChild(el);
+    return { el: el, v: new THREE.Vector3(d.p[0], d.p[1], d.p[2]) };
+  });
+
+  /* ---------- điều khiển góc nhìn ---------- */
+  var views = { section: [0, 0], persp: [-0.75, 0.28], top: [0, 1.25] };
+  var yaw = views.persp[0], pitch = views.persp[1], yawT = yaw, pitchT = pitch, zoom = 1;
+  var dragging = false, lx = 0, ly = 0;
+  var autoRot = !reduce;
+  document.getElementById('t-rot').checked = autoRot;
+
+  canvas.addEventListener('pointerdown', function (e) {
+    dragging = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    yawT += (e.clientX - lx) * 0.008;
+    pitchT = Math.max(-1.45, Math.min(1.45, pitchT + (e.clientY - ly) * 0.006));
+    lx = e.clientX; ly = e.clientY; setView(null);
+  });
+  function endDrag() { dragging = false; }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    zoom = Math.max(0.55, Math.min(1.7, zoom * (e.deltaY < 0 ? 1.08 : 0.926)));
+  }, { passive: false });
+
+  var viewBtns = document.querySelectorAll('[data-view]');
+  function setView(name) {
+    viewBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === name)); });
+  }
+  viewBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = views[b.dataset.view];
+      yawT = v[0]; pitchT = v[1];
+      autoRot = false; document.getElementById('t-rot').checked = false;
+      setView(b.dataset.view);
+    });
+  });
+  document.getElementById('t-rot').addEventListener('change', function (e) { autoRot = e.target.checked; if (autoRot) setView(null); });
+  var eqOn = true, freeOn = true, labOn = true;
+  document.getElementById('t-eq').addEventListener('change', function (e) { eqOn = e.target.checked; });
+  document.getElementById('t-free').addEventListener('change', function (e) {
+    freeOn = e.target.checked; free.forEach(function (f) { f.s.visible = freeOn; });
+  });
+  document.getElementById('t-lab').addEventListener('change', function (e) {
+    labOn = e.target.checked; labelsEl.style.display = labOn ? '' : 'none';
+  });
+
+  /* ---------- màu theo giao diện ---------- */
+  function applyTheme() {
+    var cs = getComputedStyle(document.documentElement);
+    var te = cs.getPropertyValue('--tank-edge').trim(), pe = cs.getPropertyValue('--plate-edge').trim();
+    if (te) tankEdges.material.color.set(te);
+    if (pe) plateEdges.material.color.set(pe);
+  }
+  applyTheme();
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', applyTheme);
+  }
+
+  /* ---------- kích thước ---------- */
+  var aspect = 1.6;
+  function resize() {
+    var w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    aspect = w / h; camera.aspect = aspect; camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage);
+  resize();
+
+  /* ---------- vòng lặp ---------- */
+  function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+  var last = performance.now(), clock = 0, evTimer = 0, uiTimer = 0;
+  var tmp = new THREE.Vector3();
+  var DUR_IN = 0.9, DUR_HOLD = 0.8, DUR_OUT = 0.9;
+
+  function startEvent() {
+    var active = 0, k;
+    for (k = 0; k < ions.length; k++) if (ions[k].st) active++;
+    if (active >= 6) return;
+    for (var tries = 0; tries < 10; tries++) {
+      var it = ions[(Math.random() * ions.length) | 0];
+      if (!it.st) { it.st = 1; it.t = 0; return; }
+    }
+  }
+
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000); last = now; clock += dt;
+
+    if (autoRot && !dragging) yawT += dt * 0.25;
+    yaw += (yawT - yaw) * Math.min(1, dt * 7);
+    pitch += (pitchT - pitch) * Math.min(1, dt * 7);
+    root.rotation.y = yaw; root.rotation.x = pitch;
+    camera.position.set(0, 0.4, 19 * Math.max(1, 1.5 / aspect) / zoom);
+    camera.lookAt(0, 0.2, 0);
+
+    var amp = reduce ? 0 : 1;
+    evTimer += dt;
+    if (eqOn && evTimer > 0.45) { evTimer = 0; startEvent(); }
+
+    var attached = 0;
+    ions.forEach(function (it) {
+      var jx = Math.sin(clock * 1.7 + it.ph) * 0.05 * amp,
+          jy = Math.cos(clock * 1.3 + it.ph * 1.7) * 0.05 * amp,
+          jz = Math.sin(clock * 1.1 + it.ph * 2.3) * 0.05 * amp;
+      var bx = it.base.x, by = it.base.y + jy, bz = it.base.z + jz;
+      var ax = it.side * 0.3;
+      if (it.st === 0) {
+        it.s.position.set(bx + jx, by, bz);
+      } else {
+        it.t += dt;
+        if (it.st === 1) {
+          var u = Math.min(1, it.t / DUR_IN), k = ease(u);
+          it.s.position.set(bx + (ax - bx) * k, by, bz);
+          if (u >= 1) { it.st = 2; it.t = 0; it.s.material = M.zn; it.s.scale.set(0.5, 0.5, 1); }
+        } else if (it.st === 2) {
+          it.s.position.set(ax, by, bz); attached++;
+          if (it.t >= DUR_HOLD) { it.st = 3; it.t = 0; it.s.material = M.zn2; it.s.scale.set(0.66, 0.66, 1); }
+        } else {
+          var u2 = Math.min(1, it.t / DUR_OUT), k2 = ease(u2);
+          it.s.position.set(ax + (bx - ax) * k2, by, bz);
+          if (u2 >= 1) it.st = 0;
+        }
+      }
+    });
+    elecs.forEach(function (e) {
+      e.s.position.set(e.base.x, e.base.y + Math.sin(clock * 2.1 + e.ph) * 0.03 * amp, e.base.z + Math.cos(clock * 1.8 + e.ph) * 0.03 * amp);
+    });
+
+    if (freeOn) {
+      free.forEach(function (f) {
+        var p = f.s.position;
+        if (amp) {
+          p.addScaledVector(f.v, dt);
+          f.v.x += (Math.random() - .5) * 0.6 * dt; f.v.y += (Math.random() - .5) * 0.6 * dt; f.v.z += (Math.random() - .5) * 0.6 * dt;
+          f.v.clampLength(0.2, 0.9);
+        }
+        var ax = Math.abs(p.x);
+        if (ax < 1.9 || ax > 5.6) { f.v.x *= -1; p.x = f.side * Math.max(1.9, Math.min(5.6, ax)); }
+        if (p.y < -3.1 || p.y > 1.7) { f.v.y *= -1; p.y = Math.max(-3.1, Math.min(1.7, p.y)); }
+        if (p.z < -3.1 || p.z > 3.1) { f.v.z *= -1; p.z = Math.max(-3.1, Math.min(3.1, p.z)); }
+      });
+    }
+
+    renderer.render(scene, camera);
+
+    if (labOn) {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      tags.forEach(function (t) {
+        tmp.copy(t.v); root.localToWorld(tmp); tmp.project(camera);
+        if (tmp.z > 1) { t.el.style.display = 'none'; return; }
+        t.el.style.display = '';
+        t.el.style.transform = 'translate(' + ((tmp.x * .5 + .5) * w).toFixed(1) + 'px,' + ((-tmp.y * .5 + .5) * h).toFixed(1) + 'px) translate(-50%,-50%)';
+      });
+    }
+
+    uiTimer += dt;
+    if (uiTimer > 0.2) { uiTimer = 0; document.getElementById('r-att').textContent = attached; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

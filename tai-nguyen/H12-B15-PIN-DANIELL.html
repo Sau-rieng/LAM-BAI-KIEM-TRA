@@ -1,0 +1,421 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pin Daniell 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Lexend:wght@500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: sân khấu 3D bên trái (bàn thí nghiệm tối), bảng giải thích theo bước bên phải; xếp chồng trên điện thoại */
+:root{
+  --bg:#eaeef2; --surface:#ffffff; --ink:#17202a; --muted:#56626f; --line:#d3dae2;
+  --accent:#b25a2c; --accent-ink:#ffffff; --zn:#7d8a98; --soft:#f3f5f8;
+  --e:#f2c230; --znion:#aeb8c4; --cuion:#2f7de1; --k:#a774ec; --no3:#3fae72; --so4:#c9c2ad;
+  --ok:#2c8a55; --warn:#b4471f;
+  --f-display:"Lexend","Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1418; --surface:#182027; --ink:#e7ecf1; --muted:#9aa7b4; --line:#2b3641;
+  --accent:#e08a57; --accent-ink:#1a0e07; --zn:#9eabb9; --soft:#1e2830; --ok:#5cc58a; --warn:#f08a5d; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1418; --surface:#182027; --ink:#e7ecf1; --muted:#9aa7b4; --line:#2b3641;
+  --accent:#e08a57; --accent-ink:#1a0e07; --zn:#9eabb9; --soft:#1e2830; --ok:#5cc58a; --warn:#f08a5d; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:20px 32px;display:grid;gap:16px}
+header h1{font-family:var(--f-display);font-weight:600;font-size:clamp(22px,3vw,30px);margin:0;text-wrap:balance;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:16px;align-items:start}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+.stagecol{display:grid;gap:10px;min-width:0}
+#stage{position:relative;height:clamp(380px,64vh,660px);border-radius:12px;overflow:hidden;background:#10161d;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-100%);white-space:nowrap;font-size:12px;font-weight:500;
+  color:#eef3f7;background:rgba(14,20,27,.78);border:1px solid rgba(255,255,255,.14);padding:2px 8px;border-radius:999px;display:flex;align-items:center;gap:6px}
+.lbl i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.lbl.flow{background:transparent;border:0;font-family:var(--f-mono);font-size:12px;padding:0}
+.lbl.flow.e{color:#ffd84a}.lbl.flow.i{color:#ff9d7a}
+#labels.off .lbl{display:none}
+.status{position:absolute;left:12px;top:12px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(14,20,27,.82);color:#eef3f7;display:flex;gap:8px;align-items:center}
+.status b{width:9px;height:9px;border-radius:50%;background:#5cc58a;box-shadow:0 0 8px #5cc58a}
+.status.stop b{background:#f08a5d;box-shadow:none}
+.fsbtn{position:absolute;right:10px;top:10px;font:inherit;font-size:12px;background:rgba(14,20,27,.82);color:#eef3f7;border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:4px 10px;cursor:pointer}
+.hint{position:absolute;right:12px;bottom:10px;font-size:11.5px;color:rgba(230,236,242,.6)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:13.5px;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.tab:focus-visible,select:focus-visible,.fsbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.btn.toggle[aria-pressed="true"]::before{content:"● ";color:var(--ok)}
+.btn.toggle[aria-pressed="false"]::before{content:"○ ";color:var(--warn)}
+.speed{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+select{font:inherit;font-size:13.5px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.spacer{flex:1}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}
+.stats span b{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+aside{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.tab{font:inherit;font-weight:600;font-size:14px;padding:6px 0;border-radius:6px;border:1px solid var(--line);background:var(--soft);color:var(--muted);cursor:pointer;font-variant-numeric:tabular-nums}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.eyebrow{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0}
+aside h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:2px 0 0;text-wrap:balance;line-height:1.3}
+.body p{margin:0 0 8px}.body ul{margin:0 0 8px;padding-left:18px}.body li{margin-bottom:3px}
+.eq{font-family:var(--f-mono);font-size:14px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 12px;line-height:1.8;overflow-x:auto}
+.eq sub,.eq sup{font-size:.72em}
+.nav{display:flex;gap:8px}.nav .btn{flex:1}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:13px;border-top:1px solid var(--line);padding-top:12px}
+.legend h3{grid-column:1/-1;margin:0;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.legend span{display:flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.25)}
+.note{font-size:12px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Pin điện hoá Zn – Cu hoạt động như thế nào?</h1>
+    <p>Mô phỏng 3D pin Daniell: theo dõi electron, ion và cầu muối để thấy phản ứng oxi hoá – khử biến hoá năng thành điện năng. Kéo để xoay, cuộn hoặc chụm hai ngón để phóng to.</p>
+  </header>
+
+  <div class="grid">
+    <div class="stagecol">
+      <div id="stage">
+        <div id="labels"></div>
+        <div class="status" id="status"><b></b><span id="statusText">Mạch kín – đèn sáng</span></div>
+        <button class="fsbtn" id="fs" type="button">Toàn màn hình</button>
+        <div class="hint">Mô hình minh hoạ – kích thước và tốc độ hạt không theo tỉ lệ thật</div>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" id="play" type="button">Tạm dừng</button>
+        <label class="speed" for="spd">Tốc độ
+          <select id="spd"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+        </label>
+        <button class="btn toggle" id="sw" type="button" aria-pressed="true">Khoá K đóng</button>
+        <button class="btn toggle" id="br" type="button" aria-pressed="true">Có cầu muối</button>
+        <button class="btn toggle" id="lb" type="button" aria-pressed="true">Nhãn</button>
+        <span class="spacer"></span>
+        <button class="btn" id="reset" type="button">Làm lại</button>
+      </div>
+      <div class="stats">
+        <span>Electron qua dây: <b id="sE">0</b></span>
+        <span>Zn → Zn²⁺: <b id="sZn">0</b></span>
+        <span>Cu²⁺ → Cu: <b id="sCu">0</b></span>
+      </div>
+    </div>
+
+    <aside>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div>
+        <p class="eyebrow" id="eyebrow"></p>
+        <h2 id="stTitle"></h2>
+      </div>
+      <div class="body" id="stBody"></div>
+      <div class="eq" id="stEq"></div>
+      <div class="nav">
+        <button class="btn" id="prev" type="button">← Trước</button>
+        <button class="btn primary" id="next" type="button">Tiếp →</button>
+      </div>
+      <div class="legend">
+        <h3>Chú thích hạt</h3>
+        <span><i class="dot" style="background:var(--e)"></i>Electron e⁻</span>
+        <span><i class="dot" style="background:var(--znion)"></i>Ion Zn²⁺</span>
+        <span><i class="dot" style="background:var(--cuion)"></i>Ion Cu²⁺</span>
+        <span><i class="dot" style="background:var(--so4)"></i>Ion SO₄²⁻</span>
+        <span><i class="dot" style="background:var(--k)"></i>Ion K⁺</span>
+        <span><i class="dot" style="background:var(--no3)"></i>Ion NO₃⁻</span>
+      </div>
+      <p class="note">Điều kiện chuẩn: dung dịch ZnSO₄ 1 M và CuSO₄ 1 M, 25 °C. Cầu muối chứa KNO₃ trong gel agar.</p>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const STEPS=[
+ {eb:"Bước 1 · Cấu tạo",t:"Pin gồm hai nửa pin nối với nhau",cam:[0,3.4,13.5],tg:[0,1,0],
+  b:`<p>Mỗi nửa pin là một thanh kim loại nhúng trong dung dịch muối của chính nó. Hai nửa pin được nối bằng:</p>
+  <ul><li><b>dây dẫn</b> ở mạch ngoài (có bóng đèn và khoá K);</li><li><b>cầu muối</b> ở mạch trong.</li></ul>
+  <p>Thanh Zn nhúng trong ZnSO₄ (không màu), thanh Cu nhúng trong CuSO₄ (màu xanh).</p>`,
+  eq:`Sơ đồ pin: (−) Zn | Zn<sup>2+</sup> ‖ Cu<sup>2+</sup> | Cu (+)`},
+ {eb:"Bước 2 · Cực âm (anode)",t:"Zn bị oxi hoá, nhường electron",cam:[-4.6,1.4,4.4],tg:[-3,0,0],
+  b:`<p>Nguyên tử Zn trên bề mặt thanh kẽm nhường 2 electron và đi vào dung dịch thành ion Zn²⁺. Electron ở lại trên thanh nên thanh Zn mang điện âm.</p>
+  <p>Zn nhường electron vì có tính khử mạnh hơn Cu: E°(Zn²⁺/Zn) = −0,76 V nhỏ hơn E°(Cu²⁺/Cu) = +0,34 V.</p>
+  <p><b>Quan sát:</b> thanh Zn mòn dần, số ion Zn²⁺ trong cốc tăng.</p>`,
+  eq:`Quá trình oxi hoá:<br>Zn → Zn<sup>2+</sup> + 2e`},
+ {eb:"Bước 3 · Mạch ngoài",t:"Dòng electron chính là dòng điện",cam:[0,5.6,7.6],tg:[0,3.6,0],
+  b:`<p>Electron dồn trên thanh Zn đi theo dây dẫn, qua bóng đèn, sang thanh Cu. Dòng chuyển dời có hướng của electron là dòng điện, nên đèn sáng.</p>
+  <p>Theo quy ước, chiều dòng điện ngược chiều electron: đi từ cực Cu (+) sang cực Zn (−).</p>
+  <p>Thử bấm <b>Khoá K</b> để mở mạch: electron dừng lại, đèn tắt.</p>`,
+  eq:`Electron: Zn (−) → dây dẫn → Cu (+)<br>Dòng điện I: Cu (+) → dây dẫn → Zn (−)`},
+ {eb:"Bước 4 · Cực dương (cathode)",t:"Cu²⁺ nhận electron, bám vào thanh Cu",cam:[4.6,1.4,4.4],tg:[3,0,0],
+  b:`<p>Ion Cu²⁺ trong dung dịch di chuyển tới bề mặt thanh Cu, nhận 2 electron vừa chạy sang và trở thành nguyên tử Cu bám lên thanh.</p>
+  <p><b>Quan sát:</b> thanh Cu dày lên, màu xanh của dung dịch CuSO₄ nhạt dần vì Cu²⁺ giảm.</p>`,
+  eq:`Quá trình khử:<br>Cu<sup>2+</sup> + 2e → Cu`},
+ {eb:"Bước 5 · Cầu muối",t:"Cầu muối giữ hai dung dịch trung hoà điện",cam:[0,3.3,6.2],tg:[0,2.1,0],
+  b:`<p>Khi pin chạy, cốc Zn thừa ion dương (Zn²⁺ tăng), còn cốc Cu thừa ion âm SO₄²⁻ (vì Cu²⁺ giảm). Nếu không bù lại, điện tích tích tụ sẽ chặn phản ứng.</p>
+  <ul><li>Ion NO₃⁻ đi sang cốc Zn.</li><li>Ion K⁺ đi sang cốc Cu.</li></ul>
+  <p>Thử bấm <b>Có cầu muối</b> để tháo cầu muối: mạch hở, đèn tắt.</p>`,
+  eq:`K<sup>+</sup> → cốc CuSO<sub>4</sub><br>NO<sub>3</sub><sup>−</sup> → cốc ZnSO<sub>4</sub>`},
+ {eb:"Bước 6 · Kết luận",t:"Hoá năng chuyển thành điện năng",cam:[0,4.2,14],tg:[0,1.2,0],
+  b:`<p>Cộng hai nửa phản ứng được phản ứng oxi hoá – khử xảy ra trong pin.</p>
+  <p>Nếu nhúng thẳng thanh Zn vào CuSO₄, electron chuyển trực tiếp từ Zn sang Cu²⁺ và năng lượng toả ra dưới dạng nhiệt. Trong pin, hai quá trình bị tách ra hai cốc nên electron buộc phải đi qua dây dẫn: năng lượng của phản ứng được giải phóng dưới dạng <b>điện năng</b>.</p>`,
+  eq:`Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu<br>E°<sub>pin</sub> = E°<sub>Cu²⁺/Cu</sub> − E°<sub>Zn²⁺/Zn</sub><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0,34 − (−0,76) = 1,10 V`}
+];
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stage=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+stage.insertBefore(renderer.domElement, stage.firstChild);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x10161d);
+const camera=new THREE.PerspectiveCamera(40,1,0.1,100);
+camera.position.set(0,3.4,13.5);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.target.set(0,1,0); controls.enableDamping=true; controls.minDistance=3; controls.maxDistance=24; controls.maxPolarAngle=1.6;
+
+scene.add(new THREE.HemisphereLight(0xdfeaf5,0x1a2026,0.75));
+const dl=new THREE.DirectionalLight(0xffffff,0.85); dl.position.set(5,10,8); scene.add(dl);
+const dl2=new THREE.DirectionalLight(0x9fc3ff,0.3); dl2.position.set(-6,4,-6); scene.add(dl2);
+
+const rand=(a,b)=>a+Math.random()*(b-a);
+const std=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.4,metalness:.1},o));
+function mesh(g,m,x=0,y=0,z=0){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);scene.add(o);return o;}
+
+// Bench
+mesh(new THREE.BoxGeometry(15,0.2,6.5),std(0x232d37,{roughness:.9}),0,-1.72,0);
+const grid=new THREE.GridHelper(15,30,0x34414e,0x2a3540); grid.position.y=-1.615; scene.add(grid);
+
+// Beakers
+const ZX=-3, CX=3, BOT=-1.6, LTOP=0.9;
+function beaker(x,col,op){
+  mesh(new THREE.CylinderGeometry(1.6,1.6,3.4,48,1,true),std(0xd6ecfa,{transparent:true,opacity:.13,side:THREE.DoubleSide,depthWrite:false,roughness:.05}),x,BOT+1.7,0);
+  const rim=mesh(new THREE.TorusGeometry(1.6,0.03,8,64),std(0xd6ecfa,{transparent:true,opacity:.5}),x,BOT+3.4,0); rim.rotation.x=Math.PI/2;
+  const liq=mesh(new THREE.CylinderGeometry(1.55,1.55,LTOP-BOT,48),std(col,{transparent:true,opacity:op,depthWrite:false,roughness:.15}),x,(LTOP+BOT)/2,0);
+  return liq;
+}
+beaker(ZX,0xdde7ee,0.15);
+const cuLiq=beaker(CX,0x2a7fd8,0.4);
+
+// Electrodes
+const PH=3.7, PY=-1.35+PH/2, PTOP=-1.35+PH, PHZ0=0.08;
+const ZNC=new THREE.Color(0x9aa6b3), CUC=new THREE.Color(0xc56b37);
+const znPlate=mesh(new THREE.BoxGeometry(0.9,PH,PHZ0*2),std(ZNC,{metalness:.6,roughness:.45}),ZX,PY,0);
+const cuPlate=mesh(new THREE.BoxGeometry(0.9,PH,PHZ0*2),std(CUC,{metalness:.7,roughness:.35}),CX,PY,0);
+const halfZ=p=>PHZ0*p.scale.z;
+[ZX,CX].forEach(x=>mesh(new THREE.BoxGeometry(0.4,0.22,0.36),std(0x1b1f24,{roughness:.6}),x,PTOP,0));
+
+// Wire + bulb
+const WY=3.9;
+const A=new THREE.Vector3(ZX,PTOP,0),B=new THREE.Vector3(ZX,WY,0),C=new THREE.Vector3(CX,WY,0),D=new THREE.Vector3(CX,PTOP,0);
+const wireM=std(0xcf8b55,{metalness:.5,roughness:.4});
+const wirePath=new THREE.CurvePath();
+[[A,B],[B,C],[C,D]].forEach(([p,q])=>{const lc=new THREE.LineCurve3(p,q);wirePath.add(lc);mesh(new THREE.TubeGeometry(lc,1,0.05,10),wireM);});
+[B,C].forEach(p=>mesh(new THREE.SphereGeometry(0.05,10,8),wireM,p.x,p.y,p.z));
+const WLEN=wirePath.getLength();
+mesh(new THREE.CylinderGeometry(0.22,0.26,0.4,24),std(0x8a8f96,{metalness:.7,roughness:.3}),0,WY+0.1,0);
+const bulbM=std(0xfff3c4,{transparent:true,opacity:.55,emissive:0xffcc55,emissiveIntensity:0,roughness:.1});
+mesh(new THREE.SphereGeometry(0.45,32,20),bulbM,0,WY+0.68,0);
+const filM=std(0x553311,{emissive:0xffb030,emissiveIntensity:0});
+mesh(new THREE.TorusGeometry(0.12,0.02,6,20),filM,0,WY+0.66,0);
+const bulbLight=new THREE.PointLight(0xffcc66,0,9,2); bulbLight.position.set(0,WY+0.7,0.3); scene.add(bulbLight);
+// switch K (small lever on left vertical wire)
+const swBase=mesh(new THREE.BoxGeometry(0.3,0.12,0.3),std(0x2a3038),-1.6,WY,0.0);
+const lever=new THREE.Group(); lever.position.set(-1.95,WY,0); scene.add(lever);
+const lv=new THREE.Mesh(new THREE.BoxGeometry(0.75,0.06,0.08),std(0xd8dde3,{metalness:.6}));lv.position.x=0.37;lever.add(lv);
+
+// Salt bridge
+const bridgeCurve=new THREE.CatmullRomCurve3([
+ new THREE.Vector3(-2.05,-0.6,0),new THREE.Vector3(-2.05,1.7,0),new THREE.Vector3(-1.75,2.6,0),new THREE.Vector3(0,2.95,0),
+ new THREE.Vector3(1.75,2.6,0),new THREE.Vector3(2.05,1.7,0),new THREE.Vector3(2.05,-0.6,0)]);
+const bridge=new THREE.Group(); scene.add(bridge);
+const bt=new THREE.Mesh(new THREE.TubeGeometry(bridgeCurve,120,0.22,20),std(0xe9f3fa,{transparent:true,opacity:.2,depthWrite:false,side:THREE.DoubleSide,roughness:.05}));
+const bg=new THREE.Mesh(new THREE.TubeGeometry(bridgeCurve,120,0.18,20),std(0xeee6c6,{transparent:true,opacity:.18,depthWrite:false}));
+bridge.add(bt,bg);
+[-2.05,2.05].forEach(x=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.19,0.2,20),std(0xf4f1e8,{roughness:.95}));p.position.set(x,-0.65,0);bridge.add(p);});
+
+// Particles
+const G=new THREE.SphereGeometry(1,16,12);
+function ball(col,r,emi){const m=new THREE.Mesh(G,std(col,emi?{emissive:col,emissiveIntensity:emi}:{roughness:.35}));m.scale.setScalar(r);scene.add(m);return m;}
+const COL={zn:new THREE.Color(0xb7c1cd),cu:new THREE.Color(0x2f7de1),k:0xa774ec,no3:0x3fae72,so4:0xd6cfb8,e:0xffd23f};
+
+function randInBeaker(cx){
+  const a=rand(0,Math.PI*2),r=Math.sqrt(Math.random())*1.3;
+  const v=new THREE.Vector3(cx+Math.cos(a)*r,rand(-1.4,0.7),Math.sin(a)*r);
+  if(Math.abs(v.x-cx)<0.55&&Math.abs(v.z)<0.35) v.z=(v.z>=0?1:-1)*rand(0.35,1.2);
+  return v;
+}
+function brown(p,cx,plate,dt){
+  const v=p.vel,pos=p.m.position;
+  v.x+=(Math.random()-.5)*3*dt; v.y+=(Math.random()-.5)*2*dt; v.z+=(Math.random()-.5)*3*dt;
+  v.multiplyScalar(Math.pow(0.3,dt)); pos.addScaledVector(v,dt);
+  const dx=pos.x-cx,dz=pos.z,r=Math.hypot(dx,dz);
+  if(r>1.38){const k=1.38/r;pos.x=cx+dx*k;pos.z=dz*k;v.x*=-.5;v.z*=-.5;}
+  if(pos.y<-1.45){pos.y=-1.45;v.y=Math.abs(v.y);} if(pos.y>0.75){pos.y=0.75;v.y=-Math.abs(v.y);}
+  const hz=halfZ(plate)+0.1;
+  if(Math.abs(pos.x-cx)<0.52&&Math.abs(pos.z)<hz){pos.z=(pos.z>=0?1:-1)*hz;v.z*=-.5;}
+}
+const mk=(m,extra)=>Object.assign({m,vel:new THREE.Vector3()},extra||{});
+
+let znIons=[],cuIons=[],so4=[],electrons=[],kIons=[],nIons=[];
+let stats,znRecycle=0;
+function clearAll(){[...znIons,...cuIons,...so4,...electrons,...kIons,...nIons].forEach(p=>{scene.remove(p.m);p.m.material.dispose();});
+  znIons=[];cuIons=[];so4=[];electrons=[];kIons=[];nIons=[];}
+function init(){
+  clearAll();
+  stats={e:0,zn:0,cu:0,pendingE:0,acc:0,respawn:0};
+  for(let i=0;i<10;i++){const m=ball(COL.zn,0.085);m.position.copy(randInBeaker(ZX));znIons.push(mk(m,{state:'free'}));}
+  for(let i=0;i<28;i++){const m=ball(COL.cu,0.085);m.position.copy(randInBeaker(CX));cuIons.push(mk(m,{state:'free',t:0}));}
+  [ZX,CX].forEach(cx=>{for(let i=0;i<9;i++){const m=ball(COL.so4,0.06);m.position.copy(randInBeaker(cx));so4.push(mk(m,{cx}));}});
+  for(let i=0;i<12;i++){const k=ball(COL.k,0.07);kIons.push({m:k,s:i/12,off:rand(-.09,.09),oz:rand(-.09,.09)});
+                         const n=ball(COL.no3,0.07);nIons.push({m:n,s:(i+.5)/12,off:rand(-.09,.09),oz:rand(-.09,.09)});}
+  znPlate.scale.z=1;cuPlate.scale.z=1;cuLiq.material.opacity=0.4;
+  placeBridge(0);updateStats();
+}
+function placeBridge(ds){
+  const set=(arr,dir)=>arr.forEach(p=>{p.s+=dir*ds;if(p.s>1)p.s-=1;if(p.s<0)p.s+=1;
+    const q=bridgeCurve.getPointAt(p.s);p.m.position.set(q.x+p.off,q.y+p.off*0.6,q.z+p.oz);});
+  set(kIons,1);set(nIons,-1);
+}
+function oxidize(){
+  const side=Math.random()<.5?1:-1, hz=halfZ(znPlate);
+  let p;
+  if(znIons.length<38){p=mk(ball(COL.zn,0.085));znIons.push(p);}
+  else{p=znIons[znRecycle%znIons.length];znRecycle++;}
+  p.state='leave';p.t=0;p.side=side;
+  p.m.position.set(ZX+rand(-.38,.38),rand(-1.2,0.6),side*(hz+0.06));
+  p.vel.set(rand(-.15,.15),rand(-.1,.1),side*0.9);
+  p.m.material.color.copy(ZNC);p.m.material.emissive.set(0xffffff);p.m.material.emissiveIntensity=.5;
+  for(let k=0;k<2;k++){const m=ball(COL.e,0.075,0.9);m.visible=false;electrons.push({m,u:0,delay:k*0.55});}
+  stats.zn++;
+}
+function reduceCu(){
+  const hz=halfZ(cuPlate);let best=null,bd=1e9;
+  cuIons.forEach(p=>{if(p.state!=='free')return;const d=Math.abs(p.m.position.z)+Math.abs(p.m.position.x-CX)*0.6;if(d<bd){bd=d;best=p;}});
+  if(!best)return false;
+  const side=best.m.position.z>=0?1:-1;
+  best.state='toPlate';best.target=new THREE.Vector3(CX+rand(-.4,.4),THREE.MathUtils.clamp(best.m.position.y,-1.2,0.6),side*(hz+0.05));
+  return true;
+}
+
+// Labels
+const labelsEl=document.getElementById('labels');
+const LBL=[];
+function label(html,pos,cls,dot){const d=document.createElement('div');d.className='lbl'+(cls?' '+cls:'');d.innerHTML=(dot?`<i style="background:${dot}"></i>`:'')+html;labelsEl.appendChild(d);LBL.push({d,p:new THREE.Vector3(...pos)});}
+label('Zn · cực âm (anode)',[ZX-0.1,PTOP+0.35,0],'','#a3aebb');
+label('Cu · cực dương (cathode)',[CX+0.1,PTOP+0.35,0],'','#d07a45');
+label('dd ZnSO₄',[ZX,-1.5,1.6],'','#dbe3ea');
+label('dd CuSO₄',[CX,-1.5,1.6],'','#2f7de1');
+label('Cầu muối KNO₃',[0,3.42,0.2],'','#eee6c6');
+label('Bóng đèn',[0,WY+1.35,0]);
+label('Khoá K',[-1.6,WY+0.35,0]);
+label('e⁻ ⟶',[0.9+0.9,WY+0.32,0],'flow e');
+label('⟵ I',[1.8,WY-0.12,0],'flow i');
+label('e⁻ ↑',[ZX-0.35,3.2,0],'flow e');
+label('e⁻ ↓',[CX+0.35,3.2,0],'flow e');
+const tmp=new THREE.Vector3();
+function updateLabels(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  LBL.forEach(l=>{tmp.copy(l.p).project(camera);
+    if(tmp.z>1||Math.abs(tmp.x)>1.2||Math.abs(tmp.y)>1.2){l.d.style.visibility='hidden';return;}
+    l.d.style.visibility='visible';
+    l.d.style.transform=`translate(${(tmp.x*.5+.5)*w}px,${(-tmp.y*.5+.5)*h}px) translate(-50%,-100%)`;});
+}
+
+// UI state
+let playing=true,speed=1,closed=true,bridgeOn=true,step=0,glow=0;
+const $=id=>document.getElementById(id);
+function setStatus(){
+  const run=closed&&bridgeOn, s=$('status');
+  s.classList.toggle('stop',!run);
+  $('statusText').textContent=run?(playing?'Mạch kín – pin đang phát điện':'Đang tạm dừng'):(!closed?'Khoá K mở – mạch hở, không có dòng điện':'Đã tháo cầu muối – pin ngừng hoạt động');
+}
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Tạm dừng':'Tiếp tục';setStatus();};
+$('spd').onchange=e=>speed=parseFloat(e.target.value);
+$('sw').onclick=()=>{closed=!closed;$('sw').setAttribute('aria-pressed',closed);$('sw').textContent=closed?'Khoá K đóng':'Khoá K mở';setStatus();};
+$('br').onclick=()=>{bridgeOn=!bridgeOn;bridge.visible=bridgeOn;kIons.concat(nIons).forEach(p=>p.m.visible=bridgeOn);$('br').setAttribute('aria-pressed',bridgeOn);$('br').textContent=bridgeOn?'Có cầu muối':'Đã tháo cầu muối';setStatus();};
+$('lb').onclick=()=>{const on=labelsEl.classList.toggle('off');$('lb').setAttribute('aria-pressed',!on);};
+$('reset').onclick=()=>init();
+$('fs').onclick=()=>{try{const p=document.fullscreenElement?document.exitFullscreen():stage.requestFullscreen&&stage.requestFullscreen();if(p&&p.catch)p.catch(()=>{});}catch(e){}};
+
+// Steps
+const tabs=$('tabs');
+STEPS.forEach((s,i)=>{const b=document.createElement('button');b.className='tab';b.type='button';b.setAttribute('role','tab');b.textContent=i+1;b.title=s.eb;b.onclick=()=>goStep(i);tabs.appendChild(b);});
+let tween=null;
+function goStep(i){
+  step=i;const s=STEPS[i];
+  [...tabs.children].forEach((b,j)=>b.setAttribute('aria-selected',j===i));
+  $('eyebrow').textContent=s.eb;$('stTitle').textContent=s.t;$('stBody').innerHTML=s.b;$('stEq').innerHTML=s.eq;
+  $('prev').disabled=i===0;$('next').textContent=i===STEPS.length-1?'Về bước 1':'Tiếp →';
+  const to={p:new THREE.Vector3(...s.cam),t:new THREE.Vector3(...s.tg)};
+  if(reduce){camera.position.copy(to.p);controls.target.copy(to.t);tween=null;}
+  else tween={fp:camera.position.clone(),ft:controls.target.clone(),to,k:0};
+}
+$('prev').onclick=()=>step>0&&goStep(step-1);
+$('next').onclick=()=>goStep((step+1)%STEPS.length);
+function tweenCam(dt){if(!tween)return;tween.k=Math.min(1,tween.k+dt/1.3);const e=tween.k<.5?2*tween.k*tween.k:1-Math.pow(-2*tween.k+2,2)/2;
+  camera.position.lerpVectors(tween.fp,tween.to.p,e);controls.target.lerpVectors(tween.ft,tween.to.t,e);if(tween.k>=1)tween=null;}
+controls.addEventListener('start',()=>{tween=null;});
+
+function updateStats(){$('sE').textContent=stats.e;$('sZn').textContent=stats.zn;$('sCu').textContent=stats.cu;}
+
+// Simulation
+const RATE=0.85, ESPD=1.1;
+let statT=0;
+function update(dt,run,rdt){
+  if(dt>0){
+    if(run){stats.acc+=dt*RATE;while(stats.acc>=1){stats.acc-=1;oxidize();}}
+    // electrons
+    for(let i=electrons.length-1;i>=0;i--){const e=electrons[i];
+      if(!run)continue;
+      if(e.delay>0){e.delay-=dt;continue;}
+      e.m.visible=true;e.u+=ESPD*dt/WLEN;
+      if(e.u>=1){scene.remove(e.m);e.m.material.dispose();electrons.splice(i,1);stats.e++;stats.pendingE++;continue;}
+      e.m.position.copy(wirePath.getPointAt(e.u));e.m.position.z=0.03;}
+    while(stats.pendingE>=2&&reduceCu())stats.pendingE-=2;
+    // zinc ions
+    znIons.forEach(p=>{
+      if(p.state==='leave'){p.t+=dt;p.m.position.addScaledVector(p.vel,dt);p.vel.multiplyScalar(Math.pow(0.4,dt));
+        const k=Math.min(1,p.t/0.7);p.m.material.color.copy(ZNC).lerp(COL.zn,k);p.m.material.emissiveIntensity=0.5*(1-k);
+        if(p.t>0.9){p.state='free';p.m.material.emissiveIntensity=0;}}
+      else brown(p,ZX,znPlate,dt);});
+    // copper ions
+    let alive=0;
+    cuIons.forEach(p=>{
+      if(p.state==='free'){alive++;brown(p,CX,cuPlate,dt);}
+      else if(p.state==='toPlate'){alive++;const d=tmp.copy(p.target).sub(p.m.position),L=d.length();
+        if(L<0.03){p.state='dep';p.t=0;stats.cu++;}else p.m.position.addScaledVector(d,Math.min(1,1.3*dt/L));}
+      else if(p.state==='dep'){p.t+=dt;const k=Math.min(1,p.t/0.5);p.m.material.color.copy(COL.cu).lerp(CUC,k);
+        p.m.material.emissive.set(0xffffff);p.m.material.emissiveIntensity=k<1?0.35*(1-k):0;
+        if(p.t>2.6){const s=Math.max(0,1-(p.t-2.6)/0.6);p.m.scale.setScalar(0.085*s);if(s===0){p.state='gone';p.m.visible=false;}}}
+    });
+    const prog=Math.min(1,stats.zn/360);
+    znPlate.scale.z=1-0.55*prog; cuPlate.scale.z=1+0.9*prog; cuLiq.material.opacity=0.4*(1-0.6*prog);
+    const target=Math.round(28*(1-0.5*prog));
+    stats.respawn-=dt;
+    if(alive<target&&stats.respawn<=0){const g=cuIons.find(p=>p.state==='gone');
+      if(g){g.state='free';g.m.visible=true;g.m.scale.setScalar(0.085);g.m.material.color.copy(COL.cu);g.m.material.emissiveIntensity=0;g.m.position.copy(randInBeaker(CX));stats.respawn=0.4;}}
+    so4.forEach(p=>brown(p,p.cx,p.cx<0?znPlate:cuPlate,dt));
+    if(run&&bridgeOn)placeBridge(dt*0.035);
+  }
+  const want=run?1:0; glow+=(want-glow)*Math.min(1,rdt*4);
+  bulbM.emissiveIntensity=glow*1.4;filM.emissiveIntensity=glow*2.5;bulbLight.intensity=glow*2.2;
+  lever.rotation.z+=((closed?0:0.6)-lever.rotation.z)*Math.min(1,rdt*8);
+  statT+=rdt;if(statT>0.2){statT=0;updateStats();}
+}
+
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  camera.fov=w<560?52:40;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(stage);resize();
+
+let last=performance.now();
+function frame(now){const rdt=Math.min(0.05,(now-last)/1000);last=now;
+  update(playing?rdt*speed:0,closed&&bridgeOn,rdt);tweenCam(rdt);controls.update();renderer.render(scene,camera);updateLabels();requestAnimationFrame(frame);}
+init();goStep(0);setStatus();requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
