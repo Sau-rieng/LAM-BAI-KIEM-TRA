@@ -400,6 +400,8 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 /* Tai nguyen */
 .tnDong{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
 .dsGon .tnDong:first-child{border-top:0}
+.tnBai{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:12px 14px 6px;background:var(--bg);border-top:1px solid var(--line)}
+.dsGon .tnBai:first-child{border-top:0}
 .tnDong.an{opacity:.6}
 .tnAnh{flex:none;width:96px;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#172033,#2a3a5e 60%,#b8235a 140%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px}
 .tnAnh img{width:100%;height:100%;object-fit:cover;display:block}
@@ -503,6 +505,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 <section id="scrTN" class="hidden">
   <div class="top"><div><h1>Tài nguyên học tập</h1><p class="sub" id="soTN"></p></div><div><button class="btn2" id="tnQR">▦ QR tài khoản HS</button> <button class="btn2" id="tnMoi">↻</button></div></div>
   <p class="sub" style="margin:0 2px 10px">Học sinh đăng nhập tài khoản (SBD + mã xem bài) → <b>Tài nguyên</b>. Mỗi lần em mở một tài nguyên được tính 1 lượt xem.</p>
+  <div class="loc khoi" id="tnKhoi"></div>
   <div class="loc" id="tnLop"></div>
   <div id="dsTN"></div>
 </section>
@@ -2272,7 +2275,8 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
   // =====================================================================
   // TAI NGUYEN HOC TAP (tai-nguyen/danh-muc.js) – luot xem theo lop
   // =====================================================================
-  var TNX = { data: {}, lop: 'tat', mo: null };
+  var TNX = { data: {}, lop: 'tat', mo: null, khoi: null };
+  try { TNX.khoi = localStorage.getItem('gv_tnkhoi'); } catch (e) {}
   function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file; }); }
   function moTN() { man('scrTN'); veTN(); taiTN(false); }
   function taiTN(lamMoi) {
@@ -2312,12 +2316,23 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
     chon.forEach(function (l) { var j = TNX.data[l.ten]; if (j && j.loi) h += '<div class="card loi">' + esc(l.ten) + ': ' + esc(j.loi) + '</div>'; });
     if (!ds.length) h += '<div class="card sub">Chưa có tài nguyên nào. Gửi file mô phỏng (HTML) cho Claude và nói "chuyển" để đưa lên đây.</div>';
     var khoi = []; ds.forEach(function (t) { if (khoi.indexOf(String(t.khoi)) < 0) khoi.push(String(t.khoi)); });
-    khoi.sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (k) {
-      h += '<div class="nhom">' + (k === '9' ? 'KHTN 9' : 'Hóa ' + esc(k)) + '</div><div class="dsGon">';
+    khoi.sort(function (a, b) { return Number(a) - Number(b); });
+    if (khoi.indexOf(TNX.khoi) < 0) TNX.khoi = khoi[0] || null;
+    var kt = $('tnKhoi'); kt.innerHTML = '';
+    khoi.forEach(function (k) {
+      var b = document.createElement('button'); b.className = k === TNX.khoi ? 'on' : '';
+      b.innerHTML = (k === '9' ? 'KHTN 9' : 'Hóa ' + esc(k)) + '<small>' + ds.filter(function (t) { return String(t.khoi) === k; }).length + '</small>';
+      b.onclick = function () { TNX.khoi = k; TNX.mo = null; try { localStorage.setItem('gv_tnkhoi', k); } catch (e) {} veTN(); };
+      kt.appendChild(b);
+    });
+    khoi.filter(function (k) { return k === TNX.khoi; }).forEach(function (k) {
+      var baiTr = null;
+      h += '<div class="dsGon">';
       ds.filter(function (t) { return String(t.khoi) === k; }).forEach(function (t) {
+        if (t.bai !== baiTr) { baiTr = t.bai; h += '<div class="tnBai">' + esc(t.bai || 'Khác') + '</div>'; }
         var x = theo[t.ma] || { luot: 0, em: {} }, soEm = Object.keys(x.em).length;
         h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="tai-nguyen/' + encodeURI(t.anh) + '">' : '<span>3D</span>') + '</div>' +
-          '<div class="tnChu"><b>' + esc(t.ten) + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc([t.loai, t.bai].filter(Boolean).join(' · ')) + '</span>' +
+          '<div class="tnChu"><b>' + esc(t.ten) + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
           '<span class="tnSo"><b>' + x.luot + '</b> lượt xem · <b>' + soEm + '</b>' + (siSo ? '/' + siSo : '') + ' em đã xem</span></div>' +
           '<div class="tnNut"><a class="btn2" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener">▶ Xem</a><button class="btn2 ai"' + (soEm ? '' : ' disabled') + '>' + (TNX.mo === t.ma ? 'Ẩn' : 'Ai đã xem') + '</button></div>';
         if (TNX.mo === t.ma && soEm) {

@@ -380,10 +380,10 @@ img{-webkit-user-drag:none;pointer-events:none}
     var ds = dsTN(), cac = [];
     ds.forEach(function (t) { var k = String(t.khoi || ''); if (cac.indexOf(k) < 0) cac.push(k); });
     cac.sort(function (a, b) { return Number(a) - Number(b); });
-    if (khoiTN === null) khoiTN = cac.indexOf(khoiHS()) >= 0 ? khoiHS() : 'tat';
-    if (khoiTN !== 'tat' && cac.indexOf(khoiTN) < 0) khoiTN = 'tat';
+    if (khoiTN === null) khoiTN = cac.indexOf(khoiHS()) >= 0 ? khoiHS() : cac[0];
+    if (cac.indexOf(khoiTN) < 0) khoiTN = cac[0];
     var tab = $('tnKhoi'); tab.innerHTML = '';
-    if (cac.length > 1) [['tat', 'Tất cả']].concat(cac.map(function (k) { return [k, tenKhoi(k)]; })).forEach(function (x) {
+    if (cac.length > 1) [].concat(cac.map(function (k) { return [k, tenKhoi(k)]; })).forEach(function (x) {
       var b = document.createElement('button'); b.className = x[0] === khoiTN ? 'on' : ''; b.textContent = x[1];
       b.onclick = function () { khoiTN = x[0]; veTN(); }; tab.appendChild(b);
     });
