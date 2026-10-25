@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Xem lại bài làm</title>
+<title>Tài khoản học sinh – Khám phá Hóa học</title>
 <link rel="apple-touch-icon" href="hinh/app/icon-180.png">
 <link rel="icon" type="image/png" href="hinh/app/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,6 +67,45 @@ button{font-size:18px;font-weight:600;border:0;border-radius:12px;padding:13px 1
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 img{-webkit-user-drag:none;pointer-events:none}
+/* Tai khoan: 2 thu muc */
+.chao{font-size:15px;color:var(--muted);margin:0}
+.thuMuc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.thuMuc button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:18px;min-height:150px;color:var(--ink)}
+.thuMuc .ic{font-size:42px;line-height:1;margin-bottom:12px}
+.thuMuc b{font-size:20px}
+.thuMuc span{font-size:15px;color:var(--muted);font-weight:500;margin-top:4px}
+.thuMuc button.tnBtn{background:var(--ink);border-color:var(--ink);color:#fff}
+.thuMuc button.tnBtn span{color:rgba(255,255,255,.75)}
+@media (max-width:440px){.thuMuc{grid-template-columns:1fr}.thuMuc button{min-height:0}}
+.dau{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.dau .btn2{padding:9px 14px;font-size:16px}
+.loc{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.loc button{border:2px solid var(--line);background:#fff;padding:8px 14px;font-size:16px;color:var(--ink)}
+.loc button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.baiTN{font-size:16px;font-weight:800;color:var(--muted);margin:22px 4px 10px}
+.luoiTN{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.theTN{display:flex;flex-direction:column;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:0;overflow:hidden;color:var(--ink);font-weight:400}
+.theTN .anh{position:relative;aspect-ratio:16/10;background:#172033;overflow:hidden}
+.theTN .anh img{width:100%;height:100%;object-fit:cover;display:block}
+.theTN .bia{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;color:#fff;background:linear-gradient(135deg,#172033 0%,#2a3a5e 60%,#b8235a 140%)}
+.theTN .bia i{font-style:normal;font-size:44px;font-weight:800;letter-spacing:-1px;line-height:1;opacity:.95}
+.theTN .bia small{font-size:13px;opacity:.75;margin-top:6px}
+.theTN .loai{position:absolute;top:10px;left:10px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.92);color:var(--ink);border-radius:999px;padding:3px 10px}
+.theTN .play{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:16px}
+.theTN .chu{padding:12px 14px 14px}
+.theTN .chu b{display:block;font-size:17px;line-height:1.3}
+.theTN .chu span{display:block;font-size:14px;color:var(--muted);margin-top:4px;line-height:1.4}
+.trongTN{color:var(--muted);text-align:center;padding:30px 10px}
+.xemTN{position:fixed;inset:0;z-index:100;background:#0d1320;display:flex;flex-direction:column}
+.xemTN[hidden]{display:none}
+.xtBar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#172033;color:#fff}
+.xtBar b{flex:1;min-width:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xtBar button{background:#fff;color:var(--ink);padding:8px 14px;font-size:15px}
+.xtKhung{flex:1;position:relative;background:#fff}
+.xtKhung iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.xtTai{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:17px;background:#fff;text-align:center;padding:20px}
+.xtTai .vong{width:44px;height:44px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--pri);animation:quay 1s linear infinite}
+@keyframes quay{to{transform:rotate(360deg)}}
 #wm{position:fixed;inset:0;pointer-events:none;z-index:50;background-repeat:repeat;opacity:.09;display:none}
 @media print{body>*{display:none!important}body:after{content:"Trang này không được in.";display:block;font:20px sans-serif;padding:40px}}
 </style>
@@ -76,25 +115,48 @@ img{-webkit-user-drag:none;pointer-events:none}
 
 <section id="scrLogin" class="card">
   <div class="brandHS"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học</span></div>
-  <h1>Xem lại bài làm</h1>
-  <p class="sub">Nhập SBD và mã xem bài giáo viên đã phát cho em.</p>
+  <h1>Tài khoản học sinh</h1>
+  <p class="sub">Đăng nhập bằng số báo danh và mã xem bài giáo viên đã phát cho em để xem lại bài kiểm tra và tài nguyên học tập.</p>
   <label for="lop">Lớp</label>
   <select id="lop"><option value="">– Chọn lớp –</option></select>
   <label for="sbd">Số báo danh (nhập 2 số cuối)</label>
   <div class="sbd"><span class="pre" id="pre">------</span><input id="sbd" inputmode="numeric" maxlength="2" autocomplete="off"></div>
   <label for="maxem">Mã xem bài</label>
   <input id="maxem" type="password" inputmode="numeric" autocomplete="off">
-  <button class="btn" id="btnXem">Xem bài</button>
+  <button class="btn" id="btnXem">Đăng nhập</button>
   <div class="msg" id="msg"></div>
+</section>
+
+<section id="scrHome" class="hidden">
+  <div class="card">
+    <div class="brandHS" style="margin-bottom:10px"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học · Tài khoản học sinh</span></div>
+    <h1 id="tenHome"></h1>
+    <p class="chao" id="lopHome"></p>
+    <div class="thuMuc">
+      <button id="moBai"><span class="ic" aria-hidden="true">📝</span><b>Xem lại bài</b><span id="soBai"></span></button>
+      <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true">🧪</span><b>Tài nguyên</b><span id="soTN"></span></button>
+    </div>
+    <button class="btn btn2" id="btnRa0">Thoát</button>
+  </div>
+</section>
+
+<section id="scrTN" class="hidden">
+  <div class="card">
+    <div class="dau"><button class="btn2" id="tnLai">◀ Tài khoản</button></div>
+    <h1>Tài nguyên học tập</h1>
+    <p class="sub">Mô phỏng 3D, thí nghiệm ảo. Bấm vào để xem; máy chỉ tải tạm khi em đang xem.</p>
+    <div class="loc" id="tnKhoi"></div>
+  </div>
+  <div id="dsTN"></div>
 </section>
 
 <section id="scrDS" class="hidden">
   <div class="card">
+    <div class="dau"><button class="btn2" id="dsLai">◀ Tài khoản</button></div>
     <h1 id="tenhs"></h1>
     <div class="tienbo hidden" id="tienBo"></div>
     <p class="sub">Chọn bài kiểm tra để xem lại.</p>
     <div id="dsBai"></div>
-    <button class="btn btn2" id="btnRa1">Thoát</button>
   </div>
 </section>
 
@@ -116,14 +178,19 @@ img{-webkit-user-drag:none;pointer-events:none}
 </section>
 
 </main>
+<div class="xemTN" id="xemTN" hidden role="dialog" aria-modal="true" aria-labelledby="xtTen">
+  <div class="xtBar"><b id="xtTen"></b><button id="xtDong">✕ Đóng</button></div>
+  <div class="xtKhung" id="xtKhung"><div class="xtTai" id="xtTai"><div class="vong"></div><span>Đang tải tài nguyên…</span></div></div>
+</div>
 <script src="cau-hinh-lop.js"></script>
+<script src="tai-nguyen/danh-muc.js"></script>
 <script>
 (function () {
   var DS = window.DS_LOP || [];
   var lopChon = null, duLieu = null, baiDangXem = null;
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrDS', 'scrBai'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -135,7 +202,7 @@ img{-webkit-user-drag:none;pointer-events:none}
     if (!/^\d{2}$/.test(s2)) return loi('Hãy nhập đúng 2 số cuối của SBD.');
     var mx = $('maxem').value.trim();
     if (!mx) return loi('Em chưa nhập mã xem bài.');
-    $('msg').textContent = 'Đang tải bài...';
+    $('msg').textContent = 'Đang đăng nhập...';
     $('btnXem').disabled = true;
     var du = { action: 'xemlai', mahs: lopChon.tiento + s2, maxem: mx }, url = lopChon.url, lan = 0;
     // Nhieu ban cung xem mot luc, Google co the bao ban: tu thu lai sau vai giay (toi da 5 lan)
@@ -148,13 +215,13 @@ img{-webkit-user-drag:none;pointer-events:none}
           if (!j.ok) throw new Error(j.msg || 'loi');
           $('btnXem').disabled = false;
           duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; $('maxem').value = ''; $('msg').textContent = '';
-          veDanhSach();
+          veHome();
         })
         .catch(function () {
           if (lan < 5) {
             $('msg').className = 'msg'; $('msg').textContent = 'Nhiều bạn đang xem cùng lúc, đang thử lại (' + lan + ')...';
             setTimeout(thu, 3000 + Math.random() * 5000 * lan);
-          } else { $('btnXem').disabled = false; loi('Hệ thống đang bận. Em đợi 1–2 phút rồi bấm "Xem bài" lại.'); }
+          } else { $('btnXem').disabled = false; loi('Hệ thống đang bận. Em đợi 1–2 phút rồi bấm "Đăng nhập" lại.'); }
         });
     }
     thu();
@@ -288,7 +355,100 @@ img{-webkit-user-drag:none;pointer-events:none}
   }
   $('chiSai').onchange = veCau;
   $('btnLai').onclick = function () { man('scrDS'); };
-  $('btnRa1').onclick = function () { duLieu = null; man('scrLogin'); };
+
+  // ---------- Trang tai khoan: 2 thu muc ----------
+  function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file && !t.an; }); }
+  function khoiHS() { var m = /^(\d+)/.exec(lopChon ? lopChon.ten : ''); return m ? m[1] : ''; }
+  function veHome() {
+    hinhMo(duLieu.hoten + ' · ' + duLieu.mahs);
+    $('tenHome').textContent = duLieu.hoten;
+    $('lopHome').textContent = 'Lớp ' + (lopChon ? lopChon.ten : '') + ' · SBD ' + duLieu.mahs;
+    $('soBai').textContent = duLieu.bai.length ? duLieu.bai.length + ' bài giáo viên đã mở' : 'Chưa có bài nào mở xem lại';
+    var n = dsTN().length;
+    $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
+    man('scrHome');
+  }
+  $('moBai').onclick = function () { veDanhSach(); };
+  $('moTN').onclick = function () { veTN(); man('scrTN'); };
+  $('dsLai').onclick = $('tnLai').onclick = function () { man('scrHome'); };
+  $('btnRa0').onclick = function () { duLieu = null; hinhMo(''); man('scrLogin'); };
+
+  // ---------- Tai nguyen ----------
+  var khoiTN = null;
+  function tenKhoi(k) { return k === '9' ? 'KHTN 9' : 'Hóa ' + k; }
+  function veTN() {
+    var ds = dsTN(), cac = [];
+    ds.forEach(function (t) { var k = String(t.khoi || ''); if (cac.indexOf(k) < 0) cac.push(k); });
+    cac.sort(function (a, b) { return Number(a) - Number(b); });
+    if (khoiTN === null) khoiTN = cac.indexOf(khoiHS()) >= 0 ? khoiHS() : 'tat';
+    if (khoiTN !== 'tat' && cac.indexOf(khoiTN) < 0) khoiTN = 'tat';
+    var tab = $('tnKhoi'); tab.innerHTML = '';
+    if (cac.length > 1) [['tat', 'Tất cả']].concat(cac.map(function (k) { return [k, tenKhoi(k)]; })).forEach(function (x) {
+      var b = document.createElement('button'); b.className = x[0] === khoiTN ? 'on' : ''; b.textContent = x[1];
+      b.onclick = function () { khoiTN = x[0]; veTN(); }; tab.appendChild(b);
+    });
+    var box = $('dsTN'); box.innerHTML = '';
+    var chon = ds.filter(function (t) { return khoiTN === 'tat' || String(t.khoi) === khoiTN; });
+    if (!chon.length) { box.innerHTML = '<div class="card trongTN">Giáo viên chưa đưa tài nguyên nào lên. Em quay lại sau nhé.</div>'; return; }
+    var nhom = {}, thu = [];
+    chon.forEach(function (t) { var k = (cac.length > 1 && khoiTN === 'tat' ? tenKhoi(String(t.khoi)) + ' · ' : '') + (t.bai || 'Khác'); if (!nhom[k]) { nhom[k] = []; thu.push(k); } nhom[k].push(t); });
+    thu.forEach(function (k) {
+      var h = document.createElement('div'); h.className = 'baiTN'; h.textContent = k; box.appendChild(h);
+      var luoi = document.createElement('div'); luoi.className = 'luoiTN'; box.appendChild(luoi);
+      nhom[k].forEach(function (t) {
+        var b = document.createElement('button'); b.className = 'theTN';
+        var bia = t.anh ? '<img loading="lazy" alt="" src="tai-nguyen/' + encodeURI(t.anh) + '">'
+          : '<div class="bia"><i>' + (t.loai === 'Thí nghiệm' ? '⚗' : '3D') + '</i><small>' + esc(t.ten) + '</small></div>';
+        b.innerHTML = '<span class="anh">' + bia + (t.loai ? '<span class="loai">' + esc(t.loai) + '</span>' : '') + '<span class="play" aria-hidden="true">▶</span></span>' +
+          '<span class="chu"><b>' + esc(t.ten) + '</b>' + (t.mota ? '<span>' + esc(t.mota) + '</span>' : '') + '</span>';
+        var im = b.querySelector('img'); if (im) im.onerror = function () { im.outerHTML = '<div class="bia"><i>3D</i><small>' + esc(t.ten) + '</small></div>'; };
+        b.onclick = function () { moTaiNguyen(t); };
+        luoi.appendChild(b);
+      });
+    });
+  }
+  function esc(x) { return String(x === undefined || x === null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function ghiXemTN(t) {
+    if (!lopChon || !duLieu) return;
+    try { fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'xemtn', mahs: duLieu.mahs, maxem: duLieu.maxem, matn: t.ma }) }).catch(function () {}); } catch (e) {}
+  }
+  var luotMo = 0;
+  // Tai TAM file tai nguyen (khong luu bo nho dem), chay trong khung; dong la xoa khoi trang
+  function moTaiNguyen(t) {
+    var luot = ++luotMo, khung = $('xtKhung');
+    $('xtTen').textContent = t.ten;
+    [].slice.call(khung.querySelectorAll('iframe')).forEach(function (f) { f.remove(); });
+    $('xtTai').innerHTML = '<div class="vong"></div><span>Đang tải tài nguyên…</span>'; $('xtTai').hidden = false;
+    $('xemTN').hidden = false; document.body.style.overflow = 'hidden';
+    ghiXemTN(t);
+    var goc = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '') + 'tai-nguyen/';
+    fetch('tai-nguyen/' + encodeURI(t.file) + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function (html) {
+        if (luot !== luotMo || $('xemTN').hidden) return;
+        var base = '<base href="' + goc + '">';
+        html = /<head[^>]*>/i.test(html) ? html.replace(/<head([^>]*)>/i, '<head$1>' + base) : base + html;
+        var f = document.createElement('iframe');
+        f.setAttribute('allow', 'fullscreen; accelerometer; gyroscope; xr-spatial-tracking');
+        f.setAttribute('allowfullscreen', ''); f.title = t.ten;
+        f.srcdoc = html;
+        f.onload = function () { $('xtTai').hidden = true; };
+        khung.appendChild(f);
+        setTimeout(function () { if (luot === luotMo) $('xtTai').hidden = true; }, 4000);
+      })
+      .catch(function () {
+        if (luot !== luotMo) return;
+        $('xtTai').innerHTML = '<span>Chưa tải được tài nguyên. Kiểm tra mạng rồi thử lại.</span><button class="btn2" id="xtThu">Thử lại</button>';
+        $('xtThu').onclick = function () { moTaiNguyen(t); };
+      });
+  }
+  function dongTN() {
+    luotMo++;
+    [].slice.call($('xtKhung').querySelectorAll('iframe')).forEach(function (f) { f.srcdoc = ''; f.remove(); });
+    $('xemTN').hidden = true; document.body.style.overflow = '';
+  }
+  $('xtDong').onclick = dongTN;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('xemTN').hidden) dongTN(); });
 })();
 </script>
 </body>

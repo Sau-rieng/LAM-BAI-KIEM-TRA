@@ -25,6 +25,8 @@ const TAB_VG = 'VANG THI';
 const HEAD_VG = ['ThoiGian','MaDot','MaHS','HoTen','GhiChu','TrangThai'];
 const TAB_CN = 'TRO CHOI NHOM';
 const HEAD_CN = ['ThoiGian','MaTro','TenTro','Nhom','Diem','DungSai','ThoiGian_giay','MaLuot'];
+const TAB_TN = 'XEM TAI NGUYEN';
+const HEAD_TN = ['ThoiGian','MaTN','MaHS','HoTen'];
 const TAB_NH = 'NHOM';
 const HEAD_NH = ['Nhom','MaHS','HoTen','CapNhat'];
 
@@ -59,6 +61,7 @@ function doPost(e) {
       case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
       case 'daxem':  return json(ghiDaXem(d));
+      case 'xemtn':  return json(ghiXemTN(d));
       case 'tc_vao': return json(tcVao(d));
       case 'tc_mokhoa': return json(tcMoKhoa(d));
       case 'gv_dot':
@@ -77,6 +80,7 @@ function doPost(e) {
       case 'gv_tckq':
       case 'gv_ma':
       case 'gv_madat':
+      case 'gv_tainguyen':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -93,6 +97,7 @@ function doPost(e) {
         if (d.action === 'gv_tckq') return json(gvTcKetQua(d));
         if (d.action === 'gv_ma') return json(gvMa());
         if (d.action === 'gv_madat') return json(gvMaDat(d));
+        if (d.action === 'gv_tainguyen') return json(gvTaiNguyen());
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -209,6 +214,27 @@ function xemLai(d) {
 }
 
 // HS mo xem 1 bai o trang xem lai -> ghi tab XEM LAI de GV biet em nao da xem
+// Tai khoan HS mo 1 tai nguyen (mo phong 3D, thi nghiem...): ghi 1 dong / lan mo
+function ghiXemTN(d) {
+  const ma = String(d.mahs || '').trim();
+  const hs = timHS(ma);
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false};
+  const tn = String(d.matn || '').trim().slice(0, 80);
+  if (!tn) return {ok: false};
+  ghiDong(TAB_TN, HEAD_TN, [new Date(), tn, ma, hs.ten]);
+  return {ok: true};
+}
+// GV: luot xem tai nguyen cua lop nay + si so
+function gvTaiNguyen() {
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName(TAB_TN), xem = [];
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+    if (String(r[1]).trim()) xem.push([r[0] instanceof Date ? r[0].getTime() : 0, String(r[1]).trim(), String(r[2]).trim(), String(r[3]).trim()]);
+  });
+  const ds = ss.getSheetByName(TAB_DS);
+  const siSo = ds && ds.getLastRow() > 1 ? ds.getRange(2, 1, ds.getLastRow() - 1, 1).getValues().filter(function (r) { return String(r[0]).trim(); }).length : 0;
+  return {ok: true, lop: lopNay(), siSo: siSo, xem: xem};
+}
 function ghiDaXem(d) {
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);

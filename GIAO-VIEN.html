@@ -397,6 +397,22 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .maSua button{padding:8px 12px;font-size:14px}
 .maSua .luu{background:var(--pri);color:#fff}
 .maDong .loi{flex-basis:100%;margin-top:0}
+/* Tai nguyen */
+.tnDong{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dsGon .tnDong:first-child{border-top:0}
+.tnDong.an{opacity:.6}
+.tnAnh{flex:none;width:96px;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#172033,#2a3a5e 60%,#b8235a 140%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px}
+.tnAnh img{width:100%;height:100%;object-fit:cover;display:block}
+.tnChu{flex:1 1 220px;min-width:0}
+.tnChu>b{display:block;font-size:16px}
+.tnChu>span{display:block;font-size:13.5px;color:var(--muted)}
+.tnChu .tnSo{color:var(--ink);margin-top:3px;font-size:14px}
+.tnNut{display:flex;gap:6px;flex:none}
+.tnNut .btn2,.tnNut a.btn2{padding:7px 12px;font-size:14px;text-decoration:none;color:var(--ink);background:#fff;border-radius:10px;font-weight:600}
+.tnNut button:disabled{opacity:.45}
+.tnAi{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}
+.tnAi span{font-size:13.5px;border:1.5px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff}
+.tnAi i{font-style:normal;color:var(--muted);font-size:12px}
 @media (max-width:480px){.nav button[data-di=home]{display:none}.oLuoi{grid-template-columns:1fr 1fr}.o{min-height:140px;padding:14px}.o .kh{font-size:34px}.o .mt{font-size:12.5px}}
 </style>
 </head>
@@ -404,7 +420,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 <header class="appbar hidden" id="appbar">
   <div class="ab">
     <button class="brand" data-di="home" title="Trang chủ"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><rect x="1" y="1" width="38" height="38" rx="8" fill="none" stroke="#fff" stroke-width="2"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><span><b>Khám phá Hóa học</b><small>Trang giáo viên</small></span></button>
-    <nav class="nav" aria-label="Chuyển trang"><button data-di="home">Trang chủ</button><button data-di="dot">Kiểm tra</button><button data-di="tro">Trò chơi</button><button data-di="hoso" id="btnHoSo">Hồ sơ HS</button><button data-di="caidat">Cài đặt</button></nav>
+    <nav class="nav" aria-label="Chuyển trang"><button data-di="home">Trang chủ</button><button data-di="dot">Kiểm tra</button><button data-di="tro">Trò chơi</button><button data-di="tn">Tài nguyên</button><button data-di="hoso" id="btnHoSo">Hồ sơ HS</button><button data-di="caidat">Cài đặt</button></nav>
     <div class="abPhai"><button class="abQR" id="abQR">Mã QR</button><button class="abRa" id="btnRa">Thoát</button></div>
   </div>
 </header>
@@ -484,6 +500,13 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
   <div id="kqBox"></div>
 </section>
 
+<section id="scrTN" class="hidden">
+  <div class="top"><div><h1>Tài nguyên học tập</h1><p class="sub" id="soTN"></p></div><div><button class="btn2" id="tnQR">▦ QR tài khoản HS</button> <button class="btn2" id="tnMoi">↻</button></div></div>
+  <p class="sub" style="margin:0 2px 10px">Học sinh đăng nhập tài khoản (SBD + mã xem bài) → <b>Tài nguyên</b>. Mỗi lần em mở một tài nguyên được tính 1 lượt xem.</p>
+  <div class="loc" id="tnLop"></div>
+  <div id="dsTN"></div>
+</section>
+
 <section id="scrCaiDat" class="hidden">
   <div class="card">
     <h1>Mã và cài đặt</h1>
@@ -501,7 +524,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 
 <div class="ovQR" id="ovQR" hidden role="dialog" aria-modal="true" aria-label="Mã QR cho học sinh">
   <div class="ovBar">
-    <div class="seg" id="qrSeg"><button data-q="lam" class="on">Vào làm bài</button><button data-q="xem">Xem lại bài</button></div>
+    <div class="seg" id="qrSeg"><button data-q="lam" class="on">Vào làm bài</button><button data-q="xem">Tài khoản HS</button></div>
     <div><button class="nutO" id="qrToan">⛶ Toàn màn hình</button><button class="nutO" id="qrDong">✕ Đóng</button></div>
   </div>
   <div class="ovThan">
@@ -512,16 +535,17 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="cau-hinh-lop.js"></script>
 <script src="doc-excel.js"></script>
+<script src="tai-nguyen/danh-muc.js"></script>
 <script>
 (function () {
   var DS = window.DS_LOP || [];
   var MA = '', DOT = [], dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
   function man(id) {
-    ['scrLogin', 'scrHome', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS', 'scrTro', 'scrTroKQ', 'scrCaiDat'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
+    ['scrLogin', 'scrHome', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS', 'scrTro', 'scrTroKQ', 'scrCaiDat', 'scrTN'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
     document.body.classList.toggle('rong', id === 'scrPhat' || id === 'scrHome'); window.scrollTo(0, 0);
     $('appbar').classList.toggle('hidden', id === 'scrLogin');
-    var muc = id === 'scrHome' ? 'home' : /scrHoSo|scrMotHS/.test(id) ? 'hoso' : /scrTro/.test(id) ? 'tro' : id === 'scrCaiDat' ? 'caidat' : 'dot';
+    var muc = id === 'scrHome' ? 'home' : /scrHoSo|scrMotHS/.test(id) ? 'hoso' : /scrTro/.test(id) ? 'tro' : id === 'scrCaiDat' ? 'caidat' : id === 'scrTN' ? 'tn' : 'dot';
     [].forEach.call(document.querySelectorAll('.nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-di') === muc); });
   }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -582,6 +606,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
     else if (k === 'tro') moTro();
     else if (k === 'kqtro') moKQ();
     else if (k === 'caidat') moCaiDat();
+    else if (k === 'tn') moTN();
     else $('btnHoSo').onclick();
   }
   [].forEach.call(document.querySelectorAll('[data-di]'), function (b) { if (b.id !== 'btnHoSo') b.onclick = function () { diDen(b.getAttribute('data-di')); }; });
@@ -1660,13 +1685,16 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
     var NHOM = [
       { ten: 'Kiểm tra', mt: 'Đề, phòng chờ, chấm điểm, xem lại bài', o: [
         { kh: 'Đề', ten: 'Đề kiểm tra', mt: 'Mở phòng chờ, phát đề, đóng đề; sửa tên, thời gian, lớp', so: DOT.length + ' đề', di: 'dot' },
-        { kh: 'Xm', ten: 'Mã QR xem lại bài', mt: 'Cho học sinh quét để xem lại bài ở nhà', qr: 'xem', chi: 1 },
+        { kh: 'Tk', ten: 'Mã QR tài khoản HS', mt: 'Học sinh đăng nhập để xem lại bài và tài nguyên', qr: 'xem', chi: 1 },
         { kh: 'Hs', ten: 'Hồ sơ học sinh', mt: 'Bảng điểm, tiến bộ, kiến thức yếu, vắng thi', so: DS.length + ' lớp', di: 'hoso' }
       ] },
       { ten: 'Trò chơi', mt: 'Tất cả trò chơi iPad, một nơi quản lý', o: [
         { kh: 'Tc', ten: 'Quản lý trò chơi', mt: 'Mở/đóng, thời gian chơi, lớp được chơi, mã QR', so: TRO ? soMo + '/' + TRO.length + ' mở' : '', di: 'tro', chi: 1 },
         { kh: 'Kq', ten: 'Kết quả trò chơi', mt: 'Từng lượt chơi theo lớp, theo ngày; nhóm và thành viên', di: 'kqtro' },
         { kh: 'Ml', ten: 'Mục lục trò chơi', mt: 'Trang mục lục cho học sinh', href: 'https://sau-rieng.github.io/TRO--CHOI-IPAD/MUCLUC.html' + (window.LAM_DEMO ? '?demo' : '') }
+      ] },
+      { ten: 'Tài nguyên', mt: 'Mô phỏng 3D, thí nghiệm ảo trong tài khoản học sinh', o: [
+        { kh: '3D', ten: 'Tài nguyên học tập', mt: 'Danh sách mô phỏng, lượt xem theo lớp, ai đã xem', so: dsTN().length + ' mục', di: 'tn', chi: 1 }
       ] },
       { ten: 'Cài đặt', mt: '', o: [
         { kh: 'Ma', ten: 'Mã và cài đặt', mt: 'Mã giáo viên, mã mở khóa, mã trò chơi, mã quản lý', di: 'caidat' },
@@ -1695,9 +1723,9 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
     var url = goc + (QR_KIEU === 'xem' ? 'XEM-LAI.html' : 'LAM-BAI.html') + (window.LAM_DEMO ? '?demo' : '');
     $('qrSeg').hidden = false;
     [].forEach.call($('qrSeg').children, function (b) { b.classList.toggle('on', b.getAttribute('data-q') === QR_KIEU); });
-    $('qrTieuDe').textContent = QR_KIEU === 'xem' ? 'Quét mã để xem lại bài' : 'Quét mã để vào làm bài';
+    $('qrTieuDe').textContent = QR_KIEU === 'xem' ? 'Quét mã vào tài khoản: xem lại bài, tài nguyên' : 'Quét mã để vào làm bài';
     $('qrBuoc').innerHTML = QR_KIEU === 'xem'
-      ? '<li><span>Mở <b>Camera</b> trên iPad hoặc điện thoại, quét mã</span></li><li><span>Chọn lớp, gõ <b>số báo danh</b> và <b>mã xem bài</b></span></li><li><span>Bấm vào bài để xem câu đúng, câu sai</span></li>'
+      ? '<li><span>Mở <b>Camera</b> trên iPad hoặc điện thoại, quét mã</span></li><li><span>Chọn lớp, gõ <b>số báo danh</b> và <b>mã xem bài</b></span></li><li><span>Chọn <b>Xem lại bài</b> hoặc <b>Tài nguyên</b> (mô phỏng, thí nghiệm)</span></li>'
       : '<li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Chọn <b>lớp</b>, gõ <b>2 số cuối</b> số báo danh và <b>mã giáo viên</b></span></li><li><span>Bấm <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b></span></li>';
     $('qrLink').textContent = url.replace(/^https?:\/\//, '');
     $('ovQR').hidden = false; veQR($('qrMa'), url);
@@ -2238,6 +2266,72 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
         .catch(function (e) { b.disabled = false; b.textContent = 'Lưu'; var o = document.createElement('div'); o.className = 'loi'; o.textContent = 'Chưa lưu được: ' + e.message; k.appendChild(o); });
     };
     return k;
+  }
+
+
+  // =====================================================================
+  // TAI NGUYEN HOC TAP (tai-nguyen/danh-muc.js) – luot xem theo lop
+  // =====================================================================
+  var TNX = { data: {}, lop: 'tat', mo: null };
+  function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file; }); }
+  function moTN() { man('scrTN'); veTN(); taiTN(false); }
+  function taiTN(lamMoi) {
+    DS.forEach(function (l) {
+      if (TNX.data[l.ten] && !lamMoi) return;
+      TNX.data[l.ten] = { dang: true };
+      goi(l.url, { action: 'gv_tainguyen', ma: MA }).then(function (j) {
+        TNX.data[l.ten] = j.ok ? j : { loi: /hop le/i.test(j.msg || '') ? 'Sổ lớp này chưa cập nhật bản mới' : (j.msg || 'lỗi') };
+      }).catch(function (e) { TNX.data[l.ten] = { loi: 'Không kết nối được (' + e.message + ')' }; })
+        .then(function () { if (!$('scrTN').classList.contains('hidden')) veTN(); });
+    });
+  }
+  $('tnMoi').onclick = function () { taiTN(true); };
+  $('tnQR').onclick = function () { moQR('xem'); };
+  function veTN() {
+    var ds = dsTN(), box = $('dsTN');
+    var lops = DS.slice();
+    if (TNX.lop !== 'tat' && !lops.some(function (l) { return l.ten === TNX.lop; })) TNX.lop = 'tat';
+    var tab = $('tnLop'); tab.innerHTML = '';
+    (lops.length > 1 ? [{ ten: 'tat', nhan: 'Tất cả lớp' }] : []).concat(lops.map(function (l) { return { ten: l.ten, nhan: l.ten }; })).forEach(function (x) {
+      var b = document.createElement('button'); b.className = x.ten === TNX.lop || lops.length === 1 ? 'on' : ''; b.textContent = x.nhan;
+      b.onclick = function () { TNX.lop = x.ten; veTN(); }; tab.appendChild(b);
+    });
+    var chon = TNX.lop === 'tat' ? lops : lops.filter(function (l) { return l.ten === TNX.lop; });
+    var dang = chon.filter(function (l) { return TNX.data[l.ten] && TNX.data[l.ten].dang; }).length;
+    var siSo = 0, theo = {};   // theo[ma] = {luot, em:{lop|mahs: {ten, lop, n}}}
+    chon.forEach(function (l) {
+      var j = TNX.data[l.ten]; if (!j || !j.ok) return; siSo += j.siSo || 0;
+      j.xem.forEach(function (x) {
+        var t = theo[x[1]] = theo[x[1]] || { luot: 0, em: {}, cuoi: 0 };
+        t.luot++; t.cuoi = Math.max(t.cuoi, x[0]);
+        var k = l.ten + '|' + x[2]; (t.em[k] = t.em[k] || { ten: x[3], lop: l.ten, n: 0 }).n++;
+      });
+    });
+    $('soTN').textContent = ds.length + ' tài nguyên' + (dang ? ' · đang tải ' + dang + ' lớp…' : '');
+    var h = '';
+    chon.forEach(function (l) { var j = TNX.data[l.ten]; if (j && j.loi) h += '<div class="card loi">' + esc(l.ten) + ': ' + esc(j.loi) + '</div>'; });
+    if (!ds.length) h += '<div class="card sub">Chưa có tài nguyên nào. Gửi file mô phỏng (HTML) cho Claude và nói "chuyển" để đưa lên đây.</div>';
+    var khoi = []; ds.forEach(function (t) { if (khoi.indexOf(String(t.khoi)) < 0) khoi.push(String(t.khoi)); });
+    khoi.sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (k) {
+      h += '<div class="nhom">' + (k === '9' ? 'KHTN 9' : 'Hóa ' + esc(k)) + '</div><div class="dsGon">';
+      ds.filter(function (t) { return String(t.khoi) === k; }).forEach(function (t) {
+        var x = theo[t.ma] || { luot: 0, em: {} }, soEm = Object.keys(x.em).length;
+        h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="tai-nguyen/' + encodeURI(t.anh) + '">' : '<span>3D</span>') + '</div>' +
+          '<div class="tnChu"><b>' + esc(t.ten) + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc([t.loai, t.bai].filter(Boolean).join(' · ')) + '</span>' +
+          '<span class="tnSo"><b>' + x.luot + '</b> lượt xem · <b>' + soEm + '</b>' + (siSo ? '/' + siSo : '') + ' em đã xem</span></div>' +
+          '<div class="tnNut"><a class="btn2" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener">▶ Xem</a><button class="btn2 ai"' + (soEm ? '' : ' disabled') + '>' + (TNX.mo === t.ma ? 'Ẩn' : 'Ai đã xem') + '</button></div>';
+        if (TNX.mo === t.ma && soEm) {
+          var em = Object.keys(x.em).map(function (k) { return x.em[k]; }).sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : a.ten.localeCompare(b.ten, 'vi'); });
+          h += '<div class="tnAi">' + em.map(function (e) { return '<span>' + (chon.length > 1 ? '<i>' + esc(e.lop) + '</i> ' : '') + esc(e.ten) + (e.n > 1 ? ' <b>×' + e.n + '</b>' : '') + '</span>'; }).join('') + '</div>';
+        }
+        h += '</div>';
+      });
+      h += '</div>';
+    });
+    box.innerHTML = h;
+    [].forEach.call(box.querySelectorAll('.tnDong .ai'), function (b) {
+      b.onclick = function () { var ma = b.closest('.tnDong').getAttribute('data-ma'); TNX.mo = TNX.mo === ma ? null : ma; veTN(); };
+    });
   }
 
 
