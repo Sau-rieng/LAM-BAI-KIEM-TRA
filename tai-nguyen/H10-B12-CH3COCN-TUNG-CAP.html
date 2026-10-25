@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Từng cặp nguyên tử – CH₃–CO–CN</title>
+<style>
+:root{--text-primary:#2C2C2A;--text-secondary:#5F5E5A;--surface-1:#F4F3EE;--surface-2:#FFFFFF;--border:#E3E1DA;--border-strong:#C9C7BE;--border-stronger:#9C9A92;--bg-accent:#E6F1FB;--text-accent:#0C447C;--border-accent:#378ADD;--radius:8px;--bg:#FAF9F5}
+@media (prefers-color-scheme:dark){:root{--text-primary:#EDEBE4;--text-secondary:#B4B2A9;--surface-1:#262624;--surface-2:#1F1F1D;--border:#3A3A37;--border-strong:#55544F;--border-stronger:#8A8882;--bg-accent:#0C2F52;--text-accent:#B5D4F4;--border-accent:#378ADD;--bg:#1A1A18}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.5}
+main{max-width:940px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+.lead{color:var(--text-secondary);margin:0 0 12px;font-size:15px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.bar button{font:inherit;font-size:14px;padding:7px 13px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+.bar button:hover{border-color:var(--border-stronger)}
+.bar button.on{background:var(--bg-accent);color:var(--text-accent);border-color:var(--border-accent)}
+.gl{font-size:13px;color:var(--text-secondary);min-width:100px}
+.tg{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);cursor:pointer}
+.stage{position:relative;width:100%;height:440px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);overflow:hidden;margin-top:10px}
+.cv{width:100%;height:100%;touch-action:none;cursor:grab}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;font-size:13px;padding:1px 8px;border-radius:10px;background:#fff;border:1px solid currentColor;white-space:nowrap;transform:translate(-50%,-50%);font-weight:600}
+.cap{font-size:15px;margin-top:12px;line-height:1.6}
+.cfg{margin-top:12px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface-1)}
+.hd{font-size:16px;font-weight:600;margin-bottom:4px}
+.row{display:flex;align-items:flex-start;gap:10px;margin:10px 0 4px;flex-wrap:wrap}
+.rl{font-size:14px;color:var(--text-secondary);width:110px;padding-top:4px}
+.grp{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:34px}
+.bxs{display:flex}
+.bx{width:28px;height:28px;border:1.5px solid var(--border-stronger);margin-left:-1.5px;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--text-primary)}
+.hl .bx{border-width:3px}
+.sub{font-size:12px;color:var(--text-secondary);white-space:nowrap}
+.fm{font-size:14px;color:var(--text-secondary);margin-top:8px;line-height:1.6}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--text-secondary);margin-top:8px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+table.sm{border-collapse:collapse;font-size:14px;width:100%;margin-top:8px}
+table.sm td,table.sm th{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+table.sm th{color:var(--text-secondary)}
+input[type=range]{flex:1;min-width:120px}
+.err{display:none;padding:14px;margin-top:10px;border:1px solid #E24B4A;border-radius:8px;color:#A32D2D;background:#FCEBEB}
+footer{margin-top:18px;font-size:12px;color:var(--text-secondary)}
+</style>
+</head>
+<body>
+<main>
+<h1>Từng cặp nguyên tử trong CH₃–CO–CN</h1>
+<p class="lead">Chọn một cặp: hai nguyên tử tiến lại và obitan xen phủ tạo liên kết. Kéo thanh trượt để xem chậm, kéo chuột trên hình để xoay.</p>
+<div id="err" class="err">Không tải được thư viện three.js. Hãy mở file khi máy có kết nối Internet.</div>
+<div class="bar"><span class="gl">Giữa C và C</span><button class="pr" data-k="C1C2">C(1)–C(2)</button><button class="pr" data-k="C2C3">C(2)–C(3)</button></div>
+<div class="bar"><span class="gl">C với nguyên tử khác</span><button class="pr" data-k="C1H">C(1)–H</button><button class="pr" data-k="C2O">C(2)=O</button><button class="pr" data-k="C3N">C(3)≡N</button></div>
+<div class="stage"><div class="cv" id="cv"></div><div class="labels" id="labels"></div></div>
+<div class="bar">
+<button id="all">▶ Chạy lần lượt 5 cặp</button>
+<button id="play">↺ Xem lại cặp này</button>
+<span style="font-size:14px;color:var(--text-secondary)">Tách</span>
+<input type="range" id="sl" min="0" max="100" value="0">
+<span style="font-size:14px;color:var(--text-secondary)">Ghép</span>
+<button id="rot" class="on">⟳ Tự xoay</button>
+</div>
+<div class="cfg" id="cfg"></div>
+<div class="lg">
+<span><span class="dot" style="background:#7F77DD"></span>sp³</span>
+<span><span class="dot" style="background:#D85A30"></span>sp²</span>
+<span><span class="dot" style="background:#D4537E"></span>sp</span>
+<span><span class="dot" style="background:#378ADD"></span>p (π)</span>
+<span><span class="dot" style="background:#1D9E75"></span>1s (H)</span>
+<span><span class="dot" style="background:#EF9F27"></span>Vùng xen phủ σ</span>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script>
+<script>if(!window.THREE)document.getElementById('err').style.display='block';</script>
+<script>
+if(window.THREE){
+const COL={sp3:0x7F77DD,sp2:0xD85A30,sp:0xD4537E,p:0x378ADD,h:0x1D9E75};
+const HEX={sp3:'#7F77DD',sp2:'#D85A30',sp:'#D4537E',p:'#378ADD',h:'#1D9E75'};
+const TX={sp3:'#534AB7',sp2:'#993C1D',sp:'#993556',p:'#185FA5',h:'#0F6E56',ov:'#854F0B'};
+const el=document.getElementById('cv'),lbBox=document.getElementById('labels');
+const W=()=>el.clientWidth||600,H=()=>el.clientHeight||440;
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(W(),H());el.appendChild(r.domElement);
+const sc=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(40,W()/H(),.1,100);cam.position.set(0,1.6,9);cam.lookAt(0,0,0);
+sc.add(new THREE.AmbientLight(0xffffff,.6));
+const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(4,6,8);sc.add(dl);
+const root=new THREE.Group();sc.add(root);root.rotation.y=-.45;
+const V=(x,y,z)=>new THREE.Vector3(x,y,z),Z=V(0,0,1),sph=new THREE.SphereGeometry(1,36,24);
+const cl=x=>Math.max(0,Math.min(1,x)),ez=t=>t*t*(3-2*t);
+function mat(c,o){return new THREE.MeshPhongMaterial({color:c,transparent:true,opacity:o,shininess:60,depthWrite:false});}
+function lobeMesh(par,pos,dir,len,wid,c,o){const d=dir.clone().normalize();const m=new THREE.Mesh(sph,mat(c,o));m.scale.set(wid,wid,len/2);m.position.copy(pos).add(d.clone().multiplyScalar(len/2));m.quaternion.setFromUnitVectors(Z,d);par.add(m);return m;}
+const T3=[90,210,330].map(a=>{const f=a*Math.PI/180;return V(-1/3,.9428*Math.cos(f),.9428*Math.sin(f));});
+function buildAtom(spec,side){
+const grp=new THREE.Group();const fx=v=>V(v.x*side,v.y,v.z);const hy=spec.hy;
+if(hy==='h'){const c=new THREE.Mesh(sph,mat(COL.h,.6));c.scale.setScalar(.55);grp.add(c);grp.add(new THREE.Mesh(new THREE.SphereGeometry(.16,20,14),new THREE.MeshPhongMaterial({color:0x0F6E56})));return grp;}
+grp.add(new THREE.Mesh(new THREE.SphereGeometry(.2,20,14),new THREE.MeshPhongMaterial({color:spec.nuc})));
+const O=V(0,0,0);
+lobeMesh(grp,O,fx(V(1,0,0)),1.3,.36,COL[hy],.78);
+let others=[];
+if(hy==='sp3')others=T3;
+if(hy==='sp2')others=[V(-.5,0,.866),V(-.5,0,-.866)];
+if(hy==='sp')others=[V(-1,0,0)];
+others.forEach(d=>lobeMesh(grp,O,fx(d),spec.lp?.85:1.1,.3,COL[hy],spec.lp?.45:.14));
+const ps=hy==='sp2'?['y']:hy==='sp'?['y','z']:[];
+ps.forEach(a=>{const d=a==='y'?V(0,1,0):V(0,0,1);const used=spec.pi.includes(a);[1,-1].forEach(s=>lobeMesh(grp,O,d.clone().multiplyScalar(s),.9,.3,COL.p,used?.55:.12));});
+return grp;}
+const A={
+C1:{hy:'sp3',nuc:0x5F5E5A,name:'C(1)',pi:[]},
+C2:{hy:'sp2',nuc:0x5F5E5A,name:'C(2)',pi:[]},
+C2p:{hy:'sp2',nuc:0x5F5E5A,name:'C(2)',pi:['y']},
+C3:{hy:'sp',nuc:0x5F5E5A,name:'C(3)',pi:[]},
+C3p:{hy:'sp',nuc:0x5F5E5A,name:'C(3)',pi:['y','z']},
+H:{hy:'h',name:'H',pi:[]},
+O:{hy:'sp2',nuc:0xA32D2D,name:'O',pi:['y'],lp:true},
+N:{hy:'sp',nuc:0x0C447C,name:'N',pi:['y','z'],lp:true}};
+const HN={sp3:'sp³',sp2:'sp²',sp:'sp',h:'1s'};
+const u='↑',ud='↑↓';
+const BX={
+C1:[[u,'sp3','σ C–H'],[u,'sp3','σ C–H'],[u,'sp3','σ C–H'],[u,'sp3','σ C–C(2)']],
+C2:[[u,'sp2','σ C(1)'],[u,'sp2','σ C(3)'],[u,'sp2','σ O'],[u,'p','π O']],
+C3:[[u,'sp','σ C(2)'],[u,'sp','σ N'],[u,'p','π N'],[u,'p','π N']],
+O:[[ud,'sp2','cặp e'],[ud,'sp2','cặp e'],[u,'sp2','σ C(2)'],[u,'p','π C(2)']],
+N:[[ud,'sp','cặp e'],[u,'sp','σ C(3)'],[u,'p','π C(3)'],[u,'p','π C(3)']],
+H:[[u,'h','σ C(1)']]};
+const ORDER=['C1C2','C2C3','C1H','C2O','C3N'];
+const PAIRS={
+C1C2:{a:'C1',b:'C2',ka:'C1',kb:'C2',ha:[3],hb:[0],d:2.05,pi:[],sig:'σ (sp³–sp²)',title:'C(1)–C(2): liên kết đơn',txt:'1 liên kết σ, tạo bởi xen phủ trục giữa AO sp³ của C(1) và AO sp² của C(2). Vùng xen phủ (màu vàng) nằm ngay trên trục nối hai hạt nhân. Các obitan mờ là phần C(1), C(2) dùng cho liên kết khác.'},
+C2C3:{a:'C2',b:'C3',ka:'C2',kb:'C3',ha:[1],hb:[0],d:2.0,pi:[],sig:'σ (sp²–sp)',title:'C(2)–C(3): liên kết đơn',txt:'1 liên kết σ do AO sp² của C(2) xen phủ trục với AO sp của C(3). Các obitan p của C(2), C(3) (xanh mờ) không tạo π ở cặp này vì đã dành cho liên kết π với O và N.'},
+C1H:{a:'C1',b:'H',ka:'C1',kb:'H',ha:[0],hb:[0],d:1.65,pi:[],sig:'σ (sp³–1s)',title:'C(1)–H: liên kết đơn (×3)',txt:'1 liên kết σ do AO sp³ của C(1) xen phủ trục với AO 1s hình cầu của H. C(1) lặp lại đúng như vậy với 3 nguyên tử H theo 3 thùy sp³ còn lại, nên có 3 liên kết C–H giống hệt nhau.'},
+C2O:{a:'C2p',b:'O',ka:'C2',kb:'O',ha:[2,3],hb:[2,3],d:1.95,pi:['y'],sig:'σ (sp²–sp²)',title:'C(2)=O: liên kết đôi = 1σ + 1π',txt:'σ: AO sp² của C(2) xen phủ trục với AO sp² của O. π: hai AO p song song (vuông góc mặt phẳng sp²) xen phủ bên, tạo hai vùng electron phía trên và phía dưới trục. O còn 2 cặp electron tự do trong 2 AO sp².'},
+C3N:{a:'C3p',b:'N',ka:'C3',kb:'N',ha:[1,2,3],hb:[1,2,3],d:1.9,pi:['y','z'],sig:'σ (sp–sp)',title:'C(3)≡N: liên kết ba = 1σ + 2π',txt:'σ: AO sp của C(3) xen phủ trục với AO sp của N. Hai cặp AO p (p<sub>y</sub> và p<sub>z</sub>) xen phủ bên tạo 2 liên kết π vuông góc với nhau, bao quanh trục như một ống trụ. N còn 1 cặp electron tự do hướng ra ngoài.'}};
+const scene=new THREE.Group();root.add(scene);
+let cur=null,curK='',ga,gb,ov,piM=[],LB=[],LA,LBb,LS,LP=[],s=0,target=1,auto=true,drag=false,lx=0,ly=0,playAll=false,hold=0;
+function lab(text,col){const d=document.createElement('div');d.className='lb';d.innerHTML=text;d.style.color=col;lbBox.appendChild(d);const o=new THREE.Object3D();scene.add(o);const L={o,d,op:1};LB.push(L);return L;}
+function build(k){
+curK=k;cur=PAIRS[k];while(scene.children.length)scene.remove(scene.children[0]);lbBox.innerHTML='';LB=[];LP=[];piM=[];
+ga=buildAtom(A[cur.a],1);gb=buildAtom(A[cur.b],-1);scene.add(ga);scene.add(gb);
+ov=new THREE.Mesh(sph,mat(0xEF9F27,0));scene.add(ov);
+cur.pi.forEach(a=>[1,-1].forEach(sg=>{const m=new THREE.Mesh(sph,mat(0x378ADD,0));m.userData={a,sg};scene.add(m);piM.push(m);}));
+const sa=A[cur.a],sb=A[cur.b];
+LA=lab(sa.name+' · '+HN[sa.hy],TX[sa.hy]);LBb=lab(sb.name+' · '+HN[sb.hy],TX[sb.hy]);
+LS=lab(cur.sig,TX.ov);
+cur.pi.forEach(a=>LP.push({L:lab(a==='y'?'π (p<sub>y</sub>–p<sub>y</sub>)':'π (p<sub>z</sub>–p<sub>z</sub>)',TX.p),a}));
+document.getElementById('cfg').innerHTML=cfgHTML(cur);
+document.querySelectorAll('.pr').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+s=0;target=1;hold=240;}
+function boxes(key,hl){return BX[key].map((x,i)=>{const on=hl.includes(i);return '<div class="grp '+(on?'hl':'')+'" style="opacity:'+(on?1:.35)+'"><div class="bx" style="border-color:'+HEX[x[1]]+'">'+x[0]+'</div><div class="sub" style="color:'+TX[x[1]]+'">'+x[2]+'</div></div>';}).join('');}
+function cfgHTML(c){const na=A[c.a],nb=A[c.b];return '<div class="hd">'+c.title+'</div>'+
+'<div class="row"><div class="rl">'+na.name+' ('+HN[na.hy]+')</div>'+boxes(c.ka,c.ha)+'</div>'+
+'<div class="row"><div class="rl">'+nb.name+' ('+HN[nb.hy]+')</div>'+boxes(c.kb,c.hb)+'</div>'+
+'<div class="fm">Ô viền đậm là obitan tham gia liên kết ở cặp này; ô mờ dùng cho liên kết khác hoặc chứa cặp electron tự do. Mỗi ô có 1 electron ghép với 1 electron của nguyên tử kia thành một cặp electron chung.</div>'+
+'<div class="fm" style="color:var(--text-primary)">'+c.txt+'</div>';}
+function upd(){
+const e=ez(s),d=cur.d+(5.2-cur.d)*(1-e),rev=cl((s-.82)/.18);
+ga.position.set(-d/2,0,0);gb.position.set(d/2,0,0);
+ov.scale.set(.42,.26,.26);ov.material.opacity=.75*rev;
+piM.forEach(m=>{const a=m.userData.a,sg=m.userData.sg;m.position.copy((a==='y'?V(0,1,0):V(0,0,1)).multiplyScalar(.62*sg));m.scale.set(d/2+.35,.24,.24);m.material.opacity=.45*rev;});
+LA.o.position.set(-d/2,1.6,0);LBb.o.position.set(d/2,A[cur.b].hy==='h'?.9:1.6,0);
+LS.o.position.set(0,cur.pi.includes('y')?-1.2:-.72,0);LS.op=rev;
+LP.forEach(p=>{p.L.o.position.copy(p.a==='y'?V(0,1.08,0):V(0,-.2,1.35));p.L.op=rev;});
+document.getElementById('sl').value=Math.round(s*100);}
+const allB=document.getElementById('all');
+function setAll(x){playAll=x;allB.textContent=x?'⏸ Dừng chạy lần lượt':'▶ Chạy lần lượt 5 cặp';allB.classList.toggle('on',x);}
+allB.onclick=()=>{if(playAll){setAll(false);return;}setAll(true);build(ORDER[0]);};
+document.querySelectorAll('.pr').forEach(b=>b.onclick=()=>{setAll(false);build(b.dataset.k);});
+document.getElementById('play').onclick=()=>{s=0;target=1;hold=240;};
+document.getElementById('sl').oninput=e=>{setAll(false);s=e.target.value/100;target=s;};
+const rb=document.getElementById('rot');rb.onclick=()=>{auto=!auto;rb.classList.toggle('on',auto);};
+el.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;el.style.cursor='grabbing';el.setPointerCapture(e.pointerId);});
+el.addEventListener('pointermove',e=>{if(!drag)return;root.rotation.y+=(e.clientX-lx)*.01;root.rotation.x=Math.max(-1.4,Math.min(1.4,root.rotation.x+(e.clientY-ly)*.01));lx=e.clientX;ly=e.clientY;});
+el.addEventListener('pointerup',()=>{drag=false;el.style.cursor='grab';});
+addEventListener('resize',()=>{r.setSize(W(),H());cam.aspect=W()/H();cam.updateProjectionMatrix();});
+build('C1C2');
+const v=new THREE.Vector3();let t=0;
+(function loop(){
+if(Math.abs(target-s)>.002)s+=Math.sign(target-s)*Math.min(Math.abs(target-s),.008);else{s=target;
+if(playAll&&s>=1){if(hold>0)hold--;else{const i=ORDER.indexOf(curK);if(i<ORDER.length-1)build(ORDER[i+1]);else setAll(false);}}}
+upd();
+if(auto&&!drag){t+=.008;root.rotation.y=-.45+Math.sin(t)*.6;}
+r.render(sc,cam);root.updateMatrixWorld(true);const w=W(),h=H();
+LB.forEach(L=>{L.o.getWorldPosition(v);v.project(cam);L.d.style.left=((v.x+1)/2*w)+'px';L.d.style.top=((1-v.y)/2*h)+'px';L.d.style.opacity=L.op;L.d.style.display=L.op<.02?'none':'block';});
+requestAnimationFrame(loop);
+})();
+}
+</script>
+<footer>Mở bằng Chrome, Edge, Firefox hoặc Safari; cần kết nối Internet để tải thư viện 3D (three.js).</footer>
+</main>
+</body>
+</html>

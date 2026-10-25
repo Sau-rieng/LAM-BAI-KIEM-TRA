@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lai hóa sp³ – CH₄</title>
+<style>
+:root{--text-primary:#2C2C2A;--text-secondary:#5F5E5A;--surface-1:#F4F3EE;--surface-2:#FFFFFF;--border:#E3E1DA;--border-strong:#C9C7BE;--border-stronger:#9C9A92;--bg-accent:#E6F1FB;--text-accent:#0C447C;--border-accent:#378ADD;--radius:8px;--bg:#FAF9F5}
+@media (prefers-color-scheme:dark){:root{--text-primary:#EDEBE4;--text-secondary:#B4B2A9;--surface-1:#262624;--surface-2:#1F1F1D;--border:#3A3A37;--border-strong:#55544F;--border-stronger:#8A8882;--bg-accent:#0C2F52;--text-accent:#B5D4F4;--border-accent:#378ADD;--bg:#1A1A18}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.5}
+main{max-width:940px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+.lead{color:var(--text-secondary);margin:0 0 12px;font-size:15px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.bar button{font:inherit;font-size:14px;padding:7px 13px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+.bar button:hover{border-color:var(--border-stronger)}
+.bar button.on{background:var(--bg-accent);color:var(--text-accent);border-color:var(--border-accent)}
+.gl{font-size:13px;color:var(--text-secondary);min-width:100px}
+.tg{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);cursor:pointer}
+.stage{position:relative;width:100%;height:440px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);overflow:hidden;margin-top:10px}
+.cv{width:100%;height:100%;touch-action:none;cursor:grab}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;font-size:13px;padding:1px 8px;border-radius:10px;background:#fff;border:1px solid currentColor;white-space:nowrap;transform:translate(-50%,-50%);font-weight:600}
+.cap{font-size:15px;margin-top:12px;line-height:1.6}
+.cfg{margin-top:12px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface-1)}
+.hd{font-size:16px;font-weight:600;margin-bottom:4px}
+.row{display:flex;align-items:flex-start;gap:10px;margin:10px 0 4px;flex-wrap:wrap}
+.rl{font-size:14px;color:var(--text-secondary);width:110px;padding-top:4px}
+.grp{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:34px}
+.bxs{display:flex}
+.bx{width:28px;height:28px;border:1.5px solid var(--border-stronger);margin-left:-1.5px;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--text-primary)}
+.hl .bx{border-width:3px}
+.sub{font-size:12px;color:var(--text-secondary);white-space:nowrap}
+.fm{font-size:14px;color:var(--text-secondary);margin-top:8px;line-height:1.6}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--text-secondary);margin-top:8px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+table.sm{border-collapse:collapse;font-size:14px;width:100%;margin-top:8px}
+table.sm td,table.sm th{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+table.sm th{color:var(--text-secondary)}
+input[type=range]{flex:1;min-width:120px}
+.err{display:none;padding:14px;margin-top:10px;border:1px solid #E24B4A;border-radius:8px;color:#A32D2D;background:#FCEBEB}
+footer{margin-top:18px;font-size:12px;color:var(--text-secondary)}
+</style>
+</head>
+<body>
+<main>
+<h1>Lai hóa sp³ – phân tử CH₄</h1>
+<p class="lead">Kéo chuột (hoặc vuốt) để xoay mô hình. Bấm "Phát" hoặc chọn từng bước để xem quá trình lai hóa.</p>
+<div id="err" class="err">Không tải được thư viện three.js. Hãy mở file khi máy có kết nối Internet.</div>
+<div class="stage"><div class="cv" id="cv"></div><div class="labels" id="labels"></div></div>
+<div class="bar">
+<button id="play">▶ Phát</button>
+<button class="st" data-k="0">1. Obitan s, p</button>
+<button class="st" data-k="1">2. Lai hóa sp³</button>
+<button class="st" data-k="2">3. H tiến lại</button>
+<button class="st" data-k="3">4. Phân tử CH₄</button>
+<button id="rot" class="on">⟳ Tự xoay</button>
+</div>
+<div class="cap" id="cap"></div>
+<div class="cfg" id="cfg"></div>
+<div class="lg">
+<span><span class="dot" style="background:#EF9F27"></span>Obitan 2s</span>
+<span><span class="dot" style="background:#378ADD"></span>Obitan 2p</span>
+<span><span class="dot" style="background:#7F77DD"></span>Obitan sp³</span>
+<span><span class="dot" style="background:#1D9E75"></span>Nguyên tử H (1s)</span>
+<span><span class="dot" style="background:#888780"></span>Hạt nhân C</span>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script>
+<script>if(!window.THREE)document.getElementById('err').style.display='block';</script>
+<script>
+if(window.THREE){
+const COL={s:'#EF9F27',p:'#378ADD',sp:'#7F77DD',h:'#1D9E75'};
+const TXT={s:'#BA7517',p:'#185FA5',sp:'#534AB7',h:'#0F6E56'};
+const el=document.getElementById('cv'),lbBox=document.getElementById('labels');
+const W=()=>el.clientWidth||600,H=()=>el.clientHeight||440;
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(W(),H());el.appendChild(r.domElement);
+const sc=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(40,W()/H(),.1,100);cam.position.set(0,.8,10.5);cam.lookAt(0,0,0);
+sc.add(new THREE.AmbientLight(0xffffff,.55));
+const dl=new THREE.DirectionalLight(0xffffff,.85);dl.position.set(4,6,8);sc.add(dl);
+const g=new THREE.Group();sc.add(g);g.rotation.x=.25;
+const sph=new THREE.SphereGeometry(1,40,28);const Z=new THREE.Vector3(0,0,1);
+function mat(c){return new THREE.MeshPhongMaterial({color:c,transparent:true,opacity:.7,shininess:60,depthWrite:false});}
+function lobe(par,dir,len,wid,c){const m=new THREE.Mesh(sph,mat(c));m.userData={d:dir.clone().normalize(),len,wid};par.add(m);return m;}
+function place(m,s){s=Math.max(s,.001);const u=m.userData,L=u.len*s,w=u.wid*s;m.scale.set(w,w,L/2);m.position.copy(u.d).multiplyScalar(L/2);m.quaternion.setFromUnitVectors(Z,u.d);}
+const LB=[];
+function label(par,pos,text,key){const o=new THREE.Object3D();o.position.copy(pos);par.add(o);const d=document.createElement('div');d.className='lb';d.innerHTML=text;d.style.color=TXT[key];lbBox.appendChild(d);const L={o,d,op:0};LB.push(L);return L;}
+g.add(new THREE.Mesh(new THREE.SphereGeometry(.26,24,16),new THREE.MeshPhongMaterial({color:0x888780})));
+const spG=new THREE.Group();g.add(spG);
+const sO=new THREE.Mesh(sph,mat(0xEF9F27));spG.add(sO);
+const pL=[];[[1,0,0],[0,1,0],[0,0,1]].forEach(a=>[1,-1].forEach(sg=>pL.push(lobe(spG,new THREE.Vector3(a[0]*sg,a[1]*sg,a[2]*sg),1.9,.55,0x378ADD))));
+const lS=label(spG,new THREE.Vector3(-.75,-.75,.3),'2s','s');
+const lP=[label(spG,new THREE.Vector3(2.15,0,0),'2p<sub>x</sub>','p'),label(spG,new THREE.Vector3(0,2.15,0),'2p<sub>y</sub>','p'),label(spG,new THREE.Vector3(0,0,2.15),'2p<sub>z</sub>','p')];
+const D=[new THREE.Vector3(0,1,0)];
+for(let k=0;k<3;k++){const a=k*2*Math.PI/3+Math.PI/2;D.push(new THREE.Vector3(Math.sqrt(8)/3*Math.cos(a),-1/3,Math.sqrt(8)/3*Math.sin(a)));}
+const sp3=D.map(d=>lobe(g,d,2.1,.62,0x7F77DD));
+const sp3b=D.map(d=>lobe(g,d.clone().negate(),.55,.3,0x7F77DD));
+const lSp=D.map(d=>label(g,d.clone().multiplyScalar(1.35),'sp³','sp'));
+const Hs=D.map(()=>{const grp=new THREE.Group();const n=new THREE.Mesh(new THREE.SphereGeometry(.2,20,14),new THREE.MeshPhongMaterial({color:0x0F6E56,transparent:true}));const c=new THREE.Mesh(sph,mat(0x1D9E75));c.scale.setScalar(.55);grp.add(n);grp.add(c);g.add(grp);return {grp,n,c,l:label(grp,new THREE.Vector3(0,.85,0),'H 1s¹','h')};});
+const HF=D.map(d=>d.clone().multiplyScalar(2.3));
+const eg=[];for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)eg.push(HF[i],HF[j]);
+const edges=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(eg),new THREE.LineBasicMaterial({color:0x888780,transparent:true,opacity:0}));g.add(edges);
+const lAng=label(g,D[0].clone().add(D[1]).multiplyScalar(.45).add(new THREE.Vector3(-.35,.1,0)),'109,5°','s');
+const cl=x=>Math.max(0,Math.min(1,x)),ez=t=>t*t*(3-2*t);
+function upd(p){
+const t1=ez(cl(p)),t2=ez(cl(p-1)),t3=ez(cl(p-2)),hv=cl((p-1)*4);
+spG.rotation.y=t1*2.5;spG.visible=t1<.999;
+sO.material.opacity=.55*(1-t1);sO.scale.setScalar(.95*(1-.6*t1)+.001);
+pL.forEach(m=>{m.material.opacity=.6*(1-t1);place(m,1-.5*t1);});
+sp3.forEach(m=>{m.material.opacity=.72*t1;place(m,t1);m.visible=t1>.001;});
+sp3b.forEach(m=>{m.material.opacity=.5*t1;place(m,t1);m.visible=t1>.001;});
+Hs.forEach((h,i)=>{h.grp.visible=p>1.001;h.grp.position.copy(D[i]).multiplyScalar(6-3.7*t2);h.c.material.opacity=.5*hv;h.n.material.opacity=hv;h.l.op=hv*(1-t3*.4);});
+edges.material.opacity=.55*t3;
+lS.op=cl(1-t1*3);lP.forEach(l=>l.op=cl(1-t1*3));
+lSp.forEach(l=>l.op=cl(t1*3-2)*(1-t3));lAng.op=t3;
+}
+const v=new THREE.Vector3();
+function drawLabels(){const w=W(),h=H();g.updateMatrixWorld(true);LB.forEach(L=>{L.o.getWorldPosition(v);v.project(cam);L.d.style.left=((v.x+1)/2*w)+'px';L.d.style.top=((1-v.y)/2*h)+'px';L.d.style.opacity=L.op;L.d.style.display=L.op<.02?'none':'block';});}
+function bx(arr,key){return '<div class="bxs">'+arr.map(e=>'<div class="bx" style="border-color:'+(key?COL[key]:'')+'">'+e+'</div>').join('')+'</div>';}
+const C='↑',Cd='↓',Hh='<span style="color:'+TXT.h+'">↓</span>';
+function grp(arr,name,key){return '<div class="grp">'+bx(arr,key)+'<div class="sub" style="color:'+(key?TXT[key]:'')+'">'+name+'</div></div>';}
+function row(lbl,groups){return '<div class="row"><div class="rl">'+lbl+'</div>'+groups.join('')+'</div>';}
+const core1s=grp([C+Cd],'1s');
+const rGround=row('C (cơ bản)',[core1s,grp([C+Cd],'2s','s'),grp([C,C,''],'2p','p')]);
+const rExc=row('C (kích thích)',[core1s,grp([C],'2s','s'),grp([C,C,C],'2p','p')]);
+const rHyb=row('C (lai hóa)',[core1s,grp([C,C,C,C],'sp³','sp')]);
+const rH=row('4 nguyên tử H',[grp([C],'1s','h'),grp([C],'1s','h'),grp([C],'1s','h'),grp([C],'1s','h')]);
+const rMol=row('C trong CH₄',[core1s,grp([C+Hh,C+Hh,C+Hh,C+Hh],'sp³ (liên kết σ)','sp')]);
+const cfgs=[
+rGround+rExc+'<div class="fm">1s² 2s² 2p² → 1s² 2s¹ 2p³: một electron 2s nhảy lên ô 2p trống, tạo 4 electron độc thân. Phân lớp 1s bên trong không tham gia nên không vẽ trong mô hình 3D.</div>',
+rExc+rHyb+'<div class="fm">1 AO 2s + 3 AO 2p (lớp n = 2) → 4 AO sp³ cùng năng lượng, mỗi ô 1 electron. Mỗi AO sp³ mang 25% tính chất s, 75% tính chất p.</div>',
+rHyb+rH+'<div class="fm">Mỗi nguyên tử H (Z = 1) có cấu hình 1s¹: một electron độc thân trong obitan 1s hình cầu.</div>',
+rMol+'<div class="fm">Mũi tên đen: electron của C; mũi tên xanh lục: electron của H. Mỗi obitan sp³ xen phủ với 1s tạo cặp electron chung → 4 liên kết σ C–H. Lớp ngoài của C đủ 8 electron.</div>'];
+const caps=[
+"<b>Bước 1.</b> C ở trạng thái kích thích: một obitan 2s hình cầu và ba obitan 2p hình số 8 vuông góc theo trục x, y, z.",
+"<b>Bước 2.</b> Obitan 2s trộn với ba obitan 2p → 4 obitan sp³ giống hệt nhau, hướng về 4 đỉnh tứ diện đều.",
+"<b>Bước 3.</b> Bốn nguyên tử H tiến lại theo 4 hướng sp³; obitan 1s của H xen phủ trục với thùy lớn sp³.",
+"<b>Bước 4.</b> Hình thành 4 liên kết σ C–H bằng nhau, góc H–C–H = 109,5°. Kéo để xoay mô hình."];
+let p=0,target=0,playing=false,hold=0,auto=true,drag=false,lx=0,ly=0;
+const cap=document.getElementById('cap'),cfg=document.getElementById('cfg'),pb=document.getElementById('play'),sts=[...document.querySelectorAll('.st')];
+function setT(k){target=k;cap.innerHTML=caps[k];cfg.innerHTML=cfgs[k];sts.forEach(b=>b.classList.toggle('on',+b.dataset.k===k));}
+function setPlay(x){playing=x;pb.textContent=x?'⏸ Dừng':'▶ Phát';}
+pb.onclick=()=>{if(playing){setPlay(false);return;}if(target>=3&&Math.abs(p-3)<.01){p=0;setT(0);}setPlay(true);hold=90;};
+sts.forEach(b=>b.onclick=()=>{setPlay(false);setT(+b.dataset.k);});
+const rb=document.getElementById('rot');rb.onclick=()=>{auto=!auto;rb.classList.toggle('on',auto);};
+el.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;el.style.cursor='grabbing';el.setPointerCapture(e.pointerId);});
+el.addEventListener('pointermove',e=>{if(!drag)return;g.rotation.y+=(e.clientX-lx)*.01;g.rotation.x=Math.max(-1.3,Math.min(1.3,g.rotation.x+(e.clientY-ly)*.01));lx=e.clientX;ly=e.clientY;});
+el.addEventListener('pointerup',()=>{drag=false;el.style.cursor='grab';});
+addEventListener('resize',()=>{r.setSize(W(),H());cam.aspect=W()/H();cam.updateProjectionMatrix();});
+setT(0);upd(0);
+(function loop(){
+const d=target-p;
+if(Math.abs(d)>.002)p+=Math.sign(d)*Math.min(Math.abs(d),.011);
+else{p=target;if(playing){if(hold>0)hold--;else if(target<3){setT(target+1);hold=110;}else setPlay(false);}}
+upd(p);if(auto&&!drag)g.rotation.y+=.004;
+r.render(sc,cam);drawLabels();requestAnimationFrame(loop);
+})();
+}
+</script>
+<footer>Mở bằng Chrome, Edge, Firefox hoặc Safari; cần kết nối Internet để tải thư viện 3D (three.js).</footer>
+</main>
+</body>
+</html>

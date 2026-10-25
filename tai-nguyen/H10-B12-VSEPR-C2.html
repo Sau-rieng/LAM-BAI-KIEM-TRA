@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mô hình VSEPR – C2H6, C2H4, C2H2</title>
+<style>
+:root{--text-primary:#1f1e1d;--text-secondary:#5f5e5a;--text-muted:#888780;--text-accent:#185FA5;--border-accent:#378ADD;--border-stronger:rgba(0,0,0,.4);--surface-1:#f6f5f2;--bg:#ffffff}
+@media (prefers-color-scheme: dark){:root{--text-primary:#f1efe8;--text-secondary:#b4b2a9;--text-muted:#888780;--text-accent:#85B7EB;--border-accent:#378ADD;--border-stronger:rgba(255,255,255,.45);--surface-1:#262624;--bg:#1a1a19}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:960px;margin:0 auto;padding:24px 16px}
+h1{font-size:22px;font-weight:500;margin:0 0 6px}
+.sub{font-size:14px;color:var(--text-secondary);margin:0 0 16px;line-height:1.6}
+button{font:inherit;font-size:15px;color:var(--text-primary);background:transparent;border:1px solid var(--border-stronger);border-radius:8px;padding:7px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+.tb.on{border:2px solid var(--border-accent);color:var(--text-accent)}
+.m{background:var(--surface-1);border-radius:8px;padding:8px 12px}
+.m small{display:block;font-size:12px;color:var(--text-muted)}
+.m b{font-size:16px;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);margin-right:16px}
+.sw{width:13px;height:13px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.35)}
+#cap{font-size:15px;color:var(--text-secondary);line-height:1.6;margin:10px 0 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Mô hình VSEPR: CH3–CH3, CH2=CH2, CH≡CH</h1>
+<p class="sub">Các vùng electron quanh nguyên tử C đẩy nhau ra xa nhất có thể. Liên kết đơn, đôi hay ba đều chỉ tính là 1 vùng electron.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">
+<button class="tb" data-k="0">CH3–CH3</button>
+<button class="tb" data-k="1">CH2=CH2</button>
+<button class="tb" data-k="2">CH≡CH</button>
+<button id="go" style="margin-left:auto">Mô phỏng lực đẩy ↺</button>
+</div>
+<div id="info" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px"></div>
+<canvas id="cv" style="width:100%;height:460px;display:block;cursor:grab;touch-action:none;background:var(--surface-1);border-radius:12px;color:var(--text-primary)"></canvas>
+<div id="legend" style="margin:10px 0 4px;display:flex;flex-wrap:wrap"></div>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:6px">
+<label style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><input type="checkbox" id="dom" checked> Hiện vùng electron</label>
+<label style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><input type="checkbox" id="auto" checked> Tự quay</label>
+</div>
+<p id="cap"></p>
+<p style="font-size:13px;color:var(--text-muted);margin:10px 0 0">Kéo chuột (hoặc vuốt) để xoay. Phím 1, 2, 3 chuyển phân tử; phím R (hoặc nút ↺) chạy lại mô phỏng lực đẩy.</p>
+</main>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),oc=document.createElement('canvas'),octx=oc.getContext('2d');let W=600,H=460;
+function size(){const d=window.devicePixelRatio||1,r=cv.getBoundingClientRect();W=r.width;H=r.height;cv.width=oc.width=W*d;cv.height=oc.height=H*d;ctx.setTransform(d,0,0,d,0,0);octx.setTransform(d,0,0,d,0,0)}
+size();window.addEventListener('resize',size);
+let yaw=0.5,pitch=0.45,mol=0,drag=null,st=[];
+const COL={a:[29,158,117],b:[127,119,221],cc:[216,90,48],c:[95,94,90],hw:[211,209,199]};
+const INFO=[['AX4','4','Tứ diện','Góc H–C–H'],['AX3','3 (C=C tính 1 vùng)','Tam giác phẳng','Góc H–C–H'],['AX2','2 (C≡C tính 1 vùng)','Đường thẳng','Góc H–C–C']];
+const IDEAL=['lí tưởng 109,5°','lí tưởng 120°, thực tế ≈ 117°','lí tưởng 180°'];
+const CAPS=['Mỗi C có 4 vùng electron (3 vùng C–H và 1 vùng C–C) → 4 vùng đẩy nhau ra 4 đỉnh tứ diện, góc ≈ 109,5° (AX4, tương ứng lai hóa sp3).',
+'Mỗi C có 3 vùng electron (2 vùng C–H và 1 vùng C=C) → 3 vùng nằm trong một mặt phẳng, hướng về 3 đỉnh tam giác (AX3, tương ứng lai hóa sp2). Vùng C=C chứa 4e nên đẩy mạnh hơn, làm góc H–C–H thu hẹp còn ≈ 117°.',
+'Mỗi C có 2 vùng electron (1 vùng C–H và 1 vùng C≡C) → 2 vùng đẩy nhau về hai phía đối diện, góc 180°, phân tử thẳng hàng (AX2, tương ứng lai hóa sp).'];
+const norm=v=>{const l=Math.hypot(...v);return v.map(x=>x/l)};
+const add=(a,b,k)=>a.map((v,i)=>v+b[i]*(k==null?1:k));
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const fmt=x=>x.toFixed(1).replace('.',',')+'°';
+function reset(){const n=[4,3,2][mol];st=[[1,0,0]];
+ for(let i=1;i<n;i++){const r=()=>(Math.random()-0.5)*0.35;st.push(norm(mol==1?[0.35+r(),0.9+r(),0]:[0.35+r(),0.8+r(),0.45+r()]))}}
+const wt=i=>i==0&&mol==1?1.12:1;
+function relax(){for(let it=0;it<2;it++)for(let i=1;i<st.length;i++){let f=[0,0,0];
+ for(let j=0;j<st.length;j++){if(i==j)continue;const d=add(st[i],st[j],-1);const r=Math.hypot(...d)+1e-3;f=add(f,d,wt(i)*wt(j)/(r*r*r))}
+ f=add(f,st[i],-dot(f,st[i]));const m=Math.hypot(...f);if(m<1e-6)continue;st[i]=norm(add(st[i],f,Math.min(0.02,0.01*m)/m))}}
+function ui(){document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',+b.dataset.k==mol));const I=INFO[mol];
+ document.getElementById('info').innerHTML='<div class="m"><small>Kiểu VSEPR (mỗi C)</small><b>'+I[0]+'</b></div><div class="m"><small>Số vùng electron quanh C</small><b>'+I[1]+'</b></div><div class="m"><small>Hình học quanh C</small><b>'+I[2]+'</b></div><div class="m"><small>'+I[3]+' ('+IDEAL[mol]+')</small><b id="ang">–</b></div>';
+ document.getElementById('cap').textContent=CAPS[mol];
+ const ccn=['vùng liên kết đơn C–C (2e)','vùng liên kết đôi C=C (4e)','vùng liên kết ba C≡C (6e)'][mol];
+ const ch=(c,t)=>'<span class="chip"><span class="sw" style="background:rgb('+c.join(',')+')"></span>'+t+'</span>';
+ document.getElementById('legend').innerHTML=ch(COL.a,'vùng C–H của C thứ nhất (2e)')+ch(COL.b,'vùng C–H của C thứ hai (2e)')+ch(COL.cc,ccn)+ch(COL.c,'C')+ch(COL.hw,'H')}
+document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>{mol=+b.dataset.k;reset();ui()});
+document.getElementById('go').onclick=reset;
+document.addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(['1','2','3'].includes(e.key)){mol=+e.key-1;reset();ui()}if(e.key=='r'||e.key=='R')reset()});
+cv.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw+=(e.clientX-drag[0])*0.01;pitch+=(e.clientY-drag[1])*0.01;pitch=Math.max(-1.5,Math.min(1.5,pitch));drag=[e.clientX,e.clientY]});
+cv.addEventListener('pointerup',()=>{drag=null;cv.style.cursor='grab'});
+function rot(p){const c=Math.cos(yaw),s=Math.sin(yaw);const x=c*p[0]+s*p[2],z=-s*p[0]+c*p[2];const c2=Math.cos(pitch),s2=Math.sin(pitch);return [x,c2*p[1]-s2*z,s2*p[1]+c2*z]}
+let S=80;const sc=q=>[W/2+q[0]*S,H/2-q[1]*S];
+function shade(c,z){const k=0.72+0.34*Math.max(0,Math.min(1,(z+2)/4));return 'rgb('+c.map(v=>Math.min(255,Math.round(v*k))).join(',')+')'}
+function ball(L,p,r,c,hl){const q=rot(p),[X,Y]=sc(q),R=r*S;
+ L.push({z:q[2]-1e-4,f:g=>{g.beginPath();g.arc(X,Y,R+1.3,0,7);g.fillStyle='rgba(0,0,0,0.5)';g.fill()}});
+ L.push({z:q[2],f:g=>{g.beginPath();g.arc(X,Y,R,0,7);g.fillStyle=shade(c,q[2]);g.fill();if(hl){g.beginPath();g.arc(X-R*0.35,Y-R*0.35,R*0.28,0,7);g.fillStyle='rgba(255,255,255,0.35)';g.fill()}}})}
+function lobe(L,o,d,len,R,c){for(let i=0;i<18;i++){const t=0.04+0.93*i/17;const r=R*Math.pow(t,0.6)*Math.pow(1-t,0.4)/0.51;if(r<0.02)continue;ball(L,add(o,d,len*t),r,c,false)}}
+function stick(L,a,b,off,w){const p=rot(add(a,off)),q=rot(add(b,off)),[x1,y1]=sc(p),[x2,y2]=sc(q);L.push({z:(p[2]+q[2])/2-0.3,f:g=>{g.lineCap='round';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokeStyle='rgba(0,0,0,0.5)';g.lineWidth=(w+0.04)*S;g.stroke();g.strokeStyle='rgb(180,178,169)';g.lineWidth=w*S;g.stroke()}})}
+const paint=(g,L)=>L.sort((p,q)=>p.z-q.z).forEach(p=>p.f(g));
+function frame(){if(!drag&&document.getElementById('auto').checked)yaw+=0.005;relax();
+ S=Math.min(W/4.6,H/3.6);const a=[0.77,0.67,0.6][mol],chl=[1.09,1.09,1.06][mol];const C1=[-a,0,0],C2=[a,0,0];
+ const d1=st,d2=st.map(u=>{let v=[-u[0],u[1],u[2]];if(mol==0){const c=0.5,s=0.866;v=[v[0],c*v[1]-s*v[2],s*v[1]+c*v[2]]}return v});
+ const H1=d1.slice(1).map(d=>add(C1,d,chl)),H2=d2.slice(1).map(d=>add(C2,d,chl));
+ const sk=[];const offs=mol==0?[[0,0,0]]:mol==1?[[0,0,0.1],[0,0,-0.1]]:[[0,0.13,0],[0,-0.065,0.113],[0,-0.065,-0.113]];
+ offs.forEach(o=>stick(sk,C1,C2,o,mol?0.06:0.09));H1.forEach(h=>stick(sk,C1,h,[0,0,0],0.08));H2.forEach(h=>stick(sk,C2,h,[0,0,0],0.08));
+ ball(sk,C1,0.28,COL.c,true);ball(sk,C2,0.28,COL.c,true);H1.concat(H2).forEach(h=>ball(sk,h,0.18,COL.hw,true));
+ ctx.clearRect(0,0,W,H);paint(ctx,sk);
+ if(document.getElementById('dom').checked){const dl=[],R=[0.34,0.44,0.54][mol];
+  lobe(dl,C1,d1[0],a*1.02,R,COL.cc);lobe(dl,C2,d2[0],a*1.02,R,COL.cc);
+  d1.slice(1).forEach(d=>lobe(dl,C1,d,chl+0.12,0.34,COL.a));d2.slice(1).forEach(d=>lobe(dl,C2,d,chl+0.12,0.34,COL.b));
+  octx.clearRect(0,0,W,H);paint(octx,dl);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=0.5;ctx.drawImage(oc,0,0);ctx.restore()}
+ const u=mol<2?d1[1]:d1[0],v=mol<2?d1[2]:d1[1];const th=Math.acos(Math.max(-1,Math.min(1,dot(u,v))));const ang=th*180/Math.PI;
+ const col=getComputedStyle(cv).color;ctx.setLineDash([4,3]);ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();let mid;
+ for(let i=0;i<=24;i++){const t=i/24;let w;if(th<1e-3)w=u;else{const s=Math.sin(th);w=add(u.map(x=>x*Math.sin((1-t)*th)/s),v,Math.sin(t*th)/s)}
+  const [x,y]=sc(rot(add(C1,w,0.55)));i?ctx.lineTo(x,y):ctx.moveTo(x,y);if(i==12)mid=w}
+ ctx.stroke();ctx.setLineDash([]);
+ if(mid){const [x,y]=sc(rot(add(C1,norm(mid),0.95)));ctx.font='500 15px sans-serif';ctx.textAlign='center';ctx.fillStyle=col;ctx.fillText(fmt(ang),x,y)}
+ const el=document.getElementById('ang');if(el)el.textContent=fmt(ang);
+ requestAnimationFrame(frame)}
+reset();ui();frame();
+</script>
+</body>
+</html>
