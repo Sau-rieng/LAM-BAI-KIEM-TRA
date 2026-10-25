@@ -59,6 +59,8 @@ function doPost(e) {
       case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
       case 'daxem':  return json(ghiDaXem(d));
+      case 'tc_vao': return json(tcVao(d));
+      case 'tc_mokhoa': return json(tcMoKhoa(d));
       case 'gv_dot':
       case 'gv_dat':
       case 'gv_theodoi':
@@ -70,6 +72,11 @@ function doPost(e) {
       case 'gv_nhom':
       case 'gv_kienthuc':
       case 'gv_ainx':
+      case 'gv_trochoi':
+      case 'gv_tcdat':
+      case 'gv_tckq':
+      case 'gv_ma':
+      case 'gv_madat':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -81,6 +88,11 @@ function doPost(e) {
         if (d.action === 'gv_nhom') return json(gvNhom(d));
         if (d.action === 'gv_kienthuc') return json(gvKienThuc(d));
         if (d.action === 'gv_ainx') return json(gvAINhanXet(d));
+        if (d.action === 'gv_trochoi') return json(gvTroChoi());
+        if (d.action === 'gv_tcdat') return json(gvTcDat(d));
+        if (d.action === 'gv_tckq') return json(gvTcKetQua(d));
+        if (d.action === 'gv_ma') return json(gvMa());
+        if (d.action === 'gv_madat') return json(gvMaDat(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -296,6 +308,15 @@ function gvDat(d) {
         try { CacheService.getScriptCache().remove('tt_' + d.madot); } catch (e) {}
       } else if (d.truong === 'mo') sh.getRange(i + 1, 4).setValue(d.giatri ? 'MO' : 'DONG');
       else if (d.truong === 'xemlai') sh.getRange(i + 1, 5).setValue(d.giatri ? 'CO' : 'KHONG');
+      else if (d.truong === 'ten') {
+        const ten = String(d.giatri || '').trim();
+        if (!ten) return {ok: false, msg: 'Ten bai khong duoc de trong'};
+        sh.getRange(i + 1, 2).setValue(ten);
+      } else if (d.truong === 'phut') {
+        const ph = Math.round(Number(d.giatri));
+        if (!(ph >= 1 && ph <= 180)) return {ok: false, msg: 'Thoi gian phai tu 1 den 180 phut'};
+        sh.getRange(i + 1, 3).setValue(ph);
+      } else if (d.truong === 'lop') sh.getRange(i + 1, 6).setValue(chuanDsLop(d.giatri));
       else return {ok: false, msg: 'Truong khong hop le'};
       SpreadsheetApp.flush();
       return gvDot();
@@ -640,6 +661,144 @@ function ghiDong(tab, head, row) {
   }
 }
 
+// =====================================================================
+// TRO CHOI - quan ly chung trong KHO DE (tab TRO CHOI, tu tao khi chua co)
+// MaTro | TenTro | Kieu (CA NHAN/NHOM) | Khoi | File | TrangThai (MO/DONG) | ThoiGian_phut | Lop
+// Tro choi dang nhap / mo khoa qua so lop; ket qua ghi vao HOAT DONG / TRO CHOI NHOM cua so lop.
+// =====================================================================
+const TAB_TC = 'TRO CHOI';
+const HEAD_TC = ['MaTro', 'TenTro', 'Kieu', 'Khoi', 'File', 'TrangThai', 'ThoiGian_phut', 'Lop'];
+const TC_MAC_DINH = [
+  ['DAINOI-HOA10', 'Đại Nội Huế – Hóa 10', 'CA NHAN', 10, 'DAINOI-HOA10.html', 5],
+  ['CHIMDUATHU-HOA10', 'Chim đưa thư – Hóa 10', 'CA NHAN', 10, 'HOA10-CHIMDUATHU.html', 5],
+  ['DUAXEF1-HOA10', 'Đua xe F1 – Hóa 10', 'CA NHAN', 10, 'HOA10-DUAXEF1-CANHAN.html', 5],
+  ['LANGBIANG-HOA10', 'Leo Langbiang – Hóa 10', 'CA NHAN', 10, 'LANGBIANG-HOA10.html', 5],
+  ['CHIMDUATHU-HOA10-NHOM', 'Chim đưa thư – Hóa 10 (nhóm)', 'NHOM', 10, 'HOA10-CHIMDUATHU-NHOM.html', 5],
+  ['DUAXEF1-HOA10-NHOM', 'Đua xe F1 – Hóa 10 (nhóm)', 'NHOM', 10, 'HOA10-DUAXEF1-NHOM.html', 5],
+  ['RUONGLUA-CHUKI-NHOM', 'Ruộng lúa Chu kì (nhóm)', 'NHOM', 10, 'RUONGLUA-CHUKI-NHOM.html', 5],
+  ['DUAXEF1-POLYMER-H12', 'Đua xe F1 Polymer – Hóa 12', 'CA NHAN', 12, 'HOA12-DUAXEF1-POLYMER-CANHAN.html', 5],
+  ['POLYMER-F1', 'Polymer F1 – Hóa 12', 'CA NHAN', 12, 'POLYMER-F1.html', 5],
+  ['DUAXEF1-POLYMER-H12-NHOM', 'Đua xe F1 Polymer – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-DUAXEF1-POLYMER.html', 5],
+  ['DAINOI-KHTN9', 'Đại Nội Huế – KHTN 9', 'CA NHAN', 9, 'DAINOI-KHTN9.html', 5]
+];
+function lopMacDinh(khoi) {
+  if (/DEMO/.test(khongDau(lopNay()))) return 'TAT CA';
+  return {9: '9D01, 9D03', 10: '10E01', 12: '12G01, 12G02'}[khoi] || 'TAT CA';
+}
+function chuanDsLop(v) {
+  const ds = (Array.isArray(v) ? v : String(v || '').split(',')).map(function (x) { return khongDau(x).replace(/\s+/g, ''); })
+    .filter(function (x) { return x && x !== 'TATCA'; });
+  return ds.length ? ds.join(', ') : 'TAT CA';
+}
+function tabTroChoi() {
+  const ss = kho();
+  let sh = ss.getSheetByName(TAB_TC);
+  if (!sh) {
+    sh = ss.insertSheet(TAB_TC);
+    sh.getRange(1, 1, 1, HEAD_TC.length).setValues([HEAD_TC]).setFontWeight('bold');
+  }
+  // Them tro moi trong danh sach mac dinh neu tab chua co (khong dong cham dong cu)
+  const co = {};
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { co[String(r[0]).trim()] = 1; });
+  const them = TC_MAC_DINH.filter(function (t) { return !co[t[0]]; })
+    .map(function (t) { return [t[0], t[1], t[2], t[3], t[4], 'MO', t[5], lopMacDinh(t[3])]; });
+  if (them.length) sh.getRange(sh.getLastRow() + 1, 1, them.length, HEAD_TC.length).setValues(them);
+  return sh;
+}
+function docTroChoi() {
+  const sh = tabTroChoi();
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  return sh.getRange(2, 1, n, HEAD_TC.length).getValues().map(function (r, i) {
+    return {dong: i + 2, matro: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), kieu: khongDau(r[2]) === 'NHOM' ? 'NHOM' : 'CA NHAN',
+      khoi: String(r[3]).trim(), file: String(r[4]).trim(), mo: khongDau(r[5]) !== 'DONG', phut: Number(r[6]) || 5,
+      lop: khongDau(r[7]) || 'TAT CA'};
+  }).filter(function (t) { return t.matro; });
+}
+function tcVao(d) {
+  const t = docTroChoi().filter(function (x) { return x.matro === String(d.matro || '').trim(); })[0];
+  if (!t) return {ok: false, loi: 'khongco', msg: 'Trò chơi này chưa có trong danh sách quản lý của giáo viên.'};
+  if (!t.mo) return {ok: false, loi: 'dong', msg: 'Trò chơi đang đóng. Em chờ giáo viên mở nhé.'};
+  if (!hopLop(t)) return {ok: false, loi: 'lop', msg: 'Trò chơi này chưa mở cho lớp ' + lopNay() + '.'};
+  if (String(d.ma || '').trim() !== docMa().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
+  return {ok: true, phut: t.phut, ten: t.ten};
+}
+function tcMoKhoa(d) {
+  return {ok: String(d.ma || '').trim() !== '' && String(d.ma || '').trim() === docMa().tcmokhoa};
+}
+function gvTroChoi() {
+  const m = docMa();
+  return {ok: true, lop: lopNay(), tro: docTroChoi(), coMaTc: m.coTc, coMaTcMk: m.coTcMk};
+}
+function gvTcDat(d) {
+  const sh = tabTroChoi();
+  const t = docTroChoi().filter(function (x) { return x.matro === String(d.matro || '').trim(); })[0];
+  if (!t) return {ok: false, msg: 'Khong tim thay tro ' + d.matro};
+  if (d.truong === 'tt') sh.getRange(t.dong, 6).setValue(d.giatri === true || d.giatri === 'MO' ? 'MO' : 'DONG');
+  else if (d.truong === 'phut') {
+    const ph = Math.round(Number(d.giatri));
+    if (!(ph >= 1 && ph <= 60)) return {ok: false, msg: 'Thoi gian phai tu 1 den 60 phut'};
+    sh.getRange(t.dong, 7).setValue(ph);
+  } else if (d.truong === 'lop') sh.getRange(t.dong, 8).setValue(chuanDsLop(d.giatri));
+  else return {ok: false, msg: 'Truong khong hop le'};
+  SpreadsheetApp.flush();
+  return gvTroChoi();
+}
+// Ket qua tro choi cua lop nay: ca nhan (HOAT DONG) va nhom (TRO CHOI NHOM)
+function gvTcKetQua(d) {
+  const ss = SpreadsheetApp.getActive();
+  const loc = String(d.matro || '').trim();
+  function tg(v) { return v instanceof Date ? v.getTime() : (v ? new Date(v).getTime() || 0 : 0); }
+  const canhan = [], nhom = [];
+  const hd = ss.getSheetByName(TAB_HD);
+  if (hd && hd.getLastRow() > 1) hd.getRange(2, 1, hd.getLastRow() - 1, HEAD_HD.length).getValues().forEach(function (r) {
+    const mt = String(r[1]).trim();
+    if (!mt || (loc && mt !== loc)) return;
+    canhan.push([tg(r[0]), mt, String(r[2]).trim(), String(r[3]).trim(), String(r[6]), Number(r[7]) || 0]);
+  });
+  const cn = ss.getSheetByName(TAB_CN);
+  if (cn && cn.getLastRow() > 1) cn.getRange(2, 1, cn.getLastRow() - 1, HEAD_CN.length).getValues().forEach(function (r) {
+    const mt = String(r[1]).trim();
+    if (!mt || (loc && mt !== loc)) return;
+    nhom.push([tg(r[0]), mt, String(r[3]).trim(), String(r[5]), Number(r[6]) || 0]);
+  });
+  // Thanh vien tung nhom (ten hoc sinh) + si so lop
+  const ten = {}, tv = {}, m = docNhom();
+  const ds = ss.getSheetByName(TAB_DS);
+  let siSo = 0;
+  if (ds && ds.getLastRow() > 1) ds.getRange(2, 1, ds.getLastRow() - 1, 2).getValues().forEach(function (r) {
+    if (String(r[0]).trim()) { siSo++; ten[String(r[0]).trim()] = String(r[1]).trim(); }
+  });
+  Object.keys(m).forEach(function (ma) { (tv[m[ma]] = tv[m[ma]] || []).push(ten[ma] || ma); });
+  return {ok: true, lop: lopNay(), siSo: siSo, canhan: canhan, nhom: nhom, thanhvien: tv};
+}
+// Cac ma trong tab MA (chi giao vien da dang nhap bang ma quan ly moi doc / doi duoc)
+const MA_TEN = ['MaGV', 'MaMoKhoa', 'MaLamLai', 'MaQuanLy', 'MaTroChoi', 'MaMoKhoaTroChoi'];
+function gvMa() {
+  const m = {};
+  kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[khongDau(r[0]).replace(/\s+/g, '')] = String(r[1]).trim(); });
+  return {ok: true, demo: /DEMO/.test(khongDau(lopNay())), ma: MA_TEN.map(function (t) { return {ten: t, gt: m[t.toUpperCase()] || ''}; })};
+}
+function gvMaDat(d) {
+  if (/DEMO/.test(khongDau(lopNay()))) return {ok: false, msg: 'Bản dùng thử không đổi được mã.'};
+  const ten = MA_TEN.filter(function (t) { return t === d.ten; })[0];
+  if (!ten) return {ok: false, msg: 'Ten ma khong hop le'};
+  const gt = String(d.giatri || '').trim();
+  if (!/^[A-Za-z0-9]{2,12}$/.test(gt)) return {ok: false, msg: 'Mã gồm 2–12 chữ số hoặc chữ cái, không dấu, không khoảng trắng.'};
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const sh = kho().getSheetByName('MA');
+    const v = sh.getDataRange().getValues();
+    let dong = 0;
+    for (let i = 0; i < v.length; i++) if (khongDau(v[i][0]).replace(/\s+/g, '') === ten.toUpperCase()) { dong = i + 1; break; }
+    if (!dong) { dong = v.length + 1; sh.getRange(dong, 1).setValue(ten); }
+    sh.getRange(dong, 2).setNumberFormat('@').setValue(gt);
+    SpreadsheetApp.flush();
+  } finally { lock.releaseLock(); }
+  return gvMa();
+}
+
 // ---------------------------------------------------------------------
 // Doc KHO DE
 // ---------------------------------------------------------------------
@@ -672,7 +831,10 @@ function docMa() {
   const m = {};
   // ten ma khong phan biet hoa/thuong, dau cach (MaQuanLy = maquanly = Ma Quan Ly)
   kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[khongDau(r[0]).replace(/\s+/g, '')] = String(r[1]).trim(); });
-  return {gv: m['MAGV'] || '', mokhoa: m['MAMOKHOA'] || '', lamlai: m['MALAMLAI'] || '', quanly: m['MAQUANLY'] || ''};
+  return {gv: m['MAGV'] || '', mokhoa: m['MAMOKHOA'] || '', lamlai: m['MALAMLAI'] || '', quanly: m['MAQUANLY'] || '',
+    // Ma rieng cho tro choi; chua dat thi tam dung ma kiem tra
+    tcvao: m['MATROCHOI'] || m['MAGV'] || '', tcmokhoa: m['MAMOKHOATROCHOI'] || m['MAMOKHOA'] || '',
+    coTc: !!m['MATROCHOI'], coTcMk: !!m['MAMOKHOATROCHOI']};
 }
 // Tab <MaDot>: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai (TN/DS/TLN) | Diem
 //   TN : trac nghiem 4 phuong an, DapAn = A/B/C/D

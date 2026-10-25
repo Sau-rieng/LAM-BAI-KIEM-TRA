@@ -1,6 +1,6 @@
 {
-  "name": "Kiểm tra Hóa học – Giáo viên",
-  "short_name": "Kiểm tra Hóa",
+  "name": "Khám phá Hóa học – Giáo viên",
+  "short_name": "Khám phá Hóa",
   "start_url": "GIAO-VIEN.html",
   "scope": "./",
   "display": "standalone",
