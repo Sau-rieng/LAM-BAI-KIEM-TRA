@@ -9,80 +9,126 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#172033;--muted:#5b6175;--line:#dbe0e8;--bg:#f4f5f9;--card:#fff;--pri:#1d5bc4;--chi:#b8235a}
+:root{--ink:#172033;--muted:#5b6175;--line:#d6e2f1;--bg:#f2f6fc;--card:#fff;--pri:#1f5fbf;--chi:#b8235a;--xanh:#eaf3fe;--xanhVien:#c9def7}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Be Vietnam Pro",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.5}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/giao-dien/nen-hoa.svg) 0 0/320px 320px;opacity:.055;pointer-events:none}
 :focus-visible{outline:3px solid var(--pri);outline-offset:2px}
-.dau{background:var(--ink);color:#fff}
-.dau .trong{max-width:980px;margin:0 auto;padding:22px 16px 26px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;opacity:.9}
-.brand svg{width:34px;height:34px;flex:none}
-.dau h1{font-size:clamp(26px,4vw,38px);line-height:1.15;margin:16px 0 6px;letter-spacing:-.4px;max-width:20ch}
-.dau p{margin:0;opacity:.8;max-width:60ch}
-.dau .gk{display:inline-block;margin-top:16px;background:var(--chi);color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:11px 16px}
-main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
-h2{font-size:20px;margin:26px 2px 10px}
-.luoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.o{position:relative;display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px;min-height:150px}
-.o:hover{border-color:var(--ink)}
-.o .so{position:absolute;top:12px;right:14px;font-size:13px;font-weight:700;color:var(--muted)}
-.o .kh{font-size:38px;font-weight:800;line-height:1;margin:4px 0 12px;letter-spacing:-.5px}
+.thanh{background:var(--ink);color:#fff;position:sticky;top:0;z-index:5}
+.thanh .trong{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;flex:1}
+.brand small{display:block;font-weight:500;font-size:12px;opacity:.65}
+.brand svg{width:38px;height:38px;flex:none}
+.gk{background:var(--chi);color:#fff;text-decoration:none;font-weight:700;border-radius:10px;padding:9px 14px;font-size:15px;white-space:nowrap}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 44px}
+.banner{position:relative;border-radius:20px;overflow:hidden;min-height:230px;display:flex;align-items:center;
+  background:url(hinh/giao-dien/banner-ptn.svg) right center/cover no-repeat,#e6f1fd;border:1px solid var(--xanhVien);box-shadow:0 8px 24px rgba(31,95,191,.10)}
+.banner:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#e8f2fe 0%,rgba(232,242,254,.94) 36%,rgba(232,242,254,0) 64%)}
+.bnChu{position:relative;padding:26px 30px;max-width:620px}
+.bnNho{font-size:12.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--pri)}
+.bnChu h1{font-size:clamp(26px,3.6vw,38px);line-height:1.15;margin:6px 0 8px;letter-spacing:-.4px}
+.bnChu p{margin:0;color:var(--muted);font-size:16px;max-width:46ch}
+@media (max-width:700px){.banner{min-height:300px;align-items:flex-start;background-size:auto 52%;background-position:right bottom}.banner:before{background:linear-gradient(180deg,#e8f2fe 0%,rgba(232,242,254,.92) 55%,rgba(232,242,254,0) 78%)}}
+.ba{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+@media (max-width:860px){.ba{grid-template-columns:1fr}}
+.the3{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--ink);background:#fff;border:1px solid #e1ebf7;border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.07);transition:transform .14s}
+.the3:hover{transform:translateY(-3px)}
+.the3 .bt3{width:54px;height:54px;border-radius:14px;background:var(--xanh);color:var(--pri);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.the3 .bt3 svg{width:34px;height:34px}
+.the3 b{font-size:21px}
+.the3>span.mt{font-size:14.5px;color:var(--muted);line-height:1.45}
+.the3 .ma{margin-top:auto;padding-top:10px;font-weight:700;font-size:14.5px;color:var(--pri)}
+.the3.chinh{background:linear-gradient(135deg,#b8235a 0%,#d0396f 100%);color:#fff;border:0}
+.the3.chinh .bt3{background:#fff;color:var(--chi)}
+.the3.chinh>span.mt{color:#fff;opacity:.92}
+.the3.chinh .ma{color:#fff}
+h2{font-size:19px;margin:30px 2px 4px}
+.h2nho{font-size:14px;color:var(--muted);margin:0 2px 12px}
+.luoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.o{position:relative;display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:var(--xanh);border:1.5px solid var(--xanhVien);border-radius:16px;padding:16px;min-height:160px;box-shadow:0 3px 0 var(--xanhVien),0 8px 18px rgba(31,95,191,.08);transition:transform .14s,box-shadow .14s}
+.o:hover{border-color:#9ec2ef;transform:translateY(-3px);box-shadow:0 5px 0 #9ec2ef,0 14px 26px rgba(31,95,191,.14)}
+.o .so{position:absolute;top:14px;right:14px;font-size:12.5px;font-weight:700;color:var(--pri);background:#fff;border-radius:999px;padding:2px 9px}
+.o .ic{width:50px;height:50px;border-radius:14px;background:#fff;color:var(--pri);display:flex;align-items:center;justify-content:center;margin:2px 0 12px;box-shadow:0 2px 6px rgba(31,95,191,.12)}
+.o .ic svg{width:31px;height:31px}
+.o.chi .ic{color:var(--chi)}
 .o b{font-size:16px}
 .o span.mt{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
-.o.chi .kh{color:var(--chi)}
-.card{background:#fff;border-radius:16px;border:2px solid var(--line);padding:18px}
-.hai{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
-@media (max-width:760px){.hai{grid-template-columns:1fr}}
+@media (max-width:480px){.luoi{grid-template-columns:1fr 1fr;gap:10px}.o{padding:12px;min-height:150px}.o .so{position:static;align-self:flex-start;margin-bottom:6px}}
+.card{background:#fff;border-radius:16px;border:1px solid #e1ebf7;padding:18px 20px;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.07)}
+.hai{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;margin-top:30px}
+@media (max-width:860px){.hai{grid-template-columns:1fr}}
 table{border-collapse:collapse;width:100%;font-size:15.5px}
 td{border-bottom:1px solid var(--line);padding:8px 4px;vertical-align:top}
 td:last-child{text-align:right}
-code{font-family:inherit;font-weight:800;background:var(--bg);border-radius:6px;padding:1px 7px;white-space:nowrap}
-ol{margin:0;padding-left:22px}
-ol li{margin:7px 0}
+code{font-family:inherit;font-weight:800;background:var(--xanh);border:1px solid var(--xanhVien);border-radius:6px;padding:1px 7px;white-space:nowrap;color:var(--pri)}
+ol{margin:0;padding:0;list-style:none;counter-reset:b}
+ol li{counter-increment:b;display:flex;gap:10px;margin:10px 0;line-height:1.45}
+ol li:before{content:counter(b);flex:none;width:26px;height:26px;border-radius:50%;background:var(--pri);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px}
 .qr{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px}
 #qr{width:150px;height:150px;background:#fff;padding:8px;border:2px solid var(--line);border-radius:12px}
 #qr img,#qr canvas{width:100%!important;height:auto!important}
 .ghi{color:var(--muted);font-size:14.5px;margin-top:14px}
-@media print{.dau{background:#fff;color:var(--ink);border-bottom:3px solid var(--ink)}.dau .gk{display:none}.o,.card{break-inside:avoid}}
+.tnA{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:#fff;border:1.5px solid var(--xanhVien);border-radius:16px;overflow:hidden;box-shadow:0 3px 0 var(--xanhVien),0 8px 18px rgba(31,95,191,.08);transition:transform .14s}
+.tnA:hover{transform:translateY(-3px)}
+.tnA .anh{position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,#172033,#2a3a5e 60%,#b8235a 140%)}
+.tnA img{width:100%;height:100%;object-fit:cover;display:block}
+.tnA .so{position:absolute;top:10px;left:10px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.94);border-radius:999px;padding:2px 9px;color:var(--pri)}
+.tnA .play{position:absolute;right:10px;bottom:10px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;font-size:14px}
+.tnA .chu{padding:10px 12px 12px}
+.tnA .chu b{display:block;font-size:15.5px;line-height:1.3}
+.tnA .chu span{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+@media print{body:before{display:none}.thanh{position:static}.gk{display:none}.o,.card,.the3{break-inside:avoid}}
 </style>
 </head>
 <body>
-<header class="dau"><div class="trong">
-  <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học</span></div>
-  <h1>Dùng thử hệ thống kiểm tra Hóa học trên iPad</h1>
-  <p>Lớp DEMO là lớp dùng thử riêng, có kho đề bản sao và mã riêng. Mọi thao tác ở đây không ảnh hưởng đến các lớp thật.</p>
-  <a class="gk" href="GIAM-KHAO.html">Hướng dẫn 7 bước cho Ban giám khảo (in được)</a>
+<header class="thanh"><div class="trong">
+  <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học<small>Bản dùng thử · lớp DEMO</small></span></div>
+  <a class="gk" href="GIAM-KHAO.html">Hướng dẫn cho Ban giám khảo</a>
 </div></header>
 
 <main>
-  <h2>Ứng dụng</h2>
-  <div class="luoi">
-    <a class="o chi" href="GIAO-VIEN.html?demo"><span class="so">mã 4444</span><span class="kh">Gv</span><b>Giáo viên</b><span class="mt">Trang chủ, mã QR, phòng chờ, phát đề, thống kê, hồ sơ</span></a>
-    <a class="o" href="LAM-BAI.html?demo"><span class="so">SBD 01–10</span><span class="kh">Lb</span><b>Học sinh làm bài</b><span class="mt">Chọn lớp DEMO, nhập SBD và mã giáo viên</span></a>
-    <a class="o" href="XEM-LAI.html?demo"><span class="so">mã 11+SBD</span><span class="kh">Xm</span><b>Học sinh xem lại bài</b><span class="mt">Câu đúng, câu sai, đáp án, biểu đồ tiến bộ</span></a>
+  <section class="banner"><div class="bnChu"><span class="bnNho">Bản dùng thử dành cho Ban giám khảo</span>
+    <h1>Khám phá Hóa học trên iPad</h1>
+    <p>Kiểm tra, trò chơi luyện tập và mô phỏng 3D trong một ứng dụng. Lớp DEMO có kho đề bản sao và mã riêng, mọi thao tác không ảnh hưởng đến các lớp thật.</p></div></section>
+
+  <div class="ba">
+    <a class="the3 chinh" href="GIAO-VIEN.html?demo"><span class="bt3" data-bt="hs"></span><b>Trang giáo viên</b><span class="mt">Mã QR, phòng chờ, phát đề, chấm điểm, phân tích câu sai, quản lý trò chơi và tài nguyên, hồ sơ học sinh.</span><span class="ma">Mã quản lý 4444 ▸</span></a>
+    <a class="the3" href="LAM-BAI.html?demo"><span class="bt3" data-bt="de"></span><b>Học sinh làm bài</b><span class="mt">Chọn lớp DEMO, nhập SBD và mã giáo viên; làm bài, nộp bài, có điểm ngay.</span><span class="ma">SBD 01–10 · mã 1111 ▸</span></a>
+    <a class="the3" href="XEM-LAI.html?demo"><span class="bt3" data-bt="tn"></span><b>Tài khoản học sinh</b><span class="mt">Xem lại bài (câu đúng, câu sai, tiến bộ) và tài nguyên học tập 3D.</span><span class="ma">SBD 01–10 · mã xem 11+SBD ▸</span></a>
   </div>
 
-  <h2>Trò chơi luyện tập · kết quả vào hồ sơ học sinh</h2>
+  <h2>Kiểm tra</h2><p class="h2nho">Làm bài trên iPad, chấm tự động, phân tích theo kiến thức</p>
   <div class="luoi">
-    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-HOA10.html?demo"><span class="so">cá nhân</span><span class="kh">Đn</span><b>Đại Nội – Hóa 10</b><span class="mt">Tham quan Đại Nội 3D, trả lời câu hỏi</span></a>
-    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-KHTN9.html?demo"><span class="so">cá nhân</span><span class="kh">Đn</span><b>Đại Nội – KHTN 9</b><span class="mt">Cùng trò chơi, nội dung KHTN 9</span></a>
-    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/POLYMER-F1.html?demo"><span class="so">cá nhân</span><span class="kh">Pf</span><b>Đua xe Polymer F1</b><span class="mt">Đua xe trả lời câu hỏi Hóa 12</span></a>
-    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-CHIMDUATHU-NHOM.html?demo"><span class="so">nhóm</span><span class="kh">Cd</span><b>Chim đưa thư</b><span class="mt">Chọn lớp DEMO và số nhóm; kết quả vào hồ sơ nhóm</span></a>
-    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-DUAXEF1-NHOM.html?demo"><span class="so">nhóm</span><span class="kh">F1</span><b>Đua xe F1</b><span class="mt">Hóa 10, chơi theo nhóm</span></a>
-    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/RUONGLUA-CHUKI-NHOM.html?demo"><span class="so">nhóm</span><span class="kh">Ru</span><b>Ruộng lúa Chu kì</b><span class="mt">Hóa 10, chơi theo nhóm</span></a>
+    <a class="o chi" href="GIAO-VIEN.html?demo"><span class="so">mã 4444</span><span class="ic" data-bt="de"></span><b>Phát đề, phòng chờ</b><span class="mt">Màn hình chiếu: mã QR riêng của đề, đồng hồ đếm ngược</span></a>
+    <a class="o" href="LAM-BAI.html?demo"><span class="so">SBD 01–10</span><span class="ic" data-bt="ong"></span><b>Làm bài trên iPad</b><span class="mt">Khóa màn hình khi rời trang, nộp bài có điểm ngay</span></a>
+    <a class="o" href="XEM-LAI.html?demo"><span class="so">mã 11+SBD</span><span class="ic" data-bt="xem"></span><b>Xem lại bài</b><span class="mt">Câu đúng, câu sai, đáp án, biểu đồ tiến bộ</span></a>
+    <a class="o" href="GIAO-VIEN.html?demo"><span class="so">mã 4444</span><span class="ic" data-bt="kq"></span><b>Thống kê, hồ sơ</b><span class="mt">Câu sai nhiều nhất, kiến thức yếu, bảng điểm Excel</span></a>
   </div>
 
-  <div class="hai" style="margin-top:26px">
+  <h2>Trò chơi luyện tập</h2><p class="h2nho">Kết quả tự vào hồ sơ học sinh · mã vào chơi 1111, mở khóa 2222</p>
+  <div class="luoi">
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-HOA10.html?demo"><span class="so">cá nhân</span><span class="ic" data-bt="tro"></span><b>Đại Nội – Hóa 10</b><span class="mt">Tham quan Đại Nội 3D, trả lời câu hỏi</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/DAINOI-KHTN9.html?demo"><span class="so">cá nhân</span><span class="ic" data-bt="tro"></span><b>Đại Nội – KHTN 9</b><span class="mt">Cùng trò chơi, nội dung KHTN 9</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/POLYMER-F1.html?demo"><span class="so">cá nhân</span><span class="ic" data-bt="tro"></span><b>Đua xe Polymer F1</b><span class="mt">Đua xe trả lời câu hỏi Hóa 12</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-CHIMDUATHU-NHOM.html?demo"><span class="so">nhóm</span><span class="ic" data-bt="nhom"></span><b>Chim đưa thư</b><span class="mt">Chọn lớp DEMO và số nhóm</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/HOA10-DUAXEF1-NHOM.html?demo"><span class="so">nhóm</span><span class="ic" data-bt="nhom"></span><b>Đua xe F1</b><span class="mt">Hóa 10, chơi theo nhóm</span></a>
+    <a class="o" href="https://sau-rieng.github.io/TRO--CHOI-IPAD/RUONGLUA-CHUKI-NHOM.html?demo"><span class="so">nhóm</span><span class="ic" data-bt="nhom"></span><b>Ruộng lúa Chu kì</b><span class="mt">Hóa 10, chơi theo nhóm</span></a>
+  </div>
+
+  <h2>Tài nguyên học tập 3D</h2><p class="h2nho">Mô phỏng cấu trúc, thí nghiệm ảo; học sinh xem trong tài khoản, giáo viên thấy lượt xem. Bấm vào để xem thử.</p>
+  <div class="luoi" id="tnDemo"></div>
+
+  <div class="hai">
     <div class="card">
-      <h2 style="margin-top:0">Chơi thử trong 5 phút</h2>
+      <h2 style="margin-top:0">Trải nghiệm trong 5 phút</h2>
       <ol>
-        <li><b>Giáo viên</b> mở ứng dụng (mã <code>4444</code>) → <b>Đề kiểm tra</b> → chọn đề ngắn → <b>📺 Màn hình chiếu</b> → <b>① Mở phòng chờ</b>.</li>
-        <li><b>Học sinh</b> quét mã QR trên màn hình, gõ SBD <code>01</code>–<code>10</code> → <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b>. Tên hiện lên màn hình chiếu.</li>
-        <li>Giáo viên bấm <b>▶ Bắt đầu làm bài</b>: mọi máy cùng thấy đề, đồng hồ to đếm ngược.</li>
-        <li>Thử thoát khỏi trang khi đang làm: iPad bị khóa, giáo viên mở bằng mã <code>2222</code>. Nộp bài thì điểm hiện ngay.</li>
-        <li>Giáo viên bấm <b>■ Đóng đề</b> → <b>Xem điểm và phân tích câu sai</b>.</li>
-        <li>Học sinh chơi một trò chơi bằng cùng SBD → menu <b>Hồ sơ HS</b>, bấm tên: thấy điểm kiểm tra cạnh kết quả trò chơi.</li>
-        <li>Giáo viên bật <b>Cho xem lại</b>, bấm <b>Mã QR → Xem lại bài</b>; học sinh quét, nhập mã xem <code>11</code>+SBD.</li>
+        <li><span><b>Giáo viên</b> mở trang giáo viên (mã <code>4444</code>) → <b>Kiểm tra</b> → chọn đề ngắn → <b>📺 Màn hình chiếu</b> → <b>① Mở phòng chờ</b>.</span></li>
+        <li><span><b>Học sinh</b> quét mã QR trên màn hình, gõ SBD <code>01</code>–<code>10</code> → <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b>. Tên hiện lên màn hình chiếu.</span></li>
+        <li><span>Giáo viên bấm <b>▶ Bắt đầu làm bài</b>: mọi máy cùng thấy đề, đồng hồ to đếm ngược.</span></li>
+        <li><span>Thử thoát khỏi trang khi đang làm: iPad bị khóa, giáo viên mở bằng mã <code>2222</code>. Nộp bài thì điểm hiện ngay.</span></li>
+        <li><span>Giáo viên bấm <b>■ Đóng đề</b> → <b>Xem điểm và phân tích câu sai</b>, <b>🧭 Đánh giá theo kiến thức</b>.</span></li>
+        <li><span>Học sinh chơi một trò chơi bằng cùng SBD → trang giáo viên → <b>Trò chơi → Kết quả</b> hoặc <b>Hồ sơ HS</b>.</span></li>
+        <li><span>Học sinh vào <b>Tài khoản học sinh</b> (mã xem <code>11</code>+SBD) → <b>Tài nguyên</b> → mở một mô phỏng 3D; giáo viên xem lượt xem ở mục <b>Tài nguyên</b>.</span></li>
       </ol>
     </div>
     <div class="card">
@@ -94,7 +140,7 @@ ol li{margin:7px 0}
         <tr><td>Mã mở khóa iPad</td><td><code>2222</code></td></tr>
         <tr><td>Mã cho làm lại</td><td><code>3333</code></td></tr>
         <tr><td>Trang giáo viên</td><td><code>4444</code></td></tr>
-        <tr><td>Mã xem bài</td><td><code>11</code> + SBD, vd <code>1107</code></td></tr>
+        <tr><td>Mã xem bài (tài khoản học sinh)</td><td><code>11</code> + SBD, vd <code>1107</code></td></tr>
         <tr><td>Trò chơi: vào chơi / mở khóa</td><td><code>1111</code> / <code>2222</code></td></tr>
       </table>
       <div class="qr"><div id="qr"></div><div><b>Quét để mở trang này</b><br><span class="ghi" id="link" style="word-break:break-all"></span></div></div>
@@ -104,6 +150,18 @@ ol li{margin:7px 0}
   <p class="ghi">Sau mỗi buổi dùng thử, giáo viên phụ trách có thể xóa các dòng trong tab BAI LAM của sổ “SO THEO DOI DEMO” để làm lại từ đầu.</p>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="hinh/giao-dien/bieu-tuong.js"></script>
+<script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
+<script>
+(function () {
+  var box = document.getElementById('tnDemo'), ds = (window.TAI_NGUYEN || []).filter(function (t) { return !t.an; }).slice(0, 8);
+  function e(x) { return String(x || '').replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  box.innerHTML = ds.map(function (t) {
+    return '<a class="tnA" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener"><span class="anh">' + (t.anh ? '<img loading="lazy" alt="" src="tai-nguyen/' + encodeURI(t.anh) + '">' : '') + '<span class="so">' + (t.khoi === '9' ? 'KHTN 9' : 'Hóa ' + e(t.khoi)) + '</span><span class="play">▶</span></span><span class="chu"><b>' + e(t.ten) + '</b><span>' + e(t.loai) + ' · ' + e(t.bai) + '</span></span></a>';
+  }).join('') || '<p class="h2nho">Đang cập nhật.</p>';
+  [].forEach.call(document.querySelectorAll('[data-bt]'), function (el) { if (window.BT) el.innerHTML = BT[el.getAttribute('data-bt')] || ''; });
+})();
+</script>
 <script>
 (function () {
   var url = location.href.split('#')[0].split('?')[0];
