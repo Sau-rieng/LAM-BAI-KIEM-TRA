@@ -15,18 +15,34 @@ main{max-width:720px;margin:0 auto;padding:24px 16px}
 h1{font-size:26px;margin:0 0 4px}
 p{color:#5b6175;margin:0 0 18px}
 a.item{display:block;background:#fff;border:2px solid #d9dce5;border-radius:14px;padding:18px;margin-bottom:12px;text-decoration:none;color:#172033}
-a.item b{display:block;font-size:20px;margin-bottom:4px}
+a.item b{display:block;font-size:20px;margin-bottom:4px;color:#172033}
 a.item span{color:#5b6175;font-size:16px}
+
+/* ===== Giao dien hoa hoc ===== */
+body{background:#f2f6fc}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/giao-dien/nen-hoa.svg) 0 0/320px 320px;opacity:.055;pointer-events:none}
+.card{border:1px solid #e1ebf7;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.07)}
+.bnHS{height:118px;margin:-22px -22px 16px;border-radius:16px 16px 0 0;background:url(hinh/giao-dien/banner-ptn.svg) right center/cover no-repeat,#e6f1fd;border-bottom:1px solid #c9def7}
+@media (max-width:480px){.bnHS{height:96px}}
+
+.bnHS{margin:0 0 18px;border-radius:16px;height:150px;border:1px solid #c9def7}
+a.item{display:flex;gap:16px;align-items:center;background:#eaf3fe;border:1.5px solid #c9def7;box-shadow:0 3px 0 #c9def7,0 8px 18px rgba(31,95,191,.08);transition:transform .14s}
+a.item:hover{transform:translateY(-2px)}
+a.item .ic{flex:none;width:56px;height:56px;border-radius:16px;background:#fff;color:#1f5fbf;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(31,95,191,.12)}
+a.item .ic svg{width:34px;height:34px}
 </style>
 </head>
 <body>
 <main>
+  <div class="bnHS" aria-hidden="true"></div>
   <div class="brandHS"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học</span></div>
   <h1>Làm bài kiểm tra</h1>
   <p>Chọn bài kiểm tra giáo viên yêu cầu.</p>
-  <a class="item" href="LAM-BAI.html"><b>Làm bài kiểm tra</b><span>Chọn lớp, nhập SBD và mã giáo viên</span></a>
-  <a class="item" href="XEM-LAI.html"><b>Tài khoản học sinh</b><span>Xem lại bài làm và tài nguyên học tập (mô phỏng 3D, thí nghiệm ảo)</span></a>
+  <a class="item" href="LAM-BAI.html"><span class="ic" data-bt="de"></span><span><b>Làm bài kiểm tra</b><span>Chọn lớp, nhập SBD và mã giáo viên</span></span></a>
+  <a class="item" href="XEM-LAI.html"><span class="ic" data-bt="tn"></span><span><b>Tài khoản học sinh</b><span>Xem lại bài làm và tài nguyên học tập (mô phỏng 3D, thí nghiệm ảo)</span></span></a>
   <p style="margin-top:28px"><a href="GIAO-VIEN.html" style="color:#5b6175;font-size:15px">Dành cho giáo viên</a> · <a href="DUNG-THU.html" style="color:#5b6175;font-size:15px">Dùng thử (lớp DEMO)</a></p>
 </main>
+<script src="hinh/giao-dien/bieu-tuong.js"></script>
+<script>[].forEach.call(document.querySelectorAll("[data-bt]"),function(e){if(window.BT)e.innerHTML=BT[e.getAttribute("data-bt")];});</script>
 </body>
 </html>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 260" preserveAspectRatio="xMaxYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#e6f1fd"/><stop offset=".55" stop-color="#d9eafc"/><stop offset="1" stop-color="#cfe1fa"/></linearGradient>
+<linearGradient id="kinh" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".85"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".35"/><stop offset="1" stop-color="#ffffff" stop-opacity=".75"/></linearGradient>
+<linearGradient id="ban" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9fb8d6"/><stop offset="1" stop-color="#7f9cc0"/></linearGradient>
+</defs>
+<rect width="1200" height="260" fill="url(#bg)"/>
+<g fill="none" stroke="#2a6fcf" stroke-opacity=".12" stroke-width="2">
+<path d="M560 40l26 15v30l-26 15-26-15V55z"/><circle cx="560" cy="70" r="12"/>
+<circle cx="1140" cy="50" r="5"/><ellipse cx="1140" cy="50" rx="30" ry="10"/><ellipse cx="1140" cy="50" rx="30" ry="10" transform="rotate(60 1140 50)"/><ellipse cx="1140" cy="50" rx="30" ry="10" transform="rotate(-60 1140 50)"/>
+</g>
+<!-- ban thi nghiem -->
+<rect x="0" y="218" width="1200" height="42" fill="url(#ban)"/><rect x="0" y="214" width="1200" height="6" fill="#b9cde6"/>
+<!-- gia ong nghiem -->
+<g transform="translate(640 120)">
+<rect x="0" y="62" width="150" height="12" rx="3" fill="#8a6a4a"/><rect x="6" y="74" width="8" height="24" fill="#7a5c3e"/><rect x="136" y="74" width="8" height="24" fill="#7a5c3e"/>
+<g><rect x="18" y="0" width="22" height="92" rx="11" fill="url(#kinh)" stroke="#8fb3dc" stroke-width="2"/><rect x="20" y="44" width="18" height="46" rx="9" fill="#f2c230"/></g>
+<g><rect x="54" y="-6" width="22" height="98" rx="11" fill="url(#kinh)" stroke="#8fb3dc" stroke-width="2"/><rect x="56" y="34" width="18" height="56" rx="9" fill="#2fb17a"/></g>
+<g><rect x="90" y="4" width="22" height="88" rx="11" fill="url(#kinh)" stroke="#8fb3dc" stroke-width="2"/><rect x="92" y="50" width="18" height="40" rx="9" fill="#7b5bd6"/></g>
+<rect x="0" y="40" width="150" height="10" rx="3" fill="#8a6a4a"/>
+</g>
+<!-- binh tam giac -->
+<g transform="translate(820 70)">
+<path d="M34 0h36v52l44 82a10 10 0 0 1-9 15H-1a10 10 0 0 1-9-15l44-82z" fill="url(#kinh)" stroke="#8fb3dc" stroke-width="3"/>
+<path d="M14 98h76l18 34a8 8 0 0 1-7 12H3a8 8 0 0 1-7-12z" fill="#1f6fd1" opacity=".85"/>
+<circle cx="40" cy="118" r="5" fill="#fff" opacity=".7"/><circle cx="62" cy="128" r="3.5" fill="#fff" opacity=".7"/><circle cx="52" cy="84" r="4" fill="#9cc6f5"/><circle cx="58" cy="62" r="3" fill="#9cc6f5"/>
+<rect x="30" y="-6" width="44" height="10" rx="4" fill="#cfdff3" stroke="#8fb3dc" stroke-width="2"/>
+</g>
+<!-- binh cau tren gia + den con -->
+<g transform="translate(990 30)">
+<rect x="96" y="0" width="8" height="190" fill="#6d7f96"/><rect x="66" y="180" width="70" height="10" rx="3" fill="#6d7f96"/>
+<path d="M60 40h44" stroke="#6d7f96" stroke-width="6"/>
+<path d="M34 20h22v40a42 42 0 1 1-22 0z" fill="url(#kinh)" stroke="#8fb3dc" stroke-width="3"/>
+<path d="M8 110a37 37 0 0 0 74 0z" fill="#b8235a" opacity=".85"/>
+<circle cx="40" cy="104" r="4" fill="#fff" opacity=".7"/><circle cx="50" cy="90" r="3" fill="#f6b5cc"/>
+<path d="M45 170c-9-12 2-20 0-30 10 8 13 19 0 30z" fill="#f29a2e"/><rect x="28" y="170" width="34" height="18" rx="4" fill="#cfdff3" stroke="#8fb3dc" stroke-width="2"/>
+</g>
+<!-- coc co mo -->
+<g transform="translate(470 120)">
+<path d="M0 0h86v86a10 10 0 0 1-10 10H10A10 10 0 0 1 0 86z" fill="url(#kinh)" stroke="#8fb3dc" stroke-width="3"/>
+<path d="M3 46h80v40a8 8 0 0 1-8 8H11a8 8 0 0 1-8-8z" fill="#2fb17a" opacity=".55"/>
+<path d="M60 12h14M60 28h10M60 44h14" stroke="#8fb3dc" stroke-width="2"/>
+<circle cx="30" cy="70" r="4" fill="#fff" opacity=".8"/><circle cx="44" cy="58" r="3" fill="#fff" opacity=".8"/>
+</g>
+<!-- phan tu que cau -->
+<g transform="translate(330 40)" stroke="#6d7f96" stroke-width="5">
+<line x1="40" y1="60" x2="90" y2="40"/><line x1="40" y1="60" x2="20" y2="110"/><line x1="40" y1="60" x2="0" y2="30"/><line x1="90" y1="40" x2="130" y2="70"/>
+<g stroke="none"><circle cx="40" cy="60" r="17" fill="#3b4656"/><circle cx="90" cy="40" r="17" fill="#3b4656"/><circle cx="130" cy="70" r="15" fill="#d9483b"/><circle cx="20" cy="110" r="10" fill="#f4f6f9"/><circle cx="0" cy="30" r="10" fill="#f4f6f9"/><circle cx="35" cy="55" r="5" fill="#fff" opacity=".35"/><circle cx="85" cy="35" r="5" fill="#fff" opacity=".35"/></g>
+</g>
+</svg>

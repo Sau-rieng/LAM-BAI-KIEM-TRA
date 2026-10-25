@@ -108,13 +108,32 @@ img{-webkit-user-drag:none;pointer-events:none}
 @keyframes quay{to{transform:rotate(360deg)}}
 #wm{position:fixed;inset:0;pointer-events:none;z-index:50;background-repeat:repeat;opacity:.09;display:none}
 @media print{body>*{display:none!important}body:after{content:"Trang này không được in.";display:block;font:20px sans-serif;padding:40px}}
+
+/* ===== Giao dien hoa hoc ===== */
+body{background:#f2f6fc}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/giao-dien/nen-hoa.svg) 0 0/320px 320px;opacity:.055;pointer-events:none}
+.card{border:1px solid #e1ebf7;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.07)}
+.bnHS{height:118px;margin:-22px -22px 16px;border-radius:16px 16px 0 0;background:url(hinh/giao-dien/banner-ptn.svg) right center/cover no-repeat,#e6f1fd;border-bottom:1px solid #c9def7}
+@media (max-width:480px){.bnHS{height:96px}}
+
+.thuMuc button{background:#eaf3fe;border:1.5px solid #c9def7;box-shadow:0 3px 0 #c9def7,0 8px 18px rgba(31,95,191,.08);transition:transform .14s}
+.thuMuc button:hover{transform:translateY(-2px)}
+.thuMuc .ic{width:58px;height:58px;border-radius:16px;background:#fff;color:#1f5fbf;display:flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 2px 6px rgba(31,95,191,.12)}
+.thuMuc .ic svg{width:36px;height:36px}
+.thuMuc button.tnBtn{background:#1f5fbf;border-color:#1f5fbf;box-shadow:0 3px 0 #174a96,0 8px 18px rgba(31,95,191,.25)}
+.thuMuc button.tnBtn .ic{color:#b8235a}
+.loc button{background:#eaf3fe;border:1.5px solid #c9def7;box-shadow:0 2px 0 #c9def7}
+.loc button.on{background:#1f5fbf;border-color:#1f5fbf;color:#fff;box-shadow:0 2px 0 #174a96}
+.theTN{border:1.5px solid #c9def7;box-shadow:0 3px 0 #c9def7,0 8px 18px rgba(31,95,191,.08);transition:transform .14s}
+.theTN:hover{transform:translateY(-2px)}
 </style>
 </head>
 <body>
 <main>
 
 <section id="scrLogin" class="card">
-  <div class="brandHS"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học</span></div>
+  <div class="bnHS" aria-hidden="true"></div>
+    <div class="brandHS"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học</span></div>
   <h1>Tài khoản học sinh</h1>
   <p class="sub">Đăng nhập bằng số báo danh và mã xem bài giáo viên đã phát cho em để xem lại bài kiểm tra và tài nguyên học tập.</p>
   <label for="lop">Lớp</label>
@@ -129,12 +148,13 @@ img{-webkit-user-drag:none;pointer-events:none}
 
 <section id="scrHome" class="hidden">
   <div class="card">
+    <div class="bnHS" aria-hidden="true"></div>
     <div class="brandHS" style="margin-bottom:10px"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#172033"/><rect x="5" y="5" width="30" height="30" rx="5" fill="#fff"/><path d="M5 27H35V30A5 5 0 0 1 30 35H10A5 5 0 0 1 5 30Z" fill="#b8235a"/><text x="20" y="23" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="13" font-weight="800" fill="#172033">Hh</text></svg><span>Khám phá Hóa học · Tài khoản học sinh</span></div>
     <h1 id="tenHome"></h1>
     <p class="chao" id="lopHome"></p>
     <div class="thuMuc">
-      <button id="moBai"><span class="ic" aria-hidden="true">📝</span><b>Xem lại bài</b><span id="soBai"></span></button>
-      <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true">🧪</span><b>Tài nguyên</b><span id="soTN"></span></button>
+      <button id="moBai"><span class="ic" aria-hidden="true" data-bt="xem"></span><b>Xem lại bài</b><span id="soBai"></span></button>
+      <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true" data-bt="tn"></span><b>Tài nguyên</b><span id="soTN"></span></button>
     </div>
     <button class="btn btn2" id="btnRa0">Thoát</button>
   </div>
@@ -183,6 +203,8 @@ img{-webkit-user-drag:none;pointer-events:none}
   <div class="xtKhung" id="xtKhung"><div class="xtTai" id="xtTai"><div class="vong"></div><span>Đang tải tài nguyên…</span></div></div>
 </div>
 <script src="cau-hinh-lop.js"></script>
+<script src="hinh/giao-dien/bieu-tuong.js"></script>
+<script>[].forEach.call(document.querySelectorAll("[data-bt]"),function(e){if(window.BT)e.innerHTML=BT[e.getAttribute("data-bt")];});</script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {

@@ -416,6 +416,55 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .tnAi span{font-size:13.5px;border:1.5px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff}
 .tnAi i{font-style:normal;color:var(--muted);font-size:12px}
 @media (max-width:480px){.nav button[data-di=home]{display:none}.oLuoi{grid-template-columns:1fr 1fr}.o{min-height:140px;padding:14px}.o .kh{font-size:34px}.o .mt{font-size:12.5px}}
+
+/* ===== Giao dien hoa hoc (25/10/2026) ===== */
+:root{--bg:#f2f6fc;--line:#d6e2f1;--xanh:#eaf3fe;--xanhVien:#c9def7;--xanhDam:#1f5fbf}
+body{background:var(--bg)}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/giao-dien/nen-hoa.svg) 0 0/320px 320px;opacity:.055;pointer-events:none}
+.card{border:1px solid #e1ebf7;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.06)}
+.loc button{background:var(--xanh);border:1.5px solid var(--xanhVien);color:#1d3557;box-shadow:0 2px 0 var(--xanhVien),0 4px 10px rgba(31,95,191,.08);transition:transform .12s,box-shadow .12s}
+.loc button:hover{transform:translateY(-1px);box-shadow:0 3px 0 var(--xanhVien),0 6px 14px rgba(31,95,191,.12)}
+.loc button.on{background:var(--xanhDam);border-color:var(--xanhDam);color:#fff;box-shadow:0 2px 0 #174a96,0 6px 14px rgba(31,95,191,.25)}
+.nav button{border-radius:10px}
+.nav button.on{background:#dbeafe;color:var(--ink);opacity:1;box-shadow:0 2px 0 #9ec2ef}
+.nav button:not(.on):hover{opacity:1;background:rgba(255,255,255,.08)}
+/* Banner */
+.banner{position:relative;border-radius:20px;overflow:hidden;min-height:190px;display:flex;align-items:center;margin-top:6px;
+  background:url(hinh/giao-dien/banner-ptn.svg) right center/cover no-repeat,#e6f1fd;border:1px solid var(--xanhVien);box-shadow:0 8px 24px rgba(31,95,191,.10)}
+.banner:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#e8f2fe 0%,rgba(232,242,254,.92) 30%,rgba(232,242,254,0) 58%)}
+.bnChu{position:relative;padding:22px 28px}
+.bnChu h1{font-size:34px;margin:2px 0;letter-spacing:-.4px}
+.bnChu p{margin:0;color:var(--muted);font-size:16px}
+.bnNho{font-size:12.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--xanhDam)}
+@media (max-width:640px){.banner{min-height:150px;background-position:72% center}.banner:before{background:linear-gradient(180deg,rgba(232,242,254,.95) 0%,rgba(232,242,254,.75) 55%,rgba(232,242,254,.2) 100%)}.bnChu h1{font-size:26px}}
+/* 3 the hang dau */
+.homeBa{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;align-items:stretch}
+@media (max-width:900px){.homeBa{grid-template-columns:1fr}}
+.the3{background:#fff;border:1px solid #e1ebf7;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.06);text-align:left;display:flex;flex-direction:column;gap:4px;font-weight:400;color:var(--ink)}
+.the3 h2{font-size:17px;margin-bottom:4px}
+.the3 .moRow{padding:9px 0}
+.moRow2{border-top:1px solid var(--line);padding:8px 0}
+.moRow2 b{display:block;font-size:15px}
+.moRow2 span{font-size:13px;color:var(--muted)}
+.nut3b{margin-top:auto;align-self:flex-start;padding:8px 14px;font-size:14px;background:var(--xanh);border:1.5px solid var(--xanhVien)}
+.qrThe{background:linear-gradient(135deg,#b8235a 0%,#d0396f 100%);color:#fff;border:0;cursor:pointer;position:relative;overflow:hidden}
+.qrThe:after{content:"";position:absolute;right:-30px;bottom:-30px;width:150px;height:150px;background:url(hinh/giao-dien/nen-hoa.svg) 0 0/160px;opacity:.12;filter:invert(1)}
+.qrThe .bt3{width:54px;height:54px;border-radius:14px;background:#fff;color:#b8235a;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.qrThe .bt3 svg{width:34px;height:34px}
+.qrThe b{font-size:22px}
+.qrThe>span{font-size:14.5px;opacity:.92;line-height:1.45}
+.nut3{margin-top:auto;padding-top:10px;font-style:normal;font-weight:700;font-size:15px}
+/* O muc */
+.homeH{margin:30px 2px 12px;font-size:19px}
+.oLuoi{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.o{background:var(--xanh);border:1.5px solid var(--xanhVien);border-radius:16px;min-height:168px;box-shadow:0 3px 0 var(--xanhVien),0 8px 18px rgba(31,95,191,.08);transition:transform .14s,box-shadow .14s}
+.o:hover{border-color:#9ec2ef;transform:translateY(-3px);box-shadow:0 5px 0 #9ec2ef,0 14px 26px rgba(31,95,191,.14)}
+.o .ic{width:52px;height:52px;border-radius:14px;background:#fff;color:var(--xanhDam);display:flex;align-items:center;justify-content:center;margin:2px 0 14px;box-shadow:0 2px 6px rgba(31,95,191,.12)}
+.o .ic svg{width:32px;height:32px}
+.o.chi .ic{color:var(--chi)}
+.o .so{background:#fff;border-radius:999px;padding:2px 9px;color:var(--xanhDam);top:14px}
+@media (max-width:480px){.oLuoi{grid-template-columns:1fr 1fr;gap:10px}.o{padding:12px;min-height:150px}.o .ic{width:42px;height:42px;margin-bottom:10px}.o .ic svg{width:26px;height:26px}.o .mt{font-size:12.5px}.o .so{position:static;align-self:flex-start;margin-bottom:6px}}
+@media (max-width:640px){.banner{min-height:200px;align-items:flex-start;background-size:auto 62%;background-position:right bottom}.banner:before{background:linear-gradient(180deg,#e8f2fe 0%,rgba(232,242,254,.9) 45%,rgba(232,242,254,0) 70%)}}
 </style>
 </head>
 <body>
@@ -439,10 +488,11 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 </section>
 
 <section id="scrHome" class="hidden">
-  <div class="chao"><h1>Chào thầy/cô</h1><p class="sub" id="chaoNgay"></p></div>
-  <div class="homeLuoi">
-    <button class="oQR" id="oQR"><svg viewBox="0 0 29 29" aria-hidden="true" shape-rendering="crispEdges"><path fill="#172033" d="M0 0h7v7H0zM22 0h7v7h-7zM0 22h7v7H0z"/><path fill="#fff" d="M1 1h5v5H1zM23 1h5v5h-5zM1 23h5v5H1z"/><path fill="#172033" d="M2 2h3v3H2zM24 2h3v3h-3zM2 24h3v3H2zM9 0h2v2H9zM13 1h3v2h-3zM9 4h4v2H9zM17 3h2v4h-2zM9 9h3v3H9zM14 8h2v2h-2zM18 9h4v2h-4zM24 9h2v3h-2zM0 9h2v2H0zM3 12h3v2H3zM12 13h4v3h-4zM19 14h3v3h-3zM25 15h4v2h-4zM9 17h2v4H9zM14 19h3v2h-3zM22 20h3v3h-3zM9 24h4v2H9zM15 23h2v4h-2zM19 25h3v4h-3zM25 26h4v3h-4z"/></svg><span><b>Mã QR vào thi</b><i>Chiếu lên cho học sinh quét: các em vào trang chọn lớp và điền thông tin như mọi khi.</i></span></button>
-    <div class="card homeMo" id="homeMo"></div>
+  <div class="banner"><div class="bnChu"><span class="bnNho">Khám phá Hóa học · Trang giáo viên</span><h1>Chào thầy/cô</h1><p id="chaoNgay"></p></div></div>
+  <div class="homeBa">
+    <button class="the3 qrThe" id="oQR"><span class="bt3" id="qrIcon"></span><b>Mã QR vào thi</b><span>Chiếu lên cho học sinh quét: các em vào trang chọn lớp và điền thông tin.</span><i class="nut3">Mở mã QR ▸</i></button>
+    <div class="the3" id="homeMo"></div>
+    <div class="the3" id="homeTroThe"></div>
   </div>
   <div id="oNhom"></div>
   <button class="raNho" id="raNho">Thoát tài khoản</button>
@@ -538,6 +588,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="cau-hinh-lop.js"></script>
 <script src="doc-excel.js"></script>
+<script src="hinh/giao-dien/bieu-tuong.js"></script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
@@ -1665,7 +1716,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
     var n = new Date(), THU = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
     $('chaoNgay').textContent = THU[n.getDay()] + ', ' + ('0' + n.getDate()).slice(-2) + '/' + ('0' + (n.getMonth() + 1)).slice(-2) + '/' + n.getFullYear() + (window.LAM_DEMO ? ' · bản dùng thử' : '');
     var mo = DOT.filter(function (d) { return d.tt !== 'DONG'; }), box = $('homeMo');
-    if (!mo.length) box.innerHTML = '<h2>Đề đang mở</h2><p class="sub">Chưa có đề nào mở. Vào Đề kiểm tra, chọn đề rồi bấm ① Mở phòng chờ.</p><button class="btn2" style="margin-top:12px" id="homeDe">Mở danh sách đề</button>';
+    if (!mo.length) box.innerHTML = '<h2>Đề đang mở</h2><p class="sub">Chưa có đề nào mở. Vào Đề kiểm tra, chọn đề rồi bấm ① Mở phòng chờ.</p><button class="btn2 nut3b" id="homeDe">Mở danh sách đề ▸</button>';
     else {
       box.innerHTML = '<h2>Đề đang mở (' + mo.length + ')</h2>';
       mo.forEach(function (d) {
@@ -1676,14 +1727,17 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
       });
     }
     if ($('homeDe')) $('homeDe').onclick = function () { diDen('dot'); };
-    // Tro choi dang mo
-    var tr = document.createElement('div'); tr.className = 'homeTro';
+    // The tro choi dang mo
+    var tb = $('homeTroThe');
     if (TRO) {
-      var moT = TRO.filter(function (t) { return t.mo; }).length;
-      tr.innerHTML = '<span><b>Trò chơi</b> · ' + moT + '/' + TRO.length + ' trò đang mở cho học sinh</span><button class="btn2" id="homeTro">Quản lý ▸</button>';
-    } else tr.innerHTML = '<span><b>Trò chơi</b> · ' + (TRO_LOI ? 'chưa tải được' : 'đang tải…') + '</span><button class="btn2" id="homeTro">Mở ▸</button>';
-    box.appendChild(tr);
+      var dm = TRO.filter(function (t) { return t.mo; });
+      tb.innerHTML = '<h2>Trò chơi đang mở (' + dm.length + '/' + TRO.length + ')</h2>' + dm.slice(0, 3).map(function (t) {
+        return '<div class="moRow2"><b>' + esc(t.ten) + '</b><span>' + t.phut + ' phút · ' + esc(tenLopTro(t)) + '</span></div>'; }).join('') +
+        (dm.length > 3 ? '<p class="sub">và ' + (dm.length - 3) + ' trò khác</p>' : dm.length ? '' : '<p class="sub">Chưa mở trò nào.</p>') +
+        '<button class="btn2 nut3b" id="homeTro">Quản lý trò chơi ▸</button>';
+    } else tb.innerHTML = '<h2>Trò chơi</h2><p class="sub">' + (TRO_LOI ? 'Chưa tải được danh sách trò chơi.' : 'Đang tải…') + '</p><button class="btn2 nut3b" id="homeTro">Mở mục Trò chơi ▸</button>';
     $('homeTro').onclick = function () { diDen('tro'); };
+    $('qrIcon').innerHTML = window.BT ? BT.qr : '';
     var soMo = TRO ? TRO.filter(function (t) { return t.mo; }).length : 0;
     var NHOM = [
       { ten: 'Kiểm tra', mt: 'Đề, phòng chờ, chấm điểm, xem lại bài', o: [
@@ -1711,7 +1765,8 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
       n.o.forEach(function (o) {
         var el = document.createElement(o.href ? 'a' : 'button'); el.className = 'o' + (o.chi ? ' chi' : '');
         if (o.href) { el.href = o.href; el.target = '_blank'; el.rel = 'noopener'; }
-        el.innerHTML = (o.so ? '<span class="so">' + o.so + '</span>' : '') + '<span class="kh">' + o.kh + '</span><span class="ten">' + o.ten + '</span><span class="mt">' + o.mt + '</span>';
+        var ICO = { 'Đề': 'de', Tk: 'xem', Hs: 'hs', Tc: 'tro', Kq: 'kq', Ml: 'ml', '3D': 'tn', Ma: 'ma', Dt: 'dt' };
+        el.innerHTML = (o.so ? '<span class="so">' + o.so + '</span>' : '') + '<span class="ic">' + (window.BT && BT[ICO[o.kh]] ? BT[ICO[o.kh]] : o.kh) + '</span><span class="ten">' + o.ten + '</span><span class="mt">' + o.mt + '</span>';
         if (o.di) el.onclick = function () { diDen(o.di); };
         if (o.qr) el.onclick = function () { moQR(o.qr); };
         luoi.appendChild(el);
