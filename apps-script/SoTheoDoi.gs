@@ -27,6 +27,8 @@ const TAB_CN = 'TRO CHOI NHOM';
 const HEAD_CN = ['ThoiGian','MaTro','TenTro','Nhom','Diem','DungSai','ThoiGian_giay','MaLuot'];
 const TAB_TN = 'XEM TAI NGUYEN';
 const HEAD_TN = ['ThoiGian','MaTN','MaHS','HoTen'];
+const TAB_TIN = 'TIN NHAN';
+const HEAD_TIN = ['ThoiGian','MaHS','HoTen','Tu','NoiDung','MaDot','Cau','DaDoc','MaTin'];
 const TAB_NH = 'NHOM';
 const HEAD_NH = ['Nhom','MaHS','HoTen','CapNhat'];
 
@@ -62,6 +64,8 @@ function doPost(e) {
       case 'xemlai': return json(xemLai(d));
       case 'daxem':  return json(ghiDaXem(d));
       case 'xemtn':  return json(ghiXemTN(d));
+      case 'tn_gui': return json(hsGuiTin(d));
+      case 'tn_xem': return json(hsXemTin(d));
       case 'tc_vao': return json(tcVao(d));
       case 'tc_mokhoa': return json(tcMoKhoa(d));
       case 'gv_dot':
@@ -81,6 +85,10 @@ function doPost(e) {
       case 'gv_ma':
       case 'gv_madat':
       case 'gv_tainguyen':
+      case 'gv_tin':
+      case 'gv_tin_hs':
+      case 'gv_tin_gui':
+      case 'gv_tin_goiy':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -98,6 +106,10 @@ function doPost(e) {
         if (d.action === 'gv_ma') return json(gvMa());
         if (d.action === 'gv_madat') return json(gvMaDat(d));
         if (d.action === 'gv_tainguyen') return json(gvTaiNguyen());
+        if (d.action === 'gv_tin') return json(gvTin());
+        if (d.action === 'gv_tin_hs') return json(gvTinHS(d));
+        if (d.action === 'gv_tin_gui') return json(gvTinGui(d));
+        if (d.action === 'gv_tin_goiy') return json(gvTinGoiY(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -210,7 +222,7 @@ function xemLai(d) {
       })
     });
   });
-  return {ok: true, hoten: hs.ten, bai: ketqua};
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV')};
 }
 
 // HS mo xem 1 bai o trang xem lai -> ghi tab XEM LAI de GV biet em nao da xem
@@ -823,6 +835,113 @@ function gvMaDat(d) {
     SpreadsheetApp.flush();
   } finally { lock.releaseLock(); }
   return gvMa();
+}
+
+// =====================================================================
+// TIN NHAN hoc sinh <-> giao vien (moi em mot cuoc tro chuyen, tab TIN NHAN cua so lop)
+// Tu: HS | GV. DaDoc: nguoi nhan da doc (CO / trong).
+// =====================================================================
+function docTin() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TIN);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TIN.length).getValues().map(function (r, i) {
+    return {dong: i + 2, t: r[0] instanceof Date ? r[0].getTime() : 0, mahs: String(r[1]).trim(), ten: String(r[2]).trim(), tu: String(r[3]).trim(),
+      nd: String(r[4]), madot: String(r[5]).trim(), cau: String(r[6]).trim(), doc: khongDau(r[7]) === 'CO', ma: String(r[8])};
+  }).filter(function (x) { return x.mahs && x.nd; });
+}
+function demTinMoi(mahs, tu) {
+  return docTin().filter(function (x) { return x.mahs === mahs && x.tu === tu && !x.doc; }).length;
+}
+function danhDauDoc(mahs, tu) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TIN);
+  if (!sh) return;
+  docTin().forEach(function (x) { if (x.mahs === mahs && x.tu === tu && !x.doc) sh.getRange(x.dong, 8).setValue('CO'); });
+}
+function tinGon(x) { return {t: x.t, tu: x.tu, nd: x.nd, madot: x.madot, cau: x.cau, doc: x.doc}; }
+function kiemHS(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return null;
+  hs.ma = ma; return hs;
+}
+function hsGuiTin(d) {
+  const hs = kiemHS(d);
+  if (!hs) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  const nd = String(d.noidung || '').trim().slice(0, 1500);
+  if (!nd) return {ok: false, msg: 'Tin nhắn trống'};
+  ghiDong(TAB_TIN, HEAD_TIN, [new Date(), hs.ma, hs.ten, 'HS', nd, String(d.madot || '').slice(0, 60), String(d.cau || '').slice(0, 20), '', Utilities.getUuid()]);
+  return hsXemTin(d);
+}
+function hsXemTin(d) {
+  const hs = kiemHS(d);
+  if (!hs) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  const ds = docTin().filter(function (x) { return x.mahs === hs.ma; });
+  danhDauDoc(hs.ma, 'GV');
+  return {ok: true, tin: ds.map(tinGon)};
+}
+// GV: danh sach cuoc tro chuyen cua lop nay
+function gvTin() {
+  const m = {};
+  docTin().forEach(function (x) {
+    const c = m[x.mahs] = m[x.mahs] || {mahs: x.mahs, ten: x.ten, chuaDoc: 0, so: 0, cuoi: null};
+    c.so++; if (x.tu === 'HS' && !x.doc) c.chuaDoc++;
+    if (x.tu === 'HS' && x.ten) c.ten = x.ten;
+    c.cuoi = tinGon(x);
+  });
+  const ds = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.cuoi.t - a.cuoi.t; });
+  return {ok: true, lop: lopNay(), chuaDoc: ds.reduce(function (s, c) { return s + c.chuaDoc; }, 0), ds: ds};
+}
+function gvTinHS(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  const ds = docTin().filter(function (x) { return x.mahs === ma; });
+  if (d.danhdau !== false) danhDauDoc(ma, 'HS');
+  return {ok: true, mahs: ma, ten: hs ? hs.ten : '', tin: ds.map(tinGon), cau: ngucanhCau(ma, ds)};
+}
+function gvTinGui(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs) return {ok: false, msg: 'Khong tim thay hoc sinh'};
+  const nd = String(d.noidung || '').trim().slice(0, 3000);
+  if (!nd) return {ok: false, msg: 'Tin nhắn trống'};
+  ghiDong(TAB_TIN, HEAD_TIN, [new Date(), ma, hs.ten, 'GV', nd, String(d.madot || ''), String(d.cau || ''), '', Utilities.getUuid()]);
+  danhDauDoc(ma, 'HS');
+  return gvTinHS({mahs: ma, danhdau: false});
+}
+function boThe(h) { return String(h || '').replace(/<sup>(.*?)<\/sup>/gi, '^$1').replace(/<sub>(.*?)<\/sub>/gi, '_$1').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim(); }
+// Noi dung cac cau HS dang hoi (de bai, dap an, em chon) – de GV xem va AI goi y
+function ngucanhCau(ma, ds) {
+  const can = {};
+  ds.forEach(function (x) { if (x.madot && x.cau) can[x.madot + '|' + x.cau] = 1; });
+  const out = {};
+  Object.keys(can).slice(-8).forEach(function (k) {
+    const p = k.split('|'), madot = p[0], cau = p[1];
+    try {
+      const bai = timBaiDaNop(madot, ma), de = docDe(madot);
+      const chon = bai ? tachChiTiet(bai.chitiet) : {};
+      const kq = chamBai(de, function (q, i) { return chon[i]; });
+      const q = kq.ct.filter(function (c) { return String(c.cau) === cau; })[0];
+      const c = timDot(madot);
+      if (q) out[k] = {ten: c ? c.ten : madot, cau: cau, loai: q.loai, hoi: boThe(q.hoi),
+        pa: q.pa ? ['A', 'B', 'C', 'D'].map(function (x) { return q.pa[x] ? x + '. ' + boThe(q.pa[x]) : ''; }).filter(String) : [],
+        dapan: String(q.dapan), chon: String(q.chon || ''), dung: !!q.dung};
+    } catch (e) {}
+  });
+  return out;
+}
+function gvTinGoiY(d) {
+  if (typeof goiAI !== 'function') return {ok: false, msg: 'Sổ lớp này chưa có PhanTichAI.gs (khóa AI) nên chưa gợi ý được.'};
+  const ma = String(d.mahs || '').trim();
+  const ds = docTin().filter(function (x) { return x.mahs === ma; }).slice(-8);
+  if (!ds.length) return {ok: false, msg: 'Chưa có tin nhắn'};
+  const nc = ngucanhCau(ma, ds);
+  const ctx = Object.keys(nc).map(function (k) { const q = nc[k];
+    return 'Câu ' + q.cau + ' (' + q.ten + ', loại ' + q.loai + '): ' + q.hoi + (q.pa.length ? '\n' + q.pa.join('\n') : '') + '\nĐáp án đúng: ' + q.dapan + '. Học sinh đã chọn: ' + (q.chon || 'bỏ trống') + (q.dung ? ' (đúng)' : ' (sai)'); }).join('\n\n');
+  const hoi = ds.map(function (x) { return (x.tu === 'HS' ? 'Học sinh' : 'Giáo viên') + ': ' + x.nd; }).join('\n');
+  const yeuCau = (ctx ? 'Nội dung câu hỏi trong bài kiểm tra học sinh đang hỏi:\n' + ctx + '\n\n' : '') +
+    'Cuộc trò chuyện (mới nhất ở cuối):\n' + hoi + '\n\n' +
+    'Soạn câu trả lời của giáo viên Hóa học gửi học sinh: tiếng Việt, xưng "thầy/cô" và gọi "em", thân thiện, ngắn gọn (tối đa 120 chữ), ' +
+    'giải thích đúng bản chất, chỉ ra chỗ em hay nhầm, gợi ý cách tự kiểm tra; không chỉ đưa đáp án. Dùng tên chất theo IUPAC như sách Kết nối tri thức. Số thập phân dùng dấu chấm. ' +
+    'Trả về JSON đúng dạng: {"tra_loi": "nội dung"}.';
+  const kq = goiAI(yeuCau);
+  return {ok: true, goiy: String(kq.tra_loi || kq.traLoi || '')};
 }
 
 // ---------------------------------------------------------------------

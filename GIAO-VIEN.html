@@ -465,6 +465,44 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 .o .so{background:#fff;border-radius:999px;padding:2px 9px;color:var(--xanhDam);top:14px}
 @media (max-width:480px){.oLuoi{grid-template-columns:1fr 1fr;gap:10px}.o{padding:12px;min-height:150px}.o .ic{width:42px;height:42px;margin-bottom:10px}.o .ic svg{width:26px;height:26px}.o .mt{font-size:12.5px}.o .so{position:static;align-self:flex-start;margin-bottom:6px}}
 @media (max-width:640px){.banner{min-height:200px;align-items:flex-start;background-size:auto 62%;background-position:right bottom}.banner:before{background:linear-gradient(180deg,#e8f2fe 0%,rgba(232,242,254,.9) 45%,rgba(232,242,254,0) 70%)}}
+
+/* Tin nhan */
+.abTin{position:relative;background:rgba(255,255,255,.1);color:#fff;padding:7px 10px;border-radius:10px;display:flex;align-items:center}
+.abTin svg{width:24px;height:24px}
+.soDo{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#d93025;color:#fff;font-style:normal;font-weight:800;font-size:12px;line-height:1}
+.soDo[hidden]{display:none}
+.abTin .soDo{position:absolute;top:-6px;right:-6px;box-shadow:0 0 0 2px var(--ink)}
+.o .so.do{background:#d93025;color:#fff}
+.tinLuoi{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.tinLuoi{grid-template-columns:1fr}}
+.tinTrai{padding:6px;max-height:70vh;overflow-y:auto}
+.tinDong{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border-radius:10px;padding:10px;font-weight:400;border-bottom:1px solid var(--line)}
+.tinDong:hover{background:var(--xanh)}
+.tinDong.on{background:#dbeafe}
+.tinDong .tc{flex:1;min-width:0}
+.tinDong .tc b{display:block;font-size:15.5px}
+.tinDong.moi .tc b:after{content:" •";color:#d93025}
+.tinDong .tc i{display:block;font-style:normal;font-size:12px;color:var(--muted)}
+.tinDong .tc span{display:block;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loiNho{font-size:13px;color:var(--warn);background:var(--warnbg);border-radius:8px;padding:6px 8px;margin:4px}
+.tinPhai{min-height:320px;display:flex;flex-direction:column}
+.tinTrong{color:var(--muted);text-align:center;padding:60px 10px}
+.tinDau{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+.tinDau b{font-size:18px;display:block}
+.tinDau span{font-size:13.5px;color:var(--muted)}
+.tinDs2{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:8px;background:#f4f8fd;border-radius:12px}
+.bong{max-width:84%;padding:9px 13px;border-radius:16px;font-size:15.5px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.bong.tuHS{align-self:flex-start;background:#fff;border:1px solid #d6e2f1;border-bottom-left-radius:5px}
+.bong.tuGV{align-self:flex-end;background:var(--xanhDam);color:#fff;border-bottom-right-radius:5px}
+.bong .luc{display:block;font-size:11.5px;opacity:.7;margin-top:3px;text-align:right}
+.bong .ve{font-size:13px;margin-bottom:5px;white-space:normal}
+.bong .ve summary{cursor:pointer;font-weight:700;color:var(--xanhDam)}
+.bong.tuGV .ve summary{color:#fff}
+.veNd{margin-top:6px;padding:8px 10px;background:#f4f8fd;border-radius:8px;color:var(--ink)}
+.tinGo2{margin-top:10px}
+.tinGo2 textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;resize:vertical}
+.tinNut{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.btnXanh{background:var(--xanhDam);color:#fff;min-width:110px}
 </style>
 </head>
 <body>
@@ -472,7 +510,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="ab">
     <button class="brand" data-di="home" title="Trang chủ"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><rect x="1" y="1" width="38" height="38" rx="8" fill="none" stroke="#fff" stroke-width="2"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><span><b>Khám phá Hóa học</b><small>Trang giáo viên</small></span></button>
     <nav class="nav" aria-label="Chuyển trang"><button data-di="home">Trang chủ</button><button data-di="dot">Kiểm tra</button><button data-di="tro">Trò chơi</button><button data-di="tn">Tài nguyên</button><button data-di="hoso" id="btnHoSo">Hồ sơ HS</button><button data-di="caidat">Cài đặt</button></nav>
-    <div class="abPhai"><button class="abQR" id="abQR">Mã QR</button><button class="abRa" id="btnRa">Thoát</button></div>
+    <div class="abPhai"><button class="abTin" id="abTin" title="Tin nhắn học sinh"><span id="abTinIc"></span><i class="soDo" id="abTinSo" hidden></i></button><button class="abQR" id="abQR">Mã QR</button><button class="abRa" id="btnRa">Thoát</button></div>
   </div>
 </header>
 <main>
@@ -560,6 +598,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div id="dsTN"></div>
 </section>
 
+<section id="scrTin" class="hidden">
+  <div class="top"><div><h1>Tin nhắn học sinh</h1><p class="sub">Mỗi em một cuộc trò chuyện. Học sinh nhắn từ Tài khoản học sinh hoặc từ từng câu khi xem lại bài.</p></div><button class="btn2" id="tinTai">↻</button></div>
+  <div class="loc" id="tinLop"></div>
+  <div class="tinLuoi"><div class="card tinTrai" id="tinDsGV"></div><div class="card tinPhai" id="tinCuoc"><div class="tinTrong">Chọn một học sinh ở danh sách để xem và trả lời.</div></div></div>
+</section>
+
 <section id="scrCaiDat" class="hidden">
   <div class="card">
     <h1>Mã và cài đặt</h1>
@@ -589,6 +633,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <script src="cau-hinh-lop.js"></script>
 <script src="doc-excel.js"></script>
 <script src="hinh/giao-dien/bieu-tuong.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){var e=document.getElementById('abTinIc');if(e&&window.BT)e.innerHTML=BT.chuong;});</script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
@@ -596,10 +641,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var MA = '', DOT = [], dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
   function man(id) {
-    ['scrLogin', 'scrHome', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS', 'scrTro', 'scrTroKQ', 'scrCaiDat', 'scrTN'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
-    document.body.classList.toggle('rong', id === 'scrPhat' || id === 'scrHome'); window.scrollTo(0, 0);
+    ['scrLogin', 'scrHome', 'scrDot', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS', 'scrTro', 'scrTroKQ', 'scrCaiDat', 'scrTN', 'scrTin'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
+    document.body.classList.toggle('rong', id === 'scrPhat' || id === 'scrHome' || id === 'scrTin'); window.scrollTo(0, 0);
     $('appbar').classList.toggle('hidden', id === 'scrLogin');
-    var muc = id === 'scrHome' ? 'home' : /scrHoSo|scrMotHS/.test(id) ? 'hoso' : /scrTro/.test(id) ? 'tro' : id === 'scrCaiDat' ? 'caidat' : id === 'scrTN' ? 'tn' : 'dot';
+    var muc = id === 'scrHome' ? 'home' : /scrHoSo|scrMotHS/.test(id) ? 'hoso' : /scrTro/.test(id) ? 'tro' : id === 'scrCaiDat' ? 'caidat' : id === 'scrTN' ? 'tn' : id === 'scrTin' ? 'tin' : 'dot';
     [].forEach.call(document.querySelectorAll('.nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-di') === muc); });
   }
   function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -649,6 +694,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       MA = m; try { sessionStorage.setItem(KMA, m); } catch (e) {}
       $('ma').value = ''; DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); man('scrHome'); veHome(); taiDaThi();
       taiTro(function () { if (!$('scrHome').classList.contains('hidden')) veHome(); }); taiMa();
+      taiTinTatCa(); batTheoDoiTin();
     }).catch(function (e) { $('btnVao').disabled = false; $('btnVao').textContent = 'Vào'; $('msg').textContent = e.message; man('scrLogin'); });
   }
   $('btnRa').onclick = function () { MA = ''; try { sessionStorage.removeItem(KMA); } catch (e) {} man('scrLogin'); };
@@ -661,6 +707,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     else if (k === 'kqtro') moKQ();
     else if (k === 'caidat') moCaiDat();
     else if (k === 'tn') moTN();
+    else if (k === 'tin') moTinGV();
     else $('btnHoSo').onclick();
   }
   [].forEach.call(document.querySelectorAll('[data-di]'), function (b) { if (b.id !== 'btnHoSo') b.onclick = function () { diDen(b.getAttribute('data-di')); }; });
@@ -1743,7 +1790,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       { ten: 'Kiểm tra', mt: 'Đề, phòng chờ, chấm điểm, xem lại bài', o: [
         { kh: 'Đề', ten: 'Đề kiểm tra', mt: 'Mở phòng chờ, phát đề, đóng đề; sửa tên, thời gian, lớp', so: DOT.length + ' đề', di: 'dot' },
         { kh: 'Tk', ten: 'Mã QR tài khoản HS', mt: 'Học sinh đăng nhập để xem lại bài và tài nguyên', qr: 'xem', chi: 1 },
-        { kh: 'Hs', ten: 'Hồ sơ học sinh', mt: 'Bảng điểm, tiến bộ, kiến thức yếu, vắng thi', so: DS.length + ' lớp', di: 'hoso' }
+        { kh: 'Hs', ten: 'Hồ sơ học sinh', mt: 'Bảng điểm, tiến bộ, kiến thức yếu, vắng thi', so: DS.length + ' lớp', di: 'hoso' },
+        { kh: 'Tn', ten: 'Tin nhắn học sinh', mt: 'Thắc mắc của học sinh, trả lời, gợi ý AI', so: TINX.chuaDoc ? TINX.chuaDoc + ' chưa đọc' : '', di: 'tin', tin: 1 }
       ] },
       { ten: 'Trò chơi', mt: 'Tất cả trò chơi iPad, một nơi quản lý', o: [
         { kh: 'Tc', ten: 'Quản lý trò chơi', mt: 'Mở/đóng, thời gian chơi, lớp được chơi, mã QR', so: TRO ? soMo + '/' + TRO.length + ' mở' : '', di: 'tro', chi: 1 },
@@ -1765,9 +1813,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       n.o.forEach(function (o) {
         var el = document.createElement(o.href ? 'a' : 'button'); el.className = 'o' + (o.chi ? ' chi' : '');
         if (o.href) { el.href = o.href; el.target = '_blank'; el.rel = 'noopener'; }
-        var ICO = { 'Đề': 'de', Tk: 'xem', Hs: 'hs', Tc: 'tro', Kq: 'kq', Ml: 'ml', '3D': 'tn', Ma: 'ma', Dt: 'dt' };
+        var ICO = { 'Đề': 'de', Tk: 'xem', Hs: 'hs', Tc: 'tro', Kq: 'kq', Ml: 'ml', '3D': 'tn', Ma: 'ma', Dt: 'dt', Tn: 'tin' };
+        if (o.tin) el.setAttribute('data-tin', '1');
         el.innerHTML = (o.so ? '<span class="so">' + o.so + '</span>' : '') + '<span class="ic">' + (window.BT && BT[ICO[o.kh]] ? BT[ICO[o.kh]] : o.kh) + '</span><span class="ten">' + o.ten + '</span><span class="mt">' + o.mt + '</span>';
         if (o.di) el.onclick = function () { diDen(o.di); };
+        if (o.tin && TINX.chuaDoc) el.querySelector('.so').classList.add('do');
         if (o.qr) el.onclick = function () { moQR(o.qr); };
         luoi.appendChild(el);
       });
@@ -2345,6 +2395,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     });
   }
   $('tnMoi').onclick = function () { taiTN(true); };
+  $('tinTai').onclick = function () { taiTinTatCa(); if (TINX.chon) moCuoc(TINX.chon); };
   $('tnQR').onclick = function () { moQR('xem'); };
   function veTN() {
     var ds = dsTN(), box = $('dsTN');
@@ -2402,6 +2453,105 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     [].forEach.call(box.querySelectorAll('.tnDong .ai'), function (b) {
       b.onclick = function () { var ma = b.closest('.tnDong').getAttribute('data-ma'); TNX.mo = TNX.mo === ma ? null : ma; veTN(); };
     });
+  }
+
+
+  // =====================================================================
+  // TIN NHAN HOC SINH (moi em mot cuoc tro chuyen; so lop -> tab TIN NHAN)
+  // =====================================================================
+  var TINX = { lop: {}, chon: null, lopLoc: 'tat', hen: null, chuaDoc: 0, ct: null };
+  function taiTinTatCa(sau) {
+    Promise.all(DS.map(function (l) {
+      return goi(l.url, { action: 'gv_tin', ma: MA }).then(function (j) { TINX.lop[l.ten] = j.ok ? j : { loi: /hop le/i.test(j.msg || '') ? 'cu' : j.msg }; })
+        .catch(function () { TINX.lop[l.ten] = TINX.lop[l.ten] && TINX.lop[l.ten].ok ? TINX.lop[l.ten] : { loi: 'mang' }; });
+    })).then(function () {
+      TINX.chuaDoc = DS.reduce(function (s, l) { var j = TINX.lop[l.ten]; return s + (j && j.ok ? j.chuaDoc : 0); }, 0);
+      veChuong();
+      if (sau) sau();
+    });
+  }
+  function veChuong() {
+    var n = TINX.chuaDoc, b = $('abTinSo');
+    b.hidden = !n; b.textContent = n > 99 ? '99+' : n;
+    $('abTin').title = n ? n + ' tin nhắn chưa đọc' : 'Tin nhắn học sinh';
+    if (!$('scrHome').classList.contains('hidden') && TINX.daVe !== n) { TINX.daVe = n; veHome(); }
+    if (!$('scrTin').classList.contains('hidden')) veDsTin();
+  }
+  function batTheoDoiTin() { clearInterval(TINX.hen); TINX.hen = setInterval(function () { if (MA && !document.hidden) taiTinTatCa(); }, 60000); }
+  function moTinGV() { man('scrTin'); veDsTin(); taiTinTatCa(); }
+  $('abTin').onclick = function () { diDen('tin'); };
+  function veDsTin() {
+    var tab = $('tinLop'); tab.innerHTML = '';
+    [{ ten: 'tat', nhan: 'Tất cả lớp' }].concat(DS.map(function (l) { return { ten: l.ten, nhan: l.ten }; })).forEach(function (x) {
+      var j = TINX.lop[x.ten], n = x.ten === 'tat' ? TINX.chuaDoc : j && j.ok ? j.chuaDoc : 0;
+      var b = document.createElement('button'); b.className = x.ten === TINX.lopLoc ? 'on' : '';
+      b.innerHTML = esc(x.nhan) + (n ? ' <i class="soDo">' + n + '</i>' : '');
+      b.onclick = function () { TINX.lopLoc = x.ten; veDsTin(); }; tab.appendChild(b);
+    });
+    var ds = [];
+    DS.forEach(function (l) { if (TINX.lopLoc !== 'tat' && TINX.lopLoc !== l.ten) return; var j = TINX.lop[l.ten]; if (j && j.ok) j.ds.forEach(function (c) { ds.push({ c: c, l: l }); }); });
+    ds.sort(function (a, b) { return (b.c.chuaDoc ? 1 : 0) - (a.c.chuaDoc ? 1 : 0) || b.c.cuoi.t - a.c.cuoi.t; });
+    var box = $('tinDsGV'), h = '';
+    DS.forEach(function (l) { var j = TINX.lop[l.ten]; if (j && j.loi === 'cu' && (TINX.lopLoc === 'tat' || TINX.lopLoc === l.ten)) h += '<div class="loiNho">' + esc(l.ten) + ': sổ chưa cập nhật bản mới (SoTheoDoi.gs) nên chưa nhận tin nhắn.</div>'; });
+    if (!ds.length) h += '<div class="sub" style="padding:18px 6px">' + (Object.keys(TINX.lop).length ? 'Chưa có tin nhắn nào.' : 'Đang tải…') + '</div>';
+    ds.forEach(function (x) {
+      var c = x.c, k = x.l.ten + '|' + c.mahs;
+      h += '<button class="tinDong' + (TINX.chon === k ? ' on' : '') + (c.chuaDoc ? ' moi' : '') + '" data-k="' + esc(k) + '"><span class="tc"><b>' + esc(c.ten || c.mahs) + '</b><i>' + esc(x.l.ten) + ' · ' + ngayGio(new Date(c.cuoi.t).toISOString()) + '</i>' +
+        '<span>' + (c.cuoi.tu === 'GV' ? 'Thầy/cô: ' : '') + esc(c.cuoi.nd.slice(0, 80)) + '</span></span>' + (c.chuaDoc ? '<i class="soDo">' + c.chuaDoc + '</i>' : '') + '</button>';
+    });
+    box.innerHTML = h;
+    [].forEach.call(box.querySelectorAll('.tinDong'), function (b) { b.onclick = function () { moCuoc(b.getAttribute('data-k')); }; });
+  }
+  function lopTheoTen(t) { return DS.filter(function (l) { return l.ten === t; })[0]; }
+  function moCuoc(k) {
+    TINX.chon = k; TINX.ct = null; veDsTin(); veCuoc(); var p = k.split('|'), l = lopTheoTen(p[0]);
+    goi(l.url, { action: 'gv_tin_hs', ma: MA, mahs: p[1] }).then(function (j) {
+      if (TINX.chon !== k) return;
+      if (!j.ok) throw new Error(j.msg); TINX.ct = j; veCuoc();
+      var lj = TINX.lop[p[0]]; if (lj && lj.ok) lj.ds.forEach(function (c) { if (c.mahs === p[1]) { lj.chuaDoc -= c.chuaDoc; c.chuaDoc = 0; } });
+      TINX.chuaDoc = DS.reduce(function (s, l2) { var x = TINX.lop[l2.ten]; return s + (x && x.ok ? x.chuaDoc : 0); }, 0); veChuong();
+    }).catch(function (e) { $('tinCuoc').innerHTML = '<div class="loi">Chưa tải được: ' + esc(e.message) + '</div>'; });
+    if (window.innerWidth < 900) setTimeout(function () { $('tinCuoc').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
+  }
+  function veCuoc() {
+    var box = $('tinCuoc'), k = TINX.chon;
+    if (!k) { box.innerHTML = '<div class="tinTrong">Chọn một học sinh ở danh sách để xem và trả lời.</div>'; return; }
+    var p = k.split('|'), j = TINX.ct;
+    if (!j) { box.innerHTML = '<div class="tinTrong">Đang tải…</div>'; return; }
+    var nhan = function (c) { return String(c).replace(/^I{1,3}\./, ''); };
+    var h = '<div class="tinDau"><b>' + esc(j.ten || p[1]) + '</b><span>' + esc(p[0]) + ' · SBD ' + esc(p[1]) + '</span></div><div class="tinDs2" id="tinDs2">';
+    j.tin.forEach(function (x) {
+      var q = x.madot && x.cau ? (j.cau || {})[x.madot + '|' + x.cau] : null;
+      var ve = '';
+      if (x.madot && x.cau) {
+        ve = '<details class="ve"><summary>về Câu ' + esc(nhan(x.cau)) + ' · ' + esc(q ? q.ten : x.madot) + (q ? (q.dung ? ' · em làm đúng' : ' · em làm sai') : '') + '</summary>' +
+          (q ? '<div class="veNd">' + esc(q.hoi) + (q.pa.length ? '<br>' + q.pa.map(esc).join('<br>') : '') + '<br><b>Đáp án: ' + esc(q.dapan) + '</b> · Em chọn: <b>' + esc(q.chon || 'bỏ trống') + '</b></div>' : '') + '</details>';
+      }
+      h += '<div class="bong ' + (x.tu === 'GV' ? 'tuGV' : 'tuHS') + '">' + ve + esc(x.nd) + '<span class="luc">' + (x.tu === 'GV' ? 'Thầy/cô · ' : '') + ngayGio(new Date(x.t).toISOString()) + '</span></div>';
+    });
+    h += '</div><div class="tinGo2"><textarea id="tinTL" rows="3" maxlength="3000" placeholder="Trả lời em…"></textarea>' +
+      '<div class="tinNut"><button class="btn2" id="tinAI">✨ Gợi ý AI</button><button class="btnXanh" id="tinGuiGV">Gửi</button></div><div class="msg" id="tinMsgGV"></div></div>';
+    var cu = $('tinTL') ? $('tinTL').value : '';
+    box.innerHTML = h; $('tinTL').value = cu;
+    var d2 = $('tinDs2'); d2.scrollTop = d2.scrollHeight;
+    var l = lopTheoTen(p[0]);
+    $('tinAI').onclick = function () {
+      var b = this; b.disabled = true; b.textContent = 'AI đang soạn…'; $('tinMsgGV').textContent = '';
+      goi(l.url, { action: 'gv_tin_goiy', ma: MA, mahs: p[1] }).then(function (r) {
+        b.disabled = false; b.textContent = '✨ Gợi ý AI';
+        if (!r.ok) throw new Error(r.msg);
+        $('tinTL').value = r.goiy || ''; $('tinTL').focus();
+        $('tinMsgGV').innerHTML = '<span class="sub">Gợi ý của AI: thầy/cô đọc, sửa rồi bấm Gửi.</span>';
+      }).catch(function (e) { b.disabled = false; b.textContent = '✨ Gợi ý AI'; $('tinMsgGV').textContent = 'Chưa gợi ý được: ' + e.message; });
+    };
+    $('tinGuiGV').onclick = function () {
+      var nd = $('tinTL').value.trim(); if (!nd) { $('tinTL').focus(); return; }
+      var b = this; b.disabled = true; b.textContent = 'Đang gửi…';
+      goi(l.url, { action: 'gv_tin_gui', ma: MA, mahs: p[1], noidung: nd }).then(function (r) {
+        if (!r.ok) throw new Error(r.msg);
+        $('tinTL').value = ''; TINX.ct = r; veCuoc(); taiTinTatCa();
+      }).catch(function (e) { b.disabled = false; b.textContent = 'Gửi'; $('tinMsgGV').textContent = 'Chưa gửi được: ' + e.message; });
+    };
   }
 
 

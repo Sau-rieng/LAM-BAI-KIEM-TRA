@@ -69,7 +69,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 img{-webkit-user-drag:none;pointer-events:none}
 /* Tai khoan: 2 thu muc */
 .chao{font-size:15px;color:var(--muted);margin:0}
-.thuMuc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.thuMuc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+@media (max-width:640px){.thuMuc{grid-template-columns:1fr 1fr}}
 .thuMuc button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:18px;min-height:150px;color:var(--ink)}
 .thuMuc .ic{font-size:42px;line-height:1;margin-bottom:12px}
 .thuMuc b{font-size:20px}
@@ -126,6 +127,27 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 .loc button.on{background:#1f5fbf;border-color:#1f5fbf;color:#fff;box-shadow:0 2px 0 #174a96}
 .theTN{border:1.5px solid #c9def7;box-shadow:0 3px 0 #c9def7,0 8px 18px rgba(31,95,191,.08);transition:transform .14s}
 .theTN:hover{transform:translateY(-2px)}
+
+/* Tin nhan */
+.thuMuc button{position:relative}
+.thuMuc button.tinBtn .ic{color:#1e8e3e}
+.dem{position:absolute;top:12px;right:12px;min-width:26px;height:26px;border-radius:13px;background:#d93025;color:#fff;font-style:normal;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0 7px;box-shadow:0 0 0 3px #fff}
+.dem[hidden]{display:none}
+.hoiCau{margin-top:6px;background:#eaf3fe;border:1.5px solid #c9def7;color:#1f5fbf;font-size:15px;padding:8px 12px}
+.tinDs{display:flex;flex-direction:column;gap:8px;max-height:min(56vh,520px);overflow-y:auto;padding:10px;background:#f4f8fd;border-radius:12px;border:1px solid #e1ebf7;margin:12px 0}
+.tinDs .trong{color:var(--muted);text-align:center;padding:24px 8px;font-size:15px}
+.bong{max-width:82%;padding:9px 13px;border-radius:16px;font-size:16px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;-webkit-user-select:text;user-select:text}
+.bong.hs{align-self:flex-end;background:#1f5fbf;color:#fff;border-bottom-right-radius:5px}
+.bong.gv{align-self:flex-start;background:#fff;border:1px solid #d6e2f1;border-bottom-left-radius:5px}
+.bong .ve{display:block;font-size:12.5px;opacity:.8;margin-bottom:3px;font-weight:600}
+.bong .luc{display:block;font-size:11.5px;opacity:.7;margin-top:3px;text-align:right}
+.tinCau{display:flex;align-items:center;gap:8px;background:#fff4d6;border-radius:10px;padding:7px 10px;font-size:14.5px;margin-bottom:8px}
+.tinCau[hidden]{display:none}
+.tinCau span{flex:1}
+.tinCau button{padding:2px 8px;background:none;font-size:16px}
+.tinGo{display:flex;gap:8px;align-items:flex-end}
+.tinGo textarea{flex:1;font:inherit;font-size:17px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;resize:vertical;min-height:52px;-webkit-user-select:text;user-select:text}
+.tinGo .btn{width:auto;margin:0;padding:13px 20px}
 </style>
 </head>
 <body>
@@ -155,8 +177,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <div class="thuMuc">
       <button id="moBai"><span class="ic" aria-hidden="true" data-bt="xem"></span><b>Xem lại bài</b><span id="soBai"></span></button>
       <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true" data-bt="tn"></span><b>Tài nguyên</b><span id="soTN"></span></button>
+      <button id="moTin" class="tinBtn"><span class="ic" aria-hidden="true" data-bt="tin"></span><i class="dem" id="demTin" hidden></i><b>Hỏi thầy/cô</b><span id="soTin">Nhắn thắc mắc, xem trả lời</span></button>
     </div>
     <button class="btn btn2" id="btnRa0">Thoát</button>
+  </div>
+</section>
+
+<section id="scrTin" class="hidden">
+  <div class="card tinKhung">
+    <div class="dau"><button class="btn2" id="tinLai">◀ Tài khoản</button><button class="btn2" id="tinMoi" title="Tải tin mới">↻</button></div>
+    <h1>Hỏi thầy/cô</h1>
+    <p class="sub">Em nhắn điều chưa hiểu; thầy/cô trả lời trong mục này. Khi xem lại bài, bấm "Hỏi thầy/cô câu này" để gửi kèm câu hỏi.</p>
+    <div class="tinDs" id="tinDs"></div>
+    <div class="tinCau" id="tinCau" hidden><span id="tinCauChu"></span><button id="tinCauBo" aria-label="Bỏ câu đính kèm">✕</button></div>
+    <div class="tinGo"><textarea id="tinNd" rows="2" maxlength="1500" placeholder="Nhập thắc mắc của em…"></textarea><button class="btn" id="tinGui">Gửi</button></div>
+    <div class="msg" id="tinMsg"></div>
   </div>
 </section>
 
@@ -212,7 +247,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var lopChon = null, duLieu = null, baiDangXem = null;
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -259,7 +294,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     el.style.backgroundImage = 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
     el.style.display = 'block';
   }
-  document.addEventListener('contextmenu', function (e) { if (e.target.tagName !== 'INPUT') e.preventDefault(); });
+  document.addEventListener('contextmenu', function (e) { if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); });
   document.addEventListener('copy', function (e) { e.preventDefault(); });
   function veDanhSach() {
     hinhMo(duLieu.hoten + ' · ' + duLieu.mahs);
@@ -373,6 +408,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       the.innerHTML = h;
       box.appendChild(the);
     });
+    // Nut hoi thay/co tung cau
+    [].forEach.call(box.querySelectorAll('.card.q'), function (the, i) {
+      var q = baiDangXem.cau.filter(function (x) { return !(chiSai && x.dung); })[i]; if (!q) return;
+      var n = nhan(q), b = document.createElement('button'); b.className = 'hoiCau'; b.textContent = '💬 Hỏi thầy/cô câu này';
+      b.onclick = function () { moTin({ madot: baiDangXem.madot, cau: q.cau, chu: 'Câu ' + n.so + (n.phan ? ' (Phần ' + n.phan + ')' : '') + ' · ' + baiDangXem.ten }); };
+      the.appendChild(b);
+    });
     if (!box.children.length) box.innerHTML = '<div class="card">Không có câu sai nào.</div>';
   }
   $('chiSai').onchange = veCau;
@@ -388,10 +430,59 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('soBai').textContent = duLieu.bai.length ? duLieu.bai.length + ' bài giáo viên đã mở' : 'Chưa có bài nào mở xem lại';
     var n = dsTN().length;
     $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
+    demTin(duLieu.tinMoi || 0);
     man('scrHome');
   }
   $('moBai').onclick = function () { veDanhSach(); };
   $('moTN').onclick = function () { veTN(); man('scrTN'); };
+
+  // ---------- Tin nhan voi thay/co ----------
+  var TIN = [], tinCau = null, henTin = null;
+  function demTin(n) { var e = $('demTin'); e.hidden = !n; e.textContent = n > 9 ? '9+' : n; $('soTin').textContent = n ? n + ' tin mới từ thầy/cô' : 'Nhắn thắc mắc, xem trả lời'; }
+  function gioTin(t) { var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' ' + ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); }
+  function veTin() {
+    var box = $('tinDs');
+    if (!TIN.length) { box.innerHTML = '<div class="trong">Chưa có tin nhắn. Em hãy gửi thắc mắc đầu tiên.</div>'; return; }
+    var tenBai = {}; (duLieu.bai || []).forEach(function (b) { tenBai[b.madot] = b.ten; });
+    box.innerHTML = TIN.map(function (x) {
+      var ve = x.madot && x.cau ? '<span class="ve">về Câu ' + esc(String(x.cau).replace(/^I{1,3}\./, '')) + ' · ' + esc(tenBai[x.madot] || x.madot) + '</span>' : '';
+      return '<div class="bong ' + (x.tu === 'GV' ? 'gv' : 'hs') + '">' + ve + esc(x.nd) + '<span class="luc">' + (x.tu === 'GV' ? 'Thầy/cô · ' : '') + gioTin(x.t) + '</span></div>';
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+  function goiTin(du) {
+    du.mahs = duLieu.mahs; du.maxem = duLieu.maxem;
+    return fetch(lopChon.url, { method: 'POST', body: JSON.stringify(du) }).then(function (r) { return r.json(); });
+  }
+  function taiTin(im) {
+    if (!im) $('tinMsg').textContent = 'Đang tải…';
+    return goiTin({ action: 'tn_xem' }).then(function (j) {
+      $('tinMsg').textContent = '';
+      if (!j.ok) { $('tinMsg').className = 'msg err'; $('tinMsg').textContent = /hop le/i.test(j.msg || '') ? 'Hệ thống tin nhắn chưa bật ở lớp này. Báo thầy/cô.' : 'Chưa tải được tin nhắn.'; return; }
+      TIN = j.tin; demTin(0); veTin();
+    }).catch(function () { $('tinMsg').className = 'msg err'; $('tinMsg').textContent = 'Không kết nối được. Kiểm tra mạng.'; });
+  }
+  function moTin(cau) {
+    tinCau = cau || null;
+    $('tinCau').hidden = !tinCau; if (tinCau) $('tinCauChu').textContent = 'Đính kèm: ' + tinCau.chu;
+    man('scrTin'); veTin(); taiTin();
+    clearInterval(henTin); henTin = setInterval(function () { if (!$('scrTin').classList.contains('hidden')) taiTin(true); }, 30000);
+    setTimeout(function () { $('tinNd').focus(); }, 50);
+  }
+  $('moTin').onclick = function () { moTin(null); };
+  $('tinLai').onclick = function () { clearInterval(henTin); man('scrHome'); };
+  $('tinMoi').onclick = function () { taiTin(); };
+  $('tinCauBo').onclick = function () { tinCau = null; $('tinCau').hidden = true; };
+  $('tinGui').onclick = function () {
+    var nd = $('tinNd').value.trim(); if (!nd) { $('tinNd').focus(); return; }
+    var b = $('tinGui'); b.disabled = true; b.textContent = 'Đang gửi…'; $('tinMsg').className = 'msg'; $('tinMsg').textContent = '';
+    goiTin({ action: 'tn_gui', noidung: nd, madot: tinCau ? tinCau.madot : '', cau: tinCau ? tinCau.cau : '' }).then(function (j) {
+      b.disabled = false; b.textContent = 'Gửi';
+      if (!j.ok) throw new Error(j.msg);
+      $('tinNd').value = ''; tinCau = null; $('tinCau').hidden = true; TIN = j.tin; veTin();
+      $('tinMsg').textContent = '✓ Đã gửi. Thầy/cô sẽ trả lời trong mục này.';
+    }).catch(function () { b.disabled = false; b.textContent = 'Gửi'; $('tinMsg').className = 'msg err'; $('tinMsg').textContent = 'Chưa gửi được. Thử lại.'; });
+  };
   $('dsLai').onclick = $('tnLai').onclick = function () { man('scrHome'); };
   $('btnRa0').onclick = function () { duLieu = null; hinhMo(''); man('scrLogin'); };
 
