@@ -88,6 +88,22 @@ Bài/chương mới: thêm một mục mới cùng kiểu (3–6 kiến thức),
 - Tơ
 - Cao su, keo dán
 
+## Hóa 12 – Bài 15: Thế điện cực và nguồn điện hoá học (mã đợt `H12-B15-…`, đề ôn chương `H12-C5-…`, thêm 27/10/2026)
+
+- Cặp oxi hoá – khử của kim loại: khái niệm, bán phản ứng, kí hiệu
+- Điện cực, thế điện cực chuẩn, điện cực hydrogen chuẩn
+- So sánh tính khử, tính oxi hoá; dãy điện hoá của kim loại
+- Dự đoán chiều phản ứng oxi hoá – khử; bài toán kim loại tác dụng với muối
+- Pin Galvani: cấu tạo, hoạt động, sức điện động; bài toán pin
+- Một số nguồn điện khác: acquy, pin nhiên liệu, pin Mặt Trời
+
+## Hóa 12 – Bài 16: Điện phân (mã đợt `H12-B16-…`, đề ôn chương `H12-C5-…`, thêm 27/10/2026)
+
+- Nguyên tắc điện phân: cathode, anode, quá trình ở các điện cực
+- Điện phân nóng chảy; điều chế kim loại có tính khử mạnh
+- Điện phân dung dịch: thứ tự điện phân, sản phẩm, phương trình điện phân
+- Ứng dụng của điện phân: sản xuất nhôm, tinh luyện đồng, mạ điện
+
 ## Cách đặt kiến thức cho bài mới (mẫu)
 
 - 1 kiến thức ≈ 1 yêu cầu cần đạt trong chương trình hoặc 1 mục lớn của bài SGK KNTT.
