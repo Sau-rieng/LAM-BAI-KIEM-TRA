@@ -41,7 +41,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 
 Mỗi lớp có 1 Google Sheet "SO THEO DOI <lớp>" (và "SO THEO DOI DEMO") chứa script này, triển khai dạng Web app.
 Dòng 9 `KHO_DE_ID` = ID file KHODEHOA (DEMO dùng kho bản sao riêng). **Mỗi lần sửa**: dán vào cả 5 sổ + DEMO → Triển khai → Quản lý → ✎ → Phiên bản mới.
-`PhanTichAI.gs` (hàm `goiAI`, khóa GeminiKey trong tab MA) là file riêng trong các sổ dùng AI.
+Phần AI (hàm `goiAI`, menu 🤖 Phân tích AI, khóa GeminiKey trong tab MA) **đã gộp vào `SoTheoDoi.gs`**: mỗi sổ chỉ một tệp mã; sổ còn tệp `PhanTichAI` cũ thì xóa (quên xóa vẫn chạy vì hằng số AI đã đổi tên có hậu tố _AI).
 
 - KHODEHOA: tab `CAU HINH` (MaDot | TenBai | ThoiGian_phut | TrangThai MO/CHO/DONG | ChoXemLai | Lop | BatDauLuc), `MA`, `KIEN THUC` (MaDot | Cau | KienThuc | MucDo), `TRO CHOI` (tự tạo), mỗi đề một tab.
 - Sổ lớp: `DANHSACH` (MAHS, HO TEN, GHI CHU, MAXEM), `BAI LAM`, `BAT DAU`, `PHONG CHO`, `XEM LAI`, `VANG THI`, `HOAT DONG` (trò cá nhân), `TRO CHOI NHOM`, `NHOM`, `XEM TAI NGUYEN`, `TIN NHAN`, `BANG DIEM`.
@@ -66,7 +66,7 @@ Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản
 
 1. Dán `apps-script/SoTheoDoi.gs` bản mới nhất vào 5 sổ + DEMO và triển khai phiên bản mới (cần cho: trò chơi quản lý chung, tài nguyên, tin nhắn, **nút Nạp đề mới**).
 2. Trang giáo viên → Cài đặt: đặt **Mã vào chơi** và **Mã mở khóa trò chơi** riêng.
-3. Sổ DEMO cần `PhanTichAI.gs` + khóa AI nếu muốn Ban giám khảo thử nút Gợi ý AI.
+3. Mỗi sổ sau khi dán bản mới: tải lại Sheet → 🤖 Phân tích AI → Kiểm tra kết nối AI để cấp quyền (cả sổ DEMO nếu muốn Ban giám khảo thử Gợi ý AI). KHO DE DEMO cần dòng GeminiKey riêng ở tab MA.
 4. Mở thử trên iPad 9 mô phỏng 3D (dùng three.js từ CDN) vì phiên trước không chạy được hình 3D để kiểm tra.
 
 ## 5. Việc có thể làm tiếp (giáo viên chưa chọn)

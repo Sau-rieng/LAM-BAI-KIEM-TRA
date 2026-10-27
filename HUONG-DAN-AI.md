@@ -22,16 +22,16 @@ Sau khi cài, mỗi file **SO THEO DOI <lớp>** có thêm menu **🤖 Phân tí
 
 Không chia sẻ file KHO ĐỀ cho người khác, vì trong đó có mã giáo viên và khóa AI.
 
-## Bước 2. Dán mã vào từng file Sổ theo dõi (làm cho cả 5 lớp)
+## Bước 2. Dán mã vào từng file Sổ theo dõi (5 lớp + DEMO)
 
-Lặp lại các bước sau với từng file `SO THEO DOI 10E01`, `12G01`, `12G02`, `9D1`, `9D3`:
+Phần AI nay đã **gộp vào `SoTheoDoi.gs`**: mỗi sổ chỉ còn **một** tệp mã. Lặp lại các bước sau với từng file `SO THEO DOI 10E01`, `12G01`, `12G02`, `9D01`, `9D03`, `DEMO`:
 
-1. Mở file và vào **Tiện ích**, rồi **Apps Script**.
-2. Bấm dấu **+** cạnh chữ *Tệp*, chọn **Tập lệnh** và đặt tên `PhanTichAI`.
-3. Xóa hết nội dung có sẵn, rồi dán toàn bộ nội dung file `apps-script/PhanTichAI.gs`.
-4. Mở tệp `SoTheoDoi` và **thay toàn bộ** bằng bản mới trong `apps-script/SoTheoDoi.gs`. Bản mới chỉ thêm một dòng để trang Xem lại bài hiện được gợi ý. **Nhớ điền lại `KHO_DE_ID`** như cũ.
+1. Mở file và vào **Tiện ích mở rộng**, rồi **Apps Script**.
+2. Trong tệp `SoTheoDoi`, **ghi lại dãy ID ở dòng 9** (`KHO_DE_ID = '...'`).
+3. Xóa toàn bộ nội dung tệp `SoTheoDoi`, dán toàn bộ nội dung file `apps-script/SoTheoDoi.gs` mới, rồi **điền lại ID ở dòng 9** như cũ.
+4. Nếu bên trái còn tệp **`PhanTichAI`**: bấm dấu ⋮ cạnh tên tệp → **Xóa**. (Quên xóa thì sổ vẫn chạy, nhưng nên xóa cho gọn.)
 5. Bấm **💾 Lưu**.
-6. Bấm **Triển khai**, chọn **Quản lý tùy chọn triển khai**, bấm ✏️ (sửa), ở mục Phiên bản chọn **Phiên bản mới**, rồi bấm **Triển khai**. Làm theo cách này thì link `/exec` **giữ nguyên**, không cần sửa `cau-hinh-lop.js`.
+6. Bấm **Triển khai**, chọn **Quản lý các bản triển khai**, bấm ✏️ (sửa), ở mục Phiên bản chọn **Phiên bản mới**, rồi bấm **Triển khai**. Link `/exec` **giữ nguyên**, không cần sửa `cau-hinh-lop.js`.
 7. Quay lại file Sheet và **tải lại trang**. Menu **🤖 Phân tích AI** sẽ hiện trên thanh menu.
 8. Lần đầu bấm menu, Google sẽ hỏi quyền. Bấm **Tiếp tục**, chọn tài khoản, bấm **Nâng cao**, rồi **Đi tới… (không an toàn)**, rồi **Cho phép**. Cảnh báo này là bình thường với tập lệnh do chính thầy/cô tạo.
 
@@ -54,6 +54,6 @@ Chọn **🤖 Phân tích AI**, rồi **Kiểm tra kết nối AI**. Nếu hiệ
 | Khóa AI không hợp lệ (mã 400/403) | Tạo khóa mới ở aistudio.google.com rồi dán lại |
 | Đã hết lượt dùng AI miễn phí | Gói miễn phí giới hạn số lần gọi mỗi phút và mỗi ngày. Đợi vài phút hoặc chạy lại ngày hôm sau |
 | Không tìm thấy mô hình | Google đã đổi tên mô hình. Vào aistudio.google.com xem tên mô hình Flash mới, rồi thêm dòng `GeminiModel` với tên đó ở tab MA |
-| Không có menu 🤖 | Tải lại trang Sheet. Kiểm tra tệp `PhanTichAI` đã được lưu |
+| Không có menu 🤖 | Tải lại trang Sheet. Kiểm tra tệp `SoTheoDoi` đã dán bản mới và đã lưu |
 
 Lưu ý: với gói miễn phí, Google có thể dùng nội dung gửi lên để cải thiện sản phẩm. Vì vậy hệ thống chỉ gửi mã số, không gửi tên học sinh.

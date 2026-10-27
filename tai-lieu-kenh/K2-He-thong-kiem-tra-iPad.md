@@ -11,7 +11,7 @@ Tải file này vào kênh K2 (cùng Quy-uoc-chung.md và Mau-dinh-dang-de.md). 
 | Trang giáo viên (ứng dụng **Khám phá Hóa học**) | `GIAO-VIEN.html` | Mã quản lý; Kiểm tra: mở phòng chờ → bắt đầu → đóng đề, bật xem lại, sửa tên/thời gian/lớp của đề, theo dõi nộp bài; Trò chơi: mở/đóng, thời gian, lớp, QR, kết quả; Hồ sơ HS; Cài đặt: đổi các mã |
 | Danh sách lớp | `cau-hinh-lop.js` | Tên lớp, 6 số đầu SBD, link `/exec` từng sổ |
 | Hình trong đề | `hinh/<mã đợt>/imageN.png` | Chèn bằng `<img src="https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/hinh/<mã đợt>/imageN.png">` |
-| Mã chấm | `apps-script/SoTheoDoi.gs` + `apps-script/PhanTichAI.gs` | Dán giống nhau vào cả 5 Sổ theo dõi; dòng 9 `KHO_DE_ID` = ID file KHODEHOA |
+| Mã chấm | `apps-script/SoTheoDoi.gs` (một tệp, đã gộp phần AI) | Dán giống nhau vào cả 5 Sổ theo dõi + DEMO (sổ còn tệp PhanTichAI cũ thì xóa); dòng 9 `KHO_DE_ID` = ID file KHODEHOA |
 
 ## Kho đề KHODEHOA
 
