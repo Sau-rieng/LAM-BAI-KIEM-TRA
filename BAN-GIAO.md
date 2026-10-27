@@ -40,7 +40,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 ### Máy chủ: `apps-script/SoTheoDoi.gs`
 
 Mỗi lớp có 1 Google Sheet "SO THEO DOI <lớp>" (và "SO THEO DOI DEMO") chứa script này, triển khai dạng Web app.
-Dòng 9 `KHO_DE_ID` = ID file KHODEHOA (DEMO dùng kho bản sao riêng). **Mỗi lần sửa**: dán vào cả 5 sổ + DEMO → Triển khai → Quản lý → ✎ → Phiên bản mới.
+Dòng 10 `KHO_DE_ID`: bản trên GitHub đã điền sẵn ID KHODEHOA thật (5 sổ lớp dán là dùng được); **sổ DEMO phải sửa dòng 10 thành ID kho DEMO** (bản sao riêng). **Mỗi lần sửa**: dán vào cả 5 sổ + DEMO → Triển khai → Quản lý → ✎ → Phiên bản mới.
 Phần AI (hàm `goiAI`, menu 🤖 Phân tích AI, khóa GeminiKey trong tab MA) **đã gộp vào `SoTheoDoi.gs`**: mỗi sổ chỉ một tệp mã; sổ còn tệp `PhanTichAI` cũ thì xóa (quên xóa vẫn chạy vì hằng số AI đã đổi tên có hậu tố _AI).
 
 - KHODEHOA: tab `CAU HINH` (MaDot | TenBai | ThoiGian_phut | TrangThai MO/CHO/DONG | ChoXemLai | Lop | BatDauLuc), `MA`, `KIEN THUC` (MaDot | Cau | KienThuc | MucDo), `TRO CHOI` (tự tạo), mỗi đề một tab.
