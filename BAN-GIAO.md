@@ -31,7 +31,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
   - Cài đặt: đổi MaGV, MaMoKhoa, MaLamLai, MaQuanLy, MaTroChoi, MaMoKhoaTroChoi (bản DEMO chỉ xem).
 - `LAM-BAI.html`: học sinh làm bài (chọn lớp + 2 số cuối SBD + mã giáo viên; QR riêng của đề tự điền).
 - `XEM-LAI.html`: **Tài khoản học sinh** (SBD + mã xem bài) với 3 ô: Xem lại bài (mỗi câu có nút 💬 Hỏi thầy/cô câu này) · Tài nguyên (mô phỏng tải tạm vào khung, không lưu) · Hỏi thầy/cô (số đỏ khi có trả lời).
-- `index.html`, `DUNG-THU.html` (trang cho Ban giám khảo, lớp DEMO), `GIAM-KHAO.html` (hướng dẫn in, **chưa cập nhật** phần Tài nguyên và Tin nhắn).
+- `index.html`, `DUNG-THU.html` (trang cho Ban giám khảo, lớp DEMO), `GIAM-KHAO.html` (hướng dẫn Ban giám khảo: giao diện giống trang Dùng thử, 9 bước gồm Tài nguyên 3D và Hỏi thầy/cô; bản in A4 đen trắng 2 trang).
 - `cau-hinh-lop.js`: danh sách lớp + link /exec của từng sổ; `?demo` chuyển sang lớp DEMO.
 - `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ.
 - `hinh/giao-dien/`: `nen-hoa.svg` (nền nét vẽ), `banner-ptn.svg` (banner phòng thí nghiệm), `bieu-tuong.js` (biểu tượng `window.BT`). Giao diện: nền xanh nhạt, ô/tab xanh nhạt nổi, chữ Be Vietnam Pro, màu ink #172033, hồng #b8235a, xanh #1f5fbf.
@@ -71,7 +71,6 @@ Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản
 
 ## 5. Việc có thể làm tiếp (giáo viên chưa chọn)
 
-- Làm lại `GIAM-KHAO.html` theo giao diện mới, thêm bước Tài nguyên 3D và Tin nhắn.
 - Thêm mục "Toán 6" vào Tài nguyên cho mô phỏng hai ca nô (bài 3.13); bổ sung kiến thức Hóa 10 Bài 12, Hóa 12 Bài 6/15/21 vào Danh mục kiến thức.
 - Kênh K5 (gộp vào K1), mẫu K6, K9 chưa làm.
 
