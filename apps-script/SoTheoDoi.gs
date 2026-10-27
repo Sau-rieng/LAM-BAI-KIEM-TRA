@@ -1452,7 +1452,7 @@ const HINH_MAU = '<svg viewBox="0 0 200 200" width="200" height="200" xmlns="htt
 
 // Thu lan luot cac mo hinh nay (mo hinh dau tien dung duoc se duoc dung).
 // Neu Google doi ten mo hinh, them ten moi vao dau danh sach hoac dien dong "GeminiModel" o tab MA.
-const MO_HINH_AI = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+const MO_HINH_AI = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
 
 let MO_HINH_AI_DUNG = '';   // nho mo hinh goi duoc trong lan chay nay
 
@@ -1794,7 +1794,7 @@ function goiAI(yeuCau) {
     contents: [{role: 'user', parts: [{text: yeuCau}]}],
     generationConfig: {temperature: 0.4, responseMimeType: 'application/json'}
   };
-  let loiCuoi = '';
+  const loiTung = [];
   const ds = MO_HINH_AI_DUNG ? [MO_HINH_AI_DUNG] : k.moHinh;
   for (let i = 0; i < ds.length; i++) {
     const moHinh = ds[i];
@@ -1804,10 +1804,10 @@ function goiAI(yeuCau) {
     });
     const ma = res.getResponseCode();
     const txt = res.getContentText();
-    if (ma === 404) { loiCuoi = 'Không tìm thấy mô hình ' + moHinh; continue; }
+    if (ma === 404) { loiTung.push(moHinh + ': không có'); continue; }
     if (ma === 429) throw new Error('Đã hết lượt dùng AI miễn phí trong lúc này. Đợi vài phút (hoặc sang ngày mai) rồi chạy lại.');
-    if (ma === 400 || ma === 403) throw new Error('Khóa AI không hợp lệ hoặc chưa được phép (mã ' + ma + '). Kiểm tra dòng GeminiKey ở tab MA.\n' + rutGon(txt, 300));
-    if (ma !== 200) { loiCuoi = 'Lỗi ' + ma + ': ' + rutGon(txt, 300); continue; }
+    if (ma === 401 || (ma === 400 && /API_KEY|api key/i.test(txt))) throw new Error('Khóa AI không dùng được (mã ' + ma + '). Kiểm tra dòng GeminiKey ở tab MA, hoặc tạo khóa mới ở aistudio.google.com/apikey.\n' + rutGon(txt, 300));
+    if (ma !== 200) { loiTung.push(moHinh + ': lỗi ' + ma + ' ' + rutGon(txt, 160)); continue; }
     const j = JSON.parse(txt);
     const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
     const chu = parts.map(function (p) { return p.text || ''; }).join('');
@@ -1816,7 +1816,7 @@ function goiAI(yeuCau) {
     MO_HINH_AI_DUNG = moHinh;
     return kq;
   }
-  throw new Error('Không gọi được AI. ' + loiCuoi);
+  throw new Error('Không gọi được AI. Đã thử: ' + loiTung.join(' | ') + '. Thêm dòng GeminiModel ở tab MA với tên mô hình mới (xem ai.google.dev/models).');
 }
 
 function docJSON(chu) {
