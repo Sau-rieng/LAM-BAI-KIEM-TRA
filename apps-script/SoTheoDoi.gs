@@ -7,7 +7,7 @@
 // =====================================================================
 
 // ID cua file KHO DE (dung chung moi khoi; cot Lop trong tab CAU HINH chon lop duoc lam)
-const KHO_DE_ID = 'DAN_ID_KHO_DE_VAO_DAY';
+const KHO_DE_ID = '1OB3ij2R_4anO5pQqrClQHLLl0dBXDZ13fSMaDpIx7m4';
 
 const TAB_DS = 'DANHSACH';
 const TAB_BL = 'BAI LAM';
