@@ -8,7 +8,7 @@ Không ghi mã thật ở đây: mã thật chỉ nằm trong tab MA của file 
 - Giáo viên Hóa (bộ Kết nối tri thức). Các lớp: 10E01, 12G01, 12G02, 9D01, 9D03. Sổ điểm trường: vnEdu.
 - In đen trắng. Số thập phân dùng **dấu chấm** (7.8).
 - Khi giáo viên đề xuất tính năng: **nêu các hướng làm để giáo viên chọn trước, rồi mới làm**.
-- Mỗi câu hỏi soạn ra phải gắn **Kiến thức (yêu cầu cần đạt)** và **Mức độ (Biết/Hiểu/Vận dụng)**.
+- Mỗi câu hỏi soạn ra phải gắn **Kiến thức (yêu cầu cần đạt)** và **Mức độ (Biết/Hiểu/Vận dụng)**, và có **lời giải chi tiết** (giải thích từng phương án; xem K1).
 - Viết hướng dẫn từng bước, dễ hiểu, xưng "thầy/cô".
 
 ## 2. Kho mã nguồn (GitHub, người dùng Sau-rieng)
@@ -30,7 +30,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
   - Tin nhắn: mỗi học sinh một cuộc trò chuyện, xem nội dung câu em hỏi, ✨ Gợi ý AI rồi giáo viên sửa và gửi.
   - Cài đặt: đổi MaGV, MaMoKhoa, MaLamLai, MaQuanLy, MaTroChoi, MaMoKhoaTroChoi (bản DEMO chỉ xem).
 - `LAM-BAI.html`: học sinh làm bài (chọn lớp + 2 số cuối SBD + mã giáo viên; QR riêng của đề tự điền).
-- `XEM-LAI.html`: **Tài khoản học sinh** (SBD + mã xem bài) với 3 ô: Xem lại bài (mỗi câu có nút 💬 Hỏi thầy/cô câu này) · Tài nguyên (mô phỏng tải tạm vào khung, không lưu) · Hỏi thầy/cô (số đỏ khi có trả lời).
+- `XEM-LAI.html`: **Tài khoản học sinh** (SBD + mã xem bài) với 3 ô: Xem lại bài (mỗi câu có nút 💡 Giải thích nếu có lời giải và 💬 Hỏi thầy/cô câu này) · Tài nguyên (mô phỏng tải tạm vào khung, không lưu) · Hỏi thầy/cô (số đỏ khi có trả lời).
 - `index.html`, `DUNG-THU.html` (trang cho Ban giám khảo, lớp DEMO), `GIAM-KHAO.html` (hướng dẫn Ban giám khảo: giao diện giống trang Dùng thử, 9 bước gồm Tài nguyên 3D và Hỏi thầy/cô; bản in A4 đen trắng 2 trang).
 - `cau-hinh-lop.js`: danh sách lớp + link /exec của từng sổ; `?demo` chuyển sang lớp DEMO.
 - `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ.
@@ -43,7 +43,7 @@ Mỗi lớp có 1 Google Sheet "SO THEO DOI <lớp>" (và "SO THEO DOI DEMO") ch
 Dòng 10 `KHO_DE_ID`: bản trên GitHub đã điền sẵn ID KHODEHOA thật (5 sổ lớp dán là dùng được); **sổ DEMO phải sửa dòng 10 thành ID kho DEMO** (bản sao riêng). **Mỗi lần sửa**: dán vào cả 5 sổ + DEMO → Triển khai → Quản lý → ✎ → Phiên bản mới.
 Phần AI (hàm `goiAI`, menu 🤖 Phân tích AI, khóa GeminiKey trong tab MA) **đã gộp vào `SoTheoDoi.gs`**: mỗi sổ chỉ một tệp mã; sổ còn tệp `PhanTichAI` cũ thì xóa (quên xóa vẫn chạy vì hằng số AI đã đổi tên có hậu tố _AI).
 
-- KHODEHOA: tab `CAU HINH` (MaDot | TenBai | ThoiGian_phut | TrangThai MO/CHO/DONG | ChoXemLai | Lop | BatDauLuc), `MA`, `KIEN THUC` (MaDot | Cau | KienThuc | MucDo), `TRO CHOI` (tự tạo), mỗi đề một tab.
+- KHODEHOA: tab `CAU HINH` (MaDot | TenBai | ThoiGian_phut | TrangThai MO/CHO/DONG | ChoXemLai | Lop | BatDauLuc), `MA`, `KIEN THUC` (MaDot | Cau | KienThuc | MucDo), `GIAI THICH` (MaDot | Cau | GiaiThich – nút 💡 Giải thích ở trang xem lại), `TRO CHOI` (tự tạo), mỗi đề một tab.
 - Sổ lớp: `DANHSACH` (MAHS, HO TEN, GHI CHU, MAXEM), `BAI LAM`, `BAT DAU`, `PHONG CHO`, `XEM LAI`, `VANG THI`, `HOAT DONG` (trò cá nhân), `TRO CHOI NHOM`, `NHOM`, `XEM TAI NGUYEN`, `TIN NHAN`, `BANG DIEM`.
 - Hành động học sinh: batdau, nop, mokhoa, chobai, vaobai, xemlai (trả kèm tinMoi), daxem, xemtn, tn_gui, tn_xem, tc_vao, tc_mokhoa, loai=hoatdong / loai=nhom.
 - Hành động giáo viên (cần MaQuanLy): gv_dot, gv_dat (trangthai/xemlai/ten/phut/lop), gv_theodoi, gv_hoso, gv_bangdiem, gv_vang, gv_dathi, gv_cau, gv_nhom, gv_kienthuc, gv_ainx, gv_trochoi, gv_tcdat, gv_tckq, gv_ma, gv_madat, gv_tainguyen, gv_tin, gv_tin_hs, gv_tin_gui, gv_tin_goiy, gv_napde.

@@ -15,6 +15,7 @@ Tải file này vào kênh K2 (cùng Quy-uoc-chung.md và Mau-dinh-dang-de.md). 
 
 ## Kho đề KHODEHOA
 
+- Tab `GIAI THICH`: MaDot | Cau | GiaiThich (lời giải chi tiết; HS bấm 💡 Giải thích khi xem lại bài, chỉ khi đợt bật Cho xem lại). Nạp kèm đề hoặc nạp riêng cho đề cũ bằng 📥 Nạp đề mới.
 - Tab `CAU HINH`: MaDot | TenBai | ThoiGian_phut | TrangThai (DONG/CHO/MO) | ChoXemLai (CO/KHONG) | Lop (vd `10E01` hoặc `12G01, 12G02`, trống = tất cả) | BatDauLuc (tự ghi).
 - Tab `MA`: MaGV, MaMoKhoa, MaLamLai, MaQuanLy, GeminiKey (tên không phân biệt hoa/thường). Không chép các giá trị này ra ngoài.
 - Mỗi đợt một tab tên = mã đợt: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem.

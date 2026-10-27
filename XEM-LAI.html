@@ -134,6 +134,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 .dem{position:absolute;top:12px;right:12px;min-width:26px;height:26px;border-radius:13px;background:#d93025;color:#fff;font-style:normal;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0 7px;box-shadow:0 0 0 3px #fff}
 .dem[hidden]{display:none}
 .hoiCau{margin-top:6px;background:#eaf3fe;border:1.5px solid #c9def7;color:#1f5fbf;font-size:15px;padding:8px 12px}
+.nutCau{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.nutCau .hoiCau{margin-top:0}
+.gtNut{background:#fff7e0;border:1.5px solid #f0d58a;color:#7a5200;font-size:15px;padding:8px 12px}
+.gtNut[aria-expanded="true"]{background:#7a5200;border-color:#7a5200;color:#fff}
+.giaiThich{margin-top:10px;padding:12px 14px;border-radius:12px;background:#fffbea;border:1.5px solid #f0d58a;border-left:5px solid #c99a1e;font-size:16px;line-height:1.55}
+.giaiThich[hidden]{display:none}
+.giaiThich .gtTieu{font-weight:800;color:#7a5200;margin-bottom:4px}
+.giaiThich img{max-width:100%;height:auto}
 .tinDs{display:flex;flex-direction:column;gap:8px;max-height:min(56vh,520px);overflow-y:auto;padding:10px;background:#f4f8fd;border-radius:12px;border:1px solid #e1ebf7;margin:12px 0}
 .tinDs .trong{color:var(--muted);text-align:center;padding:24px 8px;font-size:15px}
 .bong{max-width:82%;padding:9px 13px;border-radius:16px;font-size:16px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;-webkit-user-select:text;user-select:text}
@@ -411,9 +419,18 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     // Nut hoi thay/co tung cau
     [].forEach.call(box.querySelectorAll('.card.q'), function (the, i) {
       var q = baiDangXem.cau.filter(function (x) { return !(chiSai && x.dung); })[i]; if (!q) return;
-      var n = nhan(q), b = document.createElement('button'); b.className = 'hoiCau'; b.textContent = '💬 Hỏi thầy/cô câu này';
+      var n = nhan(q), hang = document.createElement('div'); hang.className = 'nutCau';
+      // Loi giai chi tiet: bam moi hien
+      if (q.gt) {
+        var g = document.createElement('button'); g.className = 'gtNut'; g.type = 'button'; g.textContent = '💡 Giải thích'; g.setAttribute('aria-expanded', 'false');
+        var khung = document.createElement('div'); khung.className = 'giaiThich'; khung.hidden = true;
+        khung.innerHTML = '<div class="gtTieu">💡 Lời giải chi tiết</div>' + (/<br|<p|<div|<ul|<ol/i.test(q.gt) ? q.gt : String(q.gt).replace(/\n/g, '<br>'));
+        g.onclick = function () { var mo = khung.hidden; khung.hidden = !mo; g.setAttribute('aria-expanded', mo ? 'true' : 'false'); g.textContent = mo ? '💡 Ẩn giải thích' : '💡 Giải thích'; };
+        hang.appendChild(g); the.appendChild(khung);
+      }
+      var b = document.createElement('button'); b.className = 'hoiCau'; b.textContent = '💬 Hỏi thầy/cô câu này';
       b.onclick = function () { moTin({ madot: baiDangXem.madot, cau: q.cau, chu: 'Câu ' + n.so + (n.phan ? ' (Phần ' + n.phan + ')' : '') + ' · ' + baiDangXem.ten }); };
-      the.appendChild(b);
+      hang.appendChild(b); the.insertBefore(hang, the.querySelector('.giaiThich'));
     });
     if (!box.children.length) box.innerHTML = '<div class="card">Không có câu sai nào.</div>';
   }
