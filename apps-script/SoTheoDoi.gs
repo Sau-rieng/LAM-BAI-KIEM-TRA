@@ -1458,8 +1458,8 @@ let MO_HINH_AI_DUNG = '';   // nho mo hinh goi duoc trong lan chay nay
 
 const MUC_DIEM_AI = [
   {ten: 'Tốt (8–10)', tu: 8},
-  {ten: 'Khá (6,5–<8)', tu: 6.5},
-  {ten: 'Đạt (5–<6,5)', tu: 5},
+  {ten: 'Khá (6.5–<8)', tu: 6.5},
+  {ten: 'Đạt (5–<6.5)', tu: 5},
   {ten: 'Chưa đạt (<5)', tu: -1}
 ];
 
