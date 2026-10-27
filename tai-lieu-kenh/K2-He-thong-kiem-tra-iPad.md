@@ -24,7 +24,7 @@ Tải file này vào kênh K2 (cùng Quy-uoc-chung.md và Mau-dinh-dang-de.md). 
 
 ## Quy trình một bài kiểm tra
 
-1. Nạp đề: Claude tách đề Word → file Excel (một tab mỗi đợt + tab CAU HINH THEM) và đưa hình lên repo. GV: KHODEHOA → Tệp → Nhập → Tải lên → **Chèn trang tính mới** (không tích "nhập giao diện"), chép các dòng CAU HINH THEM xuống tab CAU HINH rồi xóa tab đó.
+1. Nạp đề: Claude tách đề Word → file `KHO-DE-<mã đợt>.xlsx` (một tab mỗi đợt + CAU HINH THEM + KIEN THUC THEM) và đưa hình lên repo. GV: trang giáo viên → Kiểm tra → **📥 Nạp đề mới** → chọn file → xem trước (đáp án, điểm, kiến thức, hình) → Nạp (hành động `gv_napde`: tạo tab đề, thêm CAU HINH, thay KIEN THUC của đợt; không thay đề đang mở hoặc đã có lớp làm). Cách cũ: KHODEHOA → Tệp → Nhập → Chèn trang tính mới, chép dòng THEM sang tab chính.
 2. Trên lớp: trang giáo viên (ứng dụng "Kiểm tra Hóa học", có trang chủ + thanh menu Trang chủ · Đề kiểm tra · Hồ sơ HS · nút Mã QR) → bấm **Mã QR vào thi** để chiếu mã QR chung (dẫn tới LAM-BAI.html: HS chọn lớp, gõ SBD + mã GV như cũ; nút chuyển sang mã QR Xem lại bài). Mở phòng chờ, phát đề, đóng đề vẫn ở mục Đề kiểm tra như cũ: ① Mở phòng chờ → HS vào, đề tải sẵn (khóa mã) → ② Bắt đầu → ③ Đóng đề. Tùy chọn: nút "📺 Màn hình chiếu" trong từng đề = mã QR riêng của đề (điền sẵn lớp + đề + mã GV) và đồng hồ to, số em đã vào.
 3. Nộp bài: chấm trên Apps Script, ghi tab BAI LAM, lưu PDF vào `BAI LAM HOC SINH/<lớp>/<mã đợt>/`.
 4. Thi nhiều ca cùng một đề: hết ca → ③ Đóng đề → ① Mở phòng chờ (giờ của ca trước tự xóa) → ② Bắt đầu.

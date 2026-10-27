@@ -7,7 +7,7 @@ Tải file này vào kênh K1, cùng `Quy-uoc-chung.md`, `Mau-dinh-dang-de.md`, 
 | Thứ | Tên file | Dùng để |
 | --- | --- | --- |
 | Đề Word | `<mã đợt>.docx` (vd `H10-B10-101.docx`) | In cho học sinh (trang đề) + giữ trang ĐÁP ÁN, BẢNG KIẾN THỨC cho giáo viên |
-| File nạp kho | `KHO-DE-<mã đợt>.xlsx` | Nhập vào KHODEHOA: tab đề + `CAU HINH THEM` + `KIEN THUC THEM` |
+| File nạp kho | `KHO-DE-<mã đợt>.xlsx` | Nạp trên trang giáo viên (📥 Nạp đề mới): tab đề + `CAU HINH THEM` + `KIEN THUC THEM` |
 | Hình | `hinh/<mã đợt>/image1.png…` trong repo LAM-BAI-KIEM-TRA | Hiện hình khi làm bài trên iPad (Claude tự đưa lên) |
 
 Một đề soạn một lần dùng được cả giấy (app QM) lẫn iPad.
@@ -45,9 +45,13 @@ Tỉ lệ mức độ gợi ý: kiểm tra ~40% Biết · 30% Hiểu · 30% Vậ
 
 ## Nạp đề vào kho (giáo viên)
 
-1. KHODEHOA → Tệp → Nhập → Tải lên `KHO-DE-<mã đợt>.xlsx` → **Chèn trang tính mới**.
-2. Chép dòng trong `CAU HINH THEM` xuống cuối tab CAU HINH; chép các dòng trong `KIEN THUC THEM` xuống cuối tab KIEN THUC.
-3. Xóa 2 tab `… THEM`. Trang giáo viên → Đề kiểm tra: đề mới hiện ở khối tương ứng.
+1. Trang giáo viên → **Kiểm tra** → **📥 Nạp đề mới** → chọn file `KHO-DE-<mã đợt>.xlsx`.
+2. Trang hiện bản xem trước từng đề: số câu theo loại, tổng điểm, số câu đã gắn kiến thức, mức độ, hình có mở được không; bấm **Xem đáp án, điểm, kiến thức từng câu** để soát. Sửa tên bài, thời gian, lớp nếu cần.
+3. Bấm **📥 Nạp … đề vào kho**. Máy chủ tự tạo tab đề, thêm dòng CAU HINH (đề đóng, chưa cho xem lại) và thay các dòng KIEN THUC của đợt đó.
+
+Quy tắc của nút Nạp: một file có thể chứa nhiều đề (mỗi đề một tab, tên tab = mã đợt). Đề có lỗi (đáp án TN không phải A–D, Đ/S không đủ 4 chữ, thiếu phương án, trùng số câu) không nạp được. Mã đợt đã có trong kho: chỉ thay được khi đề đang đóng và chưa lớp nào làm (phải tích "Thay đề cũ"); lớp đã làm thì đổi mã đợt. Cách cũ (Tệp → Nhập → chép dòng) vẫn dùng được khi sổ chưa cập nhật.
+
+Định dạng file Claude giao (bắt buộc để nút Nạp đọc được): `.xlsx`; tab đề dòng 1 = `Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem`; tab `CAU HINH THEM` = `MaDot | TenBai | ThoiGian_phut | TrangThai | ChoXemLai | Lop`; tab `KIEN THUC THEM` = `MaDot | Cau | KienThuc | MucDo`. Số câu (`Cau`) trong KIEN THUC THEM phải trùng đúng cột Cau của tab đề. Đáp án TLN, điểm ghi dấu chấm.
 
 ## Đề mẫu đã làm
 

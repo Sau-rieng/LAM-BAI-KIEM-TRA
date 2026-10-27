@@ -141,6 +141,48 @@
       return { ten: tenSh, o: o };
     });
   }
+  // Doc moi trang tinh cua .xlsx kem ten tab that (dung cho Nap de): -> Promise<[{ten, o}]>
+  function docXLSXTatCa(b) {
+    var tep = docZip(b), td = new TextDecoder();
+    function lay(ten) { var f = tep[ten]; if (!f) return Promise.resolve(''); return (f.cach === 8 ? giaiNen(f.d) : Promise.resolve(f.d)).then(function (x) { return td.decode(x); }); }
+    return Promise.all([lay('xl/workbook.xml'), lay('xl/_rels/workbook.xml.rels'), lay('xl/sharedStrings.xml')]).then(function (x) {
+      var rel = {};
+      (x[1].match(/<Relationship\b[^>]*>/g) || []).forEach(function (r) {
+        var id = (/\bId="([^"]+)"/.exec(r) || [])[1], dich = (/\bTarget="([^"]+)"/.exec(r) || [])[1];
+        if (id && dich) rel[id] = dich.replace(/^\/?xl\//, '').replace(/^\//, '');
+      });
+      var ds = [];
+      (x[0].match(/<sheet\b[^>]*>/g) || []).forEach(function (s) {
+        var ten = chu((/\bname="([^"]*)"/.exec(s) || [])[1] || ''), rid = (/\br:id="([^"]+)"/.exec(s) || /\bid="([^"]+)"/.exec(s) || [])[1];
+        if (rel[rid]) ds.push({ ten: ten, tep: 'xl/' + rel[rid] });
+      });
+      var sst = [];
+      (x[2].match(/<si>[\s\S]*?<\/si>/g) || []).forEach(function (si) { sst.push(chu((si.match(/<t[^>]*>[\s\S]*?<\/t>/g) || []).map(function (t) { return t.replace(/<[^>]+>/g, ''); }).join(''))); });
+      return Promise.all(ds.map(function (s) {
+        return lay(s.tep).then(function (xml) { return { ten: s.ten, o: oTuXML(xml, sst) }; });
+      }));
+    });
+  }
+  function oTuXML(xml, sst) {
+    var o = [];
+    (xml.match(/<c [^>]*?(\/>|>[\s\S]*?<\/c>)/g) || []).forEach(function (c) {
+      var ref = /r="([A-Z]+)(\d+)"/.exec(c); if (!ref) return;
+      var col = 0; for (var i = 0; i < ref[1].length; i++) col = col * 26 + ref[1].charCodeAt(i) - 64;
+      var t = (/ t="(\w+)"/.exec(c) || [])[1], v = (/<v>([\s\S]*?)<\/v>/.exec(c) || [])[1], val;
+      if (t === 's') val = sst[+v];
+      else if (t === 'inlineStr') val = chu(((c.match(/<t[^>]*>[\s\S]*?<\/t>/g) || []).map(function (x) { return x.replace(/<[^>]+>/g, ''); })).join(''));
+      else if (t === 'str') val = v === undefined ? '' : chu(v);
+      else if (t === 'b') val = v === '1';
+      else if (v !== undefined) val = Number(v);
+      if (val !== undefined && val !== '') ganO(o, +ref[2] - 1, col - 1, val);
+    });
+    return o;
+  }
+  goc.docExcelTatCa = function (buf) {
+    var b = new Uint8Array(buf);
+    try { if (u32(b, 0) === 0x04034b50) return docXLSXTatCa(b); } catch (e) { return Promise.reject(e); }
+    return Promise.reject(new Error('Cần file .xlsx (file KHO-DE-<mã đợt>.xlsx Claude gửi).'));
+  };
   goc.docExcel = function (buf) {
     var b = new Uint8Array(buf);
     try {

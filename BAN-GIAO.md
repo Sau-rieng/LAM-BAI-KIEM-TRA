@@ -24,7 +24,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 ### Các trang trong LAM-BAI-KIEM-TRA
 
 - `GIAO-VIEN.html`: trang giáo viên. Đăng nhập bằng MaQuanLy. Thanh trên: Trang chủ · Kiểm tra · Trò chơi · Tài nguyên · Hồ sơ HS · Cài đặt, chuông tin nhắn (số đỏ), Mã QR.
-  - Kiểm tra: phòng chờ → bắt đầu → đóng đề, màn hình chiếu có QR riêng của đề, theo dõi nộp bài, phân tích câu sai, 🧭 đánh giá theo kiến thức (ngưỡng yếu 65%, AI nhận xét), xuất Excel, dán điểm vnEdu, sửa tên/thời gian/lớp của đề.
+  - Kiểm tra: 📥 Nạp đề mới (chọn file KHO-DE-<mã đợt>.xlsx, xem trước rồi ghi vào kho), phòng chờ → bắt đầu → đóng đề, màn hình chiếu có QR riêng của đề, theo dõi nộp bài, phân tích câu sai, 🧭 đánh giá theo kiến thức (ngưỡng yếu 65%, AI nhận xét), xuất Excel, dán điểm vnEdu, sửa tên/thời gian/lớp của đề.
   - Trò chơi: mở/đóng, thời gian, lớp được chơi, QR, kết quả theo lớp/ngày, Excel.
   - Tài nguyên: lượt xem từng mô phỏng theo lớp, ai đã xem; tab khối ngang.
   - Tin nhắn: mỗi học sinh một cuộc trò chuyện, xem nội dung câu em hỏi, ✨ Gợi ý AI rồi giáo viên sửa và gửi.
@@ -35,7 +35,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 - `cau-hinh-lop.js`: danh sách lớp + link /exec của từng sổ; `?demo` chuyển sang lớp DEMO.
 - `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ.
 - `hinh/giao-dien/`: `nen-hoa.svg` (nền nét vẽ), `banner-ptn.svg` (banner phòng thí nghiệm), `bieu-tuong.js` (biểu tượng `window.BT`). Giao diện: nền xanh nhạt, ô/tab xanh nhạt nổi, chữ Be Vietnam Pro, màu ink #172033, hồng #b8235a, xanh #1f5fbf.
-- `doc-excel.js`: đọc .xls/.xlsx (dán điểm vnEdu). Excel xuất ra do trang tự tạo (không dùng thư viện ngoài).
+- `doc-excel.js`: đọc .xls/.xlsx (dán điểm vnEdu); `docExcelTatCa` đọc mọi tab .xlsx (Nạp đề). Excel xuất ra do trang tự tạo (không dùng thư viện ngoài).
 
 ### Máy chủ: `apps-script/SoTheoDoi.gs`
 
@@ -46,7 +46,7 @@ Dòng 9 `KHO_DE_ID` = ID file KHODEHOA (DEMO dùng kho bản sao riêng). **Mỗ
 - KHODEHOA: tab `CAU HINH` (MaDot | TenBai | ThoiGian_phut | TrangThai MO/CHO/DONG | ChoXemLai | Lop | BatDauLuc), `MA`, `KIEN THUC` (MaDot | Cau | KienThuc | MucDo), `TRO CHOI` (tự tạo), mỗi đề một tab.
 - Sổ lớp: `DANHSACH` (MAHS, HO TEN, GHI CHU, MAXEM), `BAI LAM`, `BAT DAU`, `PHONG CHO`, `XEM LAI`, `VANG THI`, `HOAT DONG` (trò cá nhân), `TRO CHOI NHOM`, `NHOM`, `XEM TAI NGUYEN`, `TIN NHAN`, `BANG DIEM`.
 - Hành động học sinh: batdau, nop, mokhoa, chobai, vaobai, xemlai (trả kèm tinMoi), daxem, xemtn, tn_gui, tn_xem, tc_vao, tc_mokhoa, loai=hoatdong / loai=nhom.
-- Hành động giáo viên (cần MaQuanLy): gv_dot, gv_dat (trangthai/xemlai/ten/phut/lop), gv_theodoi, gv_hoso, gv_bangdiem, gv_vang, gv_dathi, gv_cau, gv_nhom, gv_kienthuc, gv_ainx, gv_trochoi, gv_tcdat, gv_tckq, gv_ma, gv_madat, gv_tainguyen, gv_tin, gv_tin_hs, gv_tin_gui, gv_tin_goiy.
+- Hành động giáo viên (cần MaQuanLy): gv_dot, gv_dat (trangthai/xemlai/ten/phut/lop), gv_theodoi, gv_hoso, gv_bangdiem, gv_vang, gv_dathi, gv_cau, gv_nhom, gv_kienthuc, gv_ainx, gv_trochoi, gv_tcdat, gv_tckq, gv_ma, gv_madat, gv_tainguyen, gv_tin, gv_tin_hs, gv_tin_gui, gv_tin_goiy, gv_napde.
 
 ### Trò chơi (TRO--CHOI-IPAD)
 
@@ -64,7 +64,7 @@ Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản
 
 ## 4. Việc giáo viên còn phải làm
 
-1. Dán `apps-script/SoTheoDoi.gs` bản mới nhất vào 5 sổ + DEMO và triển khai phiên bản mới (cần cho: trò chơi quản lý chung, tài nguyên, tin nhắn).
+1. Dán `apps-script/SoTheoDoi.gs` bản mới nhất vào 5 sổ + DEMO và triển khai phiên bản mới (cần cho: trò chơi quản lý chung, tài nguyên, tin nhắn, **nút Nạp đề mới**).
 2. Trang giáo viên → Cài đặt: đặt **Mã vào chơi** và **Mã mở khóa trò chơi** riêng.
 3. Sổ DEMO cần `PhanTichAI.gs` + khóa AI nếu muốn Ban giám khảo thử nút Gợi ý AI.
 4. Mở thử trên iPad 9 mô phỏng 3D (dùng three.js từ CDN) vì phiên trước không chạy được hình 3D để kiểm tra.
