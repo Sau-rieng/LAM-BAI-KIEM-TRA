@@ -55,7 +55,9 @@ Phần AI (hàm `goiAI`, menu 🤖 Phân tích AI, khóa GeminiKey trong tab MA)
 
 ### Bản dùng thử (DEMO) – mã công khai cho Ban giám khảo
 
-Lớp DEMO, SBD 26999901–10 · mã giáo viên 1111 · mở khóa 2222 · làm lại 3333 · trang giáo viên 4444 · mã xem bài 11+SBD · trò chơi 1111/2222.
+Lớp DEMO, SBD 26999901–10 · mã làm bài 1111 · mã mở khóa thoát màn hình 2222 · mã làm lại bài 3333 · mã đăng nhập (trang giáo viên) 4444 · mã xem bài 11+SBD · trò chơi 1111/2222.
+Tên hiển thị các mã (từ 28/10): Mã làm bài (MaGV) · Mã mở khóa thoát màn hình (MaMoKhoa) · Mã làm lại bài (MaLamLai) · Mã đăng nhập (MaQuanLy); tên dòng tab MA giữ nguyên.
+Thẻ "Dùng thử" trên trang giáo viên mở `GIAO-VIEN.html?demo` (tự đăng nhập 4444); `DUNG-THU.html` là trang dẫn đường cho Ban giám khảo (link/QR riêng).
 
 ## 3. Các Project (kênh) trên Claude
 

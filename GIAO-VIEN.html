@@ -1844,7 +1844,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       ] },
       { ten: 'Cài đặt', mt: '', o: [
         { kh: 'Ma', ten: 'Mã và cài đặt', mt: 'Mã làm bài, mã mở khóa, mã trò chơi, mã đăng nhập', di: 'caidat' },
-        { kh: 'Dt', ten: 'Dùng thử', mt: 'Lớp DEMO cho đồng nghiệp và ban giám khảo', href: 'DUNG-THU.html' }
+        (window.LAM_DEMO ? { kh: 'Dt', ten: 'Hướng dẫn Ban giám khảo', mt: 'Các bước trải nghiệm, bảng mã dùng thử, bản in', href: 'GIAM-KHAO.html' }
+          : { kh: 'Dt', ten: 'Dùng thử', mt: 'Trang giáo viên lớp DEMO (giống trang này) cho đồng nghiệp và ban giám khảo', href: 'GIAO-VIEN.html?demo' })
       ] }
     ];
     var g = $('oNhom'); g.innerHTML = '';
@@ -2821,6 +2822,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   };
 
 
+  if (!MA && window.LAM_DEMO) MA = '4444'; // ma dang nhap cong khai cua ban dung thu
   if (MA) vao(MA); else man('scrLogin');
 })();
 </script>
