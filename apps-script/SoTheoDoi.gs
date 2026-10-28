@@ -69,6 +69,7 @@ function doPost(e) {
       case 'tn_xem': return json(hsXemTin(d));
       case 'tc_vao': return json(tcVao(d));
       case 'tc_mokhoa': return json(tcMoKhoa(d));
+      case 'tc_tt': return json(tcTrangThai(d));
       case 'gv_dot':
       case 'gv_dat':
       case 'gv_theodoi':
@@ -811,11 +812,14 @@ function ghiDong(tab, head, row) {
 
 // =====================================================================
 // TRO CHOI - quan ly chung trong KHO DE (tab TRO CHOI, tu tao khi chua co)
-// MaTro | TenTro | Kieu (CA NHAN/NHOM) | Khoi | File | TrangThai (MO/DONG) | ThoiGian_phut | Lop
+// MaTro | TenTro | Kieu (CA NHAN/NHOM) | Khoi | File | TrangThai (MO/CHO/DONG) | ThoiGian_phut | Lop | XuatPhatLuc
+// CHO: hoc sinh dang nhap xong dung o vach xuat phat; giao vien bam Xuat phat -> XuatPhatLuc = luc bam + 12 giay,
+//      moi may dem nguoc va chay cung luc, ket thuc o XuatPhatLuc + ThoiGian_phut. Het gio thi lai cho luot moi.
 // Tro choi dang nhap / mo khoa qua so lop; ket qua ghi vao HOAT DONG / TRO CHOI NHOM cua so lop.
 // =====================================================================
 const TAB_TC = 'TRO CHOI';
-const HEAD_TC = ['MaTro', 'TenTro', 'Kieu', 'Khoi', 'File', 'TrangThai', 'ThoiGian_phut', 'Lop'];
+const HEAD_TC = ['MaTro', 'TenTro', 'Kieu', 'Khoi', 'File', 'TrangThai', 'ThoiGian_phut', 'Lop', 'XuatPhatLuc'];
+const XP_TRE = 12000;   // ms tu luc bam Xuat phat den luc den xanh (du de moi may nhan lenh)
 const TC_MAC_DINH = [
   ['DAINOI-HOA10', 'Đại Nội Huế – Hóa 10', 'CA NHAN', 10, 'DAINOI-HOA10.html', 5],
   ['CHIMDUATHU-HOA10', 'Chim đưa thư – Hóa 10', 'CA NHAN', 10, 'HOA10-CHIMDUATHU.html', 5],
@@ -846,11 +850,12 @@ function tabTroChoi() {
     sh = ss.insertSheet(TAB_TC);
     sh.getRange(1, 1, 1, HEAD_TC.length).setValues([HEAD_TC]).setFontWeight('bold');
   }
+  if (!String(sh.getRange(1, 9).getValue()).trim()) sh.getRange(1, 9).setValue('XuatPhatLuc').setFontWeight('bold');
   // Them tro moi trong danh sach mac dinh neu tab chua co (khong dong cham dong cu)
   const co = {};
   if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { co[String(r[0]).trim()] = 1; });
   const them = TC_MAC_DINH.filter(function (t) { return !co[t[0]]; })
-    .map(function (t) { return [t[0], t[1], t[2], t[3], t[4], 'MO', t[5], lopMacDinh(t[3])]; });
+    .map(function (t) { return [t[0], t[1], t[2], t[3], t[4], 'MO', t[5], lopMacDinh(t[3]), '']; });
   if (them.length) sh.getRange(sh.getLastRow() + 1, 1, them.length, HEAD_TC.length).setValues(them);
   return sh;
 }
@@ -858,9 +863,14 @@ function docTroChoi() {
   const sh = tabTroChoi();
   const n = sh.getLastRow() - 1;
   if (n < 1) return [];
+  const bay = Date.now();
   return sh.getRange(2, 1, n, HEAD_TC.length).getValues().map(function (r, i) {
+    const tt = khongDau(r[5]) === 'DONG' ? 'DONG' : khongDau(r[5]) === 'CHO' ? 'CHO' : 'MO';
+    const phut = Number(r[6]) || 5;
+    let xp = r[8] instanceof Date ? r[8].getTime() : Number(r[8]) || 0;
+    if (tt !== 'CHO' || bay >= xp + phut * 60000) xp = 0;   // chi giu gio xuat phat cua luot dang dien ra
     return {dong: i + 2, matro: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), kieu: khongDau(r[2]) === 'NHOM' ? 'NHOM' : 'CA NHAN',
-      khoi: String(r[3]).trim(), file: String(r[4]).trim(), mo: khongDau(r[5]) !== 'DONG', phut: Number(r[6]) || 5,
+      khoi: String(r[3]).trim(), file: String(r[4]).trim(), tt: tt, mo: tt !== 'DONG', cho: tt === 'CHO', xp: xp, phut: phut,
       lop: khongDau(r[7]) || 'TAT CA'};
   }).filter(function (t) { return t.matro; });
 }
@@ -870,27 +880,50 @@ function tcVao(d) {
   if (!t.mo) return {ok: false, loi: 'dong', msg: 'Trò chơi đang đóng. Em chờ giáo viên mở nhé.'};
   if (!hopLop(t)) return {ok: false, loi: 'lop', msg: 'Trò chơi này chưa mở cho lớp ' + lopNay() + '.'};
   if (String(d.ma || '').trim() !== docMa().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
-  return {ok: true, phut: t.phut, ten: t.ten};
+  return {ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now()};
+}
+// May o vach xuat phat hoi trang thai (cache 2 giay de do tai khi ca lop cung hoi)
+function tcTrangThai(d) {
+  const ma = String(d.matro || '').trim();
+  const cache = CacheService.getScriptCache();
+  let r = null;
+  const daCo = cache.get('tctt_' + ma);
+  if (daCo) r = JSON.parse(daCo);
+  else {
+    const t = docTroChoi().filter(function (x) { return x.matro === ma; })[0];
+    r = t ? {ok: true, tt: t.tt, xp: t.xp, phut: t.phut} : {ok: true, tt: 'DONG', xp: 0, phut: 5};
+    try { cache.put('tctt_' + ma, JSON.stringify(r), 2); } catch (e) {}
+  }
+  r.bayGio = Date.now();
+  return r;
 }
 function tcMoKhoa(d) {
   return {ok: String(d.ma || '').trim() !== '' && String(d.ma || '').trim() === docMa().tcmokhoa};
 }
 function gvTroChoi() {
   const m = docMa();
-  return {ok: true, lop: lopNay(), tro: docTroChoi(), coMaTc: m.coTc, coMaTcMk: m.coTcMk};
+  return {ok: true, lop: lopNay(), tro: docTroChoi(), coMaTc: m.coTc, coMaTcMk: m.coTcMk, bayGio: Date.now()};
 }
 function gvTcDat(d) {
   const sh = tabTroChoi();
   const t = docTroChoi().filter(function (x) { return x.matro === String(d.matro || '').trim(); })[0];
   if (!t) return {ok: false, msg: 'Khong tim thay tro ' + d.matro};
-  if (d.truong === 'tt') sh.getRange(t.dong, 6).setValue(d.giatri === true || d.giatri === 'MO' ? 'MO' : 'DONG');
-  else if (d.truong === 'phut') {
+  if (d.truong === 'tt') {
+    const g = d.giatri === true ? 'MO' : ['MO', 'CHO', 'DONG'].indexOf(String(d.giatri)) >= 0 ? String(d.giatri) : 'DONG';
+    sh.getRange(t.dong, 6).setValue(g);
+    sh.getRange(t.dong, 9).setValue('');            // doi trang thai = bat dau luot moi, xoa gio xuat phat cu
+  } else if (d.truong === 'xuatphat') {
+    if (t.tt !== 'CHO') return {ok: false, msg: 'Chuyen tro sang Cho xuat phat truoc'};
+    if (t.xp) return {ok: false, msg: 'Cuoc dua dang dien ra'};
+    sh.getRange(t.dong, 9).setValue(Date.now() + XP_TRE);
+  } else if (d.truong === 'phut') {
     const ph = Math.round(Number(d.giatri));
     if (!(ph >= 1 && ph <= 60)) return {ok: false, msg: 'Thoi gian phai tu 1 den 60 phut'};
     sh.getRange(t.dong, 7).setValue(ph);
   } else if (d.truong === 'lop') sh.getRange(t.dong, 8).setValue(chuanDsLop(d.giatri));
   else return {ok: false, msg: 'Truong khong hop le'};
   SpreadsheetApp.flush();
+  try { CacheService.getScriptCache().remove('tctt_' + t.matro); } catch (e) {}
   return gvTroChoi();
 }
 // Ket qua tro choi cua lop nay: ca nhan (HOAT DONG) va nhom (TRO CHOI NHOM)
