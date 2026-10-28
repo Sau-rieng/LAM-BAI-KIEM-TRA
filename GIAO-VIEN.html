@@ -546,8 +546,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <section id="scrLogin" class="card dangNhap">
   <div class="brandL"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff"/><path d="M1 31H39A8 8 0 0 1 31 39H9A8 8 0 0 1 1 31Z" fill="#b8235a"/><rect x="1" y="1" width="38" height="38" rx="8" fill="none" stroke="#fff" stroke-width="2"/><text x="20" y="25" text-anchor="middle" font-family="Be Vietnam Pro,Arial,sans-serif" font-size="17" font-weight="800" fill="#172033">Hh</text></svg><div><b>Khám phá Hóa học</b><span>Trang giáo viên</span></div></div>
   <h1>Đăng nhập</h1>
-  <p class="sub">Nhập mã quản lý để quản lý bài kiểm tra, trò chơi và hồ sơ học sinh.</p>
-  <label for="ma">Mã quản lý</label>
+  <p class="sub">Nhập mã đăng nhập để quản lý bài kiểm tra, trò chơi và hồ sơ học sinh.</p>
+  <label for="ma">Mã đăng nhập</label>
   <input id="ma" type="password" inputmode="numeric" autocomplete="off">
   <button class="btn" id="btnVao">Vào</button>
   <div class="msg" id="msg"></div>
@@ -728,7 +728,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       $('btnVao').disabled = false; $('btnVao').textContent = 'Vào';
       if (!j.ok) {
         try { sessionStorage.removeItem(KMA); } catch (e) {}
-        $('msg').textContent = j.loi === 'ma' ? 'Mã quản lý chưa đúng.' : 'Lỗi: ' + (j.msg || '') + '. Sổ theo dõi đã cập nhật mã mới chưa?';
+        $('msg').textContent = j.loi === 'ma' ? 'Mã đăng nhập chưa đúng.' : 'Lỗi: ' + (j.msg || '') + '. Sổ theo dõi đã cập nhật mã mới chưa?';
         man('scrLogin'); return;
       }
       MA = m; try { sessionStorage.setItem(KMA, m); } catch (e) {}
@@ -1843,7 +1843,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         { kh: '3D', ten: 'Tài nguyên học tập', mt: 'Danh sách mô phỏng, lượt xem theo lớp, ai đã xem', so: dsTN().length + ' mục', di: 'tn', chi: 1 }
       ] },
       { ten: 'Cài đặt', mt: '', o: [
-        { kh: 'Ma', ten: 'Mã và cài đặt', mt: 'Mã giáo viên, mã mở khóa, mã trò chơi, mã quản lý', di: 'caidat' },
+        { kh: 'Ma', ten: 'Mã và cài đặt', mt: 'Mã làm bài, mã mở khóa, mã trò chơi, mã đăng nhập', di: 'caidat' },
         { kh: 'Dt', ten: 'Dùng thử', mt: 'Lớp DEMO cho đồng nghiệp và ban giám khảo', href: 'DUNG-THU.html' }
       ] }
     ];
@@ -1875,7 +1875,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('qrTieuDe').textContent = QR_KIEU === 'xem' ? 'Quét mã vào tài khoản: xem lại bài, tài nguyên' : 'Quét mã để vào làm bài';
     $('qrBuoc').innerHTML = QR_KIEU === 'xem'
       ? '<li><span>Mở <b>Camera</b> trên iPad hoặc điện thoại, quét mã</span></li><li><span>Chọn lớp, gõ <b>số báo danh</b> và <b>mã xem bài</b></span></li><li><span>Chọn <b>Xem lại bài</b> hoặc <b>Tài nguyên</b> (mô phỏng, thí nghiệm)</span></li>'
-      : '<li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Chọn <b>lớp</b>, gõ <b>2 số cuối</b> số báo danh và <b>mã giáo viên</b></span></li><li><span>Bấm <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b></span></li>';
+      : '<li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Chọn <b>lớp</b>, gõ <b>2 số cuối</b> số báo danh và <b>mã làm bài</b></span></li><li><span>Bấm <b>Tìm tên</b> → <b>Đúng tên – Bắt đầu làm bài</b></span></li>';
     $('qrLink').textContent = url.replace(/^https?:\/\//, '');
     $('ovQR').hidden = false; veQR($('qrMa'), url);
     $('qrDong').focus();
@@ -1969,10 +1969,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     else if (d.tt === 'MO') h += '<div class="phMaQR tat">Đang làm bài · mã QR đã ẩn</div><button class="btn2 phTre" id="phTre">Hiện mã QR cho em vào trễ</button>';
     if (hien) h += '<ol class="phBuoc"><li><span>Mở <b>Camera</b> trên iPad, quét mã</span></li><li><span>Gõ <b>2 số cuối</b> số báo danh → <b>Tìm tên</b></span></li><li><span>Bấm <b>Đúng tên – Bắt đầu làm bài</b> rồi chờ giáo viên phát đề</span></li></ol>' +
       (d.tt === 'MO' ? '<button class="btn2 phTre" id="phTre">Ẩn mã QR</button>' : '');
-    if (PH.suaMa) h += '<div class="phMaGV">Mã giáo viên gắn vào QR <input id="phMaMoi" type="password" inputmode="numeric" autocomplete="off"><button id="phMaLuu">Lưu</button><button id="phMaHuy">Hủy</button>' +
+    if (PH.suaMa) h += '<div class="phMaGV">Mã làm bài gắn vào QR <input id="phMaMoi" type="password" inputmode="numeric" autocomplete="off"><button id="phMaLuu">Lưu</button><button id="phMaHuy">Hủy</button>' +
       '<div style="margin-top:6px">Mã lưu trên máy này, không hiện lên màn hình. Để trống = học sinh tự gõ mã.</div></div>';
-    else h += MAQR ? '<div class="phMaGV">🔑 Đã gắn mã giáo viên vào QR – học sinh không cần gõ mã<button id="phMaDoi">Đổi</button></div>'
-                   : '<div class="phMaGV thieu">Chưa gắn mã giáo viên: học sinh quét xong vẫn phải gõ mã.<button id="phMaDoi">Gắn mã</button></div>';
+    else h += MAQR ? '<div class="phMaGV">🔑 Đã gắn mã làm bài vào QR – học sinh không cần gõ mã<button id="phMaDoi">Đổi</button></div>'
+                   : '<div class="phMaGV thieu">Chưa gắn mã làm bài: học sinh quét xong vẫn phải gõ mã.<button id="phMaDoi">Gắn mã</button></div>';
     q.innerHTML = h;
     if (hien) veQR($('phMaQR'), linkQR(d, l));
     if ($('phTre')) $('phTre').onclick = function () { PH.hienQR = !PH.hienQR; vePhat(); };
@@ -2088,7 +2088,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var mo = TRO.filter(function (t) { return t.mo; }).length;
     $('soTro').textContent = TRO.length + ' trò · ' + mo + ' đang mở';
     $('troMa').innerHTML = !COMA.tc || !COMA.mk
-      ? '<div class="card canhCard"><b>Trò chơi chưa có mã riêng.</b> Hiện học sinh vào chơi bằng ' + (!COMA.tc ? '<b>Mã giáo viên</b> của bài kiểm tra' : '') + (!COMA.tc && !COMA.mk ? ' và mở khóa bằng ' : !COMA.mk ? 'mở khóa bằng ' : '') + (!COMA.mk ? '<b>Mã mở khóa</b> của bài kiểm tra' : '') + '. <button class="btn2 nhoBtn" id="troDatMa">Đặt mã trò chơi ▸</button></div>' : '';
+      ? '<div class="card canhCard"><b>Trò chơi chưa có mã riêng.</b> Hiện học sinh vào chơi bằng ' + (!COMA.tc ? '<b>Mã làm bài</b> của bài kiểm tra' : '') + (!COMA.tc && !COMA.mk ? ' và mở khóa bằng ' : !COMA.mk ? 'mở khóa bằng ' : '') + (!COMA.mk ? '<b>Mã mở khóa</b> của bài kiểm tra' : '') + '. <button class="btn2 nhoBtn" id="troDatMa">Đặt mã trò chơi ▸</button></div>' : '';
     if ($('troDatMa')) $('troDatMa').onclick = function () { diDen('caidat'); };
     var cacKhoi = [];
     TRO.forEach(function (t) { if (cacKhoi.indexOf(t.khoi) < 0) cacKhoi.push(t.khoi); });
@@ -2307,14 +2307,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var MA_DS = null, MA_SUA = null, MA_HIEN = {};
   var MA_NHOM = [
     { ten: 'Bài kiểm tra', ds: [
-      ['MaGV', 'Mã giáo viên', 'Học sinh nhập khi vào làm bài (mã QR riêng của đề tự điền mã này).'],
-      ['MaMoKhoa', 'Mã mở khóa', 'Mở khóa khi học sinh rời màn hình làm bài.'],
-      ['MaLamLai', 'Mã cho làm lại', 'Cho một em làm lại bài đã nộp.']] },
+      ['MaGV', 'Mã làm bài', 'Học sinh nhập khi vào làm bài (mã QR riêng của đề tự điền mã này).'],
+      ['MaMoKhoa', 'Mã mở khóa thoát màn hình', 'Mở khóa khi học sinh rời màn hình làm bài.'],
+      ['MaLamLai', 'Mã làm lại bài', 'Cho một em làm lại bài đã nộp.']] },
     { ten: 'Trò chơi', ds: [
       ['MaTroChoi', 'Mã vào chơi', 'Học sinh nhập khi vào trò chơi (mọi trò dùng chung).', 'MaGV'],
       ['MaMoKhoaTroChoi', 'Mã mở khóa trò chơi', 'Mở khóa khi học sinh rời màn hình chơi, mở lượt chơi mới.', 'MaMoKhoa']] },
     { ten: 'Quản lý', ds: [
-      ['MaQuanLy', 'Mã quản lý', 'Đăng nhập trang giáo viên này. Đổi xong, lần sau đăng nhập bằng mã mới.']] }
+      ['MaQuanLy', 'Mã đăng nhập', 'Đăng nhập trang giáo viên này. Đổi xong, lần sau đăng nhập bằng mã mới.']] }
   ];
   function taiMa(sau) {
     goiBatKy({ action: 'gv_ma', ma: MA }).then(function (j) {
@@ -2341,13 +2341,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         h += '<div class="maDong" data-ten="' + m[0] + '"><div class="maChu"><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></div>';
         if (MA_SUA === m[0]) h += '<div class="maSua"><input type="text" autocomplete="off" maxlength="12" value="' + esc(gt) + '" aria-label="' + esc(m[1]) + ' mới"><button class="btn2 huy">Hủy</button><button class="luu">Lưu</button></div>';
         else h += '<div class="maGT">' + (gt ? '<code>' + (MA_HIEN[m[0]] ? esc(gt) : '••••') + '</code><button class="btn2 nho xem" title="Hiện/ẩn">' + (MA_HIEN[m[0]] ? 'Ẩn' : 'Hiện') + '</button>'
-          : '<span class="chuaDat">Chưa đặt' + (tam ? ' · đang dùng tạm ' + (m[3] === 'MaGV' ? 'Mã giáo viên' : 'Mã mở khóa') : '') + '</span>') +
+          : '<span class="chuaDat">Chưa đặt' + (tam ? ' · đang dùng tạm ' + (m[3] === 'MaGV' ? 'Mã làm bài' : 'Mã mở khóa thoát màn hình') : '') + '</span>') +
           (MA_DS.demo ? '' : '<button class="btn2 nho sua">✎ ' + (gt ? 'Đổi' : 'Đặt mã') + '</button>') + '</div>';
         h += '</div>';
       });
       h += '</div>';
     });
-    h += '<p class="chuthich">Mã gồm 2–12 chữ số hoặc chữ cái không dấu. Nên đặt các mã khác nhau: mã học sinh được biết (mã vào chơi) không trùng mã chỉ giáo viên biết (mã mở khóa, mã quản lý).</p>';
+    h += '<p class="chuthich">Mã gồm 2–12 chữ số hoặc chữ cái không dấu. Nên đặt các mã khác nhau: mã học sinh được biết (mã vào chơi) không trùng mã chỉ giáo viên biết (mã mở khóa, mã đăng nhập).</p>';
     box.innerHTML = h;
     [].forEach.call(box.querySelectorAll('.maDong'), function (r) {
       var ten = r.getAttribute('data-ten');
@@ -2367,7 +2367,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var trung = MA_DS.ma.filter(function (m) { return m.ten !== ten && m.gt === gt; })[0];
     var tenDoc = function (t) { var x = null; MA_NHOM.forEach(function (n) { n.ds.forEach(function (m) { if (m[0] === t) x = m[1] + ' (' + n.ten.toLowerCase() + ')'; }); }); return x || t; };
     if (trung && !confirm('Mã này đang trùng với ' + tenDoc(trung.ten) + '. Vẫn lưu?')) return;
-    if (ten === 'MaQuanLy' && !confirm('Đổi mã quản lý thành "' + gt + '"?\nLần sau đăng nhập trang giáo viên phải dùng mã mới.')) return;
+    if (ten === 'MaQuanLy' && !confirm('Đổi mã đăng nhập thành "' + gt + '"?\nLần sau đăng nhập trang giáo viên phải dùng mã mới.')) return;
     nut.disabled = true; nut.textContent = 'Đang lưu…';
     goiBatKy({ action: 'gv_madat', ma: MA, ten: ten, giatri: gt }).then(function (j) {
       if (!j.ok) throw new Error(j.msg || 'lỗi');
@@ -2807,7 +2807,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (d.chiGT) return { madot: d.madot, chiGT: true, gt: d.gt };
       return { madot: d.madot, ten: d.ten, phut: d.phut, lop: d.lop, thay: !!d.thay, cau: d.cau.map(function (c) { return c.hang; }), kt: d.kt, gt: d.gt };
     }) }).then(function (j) {
-      if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới vào sổ rồi Triển khai → Phiên bản mới.' : j.loi === 'ma' ? 'Mã quản lý chưa đúng.' : (j.msg || 'lỗi không rõ'));
+      if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới vào sổ rồi Triển khai → Phiên bản mới.' : j.loi === 'ma' ? 'Mã đăng nhập chưa đúng.' : (j.msg || 'lỗi không rõ'));
       DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now();
       var nap = j.nap || [];
       $('napCuoi').classList.add('hidden'); NAP.ds = [];
