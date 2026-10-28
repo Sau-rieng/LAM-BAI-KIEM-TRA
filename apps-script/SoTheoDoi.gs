@@ -827,7 +827,8 @@ const TC_MAC_DINH = [
   ['DUAXEF1-POLYMER-H12', 'Đua xe F1 Polymer – Hóa 12', 'CA NHAN', 12, 'HOA12-DUAXEF1-POLYMER-CANHAN.html', 5],
   ['POLYMER-F1', 'Polymer F1 – Hóa 12', 'CA NHAN', 12, 'POLYMER-F1.html', 5],
   ['DUAXEF1-POLYMER-H12-NHOM', 'Đua xe F1 Polymer – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-DUAXEF1-POLYMER.html', 5],
-  ['DAINOI-KHTN9', 'Đại Nội Huế – KHTN 9', 'CA NHAN', 9, 'DAINOI-KHTN9.html', 5]
+  ['DAINOI-KHTN9', 'Đại Nội Huế – KHTN 9', 'CA NHAN', 9, 'DAINOI-KHTN9.html', 5],
+  ['PIN-F1-H12-NHOM', 'Grand Prix Điện hoá – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-PIN-F1-NHOM.html', 7]
 ];
 function lopMacDinh(khoi) {
   if (/DEMO/.test(khongDau(lopNay()))) return 'TAT CA';
