@@ -826,21 +826,21 @@ const TAB_TC = 'TRO CHOI';
 const HEAD_TC = ['MaTro', 'TenTro', 'Kieu', 'Khoi', 'File', 'TrangThai', 'ThoiGian_phut', 'Lop', 'XuatPhatLuc'];
 const XP_TRE = 12000;   // ms tu luc bam Xuat phat den luc den xanh (du de moi may nhan lenh)
 const TC_MAC_DINH = [
-  ['DAINOI-HOA10', 'Đại Nội Huế – Hóa 10', 'CA NHAN', 10, 'DAINOI-HOA10.html', 5],
+  ['DAINOI-HOA10', 'Đại Nội Huế – Hóa 10', 'CA NHAN', 10, 'HOA10-DAINOI.html', 5],
   ['CHIMDUATHU-HOA10', 'Chim đưa thư – Hóa 10', 'CA NHAN', 10, 'HOA10-CHIMDUATHU.html', 5],
   ['DUAXEF1-HOA10', 'Đua xe F1 – Hóa 10', 'CA NHAN', 10, 'HOA10-DUAXEF1-CANHAN.html', 5],
-  ['LANGBIANG-HOA10', 'Leo Langbiang – Hóa 10', 'CA NHAN', 10, 'LANGBIANG-HOA10.html', 5],
+  ['LANGBIANG-HOA10', 'Leo Langbiang – Hóa 10', 'CA NHAN', 10, 'HOA10-LANGBIANG.html', 5],
   ['CHIMDUATHU-HOA10-NHOM', 'Chim đưa thư – Hóa 10 (nhóm)', 'NHOM', 10, 'HOA10-CHIMDUATHU-NHOM.html', 5],
   ['DUAXEF1-HOA10-NHOM', 'Đua xe F1 – Hóa 10 (nhóm)', 'NHOM', 10, 'HOA10-DUAXEF1-NHOM.html', 5],
-  ['RUONGLUA-CHUKI-NHOM', 'Ruộng lúa Chu kì (nhóm)', 'NHOM', 10, 'RUONGLUA-CHUKI-NHOM.html', 5],
+  ['RUONGLUA-CHUKI-NHOM', 'Ruộng lúa Chu kì (nhóm)', 'NHOM', 10, 'HOA10-RUONGLUA-CHUKI-NHOM.html', 5],
   ['DUAXEF1-POLYMER-H12', 'Đua xe F1 Polymer – Hóa 12', 'CA NHAN', 12, 'HOA12-DUAXEF1-POLYMER-CANHAN.html', 5],
-  ['POLYMER-F1', 'Polymer F1 – Hóa 12', 'CA NHAN', 12, 'POLYMER-F1.html', 5],
-  ['DUAXEF1-POLYMER-H12-NHOM', 'Đua xe F1 Polymer – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-DUAXEF1-POLYMER.html', 5],
-  ['DAINOI-KHTN9', 'Đại Nội Huế – KHTN 9', 'CA NHAN', 9, 'DAINOI-KHTN9.html', 5],
+  ['POLYMER-F1', 'Polymer F1 – Hóa 12', 'CA NHAN', 12, 'HOA12-POLYMER-F1.html', 5],
+  ['DUAXEF1-POLYMER-H12-NHOM', 'Đua xe F1 Polymer – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-DUAXEF1-POLYMER-NHOM.html', 5],
+  ['DAINOI-KHTN9', 'Đại Nội Huế – KHTN 9', 'CA NHAN', 9, 'KHTN9-DAINOI.html', 5],
   ['PIN-F1-H12-NHOM', 'Grand Prix Điện hoá – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-PIN-F1-NHOM.html', 7],
-  ['CHUONG123-H12', 'Escape the Cartoon Forest – Hóa 12 Chương 1-2-3', 'CA NHAN', 12, 'HOA12CHUONG123.html', 7],
-  ['CHUONG123-H12-NHOM', 'Escape the Cartoon Forest – Hóa 12 Chương 1-2-3 (nhóm)', 'NHOM', 12, 'H12-CHUONG123-NHOM.html', 7],
-  ['HANGDONG-H12', 'Khám phá hang động – Ester (Hóa 12)', 'CA NHAN', 12, 'cave-explore.html', 5]
+  ['CHUONG123-H12', 'Escape the Cartoon Forest – Hóa 12 Chương 1-2-3', 'CA NHAN', 12, 'HOA12-CHUONG123.html', 7],
+  ['CHUONG123-H12-NHOM', 'Escape the Cartoon Forest – Hóa 12 Chương 1-2-3 (nhóm)', 'NHOM', 12, 'HOA12-CHUONG123-NHOM.html', 7],
+  ['HANGDONG-H12', 'Khám phá hang động – Ester (Hóa 12)', 'CA NHAN', 12, 'HOA12-HANGDONG.html', 5]
 ];
 function lopMacDinh(khoi) {
   if (/DEMO/.test(khongDau(lopNay()))) return 'TAT CA';
