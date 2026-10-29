@@ -24,6 +24,27 @@ Bài/chương mới: thêm một mục mới cùng kiểu (3–6 kiến thức),
 - So sánh tính chất vật lí của kim loại và phi kim
 - So sánh tính chất hóa học của kim loại và phi kim (ion, oxide)
 
+## Hóa 10 – Mở đầu: Nhập môn hóa học (dùng cho trò chơi Hóa 10, thêm 29/10/2026)
+
+- Đối tượng nghiên cứu, vai trò và các phân ngành của hóa học
+- Chất, đơn chất, hợp chất, hỗn hợp; biến đổi vật lí và biến đổi hóa học
+- Phương pháp học tập và nghiên cứu hóa học
+
+## Hóa 10 – Bài 1: Thành phần của nguyên tử (mã đợt `H10-B1-…`, thêm 29/10/2026)
+
+- Thành phần nguyên tử: proton, neutron, electron (điện tích, khối lượng)
+- Kích thước, khối lượng nguyên tử; bài toán số hạt
+
+## Hóa 10 – Bài 2: Nguyên tố hóa học (mã đợt `H10-B2-…`, thêm 29/10/2026)
+
+- Hạt nhân nguyên tử: số hiệu nguyên tử, số khối, kí hiệu nguyên tử
+- Đồng vị, nguyên tử khối trung bình; bài toán đồng vị
+
+## Hóa 10 – Bài 3: Cấu trúc lớp vỏ electron nguyên tử (mã đợt `H10-B3-…`, thêm 29/10/2026)
+
+- Orbital nguyên tử; lớp và phân lớp electron
+- Cấu hình electron, sơ đồ ô orbital; đặc điểm lớp electron ngoài cùng
+
 ## Hóa 10 – Bài 5: Cấu tạo của bảng tuần hoàn các nguyên tố hóa học (mã đợt `H10-B5-…`)
 
 - Lịch sử phát minh bảng tuần hoàn
