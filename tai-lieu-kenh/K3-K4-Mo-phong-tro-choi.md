@@ -7,7 +7,8 @@ Tải vào Project MO PHONG 3D, cùng `Quy-uoc-chung.md`, `Danh-muc-kien-thuc.md
 ## Nơi đăng
 
 - Repo GitHub `Sau-rieng/TRO--CHOI-IPAD` → https://sau-rieng.github.io/TRO--CHOI-IPAD/ ; mỗi sản phẩm một file HTML, thêm vào trang mục lục `MUCLUC.html`.
-- Tên file viết hoa không dấu: `HOA10-<TEN>.html`, trò nhóm thêm `-NHOM` (vd `HOA10-CHIMDUATHU-NHOM.html`).
+- Tên file viết hoa không dấu, mở đầu bằng môn + khối: `HOA10-<TEN>.html`, `HOA12-<TEN>.html`, `KHTN9-<TEN>.html`; trò nhóm thêm `-NHOM`, trò cá nhân có bản nhóm cùng tên thêm `-CANHAN` (vd `HOA10-CHIMDUATHU-NHOM.html`). Mã trò (`MA-TRO`) đã đặt thì giữ nguyên dù đổi tên file.
+- Đổi tên file: giữ file tên cũ làm trang chuyển hướng sang tên mới (link, mã QR cũ vẫn mở được), sửa `TC_TRO`, `TC_MAC_DINH` và `MUCLUC.html`.
 - Chạy mượt trên iPad (Safari), điều khiển cảm ứng; Three.js lấy từ CDN; giao diện tiếng Việt.
 
 ## Nối với hệ thống chung (bắt buộc với trò chơi; từ 25/10/2026 không tạo Sheet riêng cho trò nữa)
@@ -49,4 +50,4 @@ Soạn sao cho chuyển lên được ngay:
 
 ## Đã có (tháng 10/2026)
 
-Cá nhân: Đại Nội Hóa 10, Đại Nội KHTN 9, Chim đưa thư, Đua xe F1, Đua xe Polymer, Polymer F1, Leo Langbiang, Escape Forest H12 Chương 1-2-3, Khám phá hang động (Ester). Nhóm: Chim đưa thư, Đua xe F1, Đua xe Polymer, Ruộng lúa Chu kì, Grand Prix Điện hoá, Escape Forest H12 Chương 1-2-3. Đã nối hệ thống chung (Escape Forest H12 và Hang động nối 29/10/2026). Chưa nối: Escape Forest Bài 1 Ester (`index.html`), Toán 6, Toán 3 cửu chương.
+Cá nhân: Đại Nội Hóa 10, Đại Nội KHTN 9, Chim đưa thư, Đua xe F1, Đua xe Polymer, Polymer F1, Leo Langbiang, Escape Forest H12 Chương 1-2-3, Khám phá hang động (Ester). Nhóm: Chim đưa thư, Đua xe F1, Đua xe Polymer, Ruộng lúa Chu kì, Grand Prix Điện hoá, Escape Forest H12 Chương 1-2-3. Đã nối hệ thống chung (Escape Forest H12 và Hang động nối 29/10/2026). Ngày 29/10/2026 đổi tên file theo mẫu; bỏ Escape Forest Bài 1 Ester (bản sơ khai), Toán 6, Toán 3; `index.html` chuyển sang `MUCLUC.html`.
