@@ -722,11 +722,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       return j;
     }).catch(function () { return goiBatKy(du, i + 1); });
   }
+  // Ten lop so khop khong phan biet: hoa/thuong, dau, chu "Lop", dau cach, so 0 thua (10E1 = 10E01, 9D3 = 9D03)
+  function maLop(s) {
+    return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'D').toUpperCase()
+      .replace(/\s+/g, '').replace(/^LOP/, '').replace(/([A-Z])0+(\d)/g, '$1$2');
+  }
   function lopCuaDot(d) {
-    var l = chuan(d.lop);
-    if (!l || l === 'TATCA' || l === 'TẤTCẢ') return DS.slice();
-    var ds = l.split(',');
-    return DS.filter(function (x) { return ds.indexOf(chuan(x.ten)) >= 0; });
+    var ds = String(d.lop || '').split(/[,;/]+/).map(maLop).filter(String);
+    if (!ds.length || ds.indexOf('TATCA') >= 0) return DS.slice();
+    return DS.filter(function (x) { return ds.indexOf(maLop(x.ten)) >= 0; });
+  }
+  function loiLop(d) {
+    return 'Cột Lop của đề này đang ghi “<b>' + esc(d.lop || '') + '</b>”, không khớp lớp nào (' + esc(DS.map(function (x) { return x.ten; }).join(', ')) +
+      '). Vào <b>Kiểm tra</b> → bấm vào đề → <b>✎ Sửa tên, thời gian, lớp</b> để chọn lại lớp.';
   }
   function gio(iso) { if (!iso) return ''; var d = new Date(iso); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
   function diem(x) { return String(x).replace(',', '.'); }
@@ -930,7 +938,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     clearTimeout(hen);
     var d = dotHienTai(); if (!d) return;
     var tatCa = lopCuaDot(d), box = $('dsLop');
-    if (!tatCa.length) { box.innerHTML = '<div class="card">Cột Lop của đề này không khớp lớp nào trong danh sách.</div>'; return; }
+    if (!tatCa.length) { box.innerHTML = '<div class="card">' + loiLop(d) + '</div>'; return; }
     if (!tatCa.some(function (l) { return l.ten === lopTheo; })) lopTheo = tatCa[0].ten;
     var tb = $('tabLop'); tb.innerHTML = '';
     tatCa.forEach(function (l) {
@@ -1982,7 +1990,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       tb.appendChild(b);
     });
     var q = $('phQR');
-    if (!l) { q.innerHTML = '<div class="loi">Cột Lop của đề này không khớp lớp nào trong danh sách lớp.</div>'; veTT(); return; }
+    if (!l) { q.innerHTML = '<div class="loi">' + loiLop(d) + '</div>'; veTT(); return; }
     var hien = d.tt !== 'MO' || PH.hienQR;
     var h = '<div class="phLopTo">Học sinh lớp<b>' + esc(l.ten) + '</b></div>';
     if (hien) h += '<div class="phMaQR" id="phMaQR"></div>';
@@ -2085,10 +2093,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }).catch(function (e) { TRO_LOI = /sổ theo dõi nào/.test(e.message) ? 'cu' : e.message; if (sau) sau(); });
   }
   function lopTro(t) {
-    var l = chuan(t.lop);
-    if (!l || l === 'TATCA') return DS.slice();
-    var ds = l.split(',');
-    return DS.filter(function (x) { return ds.indexOf(chuan(x.ten)) >= 0; });
+    var ds = String(t.lop || '').split(/[,;/]+/).map(maLop).filter(String);
+    if (!ds.length || ds.indexOf('TATCA') >= 0) return DS.slice();
+    return DS.filter(function (x) { return ds.indexOf(maLop(x.ten)) >= 0; });
   }
   function lopCuaKhoi(k) {
     var ds = DS.filter(function (x) { return String(x.ten).indexOf(String(k)) === 0 && /^\d/.test(x.ten.slice(String(k).length)) === false; });

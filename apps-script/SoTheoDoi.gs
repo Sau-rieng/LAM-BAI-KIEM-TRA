@@ -1138,10 +1138,12 @@ function docCauHinh() {
 function timDot(madot) {
   return docCauHinh().filter(function (c) { return c.madot === String(madot || '').trim(); })[0] || null;
 }
+// So khop ten lop: khong phan biet dau, chu "Lop", dau cach, so 0 thua (10E1 = 10E01); ngan cach , ; /
+function maLop(s) { return khongDau(s).replace(/\s+/g, '').replace(/^LOP/, '').replace(/([A-Z])0+(\d)/g, '$1$2'); }
 function hopLop(c) {
-  if (c.lop === 'TAT CA') return true;
-  const l = khongDau(lopNay());
-  return c.lop.split(',').map(function (s) { return s.trim(); }).indexOf(l) >= 0;
+  const ds = String(c.lop || '').split(/[,;/]+/).map(maLop).filter(String);
+  if (!ds.length || ds.indexOf('TATCA') >= 0) return true;
+  return ds.indexOf(maLop(lopNay())) >= 0;
 }
 // Tab MA: cot A ten ma, cot B gia tri (MaGV, MaMoKhoa, MaLamLai)
 function docMa() {
