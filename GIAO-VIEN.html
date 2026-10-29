@@ -418,6 +418,37 @@ body.rong main{max-width:1200px}
 .suaDe{margin-top:10px;width:100%;border:2px dashed var(--line);font-size:15px;color:var(--muted);background:none}
 select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
 /* Ket qua tro choi */
+/* Bang dua truc tiep: moi lop mot bieu do cot, cot cap nhat tai cho (khong ve lai) de moc dan */
+#kqDua{display:grid;gap:12px;margin-bottom:12px}
+.duaDau{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.duaDau h2{font-size:19px}
+.duaDau .ma{font-size:14px;color:var(--muted)}
+.duaChe{display:flex;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.duaChe button{border:0;border-left:2px solid var(--line);background:#fff;padding:7px 12px;font-size:14px;font-weight:600;color:var(--muted);border-radius:0}
+.duaChe button:first-child{border-left:0}
+.duaChe button.on{background:var(--ink);color:#fff}
+.duaKhung{display:grid;grid-template-columns:30px minmax(0,1fr);gap:6px;margin-top:12px}
+.duaTruc{position:relative;height:230px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.duaTruc span{position:absolute;right:2px;transform:translateY(50%)}
+.duaVung{position:relative;height:230px;border-left:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);
+  background:repeating-linear-gradient(to top,transparent 0,transparent calc(20% - 1px),var(--line) calc(20% - 1px),var(--line) 20%);overflow-x:auto;overflow-y:visible}
+.duaCot{display:flex;align-items:flex-end;gap:10px;height:100%;padding:0 10px;min-width:min-content}
+.duaO{flex:1 0 54px;max-width:96px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;position:relative}
+.duaGT{text-align:center;font-weight:800;font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;margin-bottom:3px}
+.duaGT small{display:block;font-size:11.5px;font-weight:600;color:var(--warn)}
+.duaThan{height:0;min-height:2px;border-radius:6px 6px 0 0;background:var(--pri);transition:height .7s cubic-bezier(.2,.8,.2,1)}
+.duaO.dang .duaThan{background:repeating-linear-gradient(135deg,var(--warn) 0 8px,#d9a43a 8px 16px)}
+.duaO.nhat .duaThan{box-shadow:0 0 0 3px #f2c200 inset}
+.duaO.trong .duaThan{background:var(--off)}
+.duaTen{display:grid;grid-template-columns:30px minmax(0,1fr);gap:6px}
+.duaTen div{display:flex;gap:10px;padding:6px 10px 0;min-width:min-content}
+.duaTen span{flex:1 0 54px;max-width:96px;text-align:center;font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap}
+.duaTen span small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.duaChu{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.duaChu i{display:inline-block;width:14px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px;background:var(--pri)}
+.duaChu i.d{background:repeating-linear-gradient(135deg,var(--warn) 0 4px,#d9a43a 4px 8px)}
+.duaChu i.n{background:var(--pri);box-shadow:0 0 0 2px #f2c200 inset}
+@media (prefers-reduced-motion:reduce){.duaThan{transition:none}}
 .dh2{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .dh2 .ma{font-size:14px;color:var(--muted)}
 .dh2 .btnTai{width:auto;margin:0;flex:none;padding:8px 12px;font-size:14px}
@@ -646,6 +677,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <select id="kqChon" class="chon"></select>
     <div class="loc" id="kqLop" style="margin-top:12px"></div>
   </div>
+  <div id="kqDua"></div>
   <div id="kqBox"></div>
 </section>
 
@@ -2385,6 +2417,99 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     });
     box.innerHTML = h;
     var tai = box.querySelector('.kqTai'); if (tai) tai.onclick = function () { xuatKQ(t, chon); };
+    veDua(t, chon);
+  }
+
+  // ---------- Bang dua truc tiep (tro nhom) ----------
+  // Moi lop mot bieu do cot, cot = diem luot gan nhat cua nhom (thang 10). Nhom dang choi: diem hien tai, soc cheo, moc dan.
+  // Tien do lay tu gv_tctd 3 giay/lan; ket qua da ve dich lay tu gv_tckq 12 giay/lan (tai lang le, khong nhap nhay).
+  KQ.td = {}; KQ.che = 'gan'; KQ.hen = 0; KQ.nhip = 0;
+  try { KQ.che = localStorage.getItem('gv_duache') || 'gan'; } catch (e) {}
+  function diem10(x) { return x == null || isNaN(x) ? null : Math.round(x * 100) / 100; }
+  function soNhom(ten) { var m = /(\d+)/.exec(String(ten || '')); return m ? Number(m[1]) : 999; }
+  function fmtD(x) { return x == null ? '' : String(Math.round(x * 10) / 10); }   // dau cham thap phan
+  function cotLop(t, lop) {
+    var j = KQ.data[lop] || {}, td = (KQ.td[lop] || {}).ds || [], homNay = ngayKey(Date.now() + (LECH_TC || 0));
+    var xong = (j.nhom || []).filter(function (x) { return x[1] === t.matro && ngayKey(x[0]) === homNay; }).map(function (x) {
+      var d = x[5]; if (d == null || (d === 0 && phanTram(x[3]))) { var p = phanTram(x[3]); d = p === null ? 0 : p * 10; }
+      return { nhom: x[2], t: x[0], diem: d, ml: x[6] || '', ds: x[3] };
+    });
+    var dangDs = td.filter(function (x) { return ngayKey(x.t) === homNay; });
+    var ten = {};
+    xong.forEach(function (x) { ten[x.nhom] = 1; }); dangDs.forEach(function (x) { ten[x.nhom] = 1; });
+    return Object.keys(ten).sort(function (a, b) { return soNhom(a) - soNhom(b); }).map(function (n) {
+      var cac = xong.filter(function (x) { return x.nhom === n; }).sort(function (a, b) { return b.t - a.t; });
+      var gan = cac[0], song = dangDs.filter(function (x) { return x.nhom === n; })[0];
+      var dangChoi = song && !song.ket && !cac.some(function (x) { return x.ml && x.ml === song.maluot; }) && (!gan || song.t > gan.t);
+      var tb = cac.length ? cac.reduce(function (a, x) { return a + x.diem; }, 0) / cac.length : null;
+      if (KQ.che === 'tb') return { nhom: n, diem: diem10(tb), dang: false, phu: cac.length ? cac.length + ' lượt' : 'chưa về đích' };
+      if (dangChoi) return { nhom: n, diem: diem10(song.diem), dang: true, phu: 'đang đua · ' + (song.xong || 0) + ' câu' };
+      return { nhom: n, diem: gan ? diem10(gan.diem) : null, dang: false, phu: cac.length > 1 ? 'lượt ' + cac.length : '' };
+    });
+  }
+  function veDua(t, chon) {
+    var hop = $('kqDua');
+    if (!t || t.kieu !== 'NHOM') { hop.innerHTML = ''; hop.dataset.tro = ''; return; }
+    if (hop.dataset.tro !== t.matro + '|' + chon.map(function (l) { return l.ten; }).join(',') + '|' + KQ.che) {
+      hop.dataset.tro = t.matro + '|' + chon.map(function (l) { return l.ten; }).join(',') + '|' + KQ.che;
+      hop.innerHTML = '<div class="card"><div class="duaDau"><div><h2>🏁 Bảng đua trực tiếp</h2><div class="ma">' +
+        (KQ.che === 'tb' ? 'Điểm trung bình các lượt hôm nay của mỗi nhóm' : 'Điểm lượt gần nhất của mỗi nhóm hôm nay · tự cập nhật trong lúc đua') + '</div></div>' +
+        '<div class="duaChe" role="group" aria-label="Cách tính cột"><button type="button" data-c="gan">Lượt gần nhất</button><button type="button" data-c="tb">TB hôm nay</button></div></div>' +
+        '<div class="duaChu"><span><i></i>Đã về đích</span><span><i class="d"></i>Đang đua</span><span><i class="n"></i>Cao nhất lớp</span></div></div>' +
+        chon.map(function (l) { return '<div class="card duaLop" data-lop="' + esc(l.ten) + '"><div class="duaDau"><h2>' + esc(l.ten) + '</h2><div class="ma duaTom"></div></div>' +
+          '<div class="duaKhung"><div class="duaTruc">' + [0, 2, 4, 6, 8, 10].map(function (v) { return '<span style="bottom:' + v * 10 + '%">' + v + '</span>'; }).join('') + '</div>' +
+          '<div class="duaVung"><div class="duaCot"></div></div></div><div class="duaTen"><span></span><div class="duaTenDs"></div></div><p class="sub duaRong" hidden>Hôm nay chưa có nhóm nào chơi.</p></div>'; }).join('');
+      hop.querySelectorAll('.duaChe button').forEach(function (b) {
+        b.classList.toggle('on', b.dataset.c === KQ.che);
+        b.onclick = function () { KQ.che = b.dataset.c; try { localStorage.setItem('gv_duache', KQ.che); } catch (e) {} veDua(t, chon); };
+      });
+    }
+    chon.forEach(function (l) {
+      var the = hop.querySelector('.duaLop[data-lop="' + l.ten + '"]'); if (!the) return;
+      var ds = cotLop(t, l.ten), cot = the.querySelector('.duaCot'), tenDs = the.querySelector('.duaTenDs');
+      var max = Math.max.apply(null, ds.filter(function (x) { return !x.dang && x.diem != null; }).map(function (x) { return x.diem; }).concat([-1]));
+      the.querySelector('.duaRong').hidden = ds.length > 0;
+      var soDang = ds.filter(function (x) { return x.dang; }).length;
+      the.querySelector('.duaTom').textContent = ds.length ? ds.length + ' nhóm' + (soDang ? ' · ' + soDang + ' đang đua' : '') : '';
+      // cap nhat tai cho: giu cot cu theo ten nhom de chieu cao chuyen dong
+      var cu = {}; [].forEach.call(cot.children, function (c) { cu[c.dataset.n] = c; });
+      var moi = [];
+      ds.forEach(function (x) {
+        var o = cu[x.nhom];
+        if (!o) { o = document.createElement('div'); o.dataset.n = x.nhom; o.innerHTML = '<div class="duaGT"></div><div class="duaThan"></div>'; }
+        o.className = 'duaO' + (x.dang ? ' dang' : '') + (x.diem == null ? ' trong' : '') + (!x.dang && x.diem != null && x.diem === max && max > 0 ? ' nhat' : '');
+        o.querySelector('.duaGT').textContent = x.diem == null ? '–' : fmtD(x.diem);
+        var cao = Math.max(0, Math.min(100, (x.diem || 0) * 10)) + '%';
+        var than = o.querySelector('.duaThan');
+        if (!cu[x.nhom]) { than.style.height = '0%'; requestAnimationFrame(function () { requestAnimationFrame(function () { than.style.height = cao; }); }); }
+        else than.style.height = cao;
+        o.title = x.nhom + ': ' + (x.diem == null ? 'chưa có điểm' : fmtD(x.diem) + ' điểm') + (x.phu ? ' · ' + x.phu : '');
+        moi.push(o);
+      });
+      moi.forEach(function (o) { cot.appendChild(o); });
+      Object.keys(cu).forEach(function (n) { if (!ds.some(function (x) { return x.nhom === n; })) cu[n].remove(); });
+      tenDs.innerHTML = ds.map(function (x) { return '<span>' + esc(x.nhom) + (x.phu ? '<small>' + esc(x.phu) + '</small>' : '') + '</span>'; }).join('');
+    });
+    batNhipDua();
+  }
+  function batNhipDua() {
+    clearTimeout(KQ.hen);
+    KQ.hen = setTimeout(function nhip() {
+      var t = troKQ && TRO ? troKQ() : null;
+      if (!t || t.kieu !== 'NHOM' || $('scrTroKQ').classList.contains('hidden') || document.hidden) { KQ.hen = setTimeout(nhip, 3000); return; }
+      var lops = lopTro(t); if (!lops.length) lops = DS.slice();
+      var chon = KQ.lop === 'tat' ? lops : lops.filter(function (l) { return l.ten === KQ.lop; });
+      KQ.nhip++;
+      var lanKQ = KQ.nhip % 4 === 0;   // 12 giay tai lai ket qua da ve dich
+      Promise.all(chon.map(function (l) {
+        var p1 = goi(l.url, { action: 'gv_tctd', ma: MA, matro: t.matro }).then(function (j) { if (j && j.ok) KQ.td[l.ten] = j; }, function () {});
+        var p2 = lanKQ ? goi(l.url, { action: 'gv_tckq', ma: MA }).then(function (j) { if (j && j.ok) KQ.data[l.ten] = j; }, function () {}) : null;
+        return Promise.all([p1, p2]);
+      })).then(function () {
+        if ($('scrTroKQ').classList.contains('hidden')) return;
+        if (lanKQ) veKQ(); else veDua(t, chon);
+      });
+    }, 3000);
   }
   function xuatKQ(t, lops) {
     var nhom = t.kieu === 'NHOM', sheets = [];

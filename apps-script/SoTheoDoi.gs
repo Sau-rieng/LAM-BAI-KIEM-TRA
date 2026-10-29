@@ -70,6 +70,7 @@ function doPost(e) {
       case 'tc_vao': return json(tcVao(d));
       case 'tc_mokhoa': return json(tcMoKhoa(d));
       case 'tc_tt': return json(tcTrangThai(d));
+      case 'tc_tiendo': return json(tcTienDo(d));
       case 'gv_dot':
       case 'gv_dat':
       case 'gv_theodoi':
@@ -85,6 +86,7 @@ function doPost(e) {
       case 'gv_tcdat':
       case 'gv_tckq':
       case 'gv_tcvach':
+      case 'gv_tctd':
       case 'gv_ma':
       case 'gv_madat':
       case 'gv_tainguyen':
@@ -108,6 +110,7 @@ function doPost(e) {
         if (d.action === 'gv_tcdat') return json(gvTcDat(d));
         if (d.action === 'gv_tckq') return json(gvTcKetQua(d));
         if (d.action === 'gv_tcvach') return json(gvTcVach(d));
+        if (d.action === 'gv_tctd') return json(gvTcTienDo(d));
         if (d.action === 'gv_ma') return json(gvMa());
         if (d.action === 'gv_madat') return json(gvMaDat(d));
         if (d.action === 'gv_tainguyen') return json(gvTaiNguyen());
@@ -901,6 +904,27 @@ function ghiVach(matro, d) {
     cache.put(k, JSON.stringify(ds), 3600);
   } finally { lock.releaseLock(); }
 }
+// Tien do dang choi cua tung nhom (tro nhom gui sau moi cau): luu trong cache cua so lop, 6 gio
+function tcTienDo(d) {
+  const ma = String(d.matro || '').trim(), nhom = chuanNhom(d.nhom);
+  if (!ma || !nhom) return {ok: false, msg: 'Thieu tro hoac nhom'};
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(3000)) return {ok: false, msg: 'Ban'};
+  try {
+    const cache = CacheService.getScriptCache(), k = 'td_' + ma;
+    let ds = {};
+    try { ds = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
+    ds[nhom] = {nhom: nhom, maluot: String(d.maluot || '').slice(0, 40), diem: Math.max(0, Math.min(100, Number(d.diem) || 0)),
+      xong: Number(d.xong) || 0, ket: d.ket === true, t: Date.now()};
+    cache.put(k, JSON.stringify(ds), 21600);
+  } finally { lock.releaseLock(); }
+  return {ok: true};
+}
+function gvTcTienDo(d) {
+  let ds = {};
+  try { ds = JSON.parse(CacheService.getScriptCache().get('td_' + String(d.matro || '').trim()) || '{}'); } catch (e) {}
+  return {ok: true, lop: lopNay(), ds: Object.keys(ds).map(function (k) { return ds[k]; }), bayGio: Date.now()};
+}
 function gvTcVach(d) {
   const ma = String(d.matro || '').trim(), bay = Date.now();
   let ds = {};
@@ -970,7 +994,7 @@ function gvTcKetQua(d) {
   if (cn && cn.getLastRow() > 1) cn.getRange(2, 1, cn.getLastRow() - 1, HEAD_CN.length).getValues().forEach(function (r) {
     const mt = String(r[1]).trim();
     if (!mt || (loc && mt !== loc)) return;
-    nhom.push([tg(r[0]), mt, String(r[3]).trim(), String(r[5]), Number(r[6]) || 0]);
+    nhom.push([tg(r[0]), mt, String(r[3]).trim(), String(r[5]), Number(r[6]) || 0, Number(String(r[4]).replace(',', '.')) || 0, String(r[7] || '')]);   // + diem, ma luot
   });
   // Thanh vien tung nhom (ten hoc sinh) + si so lop
   const ten = {}, tv = {}, m = docNhom();
