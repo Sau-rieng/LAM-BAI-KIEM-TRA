@@ -837,7 +837,10 @@ const TC_MAC_DINH = [
   ['POLYMER-F1', 'Polymer F1 – Hóa 12', 'CA NHAN', 12, 'POLYMER-F1.html', 5],
   ['DUAXEF1-POLYMER-H12-NHOM', 'Đua xe F1 Polymer – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-DUAXEF1-POLYMER.html', 5],
   ['DAINOI-KHTN9', 'Đại Nội Huế – KHTN 9', 'CA NHAN', 9, 'DAINOI-KHTN9.html', 5],
-  ['PIN-F1-H12-NHOM', 'Grand Prix Điện hoá – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-PIN-F1-NHOM.html', 7]
+  ['PIN-F1-H12-NHOM', 'Grand Prix Điện hoá – Hóa 12 (nhóm)', 'NHOM', 12, 'HOA12-PIN-F1-NHOM.html', 7],
+  ['CHUONG123-H12', 'Escape the Cartoon Forest – Hóa 12 Chương 1-2-3', 'CA NHAN', 12, 'HOA12CHUONG123.html', 7],
+  ['CHUONG123-H12-NHOM', 'Escape the Cartoon Forest – Hóa 12 Chương 1-2-3 (nhóm)', 'NHOM', 12, 'H12-CHUONG123-NHOM.html', 7],
+  ['HANGDONG-H12', 'Khám phá hang động – Ester (Hóa 12)', 'CA NHAN', 12, 'cave-explore.html', 5]
 ];
 function lopMacDinh(khoi) {
   if (/DEMO/.test(khongDau(lopNay()))) return 'TAT CA';
