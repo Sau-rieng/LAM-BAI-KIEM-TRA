@@ -24,12 +24,13 @@ Tải vào Project MO PHONG 3D, cùng `Quy-uoc-chung.md`, `Danh-muc-kien-thuc.md
 - Đăng nhập: form có ô **Mã vào chơi**; gọi `api({kind:'login', code, lop, name, sbd})` (hoặc `TC.vao(lop, ma, sbd)`). Thời gian chơi lấy từ `minutes` trả về, không viết cứng.
 - Mở khóa khi rời màn hình: `api({kind:'unlock', code})` (hoặc `TC.moKhoa(ma)`). Không viết mã giáo viên trong file HTML.
 - Kết thúc: cá nhân gọi `guiSoTheoDoi(rep, 'MA-TRO', 'Tên trò', tongSoCau)` (`rep` cần `sbd` 8 số, `correct`, `startedAt`/`endedAt`) rồi gửi `fetch(SHEET_URL, …kind:'result')` để hiện "Đã gửi". Nhóm gọi `guiNhomSoTheoDoi` (`rep` cần `lop`, `group`, `correct`, `id`).
-- Giáo viên mở/đóng, đặt thời gian, lớp được chơi, lấy QR và xem kết quả trong trang giáo viên → Trò chơi. Mã vào chơi / mã mở khóa trò chơi đặt ở Cài đặt (tab MA: MaTroChoi, MaMoKhoaTroChoi).
+- Giáo viên mở/đóng, đặt thời gian, lớp được chơi, lấy QR và xem kết quả trong trang giáo viên → Trò chơi (không làm trang thống kê riêng; trang thống kê và Apps Script của Sheet riêng cũ đã chuyển vào thư mục `cu/`). Mã vào chơi / mã mở khóa trò chơi đặt ở Cài đặt (tab MA: MaTroChoi, MaMoKhoaTroChoi).
 - Mở với `?demo`: lớp DEMO (mã vào chơi 1111, mở khóa 2222); thêm `if(window.LAM_DEMO)SBD_PREFIX.DEMO='269999';` sau bảng SBD_PREFIX.
 
 ## Câu hỏi trong trò chơi / mô phỏng
 
-- Mỗi câu gắn **Kiến thức** (đúng tên trong `Danh-muc-kien-thuc.md`) và **Mức độ** (Biết / Hiểu / Vận dụng), để trong mảng câu hỏi dạng `{hoi, pa, da, kt, md}`.
+- Mỗi câu gắn **Kiến thức** (đúng tên trong `Danh-muc-kien-thuc.md`) và **Mức độ** (Biết / Hiểu / Vận dụng): câu dạng đối tượng thêm 2 khóa `kt`, `md` (vd `{hoi, pa, da, kt, md}`); câu dạng mảng thêm 2 phần tử cuối `kt`, `md`; câu sinh tự động gắn theo dạng câu. Bài chưa có trong danh mục thì thêm mục mới vào danh mục trước.
+- Ngân hàng câu dùng chung cho nhiều trò để trong 1 file `.js` (vd `POLYMER-CAUHOI.js`, `HOA12-PIN-CAUHOI.js`).
 - Đúng khoa học, đúng mức chương trình Kết nối tri thức của khối; mô hình đơn giản hóa thì ghi chú trên trang.
 - Mã hoạt động (`MA-TRO`): viết hoa không dấu, có khối và bài, vd `DAINOI-HOA10`, `H10-B5-GAME1`.
 
@@ -48,6 +49,14 @@ Soạn sao cho chuyển lên được ngay:
 - Thanh trượt chỉnh thông số (nhiệt độ, nồng độ, số cặp electron…), mô hình đổi theo ngay.
 - Kèm 3–5 câu hỏi khám phá; câu trả lời gửi về tab HOAT DONG như trò cá nhân.
 
-## Đã có (tháng 10/2026)
+## Đã có (cập nhật 29/10/2026)
 
-Cá nhân: Đại Nội Hóa 10, Đại Nội KHTN 9, Chim đưa thư, Đua xe F1, Đua xe Polymer, Polymer F1, Leo Langbiang, Escape Forest H12 Chương 1-2-3, Khám phá hang động (Ester). Nhóm: Chim đưa thư, Đua xe F1, Đua xe Polymer, Ruộng lúa Chu kì, Grand Prix Điện hoá, Escape Forest H12 Chương 1-2-3. Đã nối hệ thống chung (Escape Forest H12 và Hang động nối 29/10/2026). Ngày 29/10/2026 đổi tên file theo mẫu; bỏ Escape Forest Bài 1 Ester (bản sơ khai), Toán 6, Toán 3; `index.html` chuyển sang `MUCLUC.html`.
+Tất cả trò dưới đây đã nối hệ thống chung, đặt tên theo mẫu và gắn Kiến thức – Mức độ cho từng câu.
+
+| Khối | Cá nhân | Nhóm |
+| --- | --- | --- |
+| KHTN 9 | `KHTN9-DAINOI` (Đại Nội Huế) | |
+| Hóa 10 | `HOA10-DAINOI`, `HOA10-CHIMDUATHU`, `HOA10-DUAXEF1-CANHAN`, `HOA10-LANGBIANG` | `HOA10-CHIMDUATHU-NHOM`, `HOA10-DUAXEF1-NHOM`, `HOA10-RUONGLUA-CHUKI-NHOM` |
+| Hóa 12 | `HOA12-POLYMER-F1`, `HOA12-DUAXEF1-POLYMER-CANHAN`, `HOA12-CHUONG123`, `HOA12-HANGDONG` | `HOA12-DUAXEF1-POLYMER-NHOM`, `HOA12-PIN-F1-NHOM`, `HOA12-CHUONG123-NHOM` |
+
+Đã bỏ (29/10/2026): Toán 3, Toán 6, Escape Forest Bài 1 Ester (bản sơ khai). `index.html` chuyển sang `MUCLUC.html`.
