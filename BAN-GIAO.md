@@ -33,7 +33,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 - `XEM-LAI.html`: **Tài khoản học sinh** (SBD + mã xem bài) với 3 ô: Xem lại bài (mỗi câu có nút 💡 Giải thích nếu có lời giải và 💬 Hỏi thầy/cô câu này) · Tài nguyên (mô phỏng tải tạm vào khung, không lưu) · Hỏi thầy/cô (số đỏ khi có trả lời).
 - `index.html`, `DUNG-THU.html` (trang cho Ban giám khảo, lớp DEMO), `GIAM-KHAO.html` (hướng dẫn Ban giám khảo: giao diện giống trang Dùng thử, 9 bước gồm Tài nguyên 3D và Hỏi thầy/cô; bản in A4 đen trắng 2 trang).
 - `cau-hinh-lop.js`: danh sách lớp + link /exec của từng sổ; `?demo` chuyển sang lớp DEMO.
-- `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ. **Từ 29/10** giáo viên tự tải tài nguyên lên ở trang giáo viên → Tài nguyên → 📥 Tải tài nguyên lên (HTML lưu Drive thư mục TAI NGUYEN HOC TAP, tab `TAI NGUYEN` trong KHODEHOA; hành động gv_tn_nap, gv_tn_dat, gv_tn_xoa, gv_tn_lay, tn_lay; danh sách gộp với danh-muc.js, nhãn "Drive").
+- `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ. **Từ 29/10** giáo viên tự tải tài nguyên lên ở trang giáo viên → Tài nguyên → 📥 Tải tài nguyên lên: sổ theo dõi đẩy lên GitHub bằng dòng `GithubToken` trong tab MA (gv_tn_nap, gv_tn_dat, gv_tn_xoa) vào `tai-nguyen/tai-len/<ma>.html`, `tai-nguyen/anh/<ma>.jpg` và danh sách `tai-nguyen/tai-len.js` (**máy chủ tự ghi, không sửa tay**; mọi trang nạp sau danh-muc.js, nhãn "Tải lên"). Repo nhận commit từ máy chủ nên luôn `git fetch` + rebase trước khi đẩy.
 - `hinh/giao-dien/`: `nen-hoa.svg` (nền nét vẽ), `banner-ptn.svg` (banner phòng thí nghiệm), `bieu-tuong.js` (biểu tượng `window.BT`). Giao diện: nền xanh nhạt, ô/tab xanh nhạt nổi, chữ Be Vietnam Pro, màu ink #172033, hồng #b8235a, xanh #1f5fbf.
 - `doc-excel.js`: đọc .xls/.xlsx (dán điểm vnEdu); `docExcelTatCa` đọc mọi tab .xlsx (Nạp đề). Excel xuất ra do trang tự tạo (không dùng thư viện ngoài).
 
@@ -70,7 +70,8 @@ Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản
 
 1. Dán `apps-script/SoTheoDoi.gs` bản mới nhất vào 5 sổ + DEMO và triển khai phiên bản mới (cần cho: trò chơi quản lý chung, tài nguyên, tin nhắn, **nút Nạp đề mới**).
 2. Trang giáo viên → Cài đặt: đặt **Mã vào chơi** và **Mã mở khóa trò chơi** riêng.
-3. Mỗi sổ sau khi dán bản mới: tải lại Sheet → 🤖 Phân tích AI → Kiểm tra kết nối AI để cấp quyền (cả sổ DEMO nếu muốn Ban giám khảo thử Gợi ý AI). KHO DE DEMO cần dòng GeminiKey riêng ở tab MA.
+3. Thêm dòng `GithubToken` vào tab MA của KHODEHOA (hướng dẫn tạo mã có trong khung Tải tài nguyên lên) để dùng nút tải tài nguyên.
+4. Mỗi sổ sau khi dán bản mới: tải lại Sheet → 🤖 Phân tích AI → Kiểm tra kết nối AI để cấp quyền (cả sổ DEMO nếu muốn Ban giám khảo thử Gợi ý AI). KHO DE DEMO cần dòng GeminiKey riêng ở tab MA.
 4. Mở thử trên iPad 9 mô phỏng 3D (dùng three.js từ CDN) vì phiên trước không chạy được hình 3D để kiểm tra.
 
 ## 5. Việc có thể làm tiếp (giáo viên chưa chọn)

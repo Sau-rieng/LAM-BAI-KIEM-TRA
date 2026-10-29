@@ -743,6 +743,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <script src="hinh/giao-dien/bieu-tuong.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){var e=document.getElementById('abTinIc');if(e&&window.BT)e.innerHTML=BT.chuong;});</script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="tai-nguyen/tai-len.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function () {
   var DS = window.DS_LOP || [];
@@ -2664,9 +2665,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // =====================================================================
   // TAI NGUYEN HOC TAP (tai-nguyen/danh-muc.js) – luot xem theo lop
   // =====================================================================
-  var TNX = { data: {}, lop: 'tat', mo: null, khoi: null, drive: null, form: null };
+  var TNX = { data: {}, lop: 'tat', mo: null, khoi: null, drive: null, tailen: null, form: null };
   try { TNX.khoi = localStorage.getItem('gv_tnkhoi'); } catch (e) {}
-  function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file; }).concat((TNX.drive || []).map(function (t) { t.nguon = 'drive'; return t; })); }
+  // Danh sach = danh-muc.js (Claude dua len) + tai-len.js (giao vien tai len, GitHub) + tai nguyen Drive cu (neu con)
+  function dsTN() {
+    var goc = (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file && !t.tailen; });
+    var tl = (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || []).filter(function (t) { return t && t.tailen; })).map(function (t) { t.nguon = 'github'; return t; });
+    return goc.concat(tl).concat((TNX.drive || []).map(function (t) { t.nguon = 'drive'; return t; }));
+  }
   function anhTN(t) { return !t.anh ? '' : t.nguon === 'drive' ? t.anh : 'tai-nguyen/' + encodeURI(t.anh); }
   function moTN() { man('scrTN'); veTN(); taiTN(false); }
   function taiTN(lamMoi) {
@@ -2724,11 +2730,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (t.bai !== baiTr) { baiTr = t.bai; h += '<div class="tnBai">' + esc(t.bai || 'Khác') + '</div>'; }
         var x = theo[t.ma] || { luot: 0, em: {} }, soEm = Object.keys(x.em).length;
         h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="' + anhTN(t) + '">' : '<span>3D</span>') + '</div>' +
-          '<div class="tnChu"><b>' + esc(t.ten) + (t.nguon === 'drive' ? '<span class="tnNguon">Drive</span>' : '') + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
+          '<div class="tnChu"><b>' + esc(t.ten) + (t.nguon === 'drive' ? '<span class="tnNguon">Drive</span>' : t.nguon === 'github' ? '<span class="tnNguon">Tải lên</span>' : '') + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
           '<span class="tnSo"><b>' + x.luot + '</b> lượt xem · <b>' + soEm + '</b>' + (siSo ? '/' + siSo : '') + ' em đã xem</span></div>' +
           '<div class="tnNut">' + (t.nguon === 'drive' ? '<button class="btn2 xemD">▶ Xem</button>' : '<a class="btn2" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener">▶ Xem</a>') +
             '<button class="btn2 ai"' + (soEm ? '' : ' disabled') + '>' + (TNX.mo === t.ma ? 'Ẩn' : 'Ai đã xem') + '</button>' +
-            (t.nguon === 'drive' ? '<button class="btn2 suaD">✎ Sửa</button><button class="btn2 anD">' + (t.an ? 'Hiện' : 'Ẩn với HS') + '</button><button class="btn2 xoa xoaD">Xóa</button>' : '') + '</div>';
+            (t.nguon === 'drive' || t.nguon === 'github' ? (t.nguon === 'github' ? '<button class="btn2 suaD">✎ Sửa</button>' : '') + '<button class="btn2 anD">' + (t.an ? 'Hiện' : 'Ẩn với HS') + '</button><button class="btn2 xoa xoaD">Xóa</button>' : '') + '</div>';
         if (TNX.mo === t.ma && soEm) {
           var em = Object.keys(x.em).map(function (k) { return x.em[k]; }).sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : a.ten.localeCompare(b.ten, 'vi'); });
           h += '<div class="tnAi">' + em.map(function (e) { return '<span>' + (chon.length > 1 ? '<i>' + esc(e.lop) + '</i> ' : '') + esc(e.ten) + (e.n > 1 ? ' <b>×' + e.n + '</b>' : '') + '</span>'; }).join('') + '</div>';
@@ -2741,24 +2747,30 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     [].forEach.call(box.querySelectorAll('.tnDong .ai'), function (b) {
       b.onclick = function () { var ma = b.closest('.tnDong').getAttribute('data-ma'); TNX.mo = TNX.mo === ma ? null : ma; veTN(); };
     });
-    function tnCua(b) { var ma = b.closest('.tnDong').getAttribute('data-ma'); return (TNX.drive || []).filter(function (t) { return t.ma === ma; })[0]; }
+    function tnCua(b) { var ma = b.closest('.tnDong').getAttribute('data-ma'); return dsTN().filter(function (t) { return t.ma === ma; })[0]; }
     [].forEach.call(box.querySelectorAll('.tnDong .xemD'), function (b) { b.onclick = function () { xemTNDrive(tnCua(b)); }; });
     [].forEach.call(box.querySelectorAll('.tnDong .suaD'), function (b) { b.onclick = function () { moFormTN(tnCua(b)); }; });
     [].forEach.call(box.querySelectorAll('.tnDong .anD'), function (b) {
       b.onclick = function () {
         var t = tnCua(b); b.disabled = true; b.textContent = 'Đang lưu…';
-        goiBatKy({ action: 'gv_tn_dat', ma: MA, matn: t.ma, an: !t.an }).then(function (j) { if (!j.ok) throw new Error(j.msg); TNX.drive = j.ds; veTN(); })
+        goiBatKy({ action: 'gv_tn_dat', ma: MA, matn: t.ma, an: !t.an }).then(function (j) { if (!j.ok) throw new Error(loiTN(j)); capNhatDs(j); veTN(); })
           .catch(function (e) { alert('Chưa lưu được: ' + e.message); veTN(); });
       };
     });
     [].forEach.call(box.querySelectorAll('.tnDong .xoaD'), function (b) {
       b.onclick = function () {
-        var t = tnCua(b); if (!confirm('Xóa tài nguyên "' + t.ten + '"?\nFile chuyển vào Thùng rác của Google Drive; học sinh không thấy nữa.')) return;
+        var t = tnCua(b); if (!confirm('Xóa tài nguyên "' + t.ten + '"?\nHọc sinh sẽ không thấy nữa.')) return;
         b.disabled = true; b.textContent = 'Đang xóa…';
-        goiBatKy({ action: 'gv_tn_xoa', ma: MA, matn: t.ma }).then(function (j) { if (!j.ok) throw new Error(j.msg); TNX.drive = j.ds; veTN(); })
+        goiBatKy({ action: 'gv_tn_xoa', ma: MA, matn: t.ma }).then(function (j) { if (!j.ok) throw new Error(loiTN(j)); capNhatDs(j); veTN(); })
           .catch(function (e) { alert('Chưa xóa được: ' + e.message); veTN(); });
       };
     });
+  }
+  function capNhatDs(j) { if (j.tailen) TNX.tailen = j.tailen; if (j.ds) TNX.drive = j.ds; }
+  function loiTN(j) {
+    if (j.loi === 'token') return 'Chưa có mã GitHub. Thêm dòng GithubToken vào tab MA của KHODEHOA (xem hướng dẫn trong khung tải lên).';
+    if (/khong hop le/i.test(j.msg || '')) return 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới.';
+    return j.msg || 'lỗi không rõ';
   }
   // Mo tai nguyen luu tren Drive trong tab moi (giao vien xem thu)
   function xemTNDrive(t) {
@@ -2814,7 +2826,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var baiCo = []; dsTN().forEach(function (t) { if (String(t.khoi) === String(f.khoi) && t.bai && baiCo.indexOf(t.bai) < 0) baiCo.push(t.bai); });
     var anhHien = f.anh !== undefined ? f.anh : (f.cu ? f.cu.anh : '');
     box.innerHTML = '<div class="card tnF"><h2>' + (f.cu ? '✎ Sửa tài nguyên' : '📥 Tải tài nguyên lên') + '</h2>' +
-      '<p class="sub">File mô phỏng, thí nghiệm ảo dạng <b>.html</b> (một tệp). File được lưu trong Google Drive của thầy/cô (thư mục TAI NGUYEN HOC TAP); học sinh mở trong <b>Tài khoản học sinh → Tài nguyên</b> theo khối lớp.</p>' +
+      '<p class="sub">File mô phỏng, thí nghiệm ảo dạng <b>.html</b> (một tệp). File được đưa lên GitHub, cùng chỗ với các mô phỏng hiện có; học sinh mở trong <b>Tài khoản học sinh → Tài nguyên</b> theo khối lớp. GitHub cập nhật trang sau khoảng 1–2 phút.</p>' +
+      '<details class="goiY" style="margin-top:6px"><summary><b>Lần đầu: tạo mã GitHub</b></summary><ol style="margin:6px 0 0;padding-left:20px;line-height:1.55">' +
+      '<li>Đăng nhập github.com → ảnh đại diện → <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>' +
+      '<li>Đặt tên (vd “Khám phá Hóa học”), Expiration chọn 1 năm; Repository access → <b>Only select repositories</b> → chọn <b>LAM-BAI-KIEM-TRA</b>.</li>' +
+      '<li>Permissions → Repository permissions → <b>Contents: Read and write</b> → <b>Generate token</b> → sao chép mã (bắt đầu bằng github_pat_).</li>' +
+      '<li>Mở KHODEHOA → tab <b>MA</b> → thêm dòng: cột A <b>GithubToken</b>, cột B dán mã. Không gửi mã này cho ai.</li></ol></details>' +
       '<div class="nhan">File HTML' + (f.cu ? ' (để trống nếu giữ file cũ)' : '') + '</div>' +
       '<div class="chonTep"><label><input type="file" id="tfTep" accept=".html,.htm,text/html">📂 Chọn file .html</label><span class="goiY">' + esc(f.tenTep || (f.cu ? 'Đang dùng file cũ' : 'Chưa chọn')) + '</span>' +
       (f.html ? '<button class="btn2 nho" type="button" id="tfThu">▶ Xem thử</button>' : '') + '</div><div id="tfCanh"></div>' +
@@ -2866,10 +2883,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (f.anh !== undefined) tn.anh = f.anh;
       b.disabled = true; b.textContent = 'Đang tải lên…'; $('tfMsg').textContent = '';
       goiBatKy({ action: 'gv_tn_nap', ma: MA, tn: tn }).then(function (j) {
-        if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới.' : j.msg);
-        TNX.drive = j.ds; TNX.khoi = String(f.khoi); TNX.form = null; veFormTN(); veTN();
+        if (!j.ok) throw new Error(loiTN(j));
+        capNhatDs(j); TNX.khoi = String(f.khoi); TNX.form = null; veFormTN(); veTN();
         var dong = document.querySelector('.tnDong[data-ma="' + j.ma + '"]');
-        if (dong) { dong.scrollIntoView({ behavior: 'smooth', block: 'center' }); dong.style.background = '#e8f5ec'; }
+        if (dong) {
+          dong.scrollIntoView({ behavior: 'smooth', block: 'center' }); dong.style.background = '#e8f5ec';
+          var ghi = document.createElement('div'); ghi.className = 'sub'; ghi.style.cssText = 'flex-basis:100%;color:var(--ok);font-weight:600';
+          ghi.textContent = '✓ Đã đưa lên GitHub. Khoảng 1–2 phút nữa học sinh mở được (ảnh bìa và nút Xem cũng hiện sau khi GitHub cập nhật).'; dong.appendChild(ghi);
+        }
       }).catch(function (e) { b.disabled = false; b.textContent = f.cu ? 'Lưu thay đổi' : '📥 Tải lên'; $('tfMsg').textContent = 'Chưa tải lên được: ' + e.message; });
     };
   }
