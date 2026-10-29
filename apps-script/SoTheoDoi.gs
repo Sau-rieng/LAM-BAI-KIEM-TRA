@@ -84,6 +84,7 @@ function doPost(e) {
       case 'gv_trochoi':
       case 'gv_tcdat':
       case 'gv_tckq':
+      case 'gv_tcvach':
       case 'gv_ma':
       case 'gv_madat':
       case 'gv_tainguyen':
@@ -106,6 +107,7 @@ function doPost(e) {
         if (d.action === 'gv_trochoi') return json(gvTroChoi());
         if (d.action === 'gv_tcdat') return json(gvTcDat(d));
         if (d.action === 'gv_tckq') return json(gvTcKetQua(d));
+        if (d.action === 'gv_tcvach') return json(gvTcVach(d));
         if (d.action === 'gv_ma') return json(gvMa());
         if (d.action === 'gv_madat') return json(gvMaDat(d));
         if (d.action === 'gv_tainguyen') return json(gvTaiNguyen());
@@ -880,7 +882,31 @@ function tcVao(d) {
   if (!t.mo) return {ok: false, loi: 'dong', msg: 'Trò chơi đang đóng. Em chờ giáo viên mở nhé.'};
   if (!hopLop(t)) return {ok: false, loi: 'lop', msg: 'Trò chơi này chưa mở cho lớp ' + lopNay() + '.'};
   if (String(d.ma || '').trim() !== docMa().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
+  if (t.tt === 'CHO' && !t.xp) ghiVach(t.matro, d);
   return {ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now()};
+}
+// Danh sach may dang dung o vach xuat phat (cache cua so lop nay, moi may gui ten nhom/hoc sinh khi hoi trang thai)
+const VACH_HAN = 15000;   // may khong hoi trong 15 giay thi coi nhu da roi vach
+function ghiVach(matro, d) {
+  const may = String(d.may || '').trim().slice(0, 40);
+  if (!may) return;
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(2000)) return;
+  try {
+    const cache = CacheService.getScriptCache(), k = 'vach_' + matro, bay = Date.now();
+    let ds = {};
+    try { ds = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
+    Object.keys(ds).forEach(function (m) { if (bay - ds[m].t > VACH_HAN) delete ds[m]; });
+    ds[may] = {ten: String(d.ten || '').trim().slice(0, 60) || 'Không tên', lop: String(d.lop || '').trim().slice(0, 12), t: bay};
+    cache.put(k, JSON.stringify(ds), 3600);
+  } finally { lock.releaseLock(); }
+}
+function gvTcVach(d) {
+  const ma = String(d.matro || '').trim(), bay = Date.now();
+  let ds = {};
+  try { ds = JSON.parse(CacheService.getScriptCache().get('vach_' + ma) || '{}'); } catch (e) {}
+  return {ok: true, lop: lopNay(), ds: Object.keys(ds).map(function (m) { return ds[m]; })
+    .filter(function (x) { return bay - x.t <= VACH_HAN; }).map(function (x) { return {ten: x.ten, lop: x.lop}; })};
 }
 // May o vach xuat phat hoi trang thai (cache 2 giay de do tai khi ca lop cung hoi)
 function tcTrangThai(d) {
@@ -894,6 +920,7 @@ function tcTrangThai(d) {
     r = t ? {ok: true, tt: t.tt, xp: t.xp, phut: t.phut} : {ok: true, tt: 'DONG', xp: 0, phut: 5};
     try { cache.put('tctt_' + ma, JSON.stringify(r), 2); } catch (e) {}
   }
+  if (r.tt === 'CHO' && !r.xp) ghiVach(ma, d);
   r.bayGio = Date.now();
   return r;
 }
@@ -912,6 +939,7 @@ function gvTcDat(d) {
     const g = d.giatri === true ? 'MO' : ['MO', 'CHO', 'DONG'].indexOf(String(d.giatri)) >= 0 ? String(d.giatri) : 'DONG';
     sh.getRange(t.dong, 6).setValue(g);
     sh.getRange(t.dong, 9).setValue('');            // doi trang thai = bat dau luot moi, xoa gio xuat phat cu
+    try { CacheService.getScriptCache().remove('vach_' + t.matro); } catch (e) {}
   } else if (d.truong === 'xuatphat') {
     if (t.tt !== 'CHO') return {ok: false, msg: 'Chuyen tro sang Cho xuat phat truoc'};
     if (t.xp) return {ok: false, msg: 'Cuoc dua dang dien ra'};

@@ -365,6 +365,12 @@ body.rong main{max-width:1200px}
 .xpNut{background:#a06b00;color:#fff;font-size:18px;font-weight:800;padding:12px 22px;border-radius:12px;border:0;letter-spacing:.04em}
 .xpNut.phu{background:#fff;color:#a06b00;border:2px solid #a06b00;font-size:15px;padding:9px 14px}
 .xpNut:disabled{opacity:.6}
+.vach{flex:1 1 100%;display:grid;gap:6px}
+.vach .so{font-size:15px;font-weight:700;color:var(--ink)}
+.vach .ds{display:flex;flex-wrap:wrap;gap:6px}
+.vach .ds span{background:#fff;border:1.5px solid #e2c27a;border-radius:999px;padding:3px 10px;font-size:14px;font-weight:600;color:var(--ink)}
+.vach .ds span small{color:var(--muted);font-weight:500;margin-left:4px}
+.vach .cu{font-size:13.5px;color:var(--bad)}
 .troNut .btn2,.troNut a.btn2{flex:1 1 auto;padding:8px 12px;font-size:14px;text-align:center;text-decoration:none;color:var(--ink);background:#fff;border-radius:10px;font-weight:600;white-space:nowrap}
 .troNut .btn2.on{border-color:var(--pri);color:var(--pri);background:#eef4fd}
 .chinhKhung{margin-top:12px;padding:12px 14px;border:2px solid var(--pri);border-radius:12px;background:#f7faff}
@@ -2066,7 +2072,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var TRO = null, TRO_LOI = '', TRO_KHOI = 'tat', TRO_CHINH = null, COMA = { tc: true, mk: true };
   // Tro dua xe F1 co che do Cho xuat phat: hoc sinh dung o vach, giao vien bam Xuat phat de ca lop chay cung luc
   var XP_TRO = ['POLYMER-F1', 'PIN-F1-H12-NHOM', 'DUAXEF1-HOA10', 'DUAXEF1-HOA10-NHOM', 'DUAXEF1-POLYMER-H12', 'DUAXEF1-POLYMER-H12-NHOM'];
-  var LECH_TC = 0, xpHen = 0;   // LECH_TC: gio may chu - gio may nay
+  var LECH_TC = 0, xpHen = 0, vachHen = 0;   // LECH_TC: gio may chu - gio may nay
   var GOC_TRO = 'https://sau-rieng.github.io/TRO--CHOI-IPAD/';
   var TK_CU = { 'DUAXEF1-HOA10': 'THONGKE-DUAXEF1-CANHAN.html', 'DUAXEF1-HOA10-NHOM': 'THONGKE-DUAXEF1.html', 'CHIMDUATHU-HOA10-NHOM': 'THONGKE-CHIMDUATHU.html',
     'DUAXEF1-POLYMER-H12': 'THONGKE-DUAXEF1-POLYMER-CANHAN.html', 'DUAXEF1-POLYMER-H12-NHOM': 'THONGKE-DUAXEF1-POLYMER.html', 'POLYMER-F1': 'THONGKE-POLYMER.html', 'RUONGLUA-CHUKI-NHOM': 'THONGKE-RUONGLUA.html' };
@@ -2106,6 +2112,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('soTro').textContent = TRO.length + ' trò · ' + mo + ' đang mở';
     $('troMa').innerHTML = !COMA.tc || !COMA.mk
       ? '<div class="card canhCard"><b>Trò chơi chưa có mã riêng.</b> Hiện học sinh vào chơi bằng ' + (!COMA.tc ? '<b>Mã làm bài</b> của bài kiểm tra' : '') + (!COMA.tc && !COMA.mk ? ' và mở khóa bằng ' : !COMA.mk ? 'mở khóa bằng ' : '') + (!COMA.mk ? '<b>Mã mở khóa</b> của bài kiểm tra' : '') + '. <button class="btn2 nhoBtn" id="troDatMa">Đặt mã trò chơi ▸</button></div>' : '';
+    if (TRO.some(function (t) { return XP_TRO.indexOf(t.matro) >= 0 && !t.tt; }))
+      $('troMa').innerHTML += '<div class="card canhCard"><b>Sổ theo dõi chưa cập nhật bản có vạch xuất phát.</b><br>Nút “Mở – chờ ở vạch” chỉ chạy sau khi dán SoTheoDoi.gs mới vào sổ của các lớp (và DEMO), rồi Triển khai → Quản lý các bản triển khai → ✎ → Phiên bản mới → Triển khai.</div>';
     if ($('troDatMa')) $('troDatMa').onclick = function () { diDen('caidat'); };
     var cacKhoi = [];
     TRO.forEach(function (t) { if (cacKhoi.indexOf(t.khoi) < 0) cacKhoi.push(t.khoi); });
@@ -2129,16 +2137,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function theTro(t) {
     var el = document.createElement('div'); el.className = 'card tro' + (t.mo ? '' : ' tat');
-    var coXP = XP_TRO.indexOf(t.matro) >= 0, tt = t.tt || (t.mo ? 'MO' : 'DONG');
+    var coXP = XP_TRO.indexOf(t.matro) >= 0, tt = t.tt || (t.mo ? 'MO' : 'DONG'), soCu = !t.tt;
     var dk = coXP
-      ? '<div class="tt3" role="group" aria-label="Trạng thái">' + [['DONG', 'Đóng', ''], ['MO', 'Mở tự do', 'mo'], ['CHO', '🏁 Chờ xuất phát', 'cho']].map(function (x) {
-          return '<button type="button" data-g="' + x[0] + '" class="' + x[2] + (tt === x[0] ? ' on' : '') + '" aria-pressed="' + (tt === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>'
+      ? '<div class="tt3" role="group" aria-label="Trạng thái">' + [['DONG', 'Đóng', ''], ['CHO', '🏁 Mở – chờ ở vạch', 'cho'], ['MO', 'Mở tự do', 'mo']].map(function (x) {
+          return '<button type="button" data-g="' + x[0] + '" class="' + x[2] + (tt === x[0] ? ' on' : '') + '" aria-pressed="' + (tt === x[0]) + '"' + (soCu && x[0] === 'CHO' ? ' disabled title="Sổ theo dõi chưa cập nhật"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>'
       : '<button class="cong' + (t.mo ? ' bat' : '') + '" role="switch" aria-checked="' + t.mo + '"><i></i><span>' + (t.mo ? 'Đang mở' : 'Đang đóng') + '</span></button>';
     el.innerHTML = '<div class="troDau"><div class="troTen"><h2>' + esc(t.ten) + '</h2><div class="ma">' + (t.kieu === 'NHOM' ? 'Nhóm' : 'Cá nhân') + ' · <b>' + t.phut + ' phút</b> · ' + esc(tenLopTro(t)) + '</div></div>' +
       dk + '</div>' +
       (coXP && tt === 'CHO' ? (t.xp
         ? '<div class="xpKhung"><p><b class="dem" data-xp="' + t.xp + '" data-ph="' + t.phut + '">…</b><br>Nhóm nào đăng nhập lúc này vẫn vào đua, kết thúc cùng giờ với cả lớp.</p><button class="xpNut phu xpMoi" type="button">Lượt đua mới</button></div>'
-        : '<div class="xpKhung"><p>Học sinh đăng nhập xong sẽ dừng ở <b>vạch xuất phát</b>, câu hỏi đã tải sẵn trong máy. Khi các nhóm đã sẵn sàng, bấm Xuất phát: mọi máy đếm ngược và chạy cùng lúc.</p><button class="xpNut xpDi" type="button">🏁 XUẤT PHÁT</button></div>') : '') +
+        : '<div class="xpKhung"><p>Học sinh đăng nhập xong sẽ dừng ở <b>vạch xuất phát</b>. Khi thấy đủ các nhóm bên dưới, bấm Xuất phát: mọi máy sáng 5 đèn đỏ rồi chạy cùng lúc.</p><button class="xpNut xpDi" type="button">🏁 XUẤT PHÁT</button>' +
+          '<div class="vach" data-matro="' + esc(t.matro) + '"><div class="so">Đang ở vạch: …</div><div class="ds"></div></div></div>') : '') +
       '<div class="troNut"><a class="btn2" href="' + GOC_TRO + esc(t.file) + (window.LAM_DEMO ? '?demo' : '') + '" target="_blank" rel="noopener">▶ Mở trò</a>' +
       '<button class="btn2 qr">▦ Mã QR</button><button class="btn2 kq">📊 Kết quả</button><button class="btn2 ch' + (TRO_CHINH === t.matro ? ' on' : '') + '">⚙ Thời gian, lớp</button></div>';
     if (el.querySelector('.cong')) el.querySelector('.cong').onclick = function () {
@@ -2161,11 +2170,38 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       datTro(t, 'tt', 'CHO', el).catch(function () { b.disabled = false; });
     };
     if (el.querySelector('.dem')) demXP();
+    if (el.querySelector('.vach')) setTimeout(function () { xemVach(t); }, 0);
     el.querySelector('.qr').onclick = function () { moQRTro(t); };
     el.querySelector('.kq').onclick = function () { moKQ(t.matro); };
     el.querySelector('.ch').onclick = function () { TRO_CHINH = TRO_CHINH === t.matro ? null : t.matro; veTro(); };
     if (TRO_CHINH === t.matro) el.appendChild(khungChinhTro(t));
     return el;
+  }
+  // Ai dang o vach xuat phat: hoi so cua tung lop duoc choi (moi so giu danh sach may cua lop minh), 4 giay mot lan
+  function xemVach(t) {
+    clearTimeout(vachHen);
+    var box = document.querySelector('#dsTro .vach[data-matro="' + t.matro + '"]');
+    if (!box || $('scrTro').classList.contains('hidden')) return;
+    var dsLop = lopTro(t);
+    Promise.all(dsLop.map(function (l) {
+      return goi(l.url, { action: 'gv_tcvach', ma: MA, matro: t.matro }).then(function (j) {
+        if (j && j.ok) return { lop: l.ten, ds: j.ds || [] };
+        return { lop: l.ten, cu: true };
+      }, function () { return { lop: l.ten, loi: true }; });
+    })).then(function (kq) {
+      box = document.querySelector('#dsTro .vach[data-matro="' + t.matro + '"]');
+      if (!box) return;
+      var tat = [], cu = [];
+      kq.forEach(function (k) {
+        if (k.cu) cu.push(k.lop);
+        (k.ds || []).forEach(function (x) { tat.push({ ten: x.ten, lop: x.lop || k.lop }); });
+      });
+      tat.sort(function (a, b) { return (a.lop + a.ten).localeCompare(b.lop + b.ten, 'vi', { numeric: true }); });
+      box.querySelector('.so').textContent = 'Đang ở vạch: ' + tat.length + (t.kieu === 'NHOM' ? ' nhóm' : ' học sinh') + (tat.length ? '' : ' (chưa có ai)');
+      box.querySelector('.ds').innerHTML = tat.map(function (x) { return '<span>' + esc(x.ten) + (dsLop.length > 1 ? '<small>' + esc(x.lop) + '</small>' : '') + '</span>'; }).join('') +
+        (cu.length ? '<div class="cu">Sổ lớp ' + esc(cu.join(', ')) + ' chưa cập nhật bản mới nên chưa báo được.</div>' : '');
+      vachHen = setTimeout(function () { xemVach(t); }, 4000);
+    });
   }
   // Dong ho tren the tro dang dua: dem nguoc den xanh, roi thoi gian con lai; het gio thi tai lai
   function demXP() {

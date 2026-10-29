@@ -52,7 +52,7 @@ Phần AI (hàm `goiAI`, menu 🤖 Phân tích AI, khóa GeminiKey trong tab MA)
 
 - 11 trò nối hệ thống chung qua `noi-so-theo-doi.js`: SHEET_URL được thay bằng địa chỉ ảo, đăng nhập/mở khóa kiểm tra ở sổ lớp (tab TRO CHOI + mã trò chơi), kết quả vào HOAT DONG / TRO CHOI NHOM. Sổ chưa cập nhật thì tự dùng Sheet riêng cũ.
 - Trò mới: thêm vào `TC_TRO` (noi-so-theo-doi.js) và `TC_MAC_DINH` (SoTheoDoi.gs).
-- **Chờ xuất phát** (6 trò đua xe F1, danh sách `XP_TRO` trong GIAO-VIEN.html): tab TRO CHOI có TrangThai MO/CHO/DONG và cột XuatPhatLuc. CHO: học sinh đăng nhập xong dừng ở vạch (`xuat-phat.js` trong TRO--CHOI-IPAD), hỏi `tc_tt` 2,5–4 giây/lần (cache 2 giây). Giáo viên bấm Xuất phát → XuatPhatLuc = lúc bấm + 12 giây; mọi máy tính lệch đồng hồ theo `bayGio`, đếm 5 đèn đỏ, chạy cùng lúc, kết thúc ở XuatPhatLuc + ThoiGian_phut. Vào muộn: vẫn vào, cùng giờ kết thúc. Hết giờ hoặc bấm Lượt đua mới: chờ lệnh mới. MO: chơi tự do như cũ.
+- **Chờ xuất phát** (6 trò đua xe F1, danh sách `XP_TRO` trong GIAO-VIEN.html): tab TRO CHOI có TrangThai MO/CHO/DONG và cột XuatPhatLuc. CHO: học sinh đăng nhập xong dừng ở vạch (`xuat-phat.js` trong TRO--CHOI-IPAD), hỏi `tc_tt` 2,5–4 giây/lần (cache 2 giây). Trang giáo viên hiện danh sách nhóm/học sinh đang ở vạch (`gv_tcvach`, mỗi sổ lớp giữ danh sách máy của lớp mình trong cache, máy im 15 giây thì bỏ). Giáo viên bấm Xuất phát → XuatPhatLuc = lúc bấm + 12 giây; mọi máy tính lệch đồng hồ theo `bayGio`, đếm 5 đèn đỏ, chạy cùng lúc, kết thúc ở XuatPhatLuc + ThoiGian_phut. Vào muộn: vẫn vào, cùng giờ kết thúc. Hết giờ hoặc bấm Lượt đua mới: chờ lệnh mới. MO: chơi tự do như cũ.
 
 ### Bản dùng thử (DEMO) – mã công khai cho Ban giám khảo
 
