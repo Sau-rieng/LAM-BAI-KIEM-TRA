@@ -438,7 +438,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('btnLai').onclick = function () { man('scrDS'); };
 
   // ---------- Trang tai khoan: 2 thu muc ----------
-  function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file && !t.an; }); }
+  function dsTN() {
+    var drive = (duLieu && duLieu.tn || []).filter(function (t) { return t && t.ma && !t.an; }).map(function (t) { t.nguon = 'drive'; return t; });
+    return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file && !t.an; }).concat(drive);
+  }
   function khoiHS() { var m = /^(\d+)/.exec(lopChon ? lopChon.ten : ''); return m ? m[1] : ''; }
   function veHome() {
     hinhMo(duLieu.hoten + ' · ' + duLieu.mahs);
@@ -527,7 +530,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var luoi = document.createElement('div'); luoi.className = 'luoiTN'; box.appendChild(luoi);
       nhom[k].forEach(function (t) {
         var b = document.createElement('button'); b.className = 'theTN';
-        var bia = t.anh ? '<img loading="lazy" alt="" src="tai-nguyen/' + encodeURI(t.anh) + '">'
+        var bia = t.anh ? '<img loading="lazy" alt="" src="' + (t.nguon === 'drive' ? t.anh : 'tai-nguyen/' + encodeURI(t.anh)) + '">'
           : '<div class="bia"><i>' + (t.loai === 'Thí nghiệm' ? '⚗' : '3D') + '</i><small>' + esc(t.ten) + '</small></div>';
         b.innerHTML = '<span class="anh">' + bia + (t.loai ? '<span class="loai">' + esc(t.loai) + '</span>' : '') + '<span class="play" aria-hidden="true">▶</span></span>' +
           '<span class="chu"><b>' + esc(t.ten) + '</b>' + (t.mota ? '<span>' + esc(t.mota) + '</span>' : '') + '</span>';
@@ -550,10 +553,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     [].slice.call(khung.querySelectorAll('iframe')).forEach(function (f) { f.remove(); });
     $('xtTai').innerHTML = '<div class="vong"></div><span>Đang tải tài nguyên…</span>'; $('xtTai').hidden = false;
     $('xemTN').hidden = false; document.body.style.overflow = 'hidden';
-    ghiXemTN(t);
     var goc = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '') + 'tai-nguyen/';
-    fetch('tai-nguyen/' + encodeURI(t.file) + '?t=' + Date.now(), { cache: 'no-store' })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    // Tai nguyen giao vien tai len (Google Drive): lay noi dung qua so lop, may chu tu ghi luot xem
+    var lay = t.nguon === 'drive'
+      ? fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'tn_lay', mahs: duLieu.mahs, maxem: duLieu.maxem, matn: t.ma }) })
+          .then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.msg || 'loi'); return j.html; })
+      : (ghiXemTN(t), fetch('tai-nguyen/' + encodeURI(t.file) + '?t=' + Date.now(), { cache: 'no-store' })
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }));
+    lay
       .then(function (html) {
         if (luot !== luotMo || $('xemTN').hidden) return;
         var base = '<base href="' + goc + '">';

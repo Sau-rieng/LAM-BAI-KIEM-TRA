@@ -69,6 +69,7 @@ function doPost(e) {
       case 'tn_xem': return json(hsXemTin(d));
       case 'tc_vao': return json(tcVao(d));
       case 'tc_mokhoa': return json(tcMoKhoa(d));
+      case 'tn_lay': return json(tnLay(d));
       case 'tc_tt': return json(tcTrangThai(d));
       case 'tc_tiendo': return json(tcTienDo(d));
       case 'gv_dot':
@@ -95,6 +96,10 @@ function doPost(e) {
       case 'gv_tin_gui':
       case 'gv_tin_goiy':
       case 'gv_napde':
+      case 'gv_tn_nap':
+      case 'gv_tn_dat':
+      case 'gv_tn_xoa':
+      case 'gv_tn_lay':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -119,6 +124,10 @@ function doPost(e) {
         if (d.action === 'gv_tin_gui') return json(gvTinGui(d));
         if (d.action === 'gv_tin_goiy') return json(gvTinGoiY(d));
         if (d.action === 'gv_napde') return json(gvNapDe(d));
+        if (d.action === 'gv_tn_nap') return json(gvTnNap(d));
+        if (d.action === 'gv_tn_dat') return json(gvTnDat(d));
+        if (d.action === 'gv_tn_xoa') return json(gvTnXoa(d));
+        if (d.action === 'gv_tn_lay') return json(gvTnLay(d));
         return json(gvTheoDoi(d));
     }
     return json({ok: false, msg: 'Yeu cau khong hop le'});
@@ -232,7 +241,7 @@ function xemLai(d) {
       })
     });
   });
-  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV')};
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true)};
 }
 
 // HS mo xem 1 bai o trang xem lai -> ghi tab XEM LAI de GV biet em nao da xem
@@ -255,7 +264,100 @@ function gvTaiNguyen() {
   });
   const ds = ss.getSheetByName(TAB_DS);
   const siSo = ds && ds.getLastRow() > 1 ? ds.getRange(2, 1, ds.getLastRow() - 1, 1).getValues().filter(function (r) { return String(r[0]).trim(); }).length : 0;
-  return {ok: true, lop: lopNay(), siSo: siSo, xem: xem};
+  return {ok: true, lop: lopNay(), siSo: siSo, xem: xem, ds: dsTNDrive(false)};
+}
+// ---------------------------------------------------------------------
+// Tai nguyen giao vien tu tai len (HTML luu trong Drive, thu muc TAI NGUYEN HOC TAP)
+// Tab TAI NGUYEN trong kho de: Ma | Ten | Khoi | Bai | Loai | KienThuc | MoTa | FileId | Anh (anh bia nho, data URI) | An (CO) | CapNhat
+// ---------------------------------------------------------------------
+const TAB_TNG = 'TAI NGUYEN';
+const HEAD_TNG = ['Ma', 'Ten', 'Khoi', 'Bai', 'Loai', 'KienThuc', 'MoTa', 'FileId', 'Anh', 'An', 'CapNhat'];
+const THU_MUC_TN = 'TAI NGUYEN HOC TAP';
+const TN_TOI_DA = 15 * 1024 * 1024;
+function tabTNG() {
+  const ss = kho();
+  let sh = ss.getSheetByName(TAB_TNG);
+  if (!sh) { sh = ss.insertSheet(TAB_TNG); sh.getRange(1, 1, 1, HEAD_TNG.length).setValues([HEAD_TNG]).setFontWeight('bold'); sh.setFrozenRows(1); }
+  return sh;
+}
+function docTNG() {
+  const sh = kho().getSheetByName(TAB_TNG);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TNG.length).getValues().map(function (r, i) {
+    return {dong: i + 2, ma: String(r[0]).trim(), ten: String(r[1]).trim(), khoi: String(r[2]).trim(), bai: String(r[3]).trim(), loai: String(r[4]).trim(),
+      kienthuc: String(r[5]).trim(), mota: String(r[6]).trim(), fileId: String(r[7]).trim(), anh: String(r[8] || ''), an: khongDau(r[9]) === 'CO'};
+  }).filter(function (t) { return t.ma && t.fileId; });
+}
+function dsTNDrive(boAn) {
+  try {
+    return docTNG().filter(function (t) { return !boAn || !t.an; }).map(function (t) {
+      return {ma: t.ma, ten: t.ten, khoi: t.khoi, bai: t.bai, loai: t.loai, kienthuc: t.kienthuc, mota: t.mota, anh: t.anh, an: t.an, nguon: 'drive'};
+    });
+  } catch (e) { return []; }
+}
+function chuTN(x, n) { return String(x === undefined || x === null ? '' : x).trim().slice(0, n || 200); }
+function gvTnNap(d) {
+  const t = d.tn || {};
+  const ten = chuTN(t.ten, 140), khoi = chuTN(t.khoi, 4);
+  if (!ten) return {ok: false, msg: 'Thieu ten tai nguyen'};
+  if (!/^\d{1,2}$/.test(khoi)) return {ok: false, msg: 'Khoi khong hop le'};
+  const html = typeof t.html === 'string' ? t.html : '';
+  const cu = t.ma ? docTNG().filter(function (x) { return x.ma === String(t.ma).trim(); })[0] : null;
+  if (t.ma && !cu) return {ok: false, msg: 'Khong tim thay tai nguyen ' + t.ma};
+  if (!cu && !html) return {ok: false, msg: 'Chua co noi dung HTML'};
+  if (html.length > TN_TOI_DA) return {ok: false, msg: 'File qua lon (toi da 15 MB)'};
+  const anh = /^data:image\/(jpeg|png|webp);base64,/.test(String(t.anh || '')) && String(t.anh).length < 48000 ? String(t.anh) : (cu && t.anh === undefined ? cu.anh : '');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const sh = tabTNG();
+    const ma = cu ? cu.ma : 'D' + Date.now().toString(36).toUpperCase();
+    let fileId = cu ? cu.fileId : '';
+    if (html) {
+      const tm = layThuMuc(DriveApp.getRootFolder(), THU_MUC_TN);
+      const f = tm.createFile(Utilities.newBlob(html, 'text/html', ma + ' - ' + ten.replace(/[\\/:*?"<>|]/g, ' ') + '.html'));
+      if (cu) { try { DriveApp.getFileById(cu.fileId).setTrashed(true); } catch (e) {} }
+      fileId = f.getId();
+    }
+    const dong = [ma, ten, khoi, chuTN(t.bai, 140), chuTN(t.loai, 40), chuTN(t.kienthuc, 300), chuTN(t.mota, 300), fileId, anh, cu && cu.an ? 'CO' : '', new Date()];
+    const so = cu ? cu.dong : sh.getLastRow() + 1;
+    sh.getRange(so, 1, 1, 10).setNumberFormat('@');
+    sh.getRange(so, 1, 1, HEAD_TNG.length).setValues([dong]);
+    SpreadsheetApp.flush();
+    return {ok: true, ma: ma, ds: dsTNDrive(false)};
+  } finally {
+    lock.releaseLock();
+  }
+}
+function gvTnDat(d) {
+  const t = docTNG().filter(function (x) { return x.ma === String(d.matn || '').trim(); })[0];
+  if (!t) return {ok: false, msg: 'Khong tim thay tai nguyen'};
+  tabTNG().getRange(t.dong, 10).setValue(d.an ? 'CO' : '');
+  SpreadsheetApp.flush();
+  return {ok: true, ds: dsTNDrive(false)};
+}
+function gvTnXoa(d) {
+  const t = docTNG().filter(function (x) { return x.ma === String(d.matn || '').trim(); })[0];
+  if (!t) return {ok: false, msg: 'Khong tim thay tai nguyen'};
+  try { DriveApp.getFileById(t.fileId).setTrashed(true); } catch (e) {}
+  tabTNG().deleteRow(t.dong);
+  SpreadsheetApp.flush();
+  return {ok: true, ds: dsTNDrive(false)};
+}
+function layHtmlTN(ma, choAn) {
+  const t = docTNG().filter(function (x) { return x.ma === String(ma || '').trim(); })[0];
+  if (!t || (t.an && !choAn)) return {ok: false, msg: 'Tai nguyen khong co hoac dang an'};
+  return {ok: true, ten: t.ten, html: DriveApp.getFileById(t.fileId).getBlob().getDataAsString('UTF-8')};
+}
+function gvTnLay(d) { return layHtmlTN(d.matn, true); }
+// Hoc sinh mo tai nguyen trong tai khoan: can SBD + ma xem bai; ghi luot xem
+function tnLay(d) {
+  const ma = String(d.mahs || '').trim();
+  const hs = timHS(ma);
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  const r = layHtmlTN(d.matn, false);
+  if (r.ok) ghiDong(TAB_TN, HEAD_TN, [new Date(), String(d.matn).trim().slice(0, 80), ma, hs.ten]);
+  return r;
 }
 function ghiDaXem(d) {
   const ma = String(d.mahs || '').trim();

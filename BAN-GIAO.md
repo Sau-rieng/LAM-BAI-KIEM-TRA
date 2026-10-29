@@ -33,7 +33,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 - `XEM-LAI.html`: **Tài khoản học sinh** (SBD + mã xem bài) với 3 ô: Xem lại bài (mỗi câu có nút 💡 Giải thích nếu có lời giải và 💬 Hỏi thầy/cô câu này) · Tài nguyên (mô phỏng tải tạm vào khung, không lưu) · Hỏi thầy/cô (số đỏ khi có trả lời).
 - `index.html`, `DUNG-THU.html` (trang cho Ban giám khảo, lớp DEMO), `GIAM-KHAO.html` (hướng dẫn Ban giám khảo: giao diện giống trang Dùng thử, 9 bước gồm Tài nguyên 3D và Hỏi thầy/cô; bản in A4 đen trắng 2 trang).
 - `cau-hinh-lop.js`: danh sách lớp + link /exec của từng sổ; `?demo` chuyển sang lớp DEMO.
-- `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ.
+- `tai-nguyen/danh-muc.js` + `tai-nguyen/*.html` + `tai-nguyen/anh/*`: 10 mô phỏng (Hóa 10 Bài 12 ×5; Hóa 12 Bài 6, 15 ×3, 21). Thêm mục mới: đặt file vào `tai-nguyen/`, ảnh bìa 16:10 vào `tai-nguyen/anh/`, thêm 1 dòng vào `danh-muc.js` (ma, ten, khoi, bai, loai, kienthuc, mota, file, anh). Danh mục tải kèm `?v=thời gian` nên không bị bản cũ. **Từ 29/10** giáo viên tự tải tài nguyên lên ở trang giáo viên → Tài nguyên → 📥 Tải tài nguyên lên (HTML lưu Drive thư mục TAI NGUYEN HOC TAP, tab `TAI NGUYEN` trong KHODEHOA; hành động gv_tn_nap, gv_tn_dat, gv_tn_xoa, gv_tn_lay, tn_lay; danh sách gộp với danh-muc.js, nhãn "Drive").
 - `hinh/giao-dien/`: `nen-hoa.svg` (nền nét vẽ), `banner-ptn.svg` (banner phòng thí nghiệm), `bieu-tuong.js` (biểu tượng `window.BT`). Giao diện: nền xanh nhạt, ô/tab xanh nhạt nổi, chữ Be Vietnam Pro, màu ink #172033, hồng #b8235a, xanh #1f5fbf.
 - `doc-excel.js`: đọc .xls/.xlsx (dán điểm vnEdu); `docExcelTatCa` đọc mọi tab .xlsx (Nạp đề). Excel xuất ra do trang tự tạo (không dùng thư viện ngoài).
 
@@ -64,7 +64,7 @@ Thẻ "Dùng thử" trên trang giáo viên mở `GIAO-VIEN.html?demo` (tự đ�
 ## 3. Các Project (kênh) trên Claude
 
 8 Project theo "Cách 1": K1 – RA DE CO HINH ANH (ra đề, trộn đề app QM) · TAI LIEU KHAO BAI · K2-KIEM TRA IPAD (hệ thống + nhận xét K8 + hồ sơ dự thi) · BT VÀ ÔN TAP (K7 phiếu củng cố, HSG) · MO PHONG 3D (K3–K4) · TAI LIEU HOA 9 / 10 / 12.
-Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản mới nhất). Mô phỏng làm ở MO PHONG 3D → tải HTML về → gửi vào phiên có quyền sửa repo và nói "chuyển".
+Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản mới nhất). Mô phỏng làm ở MO PHONG 3D → tải HTML về → giáo viên tự tải lên ở trang giáo viên → Tài nguyên (hoặc gửi vào phiên có quyền sửa repo và nói "chuyển" để đưa vào GitHub).
 
 ## 4. Việc giáo viên còn phải làm
 

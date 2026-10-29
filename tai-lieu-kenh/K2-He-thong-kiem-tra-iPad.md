@@ -15,6 +15,7 @@ Tải file này vào kênh K2 (cùng Quy-uoc-chung.md và Mau-dinh-dang-de.md). 
 
 ## Kho đề KHODEHOA
 
+- Tab `TAI NGUYEN`: Ma | Ten | Khoi | Bai | Loai | KienThuc | MoTa | FileId | Anh | An | CapNhat – tài nguyên giáo viên tự tải lên (HTML trong Drive, thư mục TAI NGUYEN HOC TAP); trang giáo viên → Tài nguyên → 📥 Tải tài nguyên lên / Sửa / Ẩn với HS / Xóa. Học sinh lấy nội dung qua `tn_lay` (SBD + mã xem bài, tự ghi lượt xem).
 - Tab `GIAI THICH`: MaDot | Cau | GiaiThich (lời giải chi tiết; HS bấm 💡 Giải thích khi xem lại bài, chỉ khi đợt bật Cho xem lại). Nạp kèm đề hoặc nạp riêng cho đề cũ bằng 📥 Nạp đề mới.
 - Tab `CAU HINH`: MaDot | TenBai | ThoiGian_phut | TrangThai (DONG/CHO/MO) | ChoXemLai (CO/KHONG) | Lop (vd `10E01` hoặc `12G01, 12G02`, trống = tất cả) | BatDauLuc (tự ghi).
 - Tab `MA`: MaGV, MaMoKhoa, MaLamLai, MaQuanLy, GeminiKey (tên không phân biệt hoa/thường). Không chép các giá trị này ra ngoài.

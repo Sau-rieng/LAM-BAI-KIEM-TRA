@@ -490,6 +490,22 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .tnNut{display:flex;gap:6px;flex:none}
 .tnNut .btn2,.tnNut a.btn2{padding:7px 12px;font-size:14px;text-decoration:none;color:var(--ink);background:#fff;border-radius:10px;font-weight:600}
 .tnNut button:disabled{opacity:.45}
+.tnNguon{display:inline-block;font-size:11.5px;font-weight:700;color:#7a5200;background:#fff4d6;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.tnNut .xoa{color:var(--bad)}
+.tnF{border:2px solid var(--pri);background:#f7faff}
+.tnF h2{margin-bottom:4px}
+.tnF .nhan{font-size:14px;font-weight:700;color:var(--muted);margin:12px 0 6px}
+.tnF input[type=text]{font-size:16px;padding:9px 12px}
+.tnF .hang2{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px;align-items:start}
+@media (max-width:640px){.tnF .hang2{grid-template-columns:1fr}}
+.tnF .bia{aspect-ratio:16/10;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#172033,#2a3a5e 60%,#b8235a 140%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:28px}
+.tnF .bia img{width:100%;height:100%;object-fit:cover;display:block}
+.tnF .goiY{font-size:13.5px;color:var(--muted);margin-top:4px}
+.tnF .canh{margin-top:8px}
+.tnF .chonTep{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tnF .chonTep label{margin:0;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border:2px dashed #9ec2ef;border-radius:12px;background:#fff;color:var(--pri);font-weight:700;cursor:pointer}
+.tnF .chonTep input{position:absolute;width:1px;height:1px;opacity:0}
+
 .tnAi{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}
 .tnAi span{font-size:13.5px;border:1.5px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff}
 .tnAi i{font-style:normal;color:var(--muted);font-size:12px}
@@ -682,8 +698,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 </section>
 
 <section id="scrTN" class="hidden">
-  <div class="top"><div><h1>Tài nguyên học tập</h1><p class="sub" id="soTN"></p></div><div><button class="btn2" id="tnQR">▦ QR tài khoản HS</button> <button class="btn2" id="tnMoi">↻</button></div></div>
+  <div class="top"><div><h1>Tài nguyên học tập</h1><p class="sub" id="soTN"></p></div><div><button class="napNut" id="tnTaiLen">📥 Tải tài nguyên lên</button> <button class="btn2" id="tnQR">▦ QR tài khoản HS</button> <button class="btn2" id="tnMoi">↻</button></div></div>
   <p class="sub" style="margin:0 2px 10px">Học sinh đăng nhập tài khoản (SBD + mã xem bài) → <b>Tài nguyên</b>. Mỗi lần em mở một tài nguyên được tính 1 lượt xem.</p>
+  <div id="tnForm"></div>
   <div class="loc khoi" id="tnKhoi"></div>
   <div class="loc" id="tnLop"></div>
   <div id="dsTN"></div>
@@ -2647,9 +2664,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // =====================================================================
   // TAI NGUYEN HOC TAP (tai-nguyen/danh-muc.js) – luot xem theo lop
   // =====================================================================
-  var TNX = { data: {}, lop: 'tat', mo: null, khoi: null };
+  var TNX = { data: {}, lop: 'tat', mo: null, khoi: null, drive: null, form: null };
   try { TNX.khoi = localStorage.getItem('gv_tnkhoi'); } catch (e) {}
-  function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file; }); }
+  function dsTN() { return (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file; }).concat((TNX.drive || []).map(function (t) { t.nguon = 'drive'; return t; })); }
+  function anhTN(t) { return !t.anh ? '' : t.nguon === 'drive' ? t.anh : 'tai-nguyen/' + encodeURI(t.anh); }
   function moTN() { man('scrTN'); veTN(); taiTN(false); }
   function taiTN(lamMoi) {
     DS.forEach(function (l) {
@@ -2657,6 +2675,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       TNX.data[l.ten] = { dang: true };
       goi(l.url, { action: 'gv_tainguyen', ma: MA }).then(function (j) {
         TNX.data[l.ten] = j.ok ? j : { loi: /hop le/i.test(j.msg || '') ? 'Sổ lớp này chưa cập nhật bản mới' : (j.msg || 'lỗi') };
+        if (j.ok && j.ds && (TNX.drive === null || lamMoi)) TNX.drive = j.ds;
       }).catch(function (e) { TNX.data[l.ten] = { loi: 'Không kết nối được (' + e.message + ')' }; })
         .then(function () { if (!$('scrTN').classList.contains('hidden')) veTN(); });
     });
@@ -2687,7 +2706,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('soTN').textContent = ds.length + ' tài nguyên' + (dang ? ' · đang tải ' + dang + ' lớp…' : '');
     var h = '';
     chon.forEach(function (l) { var j = TNX.data[l.ten]; if (j && j.loi) h += '<div class="card loi">' + esc(l.ten) + ': ' + esc(j.loi) + '</div>'; });
-    if (!ds.length) h += '<div class="card sub">Chưa có tài nguyên nào. Gửi file mô phỏng (HTML) cho Claude và nói "chuyển" để đưa lên đây.</div>';
+    if (!ds.length) h += '<div class="card sub">Chưa có tài nguyên nào. Bấm <b>📥 Tải tài nguyên lên</b> để thêm file mô phỏng (HTML).</div>';
     var khoi = []; ds.forEach(function (t) { if (khoi.indexOf(String(t.khoi)) < 0) khoi.push(String(t.khoi)); });
     khoi.sort(function (a, b) { return Number(a) - Number(b); });
     if (khoi.indexOf(TNX.khoi) < 0) TNX.khoi = khoi[0] || null;
@@ -2704,10 +2723,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       ds.filter(function (t) { return String(t.khoi) === k; }).forEach(function (t) {
         if (t.bai !== baiTr) { baiTr = t.bai; h += '<div class="tnBai">' + esc(t.bai || 'Khác') + '</div>'; }
         var x = theo[t.ma] || { luot: 0, em: {} }, soEm = Object.keys(x.em).length;
-        h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="tai-nguyen/' + encodeURI(t.anh) + '">' : '<span>3D</span>') + '</div>' +
-          '<div class="tnChu"><b>' + esc(t.ten) + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
+        h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="' + anhTN(t) + '">' : '<span>3D</span>') + '</div>' +
+          '<div class="tnChu"><b>' + esc(t.ten) + (t.nguon === 'drive' ? '<span class="tnNguon">Drive</span>' : '') + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
           '<span class="tnSo"><b>' + x.luot + '</b> lượt xem · <b>' + soEm + '</b>' + (siSo ? '/' + siSo : '') + ' em đã xem</span></div>' +
-          '<div class="tnNut"><a class="btn2" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener">▶ Xem</a><button class="btn2 ai"' + (soEm ? '' : ' disabled') + '>' + (TNX.mo === t.ma ? 'Ẩn' : 'Ai đã xem') + '</button></div>';
+          '<div class="tnNut">' + (t.nguon === 'drive' ? '<button class="btn2 xemD">▶ Xem</button>' : '<a class="btn2" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener">▶ Xem</a>') +
+            '<button class="btn2 ai"' + (soEm ? '' : ' disabled') + '>' + (TNX.mo === t.ma ? 'Ẩn' : 'Ai đã xem') + '</button>' +
+            (t.nguon === 'drive' ? '<button class="btn2 suaD">✎ Sửa</button><button class="btn2 anD">' + (t.an ? 'Hiện' : 'Ẩn với HS') + '</button><button class="btn2 xoa xoaD">Xóa</button>' : '') + '</div>';
         if (TNX.mo === t.ma && soEm) {
           var em = Object.keys(x.em).map(function (k) { return x.em[k]; }).sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : a.ten.localeCompare(b.ten, 'vi'); });
           h += '<div class="tnAi">' + em.map(function (e) { return '<span>' + (chon.length > 1 ? '<i>' + esc(e.lop) + '</i> ' : '') + esc(e.ten) + (e.n > 1 ? ' <b>×' + e.n + '</b>' : '') + '</span>'; }).join('') + '</div>';
@@ -2720,7 +2741,139 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     [].forEach.call(box.querySelectorAll('.tnDong .ai'), function (b) {
       b.onclick = function () { var ma = b.closest('.tnDong').getAttribute('data-ma'); TNX.mo = TNX.mo === ma ? null : ma; veTN(); };
     });
+    function tnCua(b) { var ma = b.closest('.tnDong').getAttribute('data-ma'); return (TNX.drive || []).filter(function (t) { return t.ma === ma; })[0]; }
+    [].forEach.call(box.querySelectorAll('.tnDong .xemD'), function (b) { b.onclick = function () { xemTNDrive(tnCua(b)); }; });
+    [].forEach.call(box.querySelectorAll('.tnDong .suaD'), function (b) { b.onclick = function () { moFormTN(tnCua(b)); }; });
+    [].forEach.call(box.querySelectorAll('.tnDong .anD'), function (b) {
+      b.onclick = function () {
+        var t = tnCua(b); b.disabled = true; b.textContent = 'Đang lưu…';
+        goiBatKy({ action: 'gv_tn_dat', ma: MA, matn: t.ma, an: !t.an }).then(function (j) { if (!j.ok) throw new Error(j.msg); TNX.drive = j.ds; veTN(); })
+          .catch(function (e) { alert('Chưa lưu được: ' + e.message); veTN(); });
+      };
+    });
+    [].forEach.call(box.querySelectorAll('.tnDong .xoaD'), function (b) {
+      b.onclick = function () {
+        var t = tnCua(b); if (!confirm('Xóa tài nguyên "' + t.ten + '"?\nFile chuyển vào Thùng rác của Google Drive; học sinh không thấy nữa.')) return;
+        b.disabled = true; b.textContent = 'Đang xóa…';
+        goiBatKy({ action: 'gv_tn_xoa', ma: MA, matn: t.ma }).then(function (j) { if (!j.ok) throw new Error(j.msg); TNX.drive = j.ds; veTN(); })
+          .catch(function (e) { alert('Chưa xóa được: ' + e.message); veTN(); });
+      };
+    });
   }
+  // Mo tai nguyen luu tren Drive trong tab moi (giao vien xem thu)
+  function xemTNDrive(t) {
+    var w = window.open('', '_blank');
+    if (w) w.document.write('<p style="font:16px sans-serif;padding:20px">Đang tải ' + esc(t.ten) + '…</p>');
+    goiBatKy({ action: 'gv_tn_lay', ma: MA, matn: t.ma }).then(function (j) {
+      if (!j.ok) throw new Error(j.msg);
+      if (w) { w.document.open(); w.document.write(j.html); w.document.close(); }
+    }).catch(function (e) { if (w) w.document.body.innerHTML = '<p style="font:16px sans-serif;padding:20px;color:#c5221f">Chưa tải được: ' + esc(e.message) + '</p>'; });
+  }
+
+  // ---------- Tai tai nguyen len (luu Google Drive cua giao vien) ----------
+  var LOAI_TN = ['Mô phỏng', 'Thí nghiệm', 'Cấu trúc', 'Hiện tượng', 'Quy trình', 'Khác'];
+  var KHOI_TN = ['8', '9', '10', '11', '12'];
+  function tenKhoiTN(k) { return Number(k) <= 9 ? 'KHTN ' + k : 'Hóa ' + k; }
+  // Anh bia 16:10 nho gon (< 45 KB) de luu thang trong Google Sheet
+  function nenAnh(tep) {
+    return new Promise(function (ok, loi) {
+      var r = new FileReader();
+      r.onload = function () {
+        var im = new Image();
+        im.onload = function () {
+          var W = 480, H = 300, c = document.createElement('canvas'); c.width = W; c.height = H;
+          var x = c.getContext('2d'), tl = Math.max(W / im.width, H / im.height), w = im.width * tl, h = im.height * tl;
+          x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+          for (var q = 0.8; q >= 0.3; q -= 0.1) { var u = c.toDataURL('image/jpeg', q); if (u.length < 45000) return ok(u); }
+          ok(c.toDataURL('image/jpeg', 0.25));
+        };
+        im.onerror = function () { loi(new Error('Không đọc được ảnh')); };
+        im.src = r.result;
+      };
+      r.onerror = function () { loi(new Error('Không đọc được ảnh')); };
+      r.readAsDataURL(tep);
+    });
+  }
+  function kiemHTML(html) {
+    var canh = [], ngoai = [];
+    if (!/<html|<body|<script|<canvas|<svg|<div/i.test(html)) canh.push('File không giống trang HTML.');
+    html.replace(/<(?:script|img|link|iframe|source|video|audio)\b[^>]*?\s(?:src|href)=["']([^"'#]+)["']/gi, function (_, u) {
+      if (!/^(https?:|data:|blob:|\/\/|mailto:|javascript:)/i.test(u.trim()) && ngoai.indexOf(u) < 0) ngoai.push(u);
+    });
+    if (ngoai.length) canh.push('File dùng tệp kèm bên ngoài (' + ngoai.slice(0, 4).join(', ') + (ngoai.length > 4 ? '…' : '') + ') nên có thể không chạy. Nên dùng file HTML gói gọn trong một tệp (thư viện tải từ đường link https).');
+    return canh;
+  }
+  function moFormTN(cu) {
+    TNX.form = { cu: cu || null, html: null, tenTep: '', anh: undefined, ten: cu ? cu.ten : '', khoi: cu ? String(cu.khoi) : (TNX.khoi || ''),
+      bai: cu ? cu.bai : '', loai: cu ? (cu.loai || 'Mô phỏng') : 'Mô phỏng', mota: cu ? cu.mota : '', kienthuc: cu ? cu.kienthuc : '' };
+    veFormTN(); $('tnForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function veFormTN() {
+    var f = TNX.form, box = $('tnForm');
+    if (!f) { box.innerHTML = ''; return; }
+    var baiCo = []; dsTN().forEach(function (t) { if (String(t.khoi) === String(f.khoi) && t.bai && baiCo.indexOf(t.bai) < 0) baiCo.push(t.bai); });
+    var anhHien = f.anh !== undefined ? f.anh : (f.cu ? f.cu.anh : '');
+    box.innerHTML = '<div class="card tnF"><h2>' + (f.cu ? '✎ Sửa tài nguyên' : '📥 Tải tài nguyên lên') + '</h2>' +
+      '<p class="sub">File mô phỏng, thí nghiệm ảo dạng <b>.html</b> (một tệp). File được lưu trong Google Drive của thầy/cô (thư mục TAI NGUYEN HOC TAP); học sinh mở trong <b>Tài khoản học sinh → Tài nguyên</b> theo khối lớp.</p>' +
+      '<div class="nhan">File HTML' + (f.cu ? ' (để trống nếu giữ file cũ)' : '') + '</div>' +
+      '<div class="chonTep"><label><input type="file" id="tfTep" accept=".html,.htm,text/html">📂 Chọn file .html</label><span class="goiY">' + esc(f.tenTep || (f.cu ? 'Đang dùng file cũ' : 'Chưa chọn')) + '</span>' +
+      (f.html ? '<button class="btn2 nho" type="button" id="tfThu">▶ Xem thử</button>' : '') + '</div><div id="tfCanh"></div>' +
+      '<div class="hang2"><div>' +
+      '<div class="nhan">Tên tài nguyên</div><input type="text" id="tfTenTN" maxlength="140" placeholder="vd: Pin Daniell Zn – Cu hoạt động thế nào?">' +
+      '<div class="nhan">Khối lớp</div><div class="loc" id="tfKhoi"></div>' +
+      '<div class="nhan">Bài</div><input type="text" id="tfBai" maxlength="140" list="tfBaiDs" placeholder="vd: Bài 15: Thế điện cực và nguồn điện hóa học"><datalist id="tfBaiDs">' +
+      baiCo.map(function (b) { return '<option value="' + esc(b) + '">'; }).join('') + '</datalist>' +
+      '<div class="nhan">Loại</div><div class="loc" id="tfLoai"></div>' +
+      '<div class="nhan">Mô tả ngắn (không bắt buộc)</div><input type="text" id="tfMoTa" maxlength="300" placeholder="Một câu cho học sinh biết sẽ xem gì">' +
+      '<div class="nhan">Kiến thức – yêu cầu cần đạt (không bắt buộc)</div><input type="text" id="tfKT" maxlength="300">' +
+      '</div><div><div class="nhan">Ảnh bìa (không bắt buộc)</div><div class="bia">' + (anhHien ? '<img alt="" src="' + anhHien + '">' : '3D') + '</div>' +
+      '<div class="chonTep" style="margin-top:8px"><label><input type="file" id="tfAnh" accept="image/*">🖼 Chọn ảnh</label>' + (anhHien ? '<button class="btn2 nho" type="button" id="tfBoAnh">Bỏ ảnh</button>' : '') + '</div>' +
+      '<div class="goiY">Ảnh chụp màn hình mô phỏng; tự cắt 16:10 và nén nhỏ.</div></div></div>' +
+      '<div class="hangNut"><button class="btn2 huy" type="button" id="tfHuy">Hủy</button><button class="luu" type="button" id="tfLuu">' + (f.cu ? 'Lưu thay đổi' : '📥 Tải lên') + '</button></div><div class="msg" id="tfMsg"></div></div>';
+    $('tfTenTN').value = f.ten || ''; $('tfBai').value = f.bai || ''; $('tfMoTa').value = f.mota || ''; $('tfKT').value = f.kienthuc || '';
+    var truong = { tfTenTN: 'ten', tfBai: 'bai', tfMoTa: 'mota', tfKT: 'kienthuc' };
+    Object.keys(truong).forEach(function (id) { $(id).oninput = function () { f[truong[id]] = this.value; }; });
+    var kb = $('tfKhoi');
+    KHOI_TN.forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = tenKhoiTN(k); b.className = String(f.khoi) === k ? 'on' : ''; b.onclick = function () { f.khoi = k; veFormTN(); }; kb.appendChild(b); });
+    var lb = $('tfLoai');
+    LOAI_TN.forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = k; b.className = f.loai === k ? 'on' : ''; b.onclick = function () { f.loai = k; [].forEach.call(lb.children, function (x) { x.className = x === b ? 'on' : ''; }); }; lb.appendChild(b); });
+    if (f.html) $('tfCanh').innerHTML = kiemHTML(f.html).map(function (x) { return '<div class="canh">⚠ ' + esc(x) + '</div>'; }).join('');
+    $('tfTep').onchange = function () {
+      var tep = this.files && this.files[0]; if (!tep) return;
+      if (tep.size > 15 * 1024 * 1024) { $('tfMsg').textContent = 'File quá lớn (tối đa 15 MB).'; return; }
+      var r = new FileReader();
+      r.onload = function () {
+        f.html = String(r.result); f.tenTep = tep.name + ' · ' + Math.max(1, Math.round(tep.size / 1024)) + ' KB';
+        var tt = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(f.html);
+        if (!f.ten && tt) f.ten = tt[1].replace(/\s+/g, ' ').replace(/&amp;/g, '&').trim().slice(0, 140);
+        if (!f.ten) f.ten = tep.name.replace(/\.html?$/i, '').replace(/[-_]+/g, ' ');
+        veFormTN();
+      };
+      r.onerror = function () { $('tfMsg').textContent = 'Không đọc được file.'; };
+      r.readAsText(tep, 'UTF-8');
+    };
+    if ($('tfThu')) $('tfThu').onclick = function () { var w = window.open('', '_blank'); if (w) { w.document.open(); w.document.write(f.html); w.document.close(); } };
+    $('tfAnh').onchange = function () { var tep = this.files && this.files[0]; if (!tep) return; nenAnh(tep).then(function (u) { f.anh = u; veFormTN(); }).catch(function (e) { $('tfMsg').textContent = e.message; }); };
+    if ($('tfBoAnh')) $('tfBoAnh').onclick = function () { f.anh = ''; veFormTN(); };
+    $('tfHuy').onclick = function () { TNX.form = null; veFormTN(); };
+    $('tfLuu').onclick = function () {
+      var b = this; f.ten = $('tfTenTN').value.trim();
+      if (!f.cu && !f.html) { $('tfMsg').textContent = 'Thầy/cô chưa chọn file .html.'; return; }
+      if (!f.ten) { $('tfMsg').textContent = 'Thầy/cô chưa nhập tên tài nguyên.'; $('tfTenTN').focus(); return; }
+      if (!f.khoi) { $('tfMsg').textContent = 'Thầy/cô chưa chọn khối lớp.'; return; }
+      var tn = { ma: f.cu ? f.cu.ma : '', ten: f.ten, khoi: f.khoi, bai: $('tfBai').value.trim(), loai: f.loai, mota: $('tfMoTa').value.trim(), kienthuc: $('tfKT').value.trim() };
+      if (f.html) tn.html = f.html;
+      if (f.anh !== undefined) tn.anh = f.anh;
+      b.disabled = true; b.textContent = 'Đang tải lên…'; $('tfMsg').textContent = '';
+      goiBatKy({ action: 'gv_tn_nap', ma: MA, tn: tn }).then(function (j) {
+        if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới.' : j.msg);
+        TNX.drive = j.ds; TNX.khoi = String(f.khoi); TNX.form = null; veFormTN(); veTN();
+        var dong = document.querySelector('.tnDong[data-ma="' + j.ma + '"]');
+        if (dong) { dong.scrollIntoView({ behavior: 'smooth', block: 'center' }); dong.style.background = '#e8f5ec'; }
+      }).catch(function (e) { b.disabled = false; b.textContent = f.cu ? 'Lưu thay đổi' : '📥 Tải lên'; $('tfMsg').textContent = 'Chưa tải lên được: ' + e.message; });
+    };
+  }
+  $('tnTaiLen').onclick = function () { moFormTN(null); };
 
 
   // =====================================================================
