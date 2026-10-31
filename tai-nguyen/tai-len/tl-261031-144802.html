@@ -1,0 +1,369 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Na, K, Mg với nước</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: lab stage (dark 3D bench) on top, toolbar under it, three cup cards in a row, conclusion strip. */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --ink:#18202a; --muted:#5a6572; --line:#d8dee5;
+  --accent:#c2185b; --accent-ink:#ffffff; --accent-soft:#fbe4ee;
+  --stage:#141920;
+  --font:"Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1216; --surface:#161b22; --ink:#e6ebf0; --muted:#98a3af; --line:#29313b;
+  --accent:#f06292; --accent-ink:#1a0610; --accent-soft:#3a1424; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e1216; --surface:#161b22; --ink:#e6ebf0; --muted:#98a3af; --line:#29313b;
+  --accent:#f06292; --accent-ink:#1a0610; --accent-soft:#3a1424; color-scheme:dark }
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{margin:0;font-size:clamp(24px,3.4vw,34px);font-weight:800;line-height:1.15;text-wrap:balance}
+.lede{margin:0;color:var(--muted);max-width:68ch}
+
+.stage{position:relative;height:clamp(380px,54vw,600px);border-radius:14px;overflow:hidden;background:var(--stage)}
+#c{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;left:12px;top:12px;font-variant-numeric:tabular-nums;color:#e8edf2;background:rgba(10,13,17,.7);
+  border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:8px;font-weight:600;font-size:14px}
+.hint{position:absolute;right:12px;bottom:10px;color:rgba(232,237,242,.65);font-size:12px}
+.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-100%);pointer-events:none;white-space:nowrap;
+  background:rgba(10,13,17,.8);color:#eef2f6;border:1px solid rgba(255,255,255,.16);border-radius:8px;
+  padding:5px 9px;font-size:12px;line-height:1.35;text-align:center}
+.lbl b{display:block;font-size:13px;color:#fff}
+.lbl .m{color:#ffb3cf;font-weight:600}
+.tag{position:absolute;left:0;top:0;transform:translate(-50%,-130%);pointer-events:none;font-weight:700;font-size:12px;
+  background:#ffd54f;color:#1d1600;border-radius:999px;padding:1px 8px}
+@media (max-width:620px){ .lbl{font-size:10.5px;padding:4px 6px} .lbl b{font-size:11.5px} .hint{display:none} }
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button,select{font:inherit;font-weight:600;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:9px 16px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toolbar label{display:flex;align-items:center;gap:7px;font-weight:500;color:var(--ink)}
+.toolbar .sp{margin-left:auto;display:flex;gap:8px;align-items:center;color:var(--muted)}
+select{padding:7px 10px}
+
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.cards{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{margin:0;font-size:18px;display:flex;align-items:baseline;gap:8px}
+.card h2 .sym{font-size:22px;font-weight:800;color:var(--accent)}
+.row{display:grid;grid-template-columns:88px 1fr;gap:6px;font-size:14px}
+.row dt{color:var(--muted)} .row dd{margin:0}
+dl{margin:0;display:flex;flex-direction:column;gap:5px}
+.eq{background:var(--bg);border-radius:8px;padding:8px 10px;font-weight:600;font-size:14px}
+.live{border-top:1px dashed var(--line);padding-top:10px;font-size:14px}
+.live .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;display:block;margin-bottom:2px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-left:auto}
+
+.concl{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.concl h3{margin:0;font-size:16px}
+.concl .rank{font-size:22px;font-weight:800;letter-spacing:.02em}
+.concl p{margin:0;color:var(--muted);max-width:90ch}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Mô phỏng 3D · Tính kim loại</span>
+    <h1>Na, K, Mg tác dụng với nước có phenolphtalein</h1>
+    <p class="lede">Ba cốc nước cất giống nhau, mỗi cốc nhỏ sẵn vài giọt phenolphtalein (không màu). Bấm “Thả kim loại” để thả cùng lúc mẩu Na, mẩu K và mảnh Mg rồi so sánh hiện tượng.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="c"></canvas>
+    <div class="hud" id="hud">t = 0.0 s</div>
+    <div class="hint">Kéo để xoay · cuộn/chụm để phóng to</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" id="btnStart">Thả kim loại</button>
+    <button id="btnPause" disabled>Tạm dừng</button>
+    <button id="btnReset">Làm lại</button>
+    <label><input type="checkbox" id="hot"> Cốc 3 dùng nước nóng</label>
+    <span class="sp"><label for="speed">Tốc độ</label>
+      <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></span>
+  </div>
+
+  <div class="cards">
+    <section class="card">
+      <h2>Cốc 1 <span class="sym">Na</span><span class="pill">natri · nhóm IA</span></h2>
+      <dl>
+        <div class="row"><dt>Trong cốc</dt><dd>Nước cất + vài giọt phenolphtalein</dd></div>
+        <div class="row"><dt>Kim loại</dt><dd>Mẩu Na nhỏ (bằng hạt đậu xanh), đã thấm khô dầu hỏa</dd></div>
+      </dl>
+      <div class="eq">2Na + 2H<sub>2</sub>O → 2NaOH + H<sub>2</sub>↑</div>
+      <div class="live"><span class="k">Hiện tượng đang thấy</span><span id="st0">Chưa thả kim loại.</span></div>
+    </section>
+    <section class="card">
+      <h2>Cốc 2 <span class="sym">K</span><span class="pill">kali · nhóm IA</span></h2>
+      <dl>
+        <div class="row"><dt>Trong cốc</dt><dd>Nước cất + vài giọt phenolphtalein</dd></div>
+        <div class="row"><dt>Kim loại</dt><dd>Mẩu K nhỏ (cùng cỡ mẩu Na), đã thấm khô dầu hỏa</dd></div>
+      </dl>
+      <div class="eq">2K + 2H<sub>2</sub>O → 2KOH + H<sub>2</sub>↑</div>
+      <div class="live"><span class="k">Hiện tượng đang thấy</span><span id="st1">Chưa thả kim loại.</span></div>
+    </section>
+    <section class="card">
+      <h2>Cốc 3 <span class="sym">Mg</span><span class="pill">magie · nhóm IIA</span></h2>
+      <dl>
+        <div class="row"><dt>Trong cốc</dt><dd id="mgWater">Nước cất (nguội) + vài giọt phenolphtalein</dd></div>
+        <div class="row"><dt>Kim loại</dt><dd>Mảnh Mg đã đánh sạch lớp oxide</dd></div>
+      </dl>
+      <div class="eq">Mg + 2H<sub>2</sub>O → Mg(OH)<sub>2</sub> + H<sub>2</sub>↑ <span style="font-weight:500;color:var(--muted)">(rất chậm ở nhiệt độ thường)</span></div>
+      <div class="live"><span class="k">Hiện tượng đang thấy</span><span id="st2">Chưa thả kim loại.</span></div>
+    </section>
+  </div>
+
+  <div class="concl">
+    <h3>Kết luận so sánh</h3>
+    <div class="rank">K &gt; Na &gt; Mg</div>
+    <p>Mức độ phản ứng với nước giảm dần từ K đến Na đến Mg, đúng với tính kim loại giảm dần. K và Na cùng nhóm IA, nhưng K có bán kính nguyên tử lớn hơn nên nhường electron dễ hơn. Mg thuộc nhóm IIA, tính kim loại yếu hơn Na cùng chu kì 3. Dung dịch chuyển hồng vì tạo base (NaOH, KOH); Mg(OH)<sub>2</sub> ít tan nên cốc Mg chỉ hồng rất nhạt.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const stage=document.getElementById('stage'), canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x141920);
+const camera=new THREE.PerspectiveCamera(38,1,0.1,100);
+const controls=new THREE.OrbitControls(camera,canvas);
+controls.target.set(0,1.3,0); controls.enableDamping=true; controls.maxPolarAngle=1.5; controls.minDistance=5; controls.maxDistance=26; controls.enablePan=false;
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x303844,0.75));
+const dl=new THREE.DirectionalLight(0xffffff,0.85); dl.position.set(4,9,7); scene.add(dl);
+const fill=new THREE.DirectionalLight(0xbfd4ff,0.3); fill.position.set(-6,4,-3); scene.add(fill);
+
+// bench + wall
+const bench=new THREE.Mesh(new THREE.BoxGeometry(13,0.3,6),new THREE.MeshStandardMaterial({color:0x39414b,roughness:.85}));
+bench.position.y=-0.15; scene.add(bench);
+const wall=new THREE.Mesh(new THREE.PlaneGeometry(30,14),new THREE.MeshStandardMaterial({color:0x1e252e,roughness:1}));
+wall.position.set(0,5,-3.2); scene.add(wall);
+
+// textures
+function radTex(stops){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+  const gr=g.createRadialGradient(32,32,0,32,32,32);stops.forEach(s=>gr.addColorStop(s[0],s[1]));g.fillStyle=gr;g.fillRect(0,0,64,64);
+  const t=new THREE.CanvasTexture(c);return t;}
+const softTex=radTex([[0,'rgba(255,255,255,1)'],[.4,'rgba(255,255,255,.6)'],[1,'rgba(255,255,255,0)']]);
+const bubTex=radTex([[0,'rgba(255,255,255,.12)'],[.65,'rgba(255,255,255,.25)'],[.85,'rgba(255,255,255,.95)'],[1,'rgba(255,255,255,0)']]);
+
+// particle pools
+function Pool(n,tex,color,blend,order){
+  this.items=[];this.i=0;
+  for(let k=0;k<n;k++){const m=new THREE.SpriteMaterial({map:tex,color,transparent:true,depthWrite:false,blending:blend||THREE.NormalBlending});
+    const s=new THREE.Sprite(m);s.visible=false;s.renderOrder=order;scene.add(s);this.items.push({s,on:false,v:new THREE.Vector3(),t:0});}
+}
+Pool.prototype.spawn=function(p,v,life,s0,s1,o0,o1,g,yMax){const it=this.items[this.i];this.i=(this.i+1)%this.items.length;
+  it.on=true;it.t=0;it.life=life;it.s0=s0;it.s1=s1;it.o0=o0;it.o1=o1;it.g=g||0;it.yMax=(yMax===undefined?1e9:yMax);
+  it.s.position.copy(p);it.v.copy(v);it.s.visible=true;it.s.scale.setScalar(s0);it.s.material.opacity=o0;};
+Pool.prototype.update=function(dt){for(const it of this.items){if(!it.on)continue;it.t+=dt;
+  if(it.t>=it.life){it.on=false;it.s.visible=false;continue;}
+  it.v.y+=it.g*dt;it.s.position.addScaledVector(it.v,dt);
+  if(it.s.position.y>it.yMax){it.on=false;it.s.visible=false;continue;}
+  const k=it.t/it.life;it.s.scale.setScalar(it.s0+(it.s1-it.s0)*k);it.s.material.opacity=it.o0+(it.o1-it.o0)*k;}};
+Pool.prototype.clear=function(){for(const it of this.items){it.on=false;it.s.visible=false;}};
+const dye=new Pool(260,softTex,0xe2207a,null,2);
+const bubbles=new Pool(260,bubTex,0xffffff,null,3);
+const fizz=new Pool(260,softTex,0xffffff,null,5);
+const flame=new Pool(90,softTex,0xb98cff,THREE.AdditiveBlending,6);
+const flameCore=new Pool(60,softTex,0xffc6a0,THREE.AdditiveBlending,6);
+const splash=new Pool(80,softTex,0xdff1ff,null,5);
+const steam=new Pool(50,softTex,0xffffff,null,5);
+const pools=[dye,bubbles,fizz,flame,flameCore,splash,steam];
+
+// beakers
+const R=1.1,H=2.6,SURF=1.7,BOT=0.06;
+const glassMat=new THREE.MeshPhongMaterial({color:0xdce8f2,transparent:true,opacity:.17,shininess:140,specular:0xffffff,side:THREE.DoubleSide,depthWrite:false});
+const rimMat=new THREE.MeshPhongMaterial({color:0xeaf3fb,transparent:true,opacity:.55,shininess:140,depthWrite:false});
+const markMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35,depthWrite:false});
+const BASE=new THREE.Color(0xd4ebf7), PINK=new THREE.Color(0xe2207a);
+
+const defs=[
+ {type:'na',x:-3.7,title:'Cốc 1',metal:'Na',full:'natri'},
+ {type:'k', x:0,   title:'Cốc 2',metal:'K', full:'kali'},
+ {type:'mg',x:3.7, title:'Cốc 3',metal:'Mg',full:'magie'}
+];
+const cups=defs.map((d,i)=>{
+  const g=new THREE.Group();g.position.x=d.x;scene.add(g);
+  const glass=new THREE.Mesh(new THREE.CylinderGeometry(R,R*0.97,H,56,1,true),glassMat);glass.position.y=H/2;glass.renderOrder=4;g.add(glass);
+  const bottom=new THREE.Mesh(new THREE.CylinderGeometry(R*0.97,R*0.97,0.05,56),glassMat);bottom.position.y=0.025;bottom.renderOrder=4;g.add(bottom);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(R,0.035,10,64),rimMat);rim.rotation.x=Math.PI/2;rim.position.y=H;rim.renderOrder=4;g.add(rim);
+  for(let m=1;m<=5;m++){const mk=new THREE.Mesh(new THREE.BoxGeometry(m%2?0.28:0.16,0.015,0.01),markMat);
+    mk.position.set(-R*0.42,0.35*m,R*0.91);mk.renderOrder=4;g.add(mk);}
+  const wm=new THREE.MeshPhongMaterial({color:BASE.clone(),transparent:true,opacity:.32,shininess:90,depthWrite:false});
+  const water=new THREE.Mesh(new THREE.CylinderGeometry(R*0.955,R*0.94,SURF-0.05,56),wm);water.position.y=0.05+(SURF-0.05)/2;water.renderOrder=1;g.add(water);
+  // metal
+  const metalCol=d.type==='mg'?0x9aa1a8:(d.type==='k'?0xc7cbd4:0xd2d4d8);
+  const mmat=new THREE.MeshPhongMaterial({color:metalCol,shininess:120,specular:0xffffff});
+  const mg=new THREE.Group();g.add(mg);
+  let solid,molten=null;
+  if(d.type==='mg'){solid=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.035,0.2),mmat);}
+  else{solid=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.24,0.28),new THREE.MeshPhongMaterial({color:0x9da1a8,shininess:30}));
+    molten=new THREE.Mesh(new THREE.SphereGeometry(0.17,24,16),mmat);molten.visible=false;mg.add(molten);}
+  mg.add(solid);
+  let light=null;
+  if(d.type==='k'){light=new THREE.PointLight(0xb47cff,0,4);g.add(light);}
+  // labels
+  const lbl=document.createElement('div');lbl.className='lbl';stage.appendChild(lbl);
+  const tag=document.createElement('div');tag.className='tag';tag.textContent=d.metal;stage.appendChild(tag);
+  return Object.assign({},d,{i,g,water,wm,mg,solid,molten,light,lbl,tag,pos:new THREE.Vector3(),vel:new THREE.Vector3(),
+    state:'idle',t:0,p:0,inWater:false,status:'',ang:0});
+});
+
+function labelHTML(c){
+  const hot=document.getElementById('hot').checked;
+  const water=(c.type==='mg'&&hot)?'Nước nóng':'Nước cất';
+  return `<b>${c.title}</b>${water} + phenolphtalein<br><span class="m">+ ${c.metal} (${c.full})</span>`;
+}
+function resetCup(c){
+  c.state='idle';c.t=0;c.p=0;c.inWater=false;c.popped=false;
+  c.pos.set((Math.random()-.5)*0.2,4.3,(Math.random()-.5)*0.2);c.vel.set(0,0,0);
+  c.mg.position.copy(c.pos);c.mg.rotation.set(0.3,Math.random()*3,0.1);c.mg.visible=true;c.mg.scale.setScalar(1);
+  c.solid.visible=true;c.solid.scale.setScalar(1);if(c.molten){c.molten.visible=false;c.molten.scale.setScalar(1);}
+  if(c.light)c.light.intensity=0;
+  c.wm.color.copy(BASE);c.wm.opacity=.32;c.lbl.innerHTML=labelHTML(c);c.tag.style.display='';
+}
+cups.forEach(resetCup);
+
+// world-space helpers
+const tmp=new THREE.Vector3();
+function W(c,v){return tmp.set(c.x+v.x,v.y,v.z).clone();}
+function rnd(a){return (Math.random()*2-1)*a;}
+
+function setStatus(c,html){if(c.status!==html){c.status=html;document.getElementById('st'+c.i).innerHTML=html;}}
+
+// simulation
+const LIFE={na:15,k:7.5};
+const SPEED={na:1.1,k:2.3};
+function updateCup(c,dt){
+  const hot=document.getElementById('hot').checked;
+  if(c.state==='idle'){setStatus(c,'Chưa thả kim loại.');return;}
+  if(c.state==='falling'){
+    if(!c.inWater){c.vel.y-=9.8*0.55*dt;}
+    c.pos.addScaledVector(c.vel,dt);
+    if(!c.inWater&&c.pos.y<=SURF){
+      for(let k=0;k<10;k++)splash.spawn(W(c,new THREE.Vector3(c.pos.x,SURF,c.pos.z)),new THREE.Vector3(rnd(.9),1.4+Math.random()*1.2,rnd(.9)),.5,.06,.03,.9,0,-6);
+      if(c.type==='mg'){c.inWater=true;c.vel.y=-0.5;}
+      else{c.pos.y=SURF+0.03;c.vel.set(0,0,0);c.state='react';c.t=0;}
+    }
+    if(c.type==='mg'){
+      if(c.inWater){c.vel.y=Math.max(c.vel.y-0.4*dt,-0.55);c.mg.rotation.x*=0.97;c.mg.rotation.z*=0.97;}
+      if(c.pos.y<=BOT+0.03){c.pos.y=BOT+0.03;c.state='react';c.t=0;c.mg.rotation.x=0;c.mg.rotation.z=0;}
+      setStatus(c,'Mảnh Mg chìm xuống đáy cốc.');
+    } else setStatus(c,`Đang thả mẩu ${c.metal} vào cốc…`);
+    c.mg.position.copy(c.pos);c.mg.rotation.y+=dt*2;
+    return;
+  }
+  if(c.state==='react'){
+    c.t+=dt;
+    if(c.type==='mg'){
+      const rate=hot?9:1.2;
+      if(Math.random()<rate*dt){const a=c.mg.rotation.y,u=rnd(.45);
+        const p=new THREE.Vector3(c.pos.x+Math.cos(a)*u,c.pos.y+0.04,c.pos.z-Math.sin(a)*u);
+        bubbles.spawn(W(c,p),new THREE.Vector3(rnd(.03),hot?0.75:0.45,rnd(.03)),6,.05,.07,.85,.85,0,SURF);}
+      const pr=hot?0.012:0.0022, cap=hot?0.42:0.12;
+      c.p=Math.min(cap,c.p+pr*dt);
+      if(Math.random()<(hot?3:0.6)*dt){const a=c.mg.rotation.y,u=rnd(.4);
+        dye.spawn(W(c,new THREE.Vector3(c.pos.x+Math.cos(a)*u,c.pos.y+0.1,c.pos.z-Math.sin(a)*u)),new THREE.Vector3(rnd(.05),0.06,rnd(.05)),5,.2,.9,hot?.28:.14,0);}
+      if(hot&&Math.random()<5*dt)steam.spawn(W(c,new THREE.Vector3(rnd(.6),SURF+0.1,rnd(.6))),new THREE.Vector3(rnd(.05),.45,rnd(.05)),2.4,.25,.9,.18,0);
+      if(hot) setStatus(c,'Bọt khí H<sub>2</sub> thoát ra đều trên bề mặt Mg; dung dịch quanh mảnh Mg hồng nhạt dần.');
+      else if(c.t<15) setStatus(c,'Hầu như không thấy hiện tượng; chỉ lác đác vài bọt khí rất nhỏ trên bề mặt Mg.');
+      else setStatus(c,'Rất chậm: vài bọt khí nhỏ, dung dịch quanh Mg hồng rất nhạt. Thử bật “nước nóng” để so sánh.');
+      return;
+    }
+    // Na / K
+    const L=LIFE[c.type],f=Math.min(1,c.t/L);
+    const melt=Math.min(1,c.t/0.6);
+    c.solid.scale.setScalar(Math.max(0.001,1-melt));c.molten.visible=melt>0.05;
+    const sz=Math.max(0.05,Math.pow(1-f,0.55));c.molten.scale.setScalar(melt*sz);
+    c.solid.visible=melt<1;
+    // darting
+    const sp=SPEED[c.type]*(0.6+0.4*(1-f));
+    c.vel.x+=rnd(14)*dt*sp;c.vel.z+=rnd(14)*dt*sp;
+    const vl=Math.hypot(c.vel.x,c.vel.z);if(vl>sp){c.vel.x*=sp/vl;c.vel.z*=sp/vl;}
+    c.pos.x+=c.vel.x*dt;c.pos.z+=c.vel.z*dt;
+    const lim=R*0.86-0.17*sz,r=Math.hypot(c.pos.x,c.pos.z);
+    if(r>lim){const nx=c.pos.x/r,nz=c.pos.z/r;c.pos.x=nx*lim;c.pos.z=nz*lim;const d=c.vel.x*nx+c.vel.z*nz;c.vel.x-=2*d*nx;c.vel.z-=2*d*nz;}
+    c.pos.y=SURF+0.06*sz+Math.sin(c.t*20)*0.01;
+    c.mg.position.copy(c.pos);c.mg.rotation.y+=dt*8;
+    // gas fizz + pink trail
+    const fr=(c.type==='k'?70:45)*(1-f*0.6);
+    for(let k=0;k<fr*dt;k++)fizz.spawn(W(c,new THREE.Vector3(c.pos.x+rnd(.12),SURF+0.05,c.pos.z+rnd(.12))),new THREE.Vector3(rnd(.25),.5+Math.random()*.5,rnd(.25)),.45,.05,.02,.75,0);
+    if(Math.random()<(c.type==='k'?16:10)*dt)dye.spawn(W(c,new THREE.Vector3(c.pos.x,SURF-0.18,c.pos.z)),new THREE.Vector3(rnd(.08),-0.12-Math.random()*.15,rnd(.08)),3.5,.25,1.05,.55,0);
+    c.p=Math.min(1,c.p+dt/(L*1.05));
+    // flame for K
+    if(c.type==='k'){
+      if(c.t>0.7){for(let k=0;k<70*dt;k++){
+          flame.spawn(W(c,new THREE.Vector3(c.pos.x+rnd(.08),c.pos.y+0.12,c.pos.z+rnd(.08))),new THREE.Vector3(rnd(.15),.9+Math.random()*.7,rnd(.15)),.4,.32*sz+.08,.04,.9,0);
+          flameCore.spawn(W(c,new THREE.Vector3(c.pos.x,c.pos.y+0.1,c.pos.z)),new THREE.Vector3(rnd(.1),.6,rnd(.1)),.18,.16*sz+.05,.03,.8,0);}
+        c.light.intensity=1.6+Math.random()*0.8;c.light.position.set(c.pos.x,c.pos.y+0.4,c.pos.z);}
+      setStatus(c,c.t<0.7?'Mẩu K nóng chảy ngay khi chạm nước.':'K chạy rất nhanh trên mặt nước, bốc cháy với ngọn lửa màu tím nhạt, khí thoát ra mạnh; dung dịch hóa hồng rất nhanh.');
+    } else {
+      setStatus(c,c.t<0.6?'Mẩu Na nổi trên mặt nước và bắt đầu nóng chảy.':'Na nóng chảy thành giọt tròn màu trắng bạc, chạy trên mặt nước, có khí thoát ra (xèo xèo); vệt hồng lan dần.');
+    }
+    if(c.t>=L){
+      c.state='done';c.mg.visible=false;c.tag.style.display='none';
+      if(c.type==='k'){c.light.intensity=3;
+        for(let k=0;k<14;k++)splash.spawn(W(c,new THREE.Vector3(c.pos.x,SURF,c.pos.z)),new THREE.Vector3(rnd(1.2),1.5+Math.random()*1.5,rnd(1.2)),.55,.05,.02,.9,0,-6);
+        flame.spawn(W(c,new THREE.Vector3(c.pos.x,SURF+0.2,c.pos.z)),new THREE.Vector3(0,.3,0),.35,.3,1.2,1,0);}
+    }
+    return;
+  }
+  if(c.state==='done'){
+    c.t+=dt;c.p=Math.min(1,c.p+dt*0.02);
+    if(c.light)c.light.intensity=Math.max(0,c.light.intensity-dt*8);
+    setStatus(c,c.type==='k'?'K tan hết sau tiếng nổ nhẹ. Dung dịch có màu hồng đậm (KOH làm phenolphtalein hóa hồng).':'Na tan hết. Dung dịch có màu hồng (NaOH làm phenolphtalein hóa hồng).');
+  }
+}
+
+// controls
+let running=false,started=false,simT=0;
+const btnStart=document.getElementById('btnStart'),btnPause=document.getElementById('btnPause'),btnReset=document.getElementById('btnReset'),hotCb=document.getElementById('hot');
+btnStart.onclick=()=>{if(started)return;started=true;running=true;cups.forEach(c=>{c.state='falling';});
+  btnStart.disabled=true;btnPause.disabled=false;hotCb.disabled=true;};
+btnPause.onclick=()=>{running=!running;btnPause.textContent=running?'Tạm dừng':'Tiếp tục';};
+btnReset.onclick=()=>{started=false;running=false;simT=0;pools.forEach(p=>p.clear());cups.forEach(resetCup);
+  btnStart.disabled=false;btnPause.disabled=true;btnPause.textContent='Tạm dừng';hotCb.disabled=false;};
+hotCb.onchange=()=>{document.getElementById('mgWater').textContent=(hotCb.checked?'Nước nóng':'Nước cất (nguội)')+' + vài giọt phenolphtalein';cups.forEach(c=>c.lbl.innerHTML=labelHTML(c));};
+
+// sizing
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  const dist=Math.min(26,13*Math.max(1,1.75/camera.aspect));
+  const dir=camera.position.clone().sub(controls.target);if(dir.lengthSq()<0.01)dir.set(0,0.42,1);
+  dir.normalize().multiplyScalar(dist);camera.position.copy(controls.target).add(dir);camera.updateProjectionMatrix();}
+camera.position.set(0,1.3+5.2,12);
+new ResizeObserver(resize).observe(stage);resize();
+
+// labels
+const v3=new THREE.Vector3();
+function place(el,x,y,z){v3.set(x,y,z).project(camera);
+  if(v3.z>1){el.style.visibility='hidden';return;}el.style.visibility='visible';
+  el.style.left=((v3.x+1)/2*stage.clientWidth)+'px';el.style.top=((1-v3.y)/2*stage.clientHeight)+'px';}
+
+const hud=document.getElementById('hud'),speedSel=document.getElementById('speed');
+let last=performance.now();
+function loop(now){
+  let dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(running){dt*=parseFloat(speedSel.value);simT+=dt;cups.forEach(c=>updateCup(c,dt));pools.forEach(p=>p.update(dt));}
+  else if(!started)cups.forEach(c=>updateCup(c,0));
+  cups.forEach(c=>{c.wm.color.copy(BASE).lerp(PINK,c.p*0.85);c.wm.opacity=.32+.42*c.p;
+    place(c.lbl,c.x,H+0.35,0);
+    if(c.mg.visible&&c.state!=='idle')place(c.tag,c.x+c.pos.x,c.pos.y+0.25,c.pos.z);else if(c.state==='idle')place(c.tag,c.x+c.pos.x,c.pos.y+0.25,c.pos.z);});
+  hud.textContent='t = '+simT.toFixed(1)+' s';
+  controls.update();renderer.render(scene,camera);requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>
