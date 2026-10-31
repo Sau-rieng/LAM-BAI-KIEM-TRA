@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D Hoá 12: Điện Phân NaCl, CuSO4 & Al2O3 (Không Che Khuất)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-nav {
+            height: 52px;
+            background: rgba(15, 23, 42, 0.98);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .nav-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #38bdf8;
+        }
+        .tab-group {
+            display: flex;
+            gap: 8px;
+        }
+        .tab-btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #cbd5e1;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .tab-btn:hover {
+            border-color: #38bdf8;
+        }
+        .tab-btn.active {
+            background: linear-gradient(90deg, #0284c7, #2563eb);
+            color: #fff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+        }
+        #main-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 52px);
+            overflow: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            flex: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        /* Thanh nhắc chuột siêu mảnh ở sát mép dưới để không bao giờ che hình 3D */
+        #bottom-bar {
+            height: 28px;
+            background: rgba(15, 23, 42, 0.85);
+            border-top: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.78rem;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        #sidebar {
+            width: 410px;
+            background: rgba(15, 23, 42, 0.96);
+            border-left: 1px solid #334155;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.82);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .card h2 {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .status-banner {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid #10b981;
+            color: #34d399;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .status-desc {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+        .step-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .step-btn {
+            padding: 8px 11px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #e2e8f0;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.84rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .step-btn:hover {
+            border-color: #f97316;
+        }
+        .step-btn.active {
+            background: linear-gradient(90deg, #ea580c, #d97706);
+            color: #fff;
+            border-color: #fb923c;
+        }
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #38bdf8;
+            background: #0284c7;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .control-group {
+            margin-top: 8px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #38bdf8;
+            cursor: pointer;
+        }
+        .eq-box {
+            background: #0f172a;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.81rem;
+            margin-top: 6px;
+            border-left: 3px solid #38bdf8;
+            line-height: 1.45;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.83rem;
+            margin-top: 7px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-nav">
+    <div class="nav-title">MÔ PHỎNG 3D HOÁ HỌC 12: ĐIỆN PHÂN</div>
+    <div class="tab-group">
+        <button class="tab-btn active" id="tab-nacl">1. Điện phân NaCl nóng chảy</button>
+        <button class="tab-btn" id="tab-cuso4">2. Điện phân dung dịch CuSO₄</button>
+        <button class="tab-btn" id="tab-al2o3">3. Điện phân Al₂O₃ nóng chảy</button>
+    </div>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+        <div id="bottom-bar">
+            <span>🖱️ <strong>Kéo chuột trái:</strong> Xoay mô hình 3D 360°</span>
+            <span>🔍 <strong>Cuộn con lăn chuột:</strong> Phóng to / Thu nhỏ</span>
+            <span>✨ <strong>Không gian 3D toàn màn hình (Không có hộp chữ che khuất)</strong></span>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <!-- Trạng thái hiện tại (Đã chuyển sang Sidebar để không che hình 3D) -->
+        <div class="card">
+            <h2>Trạng Thái Thí Nghiệm</h2>
+            <div id="hud-status" class="status-banner">BƯỚC 2: ĐANG ĐIỆN PHÂN NaCl NÓNG CHẢY (7V)</div>
+            <div id="hud-desc" class="status-desc">Cl⁻ về cực dương (+) tạo khí Cl₂↑; Na⁺ về cực âm (–) tạo kim loại Na nóng chảy.</div>
+        </div>
+
+        <!-- Panel 1: NaCl -->
+        <div id="panel-nacl">
+            <div class="card">
+                <h2>Điều Khiển Điện Phân NaCl Nóng Chảy</h2>
+                <div class="step-buttons">
+                    <button class="step-btn" id="btn-nacl-0">
+                        <span>0. NaCl tinh thể rắn (Chưa nung)</span>
+                        <span>25°C</span>
+                    </button>
+                    <button class="step-btn" id="btn-nacl-1">
+                        <span>Bước 1: Nung NaCl nóng chảy</span>
+                        <span>850°C</span>
+                    </button>
+                    <button class="step-btn active" id="btn-nacl-2">
+                        <span>Bước 2: Nhúng điện cực &amp; Điện phân</span>
+                        <span>DC 7.0V</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:10px;">
+                <h2>Phương Trình Điện Phân NaCl Nóng Chảy</h2>
+                <div class="eq-box" style="border-left-color:#fb923c;">
+                    <strong>1. Phân li khi nóng chảy (Bước 1):</strong><br>
+                    NaCl(s) &rarr; Na⁺(l) + Cl⁻(l)
+                </div>
+                <div class="eq-box" style="border-left-color:#a3e635;">
+                    <strong>2a. Tại Anode (+) (Oxi hoá Cl⁻):</strong><br>
+                    2Cl⁻ &rarr; Cl₂&uarr; + 2e (Khí vàng lục)
+                </div>
+                <div class="eq-box" style="border-left-color:#f8fafc;">
+                    <strong>2b. Tại Cathode (–) (Khử Na⁺):</strong><br>
+                    Na⁺ + 1e &rarr; Na (Kim loại Na nóng chảy)
+                </div>
+                <div class="eq-box">
+                    <strong>3. Phương trình điện phân:</strong><br>
+                    2NaCl &xrightarrow{đpnc} 2Na + Cl₂&uarr;
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 2: CuSO4 -->
+        <div id="panel-cuso4" style="display:none;">
+            <div class="card">
+                <h2>Điều Khiển Điện Phân Dung Dịch CuSO₄</h2>
+                <div class="step-buttons">
+                    <button class="step-btn active" id="btn-cu-toggle">
+                        <span id="cu-btn-text">Đang Bật Nguồn Điện Một Chiều</span>
+                        <span>4.5V</span>
+                    </button>
+                    <button class="step-btn" id="btn-cu-reset">
+                        <span>Làm mới lại ống chữ U</span>
+                        <span>00:00</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:10px;">
+                <h2>Phương Trình Điện Phân Dung Dịch CuSO₄</h2>
+                <div class="eq-box" style="border-left-color:#ef4444;">
+                    <strong>(+) Anode (Cực dương - Oxi hoá H₂O):</strong><br>
+                    2H₂O &rarr; O₂&uarr; + 4H⁺ + 4e<br>
+                    <small style="color:#94a3b8;">Hiện tượng: Bọt khí O₂ không màu thoát ra.</small>
+                </div>
+                <div class="eq-box" style="border-left-color:#fb923c;">
+                    <strong>(–) Cathode (Cực âm - Khử Cu²⁺):</strong><br>
+                    Cu²⁺ + 2e &rarr; Cu&darr;<br>
+                    <small style="color:#94a3b8;">Hiện tượng: Kim loại Cu màu đỏ gạch bám vào cực âm.</small>
+                </div>
+                <div class="eq-box">
+                    <strong>Phương trình điện phân tổng quát:</strong><br>
+                    CuSO₄ + H₂O &xrightarrow{đpdd} Cu + ½O₂&uarr; + H₂SO₄
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 3: Al2O3 -->
+        <div id="panel-al2o3" style="display:none;">
+            <div class="card">
+                <h2>Điều Khiển Bể Điện Phân Al₂O₃</h2>
+                <div class="step-buttons">
+                    <button class="step-btn active" id="btn-al-toggle">
+                        <span id="al-btn-text">Đang Điện Phân Al₂O₃ Nóng Chảy</span>
+                        <span>950°C</span>
+                    </button>
+                </div>
+                <div class="btn-row">
+                    <button class="action-btn" id="btn-al-tap">Tháo Nhôm Lỏng</button>
+                    <button class="action-btn" id="btn-al-anode" style="background:#475569; border-color:#94a3b8;">Thay Mới Anode</button>
+                </div>
+                <label class="checkbox-row">
+                    <input type="checkbox" id="chk-cutaway" checked>
+                    <span>Mở mặt cắt 3D phía trước bể điện phân</span>
+                </label>
+            </div>
+
+            <div class="card" style="margin-top:10px;">
+                <h2>Phương Trình Sản Xuất Nhôm (Al₂O₃)</h2>
+                <div class="eq-box" style="border-left-color:#38bdf8;">
+                    <strong>(–) Tại Cathode (Đáy than chì - Khử Al³⁺):</strong><br>
+                    Al³⁺ + 3e &rarr; Al(l) (Nhôm lỏng lắng ở đáy)
+                </div>
+                <div class="eq-box" style="border-left-color:#ef4444;">
+                    <strong>(+) Tại Anode (Khối than chì - Oxi hoá O²⁻):</strong><br>
+                    2O²⁻ &rarr; O₂&uarr; + 4e<br>
+                    C + O₂ &rarr; CO₂&uarr; &nbsp;|&nbsp; 2C + O₂ &rarr; 2CO&uarr;
+                </div>
+                <div class="eq-box">
+                    <strong>Phương trình tổng quát:</strong><br>
+                    2Al₂O₃ &xrightarrow{đpnc, criolit} 4Al + 3O₂&uarr;
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Tuỳ Chỉnh Góc Nhìn &amp; Hạt Vi Mô</h2>
+            <div class="control-group">
+                <label>
+                    <span>Góc xoay 3D ngang:</span>
+                    <strong id="rot-val">-20°</strong>
+                </label>
+                <input type="range" id="rot-slider" min="-180" max="180" step="1" value="-20">
+            </div>
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-micro" checked>
+                <span>Hiển thị các hạt Ion &amp; dòng electron (e⁻)</span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.parentElement.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+let mode = 'nacl'; // 'nacl', 'cuso4', 'al2o3'
+let naclStep = 2;
+let naclTemp = 850;
+let naclInsert = 1;
+let naclProgress = 0.25;
+
+let cuRunning = true;
+let cuProgress = 0.25;
+
+let alRunning = true;
+let alLevel = 0.4;
+let anodeWear = 0.1;
+let isTapping = false;
+let tapTimer = 0;
+
+let rotY = -20 * Math.PI / 180;
+let rotX = 0.24;
+let zoom = 0.92; // Thu vừa vặn khung hình để thấy trọn cả nguồn điện ở đỉnh
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+const rotSlider = document.getElementById('rot-slider');
+const rotVal = document.getElementById('rot-val');
+const chkMicro = document.getElementById('chk-micro');
+const chkCutaway = document.getElementById('chk-cutaway');
+const hudStatus = document.getElementById('hud-status');
+const hudDesc = document.getElementById('hud-desc');
+
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-0.4, Math.min(0.85, rotX + dy * 0.008));
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+
+    let deg = Math.round((rotY * 180 / Math.PI) % 360);
+    if (deg > 180) deg -= 360;
+    if (deg < -180) deg += 360;
+    rotSlider.value = deg;
+    rotVal.textContent = deg + '°';
+});
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.6, Math.min(1.65, zoom - e.deltaY * 0.001));
+}, { passive: false });
+
+rotSlider.addEventListener('input', e => {
+    const deg = parseFloat(e.target.value);
+    rotVal.textContent = deg + '°';
+    rotY = deg * Math.PI / 180;
+});
+
+function project(x, y, z) {
+    let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+    let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+    let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+    const fov = 700 * zoom;
+    const viewerDist = 680;
+    const scale = fov / (viewerDist + z2);
+    return {
+        x: width / 2 + x1 * scale,
+        y: height / 2 + 45 - y2 * scale, // Hạ tâm vẽ xuống 45px để phần đỉnh cực kỳ thoáng
+        z: z2,
+        scale: scale
+    };
+}
+
+function drawCylinder3D(x, yTop, yBottom, radius, zCenter, colorTop, colorSide, alpha = 1) {
+    const segments = 20;
+    const topPts = [];
+    const botPts = [];
+    for (let i = 0; i <= segments; i++) {
+        const theta = (i / segments) * Math.PI * 2;
+        const px = x + radius * Math.cos(theta);
+        const pz = zCenter + radius * Math.sin(theta);
+        topPts.push(project(px, yTop, pz));
+        botPts.push(project(px, yBottom, pz));
+    }
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    for (let i = 0; i < segments; i++) {
+        ctx.beginPath();
+        ctx.moveTo(topPts[i].x, topPts[i].y);
+        ctx.lineTo(topPts[i + 1].x, topPts[i + 1].y);
+        ctx.lineTo(botPts[i + 1].x, botPts[i + 1].y);
+        ctx.lineTo(botPts[i].x, botPts[i].y);
+        ctx.closePath();
+        ctx.fillStyle = colorSide;
+        ctx.fill();
+    }
+    ctx.beginPath();
+    for (let i = 0; i <= segments; i++) {
+        if (i === 0) ctx.moveTo(topPts[i].x, topPts[i].y);
+        else ctx.lineTo(topPts[i].x, topPts[i].y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = colorTop;
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawBox3D(xMin, xMax, yMin, yMax, zMin, zMax, fillStyle, strokeStyle, lineWidth = 1.5, skipFront = false) {
+    const c = [
+        project(xMin, yMin, zMin), project(xMax, yMin, zMin),
+        project(xMax, yMax, zMin), project(xMin, yMax, zMin),
+        project(xMin, yMin, zMax), project(xMax, yMin, zMax),
+        project(xMax, yMax, zMax), project(xMin, yMax, zMax)
+    ];
+    const faces = [[0,1,5,4], [0,1,2,3], [0,4,7,3], [1,5,6,2], [3,2,6,7]];
+    if (!skipFront) faces.push([4,5,6,7]);
+    faces.forEach(f => {
+        ctx.beginPath();
+        ctx.moveTo(c[f[0]].x, c[f[0]].y);
+        for (let i = 1; i < 4; i++) ctx.lineTo(c[f[i]].x, c[f[i]].y);
+        ctx.closePath();
+        if (fillStyle) { ctx.fillStyle = fillStyle; ctx.fill(); }
+        if (strokeStyle) { ctx.strokeStyle = strokeStyle; ctx.lineWidth = lineWidth; ctx.stroke(); }
+    });
+}
+
+// Khởi tạo hạt
+const naclIons = [];
+const bubbles = [];
+const flames = [];
+const cuIons = [];
+const alIons = [];
+const tapDrops = [];
+
+for (let ix = -1.5; ix <= 1.5; ix += 1) {
+    for (let iy = 0; iy <= 2; iy += 1) {
+        for (let iz = -1; iz <= 1; iz += 1) {
+            const lx = ix * 38, ly = -85 + iy * 34, lz = iz * 34;
+            naclIons.push({
+                type: (naclIons.length % 2 === 0) ? 'Na+' : 'Cl-',
+                lx, ly, lz, x: lx, y: ly, z: lz,
+                vx: (Math.random() - 0.5) * 1.4,
+                vy: (Math.random() - 0.5) * 1.1,
+                vz: (Math.random() - 0.5) * 1.4,
+                phase: Math.random() * 6.28
+            });
+        }
+    }
+}
+for (let i = 0; i < 25; i++) {
+    flames.push({
+        x: (Math.random() - 0.5) * 160,
+        y: -155 + Math.random() * 30,
+        z: (Math.random() - 0.5) * 100,
+        r: 6 + Math.random() * 9,
+        vy: 0.9 + Math.random() * 1.1
+    });
+}
+for (let i = 0; i < 36; i++) {
+    cuIons.push({
+        type: i % 2 === 0 ? 'Cu2+' : 'SO42-',
+        u: 0.14 + Math.random() * 0.72,
+        rOff: (Math.random() - 0.5) * 32,
+        zOff: (Math.random() - 0.5) * 32
+    });
+}
+for (let i = 0; i < 40; i++) {
+    alIons.push({
+        type: i % 2 === 0 ? 'Al3+' : 'O2-',
+        x: (Math.random() - 0.5) * 230,
+        y: -55 + Math.random() * 80,
+        z: (Math.random() - 0.5) * 110,
+        phase: Math.random() * 6.28
+    });
+}
+
+function getUTubeSpine(u) {
+    if (u < 0.35) {
+        const t = u / 0.35;
+        return { x: -95, y: 140 - t * 160, z: 0, nx: 1, ny: 0 };
+    } else if (u <= 0.65) {
+        const t = (u - 0.35) / 0.30;
+        const angle = Math.PI + t * Math.PI;
+        return { x: 95 * Math.cos(angle), y: -20 + 95 * Math.sin(angle), z: 0, nx: Math.cos(angle), ny: Math.sin(angle) };
+    } else {
+        const t = (u - 0.65) / 0.35;
+        return { x: 95, y: -20 + t * 160, z: 0, nx: -1, ny: 0 };
+    }
+}
+
+function switchTab(newMode) {
+    mode = newMode;
+    bubbles.length = 0;
+    document.getElementById('tab-nacl').classList.toggle('active', mode === 'nacl');
+    document.getElementById('tab-cuso4').classList.toggle('active', mode === 'cuso4');
+    document.getElementById('tab-al2o3').classList.toggle('active', mode === 'al2o3');
+
+    document.getElementById('panel-nacl').style.display = mode === 'nacl' ? 'block' : 'none';
+    document.getElementById('panel-cuso4').style.display = mode === 'cuso4' ? 'block' : 'none';
+    document.getElementById('panel-al2o3').style.display = mode === 'al2o3' ? 'block' : 'none';
+    updateHUD();
+}
+
+document.getElementById('tab-nacl').addEventListener('click', () => switchTab('nacl'));
+document.getElementById('tab-cuso4').addEventListener('click', () => switchTab('cuso4'));
+document.getElementById('tab-al2o3').addEventListener('click', () => switchTab('al2o3'));
+
+[0, 1, 2].forEach(s => {
+    document.getElementById('btn-nacl-' + s).addEventListener('click', () => {
+        naclStep = s;
+        [0, 1, 2].forEach(k => document.getElementById('btn-nacl-' + k).classList.toggle('active', k === s));
+        if (s === 0) naclProgress = 0;
+        updateHUD();
+    });
+});
+
+document.getElementById('btn-cu-toggle').addEventListener('click', () => {
+    cuRunning = !cuRunning;
+    document.getElementById('btn-cu-toggle').classList.toggle('active', cuRunning);
+    document.getElementById('cu-btn-text').textContent = cuRunning ? 'Đang Bật Nguồn Điện Một Chiều' : 'Đang Tạm Dừng Điện Phân';
+    updateHUD();
+});
+document.getElementById('btn-cu-reset').addEventListener('click', () => {
+    cuProgress = 0;
+    bubbles.length = 0;
+});
+
+document.getElementById('btn-al-toggle').addEventListener('click', () => {
+    alRunning = !alRunning;
+    document.getElementById('btn-al-toggle').classList.toggle('active', alRunning);
+    document.getElementById('al-btn-text').textContent = alRunning ? 'Đang Điện Phân Al₂O₃ Nóng Chảy' : 'Đang Tạm Dừng Điện Phân';
+    updateHUD();
+});
+document.getElementById('btn-al-tap').addEventListener('click', () => {
+    isTapping = true;
+    tapTimer = 4.0;
+});
+document.getElementById('btn-al-anode').addEventListener('click', () => {
+    anodeWear = 0.0;
+});
+
+function updateHUD() {
+    if (mode === 'nacl') {
+        if (naclStep === 0) {
+            hudStatus.textContent = 'NaCl RẮN (25°C) - KHÔNG DẪN ĐIỆN';
+            hudDesc.textContent = 'Các ion Na⁺ và Cl⁻ bị giữ chặt tại nút mạng tinh thể.';
+        } else if (naclStep === 1) {
+            hudStatus.textContent = 'BƯỚC 1: NUNG NaCl NÓNG CHẢY (850°C)';
+            hudDesc.textContent = 'NaCl nóng chảy phân li thành các ion Na⁺ và Cl⁻ di chuyển tự do.';
+        } else {
+            hudStatus.textContent = 'BƯỚC 2: ĐANG ĐIỆN PHÂN NaCl NÓNG CHẢY (7V)';
+            hudDesc.textContent = 'Cl⁻ về cực dương (+) tạo khí Cl₂↑; Na⁺ về cực âm (–) tạo kim loại Na nóng chảy.';
+        }
+    } else if (mode === 'cuso4') {
+        hudStatus.textContent = cuRunning ? 'ĐANG ĐIỆN PHÂN DUNG DỊCH CuSO₄ (4.5V)' : 'TẠM DỪNG ĐIỆN PHÂN CuSO₄';
+        hudDesc.textContent = 'Khí O₂ thoát ra ở Anode (+) và kim loại Cu màu đỏ gạch bám trên Cathode (–).';
+    } else {
+        hudStatus.textContent = alRunning ? 'ĐANG ĐIỆN PHÂN Al₂O₃ NÓNG CHẢY (950°C)' : 'TẠM DỪNG BỂ ĐIỆN PHÂN Al₂O₃';
+        hudDesc.textContent = 'Al³⁺ khử ở đáy than chì (–) tạo Al lỏng; O²⁻ oxi hoá ở khối than chì (+) tạo O₂, đốt cháy C thành CO và CO₂.';
+    }
+}
+
+function renderNaCl(dt) {
+    const targetTemp = naclStep === 0 ? 25 : 850;
+    naclTemp += (targetTemp - naclTemp) * Math.min(1, dt * 4);
+    const targetIns = naclStep === 2 ? 1 : 0;
+    naclInsert += (targetIns - naclInsert) * Math.min(1, dt * 3.5);
+    if (naclStep === 2 && naclInsert > 0.8) naclProgress = Math.min(1, naclProgress + dt * 0.04);
+
+    drawCylinder3D(0, -148, -165, 95, 0, '#334155', '#1e293b', 0.95);
+    if (naclStep >= 1) {
+        flames.forEach(f => {
+            f.y += f.vy;
+            if (f.y > -115) { f.y = -152; f.x = (Math.random() - 0.5) * 160; }
+            const fp = project(f.x, f.y, f.z);
+            ctx.beginPath();
+            ctx.arc(fp.x, fp.y, f.r * fp.scale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.55)';
+            ctx.fill();
+        });
+    }
+
+    const melt = Math.max(0, Math.min(1, (naclTemp - 200) / 600));
+    if (melt > 0.05) {
+        drawBox3D(-115, 115, -115, 5, -70, 70, 'rgba(245, 158, 11, 0.32)', 'rgba(251, 146, 60, 0.5)', 1);
+    } else {
+        drawBox3D(-100, 100, -115, -5, -60, 60, 'rgba(226, 232, 240, 0.15)', 'rgba(148, 163, 184, 0.3)', 1);
+    }
+    drawBox3D(-120, 120, -118, 65, -75, 75, 'rgba(255, 255, 255, 0.03)', 'rgba(148, 163, 184, 0.75)', 2);
+
+    const yBottom = 85 - naclInsert * 170;
+    const yTop = yBottom + 175;
+    drawCylinder3D(-65, yTop, yBottom, 14, 0, '#64748b', '#334155', 1);
+    drawCylinder3D(65, yTop, yBottom, 14, 0, '#64748b', '#334155', 1);
+
+    if (naclStep === 2 && naclInsert > 0.8) {
+        drawCylinder3D(65, 4, yBottom + 5, 15 + naclProgress * 6, 0, '#f8fafc', '#cbd5e1', 0.92);
+    }
+
+    if (naclStep === 2 && naclInsert > 0.85 && Math.random() < 0.45) {
+        const th = Math.random() * 6.28;
+        bubbles.push({ x: -65 + 17 * Math.cos(th), y: -80 + Math.random() * 75, z: 17 * Math.sin(th), r: 3.5 });
+    }
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        b.y += 1.1;
+        if (b.y > 40) { bubbles.splice(i, 1); continue; }
+        const bp = project(b.x, b.y, b.z);
+        ctx.beginPath();
+        ctx.arc(bp.x, bp.y, b.r * bp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#bef264';
+        ctx.fill();
+    }
+
+    if (chkMicro.checked) {
+        naclIons.forEach(ion => {
+            ion.phase += 0.08;
+            if (melt < 0.2) {
+                ion.x = ion.lx + Math.sin(ion.phase) * 1.2;
+                ion.y = ion.ly; ion.z = ion.lz;
+            } else if (naclStep === 1 || naclInsert < 0.8) {
+                ion.x += ion.vx; ion.y += ion.vy; ion.z += ion.vz;
+                if (ion.x < -100 || ion.x > 100) ion.vx *= -1;
+                if (ion.y < -105 || ion.y > -5) ion.vy *= -1;
+                if (ion.z < -55 || ion.z > 55) ion.vz *= -1;
+            } else {
+                const tx = ion.type === 'Cl-' ? -65 : 65;
+                ion.x += (tx - ion.x) * 0.015;
+                if (Math.abs(ion.x - tx) < 18) ion.x = (Math.random() - 0.5) * 60;
+            }
+            const ip = project(ion.x, ion.y, ion.z);
+            ctx.beginPath();
+            ctx.arc(ip.x, ip.y, (ion.type === 'Na+' ? 6 : 7.5) * ip.scale, 0, Math.PI * 2);
+            ctx.fillStyle = ion.type === 'Na+' ? '#a855f7' : '#22c55e';
+            ctx.fill();
+        });
+    }
+
+    // Mạch điện nguồn một chiều (+ | | -) nhìn rõ 100% không bị che
+    const pLT = project(-65, yTop, 0), pRT = project(65, yTop, 0);
+    const wireY = 225;
+    const pCL = project(-65, wireY, 0), pCR = project(65, wireY, 0);
+    const pBL = project(-8, wireY, 0), pBR = project(8, wireY, 0);
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(pLT.x, pLT.y); ctx.lineTo(pCL.x, pCL.y); ctx.lineTo(pBL.x, pBL.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pRT.x, pRT.y); ctx.lineTo(pCR.x, pCR.y); ctx.lineTo(pBR.x, pBR.y); ctx.stroke();
+
+    const pL1 = project(-6, wireY + 20, 0), pL2 = project(-6, wireY - 20, 0);
+    ctx.beginPath(); ctx.moveTo(pL1.x, pL1.y); ctx.lineTo(pL2.x, pL2.y); ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3.5; ctx.stroke();
+    const pS1 = project(6, wireY + 11, 0), pS2 = project(6, wireY - 11, 0);
+    ctx.beginPath(); ctx.moveTo(pS1.x, pS1.y); ctx.lineTo(pS2.x, pS2.y); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 5.5; ctx.stroke();
+
+    const pPlus = project(-88, yTop - 15, 0), pMinus = project(88, yTop - 15, 0);
+    ctx.fillStyle = '#f87171'; ctx.font = 'bold 18px Segoe UI'; ctx.textAlign = 'center';
+    ctx.fillText('(+) Anode', pPlus.x - 18, pPlus.y);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText('(–) Cathode', pMinus.x + 22, pMinus.y);
+
+    const pTitle = project(0, -95, 75);
+    ctx.fillStyle = '#fde047'; ctx.font = 'bold 15px Segoe UI';
+    ctx.fillText(naclStep === 0 ? 'NaCl rắn' : 'NaCl nóng chảy', pTitle.x, pTitle.y);
+}
+
+function renderCuSO4(dt) {
+    if (cuRunning) cuProgress = Math.min(1, cuProgress + dt * 0.03);
+
+    drawCylinder3D(0, -108, -140, 56, 0, '#334155', '#1e293b', 0.95);
+    drawCylinder3D(-95, 165, 10, 10, 0, '#64748b', '#334155', 1);
+    drawCylinder3D(-95, 190, 165, 6, 0, '#f87171', '#dc2626', 1);
+    drawCylinder3D(95, 165, 10, 10, 0, '#64748b', '#334155', 1);
+    if (cuProgress > 0.01) {
+        drawCylinder3D(95, 102, 10, 11 + cuProgress * 3.8, 0, '#ea580c', '#c2410c', 0.92);
+    }
+    drawCylinder3D(95, 190, 165, 6, 0, '#4ade80', '#16a34a', 1);
+
+    const steps = 60;
+    for (let i = 6; i < steps - 6; i++) {
+        const c = getUTubeSpine(i / steps);
+        const p = project(c.x, c.y, c.z);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 28 * p.scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(14, 165, 233, 0.42)';
+        ctx.fill();
+    }
+
+    if (cuRunning && Math.random() < 0.45) {
+        const th = Math.random() * 6.28;
+        bubbles.push({ x: -95 + 14 * Math.cos(th), y: 15 + Math.random() * 75, z: 14 * Math.sin(th), r: 3 });
+    }
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        if (cuRunning) b.y += 1.0;
+        if (b.y > 105) { bubbles.splice(i, 1); continue; }
+        const bp = project(b.x, b.y, b.z);
+        ctx.beginPath();
+        ctx.arc(bp.x, bp.y, b.r * bp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fill();
+    }
+
+    if (chkMicro.checked) {
+        cuIons.forEach(ion => {
+            if (cuRunning) {
+                ion.u += ion.type === 'Cu2+' ? 0.0006 : -0.0005;
+                if (ion.u > 0.86) ion.u = 0.25;
+                if (ion.u < 0.14) ion.u = 0.75;
+            }
+            const sp = getUTubeSpine(ion.u);
+            const ip = project(sp.x + sp.nx * ion.rOff * 0.5, sp.y + sp.ny * ion.rOff * 0.5, ion.zOff * 0.5);
+            ctx.beginPath();
+            ctx.arc(ip.x, ip.y, 6 * ip.scale, 0, Math.PI * 2);
+            ctx.fillStyle = ion.type === 'Cu2+' ? '#0ea5e9' : '#eab308';
+            ctx.fill();
+        });
+    }
+
+    const pAnode = project(-145, 175, 0), pCathode = project(150, 175, 0);
+    ctx.fillStyle = '#f87171'; ctx.font = 'bold 16px Segoe UI'; ctx.textAlign = 'center';
+    ctx.fillText('(+) Anode (Khí O₂↑)', pAnode.x, pAnode.y);
+    ctx.fillStyle = '#fb923c';
+    ctx.fillText('(–) Cathode (Cu bám)', pCathode.x, pCathode.y);
+
+    const pSol = project(0, -125, 0);
+    ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 15px Segoe UI';
+    ctx.fillText('Ống chữ U: Dung dịch CuSO₄ 0,5 M', pSol.x, pSol.y);
+}
+
+function renderAl2O3(dt) {
+    if (alRunning) {
+        alLevel = Math.min(0.82, alLevel + dt * 0.008);
+        anodeWear = Math.min(0.6, anodeWear + dt * 0.006);
+    }
+    const cutaway = chkCutaway.checked;
+
+    // Vỏ bể & lớp than chì Cathode (-)
+    drawBox3D(-175, 175, -135, 65, -100, 100, 'rgba(51, 65, 85, 0.85)', '#64748b', 2, cutaway);
+    drawBox3D(-155, 155, -120, 50, -85, 85, 'rgba(15, 23, 42, 0.9)', '#94a3b8', 1.5, cutaway);
+    drawBox3D(-220, -155, -112, -92, -25, 25, '#38bdf8', '#bae6fd', 1.5, false);
+
+    // Tầng Al lỏng & Tầng Al2O3 + Cryolite
+    const alTopY = -105 + alLevel * 48;
+    drawBox3D(-142, 142, -108, alTopY, -75, 75, 'rgba(241, 245, 249, 0.94)', '#ffffff', 1.5, false);
+    drawBox3D(-142, 142, alTopY, 32, -75, 75, 'rgba(245, 158, 11, 0.42)', 'rgba(251, 191, 36, 0.75)', 1.2, false);
+
+    // Rãnh tháo & nồi chứa Al lỏng
+    drawBox3D(142, 205, -108, -88, -18, 18, '#475569', '#94a3b8', 1.2, false);
+    drawBox3D(205, 275, -145, -75, -42, 42, 'rgba(51, 65, 85, 0.9)', '#94a3b8', 1.5, cutaway);
+    drawBox3D(212, 268, -140, -110, -35, 35, '#e2e8f0', '#cbd5e1', 1.2, false);
+
+    // Thanh cái cực dương (+) và 3 khối Anode than chì
+    drawBox3D(-165, 165, 140, 158, -18, 18, '#dc2626', '#fca5a5', 1.5, false);
+    const anodeBottomY = -28 + anodeWear * 32;
+    [-90, 0, 90].forEach(ax => {
+        drawBox3D(ax - 7, ax + 7, 72, 140, -7, 7, '#94a3b8', '#e2e8f0', 1, false);
+        drawBox3D(ax - 32, ax + 32, anodeBottomY, 72, -38, 38, '#1e293b', '#64748b', 1.5, false);
+    });
+
+    if (isTapping) {
+        tapTimer -= dt;
+        alLevel = Math.max(0.2, alLevel - dt * 0.08);
+        if (Math.random() < 0.7) tapDrops.push({ x: 202, y: -96, z: 0, vx: 2.0, vy: 0 });
+        if (tapTimer <= 0) isTapping = false;
+    }
+    for (let i = tapDrops.length - 1; i >= 0; i--) {
+        const d = tapDrops[i];
+        d.x += d.vx; d.vy -= 0.18; d.y += d.vy;
+        if (d.y < -125) { tapDrops.splice(i, 1); continue; }
+        const dp = project(d.x, d.y, d.z);
+        ctx.beginPath(); ctx.arc(dp.x, dp.y, 4.5 * dp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#f8fafc'; ctx.fill();
+    }
+
+    if (alRunning && Math.random() < 0.6) {
+        const ax = [-90, 0, 90][Math.floor(Math.random() * 3)];
+        bubbles.push({ x: ax + (Math.random() - 0.5) * 60, y: anodeBottomY + 5, z: (Math.random() - 0.5) * 60, r: 3 });
+    }
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        if (alRunning) b.y += 1.0;
+        if (b.y > 40) { bubbles.splice(i, 1); continue; }
+        const bp = project(b.x, b.y, b.z);
+        ctx.beginPath(); ctx.arc(bp.x, bp.y, b.r * bp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#a3e635'; ctx.fill();
+    }
+
+    if (chkMicro.checked) {
+        alIons.forEach(ion => {
+            if (alRunning) {
+                ion.y += ion.type === 'Al3+' ? -0.45 : 0.48;
+                if (ion.type === 'Al3+' && ion.y <= alTopY + 4) ion.y = 20;
+                if (ion.type === 'O2-' && ion.y >= anodeBottomY + 6) ion.y = alTopY + 10;
+            }
+            const ip = project(ion.x, ion.y, ion.z);
+            ctx.beginPath(); ctx.arc(ip.x, ip.y, 6 * ip.scale, 0, Math.PI * 2);
+            ctx.fillStyle = ion.type === 'Al3+' ? '#0ea5e9' : '#ef4444';
+            ctx.fill();
+        });
+    }
+
+    // Nhãn 3D hoàn toàn thông thoáng không bị bất kỳ khung chữ nào đè lên
+    const pAnode = project(0, 175, 0);
+    ctx.fillStyle = '#f87171'; ctx.font = 'bold 16px Segoe UI'; ctx.textAlign = 'center';
+    ctx.fillText('(+) Cực dương (Anode bằng than chì)', pAnode.x, pAnode.y);
+
+    const pCathode = project(-215, -75, 0);
+    ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 14px Segoe UI';
+    ctx.fillText('(–) Cực âm (Cathode than chì)', pCathode.x, pCathode.y);
+
+    const pBath = project(0, (alTopY + 30) / 2, 78);
+    ctx.fillStyle = '#fde047'; ctx.font = 'bold 14px Segoe UI';
+    ctx.fillText('Al₂O₃ + Cryolite nóng chảy', pBath.x, pBath.y);
+
+    const pAl = project(0, -100, 78);
+    ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Segoe UI';
+    ctx.fillText('Nhôm (Al) nóng chảy ở đáy', pAl.x, pAl.y);
+}
+
+let lastTime = performance.now();
+function animate(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+    ctx.clearRect(0, 0, width, height);
+    if (mode === 'nacl') renderNaCl(dt);
+    else if (mode === 'cuso4') renderCuSO4(dt);
+    else renderAl2O3(dt);
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
