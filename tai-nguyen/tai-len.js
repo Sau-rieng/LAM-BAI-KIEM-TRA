@@ -44,6 +44,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261031-144802",
+  "file": "tai-len/tl-261031-144802.html",
+  "anh": "",
+  "ten": "Na, K, Mg với nước",
+  "khoi": "10",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
