@@ -723,12 +723,16 @@ function docSoDo() {
   if (!sh) return null;
   try { const o = JSON.parse(String(sh.getRange(2, 1).getValue() || '')); return o && o.ghe ? o : null; } catch (e) { return null; }
 }
+// So cho moi ban cua tung day: so (moi day nhu nhau) hoac mang [2, 4, 2]
+function choDay(sd, d) { return Array.isArray(sd.cho) ? (Number(sd.cho[d]) || 2) : (Number(sd.cho) || 2); }
 function viTriGhe(sd, mahs) {
   if (!sd) return null;
   const k = Object.keys(sd.ghe).filter(function (x) { return sd.ghe[x] && String(sd.ghe[x].mahs) === String(mahs); })[0];
   if (!k) return null;
   const p = k.split('-').map(Number);
-  return {x: p[0] * (sd.cho || 2) + p[2], h: p[1]};
+  let x = 0;
+  for (let d = 0; d < p[0]; d++) x += choDay(sd, d);
+  return {x: x + p[2], h: p[1]};
 }
 // Chi so ma de theo ghe: 2 ma -> ban co; 3 ma -> lech 2; >=4 -> moi o 2x2 du 4 ma (canh, truoc, sau, cheo deu khac)
 function chiSoDe(v, n, mahs) {
@@ -751,12 +755,13 @@ function deTheoGhe(c, mahs, sd) {
 }
 function gvSoDoLuu(d) {
   const o = d.sodo || {};
-  const day = Math.round(Number(o.day)), hang = Math.round(Number(o.hang)), cho = Math.round(Number(o.cho));
-  if (!(day >= 1 && day <= 6 && hang >= 1 && hang <= 15 && cho >= 1 && cho <= 4)) return {ok: false, msg: 'So day / hang / cho khong hop le'};
+  const day = Math.round(Number(o.day)), hang = Math.round(Number(o.hang));
+  const cho = []; for (let k = 0; k < day; k++) cho.push(Math.round(Number(Array.isArray(o.cho) ? o.cho[k] : o.cho)));
+  if (!(day >= 1 && day <= 6 && hang >= 1 && hang <= 15) || cho.some(function (n) { return !(n >= 1 && n <= 6); })) return {ok: false, msg: 'So day / hang / cho khong hop le'};
   const ghe = {}, daCo = {};
   Object.keys(o.ghe || {}).forEach(function (k) {
     const p = k.split('-').map(Number), g = o.ghe[k] || {};
-    if (p.length !== 3 || p[0] >= day || p[1] >= hang || p[2] >= cho || p.some(function (x) { return !(x >= 0); })) return;
+    if (p.length !== 3 || p[0] >= day || p[1] >= hang || p[2] >= cho[p[0]] || p.some(function (x) { return !(x >= 0); })) return;
     const mahs = String(g.mahs || '').trim();
     if (!mahs || daCo[mahs]) return;
     daCo[mahs] = 1;
