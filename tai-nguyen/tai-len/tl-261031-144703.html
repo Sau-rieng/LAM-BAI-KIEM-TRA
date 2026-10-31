@@ -1,0 +1,427 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tinh thể Gang và Thép</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 3D stage left + fact sheet right; below, a carbon slider on the Fe–C axis and composition bars. Accent = temper colours (straw / blue). */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --line:#cfd6de; --fg:#1b232c; --muted:#5a6673;
+  --stage:#dde3ea; --straw:#a8741a; --blue:#2f5fb3; --fe:#8796a8; --c:#e29a1f; --fe3c:#b9ab8c; --gr:#4b525c;
+  --ok:#2f7d4f;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --surface:#18202a; --line:#2a3542; --fg:#e4e9ef; --muted:#93a0ae;
+  --stage:#0c1116; --straw:#e2b45c; --blue:#7aa2ea; --fe:#9fb0c4; --c:#f0b13c; --fe3c:#e6dcc6; --gr:#6b7280; --ok:#6fc28f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --surface:#18202a; --line:#2a3542; --fg:#e4e9ef; --muted:#93a0ae;
+  --stage:#0c1116; --straw:#e2b45c; --blue:#7aa2ea; --fe:#9fb0c4; --c:#f0b13c; --fe3c:#e6dcc6; --gr:#6b7280; --ok:#6fc28f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:28px}
+header{display:grid;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--straw)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.4vw,46px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--f-display);font-weight:700;font-size:22px;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:0}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;color:inherit;cursor:pointer}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:500}
+.tab[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tab:focus-visible,.chip:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;border-radius:10px;overflow:hidden;background:var(--stage);border:1px solid var(--line);height:min(560px,70vh);min-height:340px}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;left:12px;bottom:12px;right:12px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.hud>*{pointer-events:auto}
+.chip{border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 88%,transparent);border-radius:6px;padding:4px 10px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip[aria-pressed="true"]{border-color:var(--straw);color:var(--straw)}
+.hint{position:absolute;top:10px;right:12px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.modes{position:absolute;top:10px;left:12px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 24px)}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0}
+.sheet p{margin:0}
+dl.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+dl.facts dt{color:var(--muted)}
+dl.facts dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:13px;color:var(--muted)}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:-1px}
+section.block{display:grid;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:16px;min-width:0}
+.slider-row{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.slider-row label{font-weight:600}
+input[type=range]{flex:1 1 260px;accent-color:var(--straw);min-width:0}
+.cval{font-family:var(--f-mono);font-size:26px;font-weight:500;font-variant-numeric:tabular-nums;min-width:6ch}
+.axis{position:relative;height:46px;margin-top:4px}
+.axis .band{position:absolute;top:0;height:16px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--bg);overflow:hidden;white-space:nowrap}
+.axis .tick{position:absolute;top:18px;font-family:var(--f-mono);font-size:11px;color:var(--muted);transform:translateX(-50%)}
+.axis .ptr{position:absolute;top:-6px;width:2px;height:28px;background:var(--fg);transform:translateX(-1px)}
+.verdict{display:grid;gap:4px}
+.verdict strong{font-family:var(--f-display);font-size:19px}
+.phasebar{display:flex;height:22px;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.phasebar span{display:block;height:100%}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:820px){.split{grid-template-columns:minmax(0,1fr)}}
+.scroll{overflow-x:auto}
+table.comp{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+table.comp th,table.comp td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.comp th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.bar{display:flex;align-items:center;gap:8px}
+.bar i{display:block;height:10px;border-radius:2px;min-width:2px}
+.bar b{font-family:var(--f-mono);font-weight:400;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.roles{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.roles li{display:grid;grid-template-columns:3.2em 1fr;gap:10px;align-items:baseline}
+.roles .sym{font-family:var(--f-display);font-weight:800;font-size:18px;color:var(--blue)}
+.small{font-size:13px;color:var(--muted)}
+.linkbtn{border:1px solid var(--straw);color:var(--straw);background:transparent;border-radius:6px;padding:5px 12px;font-size:14px;justify-self:start}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Hợp kim Fe–C · mô phỏng 3D</div>
+    <h1>Tinh thể Gang và Thép</h1>
+    <p class="lede">Gang và thép đều là hợp kim của sắt với cacbon. Ranh giới là <b>2,14 % C</b>: ít hơn là thép, nhiều hơn là gang. Xoay các mô hình bên dưới để xem cacbon nằm ở đâu trong mạng sắt, và vì sao lượng cacbon làm vật liệu khác hẳn nhau.</p>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Chọn mô hình"></nav>
+
+  <div class="lab">
+    <div class="stage" id="stage">
+      <canvas id="cv" aria-label="Mô hình 3D, kéo để xoay, cuộn để phóng to"></canvas>
+      <div class="modes" id="modes" hidden></div>
+      <div class="hint">kéo để xoay · cuộn để phóng</div>
+      <div class="hud">
+        <button class="chip" id="tRot" aria-pressed="true">Tự xoay</button>
+        <button class="chip" id="tHard" aria-pressed="false">Quả cầu đặc</button>
+        <button class="chip" id="tC" aria-pressed="true">Hiện cacbon</button>
+      </div>
+    </div>
+    <aside class="sheet" id="sheet" aria-live="polite"></aside>
+  </div>
+
+  <section class="block">
+    <h2>Lượng cacbon quyết định tên gọi</h2>
+    <div class="panel">
+      <div class="slider-row">
+        <label for="cRange">Hàm lượng cacbon</label>
+        <input type="range" id="cRange" min="0" max="6.67" step="0.01" value="0.45">
+        <span class="cval" id="cVal">0,45 %</span>
+      </div>
+      <div class="axis" id="axis"></div>
+      <div class="verdict">
+        <span class="small" id="vKind">Thép</span>
+        <strong id="vName">Thép trước cùng tích</strong>
+        <span id="vDesc"></span>
+      </div>
+      <div style="display:grid;gap:6px">
+        <span class="small">Tỉ lệ pha ở nhiệt độ phòng (cân bằng, quy tắc đòn bẩy)</span>
+        <div class="phasebar" id="pbar"><span id="pF" style="background:var(--fe)"></span><span id="pC" style="background:var(--fe3c)"></span></div>
+        <span class="small" id="pTxt"></span>
+      </div>
+      <button class="linkbtn" id="goMicro">Xem tổ chức tế vi tương ứng</button>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>Thành phần hóa học điển hình</h2>
+    <div class="split">
+      <div class="panel">
+        <div class="scroll">
+          <table class="comp" id="comp"></table>
+        </div>
+        <p class="small" style="margin:0">Giá trị trung bình điển hình, % khối lượng; P và S là giới hạn tối đa. Thành phần cụ thể tùy theo tiêu chuẩn và nhà sản xuất. Phần còn lại là sắt.</p>
+      </div>
+      <div class="panel">
+        <h3>Vai trò từng nguyên tố</h3>
+        <ul class="roles">
+          <li><span class="sym">C</span><span>Quyết định độ cứng và độ bền. Càng nhiều C, vật liệu càng cứng nhưng càng giòn, kém dẻo và khó hàn.</span></li>
+          <li><span class="sym">Si</span><span>Trong thép dùng để khử oxy. Trong gang, Si thúc đẩy cacbon tách ra thành graphit, tạo gang xám.</span></li>
+          <li><span class="sym">Mn</span><span>Khử oxy, kết hợp với S thành MnS để giảm tác hại của lưu huỳnh, tăng độ bền. Trong gang, Mn cản trở graphit hóa.</span></li>
+          <li><span class="sym">P</span><span>Tạp chất có hại trong thép, gây giòn nguội. Trong gang, P làm kim loại lỏng chảy loãng hơn, dễ đúc chi tiết mỏng.</span></li>
+          <li><span class="sym">S</span><span>Tạp chất có hại, tạo FeS gây giòn nóng khi cán, rèn. Cũng cản trở graphit hóa trong gang.</span></li>
+          <li><span class="sym">Mg</span><span>Chỉ cho vào gang cầu (khoảng 0,04 %) để graphit kết tinh thành hạt cầu thay vì tấm, giúp gang dẻo dai hơn.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const fmt = (v,d=2) => v.toFixed(d).replace('.',',');
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- three setup ---------- */
+const canvas = $('cv'), stage = $('stage');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+controls.autoRotate = !reduce; controls.autoRotateSpeed = 1.1;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x334455, 0.75));
+const d1 = new THREE.DirectionalLight(0xffffff, 0.85); d1.position.set(8,12,10); scene.add(d1);
+const d2 = new THREE.DirectionalLight(0xbfd4ff, 0.35); d2.position.set(-10,-4,-8); scene.add(d2);
+let group = new THREE.Group(); scene.add(group);
+
+const mats = {};
+function makeMats(){
+  const m = (c,o={}) => new THREE.MeshStandardMaterial(Object.assign({color:new THREE.Color(c), roughness:.38, metalness:.25}, o));
+  Object.values(mats).forEach(x=>x.dispose && x.dispose());
+  mats.fe = m(css('--fe'));
+  mats.c = m(css('--c'), {roughness:.5, metalness:0});
+  mats.fe3c = m(css('--fe3c'), {roughness:.55, metalness:.1});
+  mats.gr = m(css('--gr'), {roughness:.9, metalness:0});
+  mats.bond = m(css('--muted'), {roughness:.6, metalness:0});
+  mats.line = new THREE.LineBasicMaterial({color:new THREE.Color(css('--muted')), transparent:true, opacity:.55});
+  mats.lineHi = new THREE.LineBasicMaterial({color:new THREE.Color(css('--straw'))});
+  mats.matrix = m(css('--fe'), {transparent:true, opacity:.10, depthWrite:false, side:THREE.DoubleSide});
+  renderer.setClearColor(new THREE.Color(css('--stage')));
+}
+const sphereGeo = new THREE.SphereGeometry(1, 32, 20);
+const cylGeo = new THREE.CylinderGeometry(1,1,1,10);
+
+function clearGroup(){
+  group.traverse(o=>{ if(o.geometry && o.geometry!==sphereGeo && o.geometry!==cylGeo) o.geometry.dispose(); });
+  scene.remove(group); group = new THREE.Group(); scene.add(group);
+}
+function atom(x,y,z,r,mat,tag){ const s=new THREE.Mesh(sphereGeo,mat); s.position.set(x,y,z); s.scale.setScalar(r); s.userData.tag=tag; group.add(s); return s; }
+function bond(a,b,r,mat){
+  const A=new THREE.Vector3(...a), B=new THREE.Vector3(...b), d=B.clone().sub(A), L=d.length();
+  const c=new THREE.Mesh(cylGeo,mat); c.scale.set(r,L,r); c.position.copy(A).addScaledVector(d,.5);
+  c.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d.normalize()); group.add(c); return c;
+}
+function lines(segs, mat){
+  const g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(segs.flat(),3));
+  const l=new THREE.LineSegments(g,mat); group.add(l); return l;
+}
+function gridLines(n, ax, ay, az, off){
+  const s=[];
+  for(let i=0;i<=n;i++)for(let j=0;j<=n;j++){
+    s.push([i*ax+off[0], j*ay+off[1], off[2]],[i*ax+off[0], j*ay+off[1], n*az+off[2]]);
+    s.push([i*ax+off[0], off[1], j*az+off[2]],[i*ax+off[0], n*ay+off[1], j*az+off[2]]);
+    s.push([off[0], i*ay+off[1], j*az+off[2]],[n*ax+off[0], i*ay+off[1], j*az+off[2]]);
+  }
+  return s;
+}
+function boxEdges(w,h,d,cx,cy,cz,mat){
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)), mat);
+  e.position.set(cx,cy,cz); group.add(e); return e;
+}
+function rng(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+
+const opts = {hard:false, showC:true};
+
+/* ---------- scenes ---------- */
+const S = {};
+S.bcc = {
+  label:'Ferit (α-Fe)', dist:24,
+  build(){
+    const a=2.866, n=3, o=-n*a/2, rFe=opts.hard?1.241:.5, rC=opts.hard?.77:.32;
+    for(let i=0;i<=n;i++)for(let j=0;j<=n;j++)for(let k=0;k<=n;k++) atom(o+i*a,o+j*a,o+k*a,rFe,mats.fe);
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let k=0;k<n;k++) atom(o+(i+.5)*a,o+(j+.5)*a,o+(k+.5)*a,rFe,mats.fe);
+    lines(gridLines(n,a,a,a,[o,o,o]), mats.line);
+    boxEdges(a,a,a,o+1.5*a,o+1.5*a,o+1.5*a,mats.lineHi);
+    if(opts.showC){ // octahedral sites: face centres / edge midpoints
+      atom(o+1.5*a,o+1.5*a,o+1*a,rC,mats.c);
+      atom(o+.5*a,o+2*a,o+2.5*a,rC,mats.c);
+    }
+  },
+  sheet:`<h2>Ferit · α-Fe</h2>
+  <p>Sắt ở nhiệt độ thường có mạng <b>lập phương tâm khối (BCC)</b>: 8 nguyên tử ở đỉnh và 1 ở tâm khối. Các lỗ hổng giữa nguyên tử rất nhỏ, nên gần như không chứa được cacbon.</p>
+  <dl class="facts"><dt>Mạng</dt><dd>BCC</dd><dt>Hằng số mạng</dt><dd>a = 2,866 Å</dd><dt>Nguyên tử / ô</dt><dd>2</dd><dt>Mật độ xếp</dt><dd>68 %</dd><dt>Hòa tan C tối đa</dt><dd>0,02 % ở 727 °C</dd><dt>Ổn định</dt><dd>dưới 912 °C</dd></dl>
+  <p class="small">Ô vàng là một ô cơ sở. Chỉ có 2 nguyên tử C (màu cam) trong cả khối 54 nguyên tử sắt, và mỗi nguyên tử C chen vào làm méo mạng.</p>
+  <div class="legend"><span><i class="dot" style="background:var(--fe)"></i>Fe</span><span><i class="dot" style="background:var(--c)"></i>C xen kẽ</span></div>`
+};
+S.fcc = {
+  label:'Austenit (γ-Fe)', dist:22,
+  build(){
+    const a=3.647, n=2, o=-n*a/2, rFe=opts.hard?1.29:.5, rC=opts.hard?.77:.32;
+    const P=(x,y,z)=>atom(o+x*a,o+y*a,o+z*a,rFe,mats.fe);
+    for(let i=0;i<=n;i++)for(let j=0;j<=n;j++)for(let k=0;k<=n;k++) P(i,j,k);
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let k=0;k<=n;k++){ P(i+.5,j+.5,k); P(i+.5,k,j+.5); P(k,i+.5,j+.5); }
+    lines(gridLines(n,a,a,a,[o,o,o]), mats.line);
+    boxEdges(a,a,a,o+.5*a,o+.5*a,o+.5*a,mats.lineHi);
+    if(opts.showC){ // octahedral sites: cell centres + edge midpoints
+      [[.5,.5,.5],[1.5,1.5,.5],[1.5,.5,1.5],[.5,1.5,1.5],[1,1.5,1],[1.5,0,2]].forEach(p=>atom(o+p[0]*a,o+p[1]*a,o+p[2]*a,rC,mats.c));
+    }
+  },
+  sheet:`<h2>Austenit · γ-Fe</h2>
+  <p>Khi nung trên 727 °C, sắt chuyển sang mạng <b>lập phương tâm mặt (FCC)</b>. Nguyên tử xếp chặt hơn nhưng lỗ hổng bát diện ở tâm ô lại rộng hơn, nên chứa được nhiều cacbon hơn ferit khoảng 100 lần.</p>
+  <dl class="facts"><dt>Mạng</dt><dd>FCC</dd><dt>Hằng số mạng</dt><dd>a ≈ 3,65 Å</dd><dt>Nguyên tử / ô</dt><dd>4</dd><dt>Mật độ xếp</dt><dd>74 %</dd><dt>Hòa tan C tối đa</dt><dd>2,14 % ở 1147 °C</dd><dt>Tồn tại</dt><dd>727 – 1495 °C</dd></dl>
+  <p class="small">Con số 2,14 % chính là ranh giới giữa thép và gang. Thép có thể nung thành austenit hoàn toàn để rèn và tôi, còn gang thì không.</p>
+  <div class="legend"><span><i class="dot" style="background:var(--fe)"></i>Fe</span><span><i class="dot" style="background:var(--c)"></i>C ở lỗ bát diện</span></div>`
+};
+S.fe3c = {
+  label:'Xêmentit (Fe₃C)', dist:30,
+  build(){
+    const A=5.09,B=6.74,C=4.52, nx=2,ny=1,nz=2;
+    const sites=[['fe',.036,.25,.852],['fe',.186,.063,.328],['c',.890,.25,.450]];
+    const ops=[p=>[p[0],p[1],p[2]],p=>[.5-p[0],-p[1],.5+p[2]],p=>[-p[0],.5+p[1],-p[2]],p=>[.5+p[0],.5-p[1],.5-p[2]],
+               p=>[-p[0],-p[1],-p[2]],p=>[.5+p[0],p[1],.5-p[2]],p=>[p[0],.5-p[1],p[2]],p=>[.5-p[0],.5+p[1],.5+p[2]]];
+    const uniq={fe:[],c:[]}, w=v=>((v%1)+1)%1;
+    sites.forEach(([t,...p])=>ops.forEach(op=>{ const q=op(p).map(w);
+      if(!uniq[t].some(u=>u.every((v,i)=>Math.abs(v-q[i])<1e-3))) uniq[t].push(q); }));
+    const o=[-nx*A/2,-ny*B/2,-nz*C/2], atoms={fe:[],c:[]};
+    for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++)
+      for(const t of ['fe','c']) uniq[t].forEach(q=>atoms[t].push([o[0]+(i+q[0])*A,o[1]+(j+q[1])*B,o[2]+(k+q[2])*C]));
+    const rFe=opts.hard?1.24:.5, rC=opts.hard?.77:.34;
+    atoms.fe.forEach(p=>atom(...p,rFe,mats.fe));
+    if(opts.showC){
+      atoms.c.forEach(p=>atom(...p,rC,mats.c));
+      if(!opts.hard) atoms.c.forEach(c=>atoms.fe.forEach(f=>{ const d=Math.hypot(c[0]-f[0],c[1]-f[1],c[2]-f[2]); if(d<2.15) bond(c,f,.07,mats.bond); }));
+    }
+    for(let i=0;i<nx;i++)for(let k=0;k<nz;k++) boxEdges(A,B,C,o[0]+(i+.5)*A,o[1]+.5*B,o[2]+(k+.5)*C,(i===0&&k===0)?mats.lineHi:mats.line);
+  },
+  sheet:`<h2>Xêmentit · Fe₃C</h2>
+  <p>Khi cacbon vượt quá khả năng hòa tan, nó kết hợp với sắt thành hợp chất <b>Fe₃C</b>. Mỗi nguyên tử C nằm giữa 6 nguyên tử Fe xếp thành lăng trụ tam giác. Đây là pha cứng nhất trong thép và gang trắng.</p>
+  <dl class="facts"><dt>Mạng</dt><dd>Trực thoi (Pnma)</dd><dt>Ô cơ sở</dt><dd>5,09 × 6,74 × 4,52 Å</dd><dt>Nguyên tử / ô</dt><dd>12 Fe + 4 C</dd><dt>Hàm lượng C</dt><dd>6,67 %</dd><dt>Độ cứng</dt><dd>≈ 800 HV</dd><dt>Tính chất</dt><dd>rất cứng, rất giòn</dd></dl>
+  <p class="small">Hiển thị 4 ô cơ sở, ô vàng là một ô. Thanh xám nối C với các Fe gần nhất (≈ 2,0 Å).</p>
+  <div class="legend"><span><i class="dot" style="background:var(--fe)"></i>Fe</span><span><i class="dot" style="background:var(--c)"></i>C</span></div>`
+};
+S.gr = {
+  label:'Graphit', dist:26,
+  build(){
+    const a=2.46, h=3.35, R=7.2, layers=3, pts=[];
+    const a1=[a,0], a2=[a/2,a*Math.sqrt(3)/2], sh=[(a1[0]+a2[0])/3,(a1[1]+a2[1])/3];
+    for(let L=0;L<layers;L++){
+      const off = L%2 ? sh : [0,0], y=(L-(layers-1)/2)*h, lp=[];
+      for(let i=-6;i<=6;i++)for(let j=-6;j<=6;j++)for(const b of [[0,0],sh]){
+        const x=i*a1[0]+j*a2[0]+b[0]+off[0]-sh[0]/2, z=i*a1[1]+j*a2[1]+b[1]+off[1]-sh[1]/2;
+        if(Math.hypot(x,z)<R) lp.push([x,y,z]);
+      }
+      pts.push(lp);
+    }
+    const r=opts.hard?.71:.3;
+    pts.forEach(lp=>{ lp.forEach(p=>atom(...p,r,mats.c));
+      if(!opts.hard) for(let i=0;i<lp.length;i++)for(let j=i+1;j<lp.length;j++){ const p=lp[i],q=lp[j];
+        if(Math.hypot(p[0]-q[0],p[2]-q[2])<1.5) bond(p,q,.09,mats.bond); } });
+    // dashed hint of weak interlayer bonding
+    const s=[]; pts[0].forEach((p,i)=>{ if(i%5===0){ const q=pts[1].find(q=>Math.hypot(q[0]-p[0],q[2]-p[2])<.05); if(q) s.push(p,q);} });
+    if(s.length) lines(s, mats.line);
+  },
+  sheet:`<h2>Graphit</h2>
+  <p>Trong gang xám và gang cầu, phần lớn cacbon không tạo Fe₃C mà tách ra thành <b>graphit</b>: các lớp nguyên tử C hình tổ ong. Trong mỗi lớp liên kết rất bền, nhưng giữa các lớp chỉ có lực yếu, nên các lớp dễ trượt lên nhau.</p>
+  <dl class="facts"><dt>Mạng</dt><dd>Lục giác, xếp lớp ABA</dd><dt>Liên kết C–C</dt><dd>1,42 Å</dd><dt>Khoảng cách lớp</dt><dd>3,35 Å</dd><dt>Hằng số mạng</dt><dd>a = 2,46 Å</dd><dt>Tính chất</dt><dd>mềm, bôi trơn</dd></dl>
+  <p class="small">Nhờ graphit, gang xám dễ cắt gọt, giảm rung tốt và chịu mài mòn, nhưng chịu kéo kém vì mỗi tấm graphit giống một vết nứt nhỏ.</p>
+  <div class="legend"><span><i class="dot" style="background:var(--c)"></i>C</span><span>Đường mảnh: lực liên kết yếu giữa các lớp</span></div>`
+};
+const micro = {
+  steel:{label:'Thép (peclit)', sheet:`<h2>Thép 0,45 % C</h2><p>Nền <b>ferit</b> mềm (khối trong mờ) xen các cụm <b>peclit</b>: những tấm Fe₃C mỏng xếp song song với ferit, giống lá bánh. Peclit làm thép bền hơn mà vẫn giữ được độ dẻo.</p><dl class="facts"><dt>Tổ chức</dt><dd>ferit + peclit</dd><dt>Peclit</dt><dd>≈ 55 %</dd><dt>Khoảng cách tấm</dt><dd>≈ 0,1 – 1 µm</dd></dl>`},
+  white:{label:'Gang trắng', sheet:`<h2>Gang trắng</h2><p>Toàn bộ cacbon nằm ở dạng <b>Fe₃C</b> (lêđêburit). Mặt gãy sáng trắng nên gọi là gang trắng. Rất cứng và chịu mài mòn nhưng giòn, gần như không cắt gọt được.</p><dl class="facts"><dt>Tổ chức</dt><dd>lêđêburit + peclit</dd><dt>Dạng C</dt><dd>Fe₃C</dd><dt>Dùng cho</dt><dd>bi nghiền, lót máy nghiền</dd></dl>`},
+  gray:{label:'Gang xám', sheet:`<h2>Gang xám</h2><p>Nhiều Si và nguội chậm khiến cacbon tách ra thành <b>graphit dạng tấm</b> cong. Mặt gãy màu xám. Dễ đúc, dễ cắt gọt, giảm rung tốt, nhưng chịu kéo kém vì mép tấm graphit tập trung ứng suất.</p><dl class="facts"><dt>Tổ chức</dt><dd>nền + graphit tấm</dd><dt>Độ bền kéo</dt><dd>150 – 350 MPa</dd><dt>Dùng cho</dt><dd>thân máy, bệ máy, đĩa phanh</dd></dl>`},
+  ductile:{label:'Gang cầu', sheet:`<h2>Gang cầu</h2><p>Thêm một lượng nhỏ Mg hoặc Ce khi đúc, graphit kết tinh thành <b>hạt cầu</b>. Không còn mép sắc, nên gang dẻo và bền gần bằng thép mà vẫn đúc được.</p><dl class="facts"><dt>Tổ chức</dt><dd>nền + graphit cầu</dd><dt>Độ bền kéo</dt><dd>400 – 800 MPa</dd><dt>Độ giãn dài</dt><dd>2 – 18 %</dd><dt>Dùng cho</dt><dd>trục khuỷu, ống nước</dd></dl>`}
+};
+let microMode='steel';
+S.micro = {
+  label:'Tổ chức tế vi', dist:26,
+  build(){
+    const L=10, r=rng({steel:7,white:11,gray:3,ductile:5}[microMode]);
+    const box=new THREE.Mesh(new THREE.BoxGeometry(L,L,L), mats.matrix); group.add(box);
+    boxEdges(L,L,L,0,0,0,mats.line);
+    const rot=m=>{ m.rotation.set(r()*Math.PI,r()*Math.PI,r()*Math.PI); };
+    const inside=s=>(r()-.5)*(L-s);
+    const colony=(cx,cy,cz,size,t)=>{
+      const g=new THREE.Group(); g.position.set(cx,cy,cz); g.rotation.set(r()*3,r()*3,r()*3);
+      const n=Math.round(size/.32);
+      for(let i=0;i<n;i++){ const p=new THREE.Mesh(new THREE.BoxGeometry(size,size*.85,t),mats.fe3c); p.position.z=(i-(n-1)/2)*.32; g.add(p); }
+      group.add(g);
+    };
+    if(microMode==='steel'){ for(let i=0;i<7;i++) colony(inside(3),inside(3),inside(3),2.2+r()*.8,.05); }
+    if(microMode==='white'){
+      for(let i=0;i<70;i++){ const m=new THREE.Mesh(new THREE.BoxGeometry(.5+r()*2.2,.25+r()*.4,.25+r()*.4),mats.fe3c); m.position.set(inside(2),inside(2),inside(2)); rot(m); group.add(m); }
+      for(let i=0;i<4;i++) colony(inside(2.5),inside(2.5),inside(2.5),1.5,.04);
+    }
+    if(microMode==='gray'){
+      for(let i=0;i<26;i++){ const m=new THREE.Mesh(sphereGeo,mats.gr); m.scale.set(1.1+r()*1.5,.07,.45+r()*.6); m.position.set(inside(3),inside(3),inside(3)); rot(m); group.add(m); }
+    }
+    if(microMode==='ductile'){
+      for(let i=0;i<34;i++){ const s=.3+r()*.45; atom(inside(2*s+.2),inside(2*s+.2),inside(2*s+.2),s,mats.gr); }
+    }
+  },
+  get sheet(){ return micro[microMode].sheet + `<p class="small">Khối mô phỏng kích thước cỡ vài chục µm, không theo đúng tỉ lệ. Đổi loại vật liệu bằng các nút trên khung 3D.</p>
+  <div class="legend"><span><i class="dot" style="background:var(--fe);opacity:.5"></i>Nền kim loại</span><span><i class="dot" style="background:var(--fe3c)"></i>Fe₃C</span><span><i class="dot" style="background:var(--gr)"></i>Graphit</span></div>`; }
+};
+
+/* ---------- UI ---------- */
+let cur='bcc';
+const tabs=$('tabs'), modes=$('modes');
+Object.entries(S).forEach(([k,v])=>{ const b=document.createElement('button'); b.className='tab'; b.textContent=v.label; b.dataset.k=k; b.setAttribute('aria-pressed',k===cur); b.onclick=()=>show(k,true); tabs.appendChild(b); });
+Object.entries(micro).forEach(([k,v])=>{ const b=document.createElement('button'); b.className='chip'; b.textContent=v.label; b.dataset.m=k; b.onclick=()=>{ microMode=k; show('micro'); }; modes.appendChild(b); });
+
+function show(k, resetCam){
+  const changed = k!==cur; cur=k; clearGroup(); S[k].build();
+  $('sheet').innerHTML=S[k].sheet;
+  tabs.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  modes.hidden = k!=='micro';
+  modes.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===microMode));
+  $('tHard').disabled = $('tC').disabled = k==='micro';
+  $('tHard').style.opacity = $('tC').style.opacity = k==='micro'?.4:1;
+  if(changed||resetCam){ const d=S[k].dist; camera.position.set(d*.62,d*.42,d*.66); controls.target.set(0,0,0); }
+}
+function toggle(btn, fn){ btn.onclick=()=>{ const v=btn.getAttribute('aria-pressed')!=='true'; btn.setAttribute('aria-pressed',v); fn(v); }; }
+$('tRot').setAttribute('aria-pressed', !reduce);
+toggle($('tRot'), v=>controls.autoRotate=v);
+toggle($('tHard'), v=>{ opts.hard=v; show(cur); });
+toggle($('tC'), v=>{ opts.showC=v; show(cur); });
+
+function resize(){ const w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage);
+function retheme(){ makeMats(); show(cur); }
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+new MutationObserver(retheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+makeMats(); resize(); show('bcc', true);
+(function loop(){ controls.update(); renderer.render(scene,camera); requestAnimationFrame(loop); })();
+
+/* ---------- carbon slider ---------- */
+const MAX=6.67, pct=v=>v/MAX*100;
+const bands=[[0,.8,'Thép','var(--blue)'],[.8,2.14,'','color-mix(in srgb,var(--blue) 65%,var(--bg))'],[2.14,4.3,'Gang','var(--straw)'],[4.3,6.67,'','color-mix(in srgb,var(--straw) 60%,var(--bg))']];
+const axis=$('axis');
+axis.innerHTML = bands.map(b=>`<div class="band" style="left:${pct(b[0])}%;width:${pct(b[1]-b[0])}%;background:${b[3]}">${b[2]}</div>`).join('')
+  + [0,.8,2.14,4.3,6.67].map(t=>`<span class="tick" style="left:${pct(t)}%">${String(t).replace('.',',')}</span>`).join('')
+  + `<div class="ptr" id="ptr"></div>`;
+axis.querySelectorAll('.tick')[0].style.transform='none';
+axis.querySelectorAll('.tick')[4].style.transform='translateX(-100%)';
+function classify(c){
+  if(c<0.02) return ['Sắt','Sắt kỹ thuật','Gần như ferit nguyên chất, rất mềm và dẻo.','steel'];
+  if(c<0.78) return ['Thép','Thép trước cùng tích','Ferit + peclit. Thép kết cấu, trục, bánh răng (ví dụ C45).','steel'];
+  if(c<=0.82) return ['Thép','Thép cùng tích','100 % peclit. Thép lò xo, dây cáp.','steel'];
+  if(c<2.14) return ['Thép','Thép sau cùng tích','Peclit + lưới Fe₃C II. Thép dụng cụ: dao, mũi khoan, giũa.','steel'];
+  if(c<4.25) return ['Gang','Gang trước cùng tinh','Theo giản đồ Fe–Fe₃C: peclit + Fe₃C II + lêđêburit. Nếu nhiều Si và nguội chậm, C tách thành graphit (gang xám).','gray'];
+  if(c<=4.35) return ['Gang','Gang cùng tinh','Lêđêburit, nhiệt độ nóng chảy thấp nhất (1147 °C), đúc tốt nhất.','white'];
+  if(c<6.67) return ['Gang','Gang sau cùng tinh','Lêđêburit + Fe₃C I. Rất giòn, ít dùng.','white'];
+  return ['Hợp chất','Xêmentit Fe₃C','Hoàn toàn là Fe₃C.','white'];
+}
+let suggested='steel';
+function upd(){
+  const c=+$('cRange').value, k=classify(c);
+  $('cVal').textContent=fmt(c)+' %'; $('ptr').style.left=pct(c)+'%';
+  $('vKind').textContent=k[0]; $('vName').textContent=k[1]; $('vDesc').textContent=k[2];
+  const f3=Math.min(100,Math.max(0,(c-0.006)/(MAX-0.006)*100));
+  $('pF').style.width=(100-f3)+'%'; $('pC').style.width=f3+'%';
+  $('pTxt').textContent=`Ferit ${fmt(100-f3,1)} % · Fe₃C ${fmt(f3,1)} %`;
+  suggested=k[3];
+}
+$('cRange').addEventListener('input',upd); upd();
+$('goMicro').onclick=()=>{ microMode=suggested; show('micro',true); stage.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'}); };
+
+/* ---------- composition table ---------- */
+const comp=[['C',.45,3.6,3.6],['Si',.27,2.2,2.5],['Mn',.65,.65,.3],['P',.035,.3,.08],['S',.035,.15,.02],['Mg',0,0,.045]];
+const heads=['Thép C45','Gang xám GX15-32','Gang cầu GC42-12'], cols=['var(--blue)','var(--straw)','var(--ok)'];
+$('comp').innerHTML = `<thead><tr><th>Nguyên tố</th>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`
+  + comp.map(r=>`<tr><td><b>${r[0]}</b></td>${r.slice(1).map((v,i)=>`<td><div class="bar">${v?`<i style="width:${v/4*80}px;background:${cols[i]}"></i>`:''}<b>${v?fmt(v,v<.1?3:2).replace(/0+$/,'').replace(/,$/,''):'—'}</b></div></td>`).join('')}</tr>`).join('')
+  + `</tbody>`;
+})();
+</script>
+
+</body></html>
