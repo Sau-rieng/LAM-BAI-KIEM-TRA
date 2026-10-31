@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Điện Phân Al2O3 Nóng Chảy (Sản Xuất Nhôm)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-nav {
+            height: 54px;
+            background: rgba(15, 23, 42, 0.96);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            z-index: 20;
+        }
+        .nav-title {
+            font-weight: 700;
+            font-size: 1.08rem;
+            color: #f59e0b;
+            letter-spacing: 0.3px;
+        }
+        .badge-cryolite {
+            background: rgba(245, 158, 11, 0.18);
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        #main-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 54px);
+            overflow: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            height: 100%;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        #sidebar {
+            width: 430px;
+            background: rgba(15, 23, 42, 0.94);
+            border-left: 1px solid #334155;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 13px;
+        }
+        .card h2 {
+            font-size: 0.88rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 9px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        button {
+            flex: 1;
+            padding: 9px 10px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #f8fafc;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        button:hover {
+            border-color: #f59e0b;
+            transform: translateY(-1px);
+        }
+        button.primary {
+            background: linear-gradient(90deg, #ea580c, #d97706);
+            border-color: #fb923c;
+        }
+        button.primary.paused {
+            background: #10b981;
+            border-color: #34d399;
+        }
+        button.tap-btn {
+            background: linear-gradient(90deg, #0284c7, #2563eb);
+            border-color: #38bdf8;
+        }
+        .control-group {
+            margin-top: 8px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.84rem;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #f59e0b;
+            cursor: pointer;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            padding: 4px 0;
+            border-bottom: 1px dashed #334155;
+        }
+        .eq-box {
+            background: #0f172a;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.81rem;
+            margin-top: 6px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.45;
+        }
+        .eq-box.anode {
+            border-left-color: #ef4444;
+        }
+        .eq-box.cathode {
+            border-left-color: #38bdf8;
+        }
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            font-size: 0.81rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .hud-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(15, 23, 42, 0.86);
+            border: 1px solid #334155;
+            padding: 12px 16px;
+            border-radius: 10px;
+            pointer-events: none;
+            backdrop-filter: blur(6px);
+            max-width: 460px;
+        }
+        .hud-overlay p {
+            font-size: 0.84rem;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.84rem;
+            margin-top: 7px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-nav">
+    <div class="nav-title">MÔ PHỎNG 3D SẢN XUẤT NHÔM: ĐIỆN PHÂN Al₂O₃ NÓNG CHẢY</div>
+    <div class="badge-cryolite">Hỗn hợp Al₂O₃ + Cryolite (Na₃AlF₆) ở ~950°C</div>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+        <div class="hud-overlay">
+            <p><strong>Điều khiển 3D:</strong> Kéo chuột trái để xoay 360° quanh bể điện phân | Cuộn chuột để thu phóng</p>
+            <p>Cấu tạo bể: <strong>Vỏ thép</strong> lót <strong>than chì làm Cathode (–)</strong> ở đáy, các khối <strong>than chì làm Anode (+)</strong> nhúng từ trên xuống.</p>
+            <p id="hud-note" style="color:#fbbf24; font-size:0.8rem; margin-top:4px;">
+                Lưu ý: Cực dương Anode (than chì) bị ăn mòn dần do phản ứng với khí O₂ tạo thành CO và CO₂.
+            </p>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="card">
+            <h2>Bảng Điều Khiển Bể Điện Phân</h2>
+            <div class="btn-row">
+                <button id="btn-toggle" class="primary">Tạm Dừng Điện Phân</button>
+                <button id="btn-tap" class="tap-btn">Mở Cửa Tháo Nhôm Lỏng</button>
+            </div>
+            <div class="btn-row">
+                <button id="btn-replace-anode">Thay Mới Cực Dương (Anode)</button>
+                <button id="btn-reset">Làm Mới Toàn Bộ</button>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <span>Cường độ dòng điện / Tốc độ điện phân:</span>
+                    <strong id="speed-val">1.0x</strong>
+                </label>
+                <input type="range" id="speed-slider" min="0.5" max="2.5" step="0.25" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <span>Hạ thấp khối Anode than chì (+):</span>
+                    <strong id="anode-pos-val">Chuẩn</strong>
+                </label>
+                <input type="range" id="anode-slider" min="-25" max="20" step="1" value="0">
+            </div>
+
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-cutaway" checked>
+                <span>Mở mặt cắt 3D phía trước để nhìn rõ lòng bể</span>
+            </label>
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-micro" checked>
+                <span>Hiển thị hạt vi mô (Ion Al³⁺, O²⁻, khí O₂/CO₂)</span>
+            </label>
+        </div>
+
+        <div class="card">
+            <h2>Thông Số Vận Hành Bể Điện Phân</h2>
+            <div class="stats-row">
+                <span>Nhiệt độ vận hành (có Cryolite):</span>
+                <strong style="color:#fb923c;">950 °C (Giảm từ 2050 °C)</strong>
+            </div>
+            <div class="stats-row">
+                <span>Lượng Nhôm (Al) nóng chảy ở đáy:</span>
+                <strong id="stat-al" style="color:#38bdf8;">12.5 kg</strong>
+            </div>
+            <div class="stats-row">
+                <span>Độ hao mòn cực dương Anode (C):</span>
+                <strong id="stat-wear" style="color:#f87171;">8 %</strong>
+            </div>
+            <div class="stats-row">
+                <span>Hỗn hợp khí thoát ra ở Anode:</span>
+                <strong style="color:#a3e635;">O₂, CO₂ (chính), CO</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Cơ Chế &amp; Phương Trình Hoá Học</h2>
+            <div class="eq-box">
+                <strong style="color:#fbbf24;">1. Phân li trong Cryolite nóng chảy:</strong><br>
+                Al₂O₃ &xrightarrow{Na₃AlF₆, 950°C} 2Al³⁺ + 3O²⁻
+            </div>
+            <div class="eq-box cathode">
+                <strong style="color:#38bdf8;">2. Tại Cathode (–) (Đáy than chì - Khử Al³⁺):</strong><br>
+                Al³⁺ + 3e &rarr; Al(l) (Nhôm nóng chảy lắng xuống đáy)
+            </div>
+            <div class="eq-box anode">
+                <strong style="color:#f87171;">3. Tại Anode (+) (Khối than chì - Oxi hoá O²⁻):</strong><br>
+                2O²⁻ &rarr; O₂&uarr; + 4e<br>
+                C + O₂ &xrightarrow{t°} CO₂&uarr; &nbsp;|&nbsp; 2C + O₂ &xrightarrow{t°} 2CO&uarr;
+            </div>
+            <div class="eq-box">
+                <strong style="color:#4ade80;">4. Phương trình điện phân tổng quát:</strong><br>
+                2Al₂O₃ &xrightarrow{đpnc, criolit} 4Al + 3O₂&uarr;
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Chú Giải Mô Hình 3D</h2>
+            <div class="legend-grid">
+                <div class="legend-item"><span class="dot" style="background:#38bdf8; border:1px solid #fff;"></span> Ion Al³⁺ (Về đáy –)</div>
+                <div class="legend-item"><span class="dot" style="background:#ef4444; border:1px solid #fff;"></span> Ion O²⁻ (Lên cực +)</div>
+                <div class="legend-item"><span class="dot" style="background:#e2e8f0; border:1px solid #94a3b8;"></span> Tầng Al nóng chảy</div>
+                <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> Al₂O₃ + Cryolite</div>
+                <div class="legend-item"><span class="dot" style="background:#a3e635;"></span> Bọt khí O₂, CO₂, CO</div>
+                <div class="legend-item"><span class="dot" style="background:#334155; border:1px solid #94a3b8;"></span> Điện cực than chì</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.parentElement.clientWidth;
+    height = canvas.parentElement.clientHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Trạng thái mô phỏng
+let isRunning = true;
+let isTapping = false; // Đang mở vòi tháo nhôm nóng chảy ra nồi chứa
+let tapTimer = 0;
+let speedMult = 1.0;
+let anodeOffset = 0;
+let alLevel = 0.35; // Độ dày tầng Al nóng chảy dưới đáy (0.15 -> 0.85)
+let anodeWear = 0.08; // Độ mòn khối than chì Anode (0 -> 0.65)
+
+// Camera 3D
+let rotY = -0.42;
+let rotX = 0.32;
+let zoom = 1.0;
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-0.2, Math.min(0.85, rotX + dy * 0.008));
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.65, Math.min(1.65, zoom - e.deltaY * 0.001));
+}, { passive: false });
+
+function project(x, y, z) {
+    let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+    let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+    let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+    const fov = 720 * zoom;
+    const viewerDist = 720;
+    const scale = fov / (viewerDist + z2);
+    return {
+        x: width / 2 - 20 + x1 * scale,
+        y: height / 2 + 20 - y2 * scale,
+        z: z2,
+        scale: scale
+    };
+}
+
+// Hàm vẽ khối hộp 3D có tuỳ chọn bỏ mặt trước (cutaway) để quan sát bên trong bể
+function drawBox3D(xMin, xMax, yMin, yMax, zMin, zMax, colors, skipFront = false) {
+    const c = [
+        project(xMin, yMin, zMin), // 0: sau-dưới-trái
+        project(xMax, yMin, zMin), // 1: sau-dưới-phải
+        project(xMax, yMax, zMin), // 2: sau-trên-phải
+        project(xMin, yMax, zMin), // 3: sau-trên-trái
+        project(xMin, yMin, zMax), // 4: trước-dưới-trái
+        project(xMax, yMin, zMax), // 5: trước-dưới-phải
+        project(xMax, yMax, zMax), // 6: trước-trên-phải
+        project(xMin, yMax, zMax)  // 7: trước-trên-trái
+    ];
+
+    const faces = [
+        { idx: [0, 1, 5, 4], col: colors.bottom || colors.side }, // Đáy
+        { idx: [0, 1, 2, 3], col: colors.back || colors.side },   // Sau
+        { idx: [0, 4, 7, 3], col: colors.left || colors.side },   // Trái
+        { idx: [1, 5, 6, 2], col: colors.right || colors.side },  // Phải
+        { idx: [3, 2, 6, 7], col: colors.top || colors.side }     // Đỉnh
+    ];
+    if (!skipFront) {
+        faces.push({ idx: [4, 5, 6, 7], col: colors.front || colors.side });
+    }
+
+    // Sắp xếp theo độ sâu trung bình (Painter's algorithm)
+    faces.forEach(f => {
+        f.avgZ = (c[f.idx[0]].z + c[f.idx[1]].z + c[f.idx[2]].z + c[f.idx[3]].z) / 4;
+    });
+    faces.sort((a, b) => b.avgZ - a.avgZ);
+
+    faces.forEach(f => {
+        ctx.beginPath();
+        ctx.moveTo(c[f.idx[0]].x, c[f.idx[0]].y);
+        for (let i = 1; i < 4; i++) {
+            ctx.lineTo(c[f.idx[i]].x, c[f.idx[i]].y);
+        }
+        ctx.closePath();
+        if (f.col) {
+            ctx.fillStyle = f.col;
+            ctx.fill();
+        }
+        if (colors.stroke) {
+            ctx.strokeStyle = colors.stroke;
+            ctx.lineWidth = colors.lineWidth || 1.2;
+            ctx.stroke();
+        }
+    });
+}
+
+// Khởi tạo các hạt ion Al3+, O2- và bọt khí O2/CO2
+const ions = [];
+const gasBubbles = [];
+const tapDrops = [];
+
+for (let i = 0; i < 42; i++) {
+    ions.push({
+        type: i % 2 === 0 ? 'Al3+' : 'O2-',
+        x: (Math.random() - 0.5) * 230,
+        y: -55 + Math.random() * 85,
+        z: (Math.random() - 0.5) * 120,
+        vx: (Math.random() - 0.5) * 1.1,
+        vz: (Math.random() - 0.5) * 1.1,
+        phase: Math.random() * 6.28
+    });
+}
+
+// Sự kiện nút bấm
+const btnToggle = document.getElementById('btn-toggle');
+const btnTap = document.getElementById('btn-tap');
+const btnReplaceAnode = document.getElementById('btn-replace-anode');
+const btnReset = document.getElementById('btn-reset');
+const speedSlider = document.getElementById('speed-slider');
+const speedVal = document.getElementById('speed-val');
+const anodeSlider = document.getElementById('anode-slider');
+const anodePosVal = document.getElementById('anode-pos-val');
+const chkCutaway = document.getElementById('chk-cutaway');
+const chkMicro = document.getElementById('chk-micro');
+
+btnToggle.addEventListener('click', () => {
+    isRunning = !isRunning;
+    if (isRunning) {
+        btnToggle.textContent = 'Tạm Dừng Điện Phân';
+        btnToggle.classList.remove('paused');
+    } else {
+        btnToggle.textContent = 'Tiếp Tục Điện Phân';
+        btnToggle.classList.add('paused');
+    }
+});
+
+btnTap.addEventListener('click', () => {
+    isTapping = true;
+    tapTimer = 4.5; // Mở cửa tháo nhôm trong 4.5 giây
+});
+
+btnReplaceAnode.addEventListener('click', () => {
+    anodeWear = 0.0;
+    anodeSlider.value = 0;
+    anodeOffset = 0;
+    anodePosVal.textContent = 'Mới 100%';
+});
+
+btnReset.addEventListener('click', () => {
+    isRunning = true;
+    isTapping = false;
+    alLevel = 0.35;
+    anodeWear = 0.08;
+    anodeOffset = 0;
+    anodeSlider.value = 0;
+    btnToggle.textContent = 'Tạm Dừng Điện Phân';
+    btnToggle.classList.remove('paused');
+    gasBubbles.length = 0;
+    tapDrops.length = 0;
+});
+
+speedSlider.addEventListener('input', e => {
+    speedMult = parseFloat(e.target.value);
+    speedVal.textContent = speedMult.toFixed(2) + 'x';
+});
+
+anodeSlider.addEventListener('input', e => {
+    anodeOffset = parseFloat(e.target.value);
+    anodePosVal.textContent = (anodeOffset > 0 ? '+' : '') + anodeOffset + ' mm';
+});
+
+// Vẽ toàn bộ cấu trúc bể điện phân Al2O3 công nghiệp (Hall-Héroult Cell)
+function drawElectrolyticCell() {
+    const cutaway = chkCutaway.checked;
+
+    // 1. Lớp vỏ thép chịu nhiệt bên ngoài (Steel Shell)
+    drawBox3D(-175, 175, -135, 65, -100, 100, {
+        side: 'rgba(51, 65, 85, 0.85)',
+        bottom: '#1e293b',
+        top: 'rgba(71, 85, 105, 0.35)',
+        stroke: '#64748b',
+        lineWidth: 2
+    }, cutaway);
+
+    // 2. Lớp lót than chì làm cực âm Cathode (–) bao quanh đáy và thành trong bể
+    drawBox3D(-155, 155, -120, 50, -85, 85, {
+        side: 'rgba(30, 41, 59, 0.92)',
+        bottom: '#0f172a',
+        top: 'rgba(15, 23, 42, 0.25)',
+        stroke: '#94a3b8',
+        lineWidth: 1.5
+    }, cutaway);
+
+    // Thanh dẫn điện cực âm Cathode (–) thò ra bên sườn trái
+    drawBox3D(-220, -155, -112, -92, -25, 25, {
+        side: '#38bdf8',
+        top: '#7dd3fc',
+        stroke: '#bae6fd'
+    }, false);
+
+    // 3. Tầng Nhôm nóng chảy (Molten Al) lắng ở dưới đáy bể (vì d_Al = 2.3 g/cm³ > d_cryolite = 2.1 g/cm³)
+    const alTopY = -105 + alLevel * 48; // Dao động từ -100 đến -60
+    drawBox3D(-142, 142, -108, alTopY, -75, 75, {
+        side: 'rgba(226, 232, 240, 0.92)',
+        top: 'rgba(248, 250, 252, 0.96)',
+        bottom: '#cbd5e1',
+        stroke: '#f8fafc',
+        lineWidth: 1.5
+    }, false);
+
+    // 4. Tầng hỗn hợp Al2O3 + Cryolite (Na3AlF6) nóng chảy ở phía trên tầng Al lỏng (từ alTopY lên y = 32)
+    drawBox3D(-142, 142, alTopY, 32, -75, 75, {
+        side: 'rgba(245, 158, 11, 0.42)',
+        top: 'rgba(251, 191, 36, 0.55)',
+        bottom: 'rgba(217, 119, 6, 0.3)',
+        stroke: 'rgba(251, 191, 36, 0.75)',
+        lineWidth: 1.2
+    }, false);
+
+    // 5. Rãnh/Vòi tháo Nhôm nóng chảy ở đáy bên phải + Nồi hứng nhôm nóng chảy (giống sơ đồ SGK)
+    // Ống dẫn nghiêng ở đáy phải
+    drawBox3D(142, 205, -108, -88, -18, 18, {
+        side: '#475569',
+        top: '#64748b',
+        stroke: '#94a3b8'
+    }, false);
+
+    // Nồi hứng Nhôm lỏng bên ngoài phía phải
+    drawBox3D(205, 275, -145, -75, -42, 42, {
+        side: 'rgba(51, 65, 85, 0.9)',
+        bottom: '#1e293b',
+        top: 'rgba(30, 41, 59, 0.4)',
+        stroke: '#94a3b8'
+    }, cutaway);
+
+    // Mực nhôm lỏng trong nồi hứng bên phải
+    const ladleAlTop = -140 + (1 - alLevel * 0.4) * 40;
+    drawBox3D(212, 268, -140, ladleAlTop, -35, 35, {
+        side: '#e2e8f0',
+        top: '#f8fafc',
+        stroke: '#cbd5e1'
+    }, false);
+
+    return { alTopY };
+}
+
+// Vẽ dàn cực dương Anode (+) bằng các khối than chì treo trên thanh cái (Busbar)
+function drawGraphiteAnodes() {
+    // Thanh cái dẫn điện cực dương (+) nằm ngang phía trên (y = 145)
+    drawBox3D(-165, 165, 140, 158, -18, 18, {
+        side: '#dc2626',
+        top: '#ef4444',
+        stroke: '#fca5a5'
+    }, false);
+
+    // 3 khối cực dương Anode bằng than chì nhúng xuống lớp Al2O3 + Cryolite nóng chảy
+    const anodePositionsX = [-90, 0, 90];
+    // Đáy khối than chì bị mòn dần lên trên khi phản ứng với O2 tạo CO, CO2
+    const wearHeight = anodeWear * 32;
+    const anodeBottomY = -28 + wearHeight - anodeOffset * 0.6;
+    const anodeTopY = 72 - anodeOffset * 0.6;
+
+    anodePositionsX.forEach(ax => {
+        // Trục treo bằng kim loại nối từ thanh cái xuống khối than chì
+        drawBox3D(ax - 7, ax + 7, anodeTopY, 140, -7, 7, {
+            side: '#94a3b8',
+            top: '#cbd5e1',
+            stroke: '#e2e8f0'
+        }, false);
+
+        // Khối Anode than chì (+)
+        drawBox3D(ax - 32, ax + 32, anodeBottomY, anodeTopY, -38, 38, {
+            side: '#1e293b',
+            top: '#334155',
+            bottom: '#0f172a',
+            stroke: '#64748b',
+            lineWidth: 1.5
+        }, false);
+    });
+
+    return { anodeBottomY, anodePositionsX };
+}
+
+// Cập nhật và vẽ các hạt vi mô (Ion Al3+, O2-), bọt khí O2/CO2 và dòng nhôm chảy ra
+function updateAndDrawParticles(alTopY, anodeBottomY, anodePositionsX, dt) {
+    // 1. Dòng chảy nhôm lỏng khi bấm nút "Mở Cửa Tháo Nhôm Lỏng"
+    if (isTapping) {
+        tapTimer -= dt;
+        alLevel = Math.max(0.18, alLevel - dt * 0.08);
+        if (Math.random() < 0.75) {
+            tapDrops.push({
+                x: 202,
+                y: -96,
+                z: (Math.random() - 0.5) * 14,
+                vx: 1.8 + Math.random() * 1.2,
+                vy: 0
+            });
+        }
+        if (tapTimer <= 0) isTapping = false;
+    }
+
+    for (let i = tapDrops.length - 1; i >= 0; i--) {
+        const d = tapDrops[i];
+        d.x += d.vx;
+        d.vy -= 0.18;
+        d.y += d.vy;
+        if (d.y < -125) {
+            tapDrops.splice(i, 1);
+            continue;
+        }
+        const dp = project(d.x, d.y, d.z);
+        ctx.beginPath();
+        ctx.arc(dp.x, dp.y, 4.5 * dp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fill();
+    }
+
+    // 2. Bọt khí O2, CO2, CO thoát ra quanh đáy 3 khối Anode than chì (+)
+    if (isRunning && Math.random() < 0.65 * speedMult) {
+        const chosenX = anodePositionsX[Math.floor(Math.random() * anodePositionsX.length)];
+        gasBubbles.push({
+            x: chosenX + (Math.random() - 0.5) * 62,
+            y: anodeBottomY + Math.random() * 10,
+            z: (Math.random() - 0.5) * 62,
+            r: 2.5 + Math.random() * 2.5,
+            vy: (0.7 + Math.random() * 0.7) * speedMult,
+            isCO2: Math.random() < 0.75
+        });
+    }
+
+    for (let i = gasBubbles.length - 1; i >= 0; i--) {
+        const b = gasBubbles[i];
+        if (isRunning) {
+            b.y += b.vy;
+            b.x += Math.sin(b.y * 0.15) * 0.25;
+        }
+        if (b.y > 42) {
+            gasBubbles.splice(i, 1);
+            continue;
+        }
+        const bp = project(b.x, b.y, b.z);
+        ctx.beginPath();
+        ctx.arc(bp.x, bp.y, b.r * bp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = b.isCO2 ? 'rgba(163, 230, 53, 0.88)' : 'rgba(248, 250, 252, 0.9)';
+        ctx.fill();
+    }
+
+    // 3. Các hạt ion Al3+ (hướng xuống lớp Cathode đáy) và O2- (hướng lên khối Anode than chì)
+    if (!chkMicro.checked) return;
+
+    ions.forEach(ion => {
+        ion.phase += 0.07 * speedMult;
+        if (isRunning) {
+            if (ion.type === 'Al3+') {
+                // Al3+ di chuyển xuống đáy âm (alTopY) để nhận 3e thành Al lỏng
+                ion.y -= 0.45 * speedMult;
+                ion.x += Math.sin(ion.phase) * 0.4;
+                if (ion.y <= alTopY + 4) {
+                    ion.y = 15 + Math.random() * 12;
+                    ion.x = (Math.random() - 0.5) * 240;
+                }
+            } else {
+                // O2- di chuyển lên các khối cực dương Anode (anodeBottomY) để nhường electron
+                ion.y += 0.48 * speedMult;
+                ion.x += Math.cos(ion.phase) * 0.4;
+                if (ion.y >= anodeBottomY + 8) {
+                    ion.y = alTopY + 8 + Math.random() * 15;
+                    ion.x = (Math.random() - 0.5) * 240;
+                }
+            }
+        }
+
+        const ip = project(ion.x, ion.y, ion.z);
+        const rad = (ion.type === 'Al3+' ? 5.8 : 7.0) * ip.scale;
+
+        ctx.beginPath();
+        ctx.arc(ip.x, ip.y, rad, 0, Math.PI * 2);
+        if (ion.type === 'Al3+') {
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fill();
+            ctx.strokeStyle = '#e0f2fe';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = '#ef4444';
+            ctx.fill();
+            ctx.strokeStyle = '#fee2e2';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        if (ip.scale > 0.88) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.round(8 * ip.scale)}px Segoe UI`;
+            ctx.textAlign = 'center';
+            ctx.fillText(ion.type === 'Al3+' ? 'Al³⁺' : 'O²⁻', ip.x, ip.y + 3);
+        }
+    });
+}
+
+// Chú thích trực tiếp trên mô hình 3D (giống sơ đồ SGK Hoá 12)
+function drawAnnotations3D(alTopY) {
+    const pAnode = project(0, 168, 0);
+    ctx.fillStyle = '#f87171';
+    ctx.font = `bold ${Math.round(14 * pAnode.scale)}px Segoe UI`;
+    ctx.textAlign = 'center';
+    ctx.fillText('(+) Cực dương (Anode bằng than chì)', pAnode.x, pAnode.y);
+
+    const pCathode = project(-215, -75, 0);
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = `bold ${Math.round(13.5 * pCathode.scale)}px Segoe UI`;
+    ctx.fillText('(–) Cực âm (Cathode than chì)', pCathode.x, pCathode.y);
+
+    const pBath = project(0, (alTopY + 30) / 2, 78);
+    ctx.fillStyle = '#fde047';
+    ctx.font = `bold ${Math.round(13 * pBath.scale)}px Segoe UI`;
+    ctx.fillText('Al₂O₃ + Cryolite (Na₃AlF₆) nóng chảy', pBath.x, pBath.y);
+
+    const pAl = project(0, -100, 78);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `bold ${Math.round(12.5 * pAl.scale)}px Segoe UI`;
+    ctx.fillText('Nhôm (Al) nóng chảy lắng ở đáy', pAl.x, pAl.y);
+
+    const pLadle = project(240, -58, 0);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = `bold ${Math.round(12 * pLadle.scale)}px Segoe UI`;
+    ctx.fillText('Nồi tháo Al nóng chảy', pLadle.x, pLadle.y);
+}
+
+let lastTime = performance.now();
+function animate(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    if (isRunning) {
+        alLevel = Math.min(0.82, alLevel + dt * 0.008 * speedMult);
+        anodeWear = Math.min(0.65, anodeWear + dt * 0.006 * speedMult);
+    }
+
+    document.getElementById('stat-al').textContent = (alLevel * 36.0).toFixed(1) + ' kg';
+    document.getElementById('stat-wear').textContent = Math.round(anodeWear * 100) + ' %';
+
+    ctx.clearRect(0, 0, width, height);
+
+    const { alTopY } = drawElectrolyticCell();
+    const { anodeBottomY, anodePositionsX } = drawGraphiteAnodes();
+    updateAndDrawParticles(alTopY, anodeBottomY, anodePositionsX, dt);
+    drawAnnotations3D(alTopY);
+
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
