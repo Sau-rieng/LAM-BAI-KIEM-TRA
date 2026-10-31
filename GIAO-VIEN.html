@@ -387,6 +387,47 @@ body.rong main{max-width:1200px}
 .hangNut{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .hangNut .luu{background:var(--pri);color:#fff;min-width:110px}
 .hangNut button{padding:9px 16px;font-size:15px}
+/* So do lop */
+.sdTop{flex-wrap:wrap}
+.vpChu{color:var(--bad);font-weight:700;font-size:13.5px}
+.sdDot b{font-size:17px}
+.sdDem{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.sdDem span{background:var(--off);border-radius:999px;padding:3px 10px;font-size:14px}
+.sdDem span.vp{background:#fde8e7;color:var(--bad)}
+.sdMa{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:6px;border:1.5px solid var(--ink);font-style:normal;font-weight:800;font-size:12px;background:#fff;color:var(--ink)}
+.sdCong .sdCH,.sdBang .sdCH{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.sdCH label{margin:0;font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.sdCH select,.sdCH input{font-size:16px;padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;min-width:90px;width:auto}
+.sdCH #sdHS{min-width:240px}
+.sdNut{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
+.sdNut .luu{background:var(--pri);color:#fff}
+.sdKhung{background:#fff;border:1px solid #e1ebf7;border-radius:14px;padding:16px;margin-bottom:12px;overflow-x:auto}
+.sdBan{display:inline-block;border:2px solid var(--ink);border-radius:6px;padding:10px 26px;font-weight:800;margin-bottom:14px}
+.sdDays{display:flex;gap:28px;align-items:flex-start;min-width:max-content}
+.sdDayB{display:grid;border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
+.sdGhe{border:0;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);border-radius:0;background:#fff;text-align:left;padding:6px 8px;min-height:62px;width:160px;display:flex;flex-direction:column;justify-content:center;gap:2px;font-weight:500}
+.sdGhe .dong1{display:flex;gap:6px;align-items:center}
+.sdGhe .stt{font-style:normal;font-weight:800;font-size:12.5px;color:var(--muted);min-width:16px}
+.sdGhe .ten{font-size:15px;font-weight:600;line-height:1.25}
+.sdGhe .tt{font-size:12.5px;color:var(--muted)}
+.sdGhe.trong .ten{color:#b0b6c3;font-weight:500}
+.sdGhe.chon{outline:3px solid var(--pri);outline-offset:-3px;background:#f2f7ff}
+.sdGhe.t-danglam{background:#f3f8ff}.sdGhe.t-danglam .tt{color:var(--pri);font-weight:700}
+.sdGhe.t-danop{background:var(--okbg)}.sdGhe.t-danop .tt{color:var(--ok);font-weight:700}
+.sdGhe.t-dangcho .tt{color:var(--warn);font-weight:700}
+.sdGhe.vp{background:#fde8e7}.sdGhe.vp .tt{color:var(--bad);font-weight:800}
+.sdBang{border:2px solid var(--pri);background:#f7faff}
+.sdVP{background:var(--bad);color:#fff}
+.sdChua{line-height:1.6}
+@media (max-width:640px){.sdGhe{width:132px}.sdDays{gap:16px}}
+@media print{
+  #appbar,.sdTop,#sdLop,.sdCong,.sdBang{display:none!important}
+  #scrSoDo h1{font-size:18px;margin:0 0 6px}
+  .sdKhung{border:0;padding:0;overflow:visible}
+  .sdGhe{background:#fff!important;min-height:44px;width:150px}
+  .sdGhe .tt,.sdGhe .stt{color:#000!important}
+  .sdDot,.sdChua{box-shadow:none;border:1px solid #000}
+}
 /* Nap de */
 .napNut{background:var(--chi);color:#fff;padding:9px 14px;font-size:15px;white-space:nowrap}
 .napChon{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 0;padding:18px;border:2px dashed #9ec2ef;border-radius:14px;background:#f5f9ff;color:var(--pri);font-weight:700;cursor:pointer;text-align:center}
@@ -648,8 +689,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="napCuoi hidden" id="napCuoi"><button class="btn" id="napGui">Nạp vào kho</button></div>
 </section>
 
+<section id="scrSoDo" class="hidden">
+  <div class="top sdTop"><button class="btn2" id="sdLai">◀ Quay lại</button><div><button class="btn2" id="sdSua">✎ Sắp xếp chỗ</button> <button class="btn2" id="sdIn">🖨 In</button> <button class="btn2" id="sdMoi">↻</button></div></div>
+  <h1 id="sdTieuDe">Sơ đồ lớp</h1>
+  <div class="loc" id="sdLop"></div>
+  <div id="sdThan"></div>
+</section>
+
 <section id="scrTheo" class="hidden">
-  <div class="top"><button class="btn2" id="btnLai">◀ Các đề</button><button class="btn2" id="btnLamMoi">↻ Làm mới</button></div>
+  <div class="top"><button class="btn2" id="btnLai">◀ Các đề</button><div><button class="btn2" id="btnSoDo">🪑 Sơ đồ lớp</button> <button class="btn2" id="btnLamMoi">↻ Làm mới</button></div></div>
   <div class="card dot" id="theoDot"></div>
   <div class="loc khoi" id="tabLop"></div>
   <div class="capnhat" id="capNhat"></div>
@@ -750,8 +798,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var MA = '', DOT = [], dotXem = null, hen = null, LECH = 0;
   function $(id) { return document.getElementById(id); }
   function man(id) {
-    ['scrLogin', 'scrHome', 'scrDot', 'scrNap', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS', 'scrTro', 'scrTroKQ', 'scrCaiDat', 'scrTN', 'scrTin'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
-    document.body.classList.toggle('rong', id === 'scrPhat' || id === 'scrHome' || id === 'scrTin'); window.scrollTo(0, 0);
+    ['scrLogin', 'scrHome', 'scrDot', 'scrNap', 'scrSoDo', 'scrTheo', 'scrPhat', 'scrHoSo', 'scrMotHS', 'scrTro', 'scrTroKQ', 'scrCaiDat', 'scrTN', 'scrTin'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); });
+    document.body.classList.toggle('rong', id === 'scrPhat' || id === 'scrHome' || id === 'scrTin' || id === 'scrSoDo'); window.scrollTo(0, 0);
     $('appbar').classList.toggle('hidden', id === 'scrLogin');
     var muc = id === 'scrHome' ? 'home' : /scrHoSo|scrMotHS/.test(id) ? 'hoso' : /scrTro/.test(id) ? 'tro' : id === 'scrCaiDat' ? 'caidat' : id === 'scrTN' ? 'tn' : id === 'scrTin' ? 'tin' : 'dot';
     [].forEach.call(document.querySelectorAll('.nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-di') === muc); });
@@ -825,6 +873,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     else if (k === 'caidat') moCaiDat();
     else if (k === 'tn') moTN();
     else if (k === 'tin') moTinGV();
+    else if (k === 'sodo') moSoDo(null, null, 'home');
     else $('btnHoSo').onclick();
   }
   [].forEach.call(document.querySelectorAll('[data-di]'), function (b) { if (b.id !== 'btnHoSo') b.onclick = function () { diDen(b.getAttribute('data-di')); }; });
@@ -835,9 +884,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     return Math.round((d.batdauluc + d.phut * 60000 - (Date.now() + LECH)) / 1000);
   }
   function mmss(g) { g = Math.max(0, g); return Math.floor(g / 60) + ':' + ('0' + g % 60).slice(-2); }
+  function caChu(d) {
+    if (!d.ca) return '';
+    if (d.ca !== d.madot) return ' · <b>trong ca thi ' + esc(d.ca) + '</b>';
+    var ds = DOT.filter(function (x) { return x.ca === d.ca; }).map(function (x) { return x.madot.replace(/^.*-/, ''); });
+    return ' · <b>ca thi ' + ds.length + ' mã: ' + esc(ds.join(', ')) + '</b>';
+  }
   function nutCongTac(d, coNutTheo) {
     var chip = d.tt === 'MO' ? '<span class="chip mo">ĐANG LÀM BÀI</span>' : d.tt === 'CHO' ? '<span class="chip cho">PHÒNG CHỜ</span>' : '<span class="ttDong">đề đang đóng</span>';
-    var h = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div>' + chip + '</div>';
+    var h = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + caChu(d) + '</div></div>' + chip + '</div>';
     var g = conLaiDe(d);
     if (g !== null) h += '<div class="dem" data-madot="' + esc(d.madot) + '">' + (g > 0 ? 'Còn lại <b>' + mmss(g) + '</b>' : '<b>Đã hết giờ</b> – bấm Đóng đề') + '</div>';
     h += '<div class="sw">';
@@ -903,6 +958,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     el.insertBefore(pb, el.querySelector('.sw'));
     el.querySelector('.theo').onclick = function () { dotXem = d.madot; moTheoDoi(); };
     if (gon) el.querySelector('.thuGon').onclick = function () { moRong = null; veDot(); };
+    if (gon || d.tt !== 'DONG') {
+      var sdb = document.createElement('button'); sdb.className = 'suaDe'; sdb.textContent = '🪑 Sơ đồ lớp' + (d.tt !== 'DONG' ? ' – theo dõi, thu bài vi phạm' : '');
+      sdb.onclick = function () { var l = lopCuaDot(d)[0]; moSoDo(l ? l.ten : null, d.madot, 'dot'); };
+      el.insertBefore(sdb, el.querySelector('.dtWrap'));
+    }
+    if (gon && d.tt === 'DONG' && (!d.ca || d.ca === d.madot)) {
+      if (DE_CA === d.madot) el.insertBefore(khungCa(d), el.querySelector('.dtWrap'));
+      else {
+        var cab = document.createElement('button'); cab.className = 'suaDe'; cab.textContent = d.ca ? '🔀 Sửa ca thi nhiều mã đề' : '🔀 Thi nhiều mã đề (2 em kế bên khác đề)';
+        cab.onclick = function () { DE_CA = d.madot; veDot(); };
+        el.insertBefore(cab, el.querySelector('.dtWrap'));
+      }
+    }
     if (gon && d.tt === 'DONG') {
       if (DE_SUA === d.madot) el.insertBefore(khungSuaDe(d), el.querySelector('.dtWrap'));
       else {
@@ -915,7 +983,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function veDot() {
     var box = $('dsDot'); box.innerHTML = '';
-    var dangMo = DOT.filter(function (d) { return d.tt !== 'DONG'; });
+    // Ca thi nhieu ma de: chi hien ma chinh trong muc Dang mo (cac ma phu mo/dong theo ma chinh)
+    var dangMo = DOT.filter(function (d) { return d.tt !== 'DONG' && !(d.ca && d.ca !== d.madot); });
     $('soDot').textContent = DOT.length + ' đề · ' + dangMo.length + ' đang mở';
     // Tab khoi
     var cacKhoi = []; DOT.forEach(function (d) { var k = khoiCua(d); if (cacKhoi.indexOf(k) < 0) cacKhoi.push(k); });
@@ -945,7 +1014,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (moRong === d.madot) { khung.appendChild(theDot(d, true)); return; }
         var r = document.createElement('button'); r.className = 'dong';
         r.innerHTML = '<span class="tt2"><b>' + esc(tenNgan(d)) + '</b><span class="ma">' + esc(d.madot) + ' · ' + d.phut + ' phút · ' + esc(d.lop) +
-          (d.xemlai ? ' · <span style="color:var(--ok)">đang cho xem lại</span>' : '') + '</span>' + dathiHtml(d) + '</span><span class="mui">▸</span>';
+          (d.xemlai ? ' · <span style="color:var(--ok)">đang cho xem lại</span>' : '') + caChu(d) + '</span>' + dathiHtml(d) + '</span><span class="mui">▸</span>';
         r.onclick = function () { moRong = d.madot; veDot(); };
         khung.appendChild(r);
       });
@@ -1106,6 +1175,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     hs.forEach(function (x) {
       var so = String(x.mahs).slice(-2), tt = '';
       if (x.tt === 'danop') tt = '<a class="' + mauDiem(x.diem) + '" href="' + esc(x.pdf) + '" target="_blank" rel="noopener">' + diem(x.diem) + ' đ</a> · nộp ' + gio(x.luc) +
+        (x.made ? ' · mã ' + esc(String(x.made).replace(/^.*-/, '')) : '') + (x.ghichu ? '<br><span class="vpChu">⛔ ' + esc(x.ghichu) + '</span>' : '') +
         (x.daxem ? '<br><span class="xem">✓ đã xem lại ' + ngayGio(x.xemluc) + '</span>' : dotHienTai().xemlai ? '<br><span class="xem chua">chưa xem lại</span>' : '');
       else if (x.tt === 'danglam') tt = 'Đang làm · ' + Math.max(0, Math.round((now - new Date(x.batdau).getTime()) / 60000)) + ' phút';
       else if (x.tt === 'dangcho') tt = 'Đang chờ · vào lúc ' + gio(x.vaocho);
@@ -1909,6 +1979,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         { kh: 'Đề', ten: 'Đề kiểm tra', mt: 'Mở phòng chờ, phát đề, đóng đề; sửa tên, thời gian, lớp', so: DOT.length + ' đề', di: 'dot' },
         { kh: 'Tk', ten: 'Mã QR tài khoản HS', mt: 'Học sinh đăng nhập để xem lại bài và tài nguyên', qr: 'xem', chi: 1 },
         { kh: 'Hs', ten: 'Hồ sơ học sinh', mt: 'Bảng điểm, tiến bộ, kiến thức yếu, vắng thi', so: DS.length + ' lớp', di: 'hoso' },
+        { kh: 'Sd', ten: 'Sơ đồ lớp', mt: 'Xếp chỗ ngồi; thi nhiều mã đề, 2 em kế bên khác đề; thu bài vi phạm', di: 'sodo' },
         { kh: 'Tn', ten: 'Tin nhắn học sinh', mt: 'Thắc mắc của học sinh, trả lời, gợi ý AI', so: TINX.chuaDoc ? TINX.chuaDoc + ' chưa đọc' : '', di: 'tin', tin: 1 }
       ] },
       { ten: 'Trò chơi', mt: 'Tất cả trò chơi iPad, một nơi quản lý', o: [
@@ -1932,7 +2003,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       n.o.forEach(function (o) {
         var el = document.createElement(o.href ? 'a' : 'button'); el.className = 'o' + (o.chi ? ' chi' : '');
         if (o.href) { el.href = o.href; el.target = '_blank'; el.rel = 'noopener'; }
-        var ICO = { 'Đề': 'de', Tk: 'xem', Hs: 'hs', Tc: 'tro', Kq: 'kq', Ml: 'ml', '3D': 'tn', Ma: 'ma', Dt: 'dt', Tn: 'tin' };
+        var ICO = { Sd: 'nhom', 'Đề': 'de', Tk: 'xem', Hs: 'hs', Tc: 'tro', Kq: 'kq', Ml: 'ml', '3D': 'tn', Ma: 'ma', Dt: 'dt', Tn: 'tin' };
         if (o.tin) el.setAttribute('data-tin', '1');
         el.innerHTML = (o.so ? '<span class="so">' + o.so + '</span>' : '') + '<span class="ic">' + (window.BT && BT[ICO[o.kh]] ? BT[ICO[o.kh]] : o.kh) + '</span><span class="ten">' + o.ten + '</span><span class="mt">' + o.mt + '</span>';
         if (o.di) el.onclick = function () { diDen(o.di); };
@@ -3219,6 +3290,211 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       $('napFile').value = ''; $('napNhanChu').textContent = '📂 Nạp thêm file khác';
     }).catch(function (e) { b.disabled = false; nutNap(); $('napMsg').textContent = 'Chưa nạp được: ' + e.message; });
   };
+
+  // =====================================================================
+  // SO DO LOP: xep cho ngoi, ca thi nhieu ma de (2 em ke ben khac ma), thu bai vi pham khi dang thi
+  // =====================================================================
+  var SD = { lop: null, dot: null, data: null, sua: false, nhap: null, chon: null, hen: null, tu: 'home', dang: false };
+  function moSoDo(lop, madot, tu) {
+    SD.lop = lop || SD.lop || (DS[0] && DS[0].ten); SD.dot = madot || null; SD.tu = tu || 'home';
+    SD.sua = false; SD.chon = null; SD.data = null; man('scrSoDo'); veSoDo(); taiSoDo();
+  }
+  function lopSD() { return DS.filter(function (l) { return l.ten === SD.lop; })[0] || DS[0]; }
+  function taiSoDo(im) {
+    clearTimeout(SD.hen);
+    var l = lopSD(); if (!l) return;
+    if (!im) { SD.dang = true; veSoDo(); }
+    goi(l.url, { action: 'gv_sodo', ma: MA, madot: SD.dot || '' }).then(function (j) {
+      SD.dang = false;
+      if (!j.ok) { SD.data = { loi: /khong hop le/i.test(j.msg || '') ? 'Sổ lớp ' + l.ten + ' chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : (j.msg || 'lỗi') }; veSoDo(); return; }
+      SD.data = j;
+      if (!SD.sua) SD.nhap = saoSoDo(j.sodo);
+      veSoDo();
+      if (SD.dot && !SD.sua && !$('scrSoDo').classList.contains('hidden')) SD.hen = setTimeout(function () { taiSoDo(true); }, 10000);
+    }).catch(function (e) { SD.dang = false; SD.data = { loi: 'Không kết nối được (' + e.message + ')' }; veSoDo(); });
+  }
+  function saoSoDo(sd) {
+    var o = sd ? JSON.parse(JSON.stringify(sd)) : { day: 2, hang: 6, cho: 2, ghe: {} };
+    o.ghe = o.ghe || {}; return o;
+  }
+  function tenHS(mahs) { var x = (SD.data && SD.data.ds || []).filter(function (h) { return h[0] === mahs; })[0]; return x ? x[1] : mahs; }
+  function gheCua(mahs, sd) { var g = (sd || SD.nhap).ghe; return Object.keys(g).filter(function (k) { return g[k] && g[k].mahs === mahs; })[0]; }
+  function tenGhe(k) { var p = k.split('-').map(Number); return 'Dãy ' + (p[0] + 1) + ', bàn ' + (p[1] + 1) + ', chỗ ' + (p[2] + 1); }
+  var KH_MA = ['A', 'B', 'C', 'D', 'E', 'F'];
+  function veSoDo() {
+    var box = $('sdThan'), j = SD.data, sd = SD.nhap;
+    // tab lop
+    var tb = $('sdLop'); tb.innerHTML = '';
+    var lops = SD.dot ? lopCuaDot(DOT.filter(function (d) { return d.madot === SD.dot; })[0] || {}) : DS.slice();
+    if (!lops.length) lops = DS.slice();
+    if (lops.length > 1) lops.forEach(function (l) {
+      var b = document.createElement('button'); b.textContent = 'Lớp ' + l.ten; b.className = l.ten === SD.lop ? 'on' : '';
+      b.onclick = function () { if (SD.sua && !confirm('Bỏ các thay đổi chưa lưu?')) return; SD.lop = l.ten; SD.sua = false; SD.data = null; taiSoDo(); };
+      tb.appendChild(b);
+    });
+    $('sdTieuDe').textContent = 'Sơ đồ lớp ' + (SD.lop || '');
+    $('sdSua').textContent = SD.sua ? '✕ Hủy sắp xếp' : '✎ Sắp xếp chỗ';
+    $('sdSua').style.display = j && !j.loi ? '' : 'none';
+    if (SD.dang && !j) { box.innerHTML = '<div class="card sub">Đang tải sơ đồ…</div>'; return; }
+    if (!j) { box.innerHTML = ''; return; }
+    if (j.loi) { box.innerHTML = '<div class="card loi">' + esc(j.loi) + '</div>'; return; }
+    var h = '';
+    // Ca thi
+    var ca = j.ca || [], tt = j.tt || {}, maKH = {};
+    ca.forEach(function (c, i) { maKH[c.madot] = KH_MA[i] || String(i + 1); });
+    if (SD.dot) {
+      var d0 = DOT.filter(function (d) { return d.madot === SD.dot; })[0] || { ten: SD.dot };
+      var dem = { chua: 0, dangcho: 0, danglam: 0, danop: 0 }, vp = 0;
+      j.ds.forEach(function (x) { var t = tt[x[0]] || { tt: 'chua' }; dem[t.tt] = (dem[t.tt] || 0) + 1; if (t.vipham || t.ghichu) vp++; });
+      h += '<div class="card sdDot"><b>' + esc(d0.ten) + '</b><div class="sub">' +
+        (ca.length > 1 ? 'Ca thi ' + ca.length + ' mã đề: ' + ca.map(function (c) { return '<span class="sdMa">' + maKH[c.madot] + '</span> ' + esc(c.madot.replace(/^.*-/, 'Mã ')); }).join(' · ') + ' – cấp theo chỗ ngồi, 2 em kế bên khác mã.'
+          : 'Một mã đề (' + esc(SD.dot) + '). Muốn 2 em kế bên khác đề: vào Kiểm tra → đề → <b>🔀 Thi nhiều mã đề</b>.') + '</div>' +
+        '<div class="sdDem"><span>Chưa vào <b>' + dem.chua + '</b></span><span>Đang chờ <b>' + dem.dangcho + '</b></span><span>Đang làm <b>' + dem.danglam + '</b></span><span>Đã nộp <b>' + dem.danop + '</b></span>' + (vp ? '<span class="vp">⛔ Vi phạm <b>' + vp + '</b></span>' : '') + '</div>' +
+        (SD.sua ? '' : '<div class="sub">Bấm vào chỗ của một em để <b>thu bài khi vi phạm quy chế thi</b>. Tự cập nhật mỗi 10 giây.</div>') + '</div>';
+    } else if (!SD.sua) h += '<p class="sub">Xếp chỗ một lần, dùng cho mọi bài kiểm tra của lớp. Khi thi nhiều mã đề, hệ thống cấp mã theo chỗ ngồi để 2 em kế bên (cạnh, trước, sau, chéo) không trùng đề.</p>';
+    // Thanh sap xep
+    if (SD.sua) {
+      h += '<div class="card sdCong"><div class="sdCH"><label>Số dãy <select id="sdDay">' + [1, 2, 3, 4, 5, 6].map(function (n) { return '<option' + (n === sd.day ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+        '<label>Số bàn mỗi dãy <select id="sdHang">' + [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(function (n) { return '<option' + (n === sd.hang ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+        '<label>Chỗ mỗi bàn <select id="sdCho">' + [1, 2, 3, 4].map(function (n) { return '<option' + (n === sd.cho ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label></div>' +
+        '<div class="sdNut"><button class="btn2" id="sdTuDong">Xếp theo danh sách lớp</button><button class="btn2" id="sdXoaHet">Xóa hết chỗ</button><button class="luu" id="sdLuu">💾 Lưu sơ đồ</button></div>' +
+        '<div class="sub">Bấm vào một chỗ để chọn học sinh và số thứ tự. Chọn em đang ngồi chỗ khác thì hai em đổi chỗ cho nhau.</div><div class="msg" id="sdMsg"></div></div>';
+    }
+    // Luoi
+    h += '<div class="sdKhung"><div class="sdBan">Bàn giáo viên</div><div class="sdDays">';
+    for (var dd = 0; dd < sd.day; dd++) {
+      h += '<div class="sdDayB" style="grid-template-columns:repeat(' + sd.cho + ',minmax(0,1fr))">';
+      for (var hh = 0; hh < sd.hang; hh++) for (var cc = 0; cc < sd.cho; cc++) {
+        var k = dd + '-' + hh + '-' + cc, g = sd.ghe[k], t = g ? (tt[g.mahs] || {}) : null;
+        var lop = 'sdGhe' + (g ? '' : ' trong') + (SD.chon === k ? ' chon' : '') + (t && (t.vipham || t.ghichu) ? ' vp' : '') + (t && t.tt ? ' t-' + t.tt : '');
+        h += '<button class="' + lop + '" data-k="' + k + '">';
+        if (g) {
+          h += '<span class="dong1"><i class="stt">' + esc(g.stt || '') + '</i>' + (SD.dot && t && t.madot && ca.length > 1 ? '<i class="sdMa" title="' + esc(t.madot) + '">' + (maKH[t.madot] || '?') + '</i>' : '') + '</span>' +
+            '<span class="ten">' + esc(tenHS(g.mahs)) + '</span>';
+          if (SD.dot && t) {
+            var tx = t.tt === 'danop' ? 'Nộp · ' + diem(t.diem) + 'đ' : t.tt === 'danglam' ? 'Đang làm' : t.tt === 'dangcho' ? 'Đang chờ' : 'Chưa vào';
+            h += '<span class="tt">' + ((t.vipham || t.ghichu) ? '⛔ Vi phạm · ' : '') + tx + '</span>';
+          }
+        } else h += '<span class="ten">' + (SD.sua ? '+ trống' : '') + '</span>';
+        h += '</button>';
+      }
+      h += '</div>';
+    }
+    h += '</div></div>';
+    // Bang chon cho / thu bai
+    if (SD.chon) h += SD.sua ? khungSuaGhe(SD.chon) : khungThuBai(SD.chon);
+    // Chua xep cho
+    var chua = j.ds.filter(function (x) { return !gheCua(x[0], sd); });
+    if (chua.length) h += '<div class="card sub sdChua"><b>Chưa xếp chỗ (' + chua.length + '):</b> ' + chua.map(function (x) { return esc(x[1]) + (SD.dot && tt[x[0]] && ca.length > 1 ? ' <i class="sdMa">' + (maKH[tt[x[0]].madot] || '?') + '</i>' : ''); }).join(', ') +
+      (SD.dot && ca.length > 1 ? '<br>Các em chưa có chỗ được chia mã ngẫu nhiên.' : '') + '</div>';
+    box.innerHTML = h;
+    ganSoDo();
+  }
+  function khungSuaGhe(k) {
+    var g = SD.nhap.ghe[k] || {}, j = SD.data;
+    return '<div class="card sdBang"><b>' + tenGhe(k) + '</b><div class="sdCH">' +
+      '<label>Học sinh <select id="sdHS"><option value="">— Để trống —</option>' + j.ds.map(function (x) {
+        var o = gheCua(x[0]); return '<option value="' + esc(x[0]) + '"' + (x[0] === g.mahs ? ' selected' : '') + '>' + esc(x[1]) + (o && o !== k ? ' (đang ở ' + tenGhe(o).toLowerCase() + ')' : '') + '</option>';
+      }).join('') + '</select></label><label>Số thứ tự <input id="sdSTT" type="text" maxlength="4" inputmode="numeric" value="' + esc(g.stt || '') + '"></label></div>' +
+      '<div class="hangNut"><button class="btn2" id="sdBo">Đóng</button><button class="luu" id="sdDat">Đặt vào chỗ</button></div></div>';
+  }
+  function khungThuBai(k) {
+    var g = SD.nhap.ghe[k]; if (!g) return '';
+    var t = (SD.data.tt || {})[g.mahs] || {}, vp = t.vipham || t.ghichu;
+    var tx = !SD.dot ? '' : t.tt === 'danop' ? 'Đã nộp · ' + diem(t.diem) + ' điểm' : t.tt === 'danglam' ? 'Đang làm bài' : t.tt === 'dangcho' ? 'Đang ở phòng chờ' : 'Chưa vào bài';
+    return '<div class="card sdBang"><b>' + esc(tenHS(g.mahs)) + '</b> · SBD ' + esc(g.mahs) + ' · ' + tenGhe(k) +
+      (SD.dot ? '<div class="sub">' + (t.madot ? 'Mã đề ' + esc(t.madot) + ' · ' : '') + tx + (vp ? ' · <b style="color:var(--bad)">⛔ ' + esc(t.ghichu || 'Vi phạm quy chế thi') + '</b>' : '') + '</div>' : '<div class="sub">Mở sơ đồ từ một đề đang thi để thu bài.</div>') +
+      '<div class="hangNut"><button class="btn2" id="sdBo">Đóng</button>' +
+      (SD.dot ? (vp ? '<button class="btn2" id="sdHuyVP">↩ Bỏ vi phạm</button>' : '<button class="sdVP" id="sdThu">⛔ Thu bài – vi phạm quy chế thi</button>') : '') + '</div><div class="msg" id="sdMsg2"></div></div>';
+  }
+  function ganSoDo() {
+    [].forEach.call(document.querySelectorAll('#sdThan .sdGhe'), function (b) {
+      b.onclick = function () { var k = b.getAttribute('data-k'); if (!SD.sua && !SD.nhap.ghe[k]) return; SD.chon = SD.chon === k ? null : k; veSoDo(); var x = document.querySelector('.sdBang'); if (x) x.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
+    });
+    if ($('sdBo')) $('sdBo').onclick = function () { SD.chon = null; veSoDo(); };
+    if (SD.sua) {
+      ['sdDay', 'sdHang', 'sdCho'].forEach(function (id) {
+        $(id).onchange = function () {
+          SD.nhap[{ sdDay: 'day', sdHang: 'hang', sdCho: 'cho' }[id]] = Number(this.value);
+          var sd = SD.nhap; Object.keys(sd.ghe).forEach(function (k) { var p = k.split('-').map(Number); if (p[0] >= sd.day || p[1] >= sd.hang || p[2] >= sd.cho) delete sd.ghe[k]; });
+          SD.chon = null; veSoDo();
+        };
+      });
+      $('sdTuDong').onclick = function () {
+        if (Object.keys(SD.nhap.ghe).length && !confirm('Xếp lại toàn bộ theo thứ tự danh sách lớp?')) return;
+        var sd = SD.nhap, n = 0; sd.ghe = {};
+        for (var hh = 0; hh < sd.hang; hh++) for (var dd = 0; dd < sd.day; dd++) for (var cc = 0; cc < sd.cho; cc++) {
+          var x = SD.data.ds[n]; if (!x) break; n++; sd.ghe[dd + '-' + hh + '-' + cc] = { mahs: x[0], stt: String(n) };
+        }
+        if (n < SD.data.ds.length) alert('Sơ đồ chỉ đủ ' + n + ' chỗ cho ' + SD.data.ds.length + ' em. Thầy/cô tăng số bàn hoặc số dãy.');
+        SD.chon = null; veSoDo();
+      };
+      $('sdXoaHet').onclick = function () { if (!confirm('Xóa hết học sinh khỏi sơ đồ?')) return; SD.nhap.ghe = {}; SD.chon = null; veSoDo(); };
+      $('sdLuu').onclick = function () {
+        var b = this; b.disabled = true; b.textContent = 'Đang lưu…';
+        goi(lopSD().url, { action: 'gv_sodo_luu', ma: MA, sodo: SD.nhap, madot: SD.dot || '' }).then(function (j) {
+          if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ lớp chưa cập nhật bản mới' : j.msg);
+          SD.data = j; SD.sua = false; SD.chon = null; SD.nhap = saoSoDo(j.sodo); veSoDo(); taiSoDo(true);
+        }).catch(function (e) { b.disabled = false; b.textContent = '💾 Lưu sơ đồ'; $('sdMsg').textContent = 'Chưa lưu được: ' + e.message; });
+      };
+      if ($('sdDat')) $('sdDat').onclick = function () {
+        var k = SD.chon, sd = SD.nhap, ma = $('sdHS').value, stt = $('sdSTT').value.trim();
+        var cu = sd.ghe[k], o = ma ? gheCua(ma) : null;
+        if (o && o !== k) { if (cu) sd.ghe[o] = { mahs: cu.mahs, stt: sd.ghe[o].stt }; else delete sd.ghe[o]; }
+        if (ma) sd.ghe[k] = { mahs: ma, stt: stt }; else delete sd.ghe[k];
+        SD.chon = null; veSoDo();
+      };
+    } else {
+      function vp(huy) {
+        var g = SD.nhap.ghe[SD.chon], ten = tenHS(g.mahs);
+        if (!huy && !confirm('Thu bài của ' + ten + ' vì vi phạm quy chế thi?\n\niPad của em sẽ tự nộp trong khoảng 30 giây; bài được chấm phần đã làm và ghi chú "Vi phạm quy chế thi".')) return;
+        if (huy && !confirm('Bỏ ghi chú vi phạm của ' + ten + '?')) return;
+        var b = $(huy ? 'sdHuyVP' : 'sdThu'); b.disabled = true; b.textContent = 'Đang gửi…';
+        goi(lopSD().url, { action: 'gv_vipham', ma: MA, madot: SD.dot, mahs: g.mahs, huy: !!huy }).then(function (j) {
+          if (!j.ok) throw new Error(j.msg);
+          SD.data = j; veSoDo();
+        }).catch(function (e) { b.disabled = false; $('sdMsg2').textContent = 'Chưa gửi được: ' + e.message; });
+      }
+      if ($('sdThu')) $('sdThu').onclick = function () { vp(false); };
+      if ($('sdHuyVP')) $('sdHuyVP').onclick = function () { vp(true); };
+    }
+  }
+  $('sdSua').onclick = function () {
+    if (SD.sua) { SD.sua = false; SD.nhap = saoSoDo(SD.data && SD.data.sodo); SD.chon = null; veSoDo(); taiSoDo(true); return; }
+    clearTimeout(SD.hen); SD.sua = true; SD.chon = null; SD.nhap = saoSoDo(SD.data && SD.data.sodo); veSoDo();
+  };
+  $('sdMoi').onclick = function () { taiSoDo(); };
+  $('sdIn').onclick = function () { window.print(); };
+  $('sdLai').onclick = function () {
+    clearTimeout(SD.hen);
+    if (SD.sua && !confirm('Bỏ các thay đổi chưa lưu?')) return;
+    if (SD.tu === 'theo') { dotXem = SD.dot; moTheoDoi(); } else if (SD.tu === 'dot') diDen('dot'); else diDen('home');
+  };
+  $('btnSoDo').onclick = function () { clearTimeout(hen); moSoDo(lopTheo, dotXem, 'theo'); };
+
+  // ---------- Ca thi nhieu ma de (chon trong the de) ----------
+  function goc(md) { return String(md).replace(/-[^-]*$/, ''); }
+  function khungCa(d) {
+    var k = document.createElement('div'); k.className = 'chinhKhung';
+    var ung = DOT.filter(function (x) { return x.madot !== d.madot && goc(x.madot) === goc(d.madot) && (!x.ca || x.ca === d.madot); });
+    var dang = DOT.filter(function (x) { return x.ca === d.madot && x.madot !== d.madot; }).map(function (x) { return x.madot; });
+    k.innerHTML = '<div class="nhan">Thi nhiều mã đề cùng lúc</div><p class="sub" style="margin:0 0 8px">Chọn các mã đề khác của cùng bài để thi chung một ca với <b>' + esc(d.madot) + '</b>. Học sinh vào đề này như bình thường; hệ thống cấp mã theo <b>sơ đồ lớp</b> để 2 em kế bên (cạnh, trước, sau, chéo) không trùng đề. Mở/đóng đề này là mở/đóng cả ca.</p>' +
+      (ung.length ? ung.map(function (x) { return '<label class="napChk" style="margin:4px 0"><input type="checkbox" value="' + esc(x.madot) + '"' + (dang.indexOf(x.madot) >= 0 ? ' checked' : '') + '> ' + esc(x.madot) + ' – ' + esc(tenNgan(x)) + '</label>'; }).join('')
+        : '<p class="loi">Kho chưa có mã đề nào khác của bài này (cùng phần đầu ' + esc(goc(d.madot)) + '-…). Nạp thêm mã đề trước.</p>') +
+      '<div class="hangNut"><button class="btn2 huy">Hủy</button>' + (ung.length ? '<button class="luu">Lưu ca thi</button>' : '') + '</div>';
+    k.querySelector('.huy').onclick = function () { DE_CA = null; veDot(); };
+    var luu = k.querySelector('.luu');
+    if (luu) luu.onclick = function () {
+      var chon = [].map.call(k.querySelectorAll('input:checked'), function (x) { return x.value; });
+      luu.disabled = true; luu.textContent = 'Đang lưu…';
+      goiBatKy({ action: 'gv_dat', ma: MA, madot: d.madot, truong: 'ca', giatri: chon }).then(function (j) {
+        if (!j.ok) throw new Error(/khong hop le|Truong/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới' : j.msg);
+        DOT = j.dot; DE_CA = null; veDot();
+      }).catch(function (e) { luu.disabled = false; luu.textContent = 'Lưu ca thi'; var o = document.createElement('div'); o.className = 'loi'; o.textContent = 'Chưa lưu được: ' + e.message; k.appendChild(o); });
+    };
+    return k;
+  }
+  var DE_CA = null;
 
 
   if (!MA && window.LAM_DEMO) MA = '4444'; // ma dang nhap cong khai cua ban dung thu

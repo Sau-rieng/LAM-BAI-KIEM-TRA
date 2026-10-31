@@ -319,6 +319,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 
   // ---------- Phong cho: doi GV bam "Bat dau" roi tu vao bai ----------
   function vaoPhongCho(j, madot, malamlai) {
+    madot = j.madot || madot;   // ca thi nhieu ma de: may chu cap ma theo ghe tren so do
     man('scrCho');
     $('choTen').textContent = j.hoten + ' – SBD ' + hocSinh.mahs;
     $('choBai').textContent = j.ten + ' · ' + j.phut + ' phút';
@@ -394,6 +395,30 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     man('scrQuiz'); $('tenTop').textContent = S.hs.hoten + ' – ' + S.ten;
     veLuoi(); veCau(); chayGio();
     if (S.khoa) $('ovKhoa').classList.add('on');
+    batKiemThu();
+  }
+  // Giao vien bam "Thu bai – vi pham" tren so do lop: iPad hoi nhe moi ~20 giay, co lenh thi tu nop
+  var henThu = null;
+  function batKiemThu() {
+    clearTimeout(henThu);
+    if (!S || S.daNop) return;
+    henThu = setTimeout(function () {
+      if (!S || S.daNop) return;
+      goi(S.hs.url, { action: 'kiemthu', madot: S.madot, mahs: S.hs.mahs }).then(function (j) {
+        if (S && !S.daNop && j && j.thu) {
+          S.vipham = true; luu();
+          $('ovKhoa').classList.remove('on');
+          alertThu();
+          nopBai();
+        } else batKiemThu();
+      }).catch(function () { batKiemThu(); });
+    }, 15000 + Math.random() * 10000);
+  }
+  function alertThu() {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:300;background:#c5221f;color:#fff;font-weight:800;padding:12px 18px;border-radius:12px;font-size:17px;box-shadow:0 6px 20px rgba(0,0,0,.25)';
+    d.textContent = 'Giáo viên đã thu bài (vi phạm quy chế thi).';
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 8000);
   }
   // Xao cau trong tung phan (I, II, III), giu thu tu cac phan
   function phanCua(q) { var m = String(q.cau).match(/^(I{1,3})\./); return m ? m[1] : (q.loai === 'DS' ? 'II' : q.loai === 'TLN' ? 'III' : 'I'); }
@@ -544,11 +569,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 
   function nopBai() {
     if (!S || S.daNop) return;
-    S.daNop = true; clearInterval(dongHo);
+    S.daNop = true; clearInterval(dongHo); clearTimeout(henThu);
     $('ovNop').classList.remove('on'); $('ovKhoa').classList.remove('on');
     var tg = Math.min(Math.round((Date.now() - S.batDau) / 1000), S.phut * 60);
     var cho = { url: S.hs.url, hoten: S.hs.hoten,
-                goi: { action: 'nop', madot: S.madot, mahs: S.hs.mahs, lan: S.lan || 1, chon: S.chon, thoigianlam: tg } };
+                goi: { action: 'nop', madot: S.madot, mahs: S.hs.mahs, lan: S.lan || 1, chon: S.chon, thoigianlam: tg, vipham: !!S.vipham } };
     ghi(KEY_GUI, cho);
     xoa(KEY);
     guiBai(cho);
@@ -585,7 +610,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     man('scrKQ');
     $('kqTen').textContent = cho.hoten + ' – SBD ' + cho.goi.mahs;
     $('kqDiem').textContent = j.diem + ' điểm';
-    $('kqCau').textContent = 'Đúng ' + j.socaudung + '/' + j.tongsocau + ' câu';
+    $('kqCau').textContent = 'Đúng ' + j.socaudung + '/' + j.tongsocau + ' câu' + (cho.goi.vipham ? ' · Giáo viên thu bài: vi phạm quy chế thi' : '');
     S = null;
   }
   $('btnThoat').onclick = function () { location.replace('about:blank'); };

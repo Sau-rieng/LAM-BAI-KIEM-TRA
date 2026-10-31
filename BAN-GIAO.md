@@ -24,6 +24,7 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 ### Các trang trong LAM-BAI-KIEM-TRA
 
 - `GIAO-VIEN.html`: trang giáo viên. Đăng nhập bằng MaQuanLy. Thanh trên: Trang chủ · Kiểm tra · Trò chơi · Tài nguyên · Hồ sơ HS · Cài đặt, chuông tin nhắn (số đỏ), Mã QR.
+  - Sơ đồ lớp (tab SO DO sổ lớp): xếp chỗ, in; ca thi nhiều mã đề (cột H CaThi trong CAU HINH, cấp mã theo chỗ, gv_dat truong 'ca'); thu bài vi phạm (gv_vipham, iPad hỏi `kiemthu`, cột M GhiChu BAI LAM, tab VI PHAM). gv_theodoi gộp cả ca (o.made).
   - Kiểm tra: 📥 Nạp đề mới (chọn file KHO-DE-<mã đợt>.xlsx, xem trước rồi ghi vào kho), phòng chờ → bắt đầu → đóng đề, màn hình chiếu có QR riêng của đề, theo dõi nộp bài, phân tích câu sai, 🧭 đánh giá theo kiến thức (ngưỡng yếu 65%, AI nhận xét), xuất Excel, dán điểm vnEdu, sửa tên/thời gian/lớp của đề.
   - Trò chơi: mở/đóng, thời gian, lớp được chơi, QR, kết quả theo lớp/ngày, Excel.
   - Tài nguyên: lượt xem từng mô phỏng theo lớp, ai đã xem; tab khối ngang.
@@ -46,7 +47,7 @@ Phần AI (hàm `goiAI`, menu 🤖 Phân tích AI, khóa GeminiKey trong tab MA)
 - KHODEHOA: tab `CAU HINH` (MaDot | TenBai | ThoiGian_phut | TrangThai MO/CHO/DONG | ChoXemLai | Lop | BatDauLuc), `MA`, `KIEN THUC` (MaDot | Cau | KienThuc | MucDo), `GIAI THICH` (MaDot | Cau | GiaiThich – nút 💡 Giải thích ở trang xem lại), `TRO CHOI` (tự tạo), mỗi đề một tab.
 - Sổ lớp: `DANHSACH` (MAHS, HO TEN, GHI CHU, MAXEM), `BAI LAM`, `BAT DAU`, `PHONG CHO`, `XEM LAI`, `VANG THI`, `HOAT DONG` (trò cá nhân), `TRO CHOI NHOM`, `NHOM`, `XEM TAI NGUYEN`, `TIN NHAN`, `BANG DIEM`.
 - Hành động học sinh: batdau, nop, mokhoa, chobai, vaobai, xemlai (trả kèm tinMoi), daxem, xemtn, tn_gui, tn_xem, tc_vao, tc_mokhoa, loai=hoatdong / loai=nhom.
-- Hành động giáo viên (cần MaQuanLy): gv_dot, gv_dat (trangthai/xemlai/ten/phut/lop), gv_theodoi, gv_hoso, gv_bangdiem, gv_vang, gv_dathi, gv_cau, gv_nhom, gv_kienthuc, gv_ainx, gv_trochoi, gv_tcdat, gv_tckq, gv_ma, gv_madat, gv_tainguyen, gv_tin, gv_tin_hs, gv_tin_gui, gv_tin_goiy, gv_napde.
+- Hành động giáo viên (cần MaQuanLy): gv_dot, gv_dat (trangthai/xemlai/ten/phut/lop), gv_theodoi, gv_hoso, gv_bangdiem, gv_vang, gv_dathi, gv_cau, gv_nhom, gv_kienthuc, gv_ainx, gv_trochoi, gv_tcdat, gv_tckq, gv_ma, gv_madat, gv_tainguyen, gv_tin, gv_tin_hs, gv_tin_gui, gv_tin_goiy, gv_napde, gv_sodo, gv_sodo_luu, gv_vipham (HS: kiemthu).
 
 ### Trò chơi (TRO--CHOI-IPAD)
 

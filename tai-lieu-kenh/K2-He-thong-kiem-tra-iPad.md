@@ -24,6 +24,12 @@ Tải file này vào kênh K2 (cùng Quy-uoc-chung.md và Mau-dinh-dang-de.md). 
   - Loai: TN (DapAn A–D), DS (A–D là ý a–d, DapAn 4 chữ Đ/S), TLN (số hoặc chữ; nhiều cách đúng ngăn bằng `;`, không phân biệt dấu/hoa thường; số thập phân dùng dấu chấm, HS gõ 18,36 hay 18.36 đều đúng).
   - Diem: điểm tối đa của câu (trống: TN 0.25, DS 1, TLN 0.25). Tổng quy về thang 10.
 
+## Sơ đồ lớp, ca thi nhiều mã đề, thu bài vi phạm (từ 31/10/2026)
+
+- **Sơ đồ lớp** (trang giáo viên → Trang chủ → Sơ đồ lớp, hoặc nút 🪑 trong đề / trang theo dõi): số dãy, số bàn mỗi dãy, chỗ mỗi bàn; ✎ Sắp xếp chỗ → Xếp theo danh sách lớp, bấm từng chỗ để chọn học sinh (chọn em đang ngồi chỗ khác = đổi chỗ) và sửa số thứ tự → Lưu. Lưu ở tab `SO DO` của sổ lớp (ô A2, JSON). Có nút In.
+- **Ca thi nhiều mã đề**: Kiểm tra → mở đề (đang đóng) → 🔀 Thi nhiều mã đề → tích các mã cùng bài (cùng phần đầu, vd H10-B6-101…104). Cột H `CaThi` của CAU HINH ghi mã chính cho mọi mã trong ca. Mở/đóng, xem lại, thời gian, lớp của mã chính áp dụng cho cả ca. Học sinh chỉ thấy mã chính; máy chủ cấp mã theo chỗ ngồi: 2 mã → bàn cờ, 4 mã → mỗi ô 2×2 đủ 4 mã (cạnh, trước, sau, chéo đều khác). Em chưa có chỗ: chia mã ngẫu nhiên. Trang theo dõi và màn hình chiếu gộp cả ca (cột mã đề từng em). Vì vậy khi soạn kiểm tra nên giao 2–4 mã đề cùng bài.
+- **Thu bài vi phạm**: khi đang thi mở sơ đồ → bấm chỗ của em → ⛔ Thu bài – vi phạm quy chế thi. iPad hỏi máy chủ mỗi 15–25 giây (hành động `kiemthu`), có lệnh thì tự nộp: chấm phần đã làm, cột M `GhiChu` của BAI LAM và PDF ghi "Vi phạm quy chế thi" (tab `VI PHAM` lưu lịch sử). Đánh dấu sau khi em đã nộp vẫn ghi chú; ↩ Bỏ vi phạm thì xóa ghi chú.
+
 ## Quy trình một bài kiểm tra
 
 1. Nạp đề: Claude tách đề Word → file `KHO-DE-<mã đợt>.xlsx` (một tab mỗi đợt + CAU HINH THEM + KIEN THUC THEM) và đưa hình lên repo. GV: trang giáo viên → Kiểm tra → **📥 Nạp đề mới** → chọn file → xem trước (đáp án, điểm, kiến thức, hình) → Nạp (hành động `gv_napde`: tạo tab đề, thêm CAU HINH, thay KIEN THUC của đợt; không thay đề đang mở hoặc đã có lớp làm). Cách cũ: KHODEHOA → Tệp → Nhập → Chèn trang tính mới, chép dòng THEM sang tab chính.
