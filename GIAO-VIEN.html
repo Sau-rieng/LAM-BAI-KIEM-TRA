@@ -402,7 +402,7 @@ body.rong main{max-width:1200px}
 .sdNut{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
 .sdNut .luu{background:var(--pri);color:#fff}
 .sdKhung{background:#fff;border:1px solid #e1ebf7;border-radius:14px;padding:16px;margin-bottom:12px;overflow-x:auto}
-.sdBan{display:inline-block;border:2px solid var(--ink);border-radius:6px;padding:10px 26px;font-weight:800;margin-bottom:14px}
+.sdBan{display:inline-block;border:2px solid var(--ink);border-radius:6px;padding:10px 26px;font-weight:800;margin-top:16px}
 .sdDays{display:flex;gap:22px;align-items:flex-start;min-width:max-content}
 .sdDayB{display:grid;border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
 .sdGhe{border:0;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);border-radius:0;background:#fff;text-align:left;padding:6px 8px;height:84px;overflow:hidden;width:136px;display:flex;flex-direction:column;justify-content:center;gap:2px;font-weight:500}
@@ -3323,6 +3323,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function tenHS(mahs) { var x = (SD.data && SD.data.ds || []).filter(function (h) { return h[0] === mahs; })[0]; return x ? x[1] : mahs; }
   function gheCua(mahs, sd) { var g = (sd || SD.nhap).ghe; return Object.keys(g).filter(function (k) { return g[k] && g[k].mahs === mahs; })[0]; }
+  function sbd2(mahs) { return String(mahs || '').slice(-2); }
   function tenGhe(k) { var p = k.split('-').map(Number); return 'Dãy ' + (p[0] + 1) + ', bàn ' + (p[1] + 1) + ', chỗ ' + (p[2] + 1); }
   var KH_MA = ['A', 'B', 'C', 'D', 'E', 'F'];
   function veSoDo() {
@@ -3362,18 +3363,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         '<label>Số bàn mỗi dãy <select id="sdHang">' + [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(function (n) { return '<option' + (n === sd.hang ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
         sd.cho.map(function (c, i) { return '<label>Dãy ' + (i + 1) + ': chỗ mỗi bàn <select class="sdChoD" data-d="' + i + '">' + [1, 2, 3, 4, 5, 6].map(function (n) { return '<option' + (n === c ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div>' +
         '<div class="sdNut"><button class="btn2" id="sdTuDong">Xếp theo danh sách lớp</button><button class="btn2" id="sdXoaHet">Xóa hết chỗ</button><button class="luu" id="sdLuu">💾 Lưu sơ đồ</button></div>' +
-        '<div class="sub">Bấm vào một chỗ để chọn học sinh và số thứ tự. Chọn em đang ngồi chỗ khác thì hai em đổi chỗ cho nhau.</div><div class="msg" id="sdMsg"></div></div>';
+        '<div class="sub">Bàn 1 (gần bàn giáo viên) ở dưới cùng; xếp theo danh sách đi từ bàn 1 lên. Bấm vào một chỗ để chọn học sinh (SBD tự hiện). Chọn em đang ngồi chỗ khác thì hai em đổi chỗ cho nhau.</div><div class="msg" id="sdMsg"></div></div>';
     }
     // Luoi
-    h += '<div class="sdKhung"><div class="sdBan">Bàn giáo viên</div><div class="sdDays">';
+    h += '<div class="sdKhung"><div class="sdDays">';
     for (var dd = 0; dd < sd.day; dd++) {
       h += '<div class="sdDayB" style="grid-template-columns:repeat(' + sd.cho[dd] + ',minmax(0,1fr))">';
-      for (var hh = 0; hh < sd.hang; hh++) for (var cc = 0; cc < sd.cho[dd]; cc++) {
+      // Ban 1 (gan giao vien) nam duoi cung, xep dan len tren
+      for (var hh = sd.hang - 1; hh >= 0; hh--) for (var cc = 0; cc < sd.cho[dd]; cc++) {
         var k = dd + '-' + hh + '-' + cc, g = sd.ghe[k], t = g ? (tt[g.mahs] || {}) : null;
         var lop = 'sdGhe' + (g ? '' : ' trong') + (SD.chon === k ? ' chon' : '') + (t && (t.vipham || t.ghichu) ? ' vp' : '') + (t && t.tt ? ' t-' + t.tt : '');
         h += '<button class="' + lop + '" data-k="' + k + '">';
         if (g) {
-          h += '<span class="dong1"><i class="stt">' + esc(g.stt || '') + '</i>' + (SD.dot && t && t.madot && ca.length > 1 ? '<i class="sdMa" title="' + esc(t.madot) + '">' + (maKH[t.madot] || '?') + '</i>' : '') + '</span>' +
+          h += '<span class="dong1"><i class="stt">' + esc(sbd2(g.mahs)) + '</i>' + (SD.dot && t && t.madot && ca.length > 1 ? '<i class="sdMa" title="' + esc(t.madot) + '">' + (maKH[t.madot] || '?') + '</i>' : '') + '</span>' +
             '<span class="ten">' + esc(tenHS(g.mahs)) + '</span>';
           if (SD.dot && t) {
             var tx = t.tt === 'danop' ? 'Nộp · ' + diem(t.diem) + 'đ' : t.tt === 'danglam' ? 'Đang làm' : t.tt === 'dangcho' ? 'Đang chờ' : 'Chưa vào';
@@ -3384,7 +3386,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       }
       h += '</div>';
     }
-    h += '</div></div>';
+    h += '</div><div class="sdBan">Bàn giáo viên</div></div>';
     // Bang chon cho / thu bai
     if (SD.chon) h += SD.sua ? khungSuaGhe(SD.chon) : khungThuBai(SD.chon);
     // Chua xep cho
@@ -3398,8 +3400,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var g = SD.nhap.ghe[k] || {}, j = SD.data;
     return '<div class="card sdBang"><b>' + tenGhe(k) + '</b><div class="sdCH">' +
       '<label>Học sinh <select id="sdHS"><option value="">— Để trống —</option>' + j.ds.map(function (x) {
-        var o = gheCua(x[0]); return '<option value="' + esc(x[0]) + '"' + (x[0] === g.mahs ? ' selected' : '') + '>' + esc(x[1]) + (o && o !== k ? ' (đang ở ' + tenGhe(o).toLowerCase() + ')' : '') + '</option>';
-      }).join('') + '</select></label><label>Số thứ tự <input id="sdSTT" type="text" maxlength="4" inputmode="numeric" value="' + esc(g.stt || '') + '"></label></div>' +
+        var o = gheCua(x[0]); return '<option value="' + esc(x[0]) + '"' + (x[0] === g.mahs ? ' selected' : '') + '>' + esc(sbd2(x[0])) + ' – ' + esc(x[1]) + (o && o !== k ? ' (đang ở ' + tenGhe(o).toLowerCase() + ')' : '') + '</option>';
+      }).join('') + '</select></label><label>SBD <input id="sdSTT" type="text" readonly value="' + esc(g.mahs ? sbd2(g.mahs) : '') + '" title="Tự lấy theo học sinh"></label></div>' +
       '<div class="hangNut"><button class="btn2" id="sdBo">Đóng</button><button class="luu" id="sdDat">Đặt vào chỗ</button></div></div>';
   }
   function khungThuBai(k) {
@@ -3430,7 +3432,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (Object.keys(SD.nhap.ghe).length && !confirm('Xếp lại toàn bộ theo thứ tự danh sách lớp?')) return;
         var sd = SD.nhap, n = 0; sd.ghe = {};
         for (var hh = 0; hh < sd.hang; hh++) for (var dd = 0; dd < sd.day; dd++) for (var cc = 0; cc < sd.cho[dd]; cc++) {
-          var x = SD.data.ds[n]; if (!x) break; n++; sd.ghe[dd + '-' + hh + '-' + cc] = { mahs: x[0], stt: String(n) };
+          var x = SD.data.ds[n]; if (!x) break; n++; sd.ghe[dd + '-' + hh + '-' + cc] = { mahs: x[0], stt: sbd2(x[0]) };
         }
         if (n < SD.data.ds.length) alert('Sơ đồ chỉ đủ ' + n + ' chỗ cho ' + SD.data.ds.length + ' em. Thầy/cô tăng số bàn hoặc số dãy.');
         SD.chon = null; veSoDo();
@@ -3443,10 +3445,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           SD.data = j; SD.sua = false; SD.chon = null; SD.nhap = saoSoDo(j.sodo); veSoDo(); taiSoDo(true);
         }).catch(function (e) { b.disabled = false; b.textContent = '💾 Lưu sơ đồ'; $('sdMsg').textContent = 'Chưa lưu được: ' + e.message; });
       };
+      if ($('sdHS')) $('sdHS').onchange = function () { $('sdSTT').value = this.value ? sbd2(this.value) : ''; };
       if ($('sdDat')) $('sdDat').onclick = function () {
-        var k = SD.chon, sd = SD.nhap, ma = $('sdHS').value, stt = $('sdSTT').value.trim();
+        var k = SD.chon, sd = SD.nhap, ma = $('sdHS').value, stt = sbd2(ma);
         var cu = sd.ghe[k], o = ma ? gheCua(ma) : null;
-        if (o && o !== k) { if (cu) sd.ghe[o] = { mahs: cu.mahs, stt: sd.ghe[o].stt }; else delete sd.ghe[o]; }
+        if (o && o !== k) { if (cu) sd.ghe[o] = { mahs: cu.mahs, stt: sbd2(cu.mahs) }; else delete sd.ghe[o]; }
         if (ma) sd.ghe[k] = { mahs: ma, stt: stt }; else delete sd.ghe[k];
         SD.chon = null; veSoDo();
       };
