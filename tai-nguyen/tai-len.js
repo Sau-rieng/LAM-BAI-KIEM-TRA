@@ -66,6 +66,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261101-210500",
+  "file": "tai-len/tl-261101-210500.html",
+  "anh": "",
+  "ten": "Mô phỏng 3D: Phản ứng Na₂CO₃ và dd HNO₃ loãng",
+  "khoi": "10",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
