@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Phản ứng của Oxide với Nước</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background-color: #0f172a;
+            user-select: none;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .pointer-auto {
+            pointer-events: auto;
+        }
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+        }
+        /* Custom 3D floating labels */
+        .beaker-label {
+            position: absolute;
+            transform: translate(-50%, -100%);
+            pointer-events: auto;
+            transition: opacity 0.2s;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.6);
+            border-radius: 3px;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(56, 189, 248, 0.8); }
+            50% { border-color: rgba(56, 189, 248, 0.2); }
+        }
+        .active-beaker-card {
+            animation: pulse-border 2s infinite;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Floating 3D Labels Container -->
+    <div id="labels-container" class="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+        <!-- Label 0: Na2O -->
+        <div id="label-0" class="beaker-label bg-slate-900/90 border border-sky-500/40 px-2.5 py-1 rounded-lg shadow-lg text-center cursor-pointer hover:scale-105 transition" onclick="focusBeaker(0)">
+            <div class="text-[10px] text-sky-400 font-semibold uppercase tracking-wider leading-tight">Cốc 1: Na<sub>2</sub>O</div>
+            <div id="badge-0" class="text-[9px] px-1.5 py-0.2 mt-0.5 rounded-full bg-slate-700 text-slate-300">Chưa phản ứng</div>
+        </div>
+        <!-- Label 1: MgO -->
+        <div id="label-1" class="beaker-label bg-slate-900/90 border border-emerald-500/40 px-2.5 py-1 rounded-lg shadow-lg text-center cursor-pointer hover:scale-105 transition" onclick="focusBeaker(1)">
+            <div class="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider leading-tight">Cốc 2: MgO</div>
+            <div id="badge-1" class="text-[9px] px-1.5 py-0.2 mt-0.5 rounded-full bg-slate-700 text-slate-300">Chưa phản ứng</div>
+        </div>
+        <!-- Label 2: P2O5 -->
+        <div id="label-2" class="beaker-label bg-slate-900/90 border border-rose-500/40 px-2.5 py-1 rounded-lg shadow-lg text-center cursor-pointer hover:scale-105 transition" onclick="focusBeaker(2)">
+            <div class="text-[10px] text-rose-400 font-semibold uppercase tracking-wider leading-tight">Cốc 3: P<sub>2</sub>O<sub>5</sub></div>
+            <div id="badge-2" class="text-[9px] px-1.5 py-0.2 mt-0.5 rounded-full bg-slate-700 text-slate-300">Chưa phản ứng</div>
+        </div>
+    </div>
+
+    <!-- Main UI Overlay -->
+    <div class="ui-layer p-2 sm:p-3">
+        
+        <!-- Top Navigation & Header (Compact) -->
+        <header class="flex flex-wrap items-center justify-between gap-2 glass-panel px-3 py-2 rounded-xl pointer-auto shadow-xl">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-sky-600 flex items-center justify-center shadow-md shadow-sky-500/20">
+                    <i class="fa-solid fa-flask-vial text-white text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white flex items-center gap-2 leading-tight">
+                        1. Phản ứng của Oxide với Nước
+                        <span class="hidden md:inline-block text-[10px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">Hóa học 3D</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-300 hidden sm:block leading-tight">Cho lần lượt các oxide Na<sub>2</sub>O, MgO, P<sub>2</sub>O<sub>5</sub> vào nước và thử bằng giấy quỳ tím</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <button onclick="runAllStep1()" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-md shadow-sky-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-spoon"></i>
+                    <span>Cho cả 3 Oxide vào nước</span>
+                </button>
+                <button onclick="runAllStep2()" class="px-2.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-vial-circle-check"></i>
+                    <span>Nhúng quỳ tím cả 3</span>
+                </button>
+                <button onclick="toggleModal('qa-modal')" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Bảng KQ & Giải Câu Hỏi SGK</span>
+                </button>
+                <button onclick="resetCamera()" title="Đặt lại góc nhìn" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs transition">
+                    <i class="fa-solid fa-video"></i>
+                </button>
+                <button onclick="resetAllExperiments()" title="Làm lại từ đầu" class="px-2.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white font-semibold text-xs transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden md:inline">Làm lại</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Middle Area: Notification Toast Centered & Compact Instruction Panel on the RIGHT (1/2 size) -->
+        <div class="flex-1 flex items-start justify-between my-1.5 pointer-events-none relative">
+            <!-- Empty spacer on left so Beaker 1 is 100% clear -->
+            <div class="w-4"></div>
+
+            <!-- Notification Banner (Compact) -->
+            <div id="toast-banner" class="mx-auto glass-panel px-3 py-1 rounded-full border border-sky-400/40 text-[11px] font-medium text-sky-200 shadow-md pointer-auto flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-info text-sky-400"></i>
+                <span id="toast-text">Chọn thao tác trên từng cốc hoặc nhấn "Cho cả 3 Oxide vào nước"</span>
+            </div>
+
+            <!-- Right Helper / Compact 1/2 Size Guide Panel -->
+            <div class="hidden md:flex flex-col glass-panel p-2 rounded-xl pointer-auto w-48 text-[10px] leading-snug text-slate-300 shadow-lg border border-slate-700/80">
+                <div class="font-bold text-white flex items-center justify-between text-[11px] border-b border-slate-700/80 pb-1 mb-1 cursor-pointer" onclick="toggleGuideBody()">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-hand-pointer text-sky-400"></i> Hướng dẫn</span>
+                    <i id="guide-toggle-icon" class="fa-solid fa-chevron-up text-[9px] text-slate-400"></i>
+                </div>
+                <div id="guide-body" class="space-y-1">
+                    <p><span class="text-sky-400 font-semibold">B1:</span> Nhấn <b>"1. Cho oxide"</b> để hòa tan.</p>
+                    <p><span class="text-purple-400 font-semibold">B2:</span> Nhấn <b>"2. Nhúng quỳ"</b> thử tính acid-base.</p>
+                    <p class="text-[9px] text-slate-400"><i class="fa-solid fa-mouse mr-1"></i>Kéo chuột xoay 3D, cuộn để zoom.</p>
+                    <!-- Compact Color Legend -->
+                    <div class="pt-1 border-t border-slate-700/80">
+                        <div class="font-semibold text-white mb-0.5 text-[10px]">Màu quỳ tím:</div>
+                        <div class="grid grid-cols-2 gap-x-1 gap-y-0.5 text-[9px]">
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-400 inline-block"></span>Tím (Đầu)</div>
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>Xanh đậm</div>
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span>Xanh nhạt</div>
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-600 inline-block"></span>Đỏ (Acid)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Controls: Compact 1/2 Height Horizontal Row of 3 Experiment Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 pointer-auto max-w-5xl mx-auto w-full">
+            
+            <!-- Card 1: Na2O (Compact) -->
+            <div id="card-0" class="glass-card rounded-xl px-2.5 py-1.5 shadow-lg flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="w-5 h-5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 font-bold flex items-center justify-center text-[11px] shrink-0">1</span>
+                        <h3 class="font-bold text-white text-xs truncate">Sodium oxide (Na<sub>2</sub>O)</h3>
+                    </div>
+                    <button onclick="focusBeaker(0)" class="text-[10px] text-sky-400 hover:text-sky-300 px-1.5 py-0.5 rounded bg-slate-800/90 shrink-0">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> Xem
+                    </button>
+                </div>
+                <div id="obs-0" class="text-[10px] leading-tight bg-slate-900/75 rounded-lg px-2 py-1 mb-1.5 border border-slate-800 text-slate-300 truncate" title="Chưa tiến hành thí nghiệm">
+                    <span><i class="fa-regular fa-clock mr-1 text-slate-400"></i>Chưa tiến hành thí nghiệm.</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button id="btn-add-0" onclick="addOxide(0)" class="px-2 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:bg-slate-700 disabled:text-slate-400 text-white font-semibold text-[11px] transition flex items-center justify-center gap-1 shadow">
+                        <i class="fa-solid fa-spoon text-[10px]"></i> 1. Cho Na<sub>2</sub>O
+                    </button>
+                    <button id="btn-dip-0" onclick="dipLitmus(0)" disabled class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold text-[11px] transition flex items-center justify-center gap-1 shadow">
+                        <i class="fa-solid fa-vial text-[10px]"></i> 2. Nhúng quỳ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: MgO (Compact) -->
+            <div id="card-1" class="glass-card rounded-xl px-2.5 py-1.5 shadow-lg flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="w-5 h-5 rounded bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold flex items-center justify-center text-[11px] shrink-0">2</span>
+                        <h3 class="font-bold text-white text-xs truncate">Magnesium oxide (MgO)</h3>
+                    </div>
+                    <button onclick="focusBeaker(1)" class="text-[10px] text-emerald-400 hover:text-emerald-300 px-1.5 py-0.5 rounded bg-slate-800/90 shrink-0">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> Xem
+                    </button>
+                </div>
+                <div id="obs-1" class="text-[10px] leading-tight bg-slate-900/75 rounded-lg px-2 py-1 mb-1.5 border border-slate-800 text-slate-300 truncate" title="Chưa tiến hành thí nghiệm">
+                    <span><i class="fa-regular fa-clock mr-1 text-slate-400"></i>Chưa tiến hành thí nghiệm.</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button id="btn-add-1" onclick="addOxide(1)" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-400 text-white font-semibold text-[11px] transition flex items-center justify-center gap-1 shadow">
+                        <i class="fa-solid fa-spoon text-[10px]"></i> 1. Cho MgO
+                    </button>
+                    <button id="btn-dip-1" onclick="dipLitmus(1)" disabled class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold text-[11px] transition flex items-center justify-center gap-1 shadow">
+                        <i class="fa-solid fa-vial text-[10px]"></i> 2. Nhúng quỳ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: P2O5 (Compact) -->
+            <div id="card-2" class="glass-card rounded-xl px-2.5 py-1.5 shadow-lg flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="w-5 h-5 rounded bg-rose-500/20 border border-rose-400/40 text-rose-300 font-bold flex items-center justify-center text-[11px] shrink-0">3</span>
+                        <h3 class="font-bold text-white text-xs truncate">Diphosphorus pentoxide (P<sub>2</sub>O<sub>5</sub>)</h3>
+                    </div>
+                    <button onclick="focusBeaker(2)" class="text-[10px] text-rose-400 hover:text-rose-300 px-1.5 py-0.5 rounded bg-slate-800/90 shrink-0">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> Xem
+                    </button>
+                </div>
+                <div id="obs-2" class="text-[10px] leading-tight bg-slate-900/75 rounded-lg px-2 py-1 mb-1.5 border border-slate-800 text-slate-300 truncate" title="Chưa tiến hành thí nghiệm">
+                    <span><i class="fa-regular fa-clock mr-1 text-slate-400"></i>Chưa tiến hành thí nghiệm.</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button id="btn-add-2" onclick="addOxide(2)" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:bg-slate-700 disabled:text-slate-400 text-white font-semibold text-[11px] transition flex items-center justify-center gap-1 shadow">
+                        <i class="fa-solid fa-spoon text-[10px]"></i> 1. Cho P<sub>2</sub>O<sub>5</sub>
+                    </button>
+                    <button id="btn-dip-2" onclick="dipLitmus(2)" disabled class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold text-[11px] transition flex items-center justify-center gap-1 shadow">
+                        <i class="fa-solid fa-vial text-[10px]"></i> 2. Nhúng quỳ
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal: Bảng Hiện Tượng & Giải Câu Hỏi SGK -->
+    <div id="qa-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-4xl rounded-3xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-900/90 border-b border-slate-700">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-graduation-cap text-amber-400 text-xl"></i>
+                    <h2 class="text-lg sm:text-xl font-bold text-white">Tổng Hợp Hiện Tượng & Trả Lời Câu Hỏi SGK</h2>
+                </div>
+                <button onclick="toggleModal('qa-modal')" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto space-y-6 text-sm leading-relaxed">
+                
+                <!-- Summary Table from Textbook -->
+                <div>
+                    <h3 class="text-base font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-table"></i> Bảng hiện tượng thí nghiệm (SGK)
+                    </h3>
+                    <div class="overflow-x-auto rounded-2xl border border-slate-700">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-emerald-900/50 text-emerald-200 border-b border-slate-700 text-sm">
+                                    <th class="py-3 px-4 font-bold w-1/4 text-center border-r border-slate-700">Oxide</th>
+                                    <th class="py-3 px-4 font-bold">Hiện tượng</th>
+                                    <th class="py-3 px-4 font-bold">Màu quỳ tím</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 bg-slate-900/60">
+                                <tr>
+                                    <td class="py-3 px-4 font-extrabold text-center text-sky-300 border-r border-slate-800 text-base">Na<sub>2</sub>O</td>
+                                    <td class="py-3 px-4">Tan hoàn toàn trong nước, tạo dung dịch trong suốt.</td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-900/80 text-blue-200 border border-blue-500/40 text-xs font-semibold">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Chuyển màu xanh đậm
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-extrabold text-center text-emerald-300 border-r border-slate-800 text-base">MgO</td>
+                                    <td class="py-3 px-4">Tan một phần trong nước (còn một lượng chất rắn màu trắng lắng dưới đáy cốc).</td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-900/80 text-sky-200 border border-sky-400/40 text-xs font-semibold">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> Chuyển màu xanh nhạt
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-extrabold text-center text-rose-300 border-r border-slate-800 text-base">P<sub>2</sub>O<sub>5</sub></td>
+                                    <td class="py-3 px-4">Tan hoàn toàn trong nước, phản ứng tỏa nhiệt mạnh.</td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-900/80 text-rose-200 border border-rose-500/40 text-xs font-semibold">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Chuyển màu đỏ
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Question 1 -->
+                <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-700/80">
+                    <h4 class="font-bold text-amber-400 text-base mb-2">
+                        Câu 1: Viết phương trình hoá học của các phản ứng xảy ra trong thí nghiệm trên.
+                    </h4>
+                    <div class="space-y-2.5 pl-2 text-slate-200">
+                        <div class="flex flex-wrap items-center justify-between bg-slate-800/70 px-4 py-2.5 rounded-xl border border-slate-700">
+                            <span class="font-mono text-base font-bold text-sky-300">Na<sub>2</sub>O + H<sub>2</sub>O &rarr; 2NaOH</span>
+                            <span class="text-xs text-slate-400">Sodium hydroxide (Kiềm mạnh, tan hoàn toàn)</span>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between bg-slate-800/70 px-4 py-2.5 rounded-xl border border-slate-700">
+                            <span class="font-mono text-base font-bold text-emerald-300">MgO + H<sub>2</sub>O &rightleftarrows; Mg(OH)<sub>2</sub></span>
+                            <span class="text-xs text-slate-400">Magnesium hydroxide (Base yếu, ít tan)</span>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between bg-slate-800/70 px-4 py-2.5 rounded-xl border border-slate-700">
+                            <span class="font-mono text-base font-bold text-rose-300">P<sub>2</sub>O<sub>5</sub> + 3H<sub>2</sub>O &rarr; 2H<sub>3</sub>PO<sub>4</sub></span>
+                            <span class="text-xs text-slate-400">Phosphoric acid (Acid trung bình, tan hoàn toàn)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-700/80">
+                    <h4 class="font-bold text-amber-400 text-base mb-2">
+                        Câu 2: So sánh tính acid – base của các oxide và hydroxide tương ứng.
+                    </h4>
+                    <div class="space-y-3 text-slate-200">
+                        <div class="p-3 rounded-xl bg-slate-800/50 border-l-4 border-sky-400">
+                            <div class="font-bold text-white mb-1">1. Đối với các Oxide (Na<sub>2</sub>O, MgO, P<sub>2</sub>O<sub>5</sub>):</div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-300">
+                                <li><b>Na<sub>2</sub>O</b> là <i>basic oxide</i> mạnh (tác dụng mãnh liệt với nước tạo kiềm mạnh).</li>
+                                <li><b>MgO</b> là <i>basic oxide</i> yếu hơn Na<sub>2</sub>O (chỉ phản ứng một phần nhỏ với nước).</li>
+                                <li><b>P<sub>2</sub>O<sub>5</sub></b> là <i>acidic oxide</i> (tác dụng với nước tạo dung dịch acid).</li>
+                                <li class="text-amber-300 font-medium pt-1">&rArr; Chiều giảm dần tính base và tăng dần tính acid: <b>Na<sub>2</sub>O &gt; MgO &gt; P<sub>2</sub>O<sub>5</sub></b>.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-800/50 border-l-4 border-purple-400">
+                            <div class="font-bold text-white mb-1">2. Đối với các Hydroxide tương ứng (NaOH, Mg(OH)<sub>2</sub>, H<sub>3</sub>PO<sub>4</sub>):</div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-300">
+                                <li><b>NaOH</b>: Base mạnh (kiềm), làm quỳ tím hóa <b>xanh đậm</b>.</li>
+                                <li><b>Mg(OH)<sub>2</sub></b>: Base yếu hơn NaOH, ít tan, làm quỳ tím hóa <b>xanh nhạt</b>.</li>
+                                <li><b>H<sub>3</sub>PO<sub>4</sub></b>: Acid trung bình, làm quỳ tím hóa <b>đỏ</b>.</li>
+                                <li class="text-amber-300 font-medium pt-1">&rArr; Trong cùng chu kì 3 (Na &rarr; Mg &rarr; P), theo chiều tăng điện tích hạt nhân, <b>tính base của oxide và hydroxide giảm dần, tính acid tăng dần</b>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3 bg-slate-900/90 border-t border-slate-700 flex justify-end">
+                <button onclick="toggleModal('qa-modal')" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm transition">
+                    Đóng cửa sổ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DATA & STATE DEFINITION FOR 3 EXPERIMENTS
+        // ==========================================
+        const EXPERIMENTS = [
+            {
+                id: 0,
+                formula: "Na2O",
+                displayFormula: "Na<sub>2</sub>O",
+                name: "Sodium oxide",
+                xPos: -5.2,
+                dissolvesCompletely: true,
+                litmusTargetHex: 0x1d4ed8, // Xanh đậm (Dark Blue)
+                litmusColorName: "xanh đậm",
+                badgeClass: "bg-blue-700 text-white",
+                liquidTintHex: 0xe0f2fe,
+                liquidOpacity: 0.35,
+                equation: "Na₂O + H₂O → 2NaOH",
+                obsStep1: "Tan hoàn toàn, tạo dung dịch NaOH trong suốt.",
+                obsStep2: "Quỳ tím hóa <b>xanh đậm</b> (Na₂O + H₂O → 2NaOH)"
+            },
+            {
+                id: 1,
+                formula: "MgO",
+                displayFormula: "MgO",
+                name: "Magnesium oxide",
+                xPos: 0,
+                dissolvesCompletely: false, // Tan một phần
+                litmusTargetHex: 0x38bdf8, // Xanh nhạt (Light Blue)
+                litmusColorName: "xanh nhạt",
+                badgeClass: "bg-sky-400 text-slate-950 font-bold",
+                liquidTintHex: 0xf1f5f9, // Hơi đục nhẹ
+                liquidOpacity: 0.52,
+                equation: "MgO + H₂O ⇄ Mg(OH)₂",
+                obsStep1: "Tan một phần, cặn trắng lắng dưới đáy cốc.",
+                obsStep2: "Quỳ tím hóa <b>xanh nhạt</b> (MgO + H₂O ⇄ Mg(OH)₂)"
+            },
+            {
+                id: 2,
+                formula: "P2O5",
+                displayFormula: "P<sub>2</sub>O<sub>5</sub>",
+                name: "Diphosphorus pentoxide",
+                xPos: 5.2,
+                dissolvesCompletely: true,
+                litmusTargetHex: 0xdc2626, // Đỏ (Red)
+                litmusColorName: "đỏ",
+                badgeClass: "bg-red-600 text-white",
+                liquidTintHex: 0xffe4e6,
+                liquidOpacity: 0.36,
+                equation: "P₂O₅ + 3H₂O → 2H₃PO₄",
+                obsStep1: "Tan hoàn toàn (tỏa nhiệt), tạo dung dịch H₃PO₄.",
+                obsStep2: "Quỳ tím hóa <b>đỏ</b> (P₂O₅ + 3H₂O → 2H₃PO₄)"
+            }
+        ];
+
+        // Global Three.js variables
+        let scene, camera, renderer, controls;
+        const beakerUnits = []; // Holds 3D objects & animation state for each of the 3 setups
+        let cameraTargetPos = new THREE.Vector3(0, 5.2, 13.5);
+        let controlsTargetLook = new THREE.Vector3(0, 1.5, 0);
+        let isCameraTransitioning = false;
+
+        // Initialize 3D Scene
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0b1120);
+            scene.fog = new THREE.FogExp2(0x0b1120, 0.025);
+
+            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.copy(cameraTargetPos);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // OrbitControls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.06;
+            controls.maxPolarAngle = Math.PI / 2 - 0.03; // Prevent going under the table
+            controls.minDistance = 4;
+            controls.maxDistance = 24;
+            controls.target.copy(controlsTargetLook);
+
+            // Stop automatic camera lerp if user manually interacts
+            controls.addEventListener('start', () => {
+                isCameraTransitioning = false;
+            });
+
+            setupLights();
+            createLabEnvironment();
+            createExperimentSetups();
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function setupLights() {
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+            scene.add(ambientLight);
+
+            const mainSpot = new THREE.DirectionalLight(0xffffff, 0.9);
+            mainSpot.position.set(6, 15, 10);
+            mainSpot.castShadow = true;
+            mainSpot.shadow.mapSize.width = 2048;
+            mainSpot.shadow.mapSize.height = 2048;
+            mainSpot.shadow.camera.near = 0.5;
+            mainSpot.shadow.camera.far = 35;
+            const d = 10;
+            mainSpot.shadow.camera.left = -d;
+            mainSpot.shadow.camera.right = d;
+            mainSpot.shadow.camera.top = d;
+            mainSpot.shadow.camera.bottom = -d;
+            scene.add(mainSpot);
+
+            const fillLight = new THREE.PointLight(0x38bdf8, 0.45, 25);
+            fillLight.position.set(-8, 6, -6);
+            scene.add(fillLight);
+
+            const rimLight = new THREE.PointLight(0xa855f7, 0.35, 25);
+            rimLight.position.set(8, 5, -7);
+            scene.add(rimLight);
+        }
+
+        function createLabEnvironment() {
+            // Laboratory Table Top
+            const tableGeo = new THREE.BoxGeometry(22, 0.6, 12);
+            const tableMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.35,
+                metalness: 0.1
+            });
+            const table = new THREE.Mesh(tableGeo, tableMat);
+            table.position.set(0, -0.3, 0);
+            table.receiveShadow = true;
+            scene.add(table);
+
+            // Subtle Grid on Lab Bench
+            const gridHelper = new THREE.GridHelper(22, 22, 0x334155, 0x1e293b);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+
+            // Ceramic White Tile Mat under the 3 Beakers for high color contrast
+            const matGeo = new THREE.BoxGeometry(15.5, 0.08, 5.2);
+            const matMaterial = new THREE.MeshStandardMaterial({
+                color: 0xe2e8f0,
+                roughness: 0.2,
+                metalness: 0.05
+            });
+            const labMat = new THREE.Mesh(matGeo, matMaterial);
+            labMat.position.set(0, 0.04, 0);
+            labMat.receiveShadow = true;
+            scene.add(labMat);
+        }
+
+        // Helper to create a 3D Text Canvas Texture for Jar/Beaker markings
+        function createLabelTexture(text, subText, borderColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 256, 128);
+
+            ctx.strokeStyle = borderColor || '#0284c7';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(5, 5, 246, 118);
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 52px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 128, 52);
+
+            ctx.fillStyle = '#475569';
+            ctx.font = '600 24px Inter, sans-serif';
+            ctx.fillText(subText, 128, 96);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
+        function createExperimentSetups() {
+            EXPERIMENTS.forEach((exp, idx) => {
+                const group = new THREE.Group();
+                group.position.set(exp.xPos, 0.08, 0);
+                scene.add(group);
+
+                // 1. Glass Beaker (Outer wall)
+                const beakerRadius = 1.25;
+                const beakerHeight = 2.9;
+                const beakerGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, beakerHeight, 40, 1, true);
+                const glassMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.28,
+                    roughness: 0.08,
+                    metalness: 0.1,
+                    reflectivity: 0.9,
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+                const beakerWall = new THREE.Mesh(beakerGeo, glassMat);
+                beakerWall.position.y = beakerHeight / 2;
+                group.add(beakerWall);
+
+                // Beaker Glass Bottom
+                const bottomGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, 0.08, 40);
+                const bottomMesh = new THREE.Mesh(bottomGeo, glassMat);
+                bottomMesh.position.y = 0.04;
+                group.add(bottomMesh);
+
+                // Beaker Rim (Torus)
+                const rimGeo = new THREE.TorusGeometry(beakerRadius, 0.045, 16, 48);
+                const rimMesh = new THREE.Mesh(rimGeo, glassMat);
+                rimMesh.rotation.x = Math.PI / 2;
+                rimMesh.position.y = beakerHeight;
+                group.add(rimMesh);
+
+                // Graduation lines on beaker
+                for (let l = 1; l <= 3; l++) {
+                    const ringGeo = new THREE.RingGeometry(beakerRadius - 0.01, beakerRadius + 0.01, 32, 1, 0, Math.PI / 3);
+                    const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+                    const ring = new THREE.Mesh(ringGeo, ringMat);
+                    ring.rotation.x = Math.PI / 2;
+                    ring.position.y = l * 0.65;
+                    group.add(ring);
+                }
+
+                // 2. Water / Solution Cylinder inside Beaker
+                const waterHeight = 1.85;
+                const waterGeo = new THREE.CylinderGeometry(beakerRadius - 0.06, beakerRadius - 0.06, waterHeight, 36);
+                const waterMat = new THREE.MeshPhongMaterial({
+                    color: 0xbae6fd,
+                    transparent: true,
+                    opacity: 0.38,
+                    shininess: 90,
+                    depthWrite: false
+                });
+                const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                waterMesh.position.y = waterHeight / 2 + 0.06;
+                group.add(waterMesh);
+
+                // Water Surface Meniscus
+                const surfaceGeo = new THREE.CircleGeometry(beakerRadius - 0.06, 36);
+                const surfaceMat = new THREE.MeshPhongMaterial({
+                    color: 0xe0f2fe,
+                    transparent: true,
+                    opacity: 0.5,
+                    side: THREE.DoubleSide
+                });
+                const waterSurface = new THREE.Mesh(surfaceGeo, surfaceMat);
+                waterSurface.rotation.x = -Math.PI / 2;
+                waterSurface.position.y = waterHeight + 0.06;
+                group.add(waterSurface);
+
+                // 3. Small Reagent Dish / Bottle next to Beaker containing the White Oxide Powder
+                const jarGroup = new THREE.Group();
+                jarGroup.position.set(-1.55, 0, -1.25);
+                group.add(jarGroup);
+
+                const jarGeo = new THREE.CylinderGeometry(0.55, 0.55, 1.1, 28);
+                const jarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+                const jarMesh = new THREE.Mesh(jarGeo, jarMat);
+                jarMesh.position.y = 0.55;
+                jarMesh.castShadow = true;
+                jarGroup.add(jarMesh);
+
+                // Label on Reagent Jar
+                const borderColors = ['#38bdf8', '#10b981', '#f43f5e'];
+                const labelTex = createLabelTexture(exp.formula, "Oxide rắn", borderColors[idx]);
+                const jarLabelGeo = new THREE.CylinderGeometry(0.56, 0.56, 0.55, 28, 1, true, -Math.PI / 3, (2 * Math.PI) / 3);
+                const jarLabelMat = new THREE.MeshBasicMaterial({ map: labelTex, side: THREE.DoubleSide });
+                const jarLabel = new THREE.Mesh(jarLabelGeo, jarLabelMat);
+                jarLabel.position.y = 0.55;
+                jarGroup.add(jarLabel);
+
+                // White Powder Mound on top of open container
+                const moundGeo = new THREE.SphereGeometry(0.45, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+                const powderMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+                const powderMound = new THREE.Mesh(moundGeo, powderMat);
+                powderMound.position.y = 1.05;
+                jarGroup.add(powderMound);
+
+                // 4. Laboratory Spatula / Spoon (for pouring white oxide)
+                const spoonGroup = new THREE.Group();
+                spoonGroup.position.set(0, 3.7, 0);
+                spoonGroup.visible = false;
+                group.add(spoonGroup);
+
+                // Spoon Handle
+                const handleGeo = new THREE.BoxGeometry(1.6, 0.06, 0.14);
+                const metalMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.8, roughness: 0.2 });
+                const handleMesh = new THREE.Mesh(handleGeo, metalMat);
+                handleMesh.position.x = -0.8;
+                spoonGroup.add(handleMesh);
+
+                // Spoon Bowl
+                const bowlGeo = new THREE.SphereGeometry(0.28, 16, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                const bowlMesh = new THREE.Mesh(bowlGeo, metalMat);
+                bowlMesh.position.x = 0.1;
+                spoonGroup.add(bowlMesh);
+
+                // White Oxide Powder inside Spoon
+                const spoonPowderGeo = new THREE.SphereGeometry(0.24, 16, 12);
+                spoonPowderGeo.scale(1, 0.6, 1);
+                const spoonPowder = new THREE.Mesh(spoonPowderGeo, powderMat);
+                spoonPowder.position.set(0.1, 0.05, 0);
+                spoonGroup.add(spoonPowder);
+
+                // 5. Falling & Dissolving Powder Particles
+                const particleCount = 90;
+                const particlesGroup = new THREE.Group();
+                group.add(particlesGroup);
+                const particles = [];
+
+                const pGeo = new THREE.SphereGeometry(0.045, 8, 8);
+                for (let i = 0; i < particleCount; i++) {
+                    const pMat = new THREE.MeshStandardMaterial({
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 1,
+                        roughness: 0.8
+                    });
+                    const pMesh = new THREE.Mesh(pGeo, pMat);
+                    pMesh.visible = false;
+                    particlesGroup.add(pMesh);
+
+                    particles.push({
+                        mesh: pMesh,
+                        vx: (Math.random() - 0.5) * 0.015,
+                        vy: -0.04 - Math.random() * 0.03,
+                        vz: (Math.random() - 0.5) * 0.015,
+                        angle: Math.random() * Math.PI * 2,
+                        radius: 0.1 + Math.random() * 0.75,
+                        staysAtBottom: !exp.dissolvesCompletely && (i < 48) // For MgO, keep ~48 particles undissolved at bottom
+                    });
+                }
+
+                // 6. Undissolved White Precipitate Layer at Bottom (Specifically for MgO)
+                const sedimentGeo = new THREE.CylinderGeometry(0.85, 1.05, 0.12, 32);
+                const sedimentMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0,
+                    roughness: 0.95
+                });
+                const sedimentMesh = new THREE.Mesh(sedimentGeo, sedimentMat);
+                sedimentMesh.position.y = 0.12;
+                group.add(sedimentMesh);
+
+                // 7. Glass Stirring Rod
+                const rodGeo = new THREE.CylinderGeometry(0.045, 0.045, 3.4, 16);
+                const rodMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xe2e8f0,
+                    transparent: true,
+                    opacity: 0.65,
+                    roughness: 0.1
+                });
+                const stirringRod = new THREE.Mesh(rodGeo, rodMat);
+                stirringRod.position.set(0.3, 2.2, 0);
+                stirringRod.rotation.z = 0.12;
+                stirringRod.visible = false;
+                group.add(stirringRod);
+
+                // 8. Litmus Paper Strip (Giấy quỳ tím)
+                // Constructed in two halves: Top dry half (remains purple) + Bottom wet half (changes color smoothly)
+                const litmusGroup = new THREE.Group();
+                litmusGroup.position.set(0, 4.3, 0);
+                litmusGroup.visible = false;
+                group.add(litmusGroup);
+
+                // Metallic Tweezers holding the top of the litmus paper
+                const tweezerGeo = new THREE.BoxGeometry(0.08, 0.9, 0.12);
+                const tweezerMesh = new THREE.Mesh(tweezerGeo, metalMat);
+                tweezerMesh.position.y = 1.15;
+                litmusGroup.add(tweezerMesh);
+
+                // Top dry half of litmus paper
+                const topStripGeo = new THREE.BoxGeometry(0.38, 0.8, 0.025);
+                const topStripMat = new THREE.MeshStandardMaterial({
+                    color: 0xa855f7, // Original purple litmus color
+                    roughness: 0.7
+                });
+                const topStrip = new THREE.Mesh(topStripGeo, topStripMat);
+                topStrip.position.y = 0.4;
+                litmusGroup.add(topStrip);
+
+                // Bottom wet half of litmus paper (dips into water & changes color)
+                const bottomStripGeo = new THREE.BoxGeometry(0.38, 0.85, 0.025);
+                const bottomStripMat = new THREE.MeshStandardMaterial({
+                    color: 0xa855f7, // Starts purple, lerps to Dark Blue / Light Blue / Red
+                    roughness: 0.5
+                });
+                const bottomStrip = new THREE.Mesh(bottomStripGeo, bottomStripMat);
+                bottomStrip.position.y = -0.425;
+                litmusGroup.add(bottomStrip);
+
+                // Store unit state
+                beakerUnits.push({
+                    exp,
+                    group,
+                    waterMesh,
+                    waterSurface,
+                    spoonGroup,
+                    spoonPowder,
+                    particles,
+                    sedimentMesh,
+                    stirringRod,
+                    litmusGroup,
+                    bottomStripMat,
+                    // Animation state machine: 'idle' | 'adding_oxide' | 'oxide_done' | 'dipping_litmus' | 'complete'
+                    state: 'idle',
+                    timer: 0
+                });
+            });
+        }
+
+        // ==========================================
+        // INTERACTION & ANIMATION CONTROLLERS
+        // ==========================================
+
+        function showToast(htmlMessage) {
+            const toastText = document.getElementById('toast-text');
+            toastText.innerHTML = htmlMessage;
+        }
+
+        // Step 1: Add Oxide to Water
+        function addOxide(index) {
+            const unit = beakerUnits[index];
+            if (unit.state !== 'idle') return;
+
+            unit.state = 'adding_oxide';
+            unit.timer = 0;
+
+            // Prepare Spoon & Particles
+            unit.spoonGroup.visible = true;
+            unit.spoonGroup.position.set(-0.4, 3.6, 0);
+            unit.spoonGroup.rotation.z = 0;
+            unit.spoonPowder.visible = true;
+            unit.spoonPowder.scale.set(1, 0.6, 1);
+
+            unit.particles.forEach(p => {
+                p.mesh.visible = false;
+                p.mesh.position.set(
+                    (Math.random() - 0.5) * 0.25,
+                    3.35 + Math.random() * 0.2,
+                    (Math.random() - 0.5) * 0.25
+                );
+                p.mesh.material.opacity = 1;
+            });
+
+            // Update UI Buttons & Badges
+            document.getElementById(`btn-add-${index}`).disabled = true;
+            const badge = document.getElementById(`badge-${index}`);
+            badge.className = "text-[9px] px-1.5 py-0.2 mt-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40";
+            badge.innerText = "Đang hòa tan...";
+
+            showToast(`Đang cho <b>${unit.exp.displayFormula}</b> vào cốc ${index + 1} và khuấy đều...`);
+        }
+
+        // Step 2: Dip Litmus Paper
+        function dipLitmus(index) {
+            const unit = beakerUnits[index];
+            if (unit.state !== 'oxide_done') return;
+
+            unit.state = 'dipping_litmus';
+            unit.timer = 0;
+
+            unit.litmusGroup.visible = true;
+            unit.litmusGroup.position.set(0, 4.3, 0);
+            unit.bottomStripMat.color.setHex(0xa855f7); // Reset to initial purple
+
+            document.getElementById(`btn-dip-${index}`).disabled = true;
+            showToast(`Đang nhúng giấy quỳ tím vào dung dịch sau phản ứng của <b>${unit.exp.displayFormula}</b>...`);
+        }
+
+        // Batch Actions
+        function runAllStep1() {
+            let triggered = false;
+            beakerUnits.forEach((u, idx) => {
+                if (u.state === 'idle') {
+                    addOxide(idx);
+                    triggered = true;
+                }
+            });
+            if (!triggered) {
+                showToast("Tất cả 3 cốc đã được cho oxide vào. Hãy nhấn <b>Nhúng quỳ tím</b>!");
+            }
+        }
+
+        function runAllStep2() {
+            let triggered = false;
+            beakerUnits.forEach((u, idx) => {
+                if (u.state === 'oxide_done') {
+                    dipLitmus(idx);
+                    triggered = true;
+                }
+            });
+            if (!triggered) {
+                const anyIdle = beakerUnits.some(u => u.state === 'idle');
+                if (anyIdle) {
+                    showToast("Vui lòng thực hiện <b>Bước 1: Cho oxide vào nước</b> trước khi nhúng quỳ tím!");
+                } else {
+                    showToast("Đã thử giấy quỳ tím cho cả 3 cốc! Nhấn <b>Bảng KQ & Giải Câu Hỏi SGK</b> để xem chi tiết.");
+                }
+            }
+        }
+
+        // Reset All Experiments
+        function resetAllExperiments() {
+            beakerUnits.forEach((unit, idx) => {
+                unit.state = 'idle';
+                unit.timer = 0;
+
+                unit.spoonGroup.visible = false;
+                unit.stirringRod.visible = false;
+                unit.litmusGroup.visible = false;
+                unit.bottomStripMat.color.setHex(0xa855f7);
+
+                unit.waterMesh.material.color.setHex(0xbae6fd);
+                unit.waterMesh.material.opacity = 0.38;
+                unit.sedimentMesh.material.opacity = 0;
+
+                unit.particles.forEach(p => {
+                    p.mesh.visible = false;
+                    p.mesh.material.opacity = 1;
+                });
+
+                // Reset UI
+                document.getElementById(`btn-add-${idx}`).disabled = false;
+                document.getElementById(`btn-dip-${idx}`).disabled = true;
+
+                const badge = document.getElementById(`badge-${idx}`);
+                badge.className = "text-[9px] px-1.5 py-0.2 mt-0.5 rounded-full bg-slate-700 text-slate-300";
+                badge.innerText = "Chưa phản ứng";
+
+                document.getElementById(`obs-${idx}`).innerHTML = `<span><i class="fa-regular fa-clock mr-1 text-slate-400"></i>Chưa tiến hành thí nghiệm.</span>`;
+                document.getElementById(`card-${idx}`).classList.remove('active-beaker-card');
+            });
+
+            resetCamera();
+            showToast("Đã làm mới toàn bộ thí nghiệm. Hãy bắt đầu lại!");
+        }
+
+        function toggleGuideBody() {
+            const body = document.getElementById('guide-body');
+            const icon = document.getElementById('guide-toggle-icon');
+            body.classList.toggle('hidden');
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+
+        // Camera Focus & Reset
+        function focusBeaker(index) {
+            const x = EXPERIMENTS[index].xPos;
+            cameraTargetPos.set(x, 3.8, 7.2);
+            controlsTargetLook.set(x, 1.5, 0);
+            isCameraTransitioning = true;
+
+            beakerUnits.forEach((_, i) => {
+                const card = document.getElementById(`card-${i}`);
+                if (i === index) card.classList.add('active-beaker-card');
+                else card.classList.remove('active-beaker-card');
+            });
+        }
+
+        function resetCamera() {
+            cameraTargetPos.set(0, 5.2, 13.5);
+            controlsTargetLook.set(0, 1.5, 0);
+            isCameraTransitioning = true;
+            beakerUnits.forEach((_, i) => {
+                document.getElementById(`card-${i}`).classList.remove('active-beaker-card');
+            });
+        }
+
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+        }
+
+        // ==========================================
+        // MAIN ANIMATION LOOP
+        // ==========================================
+        function updateExperimentAnimations() {
+            beakerUnits.forEach((unit, idx) => {
+                // STATE 1: Pouring Oxide & Stirring
+                if (unit.state === 'adding_oxide') {
+                    unit.timer += 1;
+                    const t = unit.timer;
+
+                    // Phase A (0 -> 45 frames): Tilt spoon to pour powder
+                    if (t <= 45) {
+                        const progress = t / 45;
+                        unit.spoonGroup.rotation.z = -progress * 0.85;
+                        unit.spoonPowder.scale.setScalar(Math.max(0.01, 1 - progress));
+                        if (t === 20) {
+                            unit.particles.forEach(p => p.mesh.visible = true);
+                        }
+                    } else if (t === 65) {
+                        unit.spoonGroup.visible = false;
+                        unit.stirringRod.visible = true;
+                    }
+
+                    // Phase B (20 -> 210 frames): Particles fall into water, swirl with stirring rod, and dissolve
+                    if (t >= 20 && t <= 210) {
+                        // Animate Stirring Rod in circular motion
+                        if (unit.stirringRod.visible) {
+                            const rodAngle = t * 0.16;
+                            unit.stirringRod.position.x = Math.cos(rodAngle) * 0.45;
+                            unit.stirringRod.position.z = Math.sin(rodAngle) * 0.45;
+                        }
+
+                        // Animate Powder Particles
+                        unit.particles.forEach(p => {
+                            if (!p.mesh.visible) return;
+
+                            // Above water surface: fall rapidly
+                            if (p.mesh.position.y > 1.85) {
+                                p.mesh.position.y += p.vy * 1.4;
+                            } else {
+                                // Inside water: swirl and settle
+                                p.angle += 0.08;
+                                const settleFactor = Math.max(0.15, p.mesh.position.y / 1.85);
+                                p.mesh.position.x = Math.cos(p.angle) * p.radius * settleFactor;
+                                p.mesh.position.z = Math.sin(p.angle) * p.radius * settleFactor;
+
+                                if (p.mesh.position.y > 0.16) {
+                                    p.mesh.position.y += p.vy * 0.35;
+                                } else {
+                                    p.mesh.position.y = 0.14 + Math.random() * 0.04;
+                                }
+
+                                // Dissolution logic
+                                if (unit.exp.dissolvesCompletely) {
+                                    // Na2O and P2O5 dissolve completely
+                                    p.mesh.material.opacity = Math.max(0, p.mesh.material.opacity - 0.012);
+                                    if (p.mesh.material.opacity <= 0.02) p.mesh.visible = false;
+                                } else {
+                                    // MgO: dissolves partially (some particles fade out, others remain at bottom)
+                                    if (!p.staysAtBottom) {
+                                        p.mesh.material.opacity = Math.max(0, p.mesh.material.opacity - 0.01);
+                                        if (p.mesh.material.opacity <= 0.02) p.mesh.visible = false;
+                                    }
+                                }
+                            }
+                        });
+
+                        // Gradually update water appearance & MgO sediment
+                        const mixRatio = Math.min(1, (t - 40) / 150);
+                        if (mixRatio > 0) {
+                            const startColor = new THREE.Color(0xbae6fd);
+                            const targetColor = new THREE.Color(unit.exp.liquidTintHex);
+                            unit.waterMesh.material.color.lerpColors(startColor, targetColor, mixRatio);
+                            unit.waterMesh.material.opacity = 0.38 + (unit.exp.liquidOpacity - 0.38) * mixRatio;
+
+                            if (!unit.exp.dissolvesCompletely) {
+                                unit.sedimentMesh.material.opacity = mixRatio * 0.92;
+                            }
+                        }
+                    }
+
+                    // Complete Step 1 at frame 215
+                    if (t > 215) {
+                        unit.stirringRod.visible = false;
+                        unit.state = 'oxide_done';
+
+                        // Enable Step 2 (Dip Litmus) button
+                        document.getElementById(`btn-dip-${idx}`).disabled = false;
+                        document.getElementById(`obs-${idx}`).innerHTML = `<span>${unit.exp.obsStep1}</span>`;
+
+                        const badge = document.getElementById(`badge-${idx}`);
+                        badge.className = "text-[9px] px-1.5 py-0.2 mt-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40";
+                        badge.innerText = unit.exp.dissolvesCompletely ? "Tan hoàn toàn" : "Tan một phần";
+
+                        showToast(`Đã hòa tan <b>${unit.exp.displayFormula}</b>. Hãy nhấn <b>"2. Nhúng quỳ"</b> để quan sát sự đổi màu!`);
+                    }
+                }
+
+                // STATE 2: Dipping Litmus Paper & Color Transition
+                if (unit.state === 'dipping_litmus') {
+                    unit.timer += 1;
+                    const t = unit.timer;
+
+                    // Phase A (0 -> 50 frames): Lower litmus paper into the solution
+                    if (t <= 50) {
+                        const progress = t / 50;
+                        unit.litmusGroup.position.y = 4.3 - progress * 2.45; // Lowers to y = 1.85 so bottom half is submerged
+                    }
+                    // Phase B (50 -> 140 frames): Smoothly transition wet litmus color
+                    else if (t <= 140) {
+                        const colorProgress = (t - 50) / 90;
+                        const initialPurple = new THREE.Color(0xa855f7);
+                        const targetLitmus = new THREE.Color(unit.exp.litmusTargetHex);
+                        unit.bottomStripMat.color.lerpColors(initialPurple, targetLitmus, colorProgress);
+                    }
+                    // Phase C (140 -> 185 frames): Lift litmus paper slightly up for clear inspection
+                    else if (t <= 185) {
+                        const liftProgress = (t - 140) / 45;
+                        unit.litmusGroup.position.y = 1.85 + liftProgress * 0.95; // Rests at y = 2.8
+                    }
+                    // Finish Step 2
+                    else {
+                        unit.state = 'complete';
+                        document.getElementById(`obs-${idx}`).innerHTML = `<span>${unit.exp.obsStep2}</span>`;
+
+                        const badge = document.getElementById(`badge-${idx}`);
+                        badge.className = `text-[9px] px-2 py-0.2 mt-0.5 rounded-full shadow ${unit.exp.badgeClass}`;
+                        badge.innerText = `Quỳ hóa ${unit.exp.litmusColorName}`;
+
+                        showToast(`Cốc ${idx + 1} (<b>${unit.exp.displayFormula}</b>): Giấy quỳ tím chuyển màu <b>${unit.exp.litmusColorName}</b>!`);
+                    }
+                }
+            });
+        }
+
+        // Project 3D coordinates of each Beaker to 2D Screen coordinates for floating labels
+        function updateFloatingLabels() {
+            const halfW = window.innerWidth / 2;
+            const halfH = window.innerHeight / 2;
+
+            beakerUnits.forEach((unit, idx) => {
+                const labelEl = document.getElementById(`label-${idx}`);
+                const worldPos = new THREE.Vector3(unit.exp.xPos, 3.65, 0);
+                worldPos.project(camera);
+
+                // Hide if behind camera
+                if (worldPos.z > 1) {
+                    labelEl.style.opacity = '0';
+                    return;
+                }
+
+                const screenX = (worldPos.x * halfW) + halfW;
+                const screenY = -(worldPos.y * halfH) + halfH;
+
+                labelEl.style.opacity = '1';
+                labelEl.style.left = `${screenX}px`;
+                labelEl.style.top = `${screenY}px`;
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth camera transition when clicking "Xem gần" or "Đặt lại góc nhìn"
+            if (isCameraTransitioning) {
+                camera.position.lerp(cameraTargetPos, 0.08);
+                controls.target.lerp(controlsTargetLook, 0.08);
+                if (camera.position.distanceTo(cameraTargetPos) < 0.05) {
+                    isCameraTransitioning = false;
+                }
+            }
+
+            controls.update();
+            updateExperimentAnimations();
+            updateFloatingLabels();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = initThreeJS;
+    </script>
+</body>
+</html>
