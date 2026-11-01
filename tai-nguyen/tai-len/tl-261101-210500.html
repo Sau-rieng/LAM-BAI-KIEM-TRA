@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng 3D: Phản ứng Na₂CO₃ và dd HNO₃ loãng</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0b132b;
+            user-select: none;
+        }
+        #canvas-container {
+            position: absolute;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.4);
+            border-radius: 4px;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .glass-pill {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+        }
+        .label-3d {
+            position: absolute;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+
+    <!-- Không gian 3D toàn màn hình -->
+    <div id="canvas-container"></div>
+
+    <!-- Nhãn 3D bám theo vật thể -->
+    <div id="labels-container" class="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+        <!-- Nhãn Ống nhỏ giọt -->
+        <div id="label-dropper" class="label-3d flex items-center gap-1.5 bg-slate-900/85 border border-sky-400/40 text-sky-200 px-2.5 py-1 rounded-full text-[11px] font-medium shadow-lg backdrop-blur-sm">
+            <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+            <span>Ống nhỏ giọt: dd Na₂CO₃</span>
+        </div>
+        <!-- Nhãn Cốc thủy tinh -->
+        <div id="label-beaker" class="label-3d flex flex-col bg-slate-900/85 border border-emerald-400/40 text-emerald-200 px-2.5 py-1 rounded-lg text-[11px] font-medium shadow-lg backdrop-blur-sm">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Cốc thủy tinh: dd HNO₃ loãng</span>
+            </div>
+            <span id="label-beaker-sub" class="text-[10px] text-slate-300 pl-3.5">Hạt H⁺ & NO₃⁻ đang chuyển động tự do</span>
+        </div>
+        <!-- Nhãn Lọ hóa chất -->
+        <div id="label-bottle" class="label-3d bg-slate-900/80 border border-slate-600/50 text-slate-300 px-2.5 py-1 rounded text-[10px] font-medium shadow backdrop-blur-sm">
+            Lọ chứa dd Na₂CO₃
+        </div>
+    </div>
+
+    <!-- Thanh trạng thái góc trên phải -->
+    <div class="fixed top-3 right-3 z-20 flex items-center gap-2">
+        <div class="glass-panel px-3 py-1.5 rounded-full flex items-center gap-3 text-xs">
+            <div class="flex items-center gap-1.5">
+                <span class="text-sky-400">💧</span>
+                <span class="text-slate-300">Đã nhỏ:</span>
+                <span id="drop-counter" class="font-bold text-white bg-sky-500/20 border border-sky-500/40 px-1.5 py-0.5 rounded">0 giọt</span>
+            </div>
+            <div class="h-3 w-[1px] bg-slate-700"></div>
+            <div class="flex items-center gap-1.5">
+                <span class="text-emerald-400">🫧</span>
+                <span class="text-slate-300">Khí CO₂:</span>
+                <span id="gas-status" class="font-semibold text-slate-400">0.0 ml</span>
+            </div>
+        </div>
+        <button id="btn-sound" onclick="toggleSound()" class="glass-panel p-2 rounded-full hover:bg-slate-800/80 text-slate-300 hover:text-white transition" title="Bật/Tắt âm thanh">
+            <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-400 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Nút mở lại bảng hướng dẫn khi đã thu gọn -->
+    <button id="btn-open-sidebar" onclick="toggleSidebar()" class="fixed top-3 left-3 z-20 glass-panel px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-semibold text-emerald-300 hover:bg-slate-800/90 transition shadow-lg hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+        </svg>
+        <span>Mở hướng dẫn</span>
+    </button>
+
+    <!-- BẢNG HƯỚNG DẪN BÊN TRÁI -->
+    <aside id="left-sidebar" class="fixed top-3 left-3 bottom-16 w-[280px] z-20 flex flex-col pointer-events-none sidebar-transition">
+        <div class="glass-panel rounded-2xl p-3 flex flex-col max-h-full overflow-hidden pointer-events-auto shadow-2xl">
+            
+            <!-- Tiêu đề & Nút thu gọn -->
+            <div class="flex items-start justify-between gap-2 pb-2 mb-2 border-b border-slate-700/60 shrink-0">
+                <div>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-emerald-400 block">Thí nghiệm Hóa học</span>
+                    <h1 class="text-xs font-bold text-white leading-snug">2. Phản ứng muối với dung dịch acid</h1>
+                </div>
+                <button onclick="toggleSidebar()" class="p-1 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition shrink-0" title="Thu gọn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Nội dung cuộn -->
+            <div class="overflow-y-auto pr-1 space-y-2.5 text-[11.5px] leading-relaxed">
+                
+                <!-- Mục 1 -->
+                <div class="bg-slate-800/50 rounded-xl p-2.5 border border-slate-700/40">
+                    <div class="font-semibold text-sky-300 mb-1 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        <span>Tiến hành thí nghiệm</span>
+                    </div>
+                    <p class="text-slate-300 mb-1">
+                        <strong class="text-slate-100">Chuẩn bị:</strong> Cốc thủy tinh, dd <span class="text-sky-300 font-medium">Na₂CO₃</span>, dd <span class="text-emerald-300 font-medium">HNO₃ loãng</span>.
+                    </p>
+                    <p class="text-slate-300">
+                        <strong class="text-slate-100">Cách làm:</strong> Nhỏ từ từ dung dịch Na₂CO₃ vào cốc đựng HNO₃.
+                    </p>
+                </div>
+
+                <!-- Mục 2: Giải thích bản chất ion (CỰC KỲ QUAN TRỌNG) -->
+                <div class="bg-indigo-950/70 rounded-xl p-2.5 border border-indigo-500/40 space-y-2">
+                    <div class="font-semibold text-indigo-300 text-[11.5px] flex items-center gap-1.5">
+                        <span>🔬 Bản chất Vi mô (Ion & Phản ứng)</span>
+                    </div>
+                    <div class="text-[11px] text-slate-200 space-y-1.5">
+                        <p>• <strong class="text-rose-400">Ion H⁺ (Đỏ)</strong> và <strong class="text-blue-300">NO₃⁻ (Xanh dương)</strong> chuyển động tự do trong dung dịch acid.</p>
+                        <p>• Khi nhỏ <strong class="text-sky-300">Na₂CO₃</strong> vào, xuất hiện <strong class="text-amber-400">Ion CO₃²⁻ (Cam)</strong>.</p>
+                        <p>• <span class="text-emerald-300 font-medium">Va chạm cốt lõi:</span> Ion <strong class="text-amber-400">CO₃²⁻</strong> kết hợp ngay lập tức với 2 ion <strong class="text-rose-400">H⁺</strong> tạo thành phân tử khí <strong class="text-white">CO₂↑</strong> sủi bọt bay lên!</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 pt-1 text-[10px] border-t border-indigo-800/60">
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span><span>H⁺ (Acid)</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span><span>NO₃⁻</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span><span>CO₃²⁻ (Muối)</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span><span>Na⁺</span></div>
+                    </div>
+                </div>
+
+                <!-- Mục 3: Câu hỏi SGK -->
+                <div class="space-y-1.5">
+                    <div class="font-semibold text-emerald-300 px-1 flex items-center justify-between">
+                        <span>Câu hỏi & Giải đáp</span>
+                    </div>
+
+                    <!-- Câu a -->
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700/40 overflow-hidden">
+                        <button onclick="toggleAccordion('ans-a', 'arrow-a')" class="w-full p-2 text-left flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <span class="font-medium text-slate-200 text-[11px]">a) Phương trình hoá học của phản ứng.</span>
+                            <svg id="arrow-a" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="ans-a" class="hidden px-2.5 pb-2.5 pt-1 border-t border-slate-700/40 bg-slate-900/50 space-y-1.5">
+                            <div class="bg-slate-950/80 p-1.5 rounded border border-emerald-500/30 text-emerald-300 font-mono text-[10px] text-center">
+                                Na₂CO₃ + 2HNO₃ → 2NaNO₃ + CO₂↑ + H₂O
+                            </div>
+                            <div class="bg-slate-950/80 p-1.5 rounded border border-sky-500/30 text-sky-300 font-mono text-[10px] text-center">
+                                PT Ion rút gọn: CO₃²⁻ + 2H⁺ → CO₂↑ + H₂O
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu b -->
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700/40 overflow-hidden">
+                        <button onclick="toggleAccordion('ans-b', 'arrow-b')" class="w-full p-2 text-left flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <span class="font-medium text-slate-200 text-[11px]">b) So sánh độ mạnh giữa HNO₃ và H₂CO₃.</span>
+                            <svg id="arrow-b" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="ans-b" class="hidden px-2.5 pb-2.5 pt-1 border-t border-slate-700/40 bg-slate-900/50 text-[11px] text-slate-300 space-y-1">
+                            <p>• <strong class="text-emerald-300">Acid HNO₃ mạnh hơn rất nhiều</strong> so với acid H₂CO₃.</p>
+                            <p>• Do đó HNO₃ đẩy được acid yếu H₂CO₃ ra khỏi muối, tạo khí <strong class="text-white">CO₂↑</strong> sủi bọt.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-slate-400 bg-slate-900/40 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
+                    <span class="text-sm">🖱️</span>
+                    <span>Xoay 360° bằng chuột trái, cuộn để zoom, chuột phải để di chuyển.</span>
+                </div>
+
+            </div>
+        </div>
+    </aside>
+
+    <!-- THANH ĐIỀU KHIỂN NGANG PHÍA DƯỚI (MẢNH MAI, THOÁNG ĐÃNG) -->
+    <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-20 max-w-[96vw]">
+        <div class="glass-pill px-2.5 py-1.5 rounded-full flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar">
+            
+            <!-- Nút 1: Nhỏ 1 giọt Na2CO3 -->
+            <button id="btn-drop-once" onclick="triggerSingleDrop()" class="flex items-center gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 active:scale-95 text-white font-semibold text-xs px-3.5 py-2 rounded-full shadow-md shadow-sky-500/20 transition shrink-0">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <span>Nhỏ 1 giọt Na₂CO₃</span>
+            </button>
+
+            <!-- Nút 2: Nhỏ tự động -->
+            <button id="btn-drop-auto" onclick="toggleAutoDrop()" class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-600/60 text-slate-200 font-medium text-xs px-3 py-2 rounded-full transition shrink-0">
+                <span id="auto-indicator" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                <span id="auto-text">Nhỏ liên tục (Auto)</span>
+            </button>
+
+            <div class="h-5 w-[1px] bg-slate-700/80 shrink-0"></div>
+
+            <!-- Nút 3: Góc nhìn -->
+            <button onclick="toggleCameraView()" class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-600/60 text-slate-200 font-medium text-xs px-3 py-2 rounded-full transition shrink-0" title="Chuyển đổi góc nhìn">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span id="camera-view-text">Góc nhìn: Cận cảnh</span>
+            </button>
+
+            <!-- Nút 4: Bật/Tắt Ion View -->
+            <button id="btn-ion-view" onclick="toggleIonView()" class="flex items-center gap-1.5 bg-indigo-950/80 hover:bg-indigo-900/90 border border-indigo-400/60 text-indigo-200 font-medium text-xs px-3 py-2 rounded-full transition shrink-0" title="Bật/Tắt mô phỏng các ion H+, NO3-, CO3^2-">
+                <span class="text-indigo-400">⚛️</span>
+                <span id="ion-view-text">Mô hình Ion: Bật</span>
+            </button>
+
+            <div class="h-5 w-[1px] bg-slate-700/80 shrink-0"></div>
+
+            <!-- Nút 5: Làm lại -->
+            <button onclick="resetExperiment()" class="flex items-center gap-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-semibold text-xs px-3.5 py-2 rounded-full transition shrink-0 shadow-sm" title="Làm lại thí nghiệm từ đầu">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Làm lại</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. HỆ THỐNG ÂM THANH
+        // =========================================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', !soundEnabled);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', soundEnabled);
+        }
+
+        function playDropSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, now);
+            osc.frequency.exponentialRampToValueAtTime(1000, now + 0.08);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.095);
+        }
+
+        function playFizzSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const bufferSize = audioCtx.sampleRate * 0.9;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2200, now);
+            filter.Q.setValueAtTime(2, now);
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.01, now);
+            gain.gain.linearRampToValueAtTime(0.1, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start(now);
+            noise.stop(now + 0.9);
+        }
+
+        // =========================================================================
+        // 2. BIẾN TRẠNG THÁI
+        // =========================================================================
+        let dropCount = 0;
+        let autoDropInterval = null;
+        let isCloseupView = false;
+        let isIonView = true;
+        let sidebarOpen = true;
+
+        function toggleSidebar() {
+            sidebarOpen = !sidebarOpen;
+            const sidebar = document.getElementById('left-sidebar');
+            const openBtn = document.getElementById('btn-open-sidebar');
+            if (sidebarOpen) {
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.opacity = '1';
+                openBtn.classList.add('hidden');
+            } else {
+                sidebar.style.transform = 'translateX(-115%)';
+                sidebar.style.opacity = '0';
+                openBtn.classList.remove('hidden');
+            }
+        }
+
+        function toggleAccordion(contentId, arrowId) {
+            const el = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+            const isHidden = el.classList.contains('hidden');
+            el.classList.toggle('hidden', !isHidden);
+            arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // =========================================================================
+        // 3. KHỞI TẠO THREE.JS
+        // =========================================================================
+        let scene, camera, renderer, controls;
+        let beakerGroup, liquidMesh, meniscusMesh, dropperGroup, rubberBulbMesh;
+        let fallingDrops = [];
+        let bubbles = [];
+        let surfaceRipples = [];
+        let ions = []; // Danh sách các hạt ion chuyển động (H+, NO3-, CO3^2-, Na+)
+
+        // Kích thước Cốc thủy tinh to rõ ở trung tâm
+        const BEAKER_RADIUS = 1.6;
+        const BEAKER_HEIGHT = 4.2;
+        const BEAKER_BOTTOM_Y = 0.5;
+        let baseLiquidHeight = 2.2;
+        let currentLiquidHeight = baseLiquidHeight;
+
+        const anchorDropper = new THREE.Vector3(0.65, 6.2, 0);
+        const anchorBeaker = new THREE.Vector3(2.0, 2.5, 0);
+        const anchorBottle = new THREE.Vector3(4.2, 1.8, -0.4);
+
+        let targetCamPos = new THREE.Vector3(0, 4.2, 8.5);
+        let targetControlsCenter = new THREE.Vector3(0, 2.2, 0);
+        let isCameraTransitioning = false;
+
+        function createLabelCanvasTexture(title, subtitle, borderColor, bgColor = 'rgba(255, 255, 255, 0.95)') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            ctx.roundRect(12, 12, 488, 232, 24);
+            ctx.fill();
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = borderColor;
+            ctx.stroke();
+            ctx.fillStyle = borderColor;
+            ctx.fillRect(36, 36, 440, 14);
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 56px Inter, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(title, 256, 125);
+            ctx.fillStyle = '#475569';
+            ctx.font = '600 30px Inter, Arial, sans-serif';
+            ctx.fillText(subtitle, 256, 188);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = 4;
+            return texture;
+        }
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0b132b);
+            scene.fog = new THREE.FogExp2(0x0b132b, 0.02);
+
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.copy(targetCamPos);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.1;
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target.copy(targetControlsCenter);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.02;
+            controls.minDistance = 3.5;
+            controls.maxDistance = 16;
+            controls.addEventListener('start', () => { isCameraTransitioning = false; });
+
+            // Ánh sáng
+            const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.7);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(5, 12, 7);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+
+            const rimLight = new THREE.SpotLight(0x38bdf8, 1.3);
+            rimLight.position.set(-6, 6, -5);
+            rimLight.lookAt(0, 2, 0);
+            scene.add(rimLight);
+
+            buildLabTable();
+            buildBeakerAndAcid();
+            buildDropperPipette();
+            buildReagentBottle();
+            initIonsInBeaker();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function buildLabTable() {
+            const tableGeo = new THREE.BoxGeometry(30, 0.5, 20);
+            const tableMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+            const table = new THREE.Mesh(tableGeo, tableMat);
+            table.position.set(0, -0.25, 0);
+            table.receiveShadow = true;
+            scene.add(table);
+
+            const grid = new THREE.GridHelper(30, 30, 0x334155, 0x1e293b);
+            grid.position.y = 0.01;
+            scene.add(grid);
+        }
+
+        // -------------------------------------------------------------------------
+        // DỰNG CỐC THỦY TINH (BEAKER) TO RÕ Ở TRUNG TÂM & DUNG DỊCH HNO3
+        // -------------------------------------------------------------------------
+        function buildBeakerAndAcid() {
+            beakerGroup = new THREE.Group();
+            scene.add(beakerGroup);
+
+            const glassMat = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.22,
+                roughness: 0.04,
+                metalness: 0.05,
+                reflectivity: 0.9,
+                transmission: 0.88,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+
+            // Đáy cốc phẳng
+            const bottomGeo = new THREE.CylinderGeometry(BEAKER_RADIUS, BEAKER_RADIUS, 0.1, 48);
+            const bottomMesh = new THREE.Mesh(bottomGeo, glassMat);
+            bottomMesh.position.set(0, BEAKER_BOTTOM_Y + 0.05, 0);
+            beakerGroup.add(bottomMesh);
+
+            // Thành cốc hình trụ
+            const wallGeo = new THREE.CylinderGeometry(BEAKER_RADIUS, BEAKER_RADIUS, BEAKER_HEIGHT, 48, 1, true);
+            const wallMesh = new THREE.Mesh(wallGeo, glassMat);
+            wallMesh.position.set(0, BEAKER_BOTTOM_Y + BEAKER_HEIGHT / 2, 0);
+            beakerGroup.add(wallMesh);
+
+            // Vành miệng cốc hơi loe nhẹ
+            const rimGeo = new THREE.TorusGeometry(BEAKER_RADIUS + 0.03, 0.05, 16, 48);
+            rimGeo.rotateX(Math.PI / 2);
+            const rimMesh = new THREE.Mesh(rimGeo, glassMat);
+            rimMesh.position.set(0, BEAKER_BOTTOM_Y + BEAKER_HEIGHT, 0);
+            beakerGroup.add(rimMesh);
+
+            // Vạch chia độ trên cốc
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xe2e8f0, transparent: true, opacity: 0.5 });
+            for (let i = 1; i <= 5; i++) {
+                const tickGeo = new THREE.RingGeometry(BEAKER_RADIUS + 0.002, BEAKER_RADIUS + 0.008, 32, 1, -0.3, 0.6);
+                const tick = new THREE.Mesh(tickGeo, lineMat);
+                tick.position.set(0, BEAKER_BOTTOM_Y + i * 0.7, BEAKER_RADIUS + 0.005);
+                beakerGroup.add(tick);
+            }
+
+            // Nhãn dán trên cốc
+            const labelTex = createLabelCanvasTexture('dd HNO₃ loãng', 'H⁺ & NO₃⁻', '#10b981');
+            const labelGeo = new THREE.CylinderGeometry(BEAKER_RADIUS + 0.006, BEAKER_RADIUS + 0.006, 1.1, 32, 1, true, -Math.PI / 3, Math.PI / 1.5);
+            const labelMat = new THREE.MeshBasicMaterial({ map: labelTex, transparent: true, opacity: 0.95, side: THREE.DoubleSide });
+            const labelMesh = new THREE.Mesh(labelGeo, labelMat);
+            labelMesh.position.set(0, 2.2, 0);
+            beakerGroup.add(labelMesh);
+
+            // DUNG DỊCH BÊN TRONG CỐC
+            const liquidRadius = BEAKER_RADIUS - 0.05;
+            const liquidMat = new THREE.MeshPhysicalMaterial({
+                color: 0x93c5fd,
+                transparent: true,
+                opacity: 0.38,
+                roughness: 0.1,
+                transmission: 0.75
+            });
+
+            const liqBodyGeo = new THREE.CylinderGeometry(liquidRadius, liquidRadius, 1, 36);
+            liquidMesh = new THREE.Mesh(liqBodyGeo, liquidMat);
+            beakerGroup.add(liquidMesh);
+
+            const meniscusGeo = new THREE.CircleGeometry(liquidRadius, 36);
+            meniscusGeo.rotateX(-Math.PI / 2);
+            const meniscusMat = new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+            meniscusMesh = new THREE.Mesh(meniscusGeo, meniscusMat);
+            beakerGroup.add(meniscusMesh);
+
+            updateLiquidLevel();
+        }
+
+        function updateLiquidLevel() {
+            liquidMesh.scale.y = currentLiquidHeight;
+            liquidMesh.position.set(0, BEAKER_BOTTOM_Y + currentLiquidHeight / 2, 0);
+            meniscusMesh.position.set(0, BEAKER_BOTTOM_Y + currentLiquidHeight, 0);
+        }
+
+        function getLiquidSurfaceY() {
+            return BEAKER_BOTTOM_Y + currentLiquidHeight;
+        }
+
+        // -------------------------------------------------------------------------
+        // DỰNG ỐNG NHỎ GIỌT & LỌ HÓA CHẤT
+        // -------------------------------------------------------------------------
+        function buildDropperPipette() {
+            dropperGroup = new THREE.Group();
+            dropperGroup.position.set(0, 6.0, 0);
+            scene.add(dropperGroup);
+
+            const pipGlassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, roughness: 0.08, transmission: 0.8 });
+            const stemGeo = new THREE.CylinderGeometry(0.16, 0.14, 1.4, 24);
+            const stemMesh = new THREE.Mesh(stemGeo, pipGlassMat);
+            stemMesh.position.y = 0.2;
+            dropperGroup.add(stemMesh);
+
+            const tipGeo = new THREE.CylinderGeometry(0.14, 0.04, 0.7, 24);
+            const tipMesh = new THREE.Mesh(tipGeo, pipGlassMat);
+            tipMesh.position.y = -0.8;
+            dropperGroup.add(tipMesh);
+
+            const innerLiqMat = new THREE.MeshBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.6 });
+            const innerLiqGeo = new THREE.CylinderGeometry(0.12, 0.035, 1.2, 20);
+            const innerLiq = new THREE.Mesh(innerLiqGeo, innerLiqMat);
+            innerLiq.position.y = -0.45;
+            dropperGroup.add(innerLiq);
+
+            const rubberMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.4 });
+            const collarGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.18, 24);
+            const collar = new THREE.Mesh(collarGeo, rubberMat);
+            collar.position.y = 0.95;
+            dropperGroup.add(collar);
+
+            const bulbGeo = new THREE.SphereGeometry(0.26, 24, 24);
+            bulbGeo.scale(1, 1.45, 1);
+            rubberBulbMesh = new THREE.Mesh(bulbGeo, rubberMat);
+            rubberBulbMesh.position.y = 1.3;
+            dropperGroup.add(rubberBulbMesh);
+        }
+
+        function buildReagentBottle() {
+            const bottleGroup = new THREE.Group();
+            bottleGroup.position.set(3.8, 0, -0.4);
+            scene.add(bottleGroup);
+
+            const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.35, roughness: 0.1 });
+            const bodyGeo = new THREE.CylinderGeometry(1.0, 1.0, 2.4, 36);
+            const body = new THREE.Mesh(bodyGeo, glassMat);
+            body.position.y = 1.2;
+            bottleGroup.add(body);
+
+            const neckGeo = new THREE.CylinderGeometry(0.45, 1.0, 0.6, 36);
+            const neck = new THREE.Mesh(neckGeo, glassMat);
+            neck.position.y = 2.7;
+            bottleGroup.add(neck);
+
+            const labelTex = createLabelCanvasTexture('dd Na₂CO₃', 'Sodium Carbonate', '#0284c7');
+            const labelGeo = new THREE.CylinderGeometry(1.02, 1.02, 1.1, 32, 1, true, -Math.PI / 3, Math.PI / 1.5);
+            const labelMat = new THREE.MeshBasicMaterial({ map: labelTex, side: THREE.DoubleSide });
+            const label = new THREE.Mesh(labelGeo, labelMat);
+            label.position.y = 1.25;
+            bottleGroup.add(label);
+        }
+
+        // =========================================================================
+        // 4. HỆ THỐNG MÔ PHỎNG ION & PHẢN ỨNG HỌC (CỰC KỲ TRỰC QUAN)
+        // =========================================================================
+        function initIonsInBeaker() {
+            // Ban đầu cốc chứa dd HNO3 gồm các ion H+ (Đỏ) và NO3- (Xanh dương)
+            for (let i = 0; i < 24; i++) {
+                createIonParticle('H+', 0xf43f5e, 0.07); // H+ màu đỏ
+            }
+            for (let i = 0; i < 20; i++) {
+                createIonParticle('NO3-', 0x3b82f6, 0.065); // NO3- màu xanh dương
+            }
+        }
+
+        function createIonParticle(type, colorHex, radius, customPos = null) {
+            const geo = new THREE.SphereGeometry(radius, 16, 16);
+            const mat = new THREE.MeshStandardMaterial({
+                color: colorHex,
+                emissive: colorHex,
+                emissiveIntensity: 0.4,
+                roughness: 0.2
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.visible = isIonView;
+
+            const r = Math.random() * (BEAKER_RADIUS - 0.25);
+            const theta = Math.random() * Math.PI * 2;
+            const x = Math.cos(theta) * r;
+            const z = Math.sin(theta) * r;
+            const y = customPos ? customPos.y : (BEAKER_BOTTOM_Y + 0.2 + Math.random() * (baseLiquidHeight - 0.3));
+
+            mesh.position.set(x, y, z);
+            scene.add(mesh);
+
+            ions.push({
+                mesh,
+                type,
+                vx: (Math.random() - 0.5) * 0.015,
+                vy: (Math.random() - 0.5) * 0.015,
+                vz: (Math.random() - 0.5) * 0.015,
+                isReacting: false
+            });
+        }
+
+        function toggleIonView() {
+            isIonView = !isIonView;
+            const btnText = document.getElementById('ion-view-text');
+            const btn = document.getElementById('btn-ion-view');
+            btnText.textContent = isIonView ? 'Mô hình Ion: Bật' : 'Mô hình Ion: Tắt';
+            if (isIonView) {
+                btn.classList.add('border-indigo-400', 'bg-indigo-950/80');
+            } else {
+                btn.classList.remove('border-indigo-400', 'bg-indigo-950/80');
+            }
+            ions.forEach(ion => ion.mesh.visible = isIonView);
+        }
+
+        // Khi bấm nhỏ giọt Na2CO3
+        function triggerSingleDrop() {
+            animateRubberBulb();
+            playDropSound();
+
+            const dropGeo = new THREE.SphereGeometry(0.09, 16, 16);
+            dropGeo.scale(0.85, 1.4, 0.85);
+            const dropMat = new THREE.MeshPhysicalMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.9, roughness: 0.05 });
+            const dropMesh = new THREE.Mesh(dropGeo, dropMat);
+            dropMesh.position.set(0, dropperGroup.position.y - 1.15, 0);
+            scene.add(dropMesh);
+
+            fallingDrops.push({ mesh: dropMesh, velocityY: -0.05 });
+        }
+
+        function animateRubberBulb() {
+            if (!rubberBulbMesh) return;
+            rubberBulbMesh.scale.set(0.8, 1.45, 0.8);
+            setTimeout(() => { if (rubberBulbMesh) rubberBulbMesh.scale.set(1, 1.45, 1); }, 180);
+        }
+
+        function onDropHitSurface(surfaceY) {
+            dropCount++;
+            playFizzSound();
+
+            if (currentLiquidHeight < 3.5) {
+                currentLiquidHeight += 0.06;
+                updateLiquidLevel();
+            }
+
+            // Thêm các ion Na+ (Tím) và CO3^2- (Cam) vào dung dịch
+            for (let i = 0; i < 4; i++) {
+                createIonParticle('CO32-', 0xf59e0b, 0.08, new THREE.Vector3(0, surfaceY - 0.1, 0));
+                createIonParticle('Na+', 0xa855f7, 0.06, new THREE.Vector3(0, surfaceY - 0.1, 0));
+            }
+
+            // Gợn sóng
+            createSurfaceRipple(surfaceY);
+            // Sủi bọt khí CO2 bay lên
+            spawnCO2Bubbles(35);
+
+            updateUIStatus();
+        }
+
+        function createSurfaceRipple(yPos) {
+            const ringGeo = new THREE.RingGeometry(0.06, 0.1, 32);
+            ringGeo.rotateX(-Math.PI / 2);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.set(0, yPos + 0.005, 0);
+            scene.add(ring);
+            surfaceRipples.push({ mesh: ring, scale: 1, opacity: 0.8 });
+        }
+
+        function spawnCO2Bubbles(count) {
+            const surfaceY = getLiquidSurfaceY();
+            const bMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, roughness: 0.05, transmission: 0.6 });
+
+            for (let i = 0; i < count; i++) {
+                const r = 0.03 + Math.random() * 0.05;
+                const geo = new THREE.SphereGeometry(r, 12, 12);
+                const mesh = new THREE.Mesh(geo, bMat.clone());
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * (BEAKER_RADIUS - 0.2);
+                const startY = BEAKER_BOTTOM_Y + 0.2 + Math.random() * (currentLiquidHeight - 0.2);
+
+                mesh.position.set(Math.cos(angle) * dist, startY, Math.sin(angle) * dist);
+                scene.add(mesh);
+
+                bubbles.push({
+                    mesh,
+                    speedY: 0.03 + Math.random() * 0.04,
+                    wobblePhase: Math.random() * Math.PI * 2,
+                    wobbleSpeed: 0.08 + Math.random() * 0.08,
+                    wobbleAmp: 0.005,
+                    delay: Math.random() * 20,
+                    popped: false
+                });
+            }
+        }
+
+        function updateUIStatus() {
+            document.getElementById('drop-counter').textContent = `${dropCount} giọt`;
+            const gasVol = (dropCount * 1.25).toFixed(1);
+            document.getElementById('gas-status').textContent = `${gasVol} ml`;
+            document.getElementById('gas-status').className = 'font-bold text-emerald-400';
+            document.getElementById('label-beaker-sub').textContent = `Đang phản ứng tạo khí CO₂↑ (${dropCount} giọt Na₂CO₃)`;
+            document.getElementById('label-beaker-sub').className = 'text-[10px] text-emerald-300 pl-3.5 font-medium';
+        }
+
+        function toggleAutoDrop() {
+            const btn = document.getElementById('btn-drop-auto');
+            const indicator = document.getElementById('auto-indicator');
+            const text = document.getElementById('auto-text');
+
+            if (autoDropInterval) {
+                clearInterval(autoDropInterval);
+                autoDropInterval = null;
+                indicator.className = 'w-2 h-2 rounded-full bg-slate-400';
+                text.textContent = 'Nhỏ liên tục (Auto)';
+                btn.classList.remove('border-sky-400', 'bg-sky-950/80');
+            } else {
+                triggerSingleDrop();
+                autoDropInterval = setInterval(triggerSingleDrop, 1000);
+                indicator.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
+                text.textContent = 'Đang nhỏ tự động...';
+                btn.classList.add('border-sky-400', 'bg-sky-950/80');
+            }
+        }
+
+        function toggleCameraView() {
+            isCloseupView = !isCloseupView;
+            isCameraTransitioning = true;
+            const textEl = document.getElementById('camera-view-text');
+            if (isCloseupView) {
+                targetCamPos.set(0, 2.8, 3.8);
+                targetControlsCenter.set(0, 2.2, 0);
+                textEl.textContent = 'Góc nhìn: Toàn cảnh';
+            } else {
+                targetCamPos.set(0, 4.2, 8.5);
+                targetControlsCenter.set(0, 2.2, 0);
+                textEl.textContent = 'Góc nhìn: Cận cảnh';
+            }
+        }
+
+        function resetExperiment() {
+            if (autoDropInterval) toggleAutoDrop();
+            dropCount = 0;
+            currentLiquidHeight = baseLiquidHeight;
+            updateLiquidLevel();
+
+            fallingDrops.forEach(d => scene.remove(d.mesh));
+            fallingDrops = [];
+            bubbles.forEach(b => scene.remove(b.mesh));
+            bubbles = [];
+            surfaceRipples.forEach(r => scene.remove(r.mesh));
+            surfaceRipples = [];
+
+            ions.forEach(ion => scene.remove(ion.mesh));
+            ions = [];
+            initIonsInBeaker();
+
+            document.getElementById('drop-counter').textContent = '0 giọt';
+            document.getElementById('gas-status').textContent = '0.0 ml';
+            document.getElementById('gas-status').className = 'font-semibold text-slate-400';
+            document.getElementById('label-beaker-sub').textContent = 'Hạt H⁺ & NO₃⁻ đang chuyển động tự do';
+            document.getElementById('label-beaker-sub').className = 'text-[10px] text-slate-300 pl-3.5';
+        }
+
+        // =========================================================================
+        // 5. ANIMATION LOOP & CẬP NHẬT ION BROWNIAN MOTION
+        // =========================================================================
+        function update3DLabels() {
+            projectLabelToScreen(anchorDropper, 'label-dropper', 75, -10);
+            projectLabelToScreen(anchorBeaker, 'label-beaker', 105, 0);
+            projectLabelToScreen(anchorBottle, 'label-bottle', 0, -48);
+        }
+
+        function projectLabelToScreen(worldVec, elementId, offsetX = 0, offsetY = 0) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const pos = worldVec.clone().project(camera);
+            if (pos.z > 1) { el.style.opacity = '0'; return; }
+            const x = (pos.x * 0.5 + 0.5) * window.innerWidth + offsetX;
+            const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight + offsetY;
+            el.style.opacity = '1';
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const surfaceY = getLiquidSurfaceY();
+
+            if (isCameraTransitioning) {
+                camera.position.lerp(targetCamPos, 0.07);
+                controls.target.lerp(targetControlsCenter, 0.07);
+                if (camera.position.distanceTo(targetCamPos) < 0.03) isCameraTransitioning = false;
+            }
+            controls.update();
+
+            // Giọt rơi
+            for (let i = fallingDrops.length - 1; i >= 0; i--) {
+                const drop = fallingDrops[i];
+                drop.velocityY -= 0.005;
+                drop.mesh.position.y += drop.velocityY;
+                if (drop.mesh.position.y <= surfaceY) {
+                    scene.remove(drop.mesh);
+                    fallingDrops.splice(i, 1);
+                    onDropHitSurface(surfaceY);
+                }
+            }
+
+            // Gợn sóng
+            for (let i = surfaceRipples.length - 1; i >= 0; i--) {
+                const r = surfaceRipples[i];
+                r.scale += 0.3;
+                r.opacity -= 0.03;
+                r.mesh.scale.set(r.scale, 1, r.scale);
+                r.mesh.material.opacity = Math.max(0, r.opacity);
+                if (r.opacity <= 0) { scene.remove(r.mesh); surfaceRipples.splice(i, 1); }
+            }
+
+            // Bọt khí bay lên
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                const b = bubbles[i];
+                if (b.delay > 0) { b.delay--; b.mesh.visible = false; continue; }
+                b.mesh.visible = true;
+                b.wobblePhase += b.wobbleSpeed;
+                b.mesh.position.x += Math.cos(b.wobblePhase) * b.wobbleAmp;
+                b.mesh.position.z += Math.sin(b.wobblePhase) * b.wobbleAmp;
+                b.mesh.position.y += b.speedY;
+
+                if (!b.popped && b.mesh.position.y >= surfaceY) {
+                    b.popped = true;
+                }
+                if (b.popped) {
+                    b.mesh.material.opacity -= 0.035;
+                    b.mesh.scale.multiplyScalar(1.02);
+                    if (b.mesh.material.opacity <= 0.02) {
+                        scene.remove(b.mesh);
+                        bubbles.splice(i, 1);
+                    }
+                }
+            }
+
+            // Mô phỏng chuyển động ion (Brownian Motion) & Phản ứng va chạm
+            for (let i = ions.length - 1; i >= 0; i--) {
+                const ion = ions[i];
+                ion.mesh.visible = isIonView;
+                if (!isIonView) continue;
+
+                ion.mesh.position.x += ion.vx;
+                ion.mesh.position.y += ion.vy;
+                ion.mesh.position.z += ion.vz;
+
+                // Giới hạn trong lòng cốc
+                const distXZ = Math.sqrt(ion.mesh.position.x ** 2 + ion.mesh.position.z ** 2);
+                if (distXZ > BEAKER_RADIUS - 0.2) { ion.vx *= -1; ion.vz *= -1; }
+                if (ion.mesh.position.y < BEAKER_BOTTOM_Y + 0.15 || ion.mesh.position.y > surfaceY - 0.05) { ion.vy *= -1; }
+
+                // Kiểm tra va chạm giữa CO3^2- và H+ để sinh ra khí CO2 bay lên
+                if (ion.type === 'CO32-') {
+                    for (let j = 0; j < ions.length; j++) {
+                        const other = ions[j];
+                        if (other.type === 'H+') {
+                            const dist = ion.mesh.position.distanceTo(other.mesh.position);
+                            if (dist < 0.3) {
+                                // Phản ứng xảy ra: biến thành bọt khí CO2 bay vọt lên mặt thoáng
+                                scene.remove(ion.mesh);
+                                ions.splice(i, 1);
+                                spawnSingleCO2GasParticle(other.mesh.position);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            update3DLabels();
+            renderer.render(scene, camera);
+        }
+
+        function spawnSingleCO2GasParticle(pos) {
+            const geo = new THREE.SphereGeometry(0.07, 14, 14);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            scene.add(mesh);
+
+            // Đưa vào mảng bọt khí bay lên ngay lập tức
+            bubbles.push({
+                mesh,
+                speedY: 0.05,
+                wobblePhase: Math.random() * Math.PI,
+                wobbleSpeed: 0.1,
+                wobbleAmp: 0.008,
+                delay: 0,
+                popped: true
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = function () {
+            init3D();
+            animate();
+        };
+    </script>
+</body>
+</html>
