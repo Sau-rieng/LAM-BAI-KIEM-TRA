@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Tính Dẫn Điện Của Kim Loại (Hình 19.2)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-nav {
+            height: 54px;
+            background: rgba(15, 23, 42, 0.98);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .nav-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #38bdf8;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-info {
+            background: rgba(56, 189, 248, 0.16);
+            border: 1px solid #0284c7;
+            color: #7dd3fc;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        #main-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 54px);
+            overflow: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            flex: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        #bottom-bar {
+            height: 30px;
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.82rem;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        #sidebar {
+            width: 440px;
+            background: rgba(15, 23, 42, 0.96);
+            border-left: 1px solid #334155;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.82);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .card h2 {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 6px;
+        }
+        .status-banner {
+            background: rgba(100, 116, 139, 0.2);
+            border: 1px solid #64748b;
+            color: #cbd5e1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .status-banner.active {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: #22c55e;
+            color: #4ade80;
+        }
+        .status-desc {
+            font-size: 0.84rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+            text-align: justify;
+        }
+        .control-group {
+            margin-top: 12px;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #38bdf8;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+            color: #f8fafc;
+            font-weight: 600;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #38bdf8;
+            cursor: pointer;
+            height: 6px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.88rem;
+        }
+        button:hover {
+            border-color: #94a3b8;
+            background: #334155;
+        }
+        button.primary {
+            background: linear-gradient(90deg, #0284c7, #2563eb);
+            border-color: #38bdf8;
+            color: #fff;
+        }
+        button.primary.active {
+            background: linear-gradient(90deg, #ea580c, #d97706);
+            border-color: #fb923c;
+        }
+        .eq-box {
+            background: #0f172a;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            border-left: 3px solid #facc15;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .highlight {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+        .ranking-box {
+            display: flex;
+            justify-content: space-between;
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            border: 1px solid #334155;
+            font-weight: bold;
+        }
+        .ranking-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        .ranking-item span:first-child {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-nav">
+    <div class="nav-title">MÔ PHỎNG 3D HÌNH 19.2: TÍNH DẪN ĐIỆN CỦA KIM LOẠI</div>
+    <div class="badge-info">Hướng di chuyển của các electron tự do</div>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+        <div id="bottom-bar">
+            <span>🖱️ <strong>Kéo chuột trái:</strong> Xoay mô hình 3D 360°</span>
+            <span>🔍 <strong>Cuộn con lăn chuột:</strong> Phóng to / Thu nhỏ</span>
+            <span>Bật nguồn điện để quan sát dòng dịch chuyển có hướng của electron</span>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="card">
+            <h2>Trạng Thái Mạng Tinh Thể</h2>
+            <div id="hud-status" class="status-banner">CHƯA CẤP ĐIỆN (U = 0V)</div>
+            <div id="hud-desc" class="status-desc">
+                Khi chưa có hiệu điện thế, các electron tự do chuyển động <span class="highlight">hỗn loạn không ngừng</span> theo mọi hướng. Không có dòng điện chạy qua thanh kim loại.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Điều Khiển Nguồn Điện</h2>
+            <div class="btn-row">
+                <button id="btn-power" class="primary">Bật Nguồn Điện (Cấp HĐT)</button>
+            </div>
+            <div class="control-group">
+                <label>
+                    <span>Hiệu điện thế (Lực đẩy electron):</span>
+                    <strong id="voltage-val" style="color:#38bdf8;">0 V</strong>
+                </label>
+                <input type="range" id="voltage-slider" min="0" max="100" step="5" value="0" disabled>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Bản Chất Tính Dẫn Điện (SGK)</h2>
+            <div class="eq-box">
+                Khi một hiệu điện thế được áp vào thanh kim loại, các electron tự do trong mạng tinh thể sẽ <strong>di chuyển có hướng từ phía cực âm (–) về phía cực dương (+)</strong> tạo thành dòng điện.
+            </div>
+            
+            <h2 style="margin-top: 15px;">Thứ Tự Dẫn Điện Tốt Nhất</h2>
+            <div class="ranking-box">
+                <div class="ranking-item" style="color: #cbd5e1;"><span>Ag</span> Bạc</div>
+                <div style="color: #64748b; align-self: center;">&gt;</div>
+                <div class="ranking-item" style="color: #fb923c;"><span>Cu</span> Đồng</div>
+                <div style="color: #64748b; align-self: center;">&gt;</div>
+                <div class="ranking-item" style="color: #fde047;"><span>Au</span> Vàng</div>
+                <div style="color: #64748b; align-self: center;">&gt;</div>
+                <div class="ranking-item" style="color: #94a3b8;"><span>Al</span> Nhôm</div>
+            </div>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 6px; text-align: center;">
+                *Nhôm và Đồng thường được sử dụng làm dây dẫn điện hơn vì giá thành hợp lý và nhẹ (Al).
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Chú Giải Hạt Vi Mô</h2>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="dot" style="background:#eab308; border:1px solid #fde047;"></span> 
+                    Ion dương kim loại (+)
+                </div>
+                <div class="legend-item">
+                    <span class="dot" style="background:#2dd4bf; border:1px solid #ccfbf1;"></span> 
+                    Electron tự do (e⁻)
+                </div>
+                <div class="legend-item">
+                    <div style="width:16px; height:16px; background:#475569; border: 1px solid #94a3b8;"></div>
+                    Cực Âm (–)
+                </div>
+                <div class="legend-item">
+                    <div style="width:16px; height:16px; background:#0284c7; border: 1px solid #7dd3fc;"></div>
+                    Cực Dương (+)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.parentElement.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Biến trạng thái
+let isPowerOn = false;
+let voltage = 0; // Tỉ lệ với tốc độ trôi của electron
+
+// Camera
+let rotY = -10 * Math.PI / 180;
+let rotX = 0.15;
+let zoom = 1.0;
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+const btnPower = document.getElementById('btn-power');
+const voltageSlider = document.getElementById('voltage-slider');
+const voltageVal = document.getElementById('voltage-val');
+const hudStatus = document.getElementById('hud-status');
+const hudDesc = document.getElementById('hud-desc');
+
+// Điều khiển chuột
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-0.6, Math.min(0.6, rotX + dy * 0.008));
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.6, Math.min(1.8, zoom - e.deltaY * 0.001));
+}, { passive: false });
+
+function updatePowerState() {
+    if (isPowerOn) {
+        btnPower.textContent = 'Tắt Nguồn Điện';
+        btnPower.classList.add('active');
+        voltageSlider.disabled = false;
+        voltage = 50; // Giá trị mặc định khi bật
+        voltageSlider.value = voltage;
+        voltageVal.textContent = voltage + ' V';
+        voltageVal.style.color = '#4ade80';
+        
+        hudStatus.textContent = 'ĐÃ CẤP ĐIỆN (CÓ DÒNG ĐIỆN)';
+        hudStatus.classList.add('active');
+        hudDesc.innerHTML = 'Hiệu điện thế tạo ra điện trường. Các electron tự do <span class="highlight">bị hút về cực dương (+) và đẩy khỏi cực âm (–)</span>, tạo thành dòng dịch chuyển có hướng (dòng điện).';
+    } else {
+        btnPower.textContent = 'Bật Nguồn Điện (Cấp HĐT)';
+        btnPower.classList.remove('active');
+        voltageSlider.disabled = true;
+        voltage = 0;
+        voltageSlider.value = 0;
+        voltageVal.textContent = '0 V';
+        voltageVal.style.color = '#38bdf8';
+        
+        hudStatus.textContent = 'CHƯA CẤP ĐIỆN (U = 0V)';
+        hudStatus.classList.remove('active');
+        hudDesc.innerHTML = 'Khi chưa có hiệu điện thế, các electron tự do chuyển động <span class="highlight">hỗn loạn không ngừng</span> theo mọi hướng. Không có dòng điện chạy qua thanh kim loại.';
+    }
+}
+
+btnPower.addEventListener('click', () => {
+    isPowerOn = !isPowerOn;
+    updatePowerState();
+});
+
+voltageSlider.addEventListener('input', e => {
+    voltage = parseFloat(e.target.value);
+    voltageVal.textContent = voltage + ' V';
+});
+
+function project(x, y, z) {
+    let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+    let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+    let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+    const fov = 700 * zoom;
+    const viewerDist = 650;
+    const scale = fov / (viewerDist + z2);
+    return {
+        x: width / 2 + x1 * scale,
+        y: height / 2 + 10 - y2 * scale,
+        z: z2,
+        scale: scale
+    };
+}
+
+// 1. Cấu trúc mạng tinh thể ion dương (xếp sole giống Hình 19.2)
+const cations = [];
+const spacingX = 65;
+const spacingY = 55;
+for (let row = -2; row <= 2; row++) {
+    const isOffset = Math.abs(row) % 2 === 1;
+    const startCol = isOffset ? -2.5 : -2;
+    const endCol = isOffset ? 2.5 : 2;
+    
+    for (let col = startCol; col <= endCol; col++) {
+        for (let z = -1; z <= 1; z++) {
+            cations.push({
+                baseX: col * spacingX,
+                baseY: row * spacingY,
+                baseZ: z * 60,
+                phase: Math.random() * 6.28
+            });
+        }
+    }
+}
+
+// 2. Electron tự do
+const electrons = [];
+for (let i = 0; i < 110; i++) {
+    electrons.push({
+        x: (Math.random() - 0.5) * 450,
+        y: (Math.random() - 0.5) * 280,
+        z: (Math.random() - 0.5) * 150,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3,
+        vz: (Math.random() - 0.5) * 3,
+        history: [] // Để vẽ vệt đuôi
+    });
+}
+
+// Vẽ khối hộp 3D cho Điện cực
+function drawElectrodePlate(xCenter, isPositive) {
+    const w = 25; // Nửa chiều rộng
+    const h = 180; // Nửa chiều cao
+    const d = 100; // Nửa chiều sâu
+
+    const c = [
+        project(xCenter - w, -h, -d), project(xCenter + w, -h, -d),
+        project(xCenter + w,  h, -d), project(xCenter - w,  h, -d),
+        project(xCenter - w, -h,  d), project(xCenter + w, -h,  d),
+        project(xCenter + w,  h,  d), project(xCenter - w,  h,  d)
+    ];
+
+    const faces = [
+        { idx: [0,1,5,4], name: 'top' },
+        { idx: [0,1,2,3], name: 'back' },
+        { idx: [0,4,7,3], name: 'left' },
+        { idx: [1,5,6,2], name: 'right' },
+        { idx: [3,2,6,7], name: 'bottom' },
+        { idx: [4,5,6,7], name: 'front' }
+    ];
+
+    // Sắp xếp mặt theo độ sâu Z
+    faces.forEach(f => {
+        f.avgZ = (c[f.idx[0]].z + c[f.idx[1]].z + c[f.idx[2]].z + c[f.idx[3]].z) / 4;
+    });
+    faces.sort((a, b) => b.avgZ - a.avgZ);
+
+    const baseColor = isPositive ? [2, 132, 199] : [71, 85, 105]; // Xanh dương cho +, Xám cho -
+    const lightColor = isPositive ? 'rgba(56, 189, 248, 0.8)' : 'rgba(148, 163, 184, 0.8)';
+    const darkColor = isPositive ? 'rgba(3, 105, 161, 0.9)' : 'rgba(51, 65, 85, 0.9)';
+    const strokeCol = isPositive ? '#7dd3fc' : '#cbd5e1';
+
+    faces.forEach(f => {
+        ctx.beginPath();
+        ctx.moveTo(c[f.idx[0]].x, c[f.idx[0]].y);
+        for (let i = 1; i < 4; i++) ctx.lineTo(c[f.idx[i]].x, c[f.idx[i]].y);
+        ctx.closePath();
+        
+        ctx.fillStyle = (f.name === 'front' || f.name === 'top') ? lightColor : darkColor;
+        ctx.fill();
+        ctx.strokeStyle = strokeCol;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+
+    // Vẽ nhãn + / - nổi
+    const pLbl = project(isPositive ? xCenter + 35 : xCenter - 35, 0, 0);
+    ctx.fillStyle = isPositive ? '#38bdf8' : '#cbd5e1';
+    ctx.font = `bold ${Math.round(45 * pLbl.scale)}px Segoe UI`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(isPositive ? '+' : '–', pLbl.x, pLbl.y);
+}
+
+function drawSphere3D(px, py, radius, type) {
+    const grad = ctx.createRadialGradient(
+        px - radius * 0.35, py - radius * 0.35, radius * 0.1,
+        px, py, radius
+    );
+
+    if (type === 'cation') {
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.4, '#eab308');
+        grad.addColorStop(1, '#a16207');
+    } else {
+        // Màu electron (xanh ngọc) giống SGK
+        grad.addColorStop(0, '#5eead4');
+        grad.addColorStop(0.5, '#14b8a6');
+        grad.addColorStop(1, '#0f766e');
+    }
+
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.strokeStyle = type === 'cation' ? '#fde047' : '#ccfbf1';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    if (type === 'cation') {
+        ctx.fillStyle = '#451a03';
+        ctx.font = `bold ${Math.round(radius * 1.1)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('+', px, py);
+    }
+}
+
+let lastTime = performance.now();
+function animate(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Render mờ khối kim loại nền
+    const bgP1 = project(-240, -160, 0);
+    const bgP2 = project(240, 160, 0);
+    ctx.fillStyle = 'rgba(253, 224, 71, 0.03)';
+    ctx.fillRect(Math.min(bgP1.x, bgP2.x), Math.min(bgP1.y, bgP2.y), Math.abs(bgP2.x - bgP1.x), Math.abs(bgP2.y - bgP1.y));
+
+    // Vẽ 2 bản cực điện
+    drawElectrodePlate(-270, false); // Cực âm bên trái
+    drawElectrodePlate(270, true);   // Cực dương bên phải
+
+    const renderItems = [];
+    
+    // 1. Cập nhật ion dương (chỉ dao động nhẹ tại chỗ)
+    cations.forEach(n => {
+        n.phase += dt * 4;
+        const wigX = Math.sin(n.phase) * 1.5;
+        const wigY = Math.cos(n.phase) * 1.5;
+        const p = project(n.baseX + wigX, n.baseY + wigY, n.baseZ);
+        renderItems.push({ type: 'cation', p: p, radius: 22 * p.scale, zOrder: p.z });
+    });
+
+    // 2. Cập nhật electron tự do
+    const driftSpeed = isPowerOn ? (voltage / 100) * 12 : 0; // Vận tốc trôi về cực dương (+X)
+    
+    electrons.forEach(el => {
+        // Chuyển động nhiệt (hỗn loạn) + Chuyển động có hướng (drift)
+        el.x += el.vx + driftSpeed;
+        el.y += el.vy;
+        el.z += el.vz;
+        
+        // Cập nhật vận tốc nhiệt (random walk)
+        if (Math.random() < 0.1) {
+            el.vx = (Math.random() - 0.5) * 4;
+            el.vy = (Math.random() - 0.5) * 4;
+            el.vz = (Math.random() - 0.5) * 4;
+        }
+
+        // Bouncing box cho chuyển động nhiệt
+        if (el.y < -150) { el.y = -150; el.vy *= -1; }
+        if (el.y > 150)  { el.y =  150; el.vy *= -1; }
+        if (el.z < -80)  { el.z = -80;  el.vz *= -1; }
+        if (el.z > 80)   { el.z =  80;  el.vz *= -1; }
+
+        // Hiệu ứng dòng điện chảy (Nếu chạm cực dương thì vòng lại từ cực âm)
+        if (el.x > 240) {
+            if (isPowerOn) el.x = -240; // Bơm từ cực âm sang
+            else { el.x = 240; el.vx *= -1; } // Nảy lại nếu không có điện
+        }
+        if (el.x < -240) {
+            if (isPowerOn) el.x = 240; // Vòng tuần hoàn
+            else { el.x = -240; el.vx *= -1; }
+        }
+
+        // Lưu vết để vẽ đuôi (Thể hiện hướng di chuyển)
+        el.history.push({x: el.x, y: el.y, z: el.z});
+        if (el.history.length > 5) el.history.shift();
+
+        const p = project(el.x, el.y, el.z);
+        renderItems.push({ type: 'electron', p: p, radius: 6 * p.scale, zOrder: p.z, history: el.history });
+    });
+
+    // Sắp xếp Painter's Algorithm
+    renderItems.sort((a, b) => b.zOrder - a.zOrder);
+
+    // Vẽ hạt
+    renderItems.forEach(item => {
+        if (item.type === 'electron' && isPowerOn) {
+            // Vẽ vệt đuôi (chỉ rõ hướng di chuyển)
+            ctx.beginPath();
+            const firstP = project(item.history[0].x, item.history[0].y, item.history[0].z);
+            ctx.moveTo(firstP.x, firstP.y);
+            for (let i = 1; i < item.history.length; i++) {
+                const hp = project(item.history[i].x, item.history[i].y, item.history[i].z);
+                ctx.lineTo(hp.x, hp.y);
+            }
+            ctx.strokeStyle = 'rgba(45, 212, 191, 0.4)';
+            ctx.lineWidth = item.radius * 0.8;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        drawSphere3D(item.p.x, item.p.y, item.radius, item.type);
+    });
+
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
