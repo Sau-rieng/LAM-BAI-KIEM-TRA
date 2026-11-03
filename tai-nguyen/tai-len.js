@@ -99,6 +99,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261103-085335",
+  "file": "tai-len/tl-261103-085335.html",
+  "anh": "",
+  "ten": "Mô Phỏng 3D: Tính Dẻo Của Kim Loại (Hình 19.1)",
+  "khoi": "12",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
