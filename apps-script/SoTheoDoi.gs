@@ -99,6 +99,8 @@ function doPost(e) {
       case 'gv_napde':
       case 'gv_xemde':
       case 'gv_hinh':
+      case 'gv_hinhde':
+      case 'gv_ganhinh':
       case 'gv_sodo':
       case 'gv_sodo_luu':
       case 'gv_vipham':
@@ -132,6 +134,8 @@ function doPost(e) {
         if (d.action === 'gv_napde') return json(gvNapDe(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
         if (d.action === 'gv_hinh') return json(gvHinh(d));
+        if (d.action === 'gv_hinhde') return json(gvHinhDe(d));
+        if (d.action === 'gv_ganhinh') return json(gvGanHinh(d));
         if (d.action === 'gv_sodo') return json(gvSoDo(d));
         if (d.action === 'gv_sodo_luu') return json(gvSoDoLuu(d));
         if (d.action === 'gv_vipham') return json(gvViPham(d));
@@ -636,9 +640,15 @@ function gvXemDe(d) {
     try { ok = UrlFetchApp.fetch(u, {muteHttpExceptions: true, followRedirects: true}).getResponseCode() === 200; } catch (e) {}
     return (kiem[u] = ok);
   }
-  de.forEach(function (q) { urlAnhCua(q).forEach(function (u) { if (!coAnh(u)) thieu.push({cau: q.cau, url: u}); }); });
+  de.forEach(function (q) {
+    urlAnhCua(q).forEach(function (u) { if (!coAnh(u)) thieu.push({cau: q.cau, url: u}); });
+    if (nhacHinh(q)) thieu.push({cau: q.cau, url: '', nhac: true});
+  });
   const gt = docGiaiThich();
-  let html = htmlDeGoc(c, de);
+  // Cau nhac toi "Hinh 2", "so do"... ma cot Hinh dang trong: danh dau ngay duoi cau hoi trong PDF
+  let html = htmlDeGoc(c, de.map(function (q) {
+    return nhacHinh(q) ? Object.assign({}, q, {hoi: q.hoi + '<div style="border:2px dashed #000;padding:6px;margin:4px 0;font-weight:bold">⚠ CÂU NÀY NHẮC TỚI HÌNH NHƯNG CHƯA GẮN HÌNH (cột Hinh trống)</div>'}) : q;
+  }));
   // Hinh khong mo duoc: thay bang khung bao loi de GV thay ngay tren PDF
   html = html.replace(/<img[^>]*src="(https?:\/\/[^"]+)"[^>]*>/gi, function (m, u) {
     return coAnh(u) ? m : '<div style="border:2px dashed #000;padding:6px;margin:4px 0;font-weight:bold">⚠ THIẾU HÌNH: ' + esc(u.replace(/^.*\/hinh\//, 'hinh/')) + '</div>';
@@ -647,10 +657,63 @@ function gvXemDe(d) {
   if (coGT.length) html = html.replace('</body>', '<h3>LỜI GIẢI CHI TIẾT</h3>' + coGT.map(function (q) {
     return '<div class="q"><b>' + nhanCau(q) + '.</b> ' + String(gt[c.madot + '|' + q.cau]).replace(/\n/g, '<br>') + '</div>';
   }).join('') + '</body>');
-  const tom = '<p style="text-align:center">' + (thieu.length ? '<b>⚠ ' + thieu.length + ' hình chưa mở được</b>' : 'Hình: đủ') + ' · Lời giải: ' + coGT.length + '/' + de.length + ' câu</p>';
+  const tom = '<p style="text-align:center">' + (thieu.length ? '<b>⚠ ' + thieu.length + ' chỗ thiếu hình</b>' : 'Hình: đủ') + ' · Lời giải: ' + coGT.length + '/' + de.length + ' câu</p>';
   html = html.replace('</h2>', '</h2>' + tom);
   const pdf = htmlSangPDF(html, 'XEM DE - ' + c.madot + '.pdf');
   return {ok: true, madot: c.madot, ten: c.ten, socau: de.length, thieu: thieu, sogt: coGT.length, pdf: Utilities.base64Encode(pdf.getBytes())};
+}
+// Cau hoi nhac toi hinh (Hinh 2, so do, do thi, hinh ben...) nhung khong co hinh nao gan vao
+function nhacHinh(q) {
+  if (q.hinh || /<img|<svg/i.test([q.hoi, q.pa.A, q.pa.B, q.pa.C, q.pa.D].join(' '))) return false;
+  return /(hình|sơ đồ|đồ thị|biểu đồ)\s*(\d|bên|dưới|sau|vẽ|minh họa|minh hoạ|trên)/i.test(String(q.hoi).replace(/<[^>]*>/g, ' '));
+}
+// Duong dan web cua hinh de: https://<chu repo>.github.io/<ten repo>/hinh/<ma dot>/<ten file>
+function urlHinhDe(gh, madot, ten) {
+  const p = gh.repo.split('/');
+  return 'https://' + p[0].toLowerCase() + '.github.io/' + p[1] + '/hinh/' + madot + '/' + ten;
+}
+// GV mo bang "Hinh cua de": danh sach cau (dang gan hinh nao) + cac file hinh dang co trong hinh/<ma dot>/
+function gvHinhDe(d) {
+  const c = timDot(d.madot);
+  if (!c) return {ok: false, msg: 'Khong tim thay de ' + d.madot};
+  const gh = ghCauHinh(), de = docDe(c.madot);
+  let co = [];
+  try {
+    const url = 'https://api.github.com/repos/' + gh.repo + '/contents/hinh/' + encodeURIComponent(c.madot) + '?ref=' + encodeURIComponent(gh.nhanh);
+    const o = {muteHttpExceptions: true, headers: {Accept: 'application/vnd.github+json'}};
+    if (gh.token) o.headers.Authorization = 'Bearer ' + gh.token;
+    const r = UrlFetchApp.fetch(url, o);
+    if (r.getResponseCode() === 200) co = JSON.parse(r.getContentText()).filter(function (f) { return f.type === 'file' && /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name); }).map(function (f) { return f.name; });
+  } catch (e) {}
+  return {ok: true, madot: c.madot, goc: urlHinhDe(gh, c.madot, ''), co: co, coToken: !!gh.token,
+    cau: de.map(function (q) { return {cau: q.cau, hoi: String(q.hoi).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140), hinh: q.hinh, nhac: nhacHinh(q)}; })};
+}
+// Gan hinh vao cau: d.gan = [{cau, ten}] -> ghi cot H (Hinh) tab de; ten '' = bo hinh
+function gvGanHinh(d) {
+  const c = timDot(d.madot);
+  if (!c) return {ok: false, msg: 'Khong tim thay de ' + d.madot};
+  const gan = Array.isArray(d.gan) ? d.gan : [];
+  if (!gan.length) return {ok: false, msg: 'Chua chon hinh cho cau nao'};
+  const gh = ghCauHinh(), sh = kho().getSheetByName(c.madot);
+  if (!sh) return {ok: false, msg: 'Kho de chua co tab ' + c.madot};
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const v = sh.getDataRange().getValues(), hang = {};
+    let k = 0;
+    for (let i = 1; i < v.length; i++) { if (String(v[i][1]).trim() === '') continue; k++; hang[String(v[i][0]).trim() || String(k)] = i + 1; }
+    if (!String(sh.getRange(1, 8).getValue()).trim()) sh.getRange(1, 8).setValue('Hinh');
+    const xong = [];
+    gan.forEach(function (g) {
+      const cau = String(g.cau || '').trim(), ten = String(g.ten || '').trim();
+      if (!hang[cau]) throw new Error('De ' + c.madot + ' khong co cau ' + cau);
+      if (ten && !/^[A-Za-z0-9_.\-]{1,60}\.(png|jpe?g|gif|webp|svg)$/i.test(ten)) throw new Error('Ten hinh khong hop le: ' + ten);
+      sh.getRange(hang[cau], 8).setValue(ten ? urlHinhDe(gh, c.madot, ten) : '');
+      xong.push(cau);
+    });
+    SpreadsheetApp.flush();
+    return {ok: true, madot: c.madot, xong: xong};
+  } finally { lock.releaseLock(); }
 }
 // GV tai hinh cua de len GitHub: hinh/<ma dot>/<ten file> (dung dong GithubToken trong tab MA)
 function gvHinh(d) {

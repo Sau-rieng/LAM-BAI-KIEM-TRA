@@ -155,6 +155,20 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .xdBox{margin-top:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
 .xdBox.xau{border-color:#c5221f;background:#fff6f5}
 .xdBox ul{margin:6px 0;padding-left:20px;font-size:14px}
+.hhKho{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:10px 0}
+.hhKho figure{margin:0;border:1px solid var(--line);border-radius:8px;padding:4px;background:#fff;text-align:center}
+.hhKho img{display:block;width:120px;height:80px;object-fit:contain}
+.hhKho figcaption{font-size:12.5px;font-weight:700}
+.hhTai{margin:0;cursor:pointer;padding:10px 14px;border:2px solid var(--line);border-radius:10px;background:#fff;font-weight:700;font-size:15px}
+.hhDs{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.hhCau{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff}
+.hhCau.thieu{border:2px solid #c5221f;background:#fff6f5}
+.hhChu{flex:1;font-size:14px;line-height:1.35}
+.hhCanh{color:#c5221f;font-weight:700;font-size:13px;margin-top:2px}
+.hhChon{display:flex;gap:6px;align-items:center}
+.hhChon select{font-size:14px;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:#fff;max-width:170px}
+.hhChon img{width:64px;height:44px;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fff}
+@media (max-width:640px){.hhCau{flex-direction:column;align-items:stretch}}
 .xdBox a.btn2{text-decoration:none;color:var(--ink);font-weight:600;padding:8px 12px;font-size:14px;border-radius:10px;background:#fff}
 .mucThi{display:flex;align-items:center;gap:10px;width:100%;margin:8px 0 6px;padding:11px 14px;border:1.5px solid var(--line);background:#fff;border-radius:12px;text-align:left;font-size:16px}
 .mucThi span{flex:1;font-weight:700}
@@ -998,7 +1012,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var xdo = document.createElement('div'); xdo.className = 'xdO';
       var xd = document.createElement('button'); xd.className = 'suaDe'; xd.textContent = '📄 Xem đề (PDF) – kiểm tra lỗi, hình trước khi thi';
       xd.onclick = function () { xemDePDF(d, xdo); };
-      var th = document.createElement('button'); th.className = 'suaDe'; th.textContent = '🖼 Tải hình của đề lên';
+      var th = document.createElement('button'); th.className = 'suaDe'; th.textContent = '🖼 Hình của đề – tải lên, gắn vào từng câu';
       th.onclick = function () { taiHinhDe(d.madot, xdo); };
       el.insertBefore(xd, el.querySelector('.dtWrap')); el.insertBefore(th, el.querySelector('.dtWrap')); el.insertBefore(xdo, el.querySelector('.dtWrap'));
     }
@@ -1079,32 +1093,78 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : j.msg);
       var b = atob(j.pdf), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
       var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' })), ten = 'XEM-DE-' + j.madot + '.pdf';
-      o.innerHTML = '<div class="xdBox' + (j.thieu.length ? ' xau' : '') + '"><b>' + (j.thieu.length ? '⚠ Đề có ' + j.thieu.length + ' hình chưa mở được' : '✓ Hình trong đề mở được hết') + '</b>' +
+      o.innerHTML = '<div class="xdBox' + (j.thieu.length ? ' xau' : '') + '"><b>' + (j.thieu.length ? '⚠ Đề có ' + j.thieu.length + ' chỗ thiếu hình' : '✓ Hình trong đề đủ, mở được hết') + '</b>' +
         '<div class="sub">' + j.socau + ' câu · lời giải ' + j.sogt + '/' + j.socau + ' câu. File PDF có đáp án' + (j.sogt ? ' và lời giải' : '') + ' – chỉ để giáo viên xem.</div>' +
-        (j.thieu.length ? '<ul>' + j.thieu.map(function (x) { return '<li>Câu ' + esc(x.cau) + ': ' + esc(x.url.replace(/^.*\/hinh\//, 'hinh/')) + '</li>'; }).join('') + '</ul><div class="sub">Bấm <b>🖼 Tải hình của đề lên</b> rồi chọn đúng các file trên (tên file phải trùng, vd image1.png).</div>' : '') +
+        (j.thieu.length ? '<ul>' + j.thieu.map(function (x) { return '<li>Câu ' + esc(x.cau) + ': ' + (x.nhac ? 'nhắc tới hình nhưng <b>chưa gắn hình</b>' : 'hình ' + esc(x.url.replace(/^.*\/hinh\//, 'hinh/')) + ' <b>không mở được</b>') + '</li>'; }).join('') + '</ul><div class="sub">Bấm <b>🖼 Hình của đề</b> ngay bên trên để tải hình lên và gắn vào đúng câu.</div>' : '') +
         '<div class="hangNut" style="justify-content:flex-start"><a class="btn2" href="' + url + '" target="_blank" rel="noopener">📄 Mở PDF</a><a class="btn2" href="' + url + '" download="' + ten + '">⬇ Tải về</a></div></div>';
     }).catch(function (e) { o.innerHTML = '<div class="xdBox xau">Chưa tạo được PDF: ' + esc(e.message) + '</div>'; });
   }
   function docAnh(tep) { return new Promise(function (ok, loi) { var r = new FileReader(); r.onload = function () { ok({ ten: tep.name.replace(/[^A-Za-z0-9_.\-]/g, '_'), data: String(r.result) }); }; r.onerror = loi; r.readAsDataURL(tep); }); }
+  // Hinh cua de: tai file hinh len + gan hinh vao tung cau (mot hinh gan duoc nhieu cau)
+  function loiHinh(j) {
+    return j.loi === 'token' ? 'Chưa có mã GitHub (dòng GithubToken trong tab MA của KHODEHOA).' : /khong hop le/i.test(j.msg || '') && !/Hinh|Ma dot|Ten hinh/.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : j.msg;
+  }
   function taiHinhDe(madot, o, sau) {
-    o.innerHTML = '<div class="xdBox"><b>🖼 Tải hình của đề ' + esc(madot) + ' lên</b><div class="sub">Chọn các file hình của đề (vd image1.png, image2.png – đúng tên như trong đề). Hình được đưa lên GitHub vào thư mục hinh/' + esc(madot) + '/; khoảng 1–2 phút sau học sinh tải lại trang là thấy.</div>' +
-      '<div class="chonTep" style="margin-top:8px"><label class="btn2" style="margin:0;cursor:pointer">📂 Chọn file hình<input type="file" accept="image/*" multiple style="display:none"></label></div><div class="xdKQ"></div></div>';
-    o.querySelector('input').onchange = function () {
-      var tep = [].slice.call(this.files || []); if (!tep.length) return;
-      var kq = o.querySelector('.xdKQ'); kq.innerHTML = '<div class="sub">Đang tải ' + tep.length + ' hình…</div>';
-      Promise.all(tep.map(docAnh)).then(function (ds) {
-        var lo = []; for (var i = 0; i < ds.length; i += 6) lo.push(ds.slice(i, i + 6));
-        return lo.reduce(function (p, l) { return p.then(function (xong) {
-          return goiBatKy({ action: 'gv_hinh', ma: MA, madot: madot, hinh: l }).then(function (j) {
-            if (!j.ok) throw new Error(j.loi === 'token' ? 'Chưa có mã GitHub (dòng GithubToken trong tab MA của KHODEHOA).' : /khong hop le/i.test(j.msg || '') && !/Hinh|Ma dot/.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới.' : j.msg);
-            return xong.concat(j.xong);
-          });
-        }); }, Promise.resolve([]));
-      }).then(function (xong) {
-        kq.innerHTML = '<div class="sub" style="color:var(--ok);font-weight:700">✓ Đã đưa lên ' + xong.length + ' hình: ' + esc(xong.join(', ')) + '. Đợi 1–2 phút rồi bấm “Xem đề (PDF)” để kiểm tra lại.</div>';
-        if (sau) sau(xong);
-      }).catch(function (e) { kq.innerHTML = '<div class="loi">Chưa tải được: ' + esc(e.message) + '</div>'; });
-    };
+    o.innerHTML = '<div class="xdBox sub">Đang đọc các câu của đề ' + esc(madot) + '…</div>';
+    goiBatKy({ action: 'gv_hinhde', ma: MA, madot: madot }).then(function (j) {
+      if (!j.ok) throw new Error(loiHinh(j));
+      var co = j.co.slice(), moi = {}, chon = {};
+      j.cau.forEach(function (q) {
+        var m = q.hinh && q.hinh.indexOf(j.goc) === 0 ? q.hinh.slice(j.goc.length) : '';
+        chon[q.cau] = !q.hinh ? '' : m && co.indexOf(m) >= 0 ? m : m || '__giu';
+        if (m && co.indexOf(m) < 0) co.push(m);
+      });
+      var goc = Object.assign({}, chon);
+      function src(t) { return moi[t] || j.goc + encodeURIComponent(t); }
+      function ve() {
+        var nhac = j.cau.filter(function (q) { return q.nhac && !chon[q.cau]; }).length;
+        var h = '<div class="xdBox"><b>🖼 Hình của đề ' + esc(madot) + '</b>' +
+          '<div class="sub"><b>Bước 1.</b> Nếu chưa có hình: bấm “📂 Tải hình lên” chọn file hình (chọn được nhiều file). ' +
+          '<b>Bước 2.</b> Ở mỗi câu cần hình, chọn hình trong ô bên phải – một hình gắn được cho nhiều câu (vd Hình 2 dùng cho câu 9 và câu 10). <b>Bước 3.</b> Bấm “💾 Lưu”.</div>' +
+          '<div class="hhKho">' + (co.length ? co.map(function (t) { return '<figure><img src="' + esc(src(t)) + '" alt=""><figcaption>' + esc(t) + '</figcaption></figure>'; }).join('') : '<span class="sub">Đề chưa có file hình nào.</span>') +
+          '<label class="btn2 hhTai">📂 Tải hình lên<input type="file" accept="image/*" multiple style="display:none"></label></div><div class="xdKQ"></div>' +
+          (nhac ? '<div class="napCanh">⚠ Có ' + nhac + ' câu nhắc tới hình (Hình 1, sơ đồ…) nhưng chưa gắn hình – đánh dấu đỏ bên dưới.</div>' : '') +
+          '<div class="hhDs">';
+        j.cau.forEach(function (q) {
+          var v = chon[q.cau];
+          h += '<div class="hhCau' + (q.nhac && !v ? ' thieu' : '') + '"><div class="hhChu"><b>Câu ' + esc(q.cau) + '.</b> ' + esc(q.hoi) + (q.nhac && !v ? '<div class="hhCanh">⚠ Câu nhắc tới hình nhưng chưa gắn hình</div>' : '') + '</div>' +
+            '<div class="hhChon"><select data-cau="' + esc(q.cau) + '"><option value="">— Không có hình —</option>' +
+            (v === '__giu' ? '<option value="__giu" selected>(hình đang có)</option>' : '') +
+            co.map(function (t) { return '<option' + (t === v ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>' +
+            (v && v !== '__giu' ? '<img src="' + esc(src(v)) + '" alt="">' : '') + '</div></div>';
+        });
+        var doi = Object.keys(chon).filter(function (k) { return chon[k] !== goc[k]; });
+        h += '</div><div class="hangNut" style="justify-content:flex-start"><button class="btn2 hhLuu"' + (doi.length ? '' : ' disabled') + '>💾 Lưu' + (doi.length ? ' (' + doi.length + ' câu thay đổi)' : '') + '</button></div><div class="hhKQ"></div></div>';
+        o.innerHTML = h;
+        [].forEach.call(o.querySelectorAll('.hhDs select'), function (sl) { sl.onchange = function () { chon[sl.getAttribute('data-cau')] = sl.value; ve(); }; });
+        o.querySelector('.hhTai input').onchange = function () {
+          var tep = [].slice.call(this.files || []); if (!tep.length) return;
+          var kq = o.querySelector('.xdKQ'); kq.innerHTML = '<div class="sub">Đang tải ' + tep.length + ' hình lên…</div>';
+          Promise.all(tep.map(docAnh)).then(function (ds) {
+            ds.forEach(function (x) { moi[x.ten] = x.data; });
+            var lo = []; for (var i = 0; i < ds.length; i += 6) lo.push(ds.slice(i, i + 6));
+            return lo.reduce(function (p, l) { return p.then(function (xong) {
+              return goiBatKy({ action: 'gv_hinh', ma: MA, madot: madot, hinh: l }).then(function (r) { if (!r.ok) throw new Error(loiHinh(r)); return xong.concat(r.xong); });
+            }); }, Promise.resolve([]));
+          }).then(function (xong) {
+            xong.forEach(function (t) { if (co.indexOf(t) < 0) co.push(t); });
+            ve();
+            o.querySelector('.xdKQ').innerHTML = '<div class="sub" style="color:var(--ok);font-weight:700">✓ Đã tải lên ' + xong.length + ' hình: ' + esc(xong.join(', ')) + '. Giờ chọn hình cho từng câu rồi bấm Lưu.</div>';
+            if (sau) sau(xong);
+          }).catch(function (e) { kq.innerHTML = '<div class="loi">Chưa tải được: ' + esc(e.message) + '</div>'; });
+        };
+        o.querySelector('.hhLuu').onclick = function () {
+          var b = this, gan = doi.filter(function (k) { return chon[k] !== '__giu'; }).map(function (k) { return { cau: k, ten: chon[k] }; });
+          b.disabled = true; o.querySelector('.hhKQ').innerHTML = '<div class="sub">Đang lưu…</div>';
+          goiBatKy({ action: 'gv_ganhinh', ma: MA, madot: madot, gan: gan }).then(function (r) {
+            if (!r.ok) throw new Error(loiHinh(r));
+            goc = Object.assign({}, chon); ve();
+            o.querySelector('.hhKQ').innerHTML = '<div class="sub" style="color:var(--ok);font-weight:700">✓ Đã gắn hình cho câu ' + esc(r.xong.join(', ')) + '. Học sinh vào làm bài sẽ thấy hình (hình vừa tải lên cần thêm 1–2 phút). Bấm “📄 Xem đề (PDF)” để kiểm tra lại.</div>';
+          }).catch(function (e) { b.disabled = false; o.querySelector('.hhKQ').innerHTML = '<div class="loi">Chưa lưu được: ' + esc(e.message) + '</div>'; });
+        };
+      }
+      ve();
+    }).catch(function (e) { o.innerHTML = '<div class="xdBox xau">' + esc(e.message) + '</div>'; });
   }
   var MO_MUC = {};
   try { MO_MUC = JSON.parse(localStorage.getItem('gv_momuc') || '{}') || {}; } catch (e) {}
@@ -3400,7 +3460,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (hong.length) {
           o.title = hong.join('\n');
           var the = o.closest('.napDe'), k = document.createElement('div');
-          k.innerHTML = '<div class="napCanh" style="list-style:none;padding-left:12px">⚠ Thiếu hình: ' + hong.map(function (u) { return esc(u.replace(/^.*\//, '')); }).join(', ') + '. <button class="btn2 nho" type="button">🖼 Tải hình lên</button></div><div class="xdO"></div>';
+          k.innerHTML = '<div class="napCanh" style="list-style:none;padding-left:12px">⚠ Thiếu hình: ' + hong.map(function (u) { return esc(u.replace(/^.*\//, '')); }).join(', ') + '. <button class="btn2 nho" type="button">🖼 Tải hình lên, gắn vào câu</button></div><div class="xdO"></div>';
           k.querySelector('button').onclick = function () { taiHinhDe(d.madot, k.querySelector('.xdO')); };
           the.insertBefore(k, the.querySelector('.chinhKhung, details'));
         }
