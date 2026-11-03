@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Mạng Tinh Thể Kim Loại & Liên Kết Kim Loại (Bài 18)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-nav {
+            height: 54px;
+            background: rgba(15, 23, 42, 0.98);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .nav-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #38bdf8;
+        }
+        .tab-group {
+            display: flex;
+            gap: 8px;
+        }
+        .tab-btn {
+            padding: 7px 13px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #cbd5e1;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.84rem;
+        }
+        .tab-btn:hover {
+            border-color: #38bdf8;
+        }
+        .tab-btn.active {
+            background: linear-gradient(90deg, #0284c7, #2563eb);
+            color: #fff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+        }
+        #main-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 54px);
+            overflow: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            flex: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        #bottom-bar {
+            height: 28px;
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.78rem;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        #sidebar {
+            width: 420px;
+            background: rgba(15, 23, 42, 0.96);
+            border-left: 1px solid #334155;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.82);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .card h2 {
+            font-size: 0.84rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .status-banner {
+            background: rgba(56, 189, 248, 0.16);
+            border: 1px solid #0284c7;
+            color: #38bdf8;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .status-desc {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.42;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            padding: 5px 0;
+            border-bottom: 1px dashed #334155;
+        }
+        .control-group {
+            margin-top: 8px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #38bdf8;
+            cursor: pointer;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.83rem;
+            margin-top: 7px;
+            cursor: pointer;
+        }
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            margin-top: 6px;
+        }
+        .compare-table th, .compare-table td {
+            border: 1px solid #334155;
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .compare-table th {
+            background: #0f172a;
+            color: #38bdf8;
+        }
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            font-size: 0.8rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-nav">
+    <div class="nav-title">MÔ PHỎNG 3D BÀI 18: CẤU TẠO &amp; LIÊN KẾT KIM LOẠI</div>
+    <div class="tab-group">
+        <button class="tab-btn active" id="tab-bcc">1. Lập phương tâm khối (BCC)</button>
+        <button class="tab-btn" id="tab-fcc">2. Lập phương tâm mặt (FCC)</button>
+        <button class="tab-btn" id="tab-hcp">3. Lục phương chặt khít (HCP)</button>
+        <button class="tab-btn" id="tab-bond">4. Liên kết kim loại (Hình 18.1)</button>
+    </div>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+        <div id="bottom-bar">
+            <span>🖱️ <strong>Kéo chuột trái:</strong> Xoay mô hình 3D 360°</span>
+            <span>🔍 <strong>Cuộn con lăn chuột:</strong> Phóng to / Thu nhỏ</span>
+            <span>✨ <strong>Không gian 3D hoàn toàn thông thoáng</strong></span>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="card">
+            <h2>Thông Tin Mô Hình Đang Xem</h2>
+            <div id="hud-title" class="status-banner">MẠNG LẬP PHƯƠNG TÂM KHỐI (BCC)</div>
+            <div id="hud-desc" class="status-desc">
+                Các nguyên tử/ion kim loại nằm ở 8 đỉnh của hình lập phương và 1 nguyên tử nằm chính giữa tâm khối lập phương.
+            </div>
+        </div>
+
+        <div class="card" id="card-crystal-stats">
+            <h2>Thông Số Mạng Tinh Thể (SGK)</h2>
+            <div class="stats-row">
+                <span>Kiểu mạng tinh thể:</span>
+                <strong id="stat-name" style="color:#38bdf8;">Lập phương tâm khối</strong>
+            </div>
+            <div class="stats-row">
+                <span>Độ đặc khít (%):</span>
+                <strong id="stat-packing" style="color:#4ade80;">68 %</strong>
+            </div>
+            <div class="stats-row">
+                <span>Số phối trí:</span>
+                <strong id="stat-coord" style="color:#fb923c;">8</strong>
+            </div>
+            <div class="stats-row">
+                <span>Kim loại điển hình (Ví dụ):</span>
+                <strong id="stat-example" style="color:#fde047;">Li, Na, K, Ba,...</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Tuỳ Chỉnh Hiển Thị 3D</h2>
+            <div class="control-group">
+                <label>
+                    <span>Kích thước bán kính nguyên tử (Space-filling):</span>
+                    <strong id="radius-val">Chuẩn (Rỗng)</strong>
+                </label>
+                <input type="range" id="radius-slider" min="0.5" max="2.4" step="0.05" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <span>Tốc độ tự động xoay 3D:</span>
+                    <strong id="spin-val">Chậm</strong>
+                </label>
+                <input type="range" id="spin-slider" min="0" max="2.0" step="0.1" value="0.4">
+            </div>
+
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-bonds" checked>
+                <span>Hiển thị các thanh nối mạng tinh thể (Giống SGK)</span>
+            </label>
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-electrons" checked>
+                <span>Hiển thị đám mây electron hoá trị tự do (e⁻)</span>
+            </label>
+        </div>
+
+        <div class="card">
+            <h2>Giải Đáp Câu Hỏi 2 (SGK)</h2>
+            <p style="font-size:0.8rem; color:#fde047; margin-bottom:6px; font-weight:600;">
+                Câu hỏi 2: Liên kết kim loại có đặc điểm gì giống và khác với liên kết ion?
+            </p>
+            <table class="compare-table">
+                <tr>
+                    <th>Đặc điểm</th>
+                    <th>Liên kết kim loại</th>
+                    <th>Liên kết ion</th>
+                </tr>
+                <tr>
+                    <td><strong>Giống nhau</strong></td>
+                    <td colspan="2">Đều được hình thành do <strong>lực hút tĩnh điện</strong> giữa các phần tử mang điện tích trái dấu.</td>
+                </tr>
+                <tr>
+                    <td><strong>Bản chất hạt tương tác (Khác nhau)</strong></td>
+                    <td>Lực hút tĩnh điện giữa <strong>các ion dương kim loại</strong> ở nút mạng với <strong>các electron hoá trị tự do</strong> chuyển động khắp tinh thể.</td>
+                    <td>Lực hút tĩnh điện giữa <strong>các cation (ion dương)</strong> và <strong>các anion (ion âm)</strong> nằm cố định ở các nút mạng.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Chú Giải Hạt 3D</h2>
+            <div class="legend-grid">
+                <div class="legend-item"><span class="dot" style="background:#0284c7; border:1px solid #fff;"></span> Nút mạng đỉnh/mặt</div>
+                <div class="legend-item"><span class="dot" style="background:#38bdf8; border:1px solid #fff;"></span> Nút mạng tâm/giữa</div>
+                <div class="legend-item"><span class="dot" style="background:#f59e0b; border:1px solid #fff;"></span> Ion dương kim loại (+)</div>
+                <div class="legend-item"><span class="dot" style="background:#22c55e;"></span> Electron tự do (e⁻)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.parentElement.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+let currentMode = 'bcc';
+let atomScale = 1.0;
+let autoSpin = 0.4;
+let rotY = 0.55;
+let rotX = 0.32;
+let zoom = 1.05;
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+const radiusSlider = document.getElementById('radius-slider');
+const radiusVal = document.getElementById('radius-val');
+const spinSlider = document.getElementById('spin-slider');
+const spinVal = document.getElementById('spin-val');
+const chkBonds = document.getElementById('chk-bonds');
+const chkElectrons = document.getElementById('chk-electrons');
+
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-0.85, Math.min(0.85, rotX + dy * 0.008));
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.6, Math.min(1.8, zoom - e.deltaY * 0.001));
+}, { passive: false });
+
+radiusSlider.addEventListener('input', e => {
+    atomScale = parseFloat(e.target.value);
+    radiusVal.textContent = atomScale > 1.8 ? 'Đặc khít' : (atomScale === 1.0 ? 'Chuẩn (Rỗng)' : atomScale.toFixed(2) + 'x');
+});
+
+spinSlider.addEventListener('input', e => {
+    autoSpin = parseFloat(e.target.value);
+    spinVal.textContent = autoSpin === 0 ? 'Đứng yên' : autoSpin.toFixed(1) + 'x';
+});
+
+function project(x, y, z) {
+    let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+    let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+    let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+    const fov = 720 * zoom;
+    const viewerDist = 660;
+    const scale = fov / (viewerDist + z2);
+    return {
+        x: width / 2 + x1 * scale,
+        y: height / 2 - y2 * scale,
+        z: z2,
+        scale: scale
+    };
+}
+
+function buildBCC() {
+    const L = 110;
+    const nodes = [];
+    const edges = [];
+    for (let ix of [-1, 1]) {
+        for (let iy of [-1, 1]) {
+            for (let iz of [-1, 1]) {
+                nodes.push({ x: ix * L, y: iy * L, z: iz * L, role: 'corner' });
+            }
+        }
+    }
+    nodes.push({ x: 0, y: 0, z: 0, role: 'center' });
+
+    for (let i = 0; i < 8; i++) {
+        for (let j = i + 1; j < 8; j++) {
+            const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y, nodes[i].z - nodes[j].z);
+            if (Math.abs(dist - 2 * L) < 1) edges.push({ a: i, b: j, type: 'frame' });
+        }
+        edges.push({ a: i, b: 8, type: 'diag' });
+    }
+    return { nodes, edges };
+}
+
+function buildFCC() {
+    const L = 110;
+    const nodes = [];
+    const edges = [];
+    for (let ix of [-1, 1]) {
+        for (let iy of [-1, 1]) {
+            for (let iz of [-1, 1]) {
+                nodes.push({ x: ix * L, y: iy * L, z: iz * L, role: 'corner' });
+            }
+        }
+    }
+    const faceCenters = [
+        { x: L, y: 0, z: 0 }, { x: -L, y: 0, z: 0 },
+        { x: 0, y: L, z: 0 }, { x: 0, y: -L, z: 0 },
+        { x: 0, y: 0, z: L }, { x: 0, y: 0, z: -L }
+    ];
+    faceCenters.forEach(fc => nodes.push({ x: fc.x, y: fc.y, z: fc.z, role: 'face' }));
+
+    for (let i = 0; i < 8; i++) {
+        for (let j = i + 1; j < 8; j++) {
+            const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y, nodes[i].z - nodes[j].z);
+            if (Math.abs(dist - 2 * L) < 1) edges.push({ a: i, b: j, type: 'frame' });
+        }
+    }
+    for (let f = 8; f < 14; f++) {
+        for (let c = 0; c < 8; c++) {
+            const dist = Math.hypot(nodes[f].x - nodes[c].x, nodes[f].y - nodes[c].y, nodes[f].z - nodes[c].z);
+            if (Math.abs(dist - Math.SQRT2 * L) < 2) edges.push({ a: f, b: c, type: 'diag' });
+        }
+    }
+    return { nodes, edges };
+}
+
+function buildHCP() {
+    const R = 115;
+    const H = 120;
+    const nodes = [];
+    const edges = [];
+
+    for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        nodes.push({ x: R * Math.cos(a), y: H, z: R * Math.sin(a), role: 'corner' });
+    }
+    nodes.push({ x: 0, y: H, z: 0, role: 'center' });
+
+    for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        nodes.push({ x: R * Math.cos(a), y: -H, z: R * Math.sin(a), role: 'corner' });
+    }
+    nodes.push({ x: 0, y: -H, z: 0, role: 'center' });
+
+    for (let i = 0; i < 3; i++) {
+        const a = (i * 2 * Math.PI) / 3 + Math.PI / 6;
+        const rMid = R * 0.58;
+        nodes.push({ x: rMid * Math.cos(a), y: 0, z: rMid * Math.sin(a), role: 'mid' });
+    }
+
+    for (let i = 0; i < 6; i++) {
+        edges.push({ a: i, b: (i + 1) % 6, type: 'frame' });
+        edges.push({ a: i, b: 6, type: 'diag' });
+        edges.push({ a: 7 + i, b: 7 + ((i + 1) % 6), type: 'frame' });
+        edges.push({ a: 7 + i, b: 13, type: 'diag' });
+        edges.push({ a: i, b: 7 + i, type: 'frame' });
+    }
+    edges.push({ a: 14, b: 15, type: 'diag' });
+    edges.push({ a: 15, b: 16, type: 'diag' });
+    edges.push({ a: 16, b: 14, type: 'diag' });
+
+    return { nodes, edges };
+}
+
+function buildMetallicBond() {
+    const nodes = [];
+    const edges = [];
+    const spacing = 78;
+    for (let ix = -1.5; ix <= 1.5; ix += 1) {
+        for (let iy = -1.5; iy <= 1.5; iy += 1) {
+            for (let iz = -0.5; iz <= 0.5; iz += 1) {
+                nodes.push({
+                    x: ix * spacing,
+                    y: iy * spacing,
+                    z: iz * spacing,
+                    role: 'cation',
+                    phase: Math.random() * 6.28
+                });
+            }
+        }
+    }
+    return { nodes, edges };
+}
+
+const geometries = {
+    bcc: buildBCC(),
+    fcc: buildFCC(),
+    hcp: buildHCP(),
+    bond: buildMetallicBond()
+};
+
+const freeElectrons = [];
+for (let i = 0; i < 42; i++) {
+    freeElectrons.push({
+        x: (Math.random() - 0.5) * 240,
+        y: (Math.random() - 0.5) * 240,
+        z: (Math.random() - 0.5) * 140,
+        vx: (Math.random() - 0.5) * 3.2,
+        vy: (Math.random() - 0.5) * 3.2,
+        vz: (Math.random() - 0.5) * 2.2
+    });
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('tab-bcc').classList.toggle('active', mode === 'bcc');
+    document.getElementById('tab-fcc').classList.toggle('active', mode === 'fcc');
+    document.getElementById('tab-hcp').classList.toggle('active', mode === 'hcp');
+    document.getElementById('tab-bond').classList.toggle('active', mode === 'bond');
+
+    const titleEl = document.getElementById('hud-title');
+    const descEl = document.getElementById('hud-desc');
+    const sName = document.getElementById('stat-name');
+    const sPack = document.getElementById('stat-packing');
+    const sCoord = document.getElementById('stat-coord');
+    const sEx = document.getElementById('stat-example');
+
+    if (mode === 'bcc') {
+        titleEl.textContent = '1. MẠNG LẬP PHƯƠNG TÂM KHỐI (BCC)';
+        descEl.textContent = 'Các nguyên tử nằm ở 8 đỉnh hình lập phương và 1 nguyên tử nằm tại tâm của khối lập phương. Độ đặc khít đạt 68%.';
+        sName.textContent = 'Lập phương tâm khối';
+        sPack.textContent = '68 %';
+        sCoord.textContent = '8';
+        sEx.textContent = 'Li, Na, K, Ba,...';
+    } else if (mode === 'fcc') {
+        titleEl.textContent = '2. MẠNG LẬP PHƯƠNG TÂM MẶT (FCC)';
+        descEl.textContent = 'Các nguyên tử nằm ở 8 đỉnh hình lập phương và tâm của 6 mặt hình lập phương. Độ đặc khít tối đa đạt 74%.';
+        sName.textContent = 'Lập phương tâm mặt';
+        sPack.textContent = '74 %';
+        sCoord.textContent = '12';
+        sEx.textContent = 'Ca, Sr, Cu,...';
+    } else if (mode === 'hcp') {
+        titleEl.textContent = '3. MẠNG LỤC PHƯƠNG CHẶT KHÍT (HCP)';
+        descEl.textContent = 'Các nguyên tử nằm ở 12 đỉnh, 2 tâm đáy của hình lăng trụ lục giác đều và 3 nguyên tử nằm ở mặt phẳng trung gian.';
+        sName.textContent = 'Lục phương chặt khít';
+        sPack.textContent = '74 %';
+        sCoord.textContent = '12';
+        sEx.textContent = 'Be, Mg,...';
+    } else {
+        titleEl.textContent = '4. MÔ HÌNH LIÊN KẾT KIM LOẠI (HÌNH 18.1)';
+        descEl.textContent = 'Trong tinh thể kim loại, liên kết kim loại được hình thành do lực hút tĩnh điện giữa các electron hoá trị tự do (hạt xanh lá) với các ion dương kim loại (+) ở các nút mạng.';
+        sName.textContent = 'Mạng tinh thể kim loại';
+        sPack.textContent = '68 % – 74 %';
+        sCoord.textContent = '8 hoặc 12';
+        sEx.textContent = 'Tất cả kim loại';
+    }
+}
+
+document.getElementById('tab-bcc').addEventListener('click', () => setMode('bcc'));
+document.getElementById('tab-fcc').addEventListener('click', () => setMode('fcc'));
+document.getElementById('tab-hcp').addEventListener('click', () => setMode('hcp'));
+document.getElementById('tab-bond').addEventListener('click', () => setMode('bond'));
+
+function drawSphere3D(px, py, radius, role, showPlus = false) {
+    const grad = ctx.createRadialGradient(
+        px - radius * 0.35,
+        py - radius * 0.35,
+        radius * 0.1,
+        px,
+        py,
+        radius
+    );
+
+    if (role === 'cation') {
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.45, '#f59e0b');
+        grad.addColorStop(1, '#b45309');
+    } else if (role === 'center' || role === 'mid' || role === 'face') {
+        grad.addColorStop(0, '#e0f2fe');
+        grad.addColorStop(0.4, '#38bdf8');
+        grad.addColorStop(1, '#0369a1');
+    } else {
+        grad.addColorStop(0, '#bae6fd');
+        grad.addColorStop(0.4, '#0284c7');
+        grad.addColorStop(1, '#1e3a8a');
+    }
+
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.strokeStyle = role === 'cation' ? '#fde047' : 'rgba(224, 242, 254, 0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    if (showPlus) {
+        ctx.fillStyle = '#451a03';
+        ctx.font = `bold ${Math.round(radius * 1.05)}px Segoe UI`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('+', px, py);
+    }
+}
+
+let lastTime = performance.now();
+function animate(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    if (!isDragging && autoSpin > 0) {
+        rotY += dt * 0.45 * autoSpin;
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    const geom = geometries[currentMode];
+
+    if (chkBonds.checked && geom.edges.length > 0) {
+        geom.edges.forEach(e => {
+            const pA = project(geom.nodes[e.a].x, geom.nodes[e.a].y, geom.nodes[e.a].z);
+            const pB = project(geom.nodes[e.b].x, geom.nodes[e.b].y, geom.nodes[e.b].z);
+
+            ctx.beginPath();
+            ctx.moveTo(pA.x, pA.y);
+            ctx.lineTo(pB.x, pB.y);
+            if (e.type === 'frame') {
+                ctx.strokeStyle = 'rgba(203, 213, 225, 0.78)';
+                ctx.lineWidth = 3.2;
+            } else {
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.52)';
+                ctx.lineWidth = 2.0;
+            }
+            ctx.stroke();
+        });
+    }
+
+    const renderItems = [];
+
+    geom.nodes.forEach(n => {
+        let nx = n.x, ny = n.y, nz = n.z;
+        if (n.role === 'cation') {
+            n.phase += dt * 3;
+            nx += Math.sin(n.phase) * 1.5;
+            ny += Math.cos(n.phase) * 1.5;
+        }
+        const p = project(nx, ny, nz);
+        const baseR = n.role === 'cation' ? 24 : 21;
+        renderItems.push({
+            itemType: 'node',
+            p: p,
+            radius: baseR * atomScale * p.scale,
+            role: n.role,
+            showPlus: n.role === 'cation'
+        });
+    });
+
+    if (chkElectrons.checked) {
+        const count = currentMode === 'bond' ? freeElectrons.length : 18;
+        for (let i = 0; i < count; i++) {
+            const el = freeElectrons[i];
+            el.x += el.vx;
+            el.y += el.vy;
+            el.z += el.vz;
+            if (el.x < -135 || el.x > 135) el.vx *= -1;
+            if (el.y < -135 || el.y > 135) el.vy *= -1;
+            if (el.z < -85 || el.z > 85) el.vz *= -1;
+
+            const ep = project(el.x, el.y, el.z);
+            renderItems.push({
+                itemType: 'electron',
+                p: ep,
+                radius: (currentMode === 'bond' ? 7.5 : 4.8) * ep.scale
+            });
+        }
+    }
+
+    renderItems.sort((a, b) => b.p.z - a.p.z);
+
+    renderItems.forEach(item => {
+        if (item.itemType === 'node') {
+            drawSphere3D(item.p.x, item.p.y, item.radius, item.role, item.showPlus);
+        } else {
+            ctx.beginPath();
+            ctx.arc(item.p.x, item.p.y, item.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#22c55e';
+            ctx.fill();
+            ctx.strokeStyle = '#dcfce7';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            if (currentMode === 'bond' && item.p.scale > 0.9) {
+                ctx.fillStyle = '#052e16';
+                ctx.font = `bold ${Math.round(9 * item.p.scale)}px Segoe UI`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('–', item.p.x, item.p.y);
+            }
+        }
+    });
+
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
