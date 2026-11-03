@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Tính Dẻo Của Kim Loại (Hình 19.1)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-nav {
+            height: 54px;
+            background: rgba(15, 23, 42, 0.98);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .nav-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #fde047;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-info {
+            background: rgba(234, 179, 8, 0.16);
+            border: 1px solid #eab308;
+            color: #fde047;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        #main-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 54px);
+            overflow: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            flex: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        #bottom-bar {
+            height: 30px;
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.82rem;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        #sidebar {
+            width: 440px;
+            background: rgba(15, 23, 42, 0.96);
+            border-left: 1px solid #334155;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.82);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .card h2 {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 6px;
+        }
+        .status-banner {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid #22c55e;
+            color: #4ade80;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .status-desc {
+            font-size: 0.84rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+            text-align: justify;
+        }
+        .control-group {
+            margin-top: 12px;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+            color: #f8fafc;
+            font-weight: 600;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #22c55e;
+            cursor: pointer;
+            height: 6px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        button:hover {
+            border-color: #94a3b8;
+            background: #334155;
+        }
+        .eq-box {
+            background: #0f172a;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            border-left: 3px solid #facc15;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .highlight {
+            color: #fde047;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-nav">
+    <div class="nav-title">MÔ PHỎNG 3D HÌNH 19.1: TÍNH DẺO CỦA KIM LOẠI</div>
+    <div class="badge-info">Sự trượt các lớp mạng tinh thể kim loại</div>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+        <div id="bottom-bar">
+            <span>🖱️ <strong>Kéo chuột trái:</strong> Xoay mô hình 3D 360°</span>
+            <span>🔍 <strong>Cuộn con lăn chuột:</strong> Phóng to / Thu nhỏ</span>
+            <span>Kéo thanh trượt bên phải để tác dụng lực làm trượt các lớp tinh thể</span>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="card">
+            <h2>Giải Thích Hiện Tượng (SGK)</h2>
+            <div id="hud-status" class="status-banner">KÉO THANH TRƯỢT ĐỂ TÁC DỤNG LỰC</div>
+            <div class="status-desc">
+                Kim loại có <span class="highlight">tính dẻo</span>: dễ rèn, dễ dát mỏng và dễ kéo sợi.<br><br>
+                Khi thanh kim loại chịu lực tác động (rèn, cán, kéo,...), các ion dương kim loại trong mạng tinh thể <span class="highlight">có thể trượt lên nhau mà không tách rời nhau</span>. Đó là do các electron tự do trong mạng tinh thể chuyển động, liên kết các ion dương kim loại lại với nhau.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Điều Khiển Biến Dạng</h2>
+            <div class="control-group">
+                <label>
+                    <span>Lực tác động (Mô phỏng rèn/cán):</span>
+                    <strong id="force-val" style="color:#4ade80;">0 %</strong>
+                </label>
+                <input type="range" id="force-slider" min="0" max="100" step="1" value="0">
+            </div>
+            <div class="btn-row">
+                <button id="btn-animate">Tự Động Trượt</button>
+                <button id="btn-reset">Khôi Phục Ban Đầu</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Đặc Điểm Liên Kết Kim Loại</h2>
+            <div class="eq-box">
+                Khác với tinh thể ion (bị vỡ vụn khi đập), liên kết kim loại <strong>không có tính định hướng</strong>. Đám mây electron tự do luôn bao bọc và duy trì lực hút tĩnh điện với các ion dương kim loại ngay cả khi các lớp tinh thể bị xê dịch.
+            </div>
+            <div class="eq-box" style="border-left-color: #38bdf8;">
+                <strong>Ví dụ kim loại dẻo:</strong> Au (Vàng), Ag (Bạc), Al (Nhôm), Cu (Đồng), Sn (Thiếc)... 
+                <br><em>*Người ta có thể dát lá vàng mỏng tới 8 nm.</em>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Chú Giải Hạt Vi Mô</h2>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="dot" style="background:#eab308; border:1px solid #fde047;"></span> 
+                    Ion dương kim loại (+)
+                </div>
+                <div class="legend-item">
+                    <span class="dot" style="background:#22c55e;"></span> 
+                    Electron tự do (e⁻)
+                </div>
+                <div class="legend-item">
+                    <span style="color:#22c55e; font-size: 1.2rem; font-weight: bold; width: 16px; text-align: center;">&rarr;</span> 
+                    Hướng lực tác động
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.parentElement.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Biến trạng thái
+let slideProgress = 0; // 0 đến 100
+let isAutoAnimating = false;
+let autoDir = 1;
+
+// Camera
+let rotY = -15 * Math.PI / 180;
+let rotX = 0.15;
+let zoom = 1.05;
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+const forceSlider = document.getElementById('force-slider');
+const forceVal = document.getElementById('force-val');
+const btnAnimate = document.getElementById('btn-animate');
+const btnReset = document.getElementById('btn-reset');
+const hudStatus = document.getElementById('hud-status');
+
+// Điều khiển chuột
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-0.6, Math.min(0.6, rotX + dy * 0.008));
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.6, Math.min(1.8, zoom - e.deltaY * 0.001));
+}, { passive: false });
+
+function updateSlide(val) {
+    slideProgress = val;
+    forceSlider.value = val;
+    forceVal.textContent = Math.round(val) + ' %';
+    
+    if (val === 0) {
+        hudStatus.textContent = 'MẠNG TINH THỂ BAN ĐẦU';
+        hudStatus.style.borderColor = '#3b82f6';
+        hudStatus.style.color = '#60a5fa';
+        hudStatus.style.background = 'rgba(59, 130, 246, 0.15)';
+    } else if (val === 100) {
+        hudStatus.textContent = 'ĐÃ BỊ BIẾN DẠNG (LỚP TRƯỢT ĐI)';
+        hudStatus.style.borderColor = '#f59e0b';
+        hudStatus.style.color = '#fbbf24';
+        hudStatus.style.background = 'rgba(245, 158, 11, 0.15)';
+    } else {
+        hudStatus.textContent = 'CÁC LỚP ION ĐANG TRƯỢT LÊN NHAU...';
+        hudStatus.style.borderColor = '#22c55e';
+        hudStatus.style.color = '#4ade80';
+        hudStatus.style.background = 'rgba(34, 197, 94, 0.15)';
+    }
+}
+
+forceSlider.addEventListener('input', e => {
+    isAutoAnimating = false;
+    updateSlide(parseFloat(e.target.value));
+});
+
+btnAnimate.addEventListener('click', () => {
+    isAutoAnimating = true;
+    autoDir = slideProgress >= 100 ? -1 : 1;
+});
+
+btnReset.addEventListener('click', () => {
+    isAutoAnimating = false;
+    updateSlide(0);
+});
+
+function project(x, y, z) {
+    let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+    let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+    let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+    const fov = 700 * zoom;
+    const viewerDist = 650;
+    const scale = fov / (viewerDist + z2);
+    return {
+        x: width / 2 - 30 + x1 * scale,
+        y: height / 2 + 20 - y2 * scale,
+        z: z2,
+        scale: scale
+    };
+}
+
+// Cấu trúc mạng tinh thể (4 lớp theo trục Y, mỗi lớp 5x3 nguyên tử)
+const spacing = 55;
+const nodes = [];
+for (let layer = 0; layer < 4; layer++) {
+    for (let ix = -2; ix <= 2; ix++) {
+        for (let iz = -1; iz <= 1; iz++) {
+            nodes.push({
+                layer: layer, // 0 (đáy) tới 3 (đỉnh)
+                baseX: ix * spacing,
+                y: -layer * spacing + (spacing * 1.5), // Center Y around 0
+                z: iz * spacing,
+                phase: Math.random() * 6.28
+            });
+        }
+    }
+}
+
+// Cấu trúc electron tự do
+const electrons = [];
+for (let i = 0; i < 90; i++) {
+    electrons.push({
+        x: 0, y: 0, z: 0,
+        vx: (Math.random() - 0.5) * 4.5,
+        vy: (Math.random() - 0.5) * 4.5,
+        vz: (Math.random() - 0.5) * 4.5
+    });
+}
+// Phân bố ban đầu
+function initElectrons() {
+    electrons.forEach(el => {
+        el.x = (Math.random() - 0.5) * 280;
+        el.y = (Math.random() - 0.5) * 200;
+        el.z = (Math.random() - 0.5) * 150;
+    });
+}
+initElectrons();
+
+// Hàm vẽ mũi tên 3D (Thể hiện Lực tác động)
+function drawArrow3D(px, py, pz, scale, opacity) {
+    const tip = project(px, py, pz);
+    const tail = project(px - 65, py, pz);
+    const wingTop = project(px - 15, py - 12, pz);
+    const wingBot = project(px - 15, py + 12, pz);
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.beginPath();
+    ctx.moveTo(tail.x, tail.y);
+    ctx.lineTo(tip.x, tip.y);
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 4 * tip.scale;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(wingTop.x, wingTop.y);
+    ctx.lineTo(wingBot.x, wingBot.y);
+    ctx.closePath();
+    ctx.fillStyle = '#22c55e';
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawSphere3D(px, py, radius, type) {
+    const grad = ctx.createRadialGradient(
+        px - radius * 0.35, py - radius * 0.35, radius * 0.1,
+        px, py, radius
+    );
+
+    if (type === 'cation') {
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.4, '#eab308');
+        grad.addColorStop(1, '#a16207');
+    } else {
+        grad.addColorStop(0, '#86efac');
+        grad.addColorStop(0.5, '#22c55e');
+        grad.addColorStop(1, '#14532d');
+    }
+
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.strokeStyle = type === 'cation' ? '#fde047' : '#dcfce7';
+    ctx.lineWidth = type === 'cation' ? 1.5 : 1;
+    ctx.stroke();
+
+    if (type === 'cation') {
+        ctx.fillStyle = '#451a03';
+        ctx.font = `bold ${Math.round(radius * 1.1)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('+', px, py);
+    } else if (radius > 4) {
+        ctx.fillStyle = '#064e3b';
+        ctx.font = `bold ${Math.round(radius * 1.8)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('-', px, py);
+    }
+}
+
+let lastTime = performance.now();
+function animate(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    // Cập nhật hoạt ảnh tự động
+    if (isAutoAnimating) {
+        const newVal = slideProgress + autoDir * dt * 50;
+        if (newVal >= 100) {
+            updateSlide(100);
+            isAutoAnimating = false;
+        } else if (newVal <= 0) {
+            updateSlide(0);
+            isAutoAnimating = false;
+        } else {
+            updateSlide(newVal);
+        }
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    const ratio = slideProgress / 100;
+    const renderItems = [];
+    
+    // Tính toán giới hạn hộp của mạng tinh thể hiện tại để nhốt electron
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+
+    // 1. Cập nhật toạ độ ion dương (bị trượt)
+    nodes.forEach(n => {
+        // Lớp đáy (layer 0) đứng im, các lớp trên trượt dần theo trục X
+        // Layer 3 trượt nhiều nhất, layer 1 trượt ít
+        let slideOffset = 0;
+        if (n.layer === 1) slideOffset = ratio * 35;
+        if (n.layer === 2) slideOffset = ratio * 70;
+        if (n.layer === 3) slideOffset = ratio * 105;
+
+        n.currentX = n.baseX + slideOffset;
+        
+        // Cập nhật Bounding Box
+        minX = Math.min(minX, n.currentX);
+        maxX = Math.max(maxX, n.currentX);
+        minY = Math.min(minY, n.y);
+        maxY = Math.max(maxY, n.y);
+        minZ = Math.min(minZ, n.z);
+        maxZ = Math.max(maxZ, n.z);
+
+        // Hiệu ứng dao động nhẹ của mạng tinh thể
+        n.phase += dt * 3;
+        const wiggleX = Math.sin(n.phase) * 1.5;
+        const wiggleY = Math.cos(n.phase) * 1.5;
+
+        const p = project(n.currentX + wiggleX, n.y + wiggleY, n.z);
+        renderItems.push({
+            type: 'cation',
+            p: p,
+            radius: 20 * p.scale,
+            zOrder: p.z
+        });
+    });
+
+    // Mở rộng không gian cho electron bay nhảy quanh các ion
+    minX -= 25; maxX += 25;
+    minY -= 25; maxY += 25;
+    minZ -= 25; maxZ += 25;
+
+    // 2. Cập nhật toạ độ electron tự do
+    electrons.forEach(el => {
+        el.x += el.vx;
+        el.y += el.vy;
+        el.z += el.vz;
+        
+        // Nhốt electron trong mây bao quanh các ion, di chuyển theo sự xê dịch của mạng
+        if (el.x < minX) { el.x = minX; el.vx *= -1; }
+        if (el.x > maxX) { el.x = maxX; el.vx *= -1; }
+        if (el.y < minY) { el.y = minY; el.vy *= -1; }
+        if (el.y > maxY) { el.y = maxY; el.vy *= -1; }
+        if (el.z < minZ) { el.z = minZ; el.vz *= -1; }
+        if (el.z > maxZ) { el.z = maxZ; el.vz *= -1; }
+
+        const p = project(el.x, el.y, el.z);
+        renderItems.push({
+            type: 'electron',
+            p: p,
+            radius: 6.5 * p.scale,
+            zOrder: p.z
+        });
+    });
+
+    // Sắp xếp Painter's Algorithm (từ xa đến gần)
+    renderItems.sort((a, b) => b.zOrder - a.zOrder);
+
+    // Vẽ khối chất nền màu vàng nhạt bao bọc mạng tinh thể (tạo cảm giác khối giống SGK)
+    if (renderItems.length > 0) {
+        const bbCenter = project((minX + maxX)/2, (minY + maxY)/2, 0);
+        // Vẽ 1 lớp mờ mờ ở giữa
+        ctx.save();
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(width/2 - 250, height/2 - 200, 500, 400);
+        ctx.restore();
+    }
+
+    // Vẽ các mũi tên "Lực tác động" ở bên trái hướng vào lớp 2 và 3
+    if (ratio > 0.01 && ratio < 0.99 || isAutoAnimating) {
+        const arrowOpac = Math.sin(performance.now() / 200) * 0.3 + 0.7;
+        drawArrow3D(-180, -spacing * 3 + spacing * 1.5, 0, 1, arrowOpac);
+        drawArrow3D(-180, -spacing * 2 + spacing * 1.5, 0, 1, arrowOpac);
+        drawArrow3D(-180, -spacing * 1 + spacing * 1.5, 0, 1, arrowOpac);
+    }
+
+    // Render hạt
+    renderItems.forEach(item => {
+        drawSphere3D(item.p.x, item.p.y, item.radius, item.type);
+    });
+
+    // Chú thích nhãn trên màn hình (Lực tác động)
+    if (ratio > 0.01 && ratio < 0.99 || isAutoAnimating) {
+        const lblPos = project(-220, -10, 0);
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 15px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText('Lực tác động', lblPos.x, lblPos.y);
+    }
+
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
