@@ -101,6 +101,7 @@ function doPost(e) {
       case 'gv_hinh':
       case 'gv_hinhde':
       case 'gv_ganhinh':
+      case 'gv_rahinh':
       case 'gv_sodo':
       case 'gv_sodo_luu':
       case 'gv_vipham':
@@ -136,6 +137,7 @@ function doPost(e) {
         if (d.action === 'gv_hinh') return json(gvHinh(d));
         if (d.action === 'gv_hinhde') return json(gvHinhDe(d));
         if (d.action === 'gv_ganhinh') return json(gvGanHinh(d));
+        if (d.action === 'gv_rahinh') return json(gvRaHinh(d));
         if (d.action === 'gv_sodo') return json(gvSoDo(d));
         if (d.action === 'gv_sodo_luu') return json(gvSoDoLuu(d));
         if (d.action === 'gv_vipham') return json(gvViPham(d));
@@ -664,7 +666,7 @@ function gvXemDe(d) {
 }
 // Cau hoi nhac toi hinh (Hinh 2, so do, do thi, hinh ben...) nhung khong co hinh nao gan vao
 function nhacHinh(q) {
-  if (q.hinh || /<img|<svg/i.test([q.hoi, q.pa.A, q.pa.B, q.pa.C, q.pa.D].join(' '))) return false;
+  if (q.hinh || q.khongHinh || /<img|<svg/i.test([q.hoi, q.pa.A, q.pa.B, q.pa.C, q.pa.D].join(' '))) return false;
   return /(hình|sơ đồ|đồ thị|biểu đồ)\s*(\d|bên|dưới|sau|vẽ|minh họa|minh hoạ|trên)/i.test(String(q.hoi).replace(/<[^>]*>/g, ' '));
 }
 // Duong dan web cua hinh de: https://<chu repo>.github.io/<ten repo>/hinh/<ma dot>/<ten file>
@@ -673,20 +675,53 @@ function urlHinhDe(gh, madot, ten) {
   return 'https://' + p[0].toLowerCase() + '.github.io/' + p[1] + '/hinh/' + madot + '/' + ten;
 }
 // GV mo bang "Hinh cua de": danh sach cau (dang gan hinh nao) + cac file hinh dang co trong hinh/<ma dot>/
-function gvHinhDe(d) {
-  const c = timDot(d.madot);
-  if (!c) return {ok: false, msg: 'Khong tim thay de ' + d.madot};
-  const gh = ghCauHinh(), de = docDe(c.madot);
-  let co = [];
+function dsHinhGH(gh, madot) {
   try {
-    const url = 'https://api.github.com/repos/' + gh.repo + '/contents/hinh/' + encodeURIComponent(c.madot) + '?ref=' + encodeURIComponent(gh.nhanh);
+    const url = 'https://api.github.com/repos/' + gh.repo + '/contents/hinh/' + encodeURIComponent(madot) + '?ref=' + encodeURIComponent(gh.nhanh);
     const o = {muteHttpExceptions: true, headers: {Accept: 'application/vnd.github+json'}};
     if (gh.token) o.headers.Authorization = 'Bearer ' + gh.token;
     const r = UrlFetchApp.fetch(url, o);
-    if (r.getResponseCode() === 200) co = JSON.parse(r.getContentText()).filter(function (f) { return f.type === 'file' && /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name); }).map(function (f) { return f.name; });
+    if (r.getResponseCode() === 200) return JSON.parse(r.getContentText()).filter(function (f) { return f.type === 'file' && /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name); }).map(function (f) { return f.name; });
   } catch (e) {}
+  return [];
+}
+function gvHinhDe(d) {
+  const madot = String(d.madot || '').trim(), gh = ghCauHinh();
+  // Luc nap de (de chua co trong kho): chi can danh sach file hinh dang co tren GitHub
+  if (d.chiDs) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(madot)) return {ok: false, msg: 'Ma dot khong hop le'};
+    return {ok: true, madot: madot, goc: urlHinhDe(gh, madot, ''), co: dsHinhGH(gh, madot), coToken: !!gh.token};
+  }
+  const c = timDot(madot);
+  if (!c) return {ok: false, msg: 'Khong tim thay de ' + madot};
+  const de = docDe(c.madot), co = dsHinhGH(gh, c.madot);
   return {ok: true, madot: c.madot, goc: urlHinhDe(gh, c.madot, ''), co: co, coToken: !!gh.token,
-    cau: de.map(function (q) { return {cau: q.cau, hoi: String(q.hoi).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140), hinh: q.hinh, nhac: nhacHinh(q)}; })};
+    cau: de.map(function (q) { return {cau: q.cau, hoi: String(q.hoi).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140), hinh: q.khongHinh ? '-' : q.hinh, nhac: nhacHinh(q)}; })};
+}
+// Ra hinh nhieu de 1 lan (cac de chua thi): cau nhac hinh ma chua gan + hinh khong mo duoc
+function gvRaHinh(d) {
+  const ds = (Array.isArray(d.ds) ? d.ds : []).slice(0, 80), kq = [], url = {};
+  ds.forEach(function (m) {
+    const c = timDot(m); if (!c) return;
+    let de; try { de = docDe(c.madot); } catch (e) { kq.push({madot: c.madot, ten: c.ten, loi: [{cau: '', msg: 'Kho chua co tab de'}]}); return; }
+    const x = {madot: c.madot, ten: c.ten, socau: de.length, loi: []};
+    de.forEach(function (q) {
+      if (nhacHinh(q)) x.loi.push({cau: q.cau, nhac: true});
+      urlAnhCua(q).forEach(function (u) { (url[u] = url[u] || []).push([x, q.cau]); });
+    });
+    kq.push(x);
+  });
+  const us = Object.keys(url);
+  for (let i = 0; i < us.length; i += 40) {
+    const lo = us.slice(i, i + 40);
+    let rs = [];
+    try { rs = UrlFetchApp.fetchAll(lo.map(function (u) { return {url: u, muteHttpExceptions: true, followRedirects: true}; })); } catch (e) {}
+    lo.forEach(function (u, k) {
+      if (rs[k] && rs[k].getResponseCode() === 200) return;
+      url[u].forEach(function (p) { p[0].loi.push({cau: p[1], url: u.replace(/^.*\/hinh\//, 'hinh/')}); });
+    });
+  }
+  return {ok: true, ds: kq};
 }
 // Gan hinh vao cau: d.gan = [{cau, ten}] -> ghi cot H (Hinh) tab de; ten '' = bo hinh
 function gvGanHinh(d) {
@@ -707,8 +742,8 @@ function gvGanHinh(d) {
     gan.forEach(function (g) {
       const cau = String(g.cau || '').trim(), ten = String(g.ten || '').trim();
       if (!hang[cau]) throw new Error('De ' + c.madot + ' khong co cau ' + cau);
-      if (ten && !/^[A-Za-z0-9_.\-]{1,60}\.(png|jpe?g|gif|webp|svg)$/i.test(ten)) throw new Error('Ten hinh khong hop le: ' + ten);
-      sh.getRange(hang[cau], 8).setValue(ten ? urlHinhDe(gh, c.madot, ten) : '');
+      if (ten && ten !== '__khong' && !/^[A-Za-z0-9_.\-]{1,60}\.(png|jpe?g|gif|webp|svg)$/i.test(ten)) throw new Error('Ten hinh khong hop le: ' + ten);
+      sh.getRange(hang[cau], 8).setValue(ten === '__khong' ? '-' : ten ? urlHinhDe(gh, c.madot, ten) : '');
       xong.push(cau);
     });
     SpreadsheetApp.flush();
@@ -1717,7 +1752,7 @@ function docDe(madot) {
     return {
       cau: String(r[0]).trim() || String(i + 1), hoi: String(r[1]), loai: loai,
       pa: {A: String(r[2]), B: String(r[3]), C: String(r[4]), D: String(r[5])},
-      da: da, hinh: String(r[7] || '').trim(),
+      da: da, hinh: String(r[7] || '').trim() === '-' ? '' : String(r[7] || '').trim(), khongHinh: String(r[7] || '').trim() === '-',
       w: Number(String(r[9]).replace(',', '.')) || (loai === 'DS' ? 1 : 0.25)
     };
   });
