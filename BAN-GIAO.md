@@ -25,6 +25,8 @@ Commit kết thúc bằng 2 dòng ghi công (Co-Authored-By / Claude-Session) th
 
 - `GIAO-VIEN.html`: trang giáo viên. Đăng nhập bằng MaQuanLy. Thanh trên: Trang chủ · Kiểm tra · Trò chơi · Tài nguyên · Hồ sơ HS · Cài đặt, chuông tin nhắn (số đỏ), Mã QR.
   - Sơ đồ lớp (tab SO DO sổ lớp): xếp chỗ, in; ca thi nhiều mã đề (cột H CaThi trong CAU HINH, cấp mã theo chỗ, gv_dat truong 'ca'); thu bài vi phạm (gv_vipham, iPad hỏi `kiemthu`, cột M GhiChu BAI LAM, tab VI PHAM). gv_theodoi gộp cả ca (o.made).
+  - Đề kiểm tra: mỗi nhóm 7/15/45 phút chia mục ✓ Đã thi / ○ Chưa thi (bấm để mở). Trong đề: 📄 Xem đề (PDF) – gv_xemde trả PDF có đáp án + lời giải, báo hình thiếu; 🖼 Tải hình của đề lên – gv_hinh đẩy hinh/<mã>/ lên GitHub bằng GithubToken (nạp đề cũng hiện nút này khi thiếu hình).
+  - Hồ sơ HS → 🧭 Kiến thức: chọn Tổng quát hoặc từng đợt, mức điểm (≤3.5…≥9), bảng HS × đợt (yếu nhất trước, bấm tên trải ngang từng đợt); 🪑 Sơ đồ lớp cũng mở từ Hồ sơ; khi sắp xếp, bấm ô xổ danh sách lớp chọn nhanh.
   - Kiểm tra: 📥 Nạp đề mới (chọn file KHO-DE-<mã đợt>.xlsx, xem trước rồi ghi vào kho), phòng chờ → bắt đầu → đóng đề, màn hình chiếu có QR riêng của đề, theo dõi nộp bài, phân tích câu sai, 🧭 đánh giá theo kiến thức (ngưỡng yếu 65%, AI nhận xét), xuất Excel, dán điểm vnEdu, sửa tên/thời gian/lớp của đề.
   - Trò chơi: mở/đóng, thời gian, lớp được chơi, QR, kết quả theo lớp/ngày, Excel.
   - Tài nguyên: lượt xem từng mô phỏng theo lớp, ai đã xem; tab khối ngang.

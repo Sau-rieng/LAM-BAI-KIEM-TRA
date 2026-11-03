@@ -97,6 +97,8 @@ function doPost(e) {
       case 'gv_tin_gui':
       case 'gv_tin_goiy':
       case 'gv_napde':
+      case 'gv_xemde':
+      case 'gv_hinh':
       case 'gv_sodo':
       case 'gv_sodo_luu':
       case 'gv_vipham':
@@ -128,6 +130,8 @@ function doPost(e) {
         if (d.action === 'gv_tin_gui') return json(gvTinGui(d));
         if (d.action === 'gv_tin_goiy') return json(gvTinGoiY(d));
         if (d.action === 'gv_napde') return json(gvNapDe(d));
+        if (d.action === 'gv_xemde') return json(gvXemDe(d));
+        if (d.action === 'gv_hinh') return json(gvHinh(d));
         if (d.action === 'gv_sodo') return json(gvSoDo(d));
         if (d.action === 'gv_sodo_luu') return json(gvSoDoLuu(d));
         if (d.action === 'gv_vipham') return json(gvViPham(d));
@@ -612,6 +616,60 @@ function gvDatCa(d) {
   }
   SpreadsheetApp.flush();
   return gvDot();
+}
+// ---------------------------------------------------------------------
+// GV xem truoc de (PDF co dap an, loi giai) + kiem tra hinh truoc khi cho thi
+// ---------------------------------------------------------------------
+function urlAnhCua(q) {
+  const ds = [];
+  [q.hoi, q.pa.A, q.pa.B, q.pa.C, q.pa.D].join(' ').replace(/<img[^>]*src="(https?:\/\/[^"]+)"/gi, function (m, u) { ds.push(u); return m; });
+  if (/^https?:\/\//i.test(q.hinh || '')) ds.push(q.hinh);
+  return ds;
+}
+function gvXemDe(d) {
+  const c = timDot(d.madot);
+  if (!c) return {ok: false, msg: 'Khong tim thay de ' + d.madot};
+  const de = docDe(c.madot), kiem = {}, thieu = [];
+  function coAnh(u) {
+    if (u in kiem) return kiem[u];
+    let ok = false;
+    try { ok = UrlFetchApp.fetch(u, {muteHttpExceptions: true, followRedirects: true}).getResponseCode() === 200; } catch (e) {}
+    return (kiem[u] = ok);
+  }
+  de.forEach(function (q) { urlAnhCua(q).forEach(function (u) { if (!coAnh(u)) thieu.push({cau: q.cau, url: u}); }); });
+  const gt = docGiaiThich();
+  let html = htmlDeGoc(c, de);
+  // Hinh khong mo duoc: thay bang khung bao loi de GV thay ngay tren PDF
+  html = html.replace(/<img[^>]*src="(https?:\/\/[^"]+)"[^>]*>/gi, function (m, u) {
+    return coAnh(u) ? m : '<div style="border:2px dashed #000;padding:6px;margin:4px 0;font-weight:bold">⚠ THIẾU HÌNH: ' + esc(u.replace(/^.*\/hinh\//, 'hinh/')) + '</div>';
+  });
+  const coGT = de.filter(function (q) { return gt[c.madot + '|' + q.cau]; });
+  if (coGT.length) html = html.replace('</body>', '<h3>LỜI GIẢI CHI TIẾT</h3>' + coGT.map(function (q) {
+    return '<div class="q"><b>' + nhanCau(q) + '.</b> ' + String(gt[c.madot + '|' + q.cau]).replace(/\n/g, '<br>') + '</div>';
+  }).join('') + '</body>');
+  const tom = '<p style="text-align:center">' + (thieu.length ? '<b>⚠ ' + thieu.length + ' hình chưa mở được</b>' : 'Hình: đủ') + ' · Lời giải: ' + coGT.length + '/' + de.length + ' câu</p>';
+  html = html.replace('</h2>', '</h2>' + tom);
+  const pdf = htmlSangPDF(html, 'XEM DE - ' + c.madot + '.pdf');
+  return {ok: true, madot: c.madot, ten: c.ten, socau: de.length, thieu: thieu, sogt: coGT.length, pdf: Utilities.base64Encode(pdf.getBytes())};
+}
+// GV tai hinh cua de len GitHub: hinh/<ma dot>/<ten file> (dung dong GithubToken trong tab MA)
+function gvHinh(d) {
+  const gh = ghCauHinh();
+  if (!gh.token) return {ok: false, loi: 'token', msg: 'Chua co ma GitHub: them dong GithubToken vao tab MA cua kho de'};
+  const madot = String(d.madot || '').trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(madot)) return {ok: false, msg: 'Ma dot khong hop le'};
+  const ds = Array.isArray(d.hinh) ? d.hinh : [];
+  if (!ds.length || ds.length > 40) return {ok: false, msg: 'Chon 1 den 40 hinh'};
+  const xong = [];
+  ds.forEach(function (h) {
+    const ten = String(h.ten || '').trim();
+    const m = /^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,(.+)$/.exec(String(h.data || ''));
+    if (!/^[A-Za-z0-9_.\-]{1,60}\.(png|jpe?g|gif|webp|svg)$/i.test(ten) || !m) throw new Error('Hinh khong hop le: ' + ten);
+    const path = 'hinh/' + madot + '/' + ten, cu = ghLay(gh, path);
+    ghGhi(gh, path, Utilities.base64Decode(m[2]), 'Hinh de ' + madot + ': ' + ten, cu ? cu.sha : '');
+    xong.push(ten);
+  });
+  return {ok: true, madot: madot, xong: xong};
 }
 // ---------------------------------------------------------------------
 // Nap de tu trang giao vien (file KHO-DE-<ma dot>.xlsx doc tren trinh duyet)
