@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Mạ Đồng Lên Chìa Khoá (Hình 16.5 - Anode Tan)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-nav {
+            height: 52px;
+            background: rgba(15, 23, 42, 0.98);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .nav-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #fb923c;
+        }
+        .badge-info {
+            background: rgba(251, 146, 60, 0.16);
+            border: 1px solid #f97316;
+            color: #fdba74;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        #main-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 52px);
+            overflow: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            flex: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        #bottom-bar {
+            height: 28px;
+            background: rgba(15, 23, 42, 0.88);
+            border-top: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.78rem;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        #sidebar {
+            width: 420px;
+            background: rgba(15, 23, 42, 0.96);
+            border-left: 1px solid #334155;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.82);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .card h2 {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .status-banner {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid #10b981;
+            color: #34d399;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .status-banner.paused {
+            background: rgba(245, 158, 11, 0.16);
+            border-color: #f59e0b;
+            color: #fbbf24;
+        }
+        .status-desc {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.42;
+        }
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        button {
+            flex: 1;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #f8fafc;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        button:hover {
+            border-color: #fb923c;
+            transform: translateY(-1px);
+        }
+        button.primary {
+            background: linear-gradient(90deg, #ea580c, #d97706);
+            border-color: #fb923c;
+        }
+        button.primary.paused {
+            background: #10b981;
+            border-color: #34d399;
+        }
+        .control-group {
+            margin-top: 8px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #fb923c;
+            cursor: pointer;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            padding: 4px 0;
+            border-bottom: 1px dashed #334155;
+        }
+        .eq-box {
+            background: #0f172a;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.81rem;
+            margin-top: 6px;
+            border-left: 3px solid #38bdf8;
+            line-height: 1.45;
+        }
+        .eq-box.anode {
+            border-left-color: #ef4444;
+        }
+        .eq-box.cathode {
+            border-left-color: #fb923c;
+        }
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            font-size: 0.81rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.83rem;
+            margin-top: 7px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-nav">
+    <div class="nav-title">MÔ PHỎNG 3D HÌNH 16.5: ĐIỆN PHÂN MẠ ĐỒNG LÊN CHÌA KHOÁ</div>
+    <div class="badge-info">Điện phân với Anode tan (Thanh Cu) trong dung dịch CuSO₄</div>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+        <div id="bottom-bar">
+            <span>🖱️ <strong>Kéo chuột trái:</strong> Xoay mô hình 3D 360°</span>
+            <span>🔍 <strong>Cuộn con lăn chuột:</strong> Phóng to / Thu nhỏ</span>
+            <span>✨ <strong>Quan sát thanh đồng (Anode) mòn dần và chìa khoá (Cathode) phủ lớp đồng đỏ</strong></span>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="card">
+            <h2>Trạng Thái Quá Trình Mạ Điện</h2>
+            <div id="hud-status" class="status-banner">ĐANG MẠ ĐỒNG (I = 2.0 A)</div>
+            <div id="hud-desc" class="status-desc">
+                Thanh đồng ở Anode (+) bị oxi hoá tan vào dung dịch tạo ion Cu²⁺. Ion Cu²⁺ di chuyển về chiếc chìa khoá ở Cathode (–) và bị khử thành lớp kim loại Cu bám đều lên bề mặt chìa khoá.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Bảng Điều Khiển Mạ Điện</h2>
+            <div class="btn-row">
+                <button id="btn-toggle" class="primary">Tạm Dừng Mạ</button>
+                <button id="btn-reset">Làm Mới Chìa Khoá (Chưa Mạ)</button>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <span>Cường độ dòng điện (I):</span>
+                    <strong id="current-val" style="color:#fb923c;">2.0 A</strong>
+                </label>
+                <input type="range" id="current-slider" min="0.5" max="5.0" step="0.5" value="2.0">
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <span>Góc xoay 3D ngang:</span>
+                    <strong id="rot-val">-18°</strong>
+                </label>
+                <input type="range" id="rot-slider" min="-180" max="180" step="1" value="-18">
+            </div>
+
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-micro" checked>
+                <span>Hiển thị hạt vi mô (Ion Cu²⁺, SO₄²⁻ &amp; dòng e⁻)</span>
+            </label>
+        </div>
+
+        <div class="card">
+            <h2>Thông Số Thời Gian Thực (Định Luật Faraday)</h2>
+            <div class="stats-row">
+                <span>Thời gian mạ (t):</span>
+                <strong id="stat-time">00:00</strong>
+            </div>
+            <div class="stats-row">
+                <span>Độ dày lớp mạ Cu (tỉ lệ thuận với I và t):</span>
+                <strong id="stat-thickness" style="color:#fb923c;">0.0 µm</strong>
+            </div>
+            <div class="stats-row">
+                <span>Khối lượng thanh Anode Cu giảm:</span>
+                <strong id="stat-anode-loss" style="color:#f87171;">0.00 mg</strong>
+            </div>
+            <div class="stats-row">
+                <span>Nồng độ dung dịch CuSO₄:</span>
+                <strong style="color:#38bdf8;">Không đổi (0.50 M)</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Quá Trình Ở Các Điện Cực (Hình 16.5)</h2>
+            <div class="eq-box anode">
+                <strong style="color:#f87171;">(+) Anode (Thanh kim loại Cu - Anode tan):</strong><br>
+                Cu(s) &rarr; Cu²⁺(aq) + 2e<br>
+                <small style="color:#94a3b8;">Hiện tượng: Thanh đồng tan (mỏng) dần theo thời gian.</small>
+            </div>
+            <div class="eq-box cathode">
+                <strong style="color:#fb923c;">(–) Cathode (Chiếc chìa khoá - Vật cần mạ):</strong><br>
+                Cu²⁺(aq) + 2e &rarr; Cu(s)<br>
+                <small style="color:#94a3b8;">Hiện tượng: Lớp đồng màu đỏ phủ dày dần lên chìa khoá.</small>
+            </div>
+            <div class="eq-box">
+                <strong style="color:#38bdf8;">Đặc điểm quan trọng:</strong><br>
+                Số mol Cu²⁺ tan ra ở Anode bằng số mol Cu²⁺ bị khử ở Cathode &rArr; <strong>Nồng độ CuSO₄ không đổi</strong>. Độ dày lớp mạ tỉ lệ thuận với cường độ dòng điện (I) và thời gian mạ (t).
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Chú Giải Hạt Vi Mô</h2>
+            <div class="legend-grid">
+                <div class="legend-item"><span class="dot" style="background:#0ea5e9; border:1px solid #fff;"></span> Ion Cu²⁺ (Từ + sang –)</div>
+                <div class="legend-item"><span class="dot" style="background:#eab308;"></span> Ion SO₄²⁻ (Trong dd)</div>
+                <div class="legend-item"><span class="dot" style="background:#c2410c;"></span> Đồng (Cu) nguyên chất</div>
+                <div class="legend-item"><span class="dot" style="background:#94a3b8;"></span> Lõi thép chìa khoá</div>
+                <div class="legend-item"><span class="dot" style="background:#22c55e;"></span> Dòng electron (e⁻)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.parentElement.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Trạng thái mô phỏng
+let isRunning = true;
+let currentAmp = 2.0; // Cường độ dòng điện I (A)
+let simTime = 0; // Thời gian mạ (s)
+let platingProgress = 0.08; // 0 (chìa khoá xám bạc chưa mạ) -> 1 (chìa khoá mạ đồng dày đỏ rực)
+
+// Góc nhìn 3D
+let rotY = -18 * Math.PI / 180;
+let rotX = 0.22;
+let zoom = 0.98;
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+const rotSlider = document.getElementById('rot-slider');
+const rotVal = document.getElementById('rot-val');
+const currentSlider = document.getElementById('current-slider');
+const currentVal = document.getElementById('current-val');
+const chkMicro = document.getElementById('chk-micro');
+const btnToggle = document.getElementById('btn-toggle');
+const btnReset = document.getElementById('btn-reset');
+const hudStatus = document.getElementById('hud-status');
+
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-0.35, Math.min(0.8, rotX + dy * 0.008));
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+
+    let deg = Math.round((rotY * 180 / Math.PI) % 360);
+    if (deg > 180) deg -= 360;
+    if (deg < -180) deg += 360;
+    rotSlider.value = deg;
+    rotVal.textContent = deg + '°';
+});
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(0.65, Math.min(1.65, zoom - e.deltaY * 0.001));
+}, { passive: false });
+
+rotSlider.addEventListener('input', e => {
+    const deg = parseFloat(e.target.value);
+    rotVal.textContent = deg + '°';
+    rotY = deg * Math.PI / 180;
+});
+
+currentSlider.addEventListener('input', e => {
+    currentAmp = parseFloat(e.target.value);
+    currentVal.textContent = currentAmp.toFixed(1) + ' A';
+    if (isRunning) {
+        hudStatus.textContent = `ĐANG MẠ ĐỒNG (I = ${currentAmp.toFixed(1)} A)`;
+    }
+});
+
+btnToggle.addEventListener('click', () => {
+    isRunning = !isRunning;
+    if (isRunning) {
+        btnToggle.textContent = 'Tạm Dừng Mạ';
+        btnToggle.classList.remove('paused');
+        hudStatus.textContent = `ĐANG MẠ ĐỒNG (I = ${currentAmp.toFixed(1)} A)`;
+        hudStatus.classList.remove('paused');
+    } else {
+        btnToggle.textContent = 'Tiếp Tục Mạ';
+        btnToggle.classList.add('paused');
+        hudStatus.textContent = 'ĐANG TẠM DỪNG MẠ';
+        hudStatus.classList.add('paused');
+    }
+});
+
+btnReset.addEventListener('click', () => {
+    simTime = 0;
+    platingProgress = 0;
+    isRunning = true;
+    btnToggle.textContent = 'Tạm Dừng Mạ';
+    btnToggle.classList.remove('paused');
+    hudStatus.textContent = `ĐANG MẠ ĐỒNG (I = ${currentAmp.toFixed(1)} A)`;
+    hudStatus.classList.remove('paused');
+});
+
+function project(x, y, z) {
+    let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+    let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+    let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+    const fov = 720 * zoom;
+    const viewerDist = 680;
+    const scale = fov / (viewerDist + z2);
+    return {
+        x: width / 2 + x1 * scale,
+        y: height / 2 + 40 - y2 * scale,
+        z: z2,
+        scale: scale
+    };
+}
+
+// Vẽ khối hộp 3D (Dùng cho thanh kim loại đồng Anode)
+function drawBox3D(xMin, xMax, yMin, yMax, zMin, zMax, fillStyle, strokeStyle, lineWidth = 1.2) {
+    const c = [
+        project(xMin, yMin, zMin), project(xMax, yMin, zMin),
+        project(xMax, yMax, zMin), project(xMin, yMax, zMin),
+        project(xMin, yMin, zMax), project(xMax, yMin, zMax),
+        project(xMax, yMax, zMax), project(xMin, yMax, zMax)
+    ];
+    const faces = [[0,1,5,4], [0,1,2,3], [0,4,7,3], [1,5,6,2], [3,2,6,7], [4,5,6,7]];
+    faces.forEach(f => {
+        ctx.beginPath();
+        ctx.moveTo(c[f[0]].x, c[f[0]].y);
+        for (let i = 1; i < 4; i++) ctx.lineTo(c[f[i]].x, c[f[i]].y);
+        ctx.closePath();
+        if (fillStyle) { ctx.fillStyle = fillStyle; ctx.fill(); }
+        if (strokeStyle) { ctx.strokeStyle = strokeStyle; ctx.lineWidth = lineWidth; ctx.stroke(); }
+    });
+}
+
+// Vẽ cốc thuỷ tinh 3D (Beaker) và dung dịch CuSO4 màu xanh lam không đổi màu
+function drawBeakerAndSolution() {
+    const radius = 135;
+    const yBottom = -135;
+    const yLiquid = 25;
+    const yTop = 95;
+    const segments = 32;
+
+    // 1. Khối chất lỏng CuSO4 (từ yBottom đến yLiquid)
+    const liqTopPts = [];
+    const liqBotPts = [];
+    for (let i = 0; i <= segments; i++) {
+        const th = (i / segments) * Math.PI * 2;
+        const rx = (radius - 4) * Math.cos(th);
+        const rz = (radius - 4) * Math.sin(th);
+        liqTopPts.push(project(rx, yLiquid, rz));
+        liqBotPts.push(project(rx, yBottom + 4, rz));
+    }
+
+    for (let i = 0; i < segments; i++) {
+        ctx.beginPath();
+        ctx.moveTo(liqTopPts[i].x, liqTopPts[i].y);
+        ctx.lineTo(liqTopPts[i + 1].x, liqTopPts[i + 1].y);
+        ctx.lineTo(liqBotPts[i + 1].x, liqBotPts[i + 1].y);
+        ctx.lineTo(liqBotPts[i].x, liqBotPts[i].y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(14, 165, 233, 0.26)';
+        ctx.fill();
+    }
+
+    // Mặt thoáng dung dịch CuSO4
+    ctx.beginPath();
+    for (let i = 0; i <= segments; i++) {
+        if (i === 0) ctx.moveTo(liqTopPts[i].x, liqTopPts[i].y);
+        else ctx.lineTo(liqTopPts[i].x, liqTopPts[i].y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.38)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(186, 230, 253, 0.75)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 2. Vỏ cốc thuỷ tinh 3D (có mỏ rót ở bên trái giống Hình 16.5)
+    const rimPts = [];
+    const botPts = [];
+    for (let i = 0; i <= segments; i++) {
+        const th = (i / segments) * Math.PI * 2;
+        // Tạo mỏ rót nhỏ ở góc th = PI (bên trái)
+        const spout = (Math.abs(th - Math.PI) < 0.25) ? 12 * Math.cos((th - Math.PI) * 6) : 0;
+        const rxTop = (radius + spout) * Math.cos(th);
+        const rzTop = (radius + spout) * Math.sin(th);
+        rimPts.push(project(rxTop, yTop, rzTop));
+        botPts.push(project(radius * Math.cos(th), yBottom, radius * Math.sin(th)));
+    }
+
+    // Vẽ đường viền miệng cốc và đáy cốc
+    ctx.beginPath();
+    for (let i = 0; i <= segments; i++) {
+        if (i === 0) ctx.moveTo(rimPts[i].x, rimPts[i].y);
+        else ctx.lineTo(rimPts[i].x, rimPts[i].y);
+    }
+    ctx.strokeStyle = 'rgba(203, 213, 225, 0.85)';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    for (let i = 0; i <= segments; i++) {
+        if (i === 0) ctx.moveTo(botPts[i].x, botPts[i].y);
+        else ctx.lineTo(botPts[i].x, botPts[i].y);
+    }
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Cạnh đứng hai bên thành cốc
+    const leftTop = project(-radius, yTop, 0);
+    const leftBot = project(-radius, yBottom, 0);
+    const rightTop = project(radius, yTop, 0);
+    const rightBot = project(radius, yBottom, 0);
+
+    ctx.beginPath();
+    ctx.moveTo(leftTop.x, leftTop.y);
+    ctx.lineTo(leftBot.x, leftBot.y);
+    ctx.moveTo(rightTop.x, rightTop.y);
+    ctx.lineTo(rightBot.x, rightBot.y);
+    ctx.strokeStyle = 'rgba(203, 213, 225, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+// Vẽ thanh đồng Anode (+) bên trái (bị ăn mòn mỏng dần phần ngâm trong dung dịch)
+function drawCopperAnode() {
+    const xCenter = -68;
+    // Phần trên mặt nước (từ y = 25 đến y = 85): giữ nguyên kích thước
+    drawBox3D(xCenter - 18, xCenter + 18, 25, 85, -5, 5, '#ea580c', '#9a3412', 1.2);
+
+    // Phần ngâm trong dung dịch (từ y = -115 đến y = 25): bị oxi hoá tan dần nên hẹp và mỏng đi
+    const shrinkW = platingProgress * 7.5; // Bề ngang thu hẹp dần khi tan
+    const shrinkZ = platingProgress * 2.2;
+    drawBox3D(
+        xCenter - (18 - shrinkW),
+        xCenter + (18 - shrinkW),
+        -115 + platingProgress * 12,
+        25,
+        -(5 - shrinkZ),
+        (5 - shrinkZ),
+        '#c2410c',
+        '#7c2d12',
+        1.2
+    );
+
+    // Kẹp cá sấu màu đỏ kẹp trên đỉnh thanh đồng Anode (+) giống Hình 16.5
+    drawBox3D(xCenter - 8, xCenter + 8, 85, 130, -6, 6, '#ef4444', '#b91c1c', 1.2);
+}
+
+// Vẽ chiếc chìa khoá 3D ở Cathode (–) bên phải (chuyển màu từ thép xám bạc sang đồng đỏ gạch và dày dần)
+function drawKeyCathode() {
+    const kx = 65;
+    const kyHead = -12; // Tâm đầu tròn của chìa khoá
+    const headRadius = 26 + platingProgress * 2.2;
+
+    // Pha màu giữa thép xám bạc (chưa mạ: rgb(148, 163, 184)) và đồng đỏ ánh kim (đã mạ: rgb(217, 107, 39))
+    const r = Math.round(148 + (217 - 148) * Math.min(1, platingProgress * 1.25));
+    const g = Math.round(163 + (107 - 163) * Math.min(1, platingProgress * 1.25));
+    const b = Math.round(184 + (39 - 184) * Math.min(1, platingProgress * 1.25));
+    const keyColorFront = `rgb(${r}, ${g}, ${b})`;
+    const keyColorSide = `rgb(${Math.max(0, r - 35)}, ${Math.max(0, g - 28)}, ${Math.max(0, b - 20)})`;
+
+    const thicknessZ = 4 + platingProgress * 2.5;
+
+    // Vẽ 2 lớp trước/sau tạo chiều dày 3D cho chiếc chìa khoá
+    [-thicknessZ, thicknessZ].forEach((zOff, idx) => {
+        // 1. Đầu tròn của chìa khoá
+        ctx.beginPath();
+        for (let s = 0; s <= 28; s++) {
+            const th = (s / 28) * Math.PI * 2;
+            const pt = project(kx + headRadius * Math.cos(th), kyHead + headRadius * Math.sin(th), zOff);
+            if (s === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = idx === 1 ? keyColorFront : keyColorSide;
+        ctx.fill();
+        ctx.strokeStyle = keyColorSide;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Lỗ tròn nhỏ phía trên đầu chìa khoá
+        ctx.beginPath();
+        for (let s = 0; s <= 18; s++) {
+            const th = (s / 18) * Math.PI * 2;
+            const pt = project(kx + 5.5 * Math.cos(th), kyHead + 13 + 5.5 * Math.sin(th), zOff);
+            if (s === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = '#0ea5e9';
+        ctx.fill();
+
+        // 2. Thân răng cưa của chiếc chìa khoá (từ y = -36 xuống y = -112) giống Hình 16.5
+        const bladePoly = [
+            [kx - 8, kyHead - 22],
+            [kx + 7, kyHead - 22],
+            [kx + 7, -55],
+            [kx + 2, -62],
+            [kx + 8, -70],
+            [kx + 2, -80],
+            [kx + 8, -90],
+            [kx + 3, -98],
+            [kx, -112],
+            [kx - 8, -102]
+        ];
+        ctx.beginPath();
+        bladePoly.forEach((ptCoord, i) => {
+            const p = project(ptCoord[0], ptCoord[1], zOff);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        });
+        ctx.closePath();
+        ctx.fillStyle = idx === 1 ? keyColorFront : keyColorSide;
+        ctx.fill();
+        ctx.strokeStyle = keyColorSide;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+    });
+
+    // Kẹp cá sấu màu đen giữ đầu chìa khoá giống Hình 16.5
+    drawBox3D(kx - 8, kx + 8, 12, 55, -6, 6, '#1e293b', '#475569', 1.2);
+}
+
+// Vẽ dây dẫn và ký hiệu cực (+) và (–) ở phía trên giống Hình 16.5
+function drawWiresAndLabels(dt) {
+    const pAnodeClip = project(-68, 130, 0);
+    const pAnodeTop = project(-68, 215, 0);
+
+    const pCathodeClip = project(65, 55, 0);
+    const pCathodeTop = project(65, 215, 0);
+
+    // Dây đỏ nối cực dương (+) Anode
+    ctx.beginPath();
+    ctx.moveTo(pAnodeClip.x, pAnodeClip.y);
+    ctx.lineTo(pAnodeTop.x, pAnodeTop.y);
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Dây đen nối cực âm (–) Cathode
+    ctx.beginPath();
+    ctx.moveTo(pCathodeClip.x, pCathodeClip.y);
+    ctx.lineTo(pCathodeTop.x, pCathodeTop.y);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Vòng tròn dấu (+) và (–) chuẩn Hình 16.5
+    ctx.beginPath();
+    ctx.arc(pAnodeTop.x, pAnodeTop.y - 14, 13, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e293b';
+    ctx.fill();
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#ef4444';
+    ctx.font = 'bold 18px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText('+', pAnodeTop.x, pAnodeTop.y - 8);
+
+    ctx.beginPath();
+    ctx.arc(pCathodeTop.x, pCathodeTop.y - 14, 13, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e293b';
+    ctx.fill();
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 18px Segoe UI';
+    ctx.fillText('–', pCathodeTop.x, pCathodeTop.y - 8);
+
+    // Nhãn Anode & Cathode hai bên giống Hình 16.5
+    const pLblAnode = project(-130, 105, 0);
+    ctx.fillStyle = '#f87171';
+    ctx.font = 'bold 16px Segoe UI';
+    ctx.fillText('Anode (Thanh Cu)', pLblAnode.x - 15, pLblAnode.y);
+
+    const pLblCathode = project(130, 105, 0);
+    ctx.fillStyle = '#fb923c';
+    ctx.font = 'bold 16px Segoe UI';
+    ctx.fillText('Cathode (Chìa khoá)', pLblCathode.x + 15, pLblCathode.y);
+
+    const pSol = project(0, -158, 0);
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 15px Segoe UI';
+    ctx.fillText('Dung dịch điện phân CuSO₄ (Nồng độ không đổi)', pSol.x, pSol.y);
+}
+
+// Hạt vi mô: Ion Cu2+ tan ra từ thanh đồng Anode (-68) bơi sang bám vào chìa khoá Cathode (+65)
+const cuIons = [];
+const so4Ions = [];
+const electrons = [];
+
+for (let i = 0; i < 24; i++) {
+    cuIons.push({
+        t: Math.random(), // 0 (tại thanh đồng Anode) -> 1 (tại chìa khoá Cathode)
+        yBase: -105 + Math.random() * 115,
+        zOff: (Math.random() - 0.5) * 45,
+        phase: Math.random() * 6.28
+    });
+}
+for (let i = 0; i < 16; i++) {
+    so4Ions.push({
+        x: (Math.random() - 0.5) * 180,
+        y: -115 + Math.random() * 125,
+        z: (Math.random() - 0.5) * 120,
+        phase: Math.random() * 6.28
+    });
+}
+for (let i = 0; i < 14; i++) {
+    electrons.push({
+        side: i < 7 ? 'left' : 'right',
+        t: (i % 7) / 7
+    });
+}
+
+function updateAndDrawParticles(dt) {
+    if (!chkMicro.checked) return;
+
+    const speed = (currentAmp / 2.0) * 0.22;
+
+    // 1. Ion Cu2+ di chuyển từ thanh đồng Anode (-68) sang chìa khoá Cathode (+65)
+    cuIons.forEach(ion => {
+        if (isRunning) {
+            ion.t += dt * speed;
+            ion.phase += dt * 4;
+            if (ion.t >= 1) {
+                ion.t = 0;
+                ion.yBase = -105 + Math.random() * 115;
+            }
+        }
+        const x = -55 + ion.t * 115;
+        const y = ion.yBase + Math.sin(ion.phase) * 4;
+        const ip = project(x, y, ion.zOff);
+
+        ctx.beginPath();
+        ctx.arc(ip.x, ip.y, 6.2 * ip.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#0ea5e9';
+        ctx.fill();
+        ctx.strokeStyle = '#e0f2fe';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        if (ip.scale > 0.85) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.round(8 * ip.scale)}px Segoe UI`;
+            ctx.textAlign = 'center';
+            ctx.fillText('Cu²⁺', ip.x, ip.y + 3);
+        }
+    });
+
+    // 2. Ion SO4 2- lơ lửng trong dung dịch
+    so4Ions.forEach(s => {
+        if (isRunning) s.phase += dt * 2;
+        const sp = project(s.x + Math.sin(s.phase) * 3, s.y, s.z);
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, 6.8 * sp.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#eab308';
+        ctx.fill();
+        if (sp.scale > 0.85) {
+            ctx.fillStyle = '#0f172a';
+            ctx.font = `bold ${Math.round(7.5 * sp.scale)}px Segoe UI`;
+            ctx.textAlign = 'center';
+            ctx.fillText('SO₄²⁻', sp.x, sp.y + 3);
+        }
+    });
+
+    // 3. Hạt electron (e-) chạy trên 2 dây dẫn
+    electrons.forEach(el => {
+        if (isRunning) el.t = (el.t + dt * speed * 1.8) % 1;
+        let ex, ey;
+        if (el.side === 'left') {
+            // Từ thanh Anode (-68, 130) đi lên cực dương nguồn (-68, 200)
+            ex = -68;
+            ey = 130 + el.t * 70;
+        } else {
+            // Từ cực âm nguồn (65, 200) đi xuống chìa khoá Cathode (65, 55)
+            ex = 65;
+            ey = 200 - el.t * 145;
+        }
+        const ep = project(ex, ey, 0);
+        ctx.beginPath();
+        ctx.arc(ep.x, ep.y, 4 * ep.scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#22c55e';
+        ctx.fill();
+    });
+}
+
+function updateStatsUI() {
+    const mins = Math.floor(simTime / 60);
+    const secs = Math.floor(simTime % 60);
+    document.getElementById('stat-time').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    const thicknessUm = (platingProgress * 28.0).toFixed(1);
+    const massMg = (platingProgress * 64.0).toFixed(2);
+    document.getElementById('stat-thickness').textContent = `${thicknessUm} µm`;
+    document.getElementById('stat-anode-loss').textContent = `${massMg} mg`;
+}
+
+let lastTime = performance.now();
+function animate(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    if (isRunning) {
+        simTime += dt * 5;
+        // Độ dày lớp mạ tỉ lệ thuận với cường độ dòng điện (currentAmp) và thời gian mạ (dt)
+        platingProgress = Math.min(1, platingProgress + dt * 0.015 * (currentAmp / 2.0));
+        updateStatsUI();
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    drawCopperAnode();
+    drawKeyCathode();
+    updateAndDrawParticles(dt);
+    drawBeakerAndSolution();
+    drawWiresAndLabels(dt);
+
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
