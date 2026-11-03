@@ -1739,6 +1739,14 @@ function docMa() {
 //   DS : dung/sai, A-D la 4 y a)-d), DapAn = 4 chu D/S (vd DDSD)
 //   TLN: tra loi ngan, DapAn = so/chu (18,36 = 18.36); nhieu cach dung ngan bang ; (phi kim; la phi kim)
 //   Diem: diem toi da cua cau (de trong: TN 0,25 · DS 1 · TLN 0,25). Tong diem duoc quy ve thang 10.
+// Cot Hinh chi ghi ten file ("image2.png" hoac "hinh/<ma>/image2.png") -> doi thanh duong dan web day du
+function chuanHinh(h, madot) {
+  h = String(h || '').trim();
+  if (h === '-' || !h || /^https?:\/\//i.test(h) || /^<svg/i.test(h)) return h === '-' ? '' : h;
+  const m = /^(?:\.?\/)?(?:hinh\/([A-Za-z0-9_.\-]+)\/)?([A-Za-z0-9_.\-]+\.(?:png|jpe?g|gif|webp|svg))$/i.exec(h);
+  if (!m) return h;
+  return urlHinhDe({repo: GH_REPO_MAC_DINH}, m[1] || String(madot).trim(), m[2]);
+}
 function docDe(madot) {
   const sh = kho().getSheetByName(String(madot || '').trim());
   if (!sh) throw new Error('Kho de chua co tab ' + madot);
@@ -1752,7 +1760,7 @@ function docDe(madot) {
     return {
       cau: String(r[0]).trim() || String(i + 1), hoi: String(r[1]), loai: loai,
       pa: {A: String(r[2]), B: String(r[3]), C: String(r[4]), D: String(r[5])},
-      da: da, hinh: String(r[7] || '').trim() === '-' ? '' : String(r[7] || '').trim(), khongHinh: String(r[7] || '').trim() === '-',
+      da: da, hinh: chuanHinh(r[7], madot), khongHinh: String(r[7] || '').trim() === '-',
       w: Number(String(r[9]).replace(',', '.')) || (loai === 'DS' ? 1 : 0.25)
     };
   });
