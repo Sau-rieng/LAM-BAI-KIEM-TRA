@@ -69,7 +69,24 @@ input,textarea{-webkit-user-select:text;user-select:text}
 img{-webkit-user-drag:none;pointer-events:none}
 /* Tai khoan: 2 thu muc */
 .chao{font-size:15px;color:var(--muted);margin:0}
-.thuMuc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.thuMuc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.ktChon{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.ktChon button{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:700;font-size:16px;color:var(--ink);text-align:left;cursor:pointer}
+.ktChon button small{display:block;font-weight:500;font-size:12.5px;color:var(--muted)}
+.ktChon button.on{border-color:var(--pri);background:#eaf3fe}
+.ktTom{background:var(--bg);border-radius:12px;padding:10px 14px;margin:6px 0 12px;font-size:16px}
+.ktTom b{font-size:20px}
+.ktMuc{border:2px solid var(--bad);background:var(--badbg);border-radius:14px;padding:10px 14px;margin:8px 0}
+.ktMuc .t{font-weight:700;color:var(--bad);font-size:16.5px}
+.ktMuc .t i{font-style:normal;white-space:nowrap}
+.ktMuc .md{font-size:13px;color:var(--muted);margin-left:6px;font-weight:600}
+.ktMuc .s{margin-top:6px;font-size:14.5px;color:var(--ink);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ktMuc .s button{background:#fff;border:1.5px solid var(--bad);color:var(--bad);border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;cursor:pointer}
+.ktMuc .s span.c{border:1.5px dashed #b9a;border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;color:var(--muted)}
+.ktMuc .s .ng{font-size:13.5px;color:var(--muted);font-weight:700;margin-left:4px}
+.ktVung{color:var(--ok);font-weight:700;margin:12px 0 4px}
+.ktVung span{display:inline-block;border:1.5px solid var(--ok);background:var(--okbg);border-radius:999px;padding:3px 10px;margin:3px 4px 0 0;font-size:13.5px;font-weight:600;color:var(--ink)}
+.card.q.nhay{outline:3px solid var(--pri);outline-offset:2px}
 @media (max-width:640px){.thuMuc{grid-template-columns:1fr 1fr}}
 .thuMuc button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:18px;min-height:150px;color:var(--ink)}
 .thuMuc .ic{font-size:42px;line-height:1;margin-bottom:12px}
@@ -185,6 +202,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <div class="thuMuc">
       <button id="moBai"><span class="ic" aria-hidden="true" data-bt="xem"></span><b>Xem lại bài</b><span id="soBai"></span></button>
       <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true" data-bt="tn"></span><b>Tài nguyên</b><span id="soTN"></span></button>
+      <button id="moKT" class="ktBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Kiến thức cần ôn</b><span id="soKT">Em yếu phần nào, câu nào sai</span></button>
       <button id="moTin" class="tinBtn"><span class="ic" aria-hidden="true" data-bt="tin"></span><i class="dem" id="demTin" hidden></i><b>Hỏi thầy/cô</b><span id="soTin">Nhắn thắc mắc, xem trả lời</span></button>
     </div>
     <button class="btn btn2" id="btnRa0">Thoát</button>
@@ -211,6 +229,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <div class="loc" id="tnKhoi"></div>
   </div>
   <div id="dsTN"></div>
+</section>
+
+<section id="scrKT" class="hidden">
+  <div class="card">
+    <div class="dau"><button class="btn2" id="ktLai">◀ Tài khoản</button></div>
+    <h1>Kiến thức cần ôn tập</h1>
+    <p class="sub">Kiến thức em làm đúng <b>dưới 65%</b> là phần cần ôn lại. Chọn <b>Tổng hợp</b> (tất cả các đợt) hoặc từng đợt kiểm tra.</p>
+    <div class="ktChon" id="ktChon"></div>
+    <div id="ktNoi"><p class="sub">Đang tải…</p></div>
+  </div>
 </section>
 
 <section id="scrDS" class="hidden">
@@ -256,7 +284,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var lopChon = null, duLieu = null, baiDangXem = null;
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -280,7 +308,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           if (!j.ok && /SBD hoac ma xem/i.test(j.msg || '')) { $('btnXem').disabled = false; return loi('SBD hoặc mã xem bài chưa đúng.'); }
           if (!j.ok) throw new Error(j.msg || 'loi');
           $('btnXem').disabled = false;
-          duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; $('maxem').value = ''; $('msg').textContent = '';
+          duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; KT = null; KT_SEL = 'tat'; $('maxem').value = ''; $('msg').textContent = '';
           veHome();
         })
         .catch(function () {
@@ -388,7 +416,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var trangThai = q.chon === '' ? 'bo' : (q.dung ? 'dung' : 'sai');
       var chu = trangThai === 'dung' ? '✓ Đúng' : trangThai === 'sai' ? '✗ Sai' : '– Bỏ trống';
       if (q.loai === 'DS' && trangThai !== 'bo') { chu = (q.dung ? '✓ ' : '') + 'Đúng ' + q.soY + '/4 ý'; if (!q.dung && q.soY > 0) trangThai = 'mot'; }
-      var the = document.createElement('div'); the.className = 'card q ' + (q.dung ? 'dung' : 'sai');
+      var the = document.createElement('div'); the.className = 'card q ' + (q.dung ? 'dung' : 'sai'); the.setAttribute('data-cau', q.cau);
       var h = '<div class="qh"><b>Câu ' + n.so + '</b><span class="tag ' + trangThai + '">' + chu + '</span></div>' +
         '<div class="nd">' + q.hoi + '</div>' + (q.hinh ? '<img src="' + q.hinh + '" alt="Hình câu hỏi">' : '');
       if (q.loai === 'DS') {
@@ -455,6 +483,81 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     man('scrHome');
   }
   $('moBai').onclick = function () { veDanhSach(); };
+
+  // ---------- Kien thuc can on tap (moi dot da lam + tong hop) ----------
+  var KT = null, KT_SEL = 'tat';
+  function ngayDu(iso) { if (!iso) return ''; var d = new Date(iso); if (isNaN(d)) return ''; return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
+  function pct(x) { return Math.round(x * 100); }
+  function tenCau(c) { var n = nhan({ cau: c }); return (n.phan ? n.phan + '.' : '') + n.so; }
+  $('moKT').onclick = function () {
+    man('scrKT');
+    if (KT) return veKT();
+    $('ktNoi').innerHTML = '<p class="sub">Đang tải…</p>'; $('ktChon').innerHTML = '';
+    fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_kienthuc', mahs: duLieu.mahs, maxem: duLieu.maxem }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Mục này thầy/cô đang cập nhật, em quay lại sau nhé.' : j.msg || 'Lỗi');
+        var dem = {};
+        j.dot.forEach(function (g) { var n = ngayDu(g.luc) || g.madot; dem[n] = (dem[n] || 0) + 1; g.nhan = n + (dem[n] > 1 ? ' (' + dem[n] + ')' : ''); });
+        KT = j; veKT();
+      })
+      .catch(function (e) { $('ktNoi').innerHTML = '<p class="msg err">' + (e.message === 'Failed to fetch' ? 'Không kết nối được. Kiểm tra mạng rồi thử lại.' : e.message) + '</p>'; });
+  };
+  $('ktLai').onclick = function () { man('scrHome'); };
+  function veKT() {
+    var ds = KT.dot, box = $('ktNoi'), ch = $('ktChon');
+    if (!ds.length) { ch.innerHTML = ''; box.innerHTML = '<p class="sub">Em chưa có bài kiểm tra nào được đánh giá kiến thức.</p>'; return; }
+    if (KT_SEL !== 'tat' && !ds.some(function (g) { return g.madot === KT_SEL; })) KT_SEL = 'tat';
+    ch.innerHTML = '';
+    [{ madot: 'tat', nhan: '📊 Tổng hợp', ten: ds.length + ' đợt kiểm tra' }].concat(ds.slice().reverse()).forEach(function (g) {
+      var b = document.createElement('button'); b.className = g.madot === KT_SEL ? 'on' : '';
+      b.innerHTML = g.nhan + '<small>' + esc(String(g.ten).slice(0, 40)) + '</small>';
+      b.onclick = function () { KT_SEL = g.madot; veKT(); };
+      ch.appendChild(b);
+    });
+    // gom kien thuc
+    var chon = KT_SEL === 'tat' ? ds : ds.filter(function (g) { return g.madot === KT_SEL; }), K = {}, thu = [], tD = 0, tN = 0;
+    chon.forEach(function (g) {
+      g.kt.forEach(function (k) {
+        if (!K[k.kt]) { K[k.kt] = { kt: k.kt, d: 0, n: 0, md: k.md, sai: [] }; thu.push(k.kt); }
+        var x = K[k.kt]; x.d += k.d; x.n += k.n;
+        k.sai.forEach(function (c) { x.sai.push({ madot: c.madot, cau: c.cau, nhan: g.nhan, xem: !!g.xem[c.madot] }); });
+        tD += k.d; tN += k.n;
+      });
+    });
+    var all = thu.map(function (t) { var x = K[t]; x.p = x.n ? x.d / x.n : 0; return x; });
+    var yeu = all.filter(function (x) { return x.p < 0.65; }).sort(function (a, b) { return a.p - b.p; });
+    var vung = all.filter(function (x) { return x.p >= 0.65; });
+    var g1 = chon[0];
+    var h = '<div class="ktTom">' + (KT_SEL === 'tat'
+      ? '<b>' + ds.length + '</b> đợt kiểm tra'
+      : '<b>' + esc(String(g1.diem).replace(',', '.')) + '</b> điểm · ' + esc(g1.ten)) +
+      (tN ? ' · đúng <b>' + pct(tD / tN) + '%</b>' : '') + ' · cần ôn <b>' + yeu.length + '</b> kiến thức</div>';
+    if (!all.length) h += '<p class="sub">Đề này chưa được gắn nội dung kiến thức nên chưa đánh giá được.</p>';
+    else if (!yeu.length) h += '<p class="ktVung" style="font-size:17px">✓ Em không có kiến thức nào dưới 65%. Giữ vững nhé!</p>';
+    yeu.forEach(function (x, i) {
+      var nhom = {}, thuN = [];
+      x.sai.forEach(function (c) { if (!nhom[c.nhan]) { nhom[c.nhan] = []; thuN.push(c.nhan); } nhom[c.nhan].push(c); });
+      h += '<div class="ktMuc"><div class="t">' + esc(x.kt) + ' · <i>' + pct(x.p) + '%</i>' + (x.md ? '<span class="md">' + esc(x.md) + '</span>' : '') + '</div>' +
+        (x.sai.length ? '<div class="s">Câu em làm sai:' + thuN.map(function (n) {
+          return (KT_SEL === 'tat' ? '<span class="ng">' + esc(n.replace(/\/\d{4}/, '')) + '</span>' : '') + nhom[n].map(function (c) {
+            return c.xem ? '<button data-md="' + esc(c.madot) + '" data-cau="' + esc(c.cau) + '">Câu ' + esc(tenCau(c.cau)) + '</button>' : '<span class="c" title="Thầy/cô chưa mở xem lại bài này">Câu ' + esc(tenCau(c.cau)) + '</span>';
+          }).join('');
+        }).join('') + '</div>' : '') + '</div>';
+    });
+    if (yeu.some(function (x) { return x.sai.some(function (c) { return !c.xem; }); })) h += '<p class="sub">Câu viền đứt: thầy/cô chưa mở xem lại bài đó. Câu viền đỏ: bấm để xem lại câu đó và đọc 💡 Giải thích.</p>';
+    if (vung.length) h += '<div class="ktVung">✓ Đã vững (' + vung.length + '):<br>' + vung.sort(function (a, b) { return b.p - a.p; }).map(function (x) { return '<span>' + esc(x.kt) + ' · ' + pct(x.p) + '%</span>'; }).join('') + '</div>';
+    box.innerHTML = h;
+    [].forEach.call(box.querySelectorAll('.ktMuc button'), function (b) {
+      b.onclick = function () { moCau(b.getAttribute('data-md'), b.getAttribute('data-cau')); };
+    });
+  }
+  function moCau(madot, cau) {
+    var b = (duLieu.bai || []).filter(function (x) { return x.madot === madot; })[0]; if (!b) return;
+    $('chiSai').checked = false; baiDangXem = b; veBai();
+    var the = document.querySelector('#dsCau .card.q[data-cau="' + cau.replace(/"/g, '') + '"]');
+    if (the) setTimeout(function () { the.scrollIntoView({ block: 'start' }); window.scrollBy(0, -10); the.classList.add('nhay'); setTimeout(function () { the.classList.remove('nhay'); }, 2500); }, 60);
+  }
   $('moTN').onclick = function () { veTN(); man('scrTN'); };
 
   // ---------- Tin nhan voi thay/co ----------
@@ -505,7 +608,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }).catch(function () { b.disabled = false; b.textContent = 'Gửi'; $('tinMsg').className = 'msg err'; $('tinMsg').textContent = 'Chưa gửi được. Thử lại.'; });
   };
   $('dsLai').onclick = $('tnLai').onclick = function () { man('scrHome'); };
-  $('btnRa0').onclick = function () { duLieu = null; hinhMo(''); man('scrLogin'); };
+  $('btnRa0').onclick = function () { duLieu = null; KT = null; hinhMo(''); man('scrLogin'); };
 
   // ---------- Tai nguyen ----------
   var khoiTN = null;

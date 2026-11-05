@@ -63,6 +63,7 @@ function doPost(e) {
       case 'chobai': return json(trangThaiDot(d.madot));
       case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
+      case 'hs_kienthuc': return json(hsKienThuc(d));
       case 'daxem':  return json(ghiDaXem(d));
       case 'xemtn':  return json(ghiXemTN(d));
       case 'tn_gui': return json(hsGuiTin(d));
@@ -1903,6 +1904,40 @@ function timHS(ma) {
     if (String(rows[i][0]).trim() === ma) return {ten: String(rows[i][1]).trim(), maxem: String(rows[i][3]).trim()};
   }
   return null;
+}
+// Hoc sinh xem danh gia kien thuc cua minh: moi dot da lam (khong can GV mo xem lai, khong lo dap an).
+// Ca thi nhieu ma de gop 1 dot. Tra ve tung kien thuc: so diem dung/so cau, cac cau sai.
+function hsKienThuc(d) {
+  const ma = String(d.mahs || '').trim();
+  const hs = timHS(ma);
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  const kt = docKienThuc(), theo = {}, dot = [];
+  docCauHinh().forEach(function (c) {
+    if (!hopLop(c)) return;
+    const bai = timBaiDaNop(c.madot, ma);
+    if (!bai) return;
+    let de; try { de = docDe(c.madot); } catch (e) { return; }
+    const chon = tachChiTiet(bai.chitiet), kq = chamBai(de, function (q, i) { return chon[i]; });
+    const k = c.ca || c.madot;
+    let g = theo[k];
+    if (!g) { g = theo[k] = {madot: k, ma: [], ten: c.ten, luc: bai.luc, diem: bai.diem, xem: {}, kt: {}}; dot.push(g); }
+    g.ma.push(c.madot);
+    if (c.xemlai) g.xem[c.madot] = 1;
+    if (bai.luc && (!g.luc || bai.luc < g.luc)) g.luc = bai.luc;
+    kq.ct.forEach(function (r) {
+      const x = kt[c.madot + '|' + r.cau]; if (!x || !x.kt) return;
+      const v = r.loai === 'DS' ? r.soY / 4 : (r.dung ? 1 : 0);
+      const o = g.kt[x.kt] = g.kt[x.kt] || {d: 0, n: 0, md: x.md || '', sai: []};
+      o.d += v; o.n++;
+      if (v < 1) o.sai.push({madot: c.madot, cau: r.cau});
+    });
+  });
+  dot.forEach(function (g) {
+    g.ten = String(g.ten).replace(/\s*[–-]\s*Mã\s*[\w-]+\s*$/i, '');
+    g.kt = Object.keys(g.kt).map(function (t) { const o = g.kt[t]; return {kt: t, d: Math.round(o.d * 100) / 100, n: o.n, md: o.md, sai: o.sai}; });
+  });
+  dot.sort(function (a, b) { return (a.luc || '') < (b.luc || '') ? -1 : 1; });
+  return {ok: true, dot: dot};
 }
 function timBaiDaNop(madot, ma) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);

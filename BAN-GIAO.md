@@ -85,3 +85,8 @@ Tài liệu kênh nằm trong thư mục `tai-lieu-kenh/` của repo này (bản
 ## 6. Kiểm thử
 
 Phiên trước kiểm thử bằng máy chủ giả lập Node (chạy `SoTheoDoi.gs` với SpreadsheetApp giả) và Playwright (Chromium có sẵn). Dữ liệu đề thật **không** đưa lên repo; phiên mới tự dựng lại máy chủ giả với đề mẫu.
+
+### Tài khoản HS → 🧭 Kiến thức cần ôn (05/11)
+- XEM-LAI.html: ô thứ 4 trên trang tài khoản (#moKT → #scrKT). Chip Tổng hợp + từng đợt (nhãn = ngày thi, ca nhiều mã gộp 1 đợt). Kiến thức < 65% (đỏ, tăng dần) kèm “Câu em làm sai” – bấm được nếu đợt đó GV đã mở xem lại (moCau → mở bài, nháy đúng câu), viền đứt nếu chưa mở; “Đã vững” liệt kê bên dưới.
+- Server: action hs_kienthuc (hsKienThuc) – xác thực SBD + mã xem, mọi đợt em đã nộp (không cần xem lại, không trả đáp án), gom theo c.ca, chỉ tính câu có nhãn trong tab KIEN THUC.
+- Hồ sơ GV: ca thi nhiều mã gộp 1 cột (V() trong GIAO-VIEN.html; ghiBangDiem gộp theo ca), tiêu đề cột = ngày thi, điểm mã đề số lớn in nghiêng.
