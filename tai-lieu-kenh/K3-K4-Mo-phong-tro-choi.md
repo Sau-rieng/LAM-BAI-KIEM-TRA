@@ -27,6 +27,14 @@ Tải vào Project MO PHONG 3D, cùng `Quy-uoc-chung.md`, `Danh-muc-kien-thuc.md
 - Giáo viên mở/đóng, đặt thời gian, lớp được chơi, lấy QR và xem kết quả trong trang giáo viên → Trò chơi (không làm trang thống kê riêng; trang thống kê và Apps Script của Sheet riêng cũ đã chuyển vào thư mục `cu/`). Mã vào chơi / mã mở khóa trò chơi đặt ở Cài đặt (tab MA: MaTroChoi, MaMoKhoaTroChoi).
 - Mở với `?demo`: lớp DEMO (mã vào chơi 1111, mở khóa 2222); thêm `if(window.LAM_DEMO)SBD_PREFIX.DEMO='269999';` sau bảng SBD_PREFIX.
 
+## Trò chơi dạng KHUNG (từ 07/11/2026)
+
+- Khung = đồ họa + luật chơi cố định, nội dung là **bộ câu** giáo viên nạp (quy ước soạn: `K1-Bo-cau-tro-choi.md`; mỗi lượt 6 TN · 3 Đ/S · 2 TLN = 10 điểm; bộ gấp 5 lần).
+- File khung: `KHUNG-<TEN>.html` (hiện có `KHUNG-F1.html`). Mỗi khối một dòng trong tab TRO CHOI: `F1-K9`, `F1-K10`, `F1-K11`, `F1-K12` (TC_MAC_DINH), cột J `BoCau` = mã bộ đang dùng; cột C (CA NHAN/NHOM) giáo viên đổi trên bảng điều khiển.
+- Học sinh chọn lớp → `TC.cauHinh(lop)` hỏi sổ lớp (tc_tt với `khung`) để biết cá nhân/nhóm và tên bộ → đăng nhập `tc_vao` với `khung` trả về `matro` (dòng của khối), `boCau` (dữ liệu bộ câu), `maKQ` = `F1-K10:TC-H10-...`, `tenKQ`. Kết quả ghi theo `maKQ` nên hồ sơ tách từng bộ câu.
+- Bộ câu lưu trong KHO DE: tab `BO CAU` (danh sách) + một tab mỗi bộ (tên tab = mã bộ). Nạp qua `gv_bocau_nap`, xóa `gv_bocau_xoa`.
+- Khung mới (Chim đưa thư, Đại Nội…): dựng từ `KHUNG-F1.html` (phần đăng nhập, bốc câu, chấm điểm, gửi kết quả giữ nguyên), thêm dòng `<KHUNG>-K9…K12` vào TC_MAC_DINH; `noi-so-theo-doi.js` tự nhận mọi file `KHUNG-*.html`.
+
 ## Câu hỏi trong trò chơi / mô phỏng
 
 - Mỗi câu gắn **Kiến thức** (đúng tên trong `Danh-muc-kien-thuc.md`) và **Mức độ** (Biết / Hiểu / Vận dụng): câu dạng đối tượng thêm 2 khóa `kt`, `md` (vd `{hoi, pa, da, kt, md}`); câu dạng mảng thêm 2 phần tử cuối `kt`, `md`; câu sinh tự động gắn theo dạng câu. Bài chưa có trong danh mục thì thêm mục mới vào danh mục trước.

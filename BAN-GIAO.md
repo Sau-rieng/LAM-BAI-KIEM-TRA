@@ -90,3 +90,9 @@ Phiên trước kiểm thử bằng máy chủ giả lập Node (chạy `SoTheoD
 - XEM-LAI.html: ô thứ 4 trên trang tài khoản (#moKT → #scrKT). Chip Tổng hợp + từng đợt (nhãn = ngày thi, ca nhiều mã gộp 1 đợt). Kiến thức < 65% (đỏ, tăng dần) kèm “Câu em làm sai” – bấm được nếu đợt đó GV đã mở xem lại (moCau → mở bài, nháy đúng câu), viền đứt nếu chưa mở; “Đã vững” liệt kê bên dưới.
 - Server: action hs_kienthuc (hsKienThuc) – xác thực SBD + mã xem, mọi đợt em đã nộp (không cần xem lại, không trả đáp án), gom theo c.ca, chỉ tính câu có nhãn trong tab KIEN THUC.
 - Hồ sơ GV: ca thi nhiều mã gộp 1 cột (V() trong GIAO-VIEN.html; ghiBangDiem gộp theo ca), tiêu đề cột = ngày thi, điểm mã đề số lớn in nghiêng.
+
+### Trò chơi dạng KHUNG + bộ câu (07/11)
+- Bộ câu chuẩn: 30 TN · 15 Đ/S · 10 TLN; mỗi lượt bốc 6 + 3 + 2 = 10 điểm (TN 0.5; Đ/S 2đ: 1/2/3/4 ý = 0.3/0.7/1.2/2; TLN 0.5). Quy ước soạn: tai-lieu-kenh/K1-Bo-cau-tro-choi.md + MAU-BO-CAU-TRO-CHOI.xlsx.
+- Kho: tab BO CAU (danh sách) + 1 tab/bộ (tên = mã TC-H10-…). Server: gv_bocau_nap/ds/xoa, docBoCau (cache 6h), TRO CHOI cột J BoCau, dòng F1-K9/10/11/12 (file KHUNG-F1.html, mặc định DONG), timTro/thongTinKhung (khung theo khối lớp; DEMO lấy dòng khung đang mở), gvTcDat 'bo' / 'kieu', kết quả matro = F1-K10:<mã bộ>.
+- GIAO-VIEN: Trò chơi → 📥 Bộ câu trò chơi (scrTroBo: soát lỗi, xem câu, nạp, xóa); thẻ trò khung có chọn bộ câu + Cá nhân/Nhóm (đổi kiểu khi trò đóng).
+- TRO--CHOI-IPAD: KHUNG-F1.html (PR #15), noi-so-theo-doi.js nhận KHUNG-*.html, TC.cauHinh(lop).
