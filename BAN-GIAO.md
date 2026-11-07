@@ -96,3 +96,4 @@ Phiên trước kiểm thử bằng máy chủ giả lập Node (chạy `SoTheoD
 - Kho: tab BO CAU (danh sách) + 1 tab/bộ (tên = mã TC-H10-…). Server: gv_bocau_nap/ds/xoa, docBoCau (cache 6h), TRO CHOI cột J BoCau, dòng F1-K9/10/11/12 (file KHUNG-F1.html, mặc định DONG), timTro/thongTinKhung (khung theo khối lớp; DEMO lấy dòng khung đang mở), gvTcDat 'bo' / 'kieu', kết quả matro = F1-K10:<mã bộ>.
 - GIAO-VIEN: Trò chơi → 📥 Bộ câu trò chơi (scrTroBo: soát lỗi, xem câu, nạp, xóa); thẻ trò khung có chọn bộ câu + Cá nhân/Nhóm (đổi kiểu khi trò đóng).
 - TRO--CHOI-IPAD: KHUNG-F1.html (PR #15), noi-so-theo-doi.js nhận KHUNG-*.html, TC.cauHinh(lop).
+- (07/11 chiều) Mọi trò thành khung: TRO--CHOI-IPAD/khung-chung.js (window.KHUNG: khoiTao/hoiCau…) + KHUNG-MAU.html + HUONG-DAN-KHUNG.md (tải vào kênh Tạo trò chơi). GV tự thêm trò khung: Trò chơi → ➕ Thêm trò khung (gv_tc_themkhung tạo <TEN>-K9..K12; gv_tc_xoakhung gỡ). tenKQ = phần tên trò trước " – " + tên bộ.

@@ -33,7 +33,7 @@ Tải vào Project MO PHONG 3D, cùng `Quy-uoc-chung.md`, `Danh-muc-kien-thuc.md
 - File khung: `KHUNG-<TEN>.html` (hiện có `KHUNG-F1.html`). Mỗi khối một dòng trong tab TRO CHOI: `F1-K9`, `F1-K10`, `F1-K11`, `F1-K12` (TC_MAC_DINH), cột J `BoCau` = mã bộ đang dùng; cột C (CA NHAN/NHOM) giáo viên đổi trên bảng điều khiển.
 - Học sinh chọn lớp → `TC.cauHinh(lop)` hỏi sổ lớp (tc_tt với `khung`) để biết cá nhân/nhóm và tên bộ → đăng nhập `tc_vao` với `khung` trả về `matro` (dòng của khối), `boCau` (dữ liệu bộ câu), `maKQ` = `F1-K10:TC-H10-...`, `tenKQ`. Kết quả ghi theo `maKQ` nên hồ sơ tách từng bộ câu.
 - Bộ câu lưu trong KHO DE: tab `BO CAU` (danh sách) + một tab mỗi bộ (tên tab = mã bộ). Nạp qua `gv_bocau_nap`, xóa `gv_bocau_xoa`.
-- Khung mới (Chim đưa thư, Đại Nội…): dựng từ `KHUNG-F1.html` (phần đăng nhập, bốc câu, chấm điểm, gửi kết quả giữ nguyên), thêm dòng `<KHUNG>-K9…K12` vào TC_MAC_DINH; `noi-so-theo-doi.js` tự nhận mọi file `KHUNG-*.html`.
+- Khung mới (Chim đưa thư, Đại Nội…): dùng `khung-chung.js` (xem `KHUNG-MAU.html`, `HUONG-DAN-KHUNG.md` trong repo trò chơi); giáo viên thêm bằng Trò chơi → ➕ Thêm trò khung (tạo dòng `<TEN>-K9…K12`, không sửa SoTheoDoi.gs). `noi-so-theo-doi.js` tự nhận mọi file `KHUNG-*.html`.
 
 ## Câu hỏi trong trò chơi / mô phỏng
 

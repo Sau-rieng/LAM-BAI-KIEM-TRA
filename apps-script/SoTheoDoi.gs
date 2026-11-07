@@ -113,6 +113,8 @@ function doPost(e) {
       case 'gv_bocau_nap':
       case 'gv_bocau_ds':
       case 'gv_bocau_xoa':
+      case 'gv_tc_themkhung':
+      case 'gv_tc_xoakhung':
         if (!kiemMaQL(d.ma)) return json({ok: false, loi: 'ma', msg: 'Ma quan ly chua dung'});
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -140,6 +142,8 @@ function doPost(e) {
         if (d.action === 'gv_bocau_nap') return json(gvBoCauNap(d));
         if (d.action === 'gv_bocau_ds') return json({ok: true, ds: docDsBo()});
         if (d.action === 'gv_bocau_xoa') return json(gvBoCauXoa(d));
+        if (d.action === 'gv_tc_themkhung') return json(gvTcThemKhung(d));
+        if (d.action === 'gv_tc_xoakhung') return json(gvTcXoaKhung(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
         if (d.action === 'gv_hinh') return json(gvHinh(d));
         if (d.action === 'gv_hinhde') return json(gvHinhDe(d));
@@ -1478,7 +1482,7 @@ function thongTinKhung(t) {
   if (!t || !t.khung) return {};
   const b = t.bo ? docDsBo().filter(function (x) { return x.ma === t.bo; })[0] : null;
   return {khung: true, matro: t.matro, kieu: t.kieu, bo: b ? b.ma : '', tenBo: b ? b.ten : '',
-    maKQ: b ? t.matro + ':' + b.ma : t.matro, tenKQ: b ? 'Đua xe F1 – ' + b.ten + (t.kieu === 'NHOM' ? ' (nhóm)' : '') : t.ten};
+    maKQ: b ? t.matro + ':' + b.ma : t.matro, tenKQ: b ? String(t.ten).split(' – ')[0] + ' – ' + b.ten + (t.kieu === 'NHOM' ? ' (nhóm)' : '') : t.ten};
 }
 function tcVao(d) {
   const t = timTro(d);
@@ -1582,6 +1586,34 @@ function gvBoCauNap(d) {
     if (m.indexOf('TRUNG:') === 0) return {ok: false, loi: 'trung', ma: m.slice(6), msg: 'Kho da co bo ' + m.slice(6)};
     return {ok: false, msg: m};
   } finally { lock.releaseLock(); }
+}
+// GV them mot tro dang khung (file KHUNG-<TEN>.html da co tren GitHub) -> 1 dong moi khoi: <TEN>-K9..K12
+const KHOI_KHUNG = [[9, 'KHTN 9'], [10, 'Hóa 10'], [11, 'Hóa 11'], [12, 'Hóa 12']];
+function gvTcThemKhung(d) {
+  const file = String(d.file || '').trim(), m = /^KHUNG-([A-Z0-9]{2,12})\.html$/.exec(file);
+  if (!m) return {ok: false, msg: 'Ten file phai dang KHUNG-TEN.html (chu in hoa, so; vd KHUNG-CHIM.html)'};
+  const ten = String(d.ten || '').trim().replace(/\s+–\s+/g, ' - ').slice(0, 60);
+  if (!ten) return {ok: false, msg: 'Chua co ten tro choi'};
+  const sh = tabTroChoi(), co = docTroChoi(), them = [];
+  KHOI_KHUNG.forEach(function (k) {
+    const ma = m[1] + '-K' + k[0];
+    if (co.some(function (t) { return t.matro === ma; })) return;
+    them.push([ma, ten + ' – ' + k[1], 'CA NHAN', k[0], file, 'DONG', 5, lopMacDinh(k[0]), '', '']);
+  });
+  if (!them.length) return {ok: false, msg: 'Tro khung ' + file + ' da co'};
+  sh.getRange(sh.getLastRow() + 1, 1, them.length, HEAD_TC.length).setValues(them);
+  try { CacheService.getScriptCache().remove('tc_ds'); } catch (e) {}
+  return {ok: true, them: them.length, tro: docTroChoi()};
+}
+function gvTcXoaKhung(d) {
+  const file = String(d.file || '').trim();
+  if (!/^KHUNG-[A-Z0-9]{2,12}\.html$/.test(file)) return {ok: false, msg: 'Ten file khong hop le'};
+  if (file === 'KHUNG-F1.html') return {ok: false, msg: 'Khong go khung F1 mac dinh'};
+  const ds = docTroChoi().filter(function (t) { return t.khung && t.file === file; });
+  if (ds.some(function (t) { return t.mo; })) return {ok: false, msg: 'Dong tat ca cac dong cua tro nay truoc khi go'};
+  const sh = tabTroChoi();
+  ds.map(function (t) { return t.dong; }).sort(function (a, b) { return b - a; }).forEach(function (r) { sh.deleteRow(r); });
+  return {ok: true, tro: docTroChoi()};
 }
 function gvBoCauXoa(d) {
   const ma = String(d.ma_bo || '').trim();
