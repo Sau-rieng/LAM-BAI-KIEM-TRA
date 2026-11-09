@@ -3041,7 +3041,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   $('kqMoi').onclick = function () { taiKQ(true); };
   $('kqLai').onclick = function () { diDen('tro'); };
-  function phanTram(ds) { var m = /^(\d+)\s*\/\s*(\d+)/.exec(String(ds)); return m && Number(m[2]) ? Number(m[1]) / Number(m[2]) : null; }
+  // So lop ghi "4/11" thanh ngay 4/11 (Google Sheets tu doi) -> lay lai "4/11"
+  var THANG_EN = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+  function chuanDS(ds) {
+    var s = String(ds == null ? '' : ds), m = /^[A-Z][a-z]{2} ([A-Z][a-z]{2}) (\d{1,2}) \d{4}/.exec(s);
+    if (m && THANG_EN[m[1]]) return Number(m[2]) + '/' + THANG_EN[m[1]];
+    m = /^(\d{4})-(\d{2})-(\d{2})T/.exec(s);
+    if (m) { var d = new Date(s); return d.getDate() + '/' + (d.getMonth() + 1); }
+    return s;
+  }
+  function phanTram(ds) { var m = /^(\d+)\s*\/\s*(\d+)/.exec(chuanDS(ds)); return m && Number(m[2]) ? Number(m[1]) / Number(m[2]) : null; }
   function ngayKey(t) { var d = new Date(t); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function ngayChu(k) { var p = k.split('-'), d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); return ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'][d.getDay()] + ', ' + p[2] + '/' + p[1] + '/' + p[0]; }
   function giayChu(g) { g = Number(g) || 0; return g ? Math.floor(g / 60) + ':' + ('0' + g % 60).slice(-2) : ''; }
@@ -3050,8 +3059,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var r = [];
     lops.forEach(function (l) {
       var j = KQ.data[l.ten]; if (!j || !j.ok) return;
-      if (t.kieu === 'NHOM') j.nhom.forEach(function (x) { if (khopTro(x[1], t)) r.push({ t: x[0], lop: l.ten, ten: x[2], ds: x[3], g: x[4], tv: (j.thanhvien || {})[x[2]] || [] }); });
-      else j.canhan.forEach(function (x) { if (khopTro(x[1], t)) r.push({ t: x[0], lop: l.ten, ma: x[2], ten: x[3], ds: x[4], g: x[5] }); });
+      if (t.kieu === 'NHOM') j.nhom.forEach(function (x) { if (khopTro(x[1], t)) r.push({ t: x[0], lop: l.ten, ten: x[2], ds: chuanDS(x[3]), g: x[4], tv: (j.thanhvien || {})[x[2]] || [] }); });
+      else j.canhan.forEach(function (x) { if (khopTro(x[1], t)) r.push({ t: x[0], lop: l.ten, ma: x[2], ten: x[3], ds: chuanDS(x[4]), g: x[5] }); });
     });
     return r.sort(function (a, b) { return b.t - a.t; });
   }
@@ -3118,7 +3127,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var j = KQ.data[lop] || {}, td = (KQ.td[lop] || {}).ds || [], homNay = ngayKey(Date.now() + (LECH_TC || 0));
     var xong = (j.nhom || []).filter(function (x) { return khopTro(x[1], t) && ngayKey(x[0]) === homNay; }).map(function (x) {
       var d = x[5]; if (d == null || (d === 0 && phanTram(x[3]))) { var p = phanTram(x[3]); d = p === null ? 0 : p * 10; }
-      return { nhom: x[2], t: x[0], diem: d, ml: x[6] || '', ds: x[3] };
+      return { nhom: x[2], t: x[0], diem: d, ml: x[6] || '', ds: chuanDS(x[3]) };
     });
     var dangDs = td.filter(function (x) { return ngayKey(x.t) === homNay; });
     var ten = {};
