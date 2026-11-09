@@ -78,6 +78,7 @@ function doPost(e) {
       case 'gv_dat':
       case 'gv_theodoi':
       case 'gv_hoso':
+      case 'gv_solieu':
       case 'gv_bangdiem':
       case 'gv_vang':
       case 'gv_dathi':
@@ -119,6 +120,7 @@ function doPost(e) {
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
+        if (d.action === 'gv_solieu') return json(gvSoLieu(d));
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
         if (d.action === 'gv_vang') return json(gvVang(d));
         if (d.action === 'gv_dathi') return json(gvDaThi());
@@ -487,6 +489,42 @@ function tnLay(d) {
   const r = layHtmlTN(d.matn, false);
   if (r.ok) ghiDong(TAB_TN, HEAD_TN, [new Date(), String(d.matn).trim().slice(0, 80), ma, hs.ten]);
   return r;
+}
+// So lieu tong hop cua lop trong khoang ngay (d.tu, d.den: 'yyyy-mm-dd', tinh ca 2 dau) – cho ho so du thi, bao cao
+function gvSoLieu(d) {
+  const tz = Session.getScriptTimeZone();
+  const ngayCua = function (v) { return v instanceof Date ? Utilities.formatDate(v, tz, 'yyyy-MM-dd') : ''; };
+  const tu = String(d.tu || '0000-00-00'), den = String(d.den || '9999-99-99');
+  const trong = function (v) { const n = ngayCua(v); return n && n >= tu && n <= den; };
+  const ss = SpreadsheetApp.getActive();
+  const bang = function (ten) { const sh = ss.getSheetByName(ten); if (!sh || sh.getLastRow() < 2) return []; const v = sh.getDataRange().getValues(); v.shift(); return v; };
+  const caCua = {};
+  try { docCauHinh().forEach(function (c) { if (c.ca) caCua[c.madot] = c.ca; }); } catch (e) {}
+  // Bai lam trong khoang: luot nop + lan nop sau cung moi em moi de
+  const bl = bang(TAB_BL).filter(function (r) { return trong(r[0]) && String(r[2]).trim(); });
+  const cuoi = {}, de = {}, hsNop = {};
+  bl.forEach(function (r) {
+    const md = String(r[1]).trim(), ma = String(r[2]).trim(), k = ma + '|' + md;
+    de[md] = 1; hsNop[ma] = 1;
+    if (!cuoi[k] || r[0] > cuoi[k][0]) cuoi[k] = r;
+  });
+  // Gom theo dot (ca thi nhieu ma de = 1 dot)
+  const dot = {};
+  Object.keys(cuoi).forEach(function (k) {
+    const r = cuoi[k], md = String(r[1]).trim(), g = caCua[md] || md, dm = Number(String(r[5]).replace(',', '.')) || 0;
+    const o = dot[g] = dot[g] || {ma: g, luc: r[0].getTime(), n: 0, tong: 0, d5: 0};
+    o.n++; o.tong += dm; if (dm >= 5) o.d5++; if (r[0].getTime() < o.luc) o.luc = r[0].getTime();
+  });
+  const dsDot = Object.keys(dot).map(function (k) { const o = dot[k]; return {ma: o.ma, luc: o.luc, n: o.n, tong: Math.round(o.tong * 100) / 100, d5: o.d5}; })
+    .sort(function (a, b) { return a.luc - b.luc; });
+  // Xem lai: em da nop bai trong khoang va co mo xem lai (bat ky luc nao) bai cua de do
+  const xem = {};
+  bang(TAB_XL).forEach(function (r) { const ma = String(r[2]).trim(); if (de[String(r[1]).trim()] && hsNop[ma]) xem[ma] = 1; });
+  const dem = function (ten, loc) { return bang(ten).filter(function (r) { return trong(r[0]) && (!loc || loc(r)); }).length; };
+  return {ok: true, lop: lopNay(), siSo: bang(TAB_DS).filter(function (r) { return String(r[0]).trim(); }).length,
+    de: Object.keys(de), nop: bl.length, hsNop: Object.keys(hsNop).length, hsXem: Object.keys(xem).length, dot: dsDot,
+    troCN: dem(TAB_HD, function (r) { return String(r[1]).trim(); }), troNhom: dem(TAB_CN), xemTN: dem(TAB_TN),
+    hoi: dem(TAB_TIN, function (r) { return String(r[3]).trim() === 'HS'; })};
 }
 function ghiDaXem(d) {
   const ma = String(d.mahs || '').trim();
@@ -1538,8 +1576,6 @@ function docBoCau(ma) {
   try { cache.put(k, JSON.stringify(o), 21600); } catch (e) {}
   return o;
 }
-// "ĐSĐS", "D S D S", "Đ,S,Đ,S", "TFTF" -> 'DSDS'
-function chuanDS(v) { return khongDau(v).replace(/[^DSTF]/g, '').replace(/T/g, 'D').replace(/F/g, 'S'); }
 function gvBoCauNap(d) {
   const ds = Array.isArray(d.bo) ? d.bo : [];
   if (!ds.length) return {ok: false, msg: 'Chua co bo cau nao de nap'};

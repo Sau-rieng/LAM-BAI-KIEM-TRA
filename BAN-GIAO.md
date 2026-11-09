@@ -97,3 +97,7 @@ Phiên trước kiểm thử bằng máy chủ giả lập Node (chạy `SoTheoD
 - GIAO-VIEN: Trò chơi → 📥 Bộ câu trò chơi (scrTroBo: soát lỗi, xem câu, nạp, xóa); thẻ trò khung có chọn bộ câu + Cá nhân/Nhóm (đổi kiểu khi trò đóng).
 - TRO--CHOI-IPAD: KHUNG-F1.html (PR #15), noi-so-theo-doi.js nhận KHUNG-*.html, TC.cauHinh(lop).
 - (07/11 chiều) Mọi trò thành khung: TRO--CHOI-IPAD/khung-chung.js (window.KHUNG: khoiTao/hoiCau…) + KHUNG-MAU.html + HUONG-DAN-KHUNG.md (tải vào kênh Tạo trò chơi). GV tự thêm trò khung: Trò chơi → ➕ Thêm trò khung (gv_tc_themkhung tạo <TEN>-K9..K12; gv_tc_xoakhung gỡ). tenKQ = phần tên trò trước " – " + tên bộ.
+
+### 📊 Số liệu tổng hợp (09/11)
+- Hồ sơ HS → 📊 Số liệu tổng hợp (scrHoSoSL): chọn khoảng ngày, phút chấm/nhập 1 bài → gọi gv_solieu ở mọi lớp (bỏ DEMO), gộp đúng 7 chỉ số của bảng hồ sơ dự thi + bảng từng lớp + "Cách tính từng số" + Chép bảng.
+- Server gvSoLieu: BAI LAM (đề, lượt nộp, lần sau cùng theo đợt/ca), XEM LAI, HOAT DONG, TRO CHOI NHOM, XEM TAI NGUYEN, TIN NHAN (Tu=HS) trong khoảng ngày. Bỏ hàm chuanDS trùng tên (bản đúng/sai của bộ câu dùng chung hàm cũ).
