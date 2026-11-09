@@ -578,6 +578,13 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .kqBang th.tenC{font-weight:600}
 .kqBang .tvC{text-align:left;white-space:normal;min-width:200px;font-size:13px;color:var(--muted)}
 .kqBang td.thapC{color:var(--bad);font-weight:700}
+.kqBang tr.kqCo{cursor:pointer}.kqBang tr.kqCo:hover td{background:#f3f7ff}.kqBang tr.mo td{background:#eaf1ff}
+.kqBang tr.kqXem td{text-align:left;white-space:normal;background:#fafbfd;padding:10px}
+.kqCt{display:grid;gap:10px}.kqC{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;font-size:14px;line-height:1.45}
+.kqCh{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px}.kqCh small{color:var(--muted);flex-basis:100%}
+.kqC .op{margin-top:4px;padding:4px 8px;border-radius:6px}.kqC .op.dung{background:#e6f4ea}.kqC .op.chonsai{background:#fce8e6}
+.kqC .tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eee}.kqC .tag.dung{background:#e6f4ea;color:#137333}.kqC .tag.sai{background:#fce8e6;color:#c5221f}.kqC .tag.mot{background:#fef7e0;color:#9a6700}
+.kqNgayChon{margin:10px 0 0}
 @media (max-width:560px){.tk4{grid-template-columns:repeat(2,1fr)}.troDau{flex-direction:column}.cong{align-self:flex-start}}
 /* Ma */
 .maDong{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
@@ -1758,7 +1765,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       Object.keys(d.kq).forEach(function (ma) {
         var h = HS[ma] = HS[ma] || {};
         d.kq[ma].forEach(function (v, i) {
-          var c = d.cau[i]; if (!c) return;
+          var c = d.cau[i]; if (!c || v === null || v === undefined) return;
           var ten = c.kt || 'Chưa gắn nhãn kiến thức', x = h[ten] = h[ten] || { d: 0, n: 0, dot: {} };
           x.d += v; x.n++;
           var y = x.dot[d.madot] = x.dot[d.madot] || { d: 0, n: 0, di: di }; y.d += v; y.n++;
@@ -1922,7 +1929,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (!gr[k]) { gr[k] = { madot: k, ten: d.ten, luc: d.luc, _ds: [] }; dots.push(gr[k]); }
         gr[k]._ds.push(d);
       });
-      dots.forEach(function (g) { var v = nhG[g.madot]; if (v) { g.ten = v.ten; g.nhan = v.nhan; g.luc = v.luc; } else g.nhan = ngayDu(g.luc) || g.madot; });
+      dots.forEach(function (g) { var v = nhG[g.madot]; if (v) { g.ten = v.ten; g.nhan = v.nhan; g.luc = v.luc; } else g.nhan = (g._ds[0] && g._ds[0].tro ? '🎮 ' : '') + (ngayDu(g.luc) || g.madot); });
       var sel = KT_CHON[l.ten] || 'tat';
       if (sel !== 'tat' && !dots.some(function (d) { return d.madot === sel; })) sel = 'tat';
       // chon dot
@@ -1936,6 +1943,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       // diem tung em tung dot (lan lam sau cung)
       var sc = sauCung(vw.bai || []), dEm = {};
       Object.keys(sc).forEach(function (k) { var b = sc[k]; (dEm[b.mahs] = dEm[b.mahs] || {})[b.madot] = Number(String(b.diem).replace(',', '.')) || 0; });
+      x.r.dot.forEach(function (d) { if (d.tro && d.diem) Object.keys(d.diem).forEach(function (m) { (dEm[m] = dEm[m] || {})[d.madot] = d.diem[m]; }); });
       var hsDs = (HS_DL.hs || x.r.hs).map(function (h) {
         var dd = dEm[h.mahs] || {}, v;
         if (sel === 'tat') { var ks = dots.map(function (d) { return dd[d.madot]; }).filter(function (z) { return z !== undefined; }); v = ks.length ? ks.reduce(function (a, b) { return a + b; }, 0) / ks.length : undefined; }
@@ -2304,20 +2312,20 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       h += '<div class="card"><h2>🎮 Trò chơi luyện tập</h2><p class="sub">' + choi.length + ' lượt chơi · trung bình đúng ' + Math.round(tl * 100) + '% · ' +
         Object.keys(cacTro).map(function (t) { return esc(t) + ' (' + cacTro[t] + ')'; }).join(', ') + '</p>';
       choi.forEach(function (c) {
-        var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0;
-        h += '<div class="bai"><div class="d ' + (p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '" style="font-size:18px">' + c.dung + '/' + c.tong + '</div><div class="tb2"><b>' + esc(c.ten) + '</b>' +
-          '<div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · đúng ' + p + '%' + (c.giay ? ' · chơi ' + phutGiay(c.giay) : '') + '</div></div></div>';
+        var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0, coD = c.khung || String(c.tro).indexOf(':') > 0;
+        h += '<div class="bai"><div class="d ' + (coD ? mauDiem(c.diem) : p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '"' + (coD ? '' : ' style="font-size:18px"') + '>' + (coD ? diem(c.diem) : c.dung + '/' + c.tong) + '</div><div class="tb2"><b>' + esc(c.ten) + '</b>' +
+          '<div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · đúng ' + c.dung + '/' + c.tong + ' câu (' + p + '%)' + (c.giay ? ' · chơi ' + phutGiay(c.giay) : '') + '</div></div></div>';
       });
       h += '</div>';
     }
     var nhEm = (j.nhom || {})[ma];
-    if (nhEm) {
-      var cn = (j.choiNhom || []).filter(function (c) { return c.nhom === nhEm; }).sort(function (a, b) { return a.luc < b.luc ? 1 : -1; });
+    var cn = (j.choiNhom || []).filter(function (c) { return c.tv && c.tv.length ? c.tv.indexOf(ma) >= 0 : c.nhom === nhEm; }).sort(function (a, b) { return a.luc < b.luc ? 1 : -1; });
+    if (nhEm || cn.length) {
       var ban = Object.keys(j.nhom).filter(function (m2) { return j.nhom[m2] === nhEm && m2 !== ma; }).map(function (m2) { var y = j.hs.filter(function (q) { return q.mahs === m2; })[0]; return y ? y.hoten : m2; });
-      h += '<div class="card"><h2>👥 Trò chơi nhóm · ' + esc(nhEm) + '</h2><p class="sub">' + (ban.length ? 'Cùng nhóm: ' + ban.map(esc).join(', ') + '. ' : '') + cn.length + ' lượt chơi.</p>';
+      h += '<div class="card"><h2>👥 Trò chơi nhóm' + (nhEm ? ' · ' + esc(nhEm) : '') + '</h2><p class="sub">' + (ban.length ? 'Cùng nhóm: ' + ban.map(esc).join(', ') + '. ' : '') + cn.length + ' lượt chơi.</p>';
       cn.forEach(function (c) {
         var p = c.tong ? Math.round(c.dung / c.tong * 100) : 0;
-        h += '<div class="bai"><div class="d ' + (p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '" style="font-size:18px">' + c.dung + '/' + c.tong + '</div><div class="tb2"><b>' + esc(c.ten) + '</b><div>' + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · điểm ' + diem(c.diem) + '</div></div></div>';
+        h += '<div class="bai"><div class="d ' + (c.khung ? mauDiem(c.diem) : p < 35 ? 'd-do' : p < 50 ? 'd-vang' : '') + '"' + (c.khung ? '' : ' style="font-size:18px"') + '>' + (c.khung ? diem(c.diem) : c.dung + '/' + c.tong) + '</div><div class="tb2"><b>' + esc(c.ten) + '</b><div>' + (c.nhom && c.nhom !== nhEm ? esc(c.nhom) + ' · ' : '') + ngay(c.luc) + ' lúc ' + gio(c.luc) + ' · đúng ' + c.dung + '/' + c.tong + ' câu' + (c.khung ? '' : ' · điểm ' + diem(c.diem)) + '</div></div></div>';
       });
       h += '</div>';
     }
@@ -3006,7 +3014,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('troKQ').onclick = function () { moKQ(); };
 
   // ---------- Ket qua tro choi ----------
-  var KQ = { matro: null, lop: null, data: {}, dang: 0 };
+  var KQ = { matro: null, lop: null, data: {}, dang: 0, ngay: 'tat', moLuot: null, moPT: false, moKT: false };
   try { KQ.lop = localStorage.getItem('gv_kqlop'); } catch (e) {}
   function moKQ(matro) {
     if (matro) KQ.matro = matro;
@@ -3032,7 +3040,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     DS.forEach(function (l) {
       if (KQ.data[l.ten] && !lamMoi) return;
       KQ.data[l.ten] = { dang: true };
-      goi(l.url, { action: 'gv_tckq', ma: MA }).then(function (j) {
+      goi(l.url, { action: 'gv_tckq', ma: MA, chitiet: 1 }).then(function (j) {
         KQ.data[l.ten] = j.ok ? j : { loi: /hop le/i.test(j.msg || '') ? 'Sổ lớp này chưa cập nhật bản mới' : (j.msg || 'lỗi') };
       }).catch(function (e) { KQ.data[l.ten] = { loi: 'Không kết nối được (' + e.message + ')' }; })
         .then(function () { if (luot === KQ.dang && !$('scrTroKQ').classList.contains('hidden')) veKQ(); });
@@ -3059,10 +3067,110 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var r = [];
     lops.forEach(function (l) {
       var j = KQ.data[l.ten]; if (!j || !j.ok) return;
-      if (t.kieu === 'NHOM') j.nhom.forEach(function (x) { if (khopTro(x[1], t)) r.push({ t: x[0], lop: l.ten, ten: x[2], ds: chuanDS(x[3]), g: x[4], tv: (j.thanhvien || {})[x[2]] || [] }); });
-      else j.canhan.forEach(function (x) { if (khopTro(x[1], t)) r.push({ t: x[0], lop: l.ten, ma: x[2], ten: x[3], ds: chuanDS(x[4]), g: x[5] }); });
+      var lu = j.luot || {};
+      if (t.kieu === 'NHOM') j.nhom.forEach(function (x) {
+        if (!khopTro(x[1], t)) return;
+        var L = x[6] && lu[x[6]], tv = L && L.tv && L.tv.length ? L.tv.map(function (m) { return (j.ten || {})[m] || m; }) : (j.thanhvien || {})[x[2]] || [];
+        r.push({ t: x[0], lop: l.ten, ten: x[2], ds: chuanDS(x[3]), g: x[4], tv: tv, diem: String(x[1]).indexOf(':') > 0 ? x[5] : null, ml: x[6] || '', L: L || null, bo: j.bo || {} });
+      });
+      else j.canhan.forEach(function (x) {
+        if (!khopTro(x[1], t)) return;
+        var L = x[7] && lu[x[7]];
+        r.push({ t: x[0], lop: l.ten, ma: x[2], ten: x[3], ds: chuanDS(x[4]), g: x[5], diem: x[6] == null ? null : Number(x[6]), ml: x[7] || '', L: L || null, bo: j.bo || {} });
+      });
     });
     return r.sort(function (a, b) { return b.t - a.t; });
+  }
+  // ---- Tro khung: cham lai tung luot tu chi tiet (ma cau trong bo, lua chon, diem) ----
+  function mapBo(bo) {
+    if (bo._m) return bo._m;
+    var m = {};
+    (bo.tn || []).forEach(function (c) { m[c.c] = { loai: 'TN', hoi: c.q, pa: c.o || [], da: 'ABCD'[c.a] || '', kt: c.kt || '', md: c.md || '', gt: c.e || '' }; });
+    (bo.ds || []).forEach(function (c) { m[c.c] = { loai: 'DS', hoi: c.q, pa: (c.s || []).map(function (y) { return y[0]; }), da: (c.s || []).map(function (y) { return y[1] ? 'D' : 'S'; }).join(''), kt: c.kt || '', md: c.md || '', gt: c.e || '', gtY: (c.s || []).map(function (y) { return y[2] || ''; }) }; });
+    (bo.tln || []).forEach(function (c) { m[c.c] = { loai: 'TLN', hoi: c.q, pa: [], da: String(c.a), kt: c.kt || '', md: c.md || '', gt: c.e || '' }; });
+    Object.defineProperty(bo, '_m', { value: m, enumerable: false });
+    return m;
+  }
+  function chamLuotGV(x) {
+    var bo = x.bo[x.L.bo]; if (!bo) return [];
+    var m = mapBo(bo), dem = { TN: 0, DS: 0, TLN: 0 }, PH = { TN: 'I', DS: 'II', TLN: 'III' };
+    return (x.L.ct || []).map(function (c) {
+      var q = m[c[0]]; if (!q) return null;
+      dem[q.loai]++;
+      var daLam = c[2] !== '' && c[2] !== null && c[2] !== undefined, chon = String(c[1] || ''), soY = 0, dung = false;
+      if (daLam) {
+        if (q.loai === 'DS') { for (var k = 0; k < 4; k++) if (chon[k] && chon[k] === q.da[k]) soY++; dung = soY === 4; }
+        else if (q.loai === 'TLN') { var a = Number(chon.replace(',', '.')), b = Number(q.da); dung = chon !== '' && !isNaN(a) && Math.abs(a - b) < 1e-6; }
+        else dung = chon === q.da;
+      }
+      return { vt: PH[q.loai] + '.' + dem[q.loai], ma: c[0], q: q, chon: chon, daLam: daLam, dung: dung, soY: soY, diem: daLam ? Number(c[2]) || 0 : 0,
+        v: !daLam ? null : q.loai === 'DS' ? soY / 4 : (dung ? 1 : 0) };
+    }).filter(Boolean);
+  }
+  function xemLuot(x) {
+    var ct = chamLuotGV(x), h = '<div class="kqCt">';
+    ct.forEach(function (c) {
+      var q = c.q, tt = !c.daLam ? '<span class="tag bo">chưa làm</span>' : q.loai === 'DS' ? '<span class="tag ' + (c.dung ? 'dung' : c.soY ? 'mot' : 'sai') + '">' + c.soY + '/4 ý · ' + fmtD(c.diem) + 'đ</span>' : '<span class="tag ' + (c.dung ? 'dung' : 'sai') + '">' + (c.dung ? '✓ ' : '✗ ') + fmtD(c.diem) + 'đ</span>';
+      h += '<div class="kqC"><div class="kqCh"><b>' + nhanCau(c.vt) + '</b> ' + tt + (q.kt ? '<small>' + esc(q.kt) + (q.md ? ' · ' + esc(q.md) : '') + '</small>' : '') + '</div><div>' + esc(q.hoi) + '</div>';
+      if (q.loai === 'TN') h += q.pa.map(function (o, k) { var L = 'ABCD'[k], cls = L === q.da ? ' dung' : L === c.chon ? ' chonsai' : ''; return '<div class="op' + cls + '"><b>' + L + '.</b> ' + esc(o) + (L === q.da ? ' ✓' : '') + (L === c.chon ? ' ← chọn' : '') + '</div>'; }).join('');
+      else if (q.loai === 'DS') h += q.pa.map(function (o, k) { var x2 = c.chon[k], ok = x2 && x2 === q.da[k]; return '<div class="op' + (c.daLam ? (ok ? ' dung' : ' chonsai') : '') + '"><b>' + 'abcd'[k] + ')</b> ' + esc(o) + ' — đáp án <b>' + (q.da[k] === 'D' ? 'Đúng' : 'Sai') + '</b>' + (c.daLam ? ' · chọn ' + (x2 === 'D' ? 'Đúng' : x2 === 'S' ? 'Sai' : '–') : '') + '</div>'; }).join('');
+      else h += '<div class="op dung">Đáp án: <b>' + esc(q.da) + '</b></div>' + (c.daLam ? '<div class="op' + (c.dung ? ' dung' : ' chonsai') + '">Trả lời: <b>' + esc(c.chon) + '</b></div>' : '');
+      h += '</div>';
+    });
+    return h + '</div>';
+  }
+  // Cau sai nhieu -> it, gop moi luot co chi tiet (moi bo cau mot nhom)
+  function veCauTro(rows, khoa) {
+    var B = {}, thu = [];
+    rows.forEach(function (x) {
+      var b = x.L.bo; if (!B[b]) { B[b] = { ten: (x.bo[b] || {}).ten || b, cau: {}, ds: [] }; thu.push(b); }
+      chamLuotGV(x).forEach(function (c) {
+        if (!c.daLam) return;
+        var o = B[b].cau[c.ma];
+        if (!o) { o = B[b].cau[c.ma] = { ma: c.ma, q: c.q, n: 0, sai: 0, dem: {}, saiY: [0, 0, 0, 0] }; B[b].ds.push(o); }
+        o.n++; if (!c.dung) o.sai++;
+        if (c.q.loai === 'DS') { for (var k = 0; k < 4; k++) if (c.chon[k] !== c.q.da[k]) o.saiY[k]++; }
+        else { var t2 = c.chon || '(bỏ trống)'; o.dem[t2] = (o.dem[t2] || 0) + 1; }
+      });
+    });
+    var h = '';
+    thu.forEach(function (b) {
+      var ds = B[b].ds.sort(function (a, c) { return c.sai / c.n - a.sai / a.n || c.n - a.n; });
+      h += '<div class="ph"><b>' + esc(B[b].ten) + ' · câu sai nhiều → ít</b><span class="sub">' + ds.length + ' câu đã được hỏi; mỗi lượt máy bốc 11 câu nên số lần hỏi mỗi câu khác nhau</span></div>';
+      ds.forEach(function (c, n) {
+        var pct2 = Math.round(c.sai / c.n * 100), mo = CAU_MO[khoa + '|' + c.ma], q = c.q, lop = pct2 >= 50 ? 'cao' : pct2 >= 25 ? 'vua' : 'thap';
+        h += '<div class="ptc" data-cau="' + esc(c.ma) + '"><div class="h"><span class="so">' + (n + 1) + '.</span><span class="nd"><b>' + nhanCau(c.ma) + (q.loai === 'DS' ? ' (đúng/sai)' : q.loai === 'TLN' ? ' (trả lời ngắn)' : '') + '</b> <span style="color:var(--muted);font-size:13px">' + c.sai + '/' + c.n + ' lượt sai' + (q.kt ? ' · ' + esc(q.kt) : '') + '</span>' +
+          '<span class="tx">' + esc(String(q.hoi).slice(0, mo ? 0 : 140)) + (mo || String(q.hoi).length <= 140 ? '' : '…') + '</span></span><span class="ps ' + lop + '">' + pct2 + '%</span></div>';
+        if (mo) {
+          h += '<div class="ct">' + esc(q.hoi);
+          if (q.loai === 'TN') q.pa.forEach(function (o, k) { var L = 'ABCD'[k], sl = c.dem[L] || 0, p = Math.round(sl / c.n * 100); h += '<div class="op' + (L === q.da ? ' dung' : '') + '"><span class="bar"><i style="width:' + p + '%"></i></span><span><b>' + L + '.</b> ' + esc(o) + ' — ' + sl + ' lượt (' + p + '%)' + (L === q.da ? ' ✓ đáp án' : '') + '</span></div>'; });
+          else if (q.loai === 'DS') q.pa.forEach(function (o, k) { var p = Math.round(c.saiY[k] / c.n * 100); h += '<div class="op"><span class="bar"><i style="width:' + p + '%;background:#c5221f"></i></span><span><b>' + 'abcd'[k] + ')</b> ' + esc(o) + ' — đáp án <b>' + (q.da[k] === 'D' ? 'Đúng' : 'Sai') + '</b> · ' + c.saiY[k] + ' lượt sai (' + p + '%)</span></div>'; });
+          else { h += '<div class="op dung">Đáp án: ' + esc(q.da) + '</div>'; var sai = Object.keys(c.dem).filter(function (z) { return Number(z) !== Number(q.da); }).sort(function (a, z) { return c.dem[z] - c.dem[a]; }).slice(0, 6); if (sai.length) h += '<div class="op">Đã ghi: ' + sai.map(function (z) { return '"' + esc(z) + '" (' + c.dem[z] + ')'; }).join(', ') + '</div>'; }
+          if (q.gt) h += '<div class="op">💡 ' + esc(q.gt) + '</div>';
+          h += '</div>';
+        }
+        h += '</div>';
+      });
+    });
+    return h;
+  }
+  // Danh gia kien thuc: moi bo cau 1 "dot"; nguoi = em (ca nhan) hoac nhom (lop + nhom)
+  function dotTro(rows, nhom) {
+    var dots = {}, thu = [], hs = {}, dsum = {};
+    rows.forEach(function (x) {
+      var b = x.L.bo, ai = nhom ? x.lop + ' · ' + x.ten : x.ma;
+      hs[ai] = nhom ? ai : x.ten;
+      var d = dots[b]; if (!d) { d = dots[b] = { madot: b, ten: (x.bo[b] || {}).ten || b, cau: [], idx: {}, cong: {} }; thu.push(d); }
+      chamLuotGV(x).forEach(function (c) {
+        if (c.v === null) return;
+        if (!(c.ma in d.idx)) { d.idx[c.ma] = d.cau.length; d.cau.push({ cau: c.ma, loai: c.q.loai, kt: c.q.kt, md: c.q.md }); }
+        var o = d.cong[ai] = d.cong[ai] || {}, y = o[d.idx[c.ma]] = o[d.idx[c.ma]] || [0, 0]; y[0] += c.v; y[1]++;
+      });
+      if (x.diem !== null && x.diem !== undefined) { var z = dsum[ai] = dsum[ai] || [0, 0]; z[0] += Number(x.diem) || 0; z[1]++; }
+    });
+    var diemTB = {}; Object.keys(dsum).forEach(function (k) { diemTB[k] = Math.round(dsum[k][0] / dsum[k][1] * 100) / 100; });
+    return { dots: thu.map(function (d) { var kq = {}; Object.keys(d.cong).forEach(function (ai) { kq[ai] = d.cau.map(function (_, i) { var y = d.cong[ai][i]; return y ? y[0] / y[1] : null; }); }); return { madot: d.madot, ten: d.ten, cau: d.cau, kq: kq }; }),
+      hs: Object.keys(hs).map(function (k) { return { mahs: k, hoten: hs[k] }; }), diem: diemTB };
   }
   function veKQ() {
     var t = troKQ(), box = $('kqBox'); if (!t) return;
@@ -3081,37 +3189,74 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var h = '';
     if (dang) h += '<div class="capnhat">Đang tải ' + dang + ' lớp…</div>';
     loi.forEach(function (l) { h += '<div class="card loi">' + esc(l.ten) + ': ' + esc(KQ.data[l.ten].loi) + '</div>'; });
+    // Loc theo ngay
+    var cacNgay = [];
+    r.forEach(function (x) { var k = ngayKey(x.t); if (cacNgay.indexOf(k) < 0) cacNgay.push(k); });
+    if (KQ.ngay !== 'tat' && cacNgay.indexOf(KQ.ngay) < 0) KQ.ngay = 'tat';
+    if (KQ.ngay !== 'tat') r = r.filter(function (x) { return ngayKey(x.t) === KQ.ngay; });
+    var coDiem = r.some(function (x) { return x.diem !== null && x.diem !== undefined; });
     // Tom tat
     var pts = r.map(function (x) { return phanTram(x.ds); }).filter(function (x) { return x !== null; });
     var tb = pts.length ? Math.round(pts.reduce(function (a, b) { return a + b; }, 0) / pts.length * 100) : null;
     var cao = pts.length ? Math.round(Math.max.apply(null, pts) * 100) : null;
-    var soEm = {}, siSo = 0;
-    r.forEach(function (x) { soEm[(x.lop + '|' + (x.ma || x.ten))] = 1; });
+    var dms = r.filter(function (x) { return x.diem !== null && x.diem !== undefined; }).map(function (x) { return Number(x.diem) || 0; });
+    var dTB = dms.length ? Math.round(dms.reduce(function (a, b) { return a + b; }, 0) / dms.length * 100) / 100 : null, dCao = dms.length ? Math.max.apply(null, dms) : null;
+    var soEm = {}, siSo = 0, ganNhat = {};
+    r.forEach(function (x) { var k = x.lop + '|' + (x.ma || x.ten); soEm[k] = 1; if (!ganNhat[k] || x.t > ganNhat[k].t) ganNhat[k] = x; });
     chon.forEach(function (l) { var j = KQ.data[l.ten]; if (j && j.ok) siSo += j.siSo || 0; });
     h += '<div class="card"><div class="dh2"><div><h2>' + esc(t.ten) + '</h2><div class="ma">' + (nhom ? 'Trò nhóm' : 'Trò cá nhân') + ' · ' + (KQ.lop === 'tat' ? 'tất cả lớp' : 'lớp ' + esc(KQ.lop)) + '</div></div>' +
       (r.length ? '<button class="btnTai kqTai">⬇ Tải Excel</button>' : '') + '</div>' +
+      (cacNgay.length > 1 ? '<div class="loc kqNgayChon">' + ['tat'].concat(cacNgay).map(function (k) { return '<button data-ngay="' + k + '" class="' + (KQ.ngay === k ? 'on' : '') + '">' + (k === 'tat' ? 'Tất cả ngày' : ngayChu(k).replace(/\/\d{4}$/, '')) + '</button>'; }).join('') + '</div>' : '') +
       '<div class="tk tk4"><div><b>' + r.length + '</b><span>Lượt chơi</span></div><div><b>' + Object.keys(soEm).length + (nhom || !siSo ? '' : '<small>/' + siSo + '</small>') + '</b><span>' + (nhom ? 'Nhóm đã chơi' : 'Học sinh đã chơi') + '</span></div>' +
-      '<div><b>' + (tb === null ? '–' : tb + '%') + '</b><span>Đúng trung bình</span></div><div><b>' + (cao === null ? '–' : cao + '%') + '</b><span>Cao nhất</span></div></div>' +
+      (coDiem ? '<div><b>' + (dTB === null ? '–' : diem(dTB)) + '</b><span>Điểm trung bình</span></div><div><b>' + (dCao === null ? '–' : diem(dCao)) + '</b><span>Cao nhất</span></div></div>' +
+        phanBo(Object.keys(ganNhat).map(function (k) { var x = ganNhat[k]; return x.diem === null || x.diem === undefined ? null : { tt: 'danop', diem: x.diem }; }).filter(Boolean)).replace(/ em<\/i>/g, (nhom ? ' nhóm' : ' em') + '</i>') +
+        '<p class="chuthich">Mức điểm tính theo lượt chơi gần nhất của mỗi ' + (nhom ? 'nhóm' : 'em') + '.</p>'
+        : '<div><b>' + (tb === null ? '–' : tb + '%') + '</b><span>Đúng trung bình</span></div><div><b>' + (cao === null ? '–' : cao + '%') + '</b><span>Cao nhất</span></div></div>') +
       (TK_CU[t.matro] ? '<p class="chuthich">Kết quả trước khi gom (Sheet riêng cũ của trò này): <a href="' + GOC_TRO + TK_CU[t.matro] + '" target="_blank" rel="noopener">mở trang thống kê cũ ↗</a></p>' : '') + '</div>';
     if (!r.length && !dang) h += '<div class="card sub">Chưa có lượt chơi nào' + (KQ.lop === 'tat' ? '' : ' của lớp ' + esc(KQ.lop)) + ' được ghi vào sổ theo dõi.</div>';
+    // Phan tich (tro khung co chi tiet tung cau)
+    var coCT = r.filter(function (x) { return x.L && x.L.ct && x.L.ct.length && x.bo[x.L.bo]; });
+    if (coCT.length) {
+      h += '<div class="card"><button class="ptBtn kqPtBtn">📊 Câu sai nhiều nhất (' + coCT.length + ' lượt có chi tiết)</button><div class="pt kqPt"></div>' +
+        '<button class="ktBtn kqKtBtn">🧭 Đánh giá theo kiến thức (' + (nhom ? 'nhóm' : 'em') + ' yếu gì, lớp sai gì)</button><div class="kt kqKt"></div>' +
+        (coCT.length < r.length ? '<p class="chuthich">' + (r.length - coCT.length) + ' lượt chơi trước khi sổ lớp cập nhật chỉ có điểm, không có chi tiết từng câu.</p>' : '') + '</div>';
+    } else if (r.length && coDiem) h += '<div class="card sub">Các lượt này chưa có chi tiết từng câu (sổ lớp chưa dán bản SoTheoDoi.gs mới), nên chưa phân tích câu sai, kiến thức và xem bài từng lượt được.</div>';
     // Theo ngay
     var ngay = {}, thuTu = [];
     r.forEach(function (x) { var k = ngayKey(x.t); if (!ngay[k]) { ngay[k] = []; thuTu.push(k); } ngay[k].push(x); });
+    var soCot = 6 + (nhieuLop ? 1 : 0) + (nhom ? 1 : 0) + (coDiem ? 1 : 0);
     thuTu.forEach(function (k) {
       var dd = ngay[k].slice().sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : (a.ten || '').localeCompare(b.ten || '', 'vi') || a.t - b.t; });
       var lan = {};
-      h += '<div class="card kqNgay"><div class="nhom" style="margin:0 0 8px">' + ngayChu(k) + ' · ' + dd.length + ' lượt</div><div class="cuon"><table class="bang kqBang"><thead><tr><th>#</th>' +
-        (nhieuLop ? '<th>Lớp</th>' : '') + '<th class="tenC">' + (nhom ? 'Nhóm' : 'Họ và tên') + '</th>' + (nhom ? '<th class="tvC">Thành viên</th>' : '') + '<th>Đúng</th><th>%</th><th>Thời gian</th><th>Lúc</th></tr></thead><tbody>';
+      h += '<div class="card kqNgay"><div class="nhom" style="margin:0 0 8px">' + ngayChu(k) + ' · ' + dd.length + ' lượt</div>' + (coCT.length ? '<p class="chuthich" style="margin-top:0">Bấm vào một dòng để xem bài từng câu.</p>' : '') + '<div class="cuon"><table class="bang kqBang"><thead><tr><th>#</th>' +
+        (nhieuLop ? '<th>Lớp</th>' : '') + '<th class="tenC">' + (nhom ? 'Nhóm' : 'Họ và tên') + '</th>' + (nhom ? '<th class="tvC">Thành viên</th>' : '') + (coDiem ? '<th>Điểm</th>' : '') + '<th>Đúng</th><th>%</th><th>Thời gian</th><th>Lúc</th></tr></thead><tbody>';
       dd.forEach(function (x, i) {
-        var p = phanTram(x.ds), key = x.lop + '|' + (x.ma || x.ten); lan[key] = (lan[key] || 0) + 1;
-        h += '<tr><td>' + (i + 1) + '</td>' + (nhieuLop ? '<td>' + esc(x.lop) + '</td>' : '') + '<td class="tenC">' + esc(x.ten) + (lan[key] > 1 ? '<span class="lan">lần ' + lan[key] + '</span>' : '') + '</td>' +
+        var p = phanTram(x.ds), key = x.lop + '|' + (x.ma || x.ten), coX = x.L && x.L.ct && x.bo[x.L.bo], mo = coX && KQ.moLuot === x.ml;
+        lan[key] = (lan[key] || 0) + 1;
+        h += '<tr class="' + (coX ? 'kqCo' : '') + (mo ? ' mo' : '') + '"' + (coX ? ' data-ml="' + esc(x.ml) + '"' : '') + '><td>' + (i + 1) + '</td>' + (nhieuLop ? '<td>' + esc(x.lop) + '</td>' : '') + '<td class="tenC">' + (coX ? (mo ? '▾ ' : '▸ ') : '') + esc(x.ten) + (lan[key] > 1 ? '<span class="lan">lần ' + lan[key] + '</span>' : '') + '</td>' +
           (nhom ? '<td class="tvC">' + (x.tv.length ? esc(x.tv.join(', ')) : '<span class="sub">chưa ghi thành viên</span>') + '</td>' : '') +
-          '<td><b>' + esc(x.ds) + '</b></td><td class="' + (p !== null && p < 0.5 ? 'thapC' : '') + '">' + (p === null ? '' : Math.round(p * 100) + '%') + '</td><td>' + giayChu(x.g) + '</td><td>' + gio(new Date(x.t).toISOString()) + '</td></tr>';
+          (coDiem ? '<td class="' + (x.diem !== null && x.diem < 5 ? 'thapC' : '') + '"><b>' + (x.diem === null || x.diem === undefined ? '' : diem(x.diem)) + '</b></td>' : '') +
+          '<td>' + (coDiem ? '' : '<b>') + esc(x.ds) + (coDiem ? '' : '</b>') + '</td><td class="' + (!coDiem && p !== null && p < 0.5 ? 'thapC' : '') + '">' + (p === null ? '' : Math.round(p * 100) + '%') + '</td><td>' + giayChu(x.g) + '</td><td>' + gio(new Date(x.t).toISOString()) + '</td></tr>';
+        if (mo) h += '<tr class="kqXem"><td colspan="' + soCot + '">' + xemLuot(x) + '</td></tr>';
       });
       h += '</tbody></table></div></div>';
     });
     box.innerHTML = h;
     var tai = box.querySelector('.kqTai'); if (tai) tai.onclick = function () { xuatKQ(t, chon); };
+    [].forEach.call(box.querySelectorAll('.kqNgayChon button'), function (b) { b.onclick = function () { KQ.ngay = b.getAttribute('data-ngay'); veKQ(); }; });
+    [].forEach.call(box.querySelectorAll('tr.kqCo'), function (tr) { tr.onclick = function () { var ml = tr.getAttribute('data-ml'); KQ.moLuot = KQ.moLuot === ml ? null : ml; veKQ(); }; });
+    if (coCT.length) {
+      var khoa = 'tc|' + t.matro + '|' + KQ.lop + '|' + KQ.ngay, ptO = box.querySelector('.kqPt'), ktO = box.querySelector('.kqKt');
+      var veP = function () { ptO.innerHTML = KQ.moPT ? veCauTro(coCT, khoa) : ''; [].forEach.call(ptO.querySelectorAll('.ptc .h'), function (rr) { rr.onclick = function () { var kk = khoa + '|' + rr.parentNode.getAttribute('data-cau'); CAU_MO[kk] = !CAU_MO[kk]; veP(); }; }); };
+      var veK = function () {
+        if (!KQ.moKT) { ktO.innerHTML = ''; return; }
+        var D = dotTro(coCT, nhom), url = (DS.filter(function (l) { return l.ten === coCT[0].lop; })[0] || {}).url;
+        veKT(ktO, tongHopKT(D.dots, D.hs), { key: khoa, lop: KQ.lop === 'tat' ? 'các lớp' : KQ.lop, ten: t.ten + (KQ.ngay === 'tat' ? '' : ' (' + ngayChu(KQ.ngay) + ')'), tenFile: t.matro, url: url, diem: D.diem, coAI: !!url });
+      };
+      box.querySelector('.kqPtBtn').onclick = function () { KQ.moPT = !KQ.moPT; veP(); };
+      box.querySelector('.kqKtBtn').onclick = function () { KQ.moKT = !KQ.moKT; veK(); };
+      veP(); veK();
+    }
     veDua(t, chon);
   }
 
@@ -3198,7 +3343,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var lanKQ = KQ.nhip % 4 === 0;   // 12 giay tai lai ket qua da ve dich
       Promise.all(chon.map(function (l) {
         var p1 = goi(l.url, { action: 'gv_tctd', ma: MA, matro: t.matro }).then(function (j) { if (j && j.ok) KQ.td[l.ten] = j; }, function () {});
-        var p2 = lanKQ ? goi(l.url, { action: 'gv_tckq', ma: MA }).then(function (j) { if (j && j.ok) KQ.data[l.ten] = j; }, function () {}) : null;
+        var p2 = lanKQ ? goi(l.url, { action: 'gv_tckq', ma: MA, chitiet: 1 }).then(function (j) { if (j && j.ok) KQ.data[l.ten] = j; }, function () {}) : null;
         return Promise.all([p1, p2]);
       })).then(function () {
         if ($('scrTroKQ').classList.contains('hidden')) return;
@@ -3210,13 +3355,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var nhom = t.kieu === 'NHOM', sheets = [];
     lops.forEach(function (l) {
       var r = dongKQ(t, [l]); if (!r.length) return;
-      var dong = [nhom ? ['STT', 'Ngày', 'Lúc', 'Nhóm', 'Thành viên', 'Đúng/Tổng', '% đúng', 'Thời gian (giây)'] : ['STT', 'Ngày', 'Lúc', 'SBD', 'Họ và tên', 'Đúng/Tổng', '% đúng', 'Thời gian (giây)']];
+      var dong = [nhom ? ['STT', 'Ngày', 'Lúc', 'Nhóm', 'Thành viên', 'Đúng/Tổng', '% đúng', 'Thời gian (giây)', 'Điểm'] : ['STT', 'Ngày', 'Lúc', 'SBD', 'Họ và tên', 'Đúng/Tổng', '% đúng', 'Thời gian (giây)', 'Điểm']];
       r.slice().reverse().forEach(function (x, i) {
         var d = new Date(x.t), p = phanTram(x.ds);
         dong.push([i + 1, ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(), gio(d.toISOString()),
-          nhom ? x.ten : x.ma, nhom ? x.tv.join(', ') : x.ten, x.ds, p === null ? '' : { v: Math.round(p * 1000) / 10, s: 2 }, Number(x.g) || '']);
+          nhom ? x.ten : x.ma, nhom ? x.tv.join(', ') : x.ten, x.ds, p === null ? '' : { v: Math.round(p * 1000) / 10, s: 2 }, Number(x.g) || '', x.diem === null || x.diem === undefined ? '' : { v: Number(x.diem), s: 2 }]);
       });
-      sheets.push({ ten: l.ten, rong: nhom ? [6, 12, 8, 10, 50, 10, 9, 14] : [6, 12, 8, 12, 28, 10, 9, 14], dong: dong });
+      sheets.push({ ten: l.ten, rong: nhom ? [6, 12, 8, 10, 50, 10, 9, 14, 8] : [6, 12, 8, 12, 28, 10, 9, 14, 8], dong: dong });
     });
     if (!sheets.length) return;
     taiVe(taoXlsx(sheets), 'KetQua_' + t.matro + '_' + (lops.length > 1 ? 'cac-lop' : lops[0].ten) + '.xlsx');

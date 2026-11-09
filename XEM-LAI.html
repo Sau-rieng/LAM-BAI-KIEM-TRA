@@ -339,7 +339,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var box = $('dsBai'); box.innerHTML = '';
     if (!duLieu.bai.length) box.innerHTML = '<p class="sub">Chưa có bài nào được giáo viên mở cho xem lại.</p>';
     veTienBo();
-    duLieu.bai.forEach(function (b, i) {
+    var daTieuDe = false;
+    duLieu.bai.slice().sort(function (a, b) { return (a.tro ? 1 : 0) - (b.tro ? 1 : 0); }).forEach(function (b, i) {
+      if (b.tro && !daTieuDe) { daTieuDe = true; var tt = document.createElement('div'); tt.className = 'ph'; tt.textContent = '🎮 Lượt chơi trò chơi'; box.appendChild(tt); }
       var nut = document.createElement('button'); nut.className = 'dot';
       nut.innerHTML = '<b></b><span></span>';
       nut.querySelector('b').textContent = b.ten;
@@ -351,7 +353,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
 
   function veTienBo() {
-    var ds = duLieu.bai.map(function (b) { return { ten: b.ten, diem: Number(String(b.diem).replace(',', '.')) || 0, luc: b.luc || '' }; })
+    var ds = duLieu.bai.filter(function (b) { return !b.tro; }).map(function (b) { return { ten: b.ten, diem: Number(String(b.diem).replace(',', '.')) || 0, luc: b.luc || '' }; })
       .sort(function (a, b) { return a.luc < b.luc ? -1 : a.luc > b.luc ? 1 : 0; });
     var el = $('tienBo');
     el.classList.toggle('hidden', !ds.length);
@@ -381,7 +383,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // Ghi nhan em da mo xem bai nay (gui ngam, khong anh huong neu loi)
   var daGhi = {};
   function ghiDaXem(b) {
-    if (daGhi[b.madot] || !lopChon || !duLieu) return;
+    if (b.tro || daGhi[b.madot] || !lopChon || !duLieu) return;
     daGhi[b.madot] = 1;
     try { fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'daxem', mahs: duLieu.mahs, maxem: duLieu.maxem, madot: b.madot }) }).catch(function () {}); } catch (e) {}
   }
@@ -414,7 +416,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (n.phan && n.phan !== phanTruoc) { var t = document.createElement('div'); t.className = 'ph'; t.textContent = TEN_PHAN[n.phan]; box.appendChild(t); }
       phanTruoc = n.phan;
       var trangThai = q.chon === '' ? 'bo' : (q.dung ? 'dung' : 'sai');
-      var chu = trangThai === 'dung' ? '✓ Đúng' : trangThai === 'sai' ? '✗ Sai' : '– Bỏ trống';
+      var chu = trangThai === 'dung' ? '✓ Đúng' : trangThai === 'sai' ? '✗ Sai' : q.chuaLam ? '– Chưa tới câu này' : '– Bỏ trống';
       if (q.loai === 'DS' && trangThai !== 'bo') { chu = (q.dung ? '✓ ' : '') + 'Đúng ' + q.soY + '/4 ý'; if (!q.dung && q.soY > 0) trangThai = 'mot'; }
       var the = document.createElement('div'); the.className = 'card q ' + (q.dung ? 'dung' : 'sai'); the.setAttribute('data-cau', q.cau);
       var h = '<div class="qh"><b>Câu ' + n.so + '</b><span class="tag ' + trangThai + '">' + chu + '</span></div>' +
@@ -476,7 +478,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     hinhMo(duLieu.hoten + ' · ' + duLieu.mahs);
     $('tenHome').textContent = duLieu.hoten;
     $('lopHome').textContent = 'Lớp ' + (lopChon ? lopChon.ten : '') + ' · SBD ' + duLieu.mahs;
-    $('soBai').textContent = duLieu.bai.length ? duLieu.bai.length + ' bài giáo viên đã mở' : 'Chưa có bài nào mở xem lại';
+    var nTro = duLieu.bai.filter(function (b) { return b.tro; }).length, nKT = duLieu.bai.length - nTro;
+    $('soBai').textContent = duLieu.bai.length ? (nKT ? nKT + ' bài giáo viên đã mở' : '') + (nKT && nTro ? ' · ' : '') + (nTro ? nTro + ' lượt trò chơi' : '') : 'Chưa có bài nào mở xem lại';
     var n = dsTN().length;
     $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
     demTin(duLieu.tinMoi || 0);
