@@ -585,6 +585,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .kqC .op{margin-top:4px;padding:4px 8px;border-radius:6px}.kqC .op.dung{background:#e6f4ea}.kqC .op.chonsai{background:#fce8e6}
 .kqC .tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eee}.kqC .tag.dung{background:#e6f4ea;color:#137333}.kqC .tag.sai{background:#fce8e6;color:#c5221f}.kqC .tag.mot{background:#fef7e0;color:#9a6700}
 .kqNgayChon{margin:10px 0 0}
+.dot.giay{border-left:4px solid #555}.dauDeL{display:block;margin-top:8px;font-size:14px}.dauDeL input{display:block;width:100%;margin-top:3px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:15px}
 @media (max-width:560px){.tk4{grid-template-columns:repeat(2,1fr)}.troDau{flex-direction:column}.cong{align-self:flex-start}}
 /* Ma */
 .maDong{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
@@ -1107,7 +1108,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function veDot() {
     var box = $('dsDot'); box.innerHTML = '';
     // Ca thi nhieu ma de: chi hien ma chinh trong muc Dang mo (cac ma phu mo/dong theo ma chinh)
-    var dangMo = DOT.filter(function (d) { return d.tt !== 'DONG' && !(d.ca && d.ca !== d.madot); });
+    var dangMo = DOT.filter(function (d) { return d.tt !== 'DONG' && !d.giay && !(d.ca && d.ca !== d.madot); });
     $('soDot').textContent = DOT.length + ' đề · ' + dangMo.length + ' đang mở';
     // Tab khoi
     var cacKhoi = []; DOT.forEach(function (d) { var k = khoiCua(d); if (cacKhoi.indexOf(k) < 0) cacKhoi.push(k); });
@@ -1126,7 +1127,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var t = document.createElement('div'); t.className = 'nhom'; t.textContent = '● Đang mở'; box.appendChild(t);
       dangMo.forEach(function (d) { box.appendChild(theDot(d, false)); });
     }
-    var ds = DOT.filter(function (d) { return khoiCua(d) === khoiChon && d.tt === 'DONG'; });
+    var ds = DOT.filter(function (d) { return khoiCua(d) === khoiChon && d.tt === 'DONG' && !d.giay; });
+    veNhomGiay(box, DOT.filter(function (d) { return khoiCua(d) === khoiChon && d.giay; }));
     [{ ten: 'Khảo bài nhanh · 7 phút', loc: function (d) { return d.phut <= 10; } },
      { ten: 'Khảo bài · 15 phút', loc: function (d) { return d.phut > 10 && d.phut <= 20; } },
      { ten: 'Kiểm tra · 45 phút', loc: function (d) { return d.phut > 20; } }].forEach(function (g) {
@@ -1148,7 +1150,114 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         box.appendChild(khung);
       });
     });
-    if (!dangMo.length && !ds.length) box.innerHTML += '<div class="card sub">Khối này chưa có đề.</div>';
+    if (!dangMo.length && !ds.length && !DOT.some(function (d) { return khoiCua(d) === khoiChon && d.giay; })) box.innerHTML += '<div class="card sub">Khối này chưa có đề.</div>';
+  }
+
+  // ---------- ĐỀ GIẤY: in đề (PDF trên trình duyệt, 2 cột, đen trắng) + in đáp án ----------
+  var DAU_DE = { so: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO ĐỒNG NAI', truong: 'TRƯỜNG ', ky: 'KIỂM TRA', nam: '' };
+  try { Object.assign(DAU_DE, JSON.parse(localStorage.getItem('gv_daude') || '{}')); } catch (e) {}
+  var GIAY_MO = {};
+  function veNhomGiay(box, ds) {
+    if (!ds.length) return;
+    var ca = {}, thu = [];
+    ds.forEach(function (d) { var k = d.ca || d.madot; if (!ca[k]) { ca[k] = []; thu.push(k); } ca[k].push(d); });
+    var t = document.createElement('div'); t.className = 'nhom'; t.textContent = '🖨 Đề giấy (' + thu.length + ' đợt)'; box.appendChild(t);
+    thu.sort().reverse().forEach(function (k) {
+      var g = ca[k].sort(function (a, b) { return a.madot < b.madot ? -1 : 1; }), d = g[0];
+      var el = document.createElement('div'); el.className = 'card dot giay';
+      el.innerHTML = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(k.replace(/-2\d\d$/, '')) + ' · mã đề ' + esc(g.map(function (x) { return x.madot.slice(-3); }).join(', ')) +
+        ' · ' + d.phut + ' phút · Đ/S thang ' + esc(thangChu(d.thang)) + ' · Lớp: ' + esc(d.lop) + '</div></div><span class="ttDong">đề giấy</span></div>' +
+        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 inDe">🖨 In đề ' + g.length + ' mã (PDF)</button><button class="btn2 inDA">📋 In đáp án (PDF riêng)</button><button class="btn2 dauDe">⚙ Đầu đề</button></div>' +
+        '<div class="dauDeO"></div><div class="giayKQ"></div>';
+      var o = el.querySelector('.dauDeO'), kq = el.querySelector('.giayKQ');
+      function ve() {
+        if (!GIAY_MO[k]) { o.innerHTML = ''; return; }
+        o.innerHTML = '<div class="xdBox"><b>Đầu đề in</b> <span class="sub">(lưu trên máy này cho các lần in sau)</span>' +
+          [['so', 'Dòng 1 (bên trái)'], ['truong', 'Tên trường'], ['ky', 'Tên bài kiểm tra (bên phải)'], ['nam', 'Năm học (để trống thì không in)']].map(function (x) {
+            return '<label class="dauDeL">' + x[1] + '<input data-k="' + x[0] + '" value="' + esc(DAU_DE[x[0]] || '') + '" maxlength="90"></label>';
+          }).join('') + '</div>';
+        [].forEach.call(o.querySelectorAll('input'), function (ip) { ip.oninput = function () { DAU_DE[ip.getAttribute('data-k')] = ip.value; try { localStorage.setItem('gv_daude', JSON.stringify(DAU_DE)); } catch (e) {} }; });
+      }
+      el.querySelector('.dauDe').onclick = function () { GIAY_MO[k] = !GIAY_MO[k]; ve(); };
+      ve();
+      function mo(loai) {
+        var w = window.open('', '_blank');
+        if (w) w.document.write('<p style="font:16px sans-serif;padding:20px">Đang tải đề ' + esc(k) + '…</p>');
+        kq.innerHTML = '<div class="sub">Đang tải nội dung ' + g.length + ' mã đề…</div>';
+        goiBatKy({ action: 'gv_degiay', ma: MA, ca: k }).then(function (j) {
+          if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : j.msg);
+          var html = loai === 'de' ? htmlDeGiay(j, DAU_DE) : htmlDapAnGiay(j, DAU_DE);
+          if (!w || w.closed) { w = window.open('', '_blank'); }
+          if (!w) { kq.innerHTML = '<div class="xdBox xau">Trình duyệt chặn cửa sổ mới. Cho phép cửa sổ bật lên (pop-up) rồi bấm lại.</div>'; return; }
+          w.document.open(); w.document.write(html); w.document.close();
+          kq.innerHTML = '<div class="sub">✓ Đã mở ' + (loai === 'de' ? 'đề' : 'đáp án') + ' ở thẻ mới. Bấm <b>🖨 In / Lưu PDF</b> ở đầu trang, chọn khổ A4' + (loai === 'de' ? ', bỏ chọn "Đầu trang và chân trang" nếu máy in thêm địa chỉ web' : '') + '.</div>';
+        }).catch(function (e) { if (w) w.close(); kq.innerHTML = '<div class="xdBox xau">Chưa tải được: ' + esc(e.message) + '</div>'; });
+      }
+      el.querySelector('.inDe').onclick = function () { mo('de'); };
+      el.querySelector('.inDA').onclick = function () { mo('da'); };
+      box.appendChild(el);
+    });
+  }
+  function khoiSo(madot) { return (/^[A-Z]+(\d+)-/i.exec(madot) || [])[1] || ''; }
+  function monChu(madot) { var k = khoiSo(madot); return k === '9' || k === '8' || k === '7' || k === '6' ? 'KHOA HỌC TỰ NHIÊN ' + k : 'HÓA HỌC – Lớp ' + k; }
+  var CSS_IN = '@page{size:A4;margin:12mm 12mm 14mm}*{box-sizing:border-box}body{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.32;color:#000;margin:0;background:#fff}' +
+    '.thanh{position:sticky;top:0;background:#1a2b4a;color:#fff;padding:10px 14px;font:15px sans-serif;display:flex;gap:12px;align-items:center;flex-wrap:wrap;z-index:9}.thanh button{font:700 15px sans-serif;padding:8px 16px;border-radius:8px;border:0;background:#fff;color:#1a2b4a}' +
+    '@media print{.thanh{display:none}}@media screen{.trang{max-width:210mm;margin:12px auto;padding:12mm;box-shadow:0 1px 6px rgba(0,0,0,.25)}}' +
+    'img{max-width:100%;filter:grayscale(1)}sub,sup{line-height:0}table{border-collapse:collapse}';
+  function thanhIn(tieuDe) { return '<div class="thanh"><b>' + esc(tieuDe) + '</b><button onclick="window.print()">🖨 In / Lưu PDF</button><span>Khổ A4 · đen trắng</span></div>'; }
+  function htmlCau(q, so) {
+    var hinh = q.hinh ? '<div class="hinh"><img src="' + esc(q.hinh) + '" alt=""></div>' : '';
+    var h = '<div class="cau"><b>Câu ' + so + '.</b> ' + q.hoi + hinh;
+    if (q.loai === 'TN') {
+      var dai = Math.max.apply(null, ['A', 'B', 'C', 'D'].map(function (k) { return chuSo(q.pa[k]).length + (/<img/i.test(q.pa[k]) ? 40 : 0); }));
+      var cot = dai <= 10 ? 4 : dai <= 24 ? 2 : 1;
+      h += '<div class="pa c' + cot + '">' + ['A', 'B', 'C', 'D'].map(function (k) { return '<div><b>' + k + '.</b> ' + q.pa[k] + '</div>'; }).join('') + '</div>';
+    } else if (q.loai === 'DS') h += '<div class="y">' + ['A', 'B', 'C', 'D'].map(function (k, i) { return '<div><b>' + 'abcd'[i] + ')</b> ' + q.pa[k] + '</div>'; }).join('') + '</div>';
+    return h + '</div>';
+  }
+  function htmlDeGiay(j, dd) {
+    var m0 = j.ma[0], ky = (dd.ky || 'KIỂM TRA') + (dd.nam ? ' – NĂM HỌC ' + dd.nam : '');
+    var css = CSS_IN + '.dau{width:100%;margin-bottom:6px}.dau td{vertical-align:top;text-align:center;padding:0 4px}.dau .tr{width:42%}.dau .gach{width:40%;margin:3px auto 0;border-top:1px solid #000}' +
+      '.ts{display:flex;justify-content:space-between;align-items:center;margin:6px 0 4px}.made{border:1.5px solid #000;padding:3px 10px;font-weight:700}' +
+      '.than{column-count:2;column-gap:7mm;column-rule:.6pt solid #000}.ph{font-weight:700;margin:6px 0 3px;break-after:avoid}.ph span{font-weight:400;font-style:italic}' +
+      '.cau{break-inside:avoid;margin:0 0 5px;text-align:justify}.pa{display:grid;gap:1px 6px;margin-top:1px}.pa.c4{grid-template-columns:repeat(4,1fr)}.pa.c2{grid-template-columns:1fr 1fr}.pa.c1{grid-template-columns:1fr}' +
+      '.y div{margin-left:4px}.hinh{text-align:center;margin:3px 0}.het{text-align:center;font-weight:700;margin-top:8px;column-span:all}.ma{break-before:page}.ma:first-of-type{break-before:auto}';
+    var trang = '';
+    j.ma.forEach(function (m, i) {
+      var so = m.madot.slice(-3), pn = 'p' + so;
+      css += '@page ' + pn + '{@bottom-center{content:"Mã đề ' + so + ' – Trang " counter(page);font:10pt "Times New Roman"}}.ma' + so + '{page:' + pn + '}';
+      var phan = { TN: [], DS: [], TLN: [] }; m.cau.forEach(function (q) { phan[q.loai].push(q); });
+      var h = '<section class="ma ma' + so + '"><table class="dau"><tr><td class="tr"><div>' + esc(dd.so || '') + '</div><div><b>' + esc(dd.truong || '') + '</b></div><div class="gach"></div></td>' +
+        '<td><div><b>' + esc(ky) + '</b></div><div><b>Môn: ' + esc(monChu(m.madot)) + '</b></div><div><i>Thời gian làm bài: ' + m.phut + ' phút, không kể thời gian phát đề</i></div></td></tr></table>' +
+        '<div class="ts"><span>Họ, tên thí sinh: ..................................................... Số báo danh: ......................</span><span class="made">Mã đề ' + so + '</span></div><div class="than">';
+      if (phan.TN.length) h += '<div class="ph">PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. <span>Thí sinh trả lời từ câu 1 đến câu ' + phan.TN.length + '. Mỗi câu hỏi thí sinh chỉ chọn một phương án.</span></div>' + phan.TN.map(function (q, i) { return htmlCau(q, i + 1); }).join('');
+      if (phan.DS.length) h += '<div class="ph">PHẦN II. Câu trắc nghiệm đúng sai. <span>Thí sinh trả lời từ câu 1 đến câu ' + phan.DS.length + '. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn đúng hoặc sai.</span></div>' + phan.DS.map(function (q, i) { return htmlCau(q, i + 1); }).join('');
+      if (phan.TLN.length) h += '<div class="ph">PHẦN III. Câu trắc nghiệm trả lời ngắn. <span>Thí sinh trả lời từ câu 1 đến câu ' + phan.TLN.length + '.</span></div>' + phan.TLN.map(function (q, i) { return htmlCau(q, i + 1); }).join('');
+      h += '<div class="het">------ HẾT ------</div></div></section>';
+      trang += h;
+    });
+    return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>DE-GIAY-' + esc(j.ca) + '</title><style>' + css + '</style></head><body>' + thanhIn('Đề ' + m0.ten + ' · ' + j.ma.length + ' mã') + '<div class="trang">' + trang + '</div></body></html>';
+  }
+  function htmlDapAnGiay(j, dd) {
+    var m0 = j.ma[0], phanTen = { TN: 'PHẦN I', DS: 'PHẦN II', TLN: 'PHẦN III' };
+    var css = CSS_IN + 'h1{font-size:14pt;text-align:center;margin:0 0 2px}.sub{text-align:center;margin:0 0 8px}h2{font-size:12pt;margin:10px 0 4px}table.da{width:100%;margin:0 0 6px}table.da td,table.da th{border:.6pt solid #000;padding:2px 3px;text-align:center;font-size:10.5pt}table.da th{background:#eee}.ghi{font-size:10pt;margin:6px 0}';
+    var dem = { TN: [], DS: [], TLN: [] }; m0.cau.forEach(function (q) { dem[q.loai].push(q); });
+    var h = '<h1>ĐÁP ÁN – ' + esc(m0.ten) + '</h1><p class="sub">' + esc((DAU_DE.truong || '') + ' · ' + monChu(m0.madot) + ' · mã đề ' + j.ma.map(function (m) { return m.madot.slice(-3); }).join(', ')) + '</p>';
+    ['TN', 'DS', 'TLN'].forEach(function (L) {
+      var n = dem[L].length; if (!n) return;
+      var w = dem[L][0].w, tong = dem[L].reduce(function (a, q) { return a + q.w; }, 0);
+      h += '<h2>' + phanTen[L] + ' · ' + n + ' câu · ' + Number(tong.toFixed(2)) + ' điểm' + (L === 'DS' ? ' (mỗi câu ' + w + ' điểm; đúng 1/2/3/4 ý: ' + thangChu(m0.thang).replace(/^K1\d \(|\)$/g, '') + ' × điểm câu)' : ' (mỗi câu ' + w + ' điểm)') + '</h2>';
+      for (var a = 0; a < n; a += 20) {
+        var b = Math.min(n, a + 20), cot = []; for (var i = a; i < b; i++) cot.push(i + 1);
+        h += '<table class="da"><tr><th>Mã đề</th>' + cot.map(function (c) { return '<th>' + c + '</th>'; }).join('') + '</tr>' +
+          j.ma.map(function (m) {
+            var ds = m.cau.filter(function (q) { return q.loai === L; });
+            return '<tr><th>' + m.madot.slice(-3) + '</th>' + cot.map(function (c) { var q = ds[c - 1]; return '<td>' + (q ? esc(L === 'DS' ? q.da.replace(/D/g, 'Đ') : q.da) : '') + '</td>'; }).join('') + '</tr>';
+          }).join('') + '</table>';
+      }
+    });
+    h += '<p class="ghi">Phần II ghi đáp án 4 ý a, b, c, d theo thứ tự (Đ = đúng, S = sai). Phần III chấm cả dấu chấm và dấu phẩy thập phân. Bảng đối chiếu câu của từng mã về câu gốc được lưu trong kho đề (cột Goc) để thống kê theo kiến thức.</p>';
+    return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>DAP-AN-' + esc(j.ca) + '</title><style>' + css + '</style></head><body>' + thanhIn('Đáp án ' + m0.ten) + '<div class="trang">' + h + '</div></body></html>';
   }
 
   // ---------- GV xem de (PDF) truoc khi thi + tai hinh cua de len GitHub ----------
@@ -3823,7 +3932,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // CAU HINH THEM: MaDot | TenBai | ThoiGian_phut | ... | Lop ; KIEN THUC THEM: MaDot | Cau | KienThuc | MucDo
   // =====================================================================
   var NAP = { ds: [] };
-  var COT_DE = ['CAU', 'NOIDUNG', 'A', 'B', 'C', 'D', 'DAPAN', 'HINH', 'LOAI', 'DIEM'];
+  var COT_DE = ['CAU', 'NOIDUNG', 'A', 'B', 'C', 'D', 'DAPAN', 'HINH', 'LOAI', 'DIEM', 'GOC'];
   function boDau(s) { return String(s === undefined || s === null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, function (c) { return c === 'đ' ? 'd' : 'D'; }).toUpperCase().replace(/[\s_]+/g, ''); }
   function chuO(x) {
     if (x === undefined || x === null) return '';
@@ -3846,7 +3955,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     tabs.forEach(function (t) {
       var ten = boDau(t.ten);
       if (ten === 'CAUHINHTHEM' || ten === 'CAUHINH') {
-        for (var r = 1; r < t.o.length; r++) { var h = hang(t.o, r), m = chuO(h[0]).trim(); if (m) ch[m] = { ten: chuO(h[1]).trim(), phut: Number(String(chuO(h[2])).replace(',', '.')) || 0, lop: chuO(h[5]).trim() }; }
+        var dauCH = hang(t.o, 0).map(boDau), iK = dauCH.indexOf('KIEU'), iT = dauCH.indexOf('THANGDS');
+        for (var r = 1; r < t.o.length; r++) { var h = hang(t.o, r), m = chuO(h[0]).trim(); if (m) ch[m] = { ten: chuO(h[1]).trim(), phut: Number(String(chuO(h[2])).replace(',', '.')) || 0, lop: chuO(h[5]).trim(),
+          kieu: iK >= 0 ? boDau(chuO(h[iK])) : '', thang: iT >= 0 ? chuO(h[iT]).trim() : '' }; }
       } else if (ten === 'KIENTHUCTHEM' || ten === 'KIENTHUC') {
         for (var r2 = 1; r2 < t.o.length; r2++) { var h2 = hang(t.o, r2), m2 = chuO(h2[0]).trim(); if (!m2) continue; (kt[m2] = kt[m2] || {})[chuO(h2[1]).trim()] = { kt: chuO(h2[2]).trim(), md: chuO(h2[3]).trim() }; }
       } else if (ten === 'GIAITHICHTHEM' || ten === 'GIAITHICH') {
@@ -3859,6 +3970,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       }
     });
     var kq = de.map(function (x) { return xetDe(x, ch[x.madot], kt[x.madot] || {}, gt[x.madot] || {}); });
+    xetNhomGiay(kq);
     // Tab GIAI THICH THEM cho de da co trong kho (khong co tab de trong file): chi them loi giai
     Object.keys(gt).forEach(function (md) {
       if (de.some(function (x) { return x.madot === md; })) return;
@@ -3876,6 +3988,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     d.ten = cfg.ten || x.madot;
     d.phut = Math.round(cfg.phut) || 15;
     d.lop = cfg.lop || lopMacDinhNap(x.madot);
+    d.giay = cfg.kieu === 'GIAY'; d.thang = d.giay ? (cfg.thang || 'K12') : cfg.thang || '';
     if (!cfg.ten) d.canh.push('File không có dòng cấu hình cho đề này: thầy/cô kiểm tra tên bài, thời gian, lớp bên dưới.');
     if (!/^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(x.madot)) d.loi.push('Tên tab "' + x.madot + '" không dùng làm mã đợt được (chỉ chữ không dấu, số, dấu - _ .).');
     var daGap = {}, v = x.viTri;
@@ -3886,7 +3999,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var cau = lay(h, 'CAU').trim() || String(d.cau.length + 1);
       var loai = boDau(lay(h, 'LOAI')); loai = loai === 'DS' || loai === 'TLN' ? loai : 'TN';
       var da = lay(h, 'DAPAN').trim(), w = Number(lay(h, 'DIEM').replace(',', '.')) || (loai === 'DS' ? 1 : 0.25);
-      var hang10 = [cau, nd, lay(h, 'A'), lay(h, 'B'), lay(h, 'C'), lay(h, 'D'), da, chuanHinhJS(lay(h, 'HINH'), x.madot), loai, String(w)];
+      var hang10 = [cau, nd, lay(h, 'A'), lay(h, 'B'), lay(h, 'C'), lay(h, 'D'), da, chuanHinhJS(lay(h, 'HINH'), x.madot), loai, String(w), lay(h, 'GOC').trim()];
       var ten = 'Câu ' + cau + ': ';
       if (daGap[cau]) d.loi.push(ten + 'trùng số câu.'); daGap[cau] = 1;
       if (loai === 'TN') {
@@ -3909,6 +4022,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       d.cau.push({ hang: hang10, kt: k, gt: gtDe[cau] || '', chu: nd.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() });
     }
     if (!d.cau.length) d.loi.push('Tab không có câu hỏi nào.');
+    if (d.giay) xetDeGiay(d);
     var thieuKT = d.cau.filter(function (c) { return !c.kt || !c.kt.kt; }).map(function (c) { return c.hang[0]; });
     var thieuGT = d.cau.filter(function (c) { return !c.gt; }).map(function (c) { return c.hang[0]; });
     if (d.cau.length && thieuGT.length) d.canh.push(thieuGT.length + ' câu chưa có lời giải chi tiết (' + thieuGT.slice(0, 8).join(', ') + (thieuGT.length > 8 ? '…' : '') + '): học sinh sẽ không thấy nút 💡 Giải thích ở các câu này.');
@@ -3926,6 +4040,78 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       d.chon = false;
     }
     return d;
+  }
+  // ---- ĐỀ GIẤY: kiểm tra 1 mã (sức chứa phiếu, tổng điểm, cột Goc) và đối chiếu các mã cùng đợt ----
+  var SUC_PHIEU = { TN: 40, DS: 8, TLN: 6 };
+  function thangChu(t) { return t === 'K10' ? 'K10 (0.2 · 0.4 · 0.7 · 1)' : t === 'K12' || !t ? 'K12 (0.1 · 0.25 · 0.5 · 1)' : String(t).replace(/;/g, ' · '); }
+  function thangHop(t) { if (t === 'K10' || t === 'K12') return true; var a = String(t).split(/[;\/|]+/).map(function (x) { return Number(String(x).trim().replace(',', '.')); }); return a.length === 4 && a.every(function (x) { return x >= 0 && x <= 1; }); }
+  function xetDeGiay(d) {
+    if (!/-2\d\d$/.test(d.madot)) d.loi.push('Đề giấy phải có mã đề dạng 2xx (vd H10-B18-201), đang là ' + d.madot + '.');
+    if (!thangHop(d.thang)) d.loi.push('ThangDS "' + d.thang + '" không hợp lệ: ghi K10, K12 hoặc 4 số như 0.2;0.4;0.7;1.');
+    ['TN', 'DS', 'TLN'].forEach(function (k) { if (d.dem[k] > SUC_PHIEU[k]) d.loi.push({ TN: 'Phần I', DS: 'Phần II', TLN: 'Phần III' }[k] + ' có ' + d.dem[k] + ' câu, vượt sức chứa phiếu trả lời (' + SUC_PHIEU[k] + ' câu).'); });
+    if (Math.abs(d.tong - 10) > 1e-6) d.loi.push('Tổng điểm đề giấy phải đúng 10 (đang là ' + Number(d.tong.toFixed(3)) + ').');
+    var thu = { TN: 1, DS: 2, TLN: 3 }, truoc = 0, sai = false;
+    d.cau.forEach(function (c) { var t = thu[c.hang[8]]; if (t < truoc) sai = true; truoc = t; });
+    if (sai) d.loi.push('Các câu phải xếp theo thứ tự Phần I (TN) → Phần II (Đ/S) → Phần III (TLN).');
+    var thieu = d.cau.filter(function (c) { return !c.hang[10]; }).map(function (c) { return c.hang[0]; });
+    if (thieu.length) d.loi.push(thieu.length + ' câu thiếu cột Goc (câu gốc): ' + thieu.slice(0, 8).join(', ') + (thieu.length > 8 ? '…' : '') + '.');
+    d.cau.forEach(function (c) {
+      var g = tachGoc(c.hang[10]);
+      if (c.hang[10] && !g) d.loi.push('Câu ' + c.hang[0] + ': cột Goc "' + c.hang[10] + '" không đúng dạng (vd I.7 hoặc II.2:cadb).');
+      else if (g && g.phan !== { TN: 'I', DS: 'II', TLN: 'III' }[c.hang[8]]) d.loi.push('Câu ' + c.hang[0] + ': câu gốc ' + g.goc + ' khác phần với câu này.');
+    });
+  }
+  // "II.2:cadb" -> {goc:'II.2', phan:'II', y:'cadb'}: ý a của câu trộn là ý c của câu gốc...
+  function tachGoc(s) {
+    var m = /^(I{1,3})\.(\d+)(?::([a-d]{4}))?$/i.exec(String(s || '').trim()); if (!m) return null;
+    var y = (m[3] || 'abcd').toLowerCase();
+    if (y.split('').sort().join('') !== 'abcd') return null;
+    return { goc: m[1].toUpperCase() + '.' + m[2], phan: m[1].toUpperCase(), y: y };
+  }
+  function chuSo(x) { return String(x || '').replace(/<img[^>]*>/gi, ' [hình] ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase(); }
+  function xetNhomGiay(ds) {
+    var nhom = {};
+    ds.forEach(function (d) { if (d.giay && !d.chiGT) { var k = d.madot.replace(/-2\d\d$/, ''); (nhom[k] = nhom[k] || []).push(d); } });
+    Object.keys(nhom).forEach(function (k) {
+      var g = nhom[k].sort(function (a, b) { return a.madot < b.madot ? -1 : 1; }), ca = g[0].madot, loi = [], mau = {};
+      g.forEach(function (d) { d.ca = ca; });
+      // Câu gốc -> nội dung chuẩn (lấy từ mã đầu tiên có câu đó), so các mã còn lại
+      g.forEach(function (d) {
+        var gap = {};
+        d.cau.forEach(function (c) {
+          var h = c.hang, gg = tachGoc(h[10]); if (!gg) return;
+          if (gap[gg.goc]) loi.push(d.madot + ': hai câu cùng câu gốc ' + gg.goc + '.'); gap[gg.goc] = 1;
+          var o = { loai: h[8], hoi: chuSo(h[1]), w: Number(h[9]), kt: c.kt ? c.kt.kt : '' };
+          if (h[8] === 'TN') { var pa = { A: chuSo(h[2]), B: chuSo(h[3]), C: chuSo(h[4]), D: chuSo(h[5]) }; o.pa = [pa.A, pa.B, pa.C, pa.D].sort().join(' | '); o.dung = pa[h[6]] || ''; }
+          else if (h[8] === 'DS') { var dd = boDau(h[6]).replace(/[^DS]/g, ''); var yy = {}; for (var j = 0; j < 4; j++) yy[gg.y[j]] = chuSo(h[2 + j]) + ' = ' + dd[j]; o.y = ['a', 'b', 'c', 'd'].map(function (z) { return yy[z]; }); }
+          else o.da = String(h[6]).replace(',', '.').trim();
+          var m0 = mau[gg.goc];
+          if (!m0) { mau[gg.goc] = { o: o, ma: d.madot, cau: h[0] }; return; }
+          var t = d.madot + ' câu ' + h[0] + ' (gốc ' + gg.goc + ') khác ' + m0.ma + ' câu ' + m0.cau + ': ';
+          var b = m0.o;
+          if (b.loai !== o.loai) loi.push(t + 'khác loại câu.');
+          else if (b.hoi !== o.hoi) loi.push(t + 'nội dung câu dẫn khác.');
+          else if (o.loai === 'TN' && b.pa !== o.pa) loi.push(t + 'bộ phương án khác.');
+          else if (o.loai === 'TN' && b.dung !== o.dung) loi.push(t + 'đáp án sau khi trộn không trỏ cùng phương án đúng.');
+          else if (o.loai === 'DS' && JSON.stringify(b.y) !== JSON.stringify(o.y)) loi.push(t + 'các ý a–d hoặc đáp án Đ/S không khớp với thứ tự ý ghi ở cột Goc.');
+          else if (o.loai === 'TLN' && Number(b.da) !== Number(o.da) && b.da !== o.da) loi.push(t + 'đáp án khác.');
+          else if (b.w !== o.w) loi.push(t + 'điểm khác.');
+          else if (b.kt !== o.kt) loi.push(t + 'kiến thức khác.');
+        });
+      });
+      var soGoc = Object.keys(mau).length;
+      g.forEach(function (d) {
+        var thieu = Object.keys(mau).filter(function (x) { return !d.cau.some(function (c) { var gg = tachGoc(c.hang[10]); return gg && gg.goc === x; }); });
+        if (thieu.length) loi.push(d.madot + ' thiếu câu gốc ' + thieu.slice(0, 8).join(', ') + '.');
+        if (d.thang !== g[0].thang) loi.push(d.madot + ': thang Đ/S khác ' + g[0].madot + '.');
+      });
+      var ok = !loi.length;
+      g.forEach(function (d) {
+        d.doiChieu = { ok: ok, chu: g.length === 1 ? 'Chỉ có 1 mã đề giấy trong file' : ok ? '✓ Đối chiếu ' + g.length + ' mã (' + g.map(function (x) { return x.madot.slice(-3); }).join(', ') + '): ' + soGoc + ' câu gốc khớp nội dung, phương án, đáp án' : '✗ ' + loi.length + ' chỗ lệch giữa các mã – chưa nạp được' };
+        if (!ok) { d.loi = d.loi.concat(loi.slice(0, 12)); d.chon = false; }
+        if (g.length === 1) d.canh.push('File chỉ có 1 mã đề giấy của đợt này; thường trộn 4 mã (201–204).');
+      });
+    });
   }
   function veNap() {
     var box = $('napDs'); box.innerHTML = '';
@@ -3947,7 +4133,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         (d.hinh.length ? '<span class="hinhTT">' + d.hinh.length + ' hình: đang kiểm tra…</span>' : '') +
         '<span class="' + (d.kt.length === d.cau.length ? 'tot' : 'xau') + '">Kiến thức ' + d.kt.length + '/' + d.cau.length + ' câu</span>' +
         '<span class="' + (d.gt.length === d.cau.length ? 'tot' : 'xau') + '">💡 Lời giải ' + d.gt.length + '/' + d.cau.length + ' câu</span>' + (md ? '<span>' + md + '</span>' : '');
-      el.innerHTML = '<h2>' + esc(d.madot) + (d.trung ? ' <small>· đã có trong kho</small>' : ' <small>· đề mới</small>') + '</h2>' +
+      el.innerHTML = '<h2>' + esc(d.madot) + (d.trung ? ' <small>· đã có trong kho</small>' : ' <small>· đề mới</small>') + (d.giay ? ' <small>· 🖨 đề giấy · thang Đ/S ' + esc(thangChu(d.thang)) + '</small>' : '') + '</h2>' +
+        (d.giay && d.doiChieu ? '<div class="napTom"><span class="' + (d.doiChieu.ok ? 'tot' : 'xau') + '">' + esc(d.doiChieu.chu) + '</span></div>' : '') +
         '<div class="napTom">' + tom + '</div>' +
         (d.loi.length ? '<ul class="napLoi">' + d.loi.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
         (d.canh.length ? '<ul class="napCanh">' + d.canh.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
@@ -4125,7 +4312,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     b.disabled = true; b.textContent = 'Đang nạp…'; $('napMsg').textContent = '';
     goiBatKy({ action: 'gv_napde', ma: MA, de: ds.map(function (d) {
       if (d.chiGT) return { madot: d.madot, chiGT: true, gt: d.gt };
-      return { madot: d.madot, ten: d.ten, phut: d.phut, lop: d.lop, thay: !!d.thay, cau: d.cau.map(function (c) { return c.hang; }), kt: d.kt, gt: d.gt };
+      return { madot: d.madot, ten: d.ten, phut: d.phut, lop: d.lop, thay: !!d.thay, cau: d.cau.map(function (c) { return c.hang; }), kt: d.kt, gt: d.gt,
+        kieu: d.giay ? 'GIAY' : '', thang: d.thang || '', ca: d.ca || '' };
     }) }).then(function (j) {
       if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới vào sổ rồi Triển khai → Phiên bản mới.' : j.loi === 'ma' ? 'Mã đăng nhập chưa đúng.' : (j.msg || 'lỗi không rõ'));
       DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now();
@@ -4134,7 +4322,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       $('napDs').innerHTML = '<div class="card napXong"><h2>✓ Đã nạp vào kho</h2><ul>' + nap.map(function (x) {
         if (x.chiGT) return '<li><b>' + esc(x.madot) + '</b>: đã thêm lời giải cho ' + x.sogt + ' câu</li>';
         return '<li><b>' + esc(x.madot) + '</b> – ' + esc(x.ten) + ': ' + x.socau + ' câu, ' + x.sokt + ' dòng kiến thức, ' + (x.sogt || 0) + ' lời giải, lớp ' + esc(x.lop) + (x.thay ? ' (đã thay đề cũ)' : '') + '</li>';
-      }).join('') + '</ul><p class="sub">Đề đang đóng và chưa cho xem lại. Mở phòng chờ ở mục Kiểm tra khi lên lớp.</p><button class="btn" id="napXem">Xem trong danh sách đề ▶</button></div>';
+      }).join('') + '</ul><p class="sub">' + (nap.some(function (x) { return x.giay; }) ? 'Đề giấy nằm ở mục Kiểm tra → khối của đề → 🖨 Đề giấy: bấm In đề, In đáp án. ' : '') + 'Đề đang đóng và chưa cho xem lại. Mở phòng chờ ở mục Kiểm tra khi lên lớp.</p><button class="btn" id="napXem">Xem trong danh sách đề ▶</button></div>';
       $('napXem').onclick = function () { var x = DOT.filter(function (z) { return nap[0] && z.madot === nap[0].madot; })[0]; if (x) { khoiChon = khoiCua(x); moRong = x.madot; } diDen('dot'); };
       $('napFile').value = ''; $('napNhanChu').textContent = '📂 Nạp thêm file khác';
     }).catch(function (e) { b.disabled = false; nutNap(); $('napMsg').textContent = 'Chưa nạp được: ' + e.message; });

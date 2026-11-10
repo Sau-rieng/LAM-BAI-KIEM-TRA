@@ -47,7 +47,7 @@ function doGet(e) {
     if (!ma) return json({ok: true, msg: 'So theo doi ' + lopNay() + ' dang hoat dong'});
     const hs = timHS(ma);
     if (!hs) return json({ok: false, msg: 'Khong tim thay ma HS'});
-    const dot = docCauHinh().filter(function (c) { return (c.mo || c.cho) && hopLop(c) && !(c.ca && c.ca !== c.madot); })
+    const dot = docCauHinh().filter(function (c) { return (c.mo || c.cho) && !c.giay && hopLop(c) && !(c.ca && c.ca !== c.madot); })
       .map(function (c) { return {madot: c.madot, ten: c.ten, phut: c.phut, tt: c.tt}; });
     return json({ok: true, hoten: hs.ten, dot: dot});
   } catch (err) {
@@ -104,6 +104,7 @@ function doPost(e) {
       case 'gv_tin_goiy':
       case 'gv_napde':
       case 'gv_xemde':
+      case 'gv_degiay':
       case 'gv_hinh':
       case 'gv_hinhde':
       case 'gv_ganhinh':
@@ -151,6 +152,7 @@ function doPost(e) {
         if (d.action === 'gv_tc_themkhung') return json(gvTcThemKhung(d));
         if (d.action === 'gv_tc_xoakhung') return json(gvTcXoaKhung(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
+        if (d.action === 'gv_degiay') return json(gvDeGiay(d));
         if (d.action === 'gv_hinh') return json(gvHinh(d));
         if (d.action === 'gv_hinhde') return json(gvHinhDe(d));
         if (d.action === 'gv_ganhinh') return json(gvGanHinh(d));
@@ -700,7 +702,8 @@ function gvDot() {
     const tt = ['MO', 'CHO'].indexOf(khongDau(r[3])) >= 0 ? khongDau(r[3]) : 'DONG';
     return {madot: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), phut: Number(r[2]) || 15,
       tt: tt, mo: tt === 'MO', xemlai: khongDau(r[4]) === 'CO', lop: String(r[5] || 'TAT CA').trim(),
-      batdauluc: r[6] instanceof Date ? r[6].getTime() : 0, ca: String(r[7] || '').trim()};
+      batdauluc: r[6] instanceof Date ? r[6].getTime() : 0, ca: String(r[7] || '').trim(),
+      giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9])};
   }), bayGio: Date.now()};
 }
 // Doi TrangThai (MO/DONG) hoac ChoXemLai (CO/KHONG) cua 1 dot trong KHO DE
@@ -718,6 +721,8 @@ function gvDat(d) {
   if (d.truong === 'ten' && !String(d.giatri || '').trim()) return {ok: false, msg: 'Ten bai khong duoc de trong'};
   if (d.truong === 'phut') { const ph = Math.round(Number(d.giatri)); if (!(ph >= 1 && ph <= 180)) return {ok: false, msg: 'Thoi gian phai tu 1 den 180 phut'}; }
   if (['trangthai', 'mo', 'xemlai', 'ten', 'phut', 'lop'].indexOf(d.truong) < 0) return {ok: false, msg: 'Truong khong hop le'};
+  if (d.truong === 'trangthai' && ['MO', 'CHO'].indexOf(String(d.giatri)) >= 0 && khongDau(sh.getRange(i0 + 1, 9).getValue()) === 'GIAY')
+    return {ok: false, msg: 'De giay khong mo tren iPad duoc'};
   hang.forEach(function (i) {
     if (d.truong === 'trangthai') {
       const g = ['MO', 'CHO'].indexOf(String(d.giatri)) >= 0 ? String(d.giatri) : 'DONG';
@@ -808,6 +813,21 @@ function gvXemDe(d) {
   html = html.replace('</h2>', '</h2>' + tom);
   const pdf = htmlSangPDF(html, 'XEM DE - ' + c.madot + '.pdf');
   return {ok: true, madot: c.madot, ten: c.ten, socau: de.length, thieu: thieu, sogt: coGT.length, pdf: Utilities.base64Encode(pdf.getBytes())};
+}
+// De giay: tra noi dung cac ma de cung ca (de in PDF tren trinh duyet + bang dap an)
+function gvDeGiay(d) {
+  const ca = String(d.ca || '').trim();
+  const ds = docCauHinh().filter(function (c) { return c.giay && (c.ca || c.madot) === ca; })
+    .sort(function (a, b) { return a.madot < b.madot ? -1 : 1; });
+  if (!ds.length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
+  const kt = docKienThuc();
+  return {ok: true, ca: ca, ma: ds.map(function (c) {
+    return {madot: c.madot, ten: c.ten, phut: c.phut, thang: c.thang || 'K12', lop: c.lop,
+      cau: docDe(c.madot).map(function (q) {
+        const k = kt[c.madot + '|' + q.cau] || {};
+        return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, da: q.da, w: q.w, hinh: q.hinh, goc: q.goc, kt: k.kt || '', md: k.md || ''};
+      })};
+  })};
 }
 // Cau hoi nhac toi hinh (Hinh 2, so do, do thi, hinh ben...) nhung khong co hinh nao gan vao
 function nhacHinh(q) {
@@ -959,9 +979,13 @@ function gvNapDe(d) {
       const ph = Math.round(Number(x.phut));
       if (!(ph >= 1 && ph <= 180)) return {ok: false, msg: 'Thoi gian de ' + madot + ' phai tu 1 den 180 phut'};
       const khoi = (/^H(\d+)-/i.exec(madot) || [])[1];
-      viec.push({madot: madot, ten: String(x.ten || '').trim() || madot, phut: ph,
+      const giay = khongDau(x.kieu) === 'GIAY', thang = docThang(x.thang);
+      if (giay && !/^[A-Za-z0-9_.\-]*-2\d\d$/.test(madot)) return {ok: false, msg: 'De giay ' + madot + ' phai co ma de dang 2xx (vd H10-B18-201)'};
+      if (x.thang && !thang) return {ok: false, msg: 'ThangDS cua de ' + madot + ' khong hop le'};
+      viec.push({madot: madot, ten: String(x.ten || '').trim() || madot, phut: ph, giay: giay, thang: thang, ca: giay ? String(x.ca || madot).trim() : '',
+        coGoc: (Array.isArray(x.cau) ? x.cau : []).some(function (r) { return Array.isArray(r) && String(r[10] || '').trim(); }),
         lop: String(x.lop || '').trim() ? chuanDsLop(x.lop) : lopMacDinh(Number(khoi)),
-        cau: cau.map(function (r) { const o = []; for (let j = 0; j < 10; j++) o.push(r[j] === undefined || r[j] === null ? '' : String(r[j])); return o; }),
+        cau: cau.map(function (r) { const o = []; for (let j = 0; j < 11; j++) o.push(r[j] === undefined || r[j] === null ? '' : String(r[j])); return o; }),
         kt: (Array.isArray(x.kt) ? x.kt : []).filter(function (r) { return Array.isArray(r) && String(r[0] || '').trim() !== ''; })
           .map(function (r) { return [madot, String(r[0]).trim(), String(r[1] || '').trim(), String(r[2] || '').trim()]; }),
         gt: gt, tab: tab, dong: dong});
@@ -973,16 +997,21 @@ function gvNapDe(d) {
       if (v.chiGT) return;
       const sh = v.tab || ss.insertSheet(v.madot);
       sh.clear();
-      const bang = [HEAD_DE].concat(v.cau);
-      sh.getRange(1, 1, bang.length, 10).setNumberFormat('@').setValues(bang);
-      sh.getRange(1, 1, 1, 10).setFontWeight('bold');
+      const nc = v.coGoc ? 11 : 10;
+      const bang = [HEAD_DE.concat(['Goc']).slice(0, nc)].concat(v.cau.map(function (r) { return r.slice(0, nc); }));
+      sh.getRange(1, 1, bang.length, nc).setNumberFormat('@').setValues(bang);
+      sh.getRange(1, 1, 1, nc).setFontWeight('bold');
       sh.setFrozenRows(1);
       if (v.dong) {
         ch.getRange(v.dong.so, 2, 1, 2).setValues([[v.ten, v.phut]]);
         ch.getRange(v.dong.so, 6).setValue(v.lop);
+        if (v.giay || v.thang) ch.getRange(v.dong.so, 8, 1, 3).setValues([[v.ca, v.giay ? 'GIAY' : '', v.thang]]);
       } else {
-        ch.appendRow([v.madot, v.ten, v.phut, 'DONG', 'KHONG', v.lop]);
+        ch.appendRow(v.giay || v.thang ? [v.madot, v.ten, v.phut, 'DONG', 'KHONG', v.lop, '', v.ca, v.giay ? 'GIAY' : '', v.thang] : [v.madot, v.ten, v.phut, 'DONG', 'KHONG', v.lop]);
         dongCH[v.madot] = {so: ch.getLastRow(), tt: 'DONG'};
+      }
+      if ((v.giay || v.thang) && !String(ch.getRange(1, 9).getValue()).trim()) {
+        ch.getRange(1, 7, 1, 4).setValues([[String(ch.getRange(1, 7).getValue() || 'BatDauLuc'), String(ch.getRange(1, 8).getValue() || 'CaThi'), 'Kieu', 'ThangDS']]).setFontWeight('bold');
       }
     });
     // KIEN THUC: bo dong cu cua cac dot vua nap (tru dot chi them loi giai), them dong moi
@@ -1003,7 +1032,7 @@ function gvNapDe(d) {
     if (gtMoi.length) gtSh.getRange(2, 1, gtMoi.length, 3).setNumberFormat('@').setValues(gtMoi);
     SpreadsheetApp.flush();
     const r = gvDot();
-    r.nap = viec.map(function (v) { return {madot: v.madot, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT}; });
+    r.nap = viec.map(function (v) { return {madot: v.madot, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
     return r;
   } finally {
     lock.releaseLock();
@@ -2092,7 +2121,9 @@ function docCauHinh() {
       mo: khongDau(r[3]) === 'MO', cho: khongDau(r[3]) === 'CHO', xemlai: khongDau(r[4]) === 'CO',
       lop: khongDau(r[5]) || 'TAT CA',
       batdauluc: r[6] instanceof Date ? r[6].getTime() : 0,
-      ca: String(r[7] || '').trim()
+      ca: String(r[7] || '').trim(),
+      // Cot I Kieu = GIAY: de in giay (khong lam tren iPad); cot J ThangDS: thang cau dung/sai rieng cua de
+      giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9])
     };
   });
 }
@@ -2143,7 +2174,8 @@ function docDe(madot) {
       cau: String(r[0]).trim() || String(i + 1), hoi: String(r[1]), loai: loai,
       pa: {A: String(r[2]), B: String(r[3]), C: String(r[4]), D: String(r[5])},
       da: da, hinh: chuanHinh(r[7], madot), khongHinh: String(r[7] || '').trim() === '-',
-      w: Number(String(r[9]).replace(',', '.')) || (loai === 'DS' ? 1 : 0.25)
+      w: Number(String(r[9]).replace(',', '.')) || (loai === 'DS' ? 1 : 0.25),
+      goc: String(r[10] === undefined ? '' : r[10]).trim()
     };
   });
 }
@@ -2151,6 +2183,16 @@ function docDe(madot) {
 // Cham diem theo loai cau (thang diem cua Bo: DS dung 1/2/3/4 y = 0,1/0,25/0,5/1)
 // ---------------------------------------------------------------------
 const THANG_DS = [0, 0.1, 0.25, 0.5, 1];
+// Thang cau dung/sai theo tung de (cot ThangDS cua CAU HINH): K12 = thang Bo; K10 = 0.2/0.4/0.7/1; hoac 4 so "0.2;0.4;0.7;1" (ti le cua diem cau)
+const THANG_MAU = {K12: [0, 0.1, 0.25, 0.5, 1], K10: [0, 0.2, 0.4, 0.7, 1]};
+function docThang(v) {
+  const s = khongDau(v).replace(/\s+/g, '');
+  if (!s) return '';
+  if (THANG_MAU[s]) return s;
+  const so = String(v).split(/[;\/|]+/).map(function (x) { return Number(String(x).trim().replace(',', '.')); });
+  return so.length === 4 && so.every(function (x) { return x >= 0 && x <= 1; }) ? so.join(';') : '';
+}
+function mangThang(t) { return !t ? THANG_DS : THANG_MAU[t] || [0].concat(String(t).split(';').map(Number)); }
 function chuanDS(s) {
   s = khongDau(s).replace(/[^DS-]/g, '');
   return (s + '----').slice(0, 4);
