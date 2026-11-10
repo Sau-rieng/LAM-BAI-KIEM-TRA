@@ -41,6 +41,7 @@ const HEAD_KQ = ['ThoiGian','MaTro','TenTro','Kieu','MaHS','HoTen','Nhom','Thanh
 // Cong vao
 // ---------------------------------------------------------------------
 function doGet(e) {
+  CH_NHO = null;
   try {
     const p = (e && e.parameter) || {};
     const ma = String(p.mahs || '').trim();
@@ -56,6 +57,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  CH_NHO = null;
   try {
     const d = JSON.parse(e.postData.contents);
     if (d.loai === 'hoatdong') return json(ghiHoatDong(d));
@@ -93,6 +95,8 @@ function doPost(e) {
       case 'gv_trochoi':
       case 'gv_tcdat':
       case 'gv_tckq':
+      case 'gv_giay_lop':
+      case 'gv_giay_nop':
       case 'gv_tcvach':
       case 'gv_tctd':
       case 'gv_ma':
@@ -137,6 +141,8 @@ function doPost(e) {
         if (d.action === 'gv_trochoi') return json(gvTroChoi());
         if (d.action === 'gv_tcdat') return json(gvTcDat(d));
         if (d.action === 'gv_tckq') return json(gvTcKetQua(d));
+        if (d.action === 'gv_giay_lop') return json(gvGiayLop(d));
+        if (d.action === 'gv_giay_nop') return json(gvGiayNop(d));
         if (d.action === 'gv_tcvach') return json(gvTcVach(d));
         if (d.action === 'gv_tctd') return json(gvTcTienDo(d));
         if (d.action === 'gv_ma') return json(gvMa());
@@ -815,6 +821,52 @@ function gvXemDe(d) {
   html = html.replace('</h2>', '</h2>' + tom);
   const pdf = htmlSangPDF(html, 'XEM DE - ' + c.madot + '.pdf');
   return {ok: true, madot: c.madot, ten: c.ten, socau: de.length, thieu: thieu, sogt: coGT.length, pdf: Utilities.base64Encode(pdf.getBytes())};
+}
+// ---- Cham phieu giay (quet bang dien thoai tren trang GV): chay o SO LOP ----
+function maCa(ca) { return docCauHinh().filter(function (c) { return c.giay && (c.ca || c.madot) === ca; }).map(function (c) { return c.madot; }); }
+// Danh sach HS + em nao da co bai cua dot (ca) nay
+function gvGiayLop(d) {
+  const ca = String(d.ca || '').trim(), mas = maCa(ca);
+  if (!mas.length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
+  const dsh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), hs = [];
+  if (dsh && dsh.getLastRow() > 1) dsh.getRange(2, 1, dsh.getLastRow() - 1, 2).getValues().forEach(function (r) { if (String(r[0]).trim()) hs.push({mahs: String(r[0]).trim(), hoten: String(r[1]).trim()}); });
+  const da = {}, sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 8).getValues().forEach(function (r) {
+    if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7]};
+  });
+  return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da};
+}
+// Luu 1 phieu: d.madot (ma de doc duoc), d.mahs, d.chon {cau: lua chon}, d.anh (data:image/jpeg;base64,... – tuy chon), d.ghichu, d.ghide
+function gvGiayNop(d) {
+  const ma = String(d.mahs || '').trim(), madot = String(d.madot || '').trim(), hs = timHS(ma);
+  if (!hs) return {ok: false, loi: 'sbd', msg: 'SBD ' + ma + ' khong co trong danh sach lop ' + lopNay()};
+  const c = timDot(madot);
+  if (!c || !c.giay) return {ok: false, loi: 'made', msg: 'Khong co ma de giay ' + madot};
+  const mas = maCa(c.ca || c.madot), de = docDe(madot), chon = d.chon || {};
+  const kq = chamBai(de, function (q) { return chon[q.cau]; });
+  const sh = layTab(TAB_BL, HEAD_BL);
+  // Em da co bai cua dot nay (bat ky ma de nao): chi ghi khi GV chon ghi de
+  const cu = [];
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 12).getValues().forEach(function (r, i) {
+    if (String(r[2]).trim() === ma && mas.indexOf(String(r[1]).trim()) >= 0) cu.push({dong: i + 2, madot: String(r[1]).trim(), diem: r[5], lan: Number(r[11]) || 1});
+  });
+  if (cu.length && !d.ghide) return {ok: false, loi: 'trung', msg: 'Da cham ' + hs.ten, hoten: hs.ten, cu: cu[cu.length - 1]};
+  let url = '';
+  if (d.anh && /^data:image\/jpeg;base64,/.test(String(d.anh))) {
+    try {
+      const tm = layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), c.ca || c.madot);
+      const f = tm.createFile(Utilities.newBlob(Utilities.base64Decode(String(d.anh).split(',')[1]), 'image/jpeg', 'PHIEU - ' + ma + ' - ' + hs.ten + ' - ' + madot + '.jpg'));
+      url = f.getUrl();
+    } catch (e) {}
+  }
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const lan = cu.length ? cu[cu.length - 1].lan + 1 : 1;
+    cu.slice().reverse().forEach(function (x) { sh.deleteRow(x.dong); });
+    sh.appendRow([new Date(), madot, ma, hs.ten, 'GIAY', kq.diem, kq.dung, de.length, '',
+      kq.ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|'), url, lan, String(d.ghichu || '').slice(0, 200)]);
+  } finally { lock.releaseLock(); }
+  return {ok: true, hoten: hs.ten, diem: kq.diem, tongW: kq.tongW, dung: kq.dung, tong: de.length, madot: madot};
 }
 // De giay: tra noi dung cac ma de cung ca (de in PDF tren trinh duyet + bang dap an)
 function gvDeGiay(d) {
@@ -2187,11 +2239,20 @@ function chuanHinh(h, madot) {
   if (!m) return h;
   return urlHinhDe({repo: GH_REPO_MAC_DINH}, m[1] || String(madot).trim(), m[2]);
 }
+let CH_NHO = null;   // CAU HINH doc 1 lan moi luot chay
+function chNho(madot) { if (!CH_NHO) { CH_NHO = {}; try { docCauHinh().forEach(function (c) { CH_NHO[c.madot] = c; }); } catch (e) {} } return CH_NHO[String(madot || '').trim()] || null; }
 function docDe(madot) {
   const sh = kho().getSheetByName(String(madot || '').trim());
   if (!sh) throw new Error('Kho de chua co tab ' + madot);
   const v = sh.getDataRange().getValues();
   v.shift();
+  // De giay: thang Dung/Sai rieng cua de, diem giu nguyen (khong quy ve 10)
+  const c = chNho(madot), thang = c && c.thang ? mangThang(c.thang) : null;
+  const de = docDe0(v, madot, thang);
+  if (c && c.giay) de.giay = true;
+  return de;
+}
+function docDe0(v, madot, thang) {
   return v.filter(function (r) { return String(r[1]).trim() !== ''; }).map(function (r, i) {
     const loai = ['DS', 'TLN'].indexOf(khongDau(r[8])) >= 0 ? khongDau(r[8]) : 'TN';
     let da = String(r[6]).trim();
@@ -2202,7 +2263,7 @@ function docDe(madot) {
       pa: {A: String(r[2]), B: String(r[3]), C: String(r[4]), D: String(r[5])},
       da: da, hinh: chuanHinh(r[7], madot), khongHinh: String(r[7] || '').trim() === '-',
       w: Number(String(r[9]).replace(',', '.')) || (loai === 'DS' ? 1 : 0.25),
-      goc: String(r[10] === undefined ? '' : r[10]).trim()
+      goc: String(r[10] === undefined ? '' : r[10]).trim(), thang: loai === 'DS' && thang ? thang : undefined
     };
   });
 }
@@ -2241,7 +2302,7 @@ function chamCau(q, x) {
     x = x ? chuanDS(x) : '';
     let soY = 0;
     for (let k = 0; k < 4; k++) if (x[k] && x[k] === q.da[k]) soY++;
-    return {chon: x.replace(/-+$/, '') ? x : '', dung: soY === 4, soY: soY, diemCau: THANG_DS[soY] * q.w};
+    return {chon: x.replace(/-+$/, '') ? x : '', dung: soY === 4, soY: soY, diemCau: (q.thang || THANG_DS)[soY] * q.w};
   }
   if (q.loai === 'TLN') {
     x = x.replace(/\|/g, '/').slice(0, 30);
@@ -2266,6 +2327,8 @@ function chamBai(de, layChon) {
     return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: q.hinh, w: q.w,
       chon: r.chon, dapan: q.da, dung: r.dung, soY: r.soY, diemCau: Math.round(r.diemCau * 100) / 100};
   });
+  // De giay: giu nguyen tong diem cac cau (thay cong diem tu luan sau); de iPad: quy ve thang 10
+  if (de.giay) return {ct: ct, dung: dung, diem: Math.round(tongDiem * 100) / 100, tongW: Math.round(tongW * 100) / 100};
   return {ct: ct, dung: dung, diem: tongW ? Math.round(tongDiem / tongW * 1000) / 100 : 0};
 }
 // Cot ChiTiet: ban moi ngan cach bang |, ban cu bang dau phay

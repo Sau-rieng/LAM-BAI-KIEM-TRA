@@ -2,8 +2,8 @@
    Một nguồn duy nhất cho cả IN PHIẾU (PHIEU.ve()) và QUÉT PHIẾU (PHIEU.o: tâm từng ô tô).
    KHÔNG đổi tọa độ khi đã in phiếu phát cho học sinh: phiếu cũ sẽ quét sai. Đổi bố cục thì tăng PHIEU.phienBan. */
 (function () {
-  var P = { phienBan: 1, w: 210, h: 297, r: 1.85 };
-  // 4 ô vuông đen ở góc (căn ảnh khi quét) + 2 ô giữa cạnh: tâm, cạnh 6 mm
+  var P = { phienBan: 2, w: 210, h: 297, r: 1.85 };
+  // 4 ô vuông đen ở góc (căn ảnh khi quét), cạnh 6 mm + 2 vạch đen giữa 2 cạnh dài (6 × 3 mm, khác hình để máy không nhầm là góc)
   P.neo = [[11, 11], [199, 11], [11, 286], [199, 286]];
   P.neoPhu = [[11, 148], [199, 148]];
   P.canhNeo = 6;
@@ -40,7 +40,8 @@
     function O(p) { s.push('<circle cx="' + p[0].toFixed(2) + '" cy="' + p[1].toFixed(2) + '" r="' + r + '" fill="#fff" stroke="#000" stroke-width="0.25"/>'); }
     function V(p, c2) { c2 = c2 || P.canhNeo; s.push('<rect x="' + (p[0] - c2 / 2) + '" y="' + (p[1] - c2 / 2) + '" width="' + c2 + '" height="' + c2 + '" fill="#000"/>'); }
     function L(x1, y1, x2, y2, w) { s.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#000" stroke-width="' + (w || 0.3) + '"/>'); }
-    P.neo.concat(P.neoPhu).forEach(function (p) { V(p); });
+    P.neo.forEach(function (p) { V(p); });
+    P.neoPhu.forEach(function (p) { s.push('<rect x="' + (p[0] - 3) + '" y="' + (p[1] - 1.5) + '" width="6" height="3" fill="#000"/>'); });
     // ---- Đầu phiếu ----
     T(72, 21, 'PHIẾU TRẢ LỜI TRẮC NGHIỆM', { c: 5.2, b: 1, n: 'middle' });
     T(72, 28, 'Kỳ thi: ' + (opt.ky || '................................................'), { c: 3.4, n: 'middle' });

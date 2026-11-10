@@ -114,6 +114,9 @@
       P.o.p1.slice(0, 10).forEach(function (row) { diem -= doDam(a, I, ap(H, [row[0][0] + 3.65, row[0][1]]), Math.max(1, s0 * 0.6)); });
       if (!tot || diem > tot.diem) tot = { H: H, diem: diem, s0: s0, k: k };
     }
+    // Kiểm tra lại: phần lớn ô vuông nhỏ phải nằm đúng chỗ dự đoán (tránh nhầm khi phiếu ra ngoài khung hình)
+    var thay = MOC.filter(function (m) { return chinhMoc(a, ap(tot.H, m), tot.s0 * 3.2); }).length;
+    if (thay < MOC.length * 0.6) return { ok: false, loi: 'Chưa thấy trọn tờ phiếu. Đưa máy ra xa một chút cho đủ 4 ô vuông ở 4 góc.' };
     var H = tot.H, s0 = tot.s0, src2 = [P.neo[0], P.neo[1], P.neo[3], P.neo[2]], dst2 = [0, 1, 2, 3].map(function (i) { var p = q[(i + tot.k) % 4]; return [p.x, p.y]; });
     // Chỉnh lại: thêm 2 ô giữa cạnh + các ô vuông nhỏ tìm thấy
     P.neoPhu.concat(MOC).forEach(function (m, i) {
@@ -145,14 +148,14 @@
     o.p1 = P.o.p1.map(function (c) { return c.map(do1); });
     o.p2 = P.o.p2.map(function (c) { return c.map(function (y) { return [do1(y[0]), do1(y[1])]; }); });
     o.p3 = P.o.p3.map(function (c) { return { am: do1(c.am), phay: c.phay.map(do1), so: c.so.map(function (col) { return col.map(do1); }) }; });
-    // Trừ nền cục bộ (ánh sáng không đều, bóng đổ): độ đậm trung vị của các ô lân cận trong vòng 9 mm
+    // Trừ nền cục bộ (ánh sáng không đều, bóng đổ): mức 20% thấp nhất của các ô lân cận trong vòng 12 mm (không bị các ô đã tô kéo lên)
     var ds = [];
     o.sbd.concat(o.made, o.p1).forEach(function (c) { c.forEach(function (x) { ds.push(x); }); });
     o.p2.forEach(function (c) { c.forEach(function (y) { ds.push(y[0], y[1]); }); });
     o.p3.forEach(function (c) { ds.push(c.am, c.phay[0], c.phay[1]); c.so.forEach(function (col) { col.forEach(function (x) { ds.push(x); }); }); });
     var nen = ds.map(function (x) {
-      var g = []; ds.forEach(function (y) { if (y !== x && Math.abs(y.m[0] - x.m[0]) < 9 && Math.abs(y.m[1] - x.m[1]) < 9) g.push(y.v); });
-      g.sort(function (a, b) { return a - b; }); return g.length ? g[Math.floor(g.length * 0.4)] : 0;
+      var g = []; ds.forEach(function (y) { if (y !== x && Math.abs(y.m[0] - x.m[0]) < 12 && Math.abs(y.m[1] - x.m[1]) < 12) g.push(y.v); });
+      g.sort(function (a, b) { return a - b; }); return g.length ? g[Math.floor(g.length * 0.2)] : 0;
     });
     ds.forEach(function (x, i) { x.v0 = x.v; x.v = Math.max(0, x.v - nen[i]); });
     return Object.assign({ ok: true, H: H2, lech: lech, soMoc: src2.length, o: o }, giaiMa(o));
@@ -191,7 +194,7 @@
       if (ph[1] && ph[2]) loi = 'tô 2 dấu phẩy';
       var cuoi = -1; kt.forEach(function (x, i) { if (x) cuoi = i; });
       var s = kt.slice(0, cuoi + 1).join('');
-      if (cuoi >= 0 && kt.slice(0, cuoi + 1).some(function (x) { return !x; })) loi = loi || 'bỏ trống cột ' + (kt.indexOf('') + 1) + ' ở giữa';
+      if (cuoi >= 0 && kt.slice(0, cuoi + 1).some(function (x) { return !x; })) loi = loi || (kt.indexOf('') === 0 ? 'bỏ trống cột đầu' : 'bỏ trống cột ' + (kt.indexOf('') + 1) + ' ở giữa');
       if (/^-?,|,$/.test(s)) loi = loi || 'dấu phẩy đặt sai chỗ';
       if (s === '-') loi = loi || 'chỉ tô dấu −';
       var mo = c.am.nghi || c.phay.some(function (x) { return x.nghi; }) || c.so.some(function (col) { return col.some(function (x) { return x.nghi; }); });
@@ -208,5 +211,14 @@
     for (var i = 0; i < w * h; i++) g[i] = (d[i * 4] * 77 + d[i * 4 + 1] * 150 + d[i * 4 + 2] * 29) >> 8;
     return { w: w, h: h, g: g, s: s, canvas: c2 };
   }
-  window.OMR = { doc: doc, tuCanvas: tuCanvas, ap: ap, homo: homo };
+  // Xem nhanh khung hình camera: có đủ 4 ô vuông góc chưa (để tự chụp)
+  function timGoc(a) {
+    var I = tichPhan(a), g = do4Goc(timKhoiDen(a, I)); if (!g) return null; var q = g.q, S = Math.abs(dienTich(q));
+    // 4 góc phiếu: cạnh dài / cạnh ngắn ≈ 188/275 → tỉ lệ 1.46 (cho phép nghiêng)
+    var d = [0, 1, 2, 3].map(function (i) { var p1 = q[i], p2 = q[(i + 1) % 4]; return Math.hypot(p1.x - p2.x, p1.y - p2.y); });
+    var tl = ((d[0] + d[2]) / 2) / ((d[1] + d[3]) / 2); if (tl < 1) tl = 1 / tl;
+    if (tl < 1.2 || tl > 1.8) return null;
+    return { q: q.map(function (p) { return [p.x, p.y]; }), tile: S / (a.w * a.h) };
+  }
+  window.OMR = { doc: doc, tuCanvas: tuCanvas, timGoc: timGoc, ap: ap, homo: homo };
 })();
