@@ -10,7 +10,7 @@ Tải file này vào kênh ra đề cùng `Quy-uoc-chung.md`, `K1-Ra-de.md`, `Da
 | II | Đúng/Sai, mỗi câu 4 ý a b c d | 8 câu |
 | III | Trả lời ngắn, đáp án là **số** | 6 câu |
 
-- Số câu mỗi phần và điểm mỗi câu theo yêu cầu giáo viên. **Tổng điểm phải đúng 10.**
+- Số câu mỗi phần và điểm mỗi câu theo yêu cầu giáo viên. Tổng điểm **không bắt buộc** bằng 10 (ví dụ đề có thêm phần tự luận chấm tay).
 - Thang câu đúng/sai (cột `ThangDS`):
   - `K10`: đúng 1/2/3/4 ý được 0.2 / 0.4 / 0.7 / 1 × điểm câu.
   - `K12` (thang Bộ): đúng 1/2/3/4 ý được 0.1 / 0.25 / 0.5 / 1 × điểm câu.
@@ -54,7 +54,7 @@ Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo`) và `GIAI THICH THEM` (`
 
 ## 5. Trang nạp tự kiểm (lỗi thì không cho nạp)
 
-- Mã đề phải là 2xx; mỗi phần không vượt 40 · 8 · 6 câu; tổng điểm đúng 10; thứ tự phần I → II → III.
+- Mã đề phải là 2xx; mỗi phần không vượt 40 · 8 · 6 câu; thứ tự phần I → II → III.
 - Câu nào cũng có `Goc` đúng dạng; không hai câu cùng câu gốc; mã nào cũng đủ các câu gốc.
 - Cùng câu gốc ở các mã phải: cùng nội dung câu dẫn, cùng bộ phương án, đáp án trỏ cùng phương án đúng; ý Đ/S khớp thứ tự ghi ở `Goc`; cùng đáp án Phần III, cùng điểm, cùng kiến thức.
 
@@ -63,5 +63,5 @@ Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo`) và `GIAI THICH THEM` (`
 - [ ] Đủ 4 mã (hoặc số mã giáo viên yêu cầu), tên tab đúng `…-201` … `…-204`.
 - [ ] Đã sửa `DapAn` sau khi trộn phương án/ý; đối chiếu lại từng mã với đề gốc.
 - [ ] Cột `Goc` có ở mọi câu; câu Đ/S ghi đúng thứ tự ý.
-- [ ] Tổng điểm 10; `ThangDS` đúng khối giáo viên yêu cầu.
+- [ ] Điểm từng câu đúng yêu cầu giáo viên; `ThangDS` đúng khối giáo viên yêu cầu.
 - [ ] Mỗi mã đủ kiến thức, mức độ, lời giải cho mọi câu.

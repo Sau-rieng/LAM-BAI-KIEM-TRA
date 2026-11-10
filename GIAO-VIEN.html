@@ -4049,7 +4049,6 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (!/-2\d\d$/.test(d.madot)) d.loi.push('Đề giấy phải có mã đề dạng 2xx (vd H10-B18-201), đang là ' + d.madot + '.');
     if (!thangHop(d.thang)) d.loi.push('ThangDS "' + d.thang + '" không hợp lệ: ghi K10, K12 hoặc 4 số như 0.2;0.4;0.7;1.');
     ['TN', 'DS', 'TLN'].forEach(function (k) { if (d.dem[k] > SUC_PHIEU[k]) d.loi.push({ TN: 'Phần I', DS: 'Phần II', TLN: 'Phần III' }[k] + ' có ' + d.dem[k] + ' câu, vượt sức chứa phiếu trả lời (' + SUC_PHIEU[k] + ' câu).'); });
-    if (Math.abs(d.tong - 10) > 1e-6) d.loi.push('Tổng điểm đề giấy phải đúng 10 (đang là ' + Number(d.tong.toFixed(3)) + ').');
     var thu = { TN: 1, DS: 2, TLN: 3 }, truoc = 0, sai = false;
     d.cau.forEach(function (c) { var t = thu[c.hang[8]]; if (t < truoc) sai = true; truoc = t; });
     if (sai) d.loi.push('Các câu phải xếp theo thứ tự Phần I (TN) → Phần II (Đ/S) → Phần III (TLN).');
@@ -4129,7 +4128,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       }
       var md = ['Biết', 'Hiểu', 'Vận dụng'].filter(function (k) { return d.md[k]; }).map(function (k) { return k + ' ' + d.md[k]; }).join(' · ');
       var tom = '<span>' + d.cau.length + ' câu</span>' + ['TN', 'DS', 'TLN'].filter(function (k) { return d.dem[k]; }).map(function (k) { return '<span>' + d.dem[k] + ' ' + { TN: 'TN', DS: 'Đ/S', TLN: 'TLN' }[k] + '</span>'; }).join('') +
-        '<span>Tổng ' + Number(d.tong.toFixed(2)) + ' điểm' + (Math.abs(d.tong - 10) > 1e-6 ? ' → quy về 10' : '') + '</span>' +
+        '<span>Tổng ' + Number(d.tong.toFixed(2)) + ' điểm' + (Math.abs(d.tong - 10) > 1e-6 && !d.giay ? ' → quy về 10' : '') + '</span>' +
         (d.hinh.length ? '<span class="hinhTT">' + d.hinh.length + ' hình: đang kiểm tra…</span>' : '') +
         '<span class="' + (d.kt.length === d.cau.length ? 'tot' : 'xau') + '">Kiến thức ' + d.kt.length + '/' + d.cau.length + ' câu</span>' +
         '<span class="' + (d.gt.length === d.cau.length ? 'tot' : 'xau') + '">💡 Lời giải ' + d.gt.length + '/' + d.cau.length + ' câu</span>' + (md ? '<span>' + md + '</span>' : '');
