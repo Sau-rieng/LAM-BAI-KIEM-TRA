@@ -105,6 +105,7 @@ function doPost(e) {
       case 'gv_napde':
       case 'gv_xemde':
       case 'gv_degiay':
+      case 'gv_giay_diem':
       case 'gv_hinh':
       case 'gv_hinhde':
       case 'gv_ganhinh':
@@ -153,6 +154,7 @@ function doPost(e) {
         if (d.action === 'gv_tc_xoakhung') return json(gvTcXoaKhung(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
         if (d.action === 'gv_degiay') return json(gvDeGiay(d));
+        if (d.action === 'gv_giay_diem') return json(gvGiayDiem(d));
         if (d.action === 'gv_hinh') return json(gvHinh(d));
         if (d.action === 'gv_hinhde') return json(gvHinhDe(d));
         if (d.action === 'gv_ganhinh') return json(gvGanHinh(d));
@@ -828,6 +830,31 @@ function gvDeGiay(d) {
         return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, da: q.da, w: q.w, hinh: q.hinh, goc: q.goc, kt: k.kt || '', md: k.md || ''};
       })};
   })};
+}
+// GV dat diem tung phan cho ca 1 dot de giay: tn = diem/cau Phan I; ds = [dung 1 y, 2 y, 3 y, 4 y]; tln = diem/cau Phan III
+// Ghi cot Diem cua moi ma de (DS: diem 4 y) va cot ThangDS cua CAU HINH (ti le = diem k y / diem 4 y)
+function gvGiayDiem(d) {
+  const ca = String(d.ca || '').trim(), so = function (x) { return Math.round(Number(String(x).replace(',', '.')) * 1000) / 1000; };
+  const tn = so(d.tn), tln = so(d.tln), ds = (Array.isArray(d.ds) ? d.ds : []).map(so);
+  if (!(tn > 0 && tn <= 10) || !(tln > 0 && tln <= 10)) return {ok: false, msg: 'Diem moi cau Phan I, Phan III phai lon hon 0'};
+  if (ds.length !== 4 || !(ds[3] > 0 && ds[3] <= 10) || ds.some(function (x, i) { return !(x >= 0) || (i && x < ds[i - 1]); }))
+    return {ok: false, msg: 'Diem Phan II phai tang dan: dung 1 y <= 2 y <= 3 y <= 4 y'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const ch = kho().getSheetByName('CAU HINH'), v = ch.getDataRange().getValues(), thang = ds.map(function (x) { return Math.round(x / ds[3] * 10000) / 10000; }).join(';');
+    let n = 0;
+    for (let i = 1; i < v.length; i++) {
+      const m = String(v[i][0]).trim();
+      if (khongDau(v[i][8]) !== 'GIAY' || (String(v[i][7] || '').trim() || m) !== ca) continue;
+      const sh = kho().getSheetByName(m); if (!sh || sh.getLastRow() < 2) continue;
+      const loai = sh.getRange(2, 9, sh.getLastRow() - 1, 1).getValues();
+      sh.getRange(2, 10, loai.length, 1).setNumberFormat('@').setValues(loai.map(function (r) { const l = khongDau(r[0]); return [String(l === 'DS' ? ds[3] : l === 'TLN' ? tln : tn)]; }));
+      ch.getRange(i + 1, 10).setValue(thang); n++;
+    }
+    if (!n) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
+    SpreadsheetApp.flush();
+    const r = gvDot(); r.so = n; return r;
+  } finally { lock.releaseLock(); }
 }
 // Cau hoi nhac toi hinh (Hinh 2, so do, do thi, hinh ben...) nhung khong co hinh nao gan vao
 function nhacHinh(q) {

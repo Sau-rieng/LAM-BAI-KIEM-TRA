@@ -10,7 +10,7 @@ Tải file này vào kênh ra đề cùng `Quy-uoc-chung.md`, `K1-Ra-de.md`, `Da
 | II | Đúng/Sai, mỗi câu 4 ý a b c d | 8 câu |
 | III | Trả lời ngắn, đáp án là **số** | 6 câu |
 
-- Số câu mỗi phần và điểm mỗi câu theo yêu cầu giáo viên. Tổng điểm **không bắt buộc** bằng 10 (ví dụ đề có thêm phần tự luận chấm tay).
+- Số câu mỗi phần theo yêu cầu giáo viên. Điểm ghi theo mặc định; giáo viên tự chỉnh lại trên trang giáo viên (🎯 Điểm từng phần). Tổng điểm **không bắt buộc** bằng 10 (ví dụ đề có thêm phần tự luận chấm tay).
 - Thang câu đúng/sai (cột `ThangDS`):
   - `K10`: đúng 1/2/3/4 ý được 0.2 / 0.4 / 0.7 / 1 × điểm câu.
   - `K12` (thang Bộ): đúng 1/2/3/4 ý được 0.1 / 0.25 / 0.5 / 1 × điểm câu.
