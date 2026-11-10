@@ -904,6 +904,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="cau-hinh-lop.js"></script>
 <script src="doc-excel.js"></script>
+<script src="phieu-omr.js"></script>
 <script src="hinh/giao-dien/bieu-tuong.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){var e=document.getElementById('abTinIc');if(e&&window.BT)e.innerHTML=BT.chuong;});</script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
@@ -1162,6 +1163,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var ca = {}, thu = [];
     ds.forEach(function (d) { var k = d.ca || d.madot; if (!ca[k]) { ca[k] = []; thu.push(k); } ca[k].push(d); });
     var t = document.createElement('div'); t.className = 'nhom'; t.textContent = '🖨 Đề giấy (' + thu.length + ' đợt)'; box.appendChild(t);
+    var nP = document.createElement('button'); nP.className = 'suaDe'; nP.textContent = '🧾 In phiếu trả lời trắc nghiệm (phiếu trống, dùng chung mọi bài)';
+    nP.onclick = inPhieu; box.appendChild(nP);
     thu.sort().reverse().forEach(function (k) {
       var g = ca[k].sort(function (a, b) { return a.madot < b.madot ? -1 : 1; }), d = g[0];
       var el = document.createElement('div'); el.className = 'card dot giay';
@@ -1237,6 +1240,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         }).catch(function (e) { kq.innerHTML = '<div class="xdBox xau">Chưa lưu được: ' + esc(e.message) + '</div>'; b.disabled = false; });
       };
     }).catch(function (e) { o.innerHTML = '<div class="xdBox xau">' + esc(e.message) + '</div>'; });
+  }
+  function inPhieu() {
+    if (!window.PHIEU) { alert('Chưa tải được mẫu phiếu (phieu-omr.js). Tải lại trang rồi thử lại.'); return; }
+    var w = window.open('', '_blank'); if (!w) { alert('Trình duyệt chặn cửa sổ mới. Cho phép cửa sổ bật lên (pop-up) rồi bấm lại.'); return; }
+    var css = CSS_IN.replace('@page{size:A4;margin:12mm 12mm 14mm}', '@page{size:A4;margin:0}') + '@media screen{.trang{padding:0;width:210mm}}.trang svg{display:block}';
+    w.document.open(); w.document.write('<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>PHIEU-TRA-LOI</title><style>' + css + '</style></head><body>' +
+      thanhIn('Phiếu trả lời trắc nghiệm · A4') + '<div class="thanh" style="background:#fff7d6;color:#000;font-weight:400;position:static">Khi in: khổ A4, tỉ lệ 100% (không chọn “Vừa trang”), lề 0 hoặc mặc định, bỏ “Đầu trang và chân trang”. In thử 1 tờ, đặt lên tờ mẫu xem 4 ô vuông đen ở 4 góc còn đủ.</div>' +
+      '<div class="trang">' + PHIEU.ve() + '</div></body></html>');
+    w.document.close();
   }
   function khoiSo(madot) { return (/^[A-Z]+(\d+)-/i.exec(madot) || [])[1] || ''; }
   function monChu(madot) { var k = khoiSo(madot); return k === '9' || k === '8' || k === '7' || k === '6' ? 'KHOA HỌC TỰ NHIÊN ' + k : 'HÓA HỌC – Lớp ' + k; }
