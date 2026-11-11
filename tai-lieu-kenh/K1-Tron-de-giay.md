@@ -58,10 +58,21 @@ Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo`) và `GIAI THICH THEM` (`
 - Câu nào cũng có `Goc` đúng dạng; không hai câu cùng câu gốc; mã nào cũng đủ các câu gốc.
 - Cùng câu gốc ở các mã phải: cùng nội dung câu dẫn, cùng bộ phương án, đáp án trỏ cùng phương án đúng; ý Đ/S khớp thứ tự ghi ở `Goc`; cùng đáp án Phần III, cùng điểm, cùng kiến thức.
 
-## 6. Claude tự soát trước khi gửi file
+## 6. File gửi giáo viên
+
+Ngoài file Excel nạp kho, gửi kèm để in:
+
+- **Mỗi mã đề 1 file Word và 1 file PDF**: `DE-<mã đợt>.docx` và `DE-<mã đợt>.pdf` (vd `DE-H12-HK1-202.docx`, `DE-H12-HK1-202.pdf`).
+  - Khổ A4, chữ Times New Roman, in đen trắng; đầu đề như đề của Bộ, ô "Mã đề 2xx" bên phải, dòng họ tên, số báo danh.
+  - Đủ Phần I, II, III theo thứ tự đã trộn, phần tự luận (nếu có) giống nhau ở mọi mã, có hình và bảng.
+  - Chân trang "Mã đề 2xx – Trang n", số trang đánh từ 1 ở mỗi mã.
+- **1 file đáp án** Word và PDF: đáp án mọi mã theo từng phần, kèm bảng đối chiếu câu của từng mã về câu gốc.
+
+## 7. Claude tự soát trước khi gửi file
 
 - [ ] Đủ 4 mã (hoặc số mã giáo viên yêu cầu), tên tab đúng `…-201` … `…-204`.
 - [ ] Đã sửa `DapAn` sau khi trộn phương án/ý; đối chiếu lại từng mã với đề gốc.
 - [ ] Cột `Goc` có ở mọi câu; câu Đ/S ghi đúng thứ tự ý.
 - [ ] Điểm từng câu đúng yêu cầu giáo viên; `ThangDS` đúng khối giáo viên yêu cầu.
 - [ ] Mỗi mã đủ kiến thức, mức độ, lời giải cho mọi câu.
+- [ ] Đủ file Word + PDF cho từng mã và file đáp án; mở file PDF xem lại hình, bảng, số trang.
