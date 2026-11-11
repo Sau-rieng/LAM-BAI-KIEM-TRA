@@ -36,6 +36,9 @@ const HEAD_NH = ['Nhom','MaHS','HoTen','CapNhat'];
 // ChiTiet: JSON [[ma cau trong bo, lua chon, diem], ...] theo thu tu 11 cau cua luot.
 const TAB_KQ = 'KQ TRO CHOI';
 const HEAD_KQ = ['ThoiGian','MaTro','TenTro','Kieu','MaHS','HoTen','Nhom','ThanhVien','Diem','DungSai','ThoiGian_giay','MaLuot','MaBo','ChiTiet','LyDo'];
+// Anh phieu giay "chup truoc – cham sau": moi anh 1 dong; TrangThai CHO (chua cham) / DA (da cham, MaHS) / BO (bo qua)
+const TAB_AG = 'ANH GIAY';
+const HEAD_AG = ['ThoiGian','Ca','FileId','Url','SBD_doc','MaDe_doc','TrangThai','MaHS','GhiChu'];
 
 // ---------------------------------------------------------------------
 // Cong vao
@@ -97,6 +100,10 @@ function doPost(e) {
       case 'gv_tckq':
       case 'gv_giay_lop':
       case 'gv_giay_nop':
+      case 'gv_giay_anh':
+      case 'gv_giay_dsanh':
+      case 'gv_giay_layanh':
+      case 'gv_giay_boanh':
       case 'gv_tcvach':
       case 'gv_tctd':
       case 'gv_ma':
@@ -143,6 +150,10 @@ function doPost(e) {
         if (d.action === 'gv_tckq') return json(gvTcKetQua(d));
         if (d.action === 'gv_giay_lop') return json(gvGiayLop(d));
         if (d.action === 'gv_giay_nop') return json(gvGiayNop(d));
+        if (d.action === 'gv_giay_anh') return json(gvGiayAnh(d));
+        if (d.action === 'gv_giay_dsanh') return json(gvGiayDsAnh(d));
+        if (d.action === 'gv_giay_layanh') return json(gvGiayLayAnh(d));
+        if (d.action === 'gv_giay_boanh') return json(gvGiayBoAnh(d));
         if (d.action === 'gv_tcvach') return json(gvTcVach(d));
         if (d.action === 'gv_tctd') return json(gvTcTienDo(d));
         if (d.action === 'gv_ma') return json(gvMa());
@@ -831,10 +842,10 @@ function gvGiayLop(d) {
   const dsh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), hs = [];
   if (dsh && dsh.getLastRow() > 1) dsh.getRange(2, 1, dsh.getLastRow() - 1, 2).getValues().forEach(function (r) { if (String(r[0]).trim()) hs.push({mahs: String(r[0]).trim(), hoten: String(r[1]).trim()}); });
   const da = {}, sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 8).getValues().forEach(function (r) {
-    if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7]};
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 13).getValues().forEach(function (r) {
+    if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7], ct: String(r[9] || ''), anh: String(r[10] || ''), ghi: String(r[12] || '')};
   });
-  return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da};
+  return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da, cho: demAnhCho(ca)};
 }
 // Luu 1 phieu: d.madot (ma de doc duoc), d.mahs, d.chon {cau: lua chon}, d.anh (data:image/jpeg;base64,... – tuy chon), d.ghichu, d.ghide
 function gvGiayNop(d) {
@@ -852,7 +863,8 @@ function gvGiayNop(d) {
   });
   if (cu.length && !d.ghide) return {ok: false, loi: 'trung', msg: 'Da cham ' + hs.ten, hoten: hs.ten, cu: cu[cu.length - 1]};
   let url = '';
-  if (d.anh && /^data:image\/jpeg;base64,/.test(String(d.anh))) {
+  if (d.anhId) { try { url = DriveApp.getFileById(String(d.anhId)).setName('PHIEU - ' + ma + ' - ' + hs.ten + ' - ' + madot + '.jpg').getUrl(); } catch (e) {} }
+  else if (d.anh && /^data:image\/jpeg;base64,/.test(String(d.anh))) {
     try {
       const tm = layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), c.ca || c.madot);
       const f = tm.createFile(Utilities.newBlob(Utilities.base64Decode(String(d.anh).split(',')[1]), 'image/jpeg', 'PHIEU - ' + ma + ' - ' + hs.ten + ' - ' + madot + '.jpg'));
@@ -866,8 +878,48 @@ function gvGiayNop(d) {
     sh.appendRow([new Date(), madot, ma, hs.ten, 'GIAY', kq.diem, kq.dung, de.length, '',
       kq.ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|'), url, lan, String(d.ghichu || '').slice(0, 200)]);
   } finally { lock.releaseLock(); }
+  if (d.anhId) datAnh(String(d.anhId), 'DA', ma);
   return {ok: true, hoten: hs.ten, diem: kq.diem, tongW: kq.tongW, dung: kq.dung, tong: de.length, madot: madot};
 }
+// ---- Chup truoc – cham sau ----
+function thuMucAnhGiay(ca) { return layThuMuc(layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), ca), 'ANH CHUP'); }
+function gvGiayAnh(d) {
+  const ca = String(d.ca || '').trim();
+  if (!maCa(ca).length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
+  if (!/^data:image\/jpeg;base64,/.test(String(d.anh || ''))) return {ok: false, msg: 'Thieu anh'};
+  const sbd = String(d.sbd || '').replace(/[^0-9_*]/g, '').slice(0, 8), made = String(d.made || '').replace(/[^0-9_*]/g, '').slice(0, 4);
+  const f = thuMucAnhGiay(ca).createFile(Utilities.newBlob(Utilities.base64Decode(String(d.anh).split(',')[1]), 'image/jpeg',
+    'CHUP - ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss') + ' - ' + (sbd || 'khong-ro') + '.jpg'));
+  const sh = layTab(TAB_AG, HEAD_AG);
+  sh.appendRow([new Date(), ca, f.getId(), f.getUrl(), "'" + sbd, "'" + made, 'CHO', '', '']);
+  return {ok: true, id: f.getId(), cho: demAnhCho(ca)};
+}
+function docAnhGiay(ca) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_AG), ra = [];
+  if (!sh || sh.getLastRow() < 2) return ra;
+  sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_AG.length).getValues().forEach(function (r, i) {
+    if (String(r[1]).trim() === ca) ra.push({dong: i + 2, t: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), id: String(r[2]), url: String(r[3]), sbd: String(r[4]).replace(/^'/, ''), made: String(r[5]).replace(/^'/, ''), tt: String(r[6]), mahs: String(r[7])});
+  });
+  return ra;
+}
+function demAnhCho(ca) { return docAnhGiay(ca).filter(function (x) { return x.tt === 'CHO'; }).length; }
+function gvGiayDsAnh(d) {
+  const ca = String(d.ca || '').trim();
+  return {ok: true, ca: ca, anh: docAnhGiay(ca).map(function (x) { delete x.dong; return x; })};
+}
+function gvGiayLayAnh(d) {
+  const id = String(d.id || '');
+  if (!docAnhGiay(String(d.ca || '').trim()).some(function (x) { return x.id === id; })) return {ok: false, msg: 'Khong co anh nay'};
+  const b = DriveApp.getFileById(id).getBlob();
+  return {ok: true, id: id, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(b.getBytes())};
+}
+function datAnh(id, tt, mahs) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_AG);
+  if (!sh || sh.getLastRow() < 2) return;
+  const v = sh.getRange(2, 3, sh.getLastRow() - 1, 1).getValues();
+  for (let i = 0; i < v.length; i++) if (String(v[i][0]) === id) { sh.getRange(i + 2, 7, 1, 2).setValues([[tt, mahs || '']]); return; }
+}
+function gvGiayBoAnh(d) { datAnh(String(d.id || ''), d.lai ? 'CHO' : 'BO', ''); return {ok: true}; }
 // De giay: tra noi dung cac ma de cung ca (de in PDF tren trinh duyet + bang dap an)
 function gvDeGiay(d) {
   const ca = String(d.ca || '').trim();
