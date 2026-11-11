@@ -3,7 +3,7 @@
   - KHO-DE-<tiền tố>-GIAY.xlsx : các mã 2xx (cột Goc, Kieu GIAY, ThangDS) để nạp trên trang giáo viên
   - DE-<tiền tố>-2xx.docx / .pdf : mỗi mã một file để in (đủ Phần I–III đã trộn + phần tự luận lấy từ đề Word)
   - DAP-AN-<tiền tố>.docx / .pdf : đáp án mọi mã + bảng đối chiếu về câu gốc
-Cách chạy (trong repo LAM-BAI-KIEM-TRA):
+Cách chạy (ở kênh TRỘN ĐỀ, hoặc trong repo LAM-BAI-KIEM-TRA):
   python3 tools/tron-de-giay/tron.py --kho KHO-DE-H12-HK1-201.xlsx --word H12-HK1-201.docx --so-ma 4 --ra ra/
 Tùy chọn: --tron-ca-goc (mã 201 cũng trộn; mặc định 201 giữ nguyên thứ tự gốc) · --truong "TRƯỜNG THPT ..." · --ky "ĐỀ KIỂM TRA CUỐI HỌC KÌ I"
           --nam "2026 – 2027" · --thang K10|K12|"0.2;0.4;0.7;1" · --lop "12G01, 12G02" · --seed 1 · --khong-pdf
@@ -125,6 +125,26 @@ def duongHinh(h, maGoc):
     rel = 'hinh/%s/%s' % (m.group(1), m.group(2)) if m else 'hinh/%s/%s' % (maGoc, os.path.basename(h))
     return rel
 
+def timHinh(rel, cs):
+    """Tìm file hình: thư mục --hinh → hình trong đề Word (word/media) → repo LAM-BAI-KIEM-TRA."""
+    if not rel: return None
+    ten = os.path.basename(rel)
+    for d in cs.thuMuc:
+        f = os.path.join(d, ten)
+        if os.path.exists(f): return f
+    f = os.path.join(REPO, rel)
+    return f if os.path.exists(f) else None
+
+def layHinhWord(duong, ra):
+    """Chép hình trong file Word (word/media/imageN.*) ra thư mục tạm để dùng khi không có thư mục hình."""
+    import zipfile
+    d = os.path.join(ra, '_hinh_word'); os.makedirs(d, exist_ok=True)
+    with zipfile.ZipFile(duong) as z:
+        for n in z.namelist():
+            if n.startswith('word/media/') and not n.endswith('/'):
+                open(os.path.join(d, os.path.basename(n)), 'wb').write(z.read(n))
+    return d
+
 # ---------------- HTML (ô NoiDung) → Word ----------------
 class HtmlDoc(HTMLParser):
     """Chuyển nội dung ô (chữ + <br> <b> <i> <sub> <sup> <table> <img>) thành các đoạn trong Word."""
@@ -177,8 +197,8 @@ class VietWord:
                 rr = pp.add_run(r[j] if j < len(r) else ''); rr.font.size = Pt(10.5); rr.bold = i == 0
         s.p = None
     def anh(s, src):
-        rel = duongHinh(src, s.cs.maGoc); f = os.path.join(REPO, rel) if rel else None
-        if not f or not os.path.exists(f): s.cs.canh.add('Không tìm thấy hình %s' % src); return
+        rel = duongHinh(src, s.cs.maGoc); f = timHinh(rel, s.cs)
+        if not f: s.cs.canh.add('Không tìm thấy hình %s' % src); return
         p = s.doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         from PIL import Image
         w, h = Image.open(f).size; rong = min(Cm(12), Emu(int(w / 220 * 914400)))   # ảnh ~220 dpi, tối đa 12 cm
@@ -335,7 +355,7 @@ def main():
     ap.add_argument('--tron-ca-goc', action='store_true'); ap.add_argument('--seed', type=int, default=None)
     ap.add_argument('--truong', default='TRƯỜNG THPT ……………………'); ap.add_argument('--to', default='Tổ: Hóa học'); ap.add_argument('--ky', default=None)
     ap.add_argument('--nam', default='2026 – 2027'); ap.add_argument('--mon', default=None); ap.add_argument('--thang', default=None); ap.add_argument('--lop', default='')
-    ap.add_argument('--khong-pdf', action='store_true')
+    ap.add_argument('--khong-pdf', action='store_true'); ap.add_argument('--hinh', default=None, help='thư mục chứa image1.png… của đề gốc')
     a = ap.parse_args()
     maGoc, goc, ch = docKho(a.kho); a.maGoc = maGoc
     tien = re.sub(r'-\d{3}$', '', maGoc); khoi = (re.match(r'^[A-Z]+(\d+)', tien) or [None, ''])[1]
@@ -353,6 +373,7 @@ def main():
     if a.word and not tl: canh.add('Đề Word không có phần "PHẦN IV" (tự luận) – đề in chỉ có Phần I–III')
     class CS: pass
     cs = CS(); cs.maGoc = maGoc; cs.canh = canh
+    cs.thuMuc = ([a.hinh] if a.hinh else []) + [os.path.dirname(os.path.abspath(a.kho))] + ([layHinhWord(a.word, a.ra)] if a.word else [])
     files = [taoKho(tien, MA, ch, a, thang, a.ra)]
     for ma, ds in MA.items():
         f = taoDe(ma, ds, a, ch, tl, cs, a.ra); files.append(f)
@@ -364,7 +385,7 @@ def main():
     if thieuGT: canh.add('Đề gốc thiếu lời giải ở câu: ' + ', '.join(thieuGT))
     print(json.dumps({'goc': maGoc, 'ma': list(MA), 'thang': thang, 'so_cau': {L: sum(1 for c in goc if c['loai'] == L) for L in ('TN', 'DS', 'TLN')},
                       'tong_diem_trac_nghiem': round(sum(float(c['w']) for c in goc), 3), 'tu_luan': bool(tl), 'canh_bao': sorted(canh),
-                      'file': sorted(os.listdir(a.ra))}, ensure_ascii=False, indent=1))
+                      'file': sorted(f for f in os.listdir(a.ra) if not f.startswith('_'))}, ensure_ascii=False, indent=1))
 
 if __name__ == '__main__':
     main()

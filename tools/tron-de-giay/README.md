@@ -1,6 +1,6 @@
 # Trộn đề giấy
 
-Dùng ở kênh làm bài kiểm tra. Đầu vào: đề gốc 1 mã do kênh ra đề giao (`KHO-DE-…-201.xlsx` + đề Word). Đầu ra trong thư mục `--ra`:
+Dùng ở kênh TRỘN ĐỀ (tải `tron.py` vào kiến thức của kênh, xem `tai-lieu-kenh/Kenh-Tron-de.md`). Đầu vào: đề gốc 1 mã do kênh ra đề giao (`KHO-DE-…-201.xlsx` + đề Word). Đầu ra trong thư mục `--ra`:
 
 - `KHO-DE-<tiền tố>-GIAY.xlsx`: các mã 2xx để nạp trên trang giáo viên.
 - `DE-<mã>.docx` / `.pdf`: mỗi mã một đề in (Phần I–III đã trộn + Phần IV tự luận chép từ đề Word).

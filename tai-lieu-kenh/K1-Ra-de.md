@@ -71,7 +71,7 @@ Quy tắc của nút Nạp: một file có thể chứa nhiều đề (mỗi đ�
 
 Khi giáo viên nói "đề giấy" / "đề in để quét phiếu":
 
-- Kênh này soạn **đề gốc 1 mã**, mã đề `201`: `H<khối>-<bài>-201` (vd `H12-HK1-201`). **Không trộn đề** ở kênh này: giáo viên mang file sang kênh làm bài kiểm tra để trộn 4 mã (`201`–`204`), làm đáp án và file nạp (`K1-Tron-de-giay.md`).
+- Kênh này soạn **đề gốc 1 mã**, mã đề `201`: `H<khối>-<bài>-201` (vd `H12-HK1-201`). **Không trộn đề** ở kênh này: giáo viên mang file sang kênh TRỘN ĐỀ để trộn 4 mã (`201`–`204`), làm đáp án và file nạp (`K1-Tron-de-giay.md`).
 - Giao 2 file như đề thường, thêm:
   - `KHO-DE-<mã>-201.xlsx`: tab đề có thêm cột `Goc` (để trống) và, nếu có câu chùm, cột `Nhom` (cột L; các câu dùng chung một dữ kiện ghi cùng tên, vd `C1`). `CAU HINH THEM` thêm 2 cột `Kieu` = `GIAY`, `ThangDS` = `K10` hoặc `K12`.
   - `<mã>-201.docx`: đề Word đầy đủ; có tự luận thì là **PHẦN IV** đặt sau Phần III, trước `HẾT`; kèm trang hướng dẫn chấm tự luận.

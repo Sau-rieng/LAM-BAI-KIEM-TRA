@@ -3,18 +3,18 @@
 **Phân việc:**
 
 - **Kênh ra đề (K9, K10, K12)** chỉ soạn **đề gốc 1 mã** (mã `…-201`) theo `K1-Ra-de.md`, mục "Đề giấy". Kênh ra đề **không trộn**.
-- **Kênh làm bài kiểm tra** (cuộc trò chuyện quản lý trang giáo viên) nhận đề gốc, trộn thành 4 mã, làm đáp án và file nạp, bằng công cụ `tools/tron-de-giay/tron.py` trong repo LAM-BAI-KIEM-TRA.
+- **Kênh TRỘN ĐỀ** (project riêng) nhận đề gốc, trộn thành 4 mã, làm đáp án và file nạp bằng công cụ `tron.py` (tải sẵn vào kênh). Giáo viên tải file về rồi nạp lên trang giáo viên.
 
 Giáo viên nạp file Excel ở trang giáo viên (**Kiểm tra → 📥 Nạp đề mới**), in đề, học sinh tô phiếu trả lời, giáo viên quét phiếu bằng điện thoại để chấm.
 
-## 0. Giáo viên mang đến kênh làm bài kiểm tra
+## 0. Giáo viên mang đến kênh TRỘN ĐỀ
 
 1. `KHO-DE-<khối>-<bài>-201.xlsx` (đề gốc: tab đề có cột Goc trống cũng được, `CAU HINH THEM`, `KIEN THUC THEM`, `GIAI THICH THEM`).
 2. `<khối>-<bài>-201.docx` (đề Word gốc; có PHẦN IV tự luận thì để ở cuối, trước dòng HẾT).
-3. Hình đã có trong `hinh/<mã>-201/` (kênh ra đề đưa lên) hoặc gửi kèm.
+3. Hình: công cụ tự lấy hình trong file Word gốc (hình đặt tên image1.png… theo đúng thứ tự trong Word). Hình trên iPad vẫn do kênh ra đề đưa lên `hinh/<mã>-201/`.
 4. Một câu dặn: số mã (mặc định 4), lớp, trường/kỳ thi in ở đầu đề, mã 201 giữ nguyên thứ tự gốc hay trộn luôn.
 
-Chạy: `python3 tools/tron-de-giay/tron.py --kho KHO-DE-….xlsx --word ….docx --so-ma 4 --truong "TRƯỜNG THPT …" --lop "12G01, 12G02" --ra ra/`. Công cụ in ra cảnh báo (lời giải không đổi được chữ cái, thiếu hình, thiếu kiến thức…): xử lý hết cảnh báo rồi mới gửi.
+Chạy: `python3 tron.py --kho KHO-DE-….xlsx --word ….docx --so-ma 4 --truong "TRƯỜNG THPT …" --lop "12G01, 12G02" --ra ra/`. Công cụ in ra cảnh báo (lời giải không đổi được chữ cái, thiếu hình, thiếu kiến thức…): xử lý hết cảnh báo rồi mới gửi.
 
 ## 1. Cấu trúc đề (theo phiếu trả lời)
 
@@ -83,7 +83,7 @@ Ngoài file Excel nạp kho, gửi kèm để in:
   - Chân trang "Mã đề 2xx – Trang n", số trang đánh từ 1 ở mỗi mã.
 - **1 file đáp án** Word và PDF: đáp án mọi mã theo từng phần, kèm bảng đối chiếu câu của từng mã về câu gốc.
 
-## 7. Claude (kênh làm bài kiểm tra) tự soát trước khi gửi file
+## 7. Claude (kênh TRỘN ĐỀ) tự soát trước khi gửi file
 
 - [ ] Đủ 4 mã (hoặc số mã giáo viên yêu cầu), tên tab đúng `…-201` … `…-204`.
 - [ ] Đã sửa `DapAn` sau khi trộn phương án/ý; đối chiếu lại từng mã với đề gốc.
