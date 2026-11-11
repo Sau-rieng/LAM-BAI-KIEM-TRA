@@ -879,7 +879,8 @@ function gvGiayNop(d) {
       kq.ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|'), url, lan, String(d.ghichu || '').slice(0, 200)]);
   } finally { lock.releaseLock(); }
   if (d.anhId) datAnh(String(d.anhId), 'DA', ma);
-  return {ok: true, hoten: hs.ten, diem: kq.diem, tongW: kq.tongW, dung: kq.dung, tong: de.length, madot: madot};
+  return {ok: true, hoten: hs.ten, diem: kq.diem, tongW: kq.tongW, dung: kq.dung, tong: de.length, madot: madot, url: url,
+    ct: kq.ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|')};
 }
 // ---- Chup truoc – cham sau ----
 function thuMucAnhGiay(ca) { return layThuMuc(layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), ca), 'ANH CHUP'); }
@@ -907,9 +908,16 @@ function gvGiayDsAnh(d) {
   const ca = String(d.ca || '').trim();
   return {ok: true, ca: ca, anh: docAnhGiay(ca).map(function (x) { delete x.dong; return x; })};
 }
+function idTuUrl(u) { const m = String(u || '').match(/\/d\/([\w-]{10,})|[?&]id=([\w-]{10,})/); return m ? (m[1] || m[2]) : ''; }
 function gvGiayLayAnh(d) {
-  const id = String(d.id || '');
-  if (!docAnhGiay(String(d.ca || '').trim()).some(function (x) { return x.id === id; })) return {ok: false, msg: 'Khong co anh nay'};
+  const ca = String(d.ca || '').trim();
+  let id = String(d.id || '');
+  if (!id && d.url) {   // anh phieu da luu cung bai lam (cot Anh cua BAI LAM)
+    const u = String(d.url), sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL), mas = maCa(ca);
+    const co = sh && sh.getLastRow() > 1 && sh.getRange(2, 1, sh.getLastRow() - 1, 11).getValues().some(function (r) { return String(r[10]) === u && mas.indexOf(String(r[1]).trim()) >= 0; });
+    if (!co) return {ok: false, msg: 'Khong co anh nay'};
+    id = idTuUrl(u); if (!id) return {ok: false, msg: 'Khong doc duoc dia chi anh'};
+  } else if (!docAnhGiay(ca).some(function (x) { return x.id === id; })) return {ok: false, msg: 'Khong co anh nay'};
   const b = DriveApp.getFileById(id).getBlob();
   return {ok: true, id: id, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(b.getBytes())};
 }
