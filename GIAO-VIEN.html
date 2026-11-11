@@ -1193,8 +1193,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var el = document.createElement('div'); el.className = 'card dot giay';
       el.innerHTML = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(k.replace(/-2\d\d$/, '')) + ' · mã đề ' + esc(g.map(function (x) { return x.madot.slice(-3); }).join(', ')) +
         ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div><span class="ttDong">đề giấy</span></div>' +
-        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 inDe">🖨 In đề ' + g.length + ' mã (PDF)</button><button class="btn2 inDA">📋 In đáp án (PDF riêng)</button><button class="btn2 dauDe">⚙ Đầu đề</button><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button></div>' +
-        '<div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
+        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 inDe">🖨 In đề ' + g.length + ' mã (PDF)</button><button class="btn2 inDA">📋 In đáp án (PDF riêng)</button><button class="btn2 dauDe">⚙ Đầu đề</button><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button></div>' +
+        '<div class="lopO"></div><div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
       var o = el.querySelector('.dauDeO'), kq = el.querySelector('.giayKQ');
       function ve() {
         if (!GIAY_MO[k]) { o.innerHTML = ''; return; }
@@ -1205,6 +1205,22 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         [].forEach.call(o.querySelectorAll('input'), function (ip) { ip.oninput = function () { DAU_DE[ip.getAttribute('data-k')] = ip.value; try { localStorage.setItem('gv_daude', JSON.stringify(DAU_DE)); } catch (e) {} }; });
       }
       el.querySelector('.dauDe').onclick = function () { GIAY_MO[k] = !GIAY_MO[k]; ve(); };
+      el.querySelector('.lopG').onclick = function () {
+        var lo = el.querySelector('.lopO');
+        if (lo.innerHTML) { lo.innerHTML = ''; return; }
+        lo.innerHTML = '<div class="chinhKhung"><div class="nhan">Lớp làm đề giấy này (áp dụng cho cả ' + g.length + ' mã)</div><div class="loc lopChon"></div>' +
+          '<div class="hangNut"><button class="btn2 huy">Hủy</button><button class="luu">Lưu</button></div></div>';
+        var docLop = chonLop(lo.querySelector('.lopChon'), d.lop, DS);
+        lo.querySelector('.huy').onclick = function () { lo.innerHTML = ''; };
+        lo.querySelector('.luu').onclick = function () {
+          var lp = docLop(), bt = this;
+          if (chuan(lp) === chuan(d.lop)) { lo.innerHTML = ''; return; }
+          bt.disabled = true; bt.textContent = 'Đang lưu…';
+          g.reduce(function (p, x) {
+            return p.then(function () { return goiBatKy({ action: 'gv_dat', ma: MA, madot: x.madot, truong: 'lop', giatri: lp }).then(function (j) { if (!j.ok) throw new Error(j.msg || 'lỗi'); }); });
+          }, Promise.resolve()).then(function () { g.forEach(function (x) { x.lop = lp; }); veDot(); }).catch(function (e) { bt.disabled = false; bt.textContent = 'Lưu'; var o2 = document.createElement('div'); o2.className = 'loi'; o2.textContent = 'Chưa lưu được: ' + e.message; lo.firstChild.appendChild(o2); });
+        };
+      };
       ve();
       function mo(loai) {
         var w = window.open('', '_blank');
@@ -1313,6 +1329,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var lops = lopCuaDot(ca[st.ca].ds[0]);
         if (lops.length === 1) st.lop = lops[0].ten;
         h += '<div class="nhan">③ Lớp</div><div class="loc">' + lops.map(function (l) { return '<button data-lop="' + esc(l.ten) + '" class="' + (st.lop === l.ten ? 'on' : '') + '">' + esc(l.ten) + '</button>'; }).join('') + '</div>';
+        h += '<div class="sub">Thiếu lớp? Vào <b>Kiểm tra → 🖨 Đề giấy</b> → <b>🏫 Lớp làm bài</b> của đề này để thêm lớp.</div>';
         if (st.lop) h += '<button class="btn qBatDau">📷 Bắt đầu quét lớp ' + esc(st.lop) + '</button>';
       }
       box.innerHTML = h + '<div class="qLoi"></div></div>';
