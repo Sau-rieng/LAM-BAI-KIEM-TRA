@@ -1773,7 +1773,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     '.thanh{position:sticky;top:0;background:#1a2b4a;color:#fff;padding:10px 14px;font:15px sans-serif;display:flex;gap:12px;align-items:center;flex-wrap:wrap;z-index:9}.thanh button{font:700 15px sans-serif;padding:8px 16px;border-radius:8px;border:0;background:#fff;color:#1a2b4a}' +
     '@media print{.thanh{display:none}}@media screen{.trang{max-width:210mm;margin:12px auto;padding:12mm;box-shadow:0 1px 6px rgba(0,0,0,.25)}}' +
     'img{max-width:100%;filter:grayscale(1)}sub,sup{line-height:0}table{border-collapse:collapse}';
-  function thanhIn(tieuDe) { return '<div class="thanh"><b>' + esc(tieuDe) + '</b><button onclick="window.print()">🖨 In / Lưu PDF</button><span>Khổ A4 · đen trắng</span></div>'; }
+  // Thanh trên trang in: có nút Đóng (điện thoại / ứng dụng trên màn hình chính không có nút đóng thẻ)
+  function thanhIn(tieuDe) {
+    var ve = JSON.stringify(location.href.split('#')[0]).replace(/</g, '\\u003c');
+    return '<script>function dongIn(){try{window.close()}catch(e){}setTimeout(function(){location.href=' + ve + '},300)}<\/script>' +
+      '<div class="thanh"><button onclick="dongIn()">✕ Đóng</button><b>' + esc(tieuDe) + '</b><button onclick="window.print()">🖨 In / Lưu PDF</button><span>Khổ A4 · đen trắng</span></div>';
+  }
+
   function htmlCau(q, so) {
     var hinh = q.hinh ? '<div class="hinh"><img src="' + esc(q.hinh) + '" alt=""></div>' : '';
     var h = '<div class="cau"><b>Câu ' + so + '.</b> ' + q.hoi + hinh;
