@@ -67,6 +67,19 @@ Quy tắc của nút Nạp: một file có thể chứa nhiều đề (mỗi đ�
 
 Định dạng file Claude giao (bắt buộc để nút Nạp đọc được): `.xlsx`; tab đề dòng 1 = `Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem`; tab `CAU HINH THEM` = `MaDot | TenBai | ThoiGian_phut | TrangThai | ChoXemLai | Lop`; tab `KIEN THUC THEM` = `MaDot | Cau | KienThuc | MucDo`; tab `GIAI THICH THEM` = `MaDot | Cau | GiaiThich`. Số câu (`Cau`) trong hai tab này phải trùng đúng cột Cau của tab đề. Đáp án TLN, điểm ghi dấu chấm. **Cột `Hinh`: mỗi câu có nhắc tới hình (Hình 1, sơ đồ, đồ thị…) phải ghi URL hình ở CHÍNH dòng câu đó** (`https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/hinh/<mã đợt>/imageN.png`) – trên iPad mỗi câu hiện riêng, nên nhiều câu cùng dùng một hình thì dòng nào cũng ghi. Trước khi giao, rà: câu có chữ “Hình”/“sơ đồ” mà cột Hinh trống = lỗi (trang nạp đề sẽ chặn không cho nạp). Câu chỉ có chữ như “sơ đồ phản ứng sau: …” thì ghi `-` vào cột Hinh (= không cần hình).
 
+## Đề giấy (in cho học sinh tô phiếu, máy quét chấm)
+
+Khi giáo viên nói "đề giấy" / "đề in để quét phiếu":
+
+- Kênh này soạn **đề gốc 1 mã**, mã đề `201`: `H<khối>-<bài>-201` (vd `H12-HK1-201`). **Không trộn đề** ở kênh này: giáo viên mang file sang kênh làm bài kiểm tra để trộn 4 mã (`201`–`204`), làm đáp án và file nạp (`K1-Tron-de-giay.md`).
+- Giao 2 file như đề thường, thêm:
+  - `KHO-DE-<mã>-201.xlsx`: tab đề có thêm cột `Goc` (để trống) và, nếu có câu chùm, cột `Nhom` (cột L; các câu dùng chung một dữ kiện ghi cùng tên, vd `C1`). `CAU HINH THEM` thêm 2 cột `Kieu` = `GIAY`, `ThangDS` = `K10` hoặc `K12`.
+  - `<mã>-201.docx`: đề Word đầy đủ; có tự luận thì là **PHẦN IV** đặt sau Phần III, trước `HẾT`; kèm trang hướng dẫn chấm tự luận.
+  - Hình đưa lên `hinh/<mã>-201/` như đề thường.
+- Giới hạn phiếu: Phần I ≤ 40 câu, Phần II ≤ 8 câu, Phần III ≤ 6 câu; đáp án Phần III tô được trên phiếu (tối đa 4 kí tự: chữ số, "−", dấu phẩy).
+- Lời giải TN ghi rõ chữ cái ("Chọn B", "A sai vì …", mỗi phương án sai một dòng) và Đ/S ghi `a) … b) … c) … d) …` để công cụ trộn đổi được theo mã mới.
+- Phương án dạng "Cả A và B", "Tất cả đều đúng": được, công cụ giữ nguyên thứ tự phương án câu đó.
+
 ## Đề mẫu đã làm
 
 `H10-B10-101` – Hóa 10 Bài 10 Quy tắc octet, khảo bài 15 phút, 20 câu (Biết 5 · Hiểu 12 · Vận dụng 3), 1 hình, lớp 10E01.
