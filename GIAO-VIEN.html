@@ -2607,7 +2607,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var yeu = [], tong = 0, n = 0;
       Object.keys(HS[ma]).forEach(function (t) { if (K[t] && K[t].chua) return; var x = HS[ma][t]; var p = x.d / x.n; tong += x.d; n += x.n; if (p < NGUONG_YEU) yeu.push({ kt: t, p: p }); });
       return { ma: ma, ten: ten[ma] || ma, yeu: yeu.sort(function (a, b) { return a.p - b.p; }), dung: n ? tong / n : 0, kt: HS[ma] };
-    }).sort(function (a, b) { return b.yeu.length - a.yeu.length || a.dung - b.dung; });
+    }).sort(function (a, b) { return a.dung - b.dung || b.yeu.length - a.yeu.length; });
     return { kts: dsK, hs: dsHS, md: MD, soBai: Object.keys(HS).length, coNhan: dsK.some(function (k) { return !k.chua; }) };
   }
   function mdChu(md) { return Object.keys(md).sort(function (a, b) { return (a in MD_THU ? MD_THU[a] : 9) - (b in MD_THU ? MD_THU[b] : 9); }).map(function (m) { return m + ' ' + md[m]; }).join(' · '); }
@@ -2631,8 +2631,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       }
       h += '</div>';
     });
-    var canHT = T.hs.filter(function (x) { return x.yeu.length; });
-    h += '<h3>Học sinh cần hỗ trợ (' + canHT.length + '/' + T.soBai + ' em)</h3>';
+    // Em điểm thấp nhất lên đầu (không có điểm thì theo % đúng), cùng điểm thì em yếu nhiều kiến thức hơn lên trước
+    var dOf = function (x) { var d = opt.diem && opt.diem[x.ma]; return d === undefined || d === null ? null : Number(d); };
+    var canHT = T.hs.filter(function (x) { return x.yeu.length; }).sort(function (a, b) {
+      var da = dOf(a), db = dOf(b);
+      if (da !== null && db !== null && da !== db) return da - db;
+      return a.dung - b.dung || b.yeu.length - a.yeu.length;
+    });
+    h += '<h3>Học sinh cần hỗ trợ (' + canHT.length + '/' + T.soBai + ' em)</h3><p class="sub">Xếp từ điểm thấp nhất lên.</p>';
     if (!canHT.length) h += '<p class="sub">Không em nào đúng dưới 65% ở kiến thức nào.</p>';
     canHT.forEach(function (x) {
       var d = opt.diem && opt.diem[x.ma];
