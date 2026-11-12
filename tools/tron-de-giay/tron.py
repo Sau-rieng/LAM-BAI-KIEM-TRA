@@ -93,7 +93,7 @@ def doiLoiGiaiTN(gt, moi, goc, canh, giu):
     for ln in dong:
         l2 = re.sub(r'\b(Chọn|chọn|Đáp án|đáp án|phương án|Phương án)\s+([ABCD])\b', lambda m: m.group(1) + ' ' + moi[m.group(2)], ln)
         l2 = re.sub(r'^(\s*)([ABCD])(\s+(sai|đúng)\b|\s*[.:)–-]\s)', lambda m: m.group(1) + moi[m.group(2)] + m.group(3), l2)
-        thay |= l2 != ln; ra.append(l2)
+        thay |= bool(re.search(r'\b(Chọn|chọn|Đáp án|đáp án|phương án|Phương án)\s+[ABCD]\b|^\s*[ABCD](\s+(sai|đúng)\b|\s*[.:)–-]\s)', ln)); ra.append(l2)
     if not thay: canh.add('Lời giải câu gốc %s không nhận ra chữ cái phương án – xem lại lời giải ở các mã trộn' % goc)
     # dòng "X sai vì …" xếp lại A→D
     dau = [l for l in ra if not re.match(r'^\s*[ABCD]\s+sai\b', l)]; sai = sorted([l for l in ra if re.match(r'^\s*[ABCD]\s+sai\b', l)], key=lambda l: l.strip()[0])
