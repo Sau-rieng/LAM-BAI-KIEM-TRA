@@ -3389,6 +3389,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var ds = DS.filter(function (x) { return String(x.ten).indexOf(String(k)) === 0 && /^\d/.test(x.ten.slice(String(k).length)) === false; });
     return ds.length ? ds : DS.slice();
   }
+  // Lớp được chơi trò t: theo cột lớp; "Tất cả lớp" → các lớp cùng khối với trò
+  function lopCuaTro(t) {
+    var ten = String(t.lop || '').toUpperCase().split(/[,;\s]+/).filter(Boolean);
+    var ds = chuan(t.lop) === 'TATCA' || !ten.length ? DS.filter(function (l) { return !t.khoi || String(l.ten).indexOf(String(t.khoi)) === 0; }) : DS.filter(function (l) { return ten.indexOf(l.ten.toUpperCase()) >= 0; });
+    return ds.length ? ds : DS.slice();
+  }
   function tenLopTro(t) { return chuan(t.lop) === 'TATCA' || !t.lop ? 'Tất cả lớp' : 'Lớp ' + t.lop; }
   function moTro() {
     man('scrTro'); veTro();
@@ -3452,7 +3458,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         : '<div class="xpKhung"><p>Học sinh đăng nhập xong sẽ dừng ở <b>vạch xuất phát</b>. Khi thấy đủ các nhóm bên dưới, bấm Xuất phát: mọi máy sáng 5 đèn đỏ rồi chạy cùng lúc.</p><button class="xpNut xpDi" type="button">🏁 XUẤT PHÁT</button>' +
           '<div class="vach" data-matro="' + esc(t.matro) + '"><div class="so">Đang ở vạch: …</div><div class="ds"></div></div></div>') : '') +
       '<div class="troNut"><a class="btn2" href="' + GOC_TRO + esc(t.file) + (window.LAM_DEMO ? '?demo' : '') + '" target="_blank" rel="noopener">▶ Mở trò</a>' +
-      '<button class="btn2 qr">▦ Mã QR</button><button class="btn2 kq">📊 Kết quả</button><button class="btn2 ch' + (TRO_CHINH === t.matro ? ' on' : '') + '">⚙ Thời gian, lớp</button></div>';
+      '<button class="btn2 qr">▦ Mã QR</button><button class="btn2 kq">📊 Kết quả</button>' + (t.kieu === 'NHOM' ? '' : '<button class="btn2 sdTro">🪑 Sơ đồ lớp</button>') + '<button class="btn2 ch' + (TRO_CHINH === t.matro ? ' on' : '') + '">⚙ Thời gian, lớp</button></div>';
     if (el.querySelector('.cong')) el.querySelector('.cong').onclick = function () {
       var b = this; b.disabled = true; b.querySelector('span').textContent = 'Đang lưu…';
       datTro(t, 'tt', !t.mo, el);
@@ -3477,6 +3483,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (t.khung) ganKhungBo(t, el);
     el.querySelector('.qr').onclick = function () { moQRTro(t); };
     el.querySelector('.kq').onclick = function () { moKQ(t.matro); };
+    if (el.querySelector('.sdTro')) el.querySelector('.sdTro').onclick = function () { var ls = lopCuaTro(t); SD.tro = t; moSoDo(ls[0] ? ls[0].ten : null, null, 'tro'); };
     el.querySelector('.ch').onclick = function () { TRO_CHINH = TRO_CHINH === t.matro ? null : t.matro; veTro(); };
     if (TRO_CHINH === t.matro) el.appendChild(khungChinhTro(t));
     return el;
@@ -4976,7 +4983,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // =====================================================================
   var SD = { lop: null, dot: null, data: null, sua: false, nhap: null, chon: null, hen: null, tu: 'home', dang: false };
   function moSoDo(lop, madot, tu) {
-    SD.lop = lop || SD.lop || (DS[0] && DS[0].ten); SD.dot = madot || null; SD.tu = tu || 'home';
+    SD.lop = lop || SD.lop || (DS[0] && DS[0].ten); SD.dot = madot || null; SD.tu = tu || 'home'; if (SD.tu !== 'tro') SD.tro = null;
     SD.sua = false; SD.chon = null; SD.data = null; man('scrSoDo'); veSoDo(); taiSoDo();
   }
   function lopSD() { return DS.filter(function (l) { return l.ten === SD.lop; })[0] || DS[0]; }
@@ -4984,13 +4991,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     clearTimeout(SD.hen);
     var l = lopSD(); if (!l) return;
     if (!im) { SD.dang = true; veSoDo(); }
-    goi(l.url, { action: 'gv_sodo', ma: MA, madot: SD.dot || '' }).then(function (j) {
+    goi(l.url, SD.tro ? { action: 'gv_tcsodo', ma: MA, matro: SD.tro.matro } : { action: 'gv_sodo', ma: MA, madot: SD.dot || '' }).then(function (j) {
       SD.dang = false;
       if (!j.ok) { SD.data = { loi: /khong hop le/i.test(j.msg || '') ? 'Sổ lớp ' + l.ten + ' chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : (j.msg || 'lỗi') }; veSoDo(); return; }
       SD.data = j;
       if (!SD.sua) SD.nhap = saoSoDo(j.sodo);
       veSoDo();
-      if (SD.dot && !SD.sua && !$('scrSoDo').classList.contains('hidden')) SD.hen = setTimeout(function () { taiSoDo(true); }, 10000);
+      if ((SD.dot || SD.tro) && !SD.sua && !$('scrSoDo').classList.contains('hidden')) SD.hen = setTimeout(function () { taiSoDo(true); }, 10000);
     }).catch(function (e) { SD.dang = false; SD.data = { loi: 'Không kết nối được (' + e.message + ')' }; veSoDo(); });
   }
   function saoSoDo(sd) {
@@ -5009,7 +5016,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var box = $('sdThan'), j = SD.data, sd = SD.nhap;
     // tab lop
     var tb = $('sdLop'); tb.innerHTML = '';
-    var lops = SD.dot ? lopCuaDot(DOT.filter(function (d) { return d.madot === SD.dot; })[0] || {}) : DS.slice();
+    var lops = SD.tro ? lopCuaTro(SD.tro) : SD.dot ? lopCuaDot(DOT.filter(function (d) { return d.madot === SD.dot; })[0] || {}) : DS.slice();
     if (!lops.length) lops = DS.slice();
     if (lops.length > 1) lops.forEach(function (l) {
       var b = document.createElement('button'); b.textContent = 'Lớp ' + l.ten; b.className = l.ten === SD.lop ? 'on' : '';
@@ -5035,6 +5042,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           : 'Một mã đề (' + esc(SD.dot) + '). Muốn 2 em kế bên khác đề: vào Kiểm tra → đề → <b>🔀 Thi nhiều mã đề</b>.') + '</div>' +
         '<div class="sdDem"><span>Chưa vào <b>' + dem.chua + '</b></span><span>Đang chờ <b>' + dem.dangcho + '</b></span><span>Đang làm <b>' + dem.danglam + '</b></span><span>Đã nộp <b>' + dem.danop + '</b></span>' + (vp ? '<span class="vp">⛔ Vi phạm <b>' + vp + '</b></span>' : '') + '</div>' +
         (SD.sua ? '' : '<div class="sub">Bấm vào chỗ của một em để <b>thu bài khi vi phạm quy chế thi</b>. Tự cập nhật mỗi 10 giây.</div>') + '</div>';
+    } else if (SD.tro) {
+      var dm = { chua: 0, vao: 0, choi: 0, xong: 0 };
+      j.ds.forEach(function (x) { dm[(tt[x[0]] || {}).tt || 'chua']++; });
+      h += '<div class="card sdDot"><b>🎮 ' + esc(SD.tro.ten) + '</b><div class="sub">Trò cá nhân · ' + SD.tro.phut + ' phút' + (SD.tro.khung && SD.tro.tenBo ? ' · ' + esc(SD.tro.tenBo) : '') + ' · điểm là điểm cao nhất hôm nay.</div>' +
+        '<div class="sdDem"><span>Chưa vào <b>' + dm.chua + '</b></span><span>Đã vào <b>' + dm.vao + '</b></span><span>Đang chơi <b>' + dm.choi + '</b></span><span>Xong <b>' + dm.xong + '</b></span></div>' +
+        (SD.sua ? '' : '<div class="sub">Tự cập nhật mỗi 10 giây. Trò cũ (không theo bộ câu) chỉ báo Đã vào và Xong.</div>') + '</div>';
     } else if (!SD.sua) h += '<p class="sub">Xếp chỗ một lần, dùng cho mọi bài kiểm tra của lớp. Khi thi nhiều mã đề, hệ thống cấp mã theo chỗ ngồi để 2 em kế bên (cạnh, trước, sau, chéo) không trùng đề.</p>';
     // Thanh sap xep
     if (SD.sua) {
@@ -5051,12 +5064,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       // Ban 1 (gan giao vien) nam duoi cung, xep dan len tren
       for (var hh = sd.hang - 1; hh >= 0; hh--) for (var cc = 0; cc < sd.cho[dd]; cc++) {
         var k = dd + '-' + hh + '-' + cc, g = sd.ghe[k], t = g ? (tt[g.mahs] || {}) : null;
-        var lop = 'sdGhe' + (g ? '' : ' trong') + (SD.chon === k ? ' chon' : '') + (t && (t.vipham || t.ghichu) ? ' vp' : '') + (t && t.tt ? ' t-' + t.tt : '');
+        var lop = 'sdGhe' + (g ? '' : ' trong') + (SD.chon === k ? ' chon' : '') + (t && (t.vipham || t.ghichu) ? ' vp' : '') + (t && t.tt ? ' t-' + (SD.tro ? { chua: 'chua', vao: 'dangcho', choi: 'danglam', xong: 'danop' }[t.tt] : t.tt) : '');
         h += '<button class="' + lop + '" data-k="' + k + '">';
         if (g) {
           h += '<span class="dong1"><i class="stt">' + esc(sbd2(g.mahs)) + '</i>' + (SD.dot && t && t.madot && ca.length > 1 ? '<i class="sdMa" title="' + esc(t.madot) + '">' + (maKH[t.madot] || '?') + '</i>' : '') + '</span>' +
             '<span class="ten">' + esc(tenHS(g.mahs)) + '</span>';
-          if (SD.dot && t) {
+          if (SD.tro && t) {
+            var ty = t.tt === 'xong' ? 'Xong · ' + (t.diem === null || t.diem === undefined ? '✓' : diem(t.diem) + 'đ') + (t.luot > 1 ? ' (' + t.luot + ' lượt)' : '')
+              : t.tt === 'choi' ? 'Câu ' + t.cau + ' · ' + diem(t.diem) + 'đ' : t.tt === 'vao' ? (t.vach ? 'Ở vạch' : 'Đã vào') : 'Chưa vào';
+            h += '<span class="tt">' + ty + '</span>';
+          } else if (SD.dot && t) {
             var tx = t.tt === 'danop' ? 'Nộp · ' + diem(t.diem) + 'đ' : t.tt === 'danglam' ? 'Đang làm' : t.tt === 'dangcho' ? 'Đang chờ' : 'Chưa vào';
             h += '<span class="tt">' + ((t.vipham || t.ghichu) ? (t.tt === 'danop' ? '⛔ VP · ' + diem(t.diem) + 'đ' : '⛔ Vi phạm') : tx) + '</span>';
           }
@@ -5114,7 +5131,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<div class="hangNut"><button class="btn2" id="sdBo">Đóng</button><button class="luu" id="sdDat">Đặt vào chỗ</button></div></div>';
   }
   function khungThuBai(k) {
-    var g = SD.nhap.ghe[k]; if (!g) return '';
+    var g = SD.nhap.ghe[k]; if (!g || SD.tro) return '';
     var t = (SD.data.tt || {})[g.mahs] || {}, vp = t.vipham || t.ghichu;
     var tx = !SD.dot ? '' : t.tt === 'danop' ? 'Đã nộp · ' + diem(t.diem) + ' điểm' : t.tt === 'danglam' ? 'Đang làm bài' : t.tt === 'dangcho' ? 'Đang ở phòng chờ' : 'Chưa vào bài';
     return '<div class="card sdBang"><b>' + esc(tenHS(g.mahs)) + '</b> · SBD ' + esc(g.mahs) + ' · ' + tenGhe(k) +
@@ -5187,7 +5204,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     clearTimeout(SD.hen);
     if (SD.sua && !confirm('Bỏ các thay đổi chưa lưu?')) return;
     dongChonNhanh();
-    if (SD.tu === 'theo') { dotXem = SD.dot; moTheoDoi(); } else if (SD.tu === 'dot') diDen('dot'); else if (SD.tu === 'hoso') { man('scrHoSo'); if (HS_DL) veHoSo(); } else diDen('home');
+    if (SD.tu === 'tro') { SD.tro = null; moTro(); } else if (SD.tu === 'theo') { dotXem = SD.dot; moTheoDoi(); } else if (SD.tu === 'dot') diDen('dot'); else if (SD.tu === 'hoso') { man('scrHoSo'); if (HS_DL) veHoSo(); } else diDen('home');
   };
   $('btnSoDo').onclick = function () { clearTimeout(hen); moSoDo(lopTheo, dotXem, 'theo'); };
 

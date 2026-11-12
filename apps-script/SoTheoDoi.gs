@@ -105,6 +105,7 @@ function doPost(e) {
       case 'gv_giay_layanh':
       case 'gv_giay_boanh':
       case 'gv_tcvach':
+      case 'gv_tcsodo':
       case 'gv_tctd':
       case 'gv_ma':
       case 'gv_madat':
@@ -155,6 +156,7 @@ function doPost(e) {
         if (d.action === 'gv_giay_layanh') return json(gvGiayLayAnh(d));
         if (d.action === 'gv_giay_boanh') return json(gvGiayBoAnh(d));
         if (d.action === 'gv_tcvach') return json(gvTcVach(d));
+        if (d.action === 'gv_tcsodo') return json(gvTcSoDo(d));
         if (d.action === 'gv_tctd') return json(gvTcTienDo(d));
         if (d.action === 'gv_ma') return json(gvMa());
         if (d.action === 'gv_madat') return json(gvMaDat(d));
@@ -1838,6 +1840,7 @@ function tcVao(d) {
     if (!bo) return {ok: false, loi: 'bo', msg: 'Không đọc được bộ câu ' + k.bo + '.'};
   }
   if (t.tt === 'CHO' && !t.xp) ghiVach(t.matro, d);
+  ghiCaNhan(t.matro, d.mahs, {vao: Date.now()});
   return Object.assign({ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now(), boCau: bo}, k);
 }
 // =====================================================================
@@ -1975,12 +1978,30 @@ function ghiVach(matro, d) {
     let ds = {};
     try { ds = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
     Object.keys(ds).forEach(function (m) { if (bay - ds[m].t > VACH_HAN) delete ds[m]; });
-    ds[may] = {ten: String(d.ten || '').trim().slice(0, 60) || 'Không tên', lop: String(d.lop || '').trim().slice(0, 12), t: bay};
+    ds[may] = {ten: String(d.ten || '').trim().slice(0, 60) || 'Không tên', lop: String(d.lop || '').trim().slice(0, 12), t: bay, mahs: String(d.mahs || '').trim().slice(0, 8)};
     cache.put(k, JSON.stringify(ds), 3600);
   } finally { lock.releaseLock(); }
 }
 // Tien do dang choi cua tung nhom (tro nhom gui sau moi cau): luu trong cache cua so lop, 6 gio
+// Trang thai tung hoc sinh trong tro ca nhan (so do lop): vao luc nao, dang o cau may, diem hien tai, da ket thuc chua
+function ghiCaNhan(matro, mahs, them) {
+  mahs = String(mahs || '').trim();
+  if (!matro || !/^\d{8}$/.test(mahs)) return;
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(2000)) return;
+  try {
+    const cache = CacheService.getScriptCache(), k = 'tdcn_' + matro;
+    let ds = {};
+    try { ds = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
+    ds[mahs] = Object.assign(ds[mahs] || {}, them, {t: Date.now()});
+    cache.put(k, JSON.stringify(ds), 21600);
+  } finally { lock.releaseLock(); }
+}
 function tcTienDo(d) {
+  if (!d.nhom && d.mahs) {   // tro ca nhan
+    ghiCaNhan(String(d.matro || '').trim(), d.mahs, {diem: Math.max(0, Math.min(100, Number(d.diem) || 0)), xong: Number(d.xong) || 0, ket: d.ket === true, maluot: String(d.maluot || '').slice(0, 40)});
+    return {ok: true};
+  }
   const ma = String(d.matro || '').trim(), nhom = chuanNhom(d.nhom);
   if (!ma || !nhom) return {ok: false, msg: 'Thieu tro hoac nhom'};
   const lock = LockService.getScriptLock();
@@ -1999,6 +2020,33 @@ function gvTcTienDo(d) {
   let ds = {};
   try { ds = JSON.parse(CacheService.getScriptCache().get('td_' + String(d.matro || '').trim()) || '{}'); } catch (e) {}
   return {ok: true, lop: lopNay(), ds: Object.keys(ds).map(function (k) { return ds[k]; }), bayGio: Date.now()};
+}
+// So do lop cho tro ca nhan: tung em chua vao / da vao (o vach) / dang choi (cau, diem) / xong (diem cao nhat hom nay)
+function gvTcSoDo(d) {
+  const ma = String(d.matro || '').trim(), bay = Date.now(), cache = CacheService.getScriptCache();
+  const r = gvSoDo({});
+  if (!r.ok) return r;
+  let cn = {}, vach = {};
+  try { cn = JSON.parse(cache.get('tdcn_' + ma) || '{}'); } catch (e) {}
+  try { vach = JSON.parse(cache.get('vach_' + ma) || '{}'); } catch (e) {}
+  const tz = Session.getScriptTimeZone(), homNay = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), tt = {}, kq = {};
+  gvTcKetQua({matro: ma}).canhan.forEach(function (x) {
+    if (!x[0] || Utilities.formatDate(new Date(x[0]), tz, 'yyyy-MM-dd') !== homNay) return;
+    const m = x[2], dm = x[6] !== null && x[6] !== undefined ? Number(x[6]) : null, o = kq[m] || (kq[m] = {n: 0, diem: null, t: 0});
+    o.n++; if (dm !== null && (o.diem === null || dm > o.diem)) o.diem = dm; if (x[0] > o.t) o.t = x[0];
+  });
+  r.ds.forEach(function (h) {
+    const m = h[0], c = cn[m], k = kq[m];
+    let o = {tt: 'chua'};
+    if (c && c.vao && bay - c.t < 3 * 3600 * 1000) o = {tt: 'vao'};
+    if (c && !c.ket && c.xong > 0 && bay - c.t < 120000) o = {tt: 'choi', cau: c.xong, diem: c.diem};
+    if (k && (!c || c.ket || !(c.xong > 0) || k.t >= c.t - 5000 || bay - c.t >= 120000)) o = {tt: 'xong', diem: k.diem, luot: k.n};
+    if (k && o.tt === 'choi') o.luot = k.n, o.diemCu = k.diem;
+    tt[m] = o;
+  });
+  Object.keys(vach).forEach(function (may) { const v = vach[may]; if (v.mahs && bay - v.t <= VACH_HAN && tt[v.mahs] && tt[v.mahs].tt !== 'choi') tt[v.mahs] = Object.assign(tt[v.mahs], {vach: true}); });
+  r.tt = tt; r.bayGio = bay;
+  return r;
 }
 function gvTcVach(d) {
   const ma = String(d.matro || '').trim(), bay = Date.now();
