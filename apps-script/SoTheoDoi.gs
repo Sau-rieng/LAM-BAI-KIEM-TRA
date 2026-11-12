@@ -1628,11 +1628,12 @@ function gvTxAI(d) {
   const ds = dsLopTX().map(function (h, i) { return (i + 1) + '. ' + h.mahs + ' ' + h.hoten; }).join('\n');
   const yc = 'Ảnh/tài liệu đính kèm là danh sách điểm học sinh do giáo viên ghi (bảng lớp, sổ tay, giấy hoặc bảng in). ' +
     'Đọc TỪNG học sinh có điểm: số thứ tự (nếu có), số báo danh (nếu có), họ tên hoặc tên (như viết trong ảnh), điểm (số từ 0 đến 10, dấu chấm thập phân). ' +
-    'Nếu một người có nhiều điểm thì lấy điểm cuối cùng ghi cạnh tên. Không đoán người không có trong ảnh. ' +
+    'Giáo viên thường ghi mỗi em một dòng dạng "STT Tên Điểm" (vd: "12 Trân 8", "5. Bình 7,5"); STT là số thứ tự trong danh sách lớp bên dưới. Nếu một người có nhiều điểm thì lấy điểm cuối cùng ghi cạnh tên. Không đoán người không có trong ảnh. ' +
     'Đặt "chac": false nếu chữ hoặc số khó đọc. Danh sách lớp để đối chiếu cách viết tên (STT. SBD Họ tên):\n' + ds + '\n' +
     'Trả về JSON: {"dong":[{"stt":số hoặc null,"sbd":"chuỗi hoặc rỗng","ten":"tên như trong ảnh","diem":số,"chac":true/false}],"ghichu":"ghi chú ngắn nếu ảnh có tiêu đề/ngày"}';
   try {
-    const kq = goiAI(yc, {mime: m[1], b64: m[2]}, 0.1);
+    const kq = goiAI(yc, {mime: m[1], b64: m[2]}, 0.1, {thuLai: true,
+      he: 'Bạn là trợ lý nhập điểm của giáo viên. Việc của bạn chỉ là chép lại chính xác số thứ tự, tên và điểm số mà giáo viên tự tay ghi trong ảnh để đưa vào sổ điểm của trường. Đây là dữ liệu giáo viên sở hữu và được phép xử lý. Luôn trả lời, không từ chối; chỗ nào mờ thì vẫn ghi giá trị đoán được và đặt "chac": false. Chỉ trả về JSON hợp lệ.'});
     return {ok: true, dong: Array.isArray(kq.dong) ? kq.dong : [], ghichu: String(kq.ghichu || ''), moHinh: kq._moHinh};
   } catch (e) { return {ok: false, msg: e.message}; }
 }
@@ -3350,17 +3351,21 @@ function khoaAI() {
   return {khoa: khoa, moHinh: m['GeminiModel'] ? [m['GeminiModel']].concat(MO_HINH_AI) : MO_HINH_AI};
 }
 
-function goiAI(yeuCau, tep, nhietDo) {
+// tuy (khong bat buoc): {he: 'loi dan he thong rieng', thuLai: true -> mo hinh tu choi/tra rong thi thu mo hinh khac}
+function goiAI(yeuCau, tep, nhietDo, tuy) {
+  tuy = tuy || {};
   const k = khoaAI();
   const phan = [{text: yeuCau}];
   if (tep && tep.b64) phan.push({inline_data: {mime_type: tep.mime || 'image/jpeg', data: tep.b64}});
   const than = {
-    systemInstruction: {parts: [{text: 'Bạn là chuyên gia sư phạm Hóa học bậc phổ thông ở Việt Nam. Chỉ trả về JSON hợp lệ, không thêm chữ nào ngoài JSON.'}]},
+    systemInstruction: {parts: [{text: tuy.he || 'Bạn là chuyên gia sư phạm Hóa học bậc phổ thông ở Việt Nam. Chỉ trả về JSON hợp lệ, không thêm chữ nào ngoài JSON.'}]},
     contents: [{role: 'user', parts: phan}],
-    generationConfig: {temperature: nhietDo === undefined ? 0.4 : nhietDo, responseMimeType: 'application/json'}
+    generationConfig: {temperature: nhietDo === undefined ? 0.4 : nhietDo, responseMimeType: 'application/json'},
+    safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'].map(function (c) { return {category: c, threshold: 'BLOCK_NONE'}; })
   };
   const loiTung = [];
-  const ds = MO_HINH_AI_DUNG ? [MO_HINH_AI_DUNG] : k.moHinh;
+  let ds = MO_HINH_AI_DUNG ? [MO_HINH_AI_DUNG] : k.moHinh;
+  if (tuy.thuLai) ds = ds.concat(k.moHinh.filter(function (m) { return ds.indexOf(m) < 0; }));
   for (let i = 0; i < ds.length; i++) {
     const moHinh = ds[i];
     const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + moHinh + ':generateContent', {
@@ -3370,18 +3375,25 @@ function goiAI(yeuCau, tep, nhietDo) {
     const ma = res.getResponseCode();
     const txt = res.getContentText();
     if (ma === 404) { loiTung.push(moHinh + ': không có'); continue; }
-    if (ma === 429) throw new Error('Đã hết lượt dùng AI miễn phí trong lúc này. Đợi vài phút (hoặc sang ngày mai) rồi chạy lại.');
+    if (ma === 429) { if (tuy.thuLai && i < ds.length - 1) { loiTung.push(moHinh + ': hết lượt'); continue; } throw new Error('Đã hết lượt dùng AI miễn phí trong lúc này. Đợi vài phút (hoặc sang ngày mai) rồi chạy lại.'); }
     if (ma === 401 || (ma === 400 && /API_KEY|api key/i.test(txt))) throw new Error('Khóa AI không dùng được (mã ' + ma + '). Kiểm tra dòng GeminiKey ở tab MA, hoặc tạo khóa mới ở aistudio.google.com/apikey.\n' + rutGon(txt, 300));
     if (ma !== 200) { loiTung.push(moHinh + ': lỗi ' + ma + ' ' + rutGon(txt, 160)); continue; }
     const j = JSON.parse(txt);
-    const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
-    const chu = parts.map(function (p) { return p.text || ''; }).join('');
-    const kq = docJSON(chu);
+    const ung = (j.candidates || [])[0] || {};
+    const parts = (ung.content || {}).parts || [];
+    const chu = parts.map(function (p) { return p.thought ? '' : (p.text || ''); }).join('');
+    let kq = null;
+    try { kq = docJSON(chu); } catch (e) {
+      const lyDo = (j.promptFeedback && j.promptFeedback.blockReason) || ung.finishReason || 'trả về rỗng';
+      loiTung.push(moHinh + ': từ chối/không trả lời (' + lyDo + ')');
+      if (tuy.thuLai) continue;
+      throw e;
+    }
     kq._moHinh = moHinh;
     MO_HINH_AI_DUNG = moHinh;
     return kq;
   }
-  throw new Error('Không gọi được AI. Đã thử: ' + loiTung.join(' | ') + '. Thêm dòng GeminiModel ở tab MA với tên mô hình mới (xem ai.google.dev/models).');
+  throw new Error('Không gọi được AI. Đã thử: ' + loiTung.join(' | ') + (tuy.thuLai ? '' : '. Thêm dòng GeminiModel ở tab MA với tên mô hình mới (xem ai.google.dev/models).'));
 }
 
 function docJSON(chu) {
