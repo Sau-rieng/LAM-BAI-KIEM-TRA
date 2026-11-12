@@ -89,6 +89,10 @@ function doPost(e) {
       case 'gv_theodoi':
       case 'gv_hoso':
       case 'gv_anbai':
+      case 'gv_tx':
+      case 'gv_tx_luu':
+      case 'gv_tx_xoa':
+      case 'gv_tx_ai':
       case 'gv_nhanxet':
       case 'gv_solieu':
       case 'gv_bangdiem':
@@ -142,6 +146,10 @@ function doPost(e) {
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_anbai') return json(gvAnBai(d));
+        if (d.action === 'gv_tx') return json({ok: true, lop: lopNay(), hs: dsLopTX(), tx: docTX()});
+        if (d.action === 'gv_tx_luu') return json(gvTxLuu(d));
+        if (d.action === 'gv_tx_xoa') return json(gvTxXoa(d));
+        if (d.action === 'gv_tx_ai') return json(gvTxAI(d));
         if (d.action === 'gv_nhanxet') return json(gvNhanXet(d));
         if (d.action === 'gv_solieu') return json(gvSoLieu(d));
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
@@ -309,7 +317,9 @@ function xemLai(d) {
     });
   });
   try { baiTroHS(ma).forEach(function (b) { b.nx = ((nxMap[ma + '|' + b.dot] || {}).nx) || ''; delete b.dot; ketqua.push(b); }); } catch (e) {}
-  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true)};
+  let tx = [];
+  try { const T = docTX(), dm = T.diem[ma] || {}; tx = T.cot.map(function (c) { return {ngay: c.ngay, ghichu: c.ghichu, diem: dm[c.id] === undefined ? null : dm[c.id]}; }); } catch (e) {}
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx};
 }
 
 // HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
@@ -1483,7 +1493,7 @@ function hoSoLop() {
   vang.forEach(function (v) { if (!(v.madot in dauTien)) { dauTien[v.madot] = v.luc ? new Date(v.luc).getTime() : 0; } });
   const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : '', ca: caCua[m] || ''}; });
-  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), an: docBaiAn(), nx: docNhanXet(), bayGio: new Date().toISOString()};
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), an: docBaiAn(), nx: docNhanXet(), tx: docTX(), bayGio: new Date().toISOString()};
 }
 // ---- GV an bai loi (may hong, cham nham): chuyen dong sang tab "... AN", khong tinh vao diem/thong ke; khoi phuc = chuyen lai ----
 const TAB_BL_AN = 'BAI LAM AN', TAB_KQ_AN = 'KQ TRO CHOI AN';
@@ -1543,6 +1553,88 @@ function gvNhanXet(d) {
     if (nx) sh.appendRow(["'" + mahs, md, nx, new Date()]);
   } finally { lock.releaseLock(); }
   return {ok: true};
+}
+// ---- DIEM TX (diem thuong xuyen cho tren lop): moi cot = 1 lan cho diem (ngay + so thu tu) ----
+function dsLopTX() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), hs = [];
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) { if (String(r[0]).trim()) hs.push({mahs: String(r[0]).trim(), hoten: String(r[1]).trim()}); });
+  return hs;
+}
+const TAB_TX = 'DIEM TX', HEAD_TX = ['Cot', 'Ngay', 'GhiChu', 'MaHS', 'Diem', 'ThoiGian', 'Anh'];
+function ngayTX(v) { return v instanceof Date ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd') : String(v || '').trim().slice(0, 10); }
+function docTX() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TX), cot = {}, diem = {};
+  if (!sh || sh.getLastRow() < 2) return {cot: [], diem: {}};
+  sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TX.length).getValues().forEach(function (r) {
+    const id = String(r[0]).trim(); if (!id) return;
+    if (!cot[id]) cot[id] = {id: id, ngay: ngayTX(r[1]), ghichu: String(r[2] || ''), anh: String(r[6] || '')};
+    if (!cot[id].anh && r[6]) cot[id].anh = String(r[6]);
+    const ma = String(r[3]).trim().replace(/^'/, ''), v = String(r[4]).replace(',', '.').trim();
+    if (ma && v !== '') (diem[ma] = diem[ma] || {})[id] = Number(v);
+  });
+  const ds = Object.keys(cot).map(function (k) { return cot[k]; }).sort(function (a, b) { return a.id < b.id ? -1 : 1; });
+  return {cot: ds, diem: diem};
+}
+function gvTxLuu(d) {
+  const ngay = String(d.ngay || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay)) return {ok: false, msg: 'Ngay khong hop le'};
+  const ghi = String(d.ghichu || '').trim().slice(0, 80), bang = d.diem || {}, hs = {};
+  dsLopTX().forEach(function (h) { hs[h.mahs] = 1; });
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = layTab(TAB_TX, HEAD_TX);
+    let id = String(d.id || '').trim(), anhCu = '';
+    const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, HEAD_TX.length).getValues() : [];
+    if (!id) {   // cot moi: yyyy-mm-dd#so thu tu trong ngay
+      let so = 0; v.forEach(function (r) { const m = String(r[0]).match(/^(\d{4}-\d{2}-\d{2})#(\d+)$/); if (m && m[1] === ngay) so = Math.max(so, Number(m[2])); });
+      id = ngay + '#' + (so + 1);
+    } else {
+      for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === id) { if (!anhCu && v[i][6]) anhCu = String(v[i][6]); sh.deleteRow(i + 2); }
+    }
+    let anh = anhCu;
+    if (d.anh && /^data:(image\/jpeg|application\/pdf);base64,/.test(String(d.anh))) {
+      try {
+        const loai = /pdf/.test(String(d.anh).slice(0, 30)) ? 'application/pdf' : 'image/jpeg';
+        const f = layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), 'DIEM TX')
+          .createFile(Utilities.newBlob(Utilities.base64Decode(String(d.anh).split(',')[1]), loai, 'DIEM TX - ' + lopNay() + ' - ' + id.replace('#', ' lan ') + (loai === 'application/pdf' ? '.pdf' : '.jpg')));
+        anh = f.getUrl();
+      } catch (e) {}
+    }
+    const moi = [], bay = new Date(), ngD = new Date(ngay + 'T07:00:00');
+    Object.keys(bang).forEach(function (ma) {
+      const x = String(bang[ma] == null ? '' : bang[ma]).replace(',', '.').trim();
+      if (!hs[ma] || x === '' || isNaN(Number(x)) || Number(x) < 0 || Number(x) > 10) return;
+      moi.push([id, ngD, ghi, "'" + ma, Number(x), bay, anh]);
+    });
+    if (!moi.length) moi.push([id, ngD, ghi, '', '', bay, anh]);   // cot rong van giu (de GV nhap sau)
+    sh.getRange(sh.getLastRow() + 1, 1, moi.length, HEAD_TX.length).setValues(moi);
+    return {ok: true, id: id, so: moi.filter(function (r) { return r[3]; }).length, anh: anh};
+  } finally { lock.releaseLock(); }
+}
+function gvTxXoa(d) {
+  const id = String(d.id || '').trim(), sh = SpreadsheetApp.getActive().getSheetByName(TAB_TX);
+  if (!id || !sh || sh.getLastRow() < 2) return {ok: false, msg: 'Khong co cot nay'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const v = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues(); let n = 0;
+    for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === id) { sh.deleteRow(i + 2); n++; }
+    return {ok: n > 0, n: n};
+  } finally { lock.releaseLock(); }
+}
+// AI doc anh/PDF diem: tra ve tung dong {stt, sbd, ten, diem, chac}
+function gvTxAI(d) {
+  const m = String(d.anh || '').match(/^data:(image\/jpeg|image\/png|application\/pdf);base64,(.+)$/);
+  if (!m) return {ok: false, msg: 'Thieu anh'};
+  const ds = dsLopTX().map(function (h, i) { return (i + 1) + '. ' + h.mahs + ' ' + h.hoten; }).join('\n');
+  const yc = 'Ảnh/tài liệu đính kèm là danh sách điểm học sinh do giáo viên ghi (bảng lớp, sổ tay, giấy hoặc bảng in). ' +
+    'Đọc TỪNG học sinh có điểm: số thứ tự (nếu có), số báo danh (nếu có), họ tên hoặc tên (như viết trong ảnh), điểm (số từ 0 đến 10, dấu chấm thập phân). ' +
+    'Nếu một người có nhiều điểm thì lấy điểm cuối cùng ghi cạnh tên. Không đoán người không có trong ảnh. ' +
+    'Đặt "chac": false nếu chữ hoặc số khó đọc. Danh sách lớp để đối chiếu cách viết tên (STT. SBD Họ tên):\n' + ds + '\n' +
+    'Trả về JSON: {"dong":[{"stt":số hoặc null,"sbd":"chuỗi hoặc rỗng","ten":"tên như trong ảnh","diem":số,"chac":true/false}],"ghichu":"ghi chú ngắn nếu ảnh có tiêu đề/ngày"}';
+  try {
+    const kq = goiAI(yc, {mime: m[1], b64: m[2]}, 0.1);
+    return {ok: true, dong: Array.isArray(kq.dong) ? kq.dong : [], ghichu: String(kq.ghichu || ''), moHinh: kq._moHinh};
+  } catch (e) { return {ok: false, msg: e.message}; }
 }
 function docBaiAn() {
   const ss = SpreadsheetApp.getActive(), ra = [], caCua = {};
@@ -3258,12 +3350,14 @@ function khoaAI() {
   return {khoa: khoa, moHinh: m['GeminiModel'] ? [m['GeminiModel']].concat(MO_HINH_AI) : MO_HINH_AI};
 }
 
-function goiAI(yeuCau) {
+function goiAI(yeuCau, tep, nhietDo) {
   const k = khoaAI();
+  const phan = [{text: yeuCau}];
+  if (tep && tep.b64) phan.push({inline_data: {mime_type: tep.mime || 'image/jpeg', data: tep.b64}});
   const than = {
     systemInstruction: {parts: [{text: 'Bạn là chuyên gia sư phạm Hóa học bậc phổ thông ở Việt Nam. Chỉ trả về JSON hợp lệ, không thêm chữ nào ngoài JSON.'}]},
-    contents: [{role: 'user', parts: [{text: yeuCau}]}],
-    generationConfig: {temperature: 0.4, responseMimeType: 'application/json'}
+    contents: [{role: 'user', parts: phan}],
+    generationConfig: {temperature: nhietDo === undefined ? 0.4 : nhietDo, responseMimeType: 'application/json'}
   };
   const loiTung = [];
   const ds = MO_HINH_AI_DUNG ? [MO_HINH_AI_DUNG] : k.moHinh;

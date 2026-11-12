@@ -11,6 +11,7 @@
 <style>.brandHS{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700;font-size:15px;color:#5b6175}.brandHS svg{width:34px;height:34px;flex:none}.anhPhieu{margin:12px 0;border:1px solid #d9e2ef;border-radius:14px;padding:10px;background:#fff}.apTieu{font-weight:700;margin-bottom:8px}.apAnh{display:block;width:100%;max-width:560px;margin:0 auto;border-radius:8px;cursor:zoom-in}.apAnh.to{max-width:none;cursor:zoom-out}
 .tlNut{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:4px 0;font:inherit;text-align:left;cursor:pointer}.tlNut b{font-size:17px}.tlNut span{color:#5b6b80;font-size:14px}.tlNut i{margin-left:auto;font-style:normal;color:#5b6b80}.tlCau .hoi{margin:10px 0}.tlHinh{display:block;max-width:100%;margin:8px auto}
 .nxBai{margin:12px 0;border-left:4px solid #1f5fbf;background:#eef4ff;border-radius:10px;padding:10px 14px;line-height:1.5}.nxBai b{display:block;margin-bottom:4px}
+.txTB{background:#eef4ff;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:17px}.txBangHS{width:100%;border-collapse:collapse}.txBangHS th,.txBangHS td{padding:8px;border-bottom:1px solid #e3e8f0;text-align:left}.txBangHS td:last-child,.txBangHS th:last-child{text-align:center;font-size:17px}
 </style>
 <style>
 :root{--ink:#172033;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--bad:#c5221f;--okbg:#e8f5ec;--badbg:#fdecea}
@@ -205,6 +206,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <div class="thuMuc">
       <button id="moBai"><span class="ic" aria-hidden="true" data-bt="xem"></span><b>Xem lại bài</b><span id="soBai"></span></button>
       <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true" data-bt="tn"></span><b>Tài nguyên</b><span id="soTN"></span></button>
+      <button id="moTX" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Điểm TX</b><span id="soTX">Điểm thầy/cô cho trên lớp</span></button>
       <button id="moKT" class="ktBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Kiến thức cần ôn</b><span id="soKT">Em yếu phần nào, câu nào sai</span></button>
       <button id="moTin" class="tinBtn"><span class="ic" aria-hidden="true" data-bt="tin"></span><i class="dem" id="demTin" hidden></i><b>Hỏi thầy/cô</b><span id="soTin">Nhắn thắc mắc, xem trả lời</span></button>
     </div>
@@ -234,6 +236,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div id="dsTN"></div>
 </section>
 
+<section id="scrTX" class="hidden">
+  <div class="card">
+    <button class="btn2 nho" id="txVe">◀ Quay lại</button>
+    <h1 style="margin-top:10px">📒 Điểm TX</h1>
+    <p class="sub">Điểm thường xuyên thầy/cô cho trên lớp, theo ngày.</p>
+    <div id="txNoi"></div>
+  </div>
+</section>
 <section id="scrKT" class="hidden">
   <div class="card">
     <div class="dau"><button class="btn2" id="ktLai">◀ Tài khoản</button></div>
@@ -292,7 +302,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var lopChon = null, duLieu = null, baiDangXem = null;
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -538,12 +548,26 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('lopHome').textContent = 'Lớp ' + (lopChon ? lopChon.ten : '') + ' · SBD ' + duLieu.mahs;
     var nTro = duLieu.bai.filter(function (b) { return b.tro; }).length, nKT = duLieu.bai.length - nTro;
     $('soBai').textContent = duLieu.bai.length ? (nKT ? nKT + ' bài giáo viên đã mở' : '') + (nKT && nTro ? ' · ' : '') + (nTro ? nTro + ' lượt trò chơi' : '') : 'Chưa có bài nào mở xem lại';
+    var nTX = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; }).length;
+    $('soTX').textContent = nTX ? nTX + ' lần có điểm' : 'Điểm thầy/cô cho trên lớp';
     var n = dsTN().length;
     $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
     demTin(duLieu.tinMoi || 0);
     man('scrHome');
   }
   $('moBai').onclick = function () { veDanhSach(); };
+  // ---------- Điểm TX ----------
+  $('moTX').onclick = function () {
+    man('scrTX');
+    var tx = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; });
+    if (!tx.length) { $('txNoi').innerHTML = '<p class="sub">Em chưa có điểm TX nào.</p>'; return; }
+    var tb = Math.round(tx.reduce(function (a, c) { return a + Number(c.diem); }, 0) / tx.length * 100) / 100;
+    function ng(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : s; }
+    $('txNoi').innerHTML = '<div class="txTB">Trung bình điểm TX: <b>' + String(tb) + '</b> · ' + tx.length + ' lần</div>' +
+      '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm TX</th></tr></thead><tbody>' +
+      tx.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + '</td><td><b>' + String(c.diem) + '</b></td></tr>'; }).join('') + '</tbody></table>';
+  };
+  $('txVe').onclick = function () { man('scrHome'); };
 
   // ---------- Kien thuc can on tap (moi dot da lam + tong hop) ----------
   var KT = null, KT_SEL = 'tat';
