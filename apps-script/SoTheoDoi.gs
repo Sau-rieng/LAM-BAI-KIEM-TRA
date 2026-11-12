@@ -87,6 +87,7 @@ function doPost(e) {
       case 'gv_dat':
       case 'gv_theodoi':
       case 'gv_hoso':
+      case 'gv_anbai':
       case 'gv_solieu':
       case 'gv_bangdiem':
       case 'gv_vang':
@@ -138,6 +139,7 @@ function doPost(e) {
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
+        if (d.action === 'gv_anbai') return json(gvAnBai(d));
         if (d.action === 'gv_solieu') return json(gvSoLieu(d));
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
         if (d.action === 'gv_vang') return json(gvVang(d));
@@ -1450,7 +1452,52 @@ function hoSoLop() {
   vang.forEach(function (v) { if (!(v.madot in dauTien)) { dauTien[v.madot] = v.luc ? new Date(v.luc).getTime() : 0; } });
   const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : '', ca: caCua[m] || ''}; });
-  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), bayGio: new Date().toISOString()};
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), an: docBaiAn(), bayGio: new Date().toISOString()};
+}
+// ---- GV an bai loi (may hong, cham nham): chuyen dong sang tab "... AN", khong tinh vao diem/thong ke; khoi phuc = chuyen lai ----
+const TAB_BL_AN = 'BAI LAM AN', TAB_KQ_AN = 'KQ TRO CHOI AN';
+function chuyenDong(tu, den, head, loc, them) {
+  const ss = SpreadsheetApp.getActive(), a = ss.getSheetByName(tu);
+  if (!a || a.getLastRow() < 2) return 0;
+  const v = a.getRange(2, 1, a.getLastRow() - 1, head.length + (them ? 0 : 1)).getValues(), dong = [];
+  v.forEach(function (r, i) { if (loc(r)) dong.push(i + 2); });
+  if (!dong.length) return 0;
+  const b = layTab(den, them ? head.concat(['ThoiGianAn']) : head);
+  dong.forEach(function (i) { const r = v[i - 2].slice(0, head.length); if (them) r.push(new Date()); b.appendRow(r.map(function (x, k) { return typeof x === 'string' && /^\d+\/\d+$/.test(x) ? "'" + x : x; })); });
+  for (let k = dong.length - 1; k >= 0; k--) a.deleteRow(dong[k]);
+  return dong.length;
+}
+function gvAnBai(d) {
+  const mahs = String(d.mahs || '').trim(), kp = !!d.khoiphuc, md = String(d.madot || '').trim();
+  if (!mahs || !md) return {ok: false, msg: 'Thieu ma'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  let n = 0;
+  try {
+    if (md.indexOf('TC:') === 0) {   // dot tro choi: cac luot ca nhan cua em trong bo cau + ngay do
+      const p = md.split(':'), bo = p[1], ngay = p.slice(2).join(':');
+      const loc = function (r) { return String(r[4]).trim() === mahs && String(r[3]).trim() !== 'NHOM' && String(r[12]).trim() === bo && r[0] instanceof Date && ngayKhoa(r[0]) === ngay; };
+      n = kp ? chuyenDong(TAB_KQ_AN, TAB_KQ, HEAD_KQ, loc, false) : chuyenDong(TAB_KQ, TAB_KQ_AN, HEAD_KQ, loc, true);
+    } else {
+      const mas = (d.mas && d.mas.length ? d.mas : [md]).map(String);
+      const loc = function (r) { return String(r[2]).trim() === mahs && mas.indexOf(String(r[1]).trim()) >= 0; };
+      n = kp ? chuyenDong(TAB_BL_AN, TAB_BL, HEAD_BL, loc, false) : chuyenDong(TAB_BL, TAB_BL_AN, HEAD_BL, loc, true);
+    }
+  } finally { lock.releaseLock(); }
+  return {ok: n > 0, n: n, msg: n ? '' : 'Khong tim thay bai'};
+}
+function docBaiAn() {
+  const ss = SpreadsheetApp.getActive(), ra = [], caCua = {};
+  try { docCauHinh().forEach(function (c) { if (c.ca) caCua[c.madot] = c.ca; }); } catch (e) {}
+  const a = ss.getSheetByName(TAB_BL_AN);
+  if (a && a.getLastRow() > 1) a.getRange(2, 1, a.getLastRow() - 1, HEAD_BL.length + 1).getValues().forEach(function (r) {
+    ra.push({mahs: String(r[2]).trim(), madot: String(r[1]).trim(), ca: caCua[String(r[1]).trim()] || '', diem: Number(String(r[5]).replace(',', '.')) || 0, luc: r[0] instanceof Date ? r[0].toISOString() : '', an: r[HEAD_BL.length] instanceof Date ? r[HEAD_BL.length].toISOString() : ''});
+  });
+  const b = ss.getSheetByName(TAB_KQ_AN);
+  if (b && b.getLastRow() > 1) b.getRange(2, 1, b.getLastRow() - 1, HEAD_KQ.length + 1).getValues().forEach(function (r) {
+    if (!(r[0] instanceof Date)) return;
+    ra.push({mahs: String(r[4]).trim(), madot: 'TC:' + String(r[12]).trim() + ':' + ngayKhoa(r[0]), diem: Number(r[8]) || 0, luc: r[0].toISOString(), an: r[HEAD_KQ.length] instanceof Date ? r[HEAD_KQ.length].toISOString() : '', tro: true});
+  });
+  return ra;
 }
 // Lop nay da thi nhung dot nao, bao nhieu em da nop (de trang GV ghi "Da thi: 12G01 (38)")
 function gvDaThi() {
@@ -1576,13 +1623,13 @@ function dotTroKT(chiMa) {
       const i = g.cauI[c.ma];
       ai.forEach(function (ma) { const o = (g.cong[ma] = g.cong[ma] || {}); const y = (o[i] = o[i] || [0, 0]); y[0] += c.v; y[1]++; });
     });
-    ai.forEach(function (ma) { const o = (g.diem[ma] = g.diem[ma] || [0, 0]); o[0] += x.diem; o[1]++; });
+    ai.forEach(function (ma) { const o = (g.diem[ma] = g.diem[ma] || [0, 0, null, false, 0]); o[0] += x.diem; o[1]++; if (o[2] === null || x.diem > o[2]) o[2] = x.diem; if (x.kieu !== 'NHOM') o[3] = true; if (x.t > o[4]) o[4] = x.t; });
   });
   return thu.map(function (g) {
-    const kq = {}, diem = {};
+    const kq = {}, diem = {}, luot = {};
     Object.keys(g.cong).forEach(function (ma) { kq[ma] = g.cau.map(function (_, i) { const y = g.cong[ma][i]; return y ? Math.round(y[0] / y[1] * 1000) / 1000 : null; }); });
-    Object.keys(g.diem).forEach(function (ma) { diem[ma] = Math.round(g.diem[ma][0] / g.diem[ma][1] * 100) / 100; });
-    return {madot: g.madot, ten: g.ten, luc: g.luc ? new Date(g.luc).toISOString() : '', tro: true, kq: kq, cau: g.cau, diem: diem};
+    Object.keys(g.diem).forEach(function (ma) { const o = g.diem[ma]; diem[ma] = Math.round(o[0] / o[1] * 100) / 100; luot[ma] = {n: o[1], max: o[2], cn: o[3], t: o[4] ? new Date(o[4]).toISOString() : ''}; });
+    return {madot: g.madot, ten: g.ten, luc: g.luc ? new Date(g.luc).toISOString() : '', tro: true, kq: kq, cau: g.cau, diem: diem, luot: luot};
   });
 }
 // AI nhan xet: nhan so lieu tong hop (khong co ten hoc sinh), tra loi nhan xet + goi y day lai

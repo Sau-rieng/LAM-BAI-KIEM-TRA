@@ -603,6 +603,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .qKQ{position:absolute;left:10px;right:10px;top:10px;border-radius:12px;padding:12px 14px;font-size:19px;line-height:1.35;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);text-align:center}.qKQ small{display:block;font-size:14px;opacity:.9}.qKQ.cho{background:#b06000}.qKQ.ok{background:#137333}.qKQ.loi{background:#c5221f}.qKQ.xanh{background:#1a56db}
 .qKhung.khongCam video,.qKhung.khongCam canvas{display:none}.qKhung.khongCam{min-height:120px}
 .qMoi{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#e6f4ea;border-radius:10px;padding:10px 12px;font-size:16px}.qMoi b.d{font-size:20px}
+.bdDau{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}.bdBang td,.bdBang th{text-align:center}.bdBang .tn{text-align:left}.bdChua td{color:var(--muted)}.bdXoa{border:0;background:none;cursor:pointer;font-size:15px;padding:0 4px;opacity:.65}.bdXoa:hover{opacity:1}.bdAn{display:grid;gap:6px}.bdAn>div{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff7e6;border-radius:10px;padding:8px 12px}
 .kqDs{display:grid;gap:6px;margin-top:8px}.kqDong{display:grid;grid-template-columns:1fr auto auto;gap:2px 12px;align-items:center;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit}.kqDong.chua{opacity:.55}.kqTen{font-weight:600}.kqSbd{color:var(--muted);font-size:14px}.kqD{font-weight:700;color:#c5221f;font-size:18px;min-width:42px;text-align:right}.kqPhu{grid-column:1/-1;font-size:13px;color:var(--muted)}.kqC{color:#b06000}.kqLoc{flex-wrap:wrap}
 .qCheDo{display:grid;gap:8px;margin-top:12px}.qCheDo button{text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;display:flex;flex-direction:column;gap:2px}.qCheDo button b{font-size:17px}.qCheDo button span{font-size:13px;color:var(--muted)}
 .qNut{display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap}.qDs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.qDs span{background:#f1f3f4;border-radius:8px;padding:4px 8px;font-size:13px;color:var(--ink)}
@@ -1618,6 +1619,22 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     });
     return { diem: Math.round(t * 100) / 100, tong: Math.round(tong * 100) / 100 };
   }
+  // Ảnh lưu: chỉ lấy phần phiếu trong 4 ô vuông định vị (cách mép ô 3 mm), nắn thẳng theo phiếu, khổ A4
+  function anhPhieu(x, rong, cl) {
+    if (!x.r || !x.r.H || !x.canvas) return anhNen(x.canvas);
+    var src = x.canvas, sw = src.width, sh = src.height, sd = src.getContext('2d').getImageData(0, 0, sw, sh).data;
+    var X0 = 5, Y0 = 5, WM = 200, HM = 287, k = (rong || 1240) / WM, w = Math.round(WM * k), h = Math.round(HM * k);
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var cx = c.getContext('2d'), im = cx.createImageData(w, h), d = im.data, H = x.r.H;
+    for (var v = 0; v < h; v++) for (var u = 0; u < w; u++) {
+      var p = OMR.ap(H, [X0 + u / k, Y0 + v / k]), px = Math.round(p[0]), py = Math.round(p[1]), o = (v * w + u) * 4;
+      if (px < 0 || py < 0 || px >= sw || py >= sh) { d[o] = d[o + 1] = d[o + 2] = 255; }
+      else { var q = (py * sw + px) * 4; d[o] = sd[q]; d[o + 1] = sd[q + 1]; d[o + 2] = sd[q + 2]; }
+      d[o + 3] = 255;
+    }
+    cx.putImageData(im, 0, 0);
+    return c.toDataURL('image/jpeg', cl || 0.7);
+  }
   function anhNen(canvas) {
     var s = Math.min(1, 1400 / Math.max(canvas.width, canvas.height)), c = document.createElement('canvas');
     c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s); c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
@@ -1625,7 +1642,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function guiPhieu(x, ghide) {
     var d = tinhDiem(x), du = { action: 'gv_giay_nop', ma: MA, madot: x.madot, mahs: x.sbd, chon: x.chon, ghide: !!ghide,
-      ghichu: (x.canhLuu ? ['⚠ ' + x.canhLuu] : []).concat(x.ghi, x.daSua ? ['GV sửa tay: ' + x.daSua] : [], x.gvXem ? ['GV đã xem'] : []).join('; '), anh: x.anhId ? '' : QC.anh ? anhNen(x.canvas) : '', anhId: x.anhId || '' };
+      ghichu: (x.canhLuu ? ['⚠ ' + x.canhLuu] : []).concat(x.ghi, x.daSua ? ['GV sửa tay: ' + x.daSua] : [], x.gvXem ? ['GV đã xem'] : []).join('; '), anh: x.anhId ? '' : QC.anh ? anhPhieu(x) : '', anhId: x.anhId || '' };
     Q.cuoi = { sbd: x.sbd, madot: x.madot };
     Q.dangGui++; veTienDo();
     var ten = esc(Q.ten[x.sbd] || x.sbd), dd = '<b>' + diem(d.diem) + '</b> điểm · mã ' + (x.khongMa ? esc(x.khongMa) + ' (không có)' : esc(x.madot.slice(-3)));
@@ -1754,9 +1771,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (choXuLy) hienKQ('loi', '⚠ Chưa vào sổ: ' + ten + (x.de ? '' : ' · mã đề chưa rõ'), 'Ảnh lưu ở 📋 Kết quả › Chờ xử lý · lật sang tờ tiếp theo');
     else hienKQ('xanh', '📸 Tờ ' + so + ' · ' + ten, 'SBD ' + esc(x.sbd.replace(/_/g, '□')) + ' · mã ' + esc(String(x.made).replace(/_/g, '□')) + ' · đang gửi…');
     Q.moi = { html: '📸 Tờ ' + so + ' · <b>' + ten + '</b> <small>đang gửi…</small>' }; veDaCham(); veTienDo();
-    var s = Math.min(1, 1700 / Math.max(canvas.width, canvas.height)), c = document.createElement('canvas');
-    c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s); c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
-    var du = { action: 'gv_giay_anh', ma: MA, ca: Q.ca, anh: c.toDataURL('image/jpeg', 0.75), sbd: x.sbd, made: x.made };
+    var du = { action: 'gv_giay_anh', ma: MA, ca: Q.ca, anh: anhPhieu(x, 1400, 0.75), sbd: x.sbd, made: x.made };
     Q.hang = (Q.hang && Q.hang.then ? Q.hang : Promise.resolve()).then(function () { return goi(Q.lop.url, du); }).then(function (j) {
       Q.dangGui--; if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới.' : j.msg);
       if (Q.soChup === so && !choXuLy) hienKQ('ok', '✓ Tờ ' + so + ' · ' + ten, 'Đã gửi ảnh · lật sang tờ tiếp theo');
@@ -2676,7 +2691,63 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function khoiLop(t) { var m = /^(\d+)/.exec(t); return m ? m[1] : String(t).replace(/\d+$/, ''); }
   // Ho so -> Kien thuc: chon tung dot hoac Tong quat; muc diem; bang hoc sinh x cac dot (yeu nhat len dau)
-  var KT_CHON = {}, KT_DOTL = {}, KT_EM = null;
+  var KT_CHON = {}, KT_DOTL = {}, KT_EM = null, KT_TAB = {};
+  // ---- 📄 Bảng điểm một đợt (bài kiểm tra / đề giấy / trò chơi theo bộ câu); 🗑 ẩn bài lỗi, ↩ khôi phục ----
+  function veBangDiemDot(o, l, g, nh, vw, x) {
+    var tro = g._ds[0] && g._ds[0].tro, hs = HS_DL.hs || x.r.hs, rows = [], mas = tro ? [g.madot] : ((nh && nh.ma) || g._ds.map(function (d) { return d.madot; }));
+    var sc = sauCung(vw.bai || []), an = (HS_DL.an || []).filter(function (a) { return tro ? a.madot === g.madot : mas.indexOf(a.madot) >= 0 || (a.ca && a.ca === g.madot); });
+    var gio = function (t) { if (!t) return ''; var d = new Date(t); return isNaN(d) ? '' : ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' ' + ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); };
+    hs.forEach(function (h, i) {
+      if (tro) {
+        var D = g._ds[0], lu = (D.luot || {})[h.mahs];
+        rows.push({ i: i + 1, ma: h.mahs, ten: h.hoten, co: !!lu || D.diem && D.diem[h.mahs] !== undefined, diem: D.diem ? D.diem[h.mahs] : undefined, max: lu && lu.max, n: lu && lu.n, t: lu && lu.t, xoa: !!(lu && lu.cn) });
+      } else {
+        var b = sc[h.mahs + '|' + g.madot];
+        rows.push({ i: i + 1, ma: h.mahs, ten: h.hoten, co: !!b, diem: b && b.diem, dung: b && b.dung, tong: b && b.tong, made: b && String(b.maDe || '').slice(-3), t: b && b.luc, lan: b && b.lan, pdf: b && b.pdf, xoa: !!b });
+      }
+    });
+    var co = rows.filter(function (r) { return r.co; });
+    var h = '<div class="bdDau"><h3 style="margin:0">📄 Bảng điểm · ' + esc(g.nhan) + ' · ' + co.length + '/' + rows.length + ' em có bài</h3><button class="btn2 nho bdXuat">⬇ Xuất Excel</button></div>' +
+      '<p class="sub">🗑 ẩn bài bị lỗi (máy hỏng, chấm nhầm): bài không tính vào điểm, thống kê, đánh giá' + (tro ? '' : '; bài iPad thì em được làm lại') + '. Khôi phục được ở cuối bảng.' + (tro ? ' Lượt chơi nhóm không ẩn riêng từng em được.' : '') + '</p>' +
+      '<div class="bang"><table class="bdBang"><thead><tr><th>STT</th><th class="tn">Họ và tên</th><th>SBD</th>' + (tro ? '<th>Điểm TB</th><th>Cao nhất</th><th>Số lượt</th><th>Lượt cuối</th>' : '<th>Điểm</th><th>Đúng</th><th>Mã đề</th><th>Nộp lúc</th><th>Lần</th><th>Bài</th>') + '</tr></thead><tbody>';
+    rows.forEach(function (r) {
+      h += '<tr class="' + (r.co ? '' : 'bdChua') + '"><td>' + r.i + '</td><td class="tn">' + esc(r.ten) + (r.co && r.xoa ? ' <button class="bdXoa" data-ma="' + esc(r.ma) + '" title="Ẩn bài lỗi của em này">🗑</button>' : '') + '</td><td>' + esc(r.ma) + '</td>';
+      if (!r.co) h += '<td colspan="' + (tro ? 4 : 6) + '" class="sub">chưa có bài</td>';
+      else if (tro) h += '<td><b>' + (r.diem === undefined ? '–' : diem(r.diem)) + '</b></td><td>' + (r.max === null || r.max === undefined ? '–' : diem(r.max)) + '</td><td>' + (r.n || (r.xoa ? '' : 'nhóm')) + '</td><td>' + gio(r.t) + '</td>';
+      else h += '<td><b>' + diem(r.diem) + '</b></td><td>' + (r.dung !== '' && r.dung !== undefined ? esc(r.dung) + '/' + esc(r.tong) : '') + '</td><td>' + esc(r.made || '') + '</td><td>' + gio(r.t) + '</td><td>' + (r.lan || '') + '</td><td>' + (/^https?:/.test(r.pdf || '') ? '<a href="' + esc(r.pdf) + '" target="_blank" rel="noopener">mở</a>' : '') + '</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+    if (an.length) h += '<h3>Bài đã ẩn (' + an.length + ')</h3><div class="bdAn">' + an.map(function (a) {
+      var ten = (hs.filter(function (z) { return z.mahs === a.mahs; })[0] || {}).hoten || a.mahs;
+      return '<div><span>' + esc(ten) + ' · ' + diem(a.diem) + ' điểm · ' + gio(a.luc) + (a.an ? ' · ẩn lúc ' + gio(a.an) : '') + '</span><button class="btn2 nho bdKP" data-ma="' + esc(a.mahs) + '">↩ Khôi phục</button></div>';
+    }).filter(function (v, i, A) { return A.indexOf(v) === i; }).join('') + '</div>';
+    o.innerHTML = h;
+    function lam(ma, kp, nut) {
+      var ten = (hs.filter(function (z) { return z.mahs === ma; })[0] || {}).hoten || ma;
+      if (!kp && !confirm('Ẩn bài của ' + ten + ' (' + g.nhan + ')?\nBài không tính vào điểm và thống kê nữa. Khôi phục được ở cuối bảng.')) return;
+      nut.disabled = true; nut.textContent = '…';
+      goi(l.url, { action: 'gv_anbai', ma: MA, madot: g.madot, mas: kp ? mas.concat(an.filter(function (z) { return z.mahs === ma; }).map(function (z) { return z.madot; })) : mas, mahs: ma, khoiphuc: kp }).then(function (j) {
+        if (!j.ok) throw new Error(/hop le/i.test(j.msg || '') ? 'Sổ lớp chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai phiên bản mới).' : j.msg || 'Lỗi');
+        return goi(l.url, { action: 'gv_hoso', ma: MA });
+      }).then(function (j2) {
+        if (j2 && j2.ok) { HS_CACHE[l.ten] = HS_DL = j2; }
+        delete KT_LOP[l.ten]; Object.keys(KT_DOTL).forEach(function (k) { if (k.indexOf(l.ten + '|') === 0) delete KT_DOTL[k]; });
+        veKTLop();
+      }).catch(function (e) { nut.disabled = false; nut.textContent = kp ? '↩ Khôi phục' : '🗑'; alert('Chưa làm được: ' + e.message); });
+    }
+    [].forEach.call(o.querySelectorAll('.bdXoa'), function (b) { b.onclick = function () { lam(b.getAttribute('data-ma'), false, b); }; });
+    [].forEach.call(o.querySelectorAll('.bdKP'), function (b) { b.onclick = function () { lam(b.getAttribute('data-ma'), true, b); }; });
+    o.querySelector('.bdXuat').onclick = function () {
+      var dong = [tro ? ['STT', 'SBD', 'Họ và tên', 'Điểm TB', 'Cao nhất', 'Số lượt', 'Lượt cuối'] : ['STT', 'SBD', 'Họ và tên', 'Điểm', 'Đúng', 'Mã đề', 'Nộp lúc', 'Lần']];
+      function so(v) { return v === null || v === undefined || v === '' ? '' : { v: Number(v), s: 2 }; }
+      rows.forEach(function (r) {
+        if (!r.co) { dong.push([r.i, r.ma, r.ten, '', '', '', '', ''].slice(0, dong[0].length)); return; }
+        dong.push(tro ? [r.i, r.ma, r.ten, so(r.diem), so(r.max), r.n || '', gio(r.t)] : [r.i, r.ma, r.ten, so(r.diem), r.dung !== '' && r.dung !== undefined ? r.dung + '/' + r.tong : '', r.made || '', gio(r.t), r.lan || '']);
+      });
+      taiVe(taoXlsx([{ ten: l.ten, rong: tro ? [6, 12, 28, 9, 9, 8, 14] : [6, 12, 28, 8, 8, 8, 14, 6], dong: dong }]), 'BangDiem_' + tenFile(l.ten) + '_' + tenFile(g.nhan) + '.xlsx');
+    };
+  }
   function veKTLop() {
     var l = HS_LOP, box = $('hoSo');
     box.innerHTML = '<div class="card"><h2>🧭 Kiến thức · Lớp ' + esc(l.ten) + '</h2><p class="sub">Chọn một đợt kiểm tra hoặc <b>Tổng quát</b> (cộng dồn các đợt).</p>' +
@@ -2721,6 +2792,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var T = sel === 'tat' ? x.T : (KT_DOTL[l.ten + '|' + sel] = KT_DOTL[l.ten + '|' + sel] || tongHopKT(gr[sel]._ds, x.r.hs));
       var cung = DS.filter(function (y) { return khoiLop(y.ten) === khoiLop(l.ten); });
       var diemSel = {}; nop.forEach(function (h) { diemSel[h.mahs] = h.diem; });
+      // Tab Đánh giá | Bảng điểm cho từng đợt
+      if (sel !== 'tat') {
+        var tab = KT_TAB[l.ten] || 'dg', tb2 = document.createElement('div'); tb2.className = 'loc khoi loaiTab';
+        [['dg', '📊 Đánh giá'], ['bd', '📄 Bảng điểm']].forEach(function (a) { var b = document.createElement('button'); b.className = tab === a[0] ? 'on' : ''; b.textContent = a[1]; b.onclick = function () { KT_TAB[l.ten] = a[0]; veKTLop(); }; tb2.appendChild(b); });
+        box.querySelector('.ktDiem').appendChild(tb2);
+        if (tab === 'bd') { box.querySelector('.ktHS').remove(); veBangDiemDot(box.querySelector('.kt'), l, gr[sel], nhG[sel], vw, x); return; }
+      }
       veKT(box.querySelector('.kt'), T, { key: 'lop|' + l.ten + '|' + sel, lop: l.ten, ten: sel === 'tat' ? 'Tất cả các bài' : gr[sel].ten + ' (' + gr[sel].nhan + ')', tenFile: sel === 'tat' ? 'tat-ca' : sel, url: l.url, diem: diemSel,
         coAI: sel !== 'tat', nhieuDot: sel === 'tat', coSS: sel === 'tat' && cung.length > 1, tenSS: 'So sánh các lớp khối ' + khoiLop(l.ten), soSanh: function (o) { soSanhKhoi(o, cung, 'lop|' + l.ten + '|tat'); } });
       veBangHS(box.querySelector('.ktHS'), l, dots, x, dEm);
