@@ -72,6 +72,7 @@ function doPost(e) {
       case 'chobai': return json(trangThaiDot(d.madot));
       case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
+      case 'hs_anhphieu': return json(hsAnhPhieu(d));
       case 'hs_kienthuc': return json(hsKienThuc(d));
       case 'daxem':  return json(ghiDaXem(d));
       case 'xemtn':  return json(ghiXemTN(d));
@@ -294,7 +295,8 @@ function xemLai(d) {
     const de = docDe(c.madot);
     const kq = chamBai(de, function (q, i) { return chon[i]; });
     ketqua.push({
-      madot: c.madot, ten: c.ten + (bai.lan > 1 ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
+      madot: c.madot, ten: c.ten + (bai.lan > 1 && !c.giay ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
+      giay: !!c.giay, coAnh: !!(c.giay && idTuUrl(bai.file)), tongDiem: c.giay ? de.reduce(function (a, q) { return a + (Number(q.w) || 0); }, 0) : null,
       goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
       cau: kq.ct.map(function (q) {
         return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chon: q.chon, dapan: q.dapan,
@@ -306,6 +308,17 @@ function xemLai(d) {
   return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true)};
 }
 
+// HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
+function hsAnhPhieu(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma), madot = String(d.madot || '').trim();
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  const c = timDot(madot);
+  if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
+  const bai = timBaiDaNop(madot, ma), id = bai ? idTuUrl(bai.file) : '';
+  if (!id) return {ok: false, msg: 'Khong co anh phieu'};
+  const b = DriveApp.getFileById(id).getBlob();
+  return {ok: true, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(b.getBytes())};
+}
 // Cac luot tro khung cua em dang bai xem lai (madot = TC#<ma luot>)
 function baiTroHS(ma) {
   const layBo = boDem(), tz = Session.getScriptTimeZone();
@@ -2611,7 +2624,7 @@ function timBaiDaNop(madot, ma) {
   const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues();
   for (let i = v.length - 1; i >= 0; i--) {
     if (String(v[i][1]).trim() === madot && String(v[i][2]).trim() === ma) {
-      return {diem: v[i][5], socaudung: v[i][6], tongsocau: v[i][7], chitiet: v[i][9], lan: Number(v[i][11]) || 1,
+      return {diem: v[i][5], socaudung: v[i][6], tongsocau: v[i][7], chitiet: v[i][9], lan: Number(v[i][11]) || 1, file: String(v[i][10] || ''),
         luc: v[i][0] instanceof Date ? v[i][0].toISOString() : ''};
     }
   }

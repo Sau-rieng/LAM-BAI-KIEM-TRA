@@ -8,7 +8,8 @@
 <link rel="icon" type="image/png" href="hinh/app/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>.brandHS{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700;font-size:15px;color:#5b6175}.brandHS svg{width:34px;height:34px;flex:none}</style>
+<style>.brandHS{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700;font-size:15px;color:#5b6175}.brandHS svg{width:34px;height:34px;flex:none}.anhPhieu{margin:12px 0;border:1px solid #d9e2ef;border-radius:14px;padding:10px;background:#fff}.apTieu{font-weight:700;margin-bottom:8px}.apAnh{display:block;width:100%;max-width:560px;margin:0 auto;border-radius:8px;cursor:zoom-in}.apAnh.to{max-width:none;cursor:zoom-out}
+</style>
 <style>
 :root{--ink:#172033;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--bad:#c5221f;--okbg:#e8f5ec;--badbg:#fdecea}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -263,6 +264,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       <ul id="goiYDS"></ul>
       <div class="gc">Gợi ý do AI soạn, giáo viên đã xem trước khi gửi em.</div>
     </div>
+    <div class="anhPhieu hidden" id="anhPhieu"></div>
     <div class="bar"><label><input type="checkbox" id="chiSai"> Chỉ xem câu sai và câu bỏ trống</label></div>
   </div>
   <div id="dsCau"></div>
@@ -274,6 +276,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="xtKhung" id="xtKhung"><div class="xtTai" id="xtTai"><div class="vong"></div><span>Đang tải tài nguyên…</span></div></div>
 </div>
 <script src="cau-hinh-lop.js"></script>
+<script src="phieu-omr.js"></script>
+<script src="quet-omr.js"></script>
+<script src="danh-dau.js"></script>
 <script src="hinh/giao-dien/bieu-tuong.js"></script>
 <script>[].forEach.call(document.querySelectorAll("[data-bt]"),function(e){if(window.BT)e.innerHTML=BT[e.getAttribute("data-bt")];});</script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
@@ -387,11 +392,37 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     daGhi[b.madot] = 1;
     try { fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'daxem', mahs: duLieu.mahs, maxem: duLieu.maxem, madot: b.madot }) }).catch(function () {}); } catch (e) {}
   }
+  // Đề giấy: ảnh phiếu em đã tô, máy đánh dấu ✓/✗ từng câu; bấm ảnh để phóng to
+  var ANH_PHIEU = {};
+  function veAnhPhieu(b) {
+    var o = $('anhPhieu');
+    if (!b.giay || !b.coAnh) { o.classList.add('hidden'); o.innerHTML = ''; return; }
+    o.classList.remove('hidden');
+    function hien(src) {
+      o.innerHTML = '<div class="apTieu">📷 Phiếu trả lời của em</div><img src="' + src + '" alt="Phiếu trả lời của em" class="apAnh"><p class="sub">' + (window.DANHDAU ? DANHDAU.chuThich : '') + '. Bấm vào ảnh để phóng to.</p>';
+      o.querySelector('.apAnh').onclick = function () { this.classList.toggle('to'); };
+    }
+    if (ANH_PHIEU[b.madot]) { hien(ANH_PHIEU[b.madot]); return; }
+    o.innerHTML = '<p class="sub">Đang tải ảnh phiếu…</p>';
+    fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_anhphieu', mahs: duLieu.mahs, maxem: duLieu.maxem, madot: b.madot }) }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) throw new Error(j.msg || 'lỗi');
+      return new Promise(function (ok, loi) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { loi(new Error('ảnh hỏng')); }; im.src = j.anh; });
+    }).then(function (im) {
+      var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0);
+      var src = im.src;
+      try {
+        var A = OMR.tuCanvas(c, 1800), r = OMR.doc(A);
+        if (r.ok) { DANHDAU.ve(A.canvas, r, b.cau.map(function (q) { return { loai: q.loai, da: q.dapan, chon: q.chon }; })); src = A.canvas.toDataURL('image/jpeg', 0.85); }
+      } catch (e) {}
+      ANH_PHIEU[b.madot] = src; if (baiDangXem === b) hien(src);
+    }).catch(function (e) { if (baiDangXem === b) o.innerHTML = '<p class="sub">Chưa mở được ảnh phiếu (' + String(e.message).replace(/</g, '&lt;') + ').</p>'; });
+  }
   function veBai() {
     var b = baiDangXem;
     ghiDaXem(b);
     $('tenBai').textContent = b.ten;
-    $('diemBai').textContent = String(b.diem).replace(',', '.') + ' điểm';
+    $('diemBai').textContent = String(b.diem).replace(',', '.') + ' điểm' + (b.giay && b.tongDiem ? ' / ' + String(Math.round(b.tongDiem * 100) / 100) : '');
+    veAnhPhieu(b);
     var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { var n = nhan(q); return (n.phan ? n.phan + '.' : '') + n.so; });
     $('tomTat').textContent = 'Đúng hoàn toàn ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
     var g = b.goiy;
