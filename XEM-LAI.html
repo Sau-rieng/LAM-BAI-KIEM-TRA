@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>.brandHS{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700;font-size:15px;color:#5b6175}.brandHS svg{width:34px;height:34px;flex:none}.anhPhieu{margin:12px 0;border:1px solid #d9e2ef;border-radius:14px;padding:10px;background:#fff}.apTieu{font-weight:700;margin-bottom:8px}.apAnh{display:block;width:100%;max-width:560px;margin:0 auto;border-radius:8px;cursor:zoom-in}.apAnh.to{max-width:none;cursor:zoom-out}
 .tlNut{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:4px 0;font:inherit;text-align:left;cursor:pointer}.tlNut b{font-size:17px}.tlNut span{color:#5b6b80;font-size:14px}.tlNut i{margin-left:auto;font-style:normal;color:#5b6b80}.tlCau .hoi{margin:10px 0}.tlHinh{display:block;max-width:100%;margin:8px auto}
+.nxBai{margin:12px 0;border-left:4px solid #1f5fbf;background:#eef4ff;border-radius:10px;padding:10px 14px;line-height:1.5}.nxBai b{display:block;margin-bottom:4px}
 </style>
 <style>
 :root{--ink:#172033;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--bad:#c5221f;--okbg:#e8f5ec;--badbg:#fdecea}
@@ -265,6 +266,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       <ul id="goiYDS"></ul>
       <div class="gc">Gợi ý do AI soạn, giáo viên đã xem trước khi gửi em.</div>
     </div>
+    <div class="nxBai hidden" id="nxBai"></div>
     <div class="anhPhieu hidden" id="anhPhieu"></div>
     <div class="bar"><label><input type="checkbox" id="chiSai"> Chỉ xem câu sai và câu bỏ trống</label></div>
   </div>
@@ -424,6 +426,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('tenBai').textContent = b.ten;
     $('diemBai').textContent = String(b.diem).replace(',', '.') + ' điểm' + (b.giay && b.tongDiem ? ' / ' + String(Math.round(b.tongDiem * 100) / 100) : '');
     veAnhPhieu(b);
+    var nx = $('nxBai'); if (b.nx) { nx.classList.remove('hidden'); nx.innerHTML = '<b>📝 Nhận xét của thầy/cô</b><div>' + String(b.nx).replace(/</g, '&lt;').replace(/\n/g, '<br>') + '</div>'; } else { nx.classList.add('hidden'); nx.innerHTML = ''; }
     var sai = b.cau.filter(function (q) { return !q.dung; }).map(function (q) { var n = nhan(q); return (n.phan ? n.phan + '.' : '') + n.so; });
     $('tomTat').textContent = 'Đúng hoàn toàn ' + b.socaudung + '/' + b.tongsocau + ' câu. ' + (sai.length ? 'Câu cần làm lại: ' + sai.join(', ') + '.' : 'Em làm đúng tất cả!');
     var g = b.goiy;

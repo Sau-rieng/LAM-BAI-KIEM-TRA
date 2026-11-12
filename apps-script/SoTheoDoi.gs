@@ -89,6 +89,7 @@ function doPost(e) {
       case 'gv_theodoi':
       case 'gv_hoso':
       case 'gv_anbai':
+      case 'gv_nhanxet':
       case 'gv_solieu':
       case 'gv_bangdiem':
       case 'gv_vang':
@@ -141,6 +142,7 @@ function doPost(e) {
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_anbai') return json(gvAnBai(d));
+        if (d.action === 'gv_nhanxet') return json(gvNhanXet(d));
         if (d.action === 'gv_solieu') return json(gvSoLieu(d));
         if (d.action === 'gv_bangdiem') return json(ghiBangDiem());
         if (d.action === 'gv_vang') return json(gvVang(d));
@@ -286,7 +288,7 @@ function xemLai(d) {
   const hs = timHS(ma);
   if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
   const ketqua = [];
-  const gtMap = docGiaiThich();
+  const gtMap = docGiaiThich(), nxMap = docNhanXet();
   let tlMap = null;
   docCauHinh().forEach(function (c) {
     if (!c.xemlai || !hopLop(c)) return;
@@ -297,7 +299,7 @@ function xemLai(d) {
     const kq = chamBai(de, function (q, i) { return chon[i]; });
     ketqua.push({
       madot: c.madot, ten: c.ten + (bai.lan > 1 && !c.giay ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
-      giay: !!c.giay, coAnh: !!(c.giay && idTuUrl(bai.file)),
+      giay: !!c.giay, coAnh: !!(c.giay && idTuUrl(bai.file)), nx: ((nxMap[ma + '|' + (c.ca || c.madot)] || nxMap[ma + '|' + c.madot]) || {}).nx || '',
       tuluan: c.giay ? ((tlMap = tlMap || docTuLuan())[c.madot] || []).map(function (t) { return {cau: t.cau, hoi: t.hoi, hinh: t.hinh && t.hinh !== '-' ? anhDataUri(/^hinh\//.test(t.hinh) ? 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/' + t.hinh : t.hinh) : '', diem: t.diem, gt: t.gt}; }) : [], tongDiem: c.giay ? de.reduce(function (a, q) { return a + (Number(q.w) || 0); }, 0) : null,
       goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
       cau: kq.ct.map(function (q) {
@@ -306,7 +308,7 @@ function xemLai(d) {
       })
     });
   });
-  try { baiTroHS(ma).forEach(function (b) { ketqua.push(b); }); } catch (e) {}
+  try { baiTroHS(ma).forEach(function (b) { b.nx = ((nxMap[ma + '|' + b.dot] || {}).nx) || ''; delete b.dot; ketqua.push(b); }); } catch (e) {}
   return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true)};
 }
 
@@ -328,6 +330,7 @@ function baiTroHS(ma) {
     const ct = chamLuot(x, layBo); if (!ct) return null;
     return {madot: 'TC#' + x.ml, tro: true, ten: '🎮 ' + tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + ' · ' + Utilities.formatDate(new Date(x.t), tz, 'dd/MM HH:mm'),
       diem: x.diem, luc: x.t ? new Date(x.t).toISOString() : '', socaudung: ct.filter(function (c) { return c.dung; }).length, tongsocau: ct.length,
+      dot: x.bo && x.t && x.kieu !== 'NHOM' ? 'TC:' + x.bo + ':' + ngayKhoa(x.t) : '',
       cau: ct.map(function (c) {
         return {cau: c.cau, loai: c.loai, hoi: c.hoi, pa: c.pa, hinh: c.hinh, chon: c.chon, dapan: c.dapan, dung: c.dung, soY: c.soY, diem: c.diem, toiDa: c.toiDa,
           gt: c.gt, chuaLam: !c.daLam};
@@ -1463,7 +1466,7 @@ function hoSoLop() {
     if (x.kieu === 'NHOM') { if (x.ml) tvLuot[x.ml] = x.tv; return; }
     const m = /^(\d+(?:[.,]\d+)?)\/(\d+)$/.exec(x.ds);
     choi.push({mahs: x.mahs, tro: x.matro, ten: x.ten, dung: m ? Number(m[1].replace(',', '.')) : 0, tong: m ? Number(m[2]) : 0, diem: x.diem, giay: x.giay,
-      luc: x.t ? new Date(x.t).toISOString() : '', khung: true});
+      luc: x.t ? new Date(x.t).toISOString() : '', khung: true, ml: x.ml, dot: x.bo && x.t ? 'TC:' + x.bo + ':' + ngayKhoa(x.t) : ''});
   });
   const choiNhom = [];
   const cn = ss.getSheetByName(TAB_CN);
@@ -1480,7 +1483,7 @@ function hoSoLop() {
   vang.forEach(function (v) { if (!(v.madot in dauTien)) { dauTien[v.madot] = v.luc ? new Date(v.luc).getTime() : 0; } });
   const dot2 = Object.keys(dauTien).sort(function (a, b) { return dauTien[a] - dauTien[b]; })
     .map(function (m) { return {madot: m, ten: ten[m] || m, luc: dauTien[m] ? new Date(dauTien[m]).toISOString() : '', ca: caCua[m] || ''}; });
-  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), an: docBaiAn(), bayGio: new Date().toISOString()};
+  return {ok: true, lop: lopNay(), hs: hs, dot: dot2, bai: bai, vang: vang, choi: choi, choiNhom: choiNhom, nhom: docNhom(), an: docBaiAn(), nx: docNhanXet(), bayGio: new Date().toISOString()};
 }
 // ---- GV an bai loi (may hong, cham nham): chuyen dong sang tab "... AN", khong tinh vao diem/thong ke; khoi phuc = chuyen lai ----
 const TAB_BL_AN = 'BAI LAM AN', TAB_KQ_AN = 'KQ TRO CHOI AN';
@@ -1503,27 +1506,55 @@ function gvAnBai(d) {
   try {
     if (md.indexOf('TC:') === 0) {   // dot tro choi: cac luot ca nhan cua em trong bo cau + ngay do
       const p = md.split(':'), bo = p[1], ngay = p.slice(2).join(':');
-      const loc = function (r) { return String(r[4]).trim() === mahs && String(r[3]).trim() !== 'NHOM' && String(r[12]).trim() === bo && r[0] instanceof Date && ngayKhoa(r[0]) === ngay; };
+      const ml = String(d.maluot || '').trim();
+      const loc = function (r) { return String(r[4]).trim() === mahs && String(r[3]).trim() !== 'NHOM' && (ml ? String(r[11]).trim() === ml : String(r[12]).trim() === bo && r[0] instanceof Date && ngayKhoa(r[0]) === ngay); };
       n = kp ? chuyenDong(TAB_KQ_AN, TAB_KQ, HEAD_KQ, loc, false) : chuyenDong(TAB_KQ, TAB_KQ_AN, HEAD_KQ, loc, true);
     } else {
       const mas = (d.mas && d.mas.length ? d.mas : [md]).map(String);
-      const loc = function (r) { return String(r[2]).trim() === mahs && mas.indexOf(String(r[1]).trim()) >= 0; };
+      const lan = Number(d.lan) || 0;
+      const loc = function (r) { return String(r[2]).trim() === mahs && mas.indexOf(String(r[1]).trim()) >= 0 && (!lan || (Number(r[11]) || 1) === lan); };
       n = kp ? chuyenDong(TAB_BL_AN, TAB_BL, HEAD_BL, loc, false) : chuyenDong(TAB_BL, TAB_BL_AN, HEAD_BL, loc, true);
     }
   } finally { lock.releaseLock(); }
   return {ok: n > 0, n: n, msg: n ? '' : 'Khong tim thay bai'};
+}
+// ---- Nhan xet tung dot cho tung em (GV luu; HS thay khi xem lai) ----
+const TAB_NX = 'NHAN XET', HEAD_NX = ['MaHS', 'MaDot', 'NhanXet', 'ThoiGian'];
+function docNhanXet() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_NX), m = {};
+  if (!sh || sh.getLastRow() < 2) return m;
+  sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+    const k = String(r[0]).trim() + '|' + String(r[1]).trim();
+    if (String(r[2]).trim()) m[k] = {nx: String(r[2]), luc: r[3] instanceof Date ? r[3].toISOString() : ''};
+  });
+  return m;
+}
+function gvNhanXet(d) {
+  const mahs = String(d.mahs || '').trim(), md = String(d.madot || '').trim(), nx = String(d.nx || '').trim().slice(0, 2000);
+  if (!mahs || !md) return {ok: false, msg: 'Thieu ma'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = layTab(TAB_NX, HEAD_NX), n = sh.getLastRow();
+    const v = n > 1 ? sh.getRange(2, 1, n - 1, 2).getValues() : [];
+    for (let i = 0; i < v.length; i++) if (String(v[i][0]).trim() === mahs && String(v[i][1]).trim() === md) {
+      if (nx) sh.getRange(i + 2, 3, 1, 2).setValues([[nx, new Date()]]); else sh.deleteRow(i + 2);
+      return {ok: true};
+    }
+    if (nx) sh.appendRow(["'" + mahs, md, nx, new Date()]);
+  } finally { lock.releaseLock(); }
+  return {ok: true};
 }
 function docBaiAn() {
   const ss = SpreadsheetApp.getActive(), ra = [], caCua = {};
   try { docCauHinh().forEach(function (c) { if (c.ca) caCua[c.madot] = c.ca; }); } catch (e) {}
   const a = ss.getSheetByName(TAB_BL_AN);
   if (a && a.getLastRow() > 1) a.getRange(2, 1, a.getLastRow() - 1, HEAD_BL.length + 1).getValues().forEach(function (r) {
-    ra.push({mahs: String(r[2]).trim(), madot: String(r[1]).trim(), ca: caCua[String(r[1]).trim()] || '', diem: Number(String(r[5]).replace(',', '.')) || 0, luc: r[0] instanceof Date ? r[0].toISOString() : '', an: r[HEAD_BL.length] instanceof Date ? r[HEAD_BL.length].toISOString() : ''});
+    ra.push({mahs: String(r[2]).trim(), madot: String(r[1]).trim(), ca: caCua[String(r[1]).trim()] || '', lan: Number(r[11]) || 1, diem: Number(String(r[5]).replace(',', '.')) || 0, luc: r[0] instanceof Date ? r[0].toISOString() : '', an: r[HEAD_BL.length] instanceof Date ? r[HEAD_BL.length].toISOString() : ''});
   });
   const b = ss.getSheetByName(TAB_KQ_AN);
   if (b && b.getLastRow() > 1) b.getRange(2, 1, b.getLastRow() - 1, HEAD_KQ.length + 1).getValues().forEach(function (r) {
     if (!(r[0] instanceof Date)) return;
-    ra.push({mahs: String(r[4]).trim(), madot: 'TC:' + String(r[12]).trim() + ':' + ngayKhoa(r[0]), diem: Number(r[8]) || 0, luc: r[0].toISOString(), an: r[HEAD_KQ.length] instanceof Date ? r[HEAD_KQ.length].toISOString() : '', tro: true});
+    ra.push({mahs: String(r[4]).trim(), madot: 'TC:' + String(r[12]).trim() + ':' + ngayKhoa(r[0]), diem: Number(r[8]) || 0, luc: r[0].toISOString(), an: r[HEAD_KQ.length] instanceof Date ? r[HEAD_KQ.length].toISOString() : '', tro: true, ml: String(r[11]).trim(), ten: String(r[2]).trim()});
   });
   return ra;
 }
