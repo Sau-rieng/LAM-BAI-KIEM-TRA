@@ -1503,6 +1503,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (Q.cheDo === 'chup') { bip(true); guiAnh(x, canvas); Q.trangThai = 'doiTo'; return; }
     Q.trangThai = 'doiTo';
     // Không biết em nào / mã đề nào: chưa vào sổ được → ảnh để ở Kết quả › Chờ xử lý
+    // Đúng em nhưng tô mã đề sai (không có mã đó): vẫn lưu bài 0 điểm kèm ảnh, ghi chú ⚠ để GV chọn lại mã ở Kết quả
+    if (x.sbd && Q.ten[x.sbd] && !x.de && !Q.da[x.sbd]) {
+      var mt = String(x.made || '').replace(/_/g, '□') || '?';
+      x.de = Q.de[0]; x.madot = x.de.madot; x.chon = {}; x.ghi = []; x.khongMa = mt;
+      x.canhLuu = 'Mã đề tô ' + mt + ' – không có mã đề này, tạm ghi 0 điểm';
+      bip(false); guiPhieu(x, false); return;
+    }
     if (!x.sbd || !Q.ten[x.sbd] || !x.de) { bip(false); guiAnh(x, canvas, true); return; }
     var cu = Q.da[x.sbd], ghide = false;
     x.canh = x.canh.filter(function (c) { return c.k !== 'trung'; });
@@ -1621,7 +1628,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       ghichu: (x.canhLuu ? ['⚠ ' + x.canhLuu] : []).concat(x.ghi, x.daSua ? ['GV sửa tay: ' + x.daSua] : [], x.gvXem ? ['GV đã xem'] : []).join('; '), anh: x.anhId ? '' : QC.anh ? anhNen(x.canvas) : '', anhId: x.anhId || '' };
     Q.cuoi = { sbd: x.sbd, madot: x.madot };
     Q.dangGui++; veTienDo();
-    var ten = esc(Q.ten[x.sbd] || x.sbd), dd = '<b>' + diem(d.diem) + '</b> điểm · mã ' + esc(x.madot.slice(-3));
+    var ten = esc(Q.ten[x.sbd] || x.sbd), dd = '<b>' + diem(d.diem) + '</b> điểm · mã ' + (x.khongMa ? esc(x.khongMa) + ' (không có)' : esc(x.madot.slice(-3)));
     hienKQ('cho', ten + ' · ' + dd, 'SBD ' + esc(x.sbd) + ' · đang lưu…');
     Q.moi = { html: '<b>' + esc(x.sbd.slice(-2)) + '</b> ' + ten + ' · <b class="d">' + diem(d.diem) + '</b> <small>mã ' + esc(x.madot.slice(-3)) + ' · đang lưu…</small>' }; veDaCham();
     $('qTT').innerHTML = Q.cheDo === 'cham' ? $('qTT').innerHTML : 'Đã đọc xong · lật sang tờ tiếp theo';
@@ -1690,6 +1697,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function layAnhCho() {
     goi(Q.lop.url, { action: 'gv_giay_dsanh', ma: MA, ca: Q.ca }).then(function (j) { if (j.ok) { Q.choDs = j.anh.filter(function (a) { return a.tt === 'CHO'; }); veKetQua(); } }).catch(function () {});
   }
+  function khongMa(d) { return d && /không có mã đề/.test(String(d.ghi || '')); }
   function laCanh(d) { return d && /^⚠/.test(String(d.ghi || '')); }
   function veKetQua() {
     if (!Q || Q.cheDo !== 'ketqua') return;
@@ -1703,7 +1711,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       h += rows.length ? '<div class="kqDs">' + rows.map(function (x) {
         var d = Q.da[x.mahs];
         return '<button class="kqDong' + (d ? '' : ' chua') + '" data-sbd="' + esc(x.mahs) + '"' + (d ? '' : ' disabled') + '><span class="kqTen">' + esc(x.hoten) + (laCanh(d) ? ' <span class="kqC">⚠</span>' : '') + '</span><span class="kqSbd">' + esc(x.mahs) + '</span><span class="kqD">' + (d ? diem(d.diem) : '—') + '</span>' +
-          (d ? '<span class="kqPhu">mã ' + esc(String(d.madot).slice(-3)) + (laCanh(d) ? ' · ' + esc(String(d.ghi).replace(/^⚠\s*/, '').split(';')[0]) : '') + '</span>' : '<span class="kqPhu">chưa có bài</span>') + '</button>';
+          (d ? '<span class="kqPhu">mã ' + (khongMa(d) ? '?' : esc(String(d.madot).slice(-3))) + (laCanh(d) ? ' · ' + esc(String(d.ghi).replace(/^⚠\s*/, '').split(';')[0]) : '') + '</span>' : '<span class="kqPhu">chưa có bài</span>') + '</button>';
       }).join('') + '</div>' : '<p class="sub">Không có em nào.</p>';
     }
     $('qDa').innerHTML = h;
@@ -1724,8 +1732,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var x = xetPhieu(r); x.canvas = A.canvas; x.r = r; x.anhId = o.id; x.anhCho = !sbd;
       x.canh = x.canh.filter(function (c2) { return c2.k !== 'trung'; });
       if (sbd) {   // bài đã lưu: lấy đúng em, mã đề, câu trả lời đã lưu (có thể GV đã sửa tay)
-        var d = Q.da[sbd]; x.sbd = sbd; x.de = Q.de.filter(function (z) { return z.madot === d.madot; })[0] || x.de; x.madot = x.de ? x.de.madot : '';
-        if (x.de) { docTraLoi(x, r, x.de); x.canh = x.canh.filter(function (c2) { return c2.k !== 'trung' && c2.k !== 'sbd' && c2.k !== 'made'; }); var v = String(d.ct || '').split('|'); if (v.length === x.de.cau.length) x.de.cau.forEach(function (q, i) { x.chon[q.cau] = v[i] === '-' ? '' : v[i]; }); }
+        var d = Q.da[sbd]; x.sbd = sbd;
+        if (khongMa(d)) { if (!x.de) x.canh.push({ k: 'made', t: 'Mã đề tô sai – chọn đúng mã đề rồi bấm Lưu' }); }
+        else { x.de = Q.de.filter(function (z) { return z.madot === d.madot; })[0] || x.de; x.madot = x.de ? x.de.madot : '';
+        if (x.de) { docTraLoi(x, r, x.de); x.canh = x.canh.filter(function (c2) { return c2.k !== 'trung' && c2.k !== 'sbd' && c2.k !== 'made'; }); var v = String(d.ct || '').split('|'); if (v.length === x.de.cau.length) x.de.cau.forEach(function (q, i) { x.chon[q.cau] = v[i] === '-' ? '' : v[i]; }); } }
       }
       veXet(x);
       var tde = $('qXet').querySelector('h2'); if (tde) tde.textContent = sbd ? '📋 ' + Q.ten[sbd] + ' · ' + diem(Q.da[sbd].diem) + ' điểm' : '⚠ Ảnh chờ xử lý – chọn em và mã đề';
@@ -1824,6 +1834,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
             var d = theoMa[b.madot], p = null;
             if (d && b.ct) { var ch = {}, v = b.ct.split('|'); d.cau.forEach(function (q, k) { ch[q.cau] = v[k] === '-' ? '' : (v[k] || ''); }); p = diemTungPhan(d, ch); }
             function so(x) { return x === null || x === undefined || x === '' ? '' : { v: Number(x), s: 2 }; }
+            if (/không có mã đề/.test(b.ghi || '')) { dong.push([i + 1, h.mahs, h.hoten, '?', '', '', '', so(b.diem), b.ghi || '']); return; }
             dong.push([i + 1, h.mahs, h.hoten, b.madot.slice(-3), p ? so(p.TN) : '', p ? so(p.DS) : '', p ? so(p.TLN) : '', so(b.diem), b.ghi || '']);
           });
           sheets.push({ ten: j.tenLop, rong: [6, 12, 28, 8, 9, 9, 9, 9, 40], dong: dong });
