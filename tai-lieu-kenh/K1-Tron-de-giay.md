@@ -9,7 +9,7 @@ Giáo viên nạp file Excel ở trang giáo viên (**Kiểm tra → 📥 Nạp 
 
 ## 0. Giáo viên mang đến kênh TRỘN ĐỀ
 
-1. `KHO-DE-<khối>-<bài>-201.xlsx` (đề gốc: tab đề có cột Goc trống cũng được, `CAU HINH THEM`, `KIEN THUC THEM`, `GIAI THICH THEM`).
+1. `KHO-DE-<khối>-<bài>-201.xlsx` (đề gốc: tab đề có cột Goc trống cũng được, `CAU HINH THEM`, `KIEN THUC THEM`, `GIAI THICH THEM`, và `TU LUAN THEM` nếu đề có tự luận).
 2. `<khối>-<bài>-201.docx` (đề Word gốc; có PHẦN IV tự luận thì để ở cuối, trước dòng HẾT).
 3. Hình: công cụ tự lấy hình trong file Word gốc (hình đặt tên image1.png… theo đúng thứ tự trong Word). Hình trên iPad vẫn do kênh ra đề đưa lên `hinh/<mã>-201/`.
 4. Một câu dặn: số mã (mặc định 4), lớp, trường/kỳ thi in ở đầu đề, mã 201 giữ nguyên thứ tự gốc hay trộn luôn.
@@ -65,6 +65,8 @@ Tab `CAU HINH THEM`:
 
 - Mỗi mã một dòng. `Kieu` = `GIAY`. `ThangDS` = `K10` hoặc `K12` (các mã cùng đợt giống nhau). `TrangThai` = `DONG`, `ChoXemLai` = `KHONG`.
 
+Tab `TU LUAN THEM` (`MaDot | Cau | NoiDung | Hinh | Diem | LoiGiai`, xem `K1-Ra-de.md`): tự luận giống nhau ở mọi mã, **mỗi mã một bộ dòng** (công cụ trộn tự chép). Thiếu tab này thì học sinh không xem được lời giải tự luận; công cụ báo cảnh báo.
+
 Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo`) và `GIAI THICH THEM` (`MaDot | Cau | GiaiThich`): **mỗi mã đề đủ mọi câu**, `Cau` theo số câu của mã đó. Lời giải Phần I viết theo **chữ cái của mã đó** (đã đổi sau khi trộn).
 
 ## 5. Trang nạp tự kiểm (lỗi thì không cho nạp)
@@ -91,4 +93,5 @@ Ngoài file Excel nạp kho, gửi kèm để in:
 - [ ] Điểm từng câu đúng yêu cầu giáo viên; `ThangDS` đúng khối giáo viên yêu cầu.
 - [ ] Mỗi mã đủ kiến thức, mức độ, lời giải cho mọi câu.
 - [ ] Đủ file Word + PDF cho từng mã và file đáp án; mở file PDF xem lại hình, bảng, số trang.
+- [ ] Đề có tự luận thì file nạp có tab `TU LUAN THEM` đủ các mã.
 - [ ] Công cụ không còn cảnh báo (hoặc đã sửa tay phần cảnh báo).

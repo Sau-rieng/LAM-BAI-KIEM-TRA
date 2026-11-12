@@ -75,10 +75,28 @@ Khi giáo viên nói "đề giấy" / "đề in để quét phiếu":
 - Giao 2 file như đề thường, thêm:
   - `KHO-DE-<mã>-201.xlsx`: tab đề có thêm cột `Goc` (để trống) và, nếu có câu chùm, cột `Nhom` (cột L; các câu dùng chung một dữ kiện ghi cùng tên, vd `C1`). `CAU HINH THEM` thêm 2 cột `Kieu` = `GIAY`, `ThangDS` = `K10` hoặc `K12`.
   - `<mã>-201.docx`: đề Word đầy đủ; có tự luận thì là **PHẦN IV** đặt sau Phần III, trước `HẾT`; kèm trang hướng dẫn chấm tự luận.
+  - Có tự luận thì file kho thêm tab **`TU LUAN THEM`** để học sinh xem lại lời giải từng câu tự luận (mục "Tự luận" bên dưới).
   - Hình đưa lên `hinh/<mã>-201/` như đề thường.
 - Giới hạn phiếu: Phần I ≤ 40 câu, Phần II ≤ 8 câu, Phần III ≤ 6 câu; đáp án Phần III tô được trên phiếu (tối đa 4 kí tự: chữ số, "−", dấu phẩy).
 - Lời giải TN ghi rõ chữ cái ("Chọn B", "A sai vì …", mỗi phương án sai một dòng) và Đ/S ghi `a) … b) … c) … d) …` để công cụ trộn đổi được theo mã mới.
 - Phương án dạng "Cả A và B", "Tất cả đều đúng": được, công cụ giữ nguyên thứ tự phương án câu đó.
+
+### Tự luận (Phần IV) – tab `TU LUAN THEM`
+
+Học sinh xem lại bài đề giấy thấy mục **Phần IV · Tự luận**: bấm câu nào mới hiện đề và lời giải câu đó. Điểm tự luận giáo viên chấm tay.
+
+Tab `TU LUAN THEM`, dòng 1 đúng thứ tự:
+
+`MaDot | Cau | NoiDung | Hinh | Diem | LoiGiai`
+
+- `MaDot`: mã đề gốc (`…-201`); kênh trộn đề tự chép sang các mã 202–204.
+- `Cau`: `IV.1`, `IV.2`…
+- `NoiDung`: nguyên văn câu hỏi như trong đề Word (cả các ý a, b…), xuống dòng bằng xuống dòng thường; dùng kí tự ₂ ³ hoặc `<sub>` `<sup>`.
+- `Hinh`: hình của câu (nếu có): `hinh/<mã>-201/imageN.png` (đưa hình lên repo như đề thường), không có ghi trống.
+- `Diem`: điểm câu, dấu chấm (vd `1`, `1.5`).
+- `LoiGiai`: lời giải chi tiết **viết cho học sinh tự đọc** theo hướng dẫn chấm: từng ý a), b)…, phương trình, các bước tính, kết quả; ghi điểm từng bước ở cuối dòng (vd `– 0.25 điểm`).
+
+Có `TU LUAN THEM` thì vẫn giữ trang hướng dẫn chấm trong file Word cho giáo viên. Đề đã nạp rồi mà thiếu tự luận: gửi file chỉ có tab `TU LUAN THEM` (đủ 4 mã); trang nạp hiện "chỉ thêm tự luận", bài đã chấm giữ nguyên.
 
 ## Đề mẫu đã làm
 

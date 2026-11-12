@@ -51,6 +51,7 @@ def docKho(duong):
     ch = (bang('CAU HINH THEM') or [{}])[0]
     kt = {x.get('CAU'): (x.get('KIENTHUC', ''), x.get('MUCDO', '')) for x in bang('KIEN THUC THEM') if x.get('MADOT', ma) == ma}
     gt = {x.get('CAU'): x.get('GIAITHICH', '') for x in bang('GIAI THICH THEM') if x.get('MADOT', ma) == ma}
+    ch['_TL'] = [[x.get('CAU', ''), x.get('NOIDUNG', ''), x.get('HINH', ''), x.get('DIEM', ''), x.get('LOIGIAI', '')] for x in bang('TU LUAN THEM') if x.get('MADOT', ma) in (ma, '')]
     for c in cau:
         c['kt'], c['md'] = kt.get(c['cau'], ('', '')); c['gt'] = gt.get(c['cau'], '')
         if c['loai'] == 'DS': c['da'] = boDau(c['da']).replace('Đ', 'D')
@@ -335,8 +336,12 @@ def taoKho(tien, MA, ch, a, thang, ra):
     c = wb.create_sheet('CAU HINH THEM'); c.append(['MaDot', 'TenBai', 'ThoiGian_phut', 'TrangThai', 'ChoXemLai', 'Lop', 'Kieu', 'ThangDS'])
     k = wb.create_sheet('KIEN THUC THEM'); k.append(['MaDot', 'Cau', 'KienThuc', 'MucDo'])
     g = wb.create_sheet('GIAI THICH THEM'); g.append(['MaDot', 'Cau', 'GiaiThich'])
+    tl = ch.get('_TL') or []
+    t = wb.create_sheet('TU LUAN THEM') if tl else None
+    if t: t.append(['MaDot', 'Cau', 'NoiDung', 'Hinh', 'Diem', 'LoiGiai'])
     for ma, ds in MA.items():
         c.append([ma, ch.get('TENBAI') or a.ky, ch.get('THOIGIAN_PHUT') or '45', 'DONG', 'KHONG', a.lop or ch.get('LOP', ''), 'GIAY', thang])
+        for r in tl: t.append([ma] + [duongHinh(r[2], a.maGoc) or r[2] if j == 2 else r[j] for j in range(5)])
         for x in ds:
             k.append([ma, x['cau'], x['kt'], x['md']])
             if x['gt']: g.append([ma, x['cau'], x['gt']])
@@ -371,6 +376,7 @@ def main():
     os.makedirs(a.ra, exist_ok=True)
     tl = phanTuLuan(a.word)
     if a.word and not tl: canh.add('Đề Word không có phần "PHẦN IV" (tự luận) – đề in chỉ có Phần I–III')
+    if tl and not ch.get('_TL'): canh.add('Đề có PHẦN IV tự luận nhưng file kho thiếu tab TU LUAN THEM – học sinh sẽ không xem được lời giải tự luận khi xem lại')
     class CS: pass
     cs = CS(); cs.maGoc = maGoc; cs.canh = canh
     cs.thuMuc = ([a.hinh] if a.hinh else []) + [os.path.dirname(os.path.abspath(a.kho))] + ([layHinhWord(a.word, a.ra)] if a.word else [])
@@ -384,7 +390,7 @@ def main():
     if thieuKT: canh.add('Đề gốc thiếu kiến thức ở câu: ' + ', '.join(thieuKT))
     if thieuGT: canh.add('Đề gốc thiếu lời giải ở câu: ' + ', '.join(thieuGT))
     print(json.dumps({'goc': maGoc, 'ma': list(MA), 'thang': thang, 'so_cau': {L: sum(1 for c in goc if c['loai'] == L) for L in ('TN', 'DS', 'TLN')},
-                      'tong_diem_trac_nghiem': round(sum(float(c['w']) for c in goc), 3), 'tu_luan': bool(tl), 'canh_bao': sorted(canh),
+                      'tong_diem_trac_nghiem': round(sum(float(c['w']) for c in goc), 3), 'tu_luan': bool(tl), 'tu_luan_xem_lai': len(ch.get('_TL') or []), 'canh_bao': sorted(canh),
                       'file': sorted(f for f in os.listdir(a.ra) if not f.startswith('_'))}, ensure_ascii=False, indent=1))
 
 if __name__ == '__main__':

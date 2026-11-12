@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>.brandHS{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700;font-size:15px;color:#5b6175}.brandHS svg{width:34px;height:34px;flex:none}.anhPhieu{margin:12px 0;border:1px solid #d9e2ef;border-radius:14px;padding:10px;background:#fff}.apTieu{font-weight:700;margin-bottom:8px}.apAnh{display:block;width:100%;max-width:560px;margin:0 auto;border-radius:8px;cursor:zoom-in}.apAnh.to{max-width:none;cursor:zoom-out}
+.tlNut{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:4px 0;font:inherit;text-align:left;cursor:pointer}.tlNut b{font-size:17px}.tlNut span{color:#5b6b80;font-size:14px}.tlNut i{margin-left:auto;font-style:normal;color:#5b6b80}.tlCau .hoi{margin:10px 0}.tlHinh{display:block;max-width:100%;margin:8px auto}
 </style>
 <style>
 :root{--ink:#172033;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--bad:#c5221f;--okbg:#e8f5ec;--badbg:#fdecea}
@@ -495,6 +496,29 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       hang.appendChild(b); the.insertBefore(hang, the.querySelector('.giaiThich'));
     });
     if (!box.children.length) box.innerHTML = '<div class="card">Không có câu sai nào.</div>';
+    veTuLuan(box);
+  }
+  // Phần IV tự luận (đề giấy): bấm câu nào mới hiện đề và lời giải câu đó
+  function veTuLuan(box) {
+    var tl = baiDangXem.tuluan || [];
+    if (!tl.length) return;
+    var p = document.createElement('div'); p.className = 'ph'; p.textContent = 'Phần IV · Tự luận'; box.appendChild(p);
+    var ghi = document.createElement('p'); ghi.className = 'sub'; ghi.textContent = 'Bấm vào từng câu để xem đề và lời giải chi tiết. Điểm phần tự luận do thầy/cô chấm trên bài giấy.'; box.appendChild(ghi);
+    function html(t) { t = String(t || ''); return /<br|<p|<div|<ul|<ol|<table|<sub|<sup|<b>/i.test(t) ? t : t.replace(/</g, '&lt;').replace(/\n/g, '<br>'); }
+    tl.forEach(function (q) {
+      var the = document.createElement('div'); the.className = 'card q tlCau';
+      var nut = document.createElement('button'); nut.type = 'button'; nut.className = 'tlNut'; nut.setAttribute('aria-expanded', 'false');
+      nut.innerHTML = '<b>Câu ' + String(q.cau).replace(/^IV\./, '').replace(/</g, '&lt;') + '</b>' + (q.diem ? '<span>' + String(q.diem).replace(',', '.') + ' điểm</span>' : '') + '<i>▸</i>';
+      var khung = document.createElement('div'); khung.hidden = true;
+      khung.innerHTML = '<div class="hoi">' + html(q.hoi) + '</div>' + (q.hinh ? '<img class="tlHinh" src="' + q.hinh + '" alt="Hình">' : '') +
+        (q.gt ? '<div class="giaiThich"><div class="gtTieu">💡 Lời giải chi tiết</div>' + html(q.gt) + '</div>' : '<p class="sub">Thầy/cô chưa đưa lời giải câu này.</p>');
+      nut.onclick = function () { var mo = khung.hidden; khung.hidden = !mo; nut.setAttribute('aria-expanded', mo ? 'true' : 'false'); nut.querySelector('i').textContent = mo ? '▾' : '▸'; };
+      var hang = document.createElement('div'); hang.className = 'nutCau';
+      var b = document.createElement('button'); b.className = 'hoiCau'; b.textContent = '💬 Hỏi thầy/cô câu này';
+      b.onclick = function () { moTin({ madot: baiDangXem.madot, cau: 'IV.' + String(q.cau).replace(/^IV\./, ''), chu: 'Câu ' + String(q.cau).replace(/^IV\./, '') + ' (Phần IV · tự luận) · ' + baiDangXem.ten }); };
+      hang.appendChild(b); khung.appendChild(hang);
+      the.appendChild(nut); the.appendChild(khung); box.appendChild(the);
+    });
   }
   $('chiSai').onchange = veCau;
   $('btnLai').onclick = function () { man('scrDS'); };
