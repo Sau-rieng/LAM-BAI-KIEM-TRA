@@ -364,7 +364,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       nut.innerHTML = '<b></b><span></span>';
       nut.querySelector('b').textContent = b.ten;
       nut.querySelector('span').textContent = String(b.diem).replace(',', '.') + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
-      nut.onclick = function () { baiDangXem = b; veBai(); };
+      if (b.khoa) { nut.querySelector('span').textContent += ' · 🔒 thầy/cô chưa mở xem lại'; nut.disabled = true; nut.style.opacity = '.75'; nut.style.cursor = 'default'; }
+      else nut.onclick = function () { baiDangXem = b; veBai(); };
       box.appendChild(nut);
     });
     man('scrDS');

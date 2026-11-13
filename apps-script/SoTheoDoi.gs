@@ -334,14 +334,18 @@ function hsAnhPhieu(d) {
   return {ok: true, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(b.getBytes())};
 }
 // Cac luot tro khung cua em dang bai xem lai (madot = TC#<ma luot>)
+// Tro co "Cho HS xem lai" = CO moi gui cau/dap an; tro dang tat: chi gui diem
 function baiTroHS(ma) {
-  const layBo = boDem(), tz = Session.getScriptTimeZone();
+  const layBo = boDem(), tz = Session.getScriptTimeZone(), choXem = {};
+  try { docTroChoi().forEach(function (t) { if (t.xemlai) choXem[t.matro] = 1; }); } catch (e) {}
   return luotCuaHS(ma).map(function (x) {
     const ct = chamLuot(x, layBo); if (!ct) return null;
+    const mo = !!choXem[String(x.matro).split(':')[0]];
     return {madot: 'TC#' + x.ml, tro: true, ten: '🎮 ' + tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + ' · ' + Utilities.formatDate(new Date(x.t), tz, 'dd/MM HH:mm'),
       diem: x.diem, luc: x.t ? new Date(x.t).toISOString() : '', socaudung: ct.filter(function (c) { return c.dung; }).length, tongsocau: ct.length,
       dot: x.bo && x.t && x.kieu !== 'NHOM' ? 'TC:' + x.bo + ':' + ngayKhoa(x.t) : '',
-      cau: ct.map(function (c) {
+      khoa: !mo,
+      cau: !mo ? [] : ct.map(function (c) {
         return {cau: c.cau, loai: c.loai, hoi: c.hoi, pa: c.pa, hinh: c.hinh, chon: c.chon, dapan: c.dapan, dung: c.dung, soY: c.soY, diem: c.diem, toiDa: c.toiDa,
           gt: c.gt, chuaLam: !c.daLam};
       })};
@@ -1954,7 +1958,7 @@ function ghiDong(tab, head, row) {
 // Tro choi dang nhap / mo khoa qua so lop; ket qua ghi vao HOAT DONG / TRO CHOI NHOM cua so lop.
 // =====================================================================
 const TAB_TC = 'TRO CHOI';
-const HEAD_TC = ['MaTro', 'TenTro', 'Kieu', 'Khoi', 'File', 'TrangThai', 'ThoiGian_phut', 'Lop', 'XuatPhatLuc', 'BoCau'];
+const HEAD_TC = ['MaTro', 'TenTro', 'Kieu', 'Khoi', 'File', 'TrangThai', 'ThoiGian_phut', 'Lop', 'XuatPhatLuc', 'BoCau', 'ChoXemLai'];
 const XP_TRE = 12000;   // ms tu luc bam Xuat phat den luc den xanh (du de moi may nhan lenh)
 const TC_MAC_DINH = [
   ['DAINOI-HOA10', 'Đại Nội Huế – Hóa 10', 'CA NHAN', 10, 'HOA10-DAINOI.html', 5],
@@ -1996,11 +2000,12 @@ function tabTroChoi() {
   }
   if (!String(sh.getRange(1, 9).getValue()).trim()) sh.getRange(1, 9).setValue('XuatPhatLuc').setFontWeight('bold');
   if (!String(sh.getRange(1, 10).getValue()).trim()) sh.getRange(1, 10).setValue('BoCau').setFontWeight('bold');
+  if (!String(sh.getRange(1, 11).getValue()).trim()) sh.getRange(1, 11).setValue('ChoXemLai').setFontWeight('bold');
   // Them tro moi trong danh sach mac dinh neu tab chua co (khong dong cham dong cu)
   const co = {};
   if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { co[String(r[0]).trim()] = 1; });
   const them = TC_MAC_DINH.filter(function (t) { return !co[t[0]]; })
-    .map(function (t) { return [t[0], t[1], t[2], t[3], t[4], /^KHUNG-/.test(t[4]) ? 'DONG' : 'MO', t[5], lopMacDinh(t[3]), '', '']; });
+    .map(function (t) { return [t[0], t[1], t[2], t[3], t[4], /^KHUNG-/.test(t[4]) ? 'DONG' : 'MO', t[5], lopMacDinh(t[3]), '', '', 'KHONG']; });
   if (them.length) sh.getRange(sh.getLastRow() + 1, 1, them.length, HEAD_TC.length).setValues(them);
   return sh;
 }
@@ -2016,7 +2021,7 @@ function docTroChoi() {
     if (tt !== 'CHO' || bay >= xp + phut * 60000) xp = 0;   // chi giu gio xuat phat cua luot dang dien ra
     return {dong: i + 2, matro: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), kieu: khongDau(r[2]) === 'NHOM' ? 'NHOM' : 'CA NHAN',
       khoi: String(r[3]).trim(), file: String(r[4]).trim(), tt: tt, mo: tt !== 'DONG', cho: tt === 'CHO', xp: xp, phut: phut,
-      lop: khongDau(r[7]) || 'TAT CA', bo: String(r[9] || '').trim(), khung: /^KHUNG-/i.test(String(r[4]).trim())};
+      lop: khongDau(r[7]) || 'TAT CA', bo: String(r[9] || '').trim(), khung: /^KHUNG-/i.test(String(r[4]).trim()), xemlai: khongDau(r[10]) === 'CO'};
   }).filter(function (t) { return t.matro; });
 }
 // Ban doc nhanh cho luc ca lop cung dang nhap / hoi trang thai: giu trong cache cua so lop vai giay
@@ -2159,7 +2164,7 @@ function gvTcThemKhung(d) {
   KHOI_KHUNG.forEach(function (k) {
     const ma = m[1] + '-K' + k[0];
     if (co.some(function (t) { return t.matro === ma; })) return;
-    them.push([ma, ten + ' – ' + k[1], 'CA NHAN', k[0], file, 'DONG', 5, lopMacDinh(k[0]), '', '']);
+    them.push([ma, ten + ' – ' + k[1], 'CA NHAN', k[0], file, 'DONG', 5, lopMacDinh(k[0]), '', '', 'KHONG']);
   });
   if (!them.length) return {ok: false, msg: 'Tro khung ' + file + ' da co'};
   sh.getRange(sh.getLastRow() + 1, 1, them.length, HEAD_TC.length).setValues(them);
@@ -2329,6 +2334,7 @@ function gvTcDat(d) {
     if (!(ph >= 1 && ph <= 60)) return {ok: false, msg: 'Thoi gian phai tu 1 den 60 phut'};
     sh.getRange(t.dong, 7).setValue(ph);
   } else if (d.truong === 'lop') sh.getRange(t.dong, 8).setValue(chuanDsLop(d.giatri));
+  else if (d.truong === 'xemlai') sh.getRange(t.dong, 11).setValue(d.giatri ? 'CO' : 'KHONG');
   else if (d.truong === 'bo') {
     if (!t.khung) return {ok: false, msg: 'Tro nay khong dung bo cau'};
     const ma = String(d.giatri || '').trim(), b = docDsBo().filter(function (x) { return x.ma === ma; })[0];
