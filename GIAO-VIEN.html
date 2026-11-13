@@ -3336,7 +3336,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var b = m[x.mahs + '|' + d.madot];
         if (!b) { var v = vangCua(x.mahs, d.madot); h += v ? '<td class="vg" title="' + esc(v.ghichu || 'Vắng') + '">V</td>' : '<td>–</td>'; return; }
         t += b.diem; n++;
-        if (b.tro) { h += '<td class="' + mauDiem(b.diem) + ' troO" title="Trò chơi: điểm cao nhất ' + b.soLuot + ' lượt">' + diem(b.diem) + (b.soLuot > 1 ? '<span class="lan2">' + b.soLuot + 'l</span>' : '') + '</td>'; return; }
+        if (b.tro) { h += '<td class="' + mauDiem(b.diem) + ' troO" title="Trò chơi: điểm cao nhất ' + b.soLuot + ' lượt">' + diem(b.diem) + (b.soLuot > 1 ? '<span class="lan2">×' + b.soLuot + '</span>' : '') + '</td>'; return; }
         h += '<td class="' + mauDiem(b.diem) + (b.nghieng ? ' ngh' : '') + '"' + (b.nghieng ? ' title="Mã ' + esc(b.maDe) + '"' : '') + '><a href="' + esc(b.pdf) + '" target="_blank" rel="noopener">' + diem(b.diem) + '</a>' + (b.lan > 1 ? '<span class="lan2">L' + b.lan + '</span>' : '') + '</td>';
       });
       var tb = n ? lam2(t / n) : null;
@@ -3355,7 +3355,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     card.innerHTML = '<h2>Lớp ' + esc(j.lop) + '</h2>' +
       '<div class="tk tk3"><div><b>' + j.hs.length + '</b><span>Học sinh</span></div><div><b>' + j.dot.length + '</b><span>' + (j.dot.some(function (d) { return d.tro; }) ? 'Bài KT + buổi trò chơi' : 'Bài kiểm tra') + '</span></div>' +
       '<div><b>' + (soTB ? diem(lam2(tongTB / soTB)) : '–') + '</b><span>Điểm TB lớp</span></div></div>' +
-      (duoi5 ? '<p class="sub">' + duoi5 + ' em có điểm trung bình dưới 5. Điểm ≤ 3.5 màu đỏ, dưới 5 màu vàng.</p>' : '') +
+      (duoi5 ? '<p class="sub">' + duoi5 + ' em có điểm trung bình dưới 5. Điểm ≤ 3.5 màu đỏ, dưới 5 màu vàng.</p>' : '') + '<p class="sub">🎮 cột trò chơi: lấy điểm cao nhất trong buổi; <b>×2</b> = em chơi 2 lượt. Dấu – là em không có điểm (chưa làm bài / không vào chơi).</p>' +
       '<div class="bang">' + h + '</div>' +
       '<div class="chuthich">' + ct + '<br>Điểm tính theo lần làm sau cùng; <span style="color:var(--warn)">L2</span> = làm lại lần 2; <b style="color:var(--warn)">V</b> = vắng thi (bấm tên em để ghi/bỏ vắng); 🎮 = số lượt chơi trò chơi luyện tập.' +
       (function () { var n = (j.vang || []).filter(function (v) { return !m[v.mahs + '|' + v.madot]; }).length; return n ? '<br><b style="color:var(--warn)">' + n + ' lượt vắng chưa thi bù.</b>' : ''; })() + '</div>' +
@@ -4279,9 +4279,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function taiKQ(lamMoi) {
     var luot = ++KQ.dang;
     DS.forEach(function (l) {
-      if (KQ.data[l.ten] && !lamMoi) return;
-      KQ.data[l.ten] = { dang: true };
+      var cu = KQ.data[l.ten];
+      if (cu && (cu.dang || (!lamMoi && cu.luc && Date.now() - cu.luc < 30000))) return;
+      if (!cu || !cu.ok) KQ.data[l.ten] = { dang: true };
       goi(l.url, { action: 'gv_tckq', ma: MA, chitiet: 1 }).then(function (j) {
+        if (j.ok) j.luc = Date.now();
         KQ.data[l.ten] = j.ok ? j : { loi: /hop le/i.test(j.msg || '') ? 'Sổ lớp này chưa cập nhật bản mới' : (j.msg || 'lỗi') };
       }).catch(function (e) { KQ.data[l.ten] = { loi: 'Không kết nối được (' + e.message + ')' }; })
         .then(function () { if (luot === KQ.dang && !$('scrTroKQ').classList.contains('hidden')) veKQ(); });
@@ -4454,7 +4456,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         '<p class="chuthich">Mức điểm tính theo lượt chơi gần nhất của mỗi ' + (nhom ? 'nhóm' : 'em') + '.</p>'
         : '<div><b>' + (tb === null ? '–' : tb + '%') + '</b><span>Đúng trung bình</span></div><div><b>' + (cao === null ? '–' : cao + '%') + '</b><span>Cao nhất</span></div></div>') +
       (TK_CU[t.matro] ? '<p class="chuthich">Kết quả trước khi gom (Sheet riêng cũ của trò này): <a href="' + GOC_TRO + TK_CU[t.matro] + '" target="_blank" rel="noopener">mở trang thống kê cũ ↗</a></p>' : '') + '</div>';
-    if (!r.length && !dang) h += '<div class="card sub">Chưa có lượt chơi nào' + (KQ.lop === 'tat' ? '' : ' của lớp ' + esc(KQ.lop)) + ' được ghi vào sổ theo dõi.</div>';
+    if (!r.length && !dang) {
+      var khac = TRO.filter(function (t2) { return t2.matro !== t.matro; }).map(function (t2) { return { t: t2, n: dongKQ(t2, chon).length }; }).filter(function (x) { return x.n; });
+      h += '<div class="card sub">Chưa có lượt chơi nào của trò này' + (KQ.lop === 'tat' ? '' : ' ở lớp ' + esc(KQ.lop)) + '.' +
+        (khac.length ? '<br>Lớp đã chơi các trò: ' + khac.map(function (x) { return '<button class="btn2 kqSang" data-tro="' + esc(x.t.matro) + '">' + esc(x.t.ten) + ' (' + x.n + ' lượt)</button>'; }).join(' ') : '') + '</div>';
+    }
     // Phan tich (tro khung co chi tiet tung cau)
     var coCT = r.filter(function (x) { return x.L && x.L.ct && x.L.ct.length && x.bo[x.L.bo]; });
     if (coCT.length) {
@@ -4486,6 +4492,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     box.innerHTML = h;
     var tai = box.querySelector('.kqTai'); if (tai) tai.onclick = function () { xuatKQ(t, chon); };
     [].forEach.call(box.querySelectorAll('.kqNgayChon button'), function (b) { b.onclick = function () { KQ.ngay = b.getAttribute('data-ngay'); veKQ(); }; });
+    [].forEach.call(box.querySelectorAll('.kqSang'), function (b) { b.onclick = function () { KQ.matro = b.getAttribute('data-tro'); veKQChon(); veKQ(); }; });
     [].forEach.call(box.querySelectorAll('tr.kqCo'), function (tr) { tr.onclick = function () { var ml = tr.getAttribute('data-ml'); KQ.moLuot = KQ.moLuot === ml ? null : ml; veKQ(); }; });
     [].forEach.call(box.querySelectorAll('.kqXoa'), function (b) {
       b.onclick = function (ev) {

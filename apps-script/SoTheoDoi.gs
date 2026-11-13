@@ -2019,9 +2019,21 @@ function docTroChoi() {
       lop: khongDau(r[7]) || 'TAT CA', bo: String(r[9] || '').trim(), khung: /^KHUNG-/i.test(String(r[4]).trim())};
   }).filter(function (t) { return t.matro; });
 }
+// Ban doc nhanh cho luc ca lop cung dang nhap / hoi trang thai: giu trong cache cua so lop vai giay
+// (mo KHO DE moi lan mat 1-2 giay; 40 may cung goi la qua tai)
+function docNhanh(khoa, giay, ham) {
+  const cache = CacheService.getScriptCache();
+  try { const c = cache.get(khoa); if (c) return JSON.parse(c); } catch (e) {}
+  const v = ham();
+  try { cache.put(khoa, JSON.stringify(v), giay); } catch (e) {}
+  return v;
+}
+function docTroChoiNhanh() { return docNhanh('tcds', 5, docTroChoi); }
+function docMaNhanh() { return docNhanh('ma_nhanh', 60, docMa); }
+function docDsBoNhanh() { return docNhanh('dsbo', 60, docDsBo); }
 // Khung tro choi (d.khung = 'F1'...): tim dong cua khoi lop nay (F1-K10...); lop DEMO: dong khung dang mo
 function timTro(d) {
-  const ds = docTroChoi(), ma = String(d.matro || '').trim(), kh = String(d.khung || '').trim().toUpperCase();
+  const ds = docTroChoiNhanh(), ma = String(d.matro || '').trim(), kh = String(d.khung || '').trim().toUpperCase();
   if (!kh) return ds.filter(function (x) { return x.matro === ma; })[0];
   const cac = ds.filter(function (x) { return x.khung && x.matro.toUpperCase().indexOf(kh + '-') === 0; });
   const so = (/^(\d+)/.exec(lopNay()) || [])[1];
@@ -2030,7 +2042,7 @@ function timTro(d) {
 }
 function thongTinKhung(t) {
   if (!t || !t.khung) return {};
-  const b = t.bo ? docDsBo().filter(function (x) { return x.ma === t.bo; })[0] : null;
+  const b = t.bo ? docDsBoNhanh().filter(function (x) { return x.ma === t.bo; })[0] : null;
   return {khung: true, matro: t.matro, kieu: t.kieu, bo: b ? b.ma : '', tenBo: b ? b.ten : '',
     maKQ: b ? t.matro + ':' + b.ma : t.matro, tenKQ: b ? String(t.ten).split(' – ')[0] + ' – ' + b.ten + (t.kieu === 'NHOM' ? ' (nhóm)' : '') : t.ten};
 }
@@ -2039,7 +2051,7 @@ function tcVao(d) {
   if (!t) return {ok: false, loi: 'khongco', msg: 'Trò chơi này chưa có trong danh sách quản lý của giáo viên.'};
   if (!t.mo) return {ok: false, loi: 'dong', msg: 'Trò chơi đang đóng. Em chờ giáo viên mở nhé.'};
   if (!hopLop(t)) return {ok: false, loi: 'lop', msg: 'Trò chơi này chưa mở cho lớp ' + lopNay() + '.'};
-  if (String(d.ma || '').trim() !== docMa().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
+  if (String(d.ma || '').trim() !== docMaNhanh().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
   const k = thongTinKhung(t);
   let bo = null;
   if (t.khung) {
@@ -2126,7 +2138,7 @@ function gvBoCauNap(d) {
       let dong = 0;
       for (let i = 1; i < vl.length; i++) if (String(vl[i][0]).trim() === v.ma) { dong = i + 1; break; }
       if (dong) ls.getRange(dong, 1, 1, hang.length).setValues([hang]); else ls.appendRow(hang);
-      try { CacheService.getScriptCache().remove('bo_' + v.ma); } catch (e) {}
+      try { CacheService.getScriptCache().removeAll(['bo_' + v.ma, 'dsbo']); } catch (e) {}
     });
     SpreadsheetApp.flush();
     return {ok: true, xong: viec.map(function (v) { return {ma: v.ma, ten: v.ten, tn: v.dem.I, ds: v.dem.II, tln: v.dem.III}; }), ds: docDsBo()};
@@ -2171,39 +2183,54 @@ function gvBoCauXoa(d) {
   const ss = kho(), ls = ss.getSheetByName(TAB_BO);
   if (ls) { const v = ls.getDataRange().getValues(); for (let i = v.length - 1; i >= 1; i--) if (String(v[i][0]).trim() === ma) ls.deleteRow(i + 1); }
   const sh = ss.getSheetByName(ma); if (sh) ss.deleteSheet(sh);
-  try { CacheService.getScriptCache().remove('bo_' + ma); } catch (e) {}
+  try { CacheService.getScriptCache().removeAll(['bo_' + ma, 'dsbo']); } catch (e) {}
   return {ok: true, ds: docDsBo()};
 }
 // Danh sach may dang dung o vach xuat phat (cache cua so lop nay, moi may gui ten nhom/hoc sinh khi hoi trang thai)
 const VACH_HAN = 15000;   // may khong hoi trong 15 giay thi coi nhu da roi vach
+// Moi may 1 o cache rieng (khong khoa) + 1 danh sach may (chi khoa khi may moi vao lan dau)
 function ghiVach(matro, d) {
   const may = String(d.may || '').trim().slice(0, 40);
   if (!may) return;
+  const cache = CacheService.getScriptCache(), bay = Date.now();
+  cache.put('vach_' + matro + '|' + may, JSON.stringify({ten: String(d.ten || '').trim().slice(0, 60) || 'Không tên', lop: String(d.lop || '').trim().slice(0, 12), t: bay, mahs: String(d.mahs || '').trim().slice(0, 8)}), 3600);
+  let ds = [];
+  try { ds = JSON.parse(cache.get('vachds_' + matro) || '[]'); } catch (e) {}
+  if (ds.indexOf(may) >= 0) return;
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(2000)) return;
+  if (!lock.tryLock(5000)) return;
   try {
-    const cache = CacheService.getScriptCache(), k = 'vach_' + matro, bay = Date.now();
-    let ds = {};
-    try { ds = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
-    Object.keys(ds).forEach(function (m) { if (bay - ds[m].t > VACH_HAN) delete ds[m]; });
-    ds[may] = {ten: String(d.ten || '').trim().slice(0, 60) || 'Không tên', lop: String(d.lop || '').trim().slice(0, 12), t: bay, mahs: String(d.mahs || '').trim().slice(0, 8)};
-    cache.put(k, JSON.stringify(ds), 3600);
+    try { ds = JSON.parse(cache.get('vachds_' + matro) || '[]'); } catch (e) { ds = []; }
+    if (ds.indexOf(may) < 0) { ds.push(may); if (ds.length > 200) ds = ds.slice(-200); cache.put('vachds_' + matro, JSON.stringify(ds), 3600); }
   } finally { lock.releaseLock(); }
 }
-// Tien do dang choi cua tung nhom (tro nhom gui sau moi cau): luu trong cache cua so lop, 6 gio
-// Trang thai tung hoc sinh trong tro ca nhan (so do lop): vao luc nao, dang o cau may, diem hien tai, da ket thuc chua
+function docVach(matro) {
+  const cache = CacheService.getScriptCache(), kq = {};
+  let ds = [];
+  try { ds = JSON.parse(cache.get('vachds_' + matro) || '[]'); } catch (e) {}
+  if (ds.length) {
+    const v = cache.getAll(ds.map(function (m) { return 'vach_' + matro + '|' + m; }));
+    ds.forEach(function (m) { const x = v['vach_' + matro + '|' + m]; if (x) try { kq[m] = JSON.parse(x); } catch (e) {} });
+  }
+  return kq;
+}
+function xoaVach(matro) { try { CacheService.getScriptCache().remove('vachds_' + matro); } catch (e) {} }
+// Trang thai tung hoc sinh trong tro ca nhan (so do lop): moi em 1 o cache rieng, khong khoa
 function ghiCaNhan(matro, mahs, them) {
   mahs = String(mahs || '').trim();
   if (!matro || !/^\d{8}$/.test(mahs)) return;
-  const lock = LockService.getScriptLock();
-  if (!lock.tryLock(2000)) return;
-  try {
-    const cache = CacheService.getScriptCache(), k = 'tdcn_' + matro;
-    let ds = {};
-    try { ds = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
-    ds[mahs] = Object.assign(ds[mahs] || {}, them, {t: Date.now()});
-    cache.put(k, JSON.stringify(ds), 21600);
-  } finally { lock.releaseLock(); }
+  const cache = CacheService.getScriptCache(), k = 'tdcn_' + matro + '|' + mahs;
+  let o = {};
+  try { o = JSON.parse(cache.get(k) || '{}'); } catch (e) {}
+  cache.put(k, JSON.stringify(Object.assign(o, them, {t: Date.now()})), 21600);
+}
+function docCaNhan(matro, dsMa) {
+  const cache = CacheService.getScriptCache(), kq = {};
+  for (let i = 0; i < dsMa.length; i += 100) {
+    const v = cache.getAll(dsMa.slice(i, i + 100).map(function (m) { return 'tdcn_' + matro + '|' + m; }));
+    Object.keys(v).forEach(function (k) { try { kq[k.split('|')[1]] = JSON.parse(v[k]); } catch (e) {} });
+  }
+  return kq;
 }
 function tcTienDo(d) {
   if (!d.nhom && d.mahs) {   // tro ca nhan
@@ -2234,9 +2261,7 @@ function gvTcSoDo(d) {
   const ma = String(d.matro || '').trim(), bay = Date.now(), cache = CacheService.getScriptCache();
   const r = gvSoDo({});
   if (!r.ok) return r;
-  let cn = {}, vach = {};
-  try { cn = JSON.parse(cache.get('tdcn_' + ma) || '{}'); } catch (e) {}
-  try { vach = JSON.parse(cache.get('vach_' + ma) || '{}'); } catch (e) {}
+  const cn = docCaNhan(ma, r.ds.map(function (h) { return String(h[0]); })), vach = docVach(ma);
   const tz = Session.getScriptTimeZone(), homNay = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), tt = {}, kq = {};
   gvTcKetQua({matro: ma}).canhan.forEach(function (x) {
     if (!x[0] || Utilities.formatDate(new Date(x[0]), tz, 'yyyy-MM-dd') !== homNay) return;
@@ -2258,8 +2283,7 @@ function gvTcSoDo(d) {
 }
 function gvTcVach(d) {
   const ma = String(d.matro || '').trim(), bay = Date.now();
-  let ds = {};
-  try { ds = JSON.parse(CacheService.getScriptCache().get('vach_' + ma) || '{}'); } catch (e) {}
+  const ds = docVach(ma);
   return {ok: true, lop: lopNay(), ds: Object.keys(ds).map(function (m) { return ds[m]; })
     .filter(function (x) { return bay - x.t <= VACH_HAN; }).map(function (x) { return {ten: x.ten, lop: x.lop}; })};
 }
@@ -2280,7 +2304,7 @@ function tcTrangThai(d) {
   return r;
 }
 function tcMoKhoa(d) {
-  return {ok: String(d.ma || '').trim() !== '' && String(d.ma || '').trim() === docMa().tcmokhoa};
+  return {ok: String(d.ma || '').trim() !== '' && String(d.ma || '').trim() === docMaNhanh().tcmokhoa};
 }
 function gvTroChoi() {
   const m = docMa();
@@ -2295,7 +2319,7 @@ function gvTcDat(d) {
     if (t.khung && g !== 'DONG' && !t.bo) return {ok: false, msg: 'Chon bo cau hoi truoc khi mo tro choi'};
     sh.getRange(t.dong, 6).setValue(g);
     sh.getRange(t.dong, 9).setValue('');            // doi trang thai = bat dau luot moi, xoa gio xuat phat cu
-    try { CacheService.getScriptCache().remove('vach_' + t.matro); } catch (e) {}
+    xoaVach(t.matro);
   } else if (d.truong === 'xuatphat') {
     if (t.tt !== 'CHO') return {ok: false, msg: 'Chuyen tro sang Cho xuat phat truoc'};
     if (t.xp) return {ok: false, msg: 'Cuoc dua dang dien ra'};
@@ -2319,7 +2343,7 @@ function gvTcDat(d) {
   }
   else return {ok: false, msg: 'Truong khong hop le'};
   SpreadsheetApp.flush();
-  try { CacheService.getScriptCache().remove('tctt_' + t.matro); } catch (e) {}
+  try { CacheService.getScriptCache().removeAll(['tctt_' + t.matro, 'tcds']); } catch (e) {}
   return gvTroChoi();
 }
 // Ket qua tro choi cua lop nay: ca nhan (HOAT DONG) va nhom (TRO CHOI NHOM)
@@ -2383,6 +2407,7 @@ function gvMaDat(d) {
     if (!dong) { dong = v.length + 1; sh.getRange(dong, 1).setValue(ten); }
     sh.getRange(dong, 2).setNumberFormat('@').setValue(gt);
     SpreadsheetApp.flush();
+    try { CacheService.getScriptCache().remove('ma_nhanh'); } catch (e) {}
   } finally { lock.releaseLock(); }
   return gvMa();
 }
