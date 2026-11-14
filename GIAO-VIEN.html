@@ -4201,7 +4201,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (!j.ok) throw new Error(j.msg || 'lỗi');
       TRO = j.tro; if (j.boCau) BO_DS = j.boCau; COMA = { tc: j.coMaTc, mk: j.coMaTcMk }; if (j.bayGio) LECH_TC = j.bayGio - Date.now(); veTro(); return j;
     }).catch(function (e) {
-      var x = document.createElement('div'); x.className = 'loi'; x.textContent = 'Chưa lưu được: ' + e.message + '. Thử lại.';
+      var x = document.createElement('div'); x.className = 'loi'; x.textContent = /Truong khong hop le/i.test(e.message) ? 'Chưa lưu được: sổ theo dõi chưa cập nhật bản mới. Dán file SoTheoDoi.gs mới vào sổ rồi Triển khai → Quản lý → ✎ → Phiên bản mới.' : 'Chưa lưu được: ' + e.message + '. Thử lại.';
       if (el) el.appendChild(x); var c = el && el.querySelector('.cong'); if (c) { c.disabled = false; c.querySelector('span').textContent = t.mo ? 'Đang mở' : 'Đang đóng'; }
       throw e;
     });
