@@ -1007,7 +1007,7 @@ function gvGiayDiem(d) {
 // Cau hoi nhac toi hinh (Hinh 2, so do, do thi, hinh ben...) nhung khong co hinh nao gan vao
 function nhacHinh(q) {
   if (q.hinh || q.khongHinh || /<img|<svg/i.test([q.hoi, q.pa.A, q.pa.B, q.pa.C, q.pa.D].join(' '))) return false;
-  return /(hình|sơ đồ|đồ thị|biểu đồ)\s*(\d|bên|dưới|sau|vẽ|minh họa|minh hoạ|trên)/i.test(String(q.hoi).replace(/<[^>]*>/g, ' '));
+  return /(hình|sơ đồ|đồ thị|biểu đồ)\s*(\d|bên|dưới|sau|vẽ|minh họa|minh hoạ|trên)/i.test(String(q.hoi).replace(/<[^>]*>/g, ' ').replace(/(cấu|định|điển|ngoại|vô|hữu|tạo|lập|hiện|trình|đồng)\s+hình/gi, ' '));
 }
 // Duong dan web cua hinh de: https://<chu repo>.github.io/<ten repo>/hinh/<ma dot>/<ten file>
 function urlHinhDe(gh, madot, ten) {

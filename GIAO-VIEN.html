@@ -5385,7 +5385,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // ---- Kiem soat hinh truoc khi nap: cau nhac "Hinh 1/so do/do thi..." ma chua gan hinh, hoac hinh khong mo duoc -> chan nap ----
   var RE_NHAC = /(hình|sơ đồ|đồ thị|biểu đồ)\s*(\d|bên|dưới|sau|vẽ|minh họa|minh hoạ|trên)/i;
   function anhCau(c) { var a = []; c.hang.slice(1, 6).join(' ').replace(/<img[^>]+src="([^"]+)"/gi, function (_, u) { a.push(u); }); if (/^https?:\/\//i.test(c.hang[7])) a.push(c.hang[7]); return a; }
-  function nhacHinhC(c) { return !c.hang[7] && !/<img|<svg/i.test(c.hang.slice(1, 6).join(' ')) && RE_NHAC.test(c.chu); }
+  function nhacHinhC(c) { return !c.hang[7] && !/<img|<svg/i.test(c.hang.slice(1, 6).join(' ')) && RE_NHAC.test(boTuHinh(c.chu)); }
+  // "cấu hình 1s2…", "mô hình", "định hình"… không phải nhắc tới hình vẽ
+  function boTuHinh(t) { return String(t || '').replace(/(cấu|định|điển|ngoại|vô|hữu|tạo|lập|hiện|trình|đồng)\s+hình/gi, ' '); }
   function loiHinhC(d, c) {
     if (d.hh.boQua[c.hang[0]]) return '';
     if (nhacHinhC(c)) return 'nhắc tới hình nhưng chưa gắn hình';
