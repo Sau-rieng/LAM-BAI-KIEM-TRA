@@ -34,6 +34,8 @@ Quy tắc: `H<khối>-B<số bài>-<mã đề>`; đề theo chương thì `H<kh�
 - Đặt tên file Word đúng bằng mã đợt: `H9-B18-101.docx`.
 - Tên bài (cột TenBai): `Hóa 9 – Bài 18: Tính chất chung của kim loại – Mã 101`.
 - Mã đợt là tên tab đề trong kho đề, tên thư mục ảnh `hinh/<mã đợt>/` và tên thư mục PDF bài làm, nên chỉ dùng chữ không dấu, số và dấu gạch ngang.
+- **Trước khi đưa hình lên GitHub**, kiểm tra thư mục `hinh/<mã đợt>/` đã có chưa. Nếu đã có (mã này từng dùng cho đề khác), KHÔNG ghi đè: chọn mã mới chưa có (vd tăng số 101 → 102) cho cả file đề lẫn thư mục hình. Ghi đè sẽ làm đề cũ trong kho hiện sai hình.
+- Nếu thầy/cô báo đã đổi mã đề khi nạp (nút ✎ Đổi mã đề trên trang GV, vd H12-C1-101 → H12-C1-105): từ đó mọi file gửi thêm cho đề này (lời giải, tự luận, hình) dùng mã mới. Trang GV có ghi nhớ và gợi ý chuyển nếu file vẫn mang mã cũ, nhưng ghi đúng mã mới vẫn an toàn hơn.
 - Khảo bài và kiểm tra cùng phạm vi phân biệt bằng dãy mã đề (vd chương 1–4: khảo bài 501, kiểm tra 101–104) và ghi rõ trong tên bài.
 - Phiếu ôn tập / củng cố lỗ hổng đưa lên iPad (kênh K7) dùng dãy mã 9xx, vd `H10-B5-901`; tên bài ghi rõ "Phiếu củng cố".
 

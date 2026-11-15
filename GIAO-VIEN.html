@@ -526,6 +526,7 @@ body.rong main{max-width:1200px}
 .napDe summary{cursor:pointer;font-weight:700;color:var(--pri);font-size:15px;padding:4px 0}
 .napDe .bang td.trai{text-align:left;white-space:normal;min-width:180px;max-width:320px;font-size:14px}
 .napDe .bang td.da{font-weight:800}
+.napNho{border:2px solid #f0c36d;background:#fffaf0}
 .doiMaKhung{margin:8px 0}.doiMaHang{display:flex;gap:8px;flex-wrap:wrap}.doiMaHang input{flex:1;min-width:160px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;text-transform:uppercase}
 .napChk{display:flex;align-items:center;gap:8px;font-weight:700;margin:12px 0 0;font-size:15.5px;cursor:pointer}
 .napChk input{width:22px;height:22px;margin:0;flex:none}
@@ -1024,7 +1025,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         man('scrLogin'); return;
       }
       MA = m; try { sessionStorage.setItem(KMA, m); } catch (e) {}
-      $('ma').value = ''; DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now(); man('scrHome'); veHome(); taiDaThi();
+      $('ma').value = ''; DOT = j.dot; window.DOIMA = j.doima || {}; if (j.bayGio) LECH = j.bayGio - Date.now(); man('scrHome'); veHome(); taiDaThi();
       taiTro(function () { if (!$('scrHome').classList.contains('hidden')) veHome(); }); taiMa();
       taiTinTatCa(); batTheoDoiTin();
     }).catch(function (e) { $('btnVao').disabled = false; $('btnVao').textContent = 'Vào'; $('msg').textContent = e.message; man('scrLogin'); });
@@ -5144,9 +5145,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     Object.keys(gt).concat(Object.keys(tl).filter(function (m) { return !gt[m]; })).forEach(function (md) {
       if (de.some(function (x) { return x.madot === md; })) return;
       var cu = DOT.filter(function (z) { return z.madot === md; })[0];
-      var d = { madot: md, chiGT: true, ten: cu ? cu.ten : md, loi: [], canh: [], cau: [], kt: [], hinh: [], md: {}, dem: {}, tong: 0,
+      var gocMd = Object.keys(NAP.doiMa || {}).filter(function (k) { return NAP.doiMa[k] === md; })[0] || md;
+      var d = { madot: md, goc: gocMd, chiGT: true, ten: cu ? cu.ten : md, loi: [], canh: [], cau: [], kt: [], hinh: [], md: {}, dem: {}, tong: 0,
         gt: Object.keys(gt[md] || {}).map(function (c) { return [c, gt[md][c]]; }), tl: tl[md] || [], chon: !!cu };
       if (!cu) d.loi.push('Kho chưa có đề ' + md + ' nên chưa thêm lời giải được. Nạp đề trước (hoặc gửi file có cả tab đề).');
+      if (gocMd !== md) d.ten += ' (trong file: ' + gocMd + ')';
       kq.push(d);
     });
     return kq;
@@ -5283,6 +5286,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function veNap() {
     var box = $('napDs'); box.innerHTML = '';
+    var nho = {}; NAP.ds.forEach(function (d) { var g = d.goc || d.madot; if (g === d.madot && window.DOIMA && DOIMA[g] && DOIMA[g] !== g) nho[g] = DOIMA[g]; });
+    var dsNho = Object.keys(nho);
+    if (dsNho.length) {
+      var bn = document.createElement('div'); bn.className = 'card napNho';
+      bn.innerHTML = '<b>🔁 Lần trước thầy/cô đã đổi mã:</b> ' + dsNho.map(function (g) { return esc(g) + ' → <b>' + esc(nho[g]) + '</b>'; }).join(', ') +
+        '<p class="sub">File này có mã cũ. Nếu đây là nội dung của đề đã đổi mã (vd lời giải, tự luận gửi sau), bấm Áp dụng để nạp vào mã mới.</p><button type="button" class="btn apNho">Áp dụng mã mới</button>';
+      bn.querySelector('.apNho').onclick = function () { NAP.doiMa = NAP.doiMa || {}; dsNho.forEach(function (g) { NAP.doiMa[g] = nho[g]; }); NAP.ds = phanTichFile(NAP.tabs); veNap(); };
+      box.appendChild(bn);
+    }
     NAP.ds.forEach(function (d, i) {
       var el = document.createElement('div'); el.className = 'card napDe' + (d.loi.length ? ' coLoi' : '');
       if (d.chiGT) {
@@ -5344,7 +5356,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var goiY = d.giay ? (function () { for (var k = 2; k < 60; k++) { var t = cu + '-' + k; if (!nhom.some(function (z) { return maCoRoi(t + z.madot.slice(-4)); })) return t; } return cu; })() : goiYMa(d.madot);
     khung.innerHTML = '<div class="nhan">' + (d.giay ? 'Mã đợt mới (áp dụng cho cả ' + nhom.length + ' mã đề ' + nhom.map(function (z) { return z.madot.slice(-3); }).join(', ') + ')' : 'Mã đề mới') + '</div>' +
       '<div class="doiMaHang"><input type="text" class="maMoi" maxlength="36" value="' + esc(goiY) + '"><button type="button" class="btn doiMaOK">Đổi</button><button type="button" class="btn2 doiMaHuy">Hủy</button></div>' +
-      '<p class="sub">Câu hỏi, đáp án, kiến thức, lời giải, tự luận và hình đi kèm đều giữ nguyên, chỉ đổi mã. Hình vẫn lấy ở thư mục cũ (hinh/' + esc(d.goc) + '/). Đề cũ trong kho và bài làm cũ không bị ảnh hưởng.</p><p class="loi doiMaLoi"></p>';
+      '<p class="sub">Câu hỏi, đáp án, kiến thức, lời giải, tự luận đi theo mã mới. Khi nạp, hình đang ở hinh/' + esc(d.goc) + '/ được chép sang thư mục của mã mới, và trang ghi nhớ lần đổi này: lần sau nạp file còn mã cũ (vd lời giải gửi sau) sẽ được gợi ý chuyển sang mã mới. Đề cũ trong kho và bài làm cũ không bị ảnh hưởng.</p><p class="loi doiMaLoi"></p>';
     var ip = khung.querySelector('.maMoi'); ip.focus(); ip.select();
     khung.querySelector('.doiMaHuy').onclick = function () { veNap(); };
     khung.querySelector('.doiMaOK').onclick = function () {
@@ -5510,17 +5522,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (thay.length && !confirm('Ghi đè đề cũ trong kho: ' + thay.join(', ') + '?')) return;
     b.disabled = true; b.textContent = 'Đang nạp…'; $('napMsg').textContent = '';
     goiBatKy({ action: 'gv_napde', ma: MA, de: ds.map(function (d) {
-      if (d.chiGT) return { madot: d.madot, chiGT: true, gt: d.gt, tl: d.tl || [] };
-      return { madot: d.madot, ten: d.ten, phut: d.phut, lop: d.lop, thay: !!d.thay, cau: d.cau.map(function (c) { return c.hang; }), kt: d.kt, gt: d.gt, tl: d.tl || [],
+      var goc = d.goc && d.goc !== d.madot ? d.goc : '';
+      if (d.chiGT) return { madot: d.madot, goc: goc, chiGT: true, gt: d.gt, tl: d.tl || [] };
+      return { madot: d.madot, goc: goc, ten: d.ten, phut: d.phut, lop: d.lop, thay: !!d.thay, cau: d.cau.map(function (c) { return c.hang; }), kt: d.kt, gt: d.gt, tl: d.tl || [],
         kieu: d.giay ? 'GIAY' : '', thang: d.thang || '', ca: d.ca || '' };
     }) }).then(function (j) {
       if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới. Thầy/cô dán SoTheoDoi.gs mới vào sổ rồi Triển khai → Phiên bản mới.' : j.loi === 'ma' ? 'Mã đăng nhập chưa đúng.' : (j.msg || 'lỗi không rõ'));
-      DOT = j.dot; if (j.bayGio) LECH = j.bayGio - Date.now();
+      DOT = j.dot; if (j.doima) window.DOIMA = j.doima; if (j.bayGio) LECH = j.bayGio - Date.now();
       var nap = j.nap || [];
       $('napCuoi').classList.add('hidden'); NAP.ds = [];
       $('napDs').innerHTML = '<div class="card napXong"><h2>✓ Đã nạp vào kho</h2><ul>' + nap.map(function (x) {
         if (x.chiGT) return '<li><b>' + esc(x.madot) + '</b>: đã thêm ' + [x.sogt ? 'lời giải ' + x.sogt + ' câu' : '', x.sotl ? 'tự luận ' + x.sotl + ' câu' : ''].filter(String).join(', ') + '</li>';
-        return '<li><b>' + esc(x.madot) + '</b> – ' + esc(x.ten) + ': ' + x.socau + ' câu, ' + x.sokt + ' dòng kiến thức, ' + (x.sogt || 0) + ' lời giải, lớp ' + esc(x.lop) + (x.thay ? ' (đã thay đề cũ)' : '') + '</li>';
+        return '<li><b>' + esc(x.madot) + '</b> – ' + esc(x.ten) + ': ' + x.socau + ' câu, ' + x.sokt + ' dòng kiến thức, ' + (x.sogt || 0) + ' lời giải, lớp ' + esc(x.lop) + (x.thay ? ' (đã thay đề cũ)' : '') +
+          (x.hinh && x.hinh.so ? ' · 🖼 đã chuyển ' + x.hinh.so + ' hình sang hinh/' + esc(x.madot) + '/' : '') + (x.hinh && x.hinh.loi ? ' · <span class="loi">' + esc(x.hinh.loi) + '</span>' : '') + '</li>';
       }).join('') + '</ul><p class="sub">' + (nap.some(function (x) { return x.giay; }) ? 'Đề giấy nằm ở mục Kiểm tra → khối của đề → tab 🖨 Đề giấy. ' : '') + 'Đề đang đóng và chưa cho xem lại. Mở phòng chờ ở mục Kiểm tra khi lên lớp.</p><button class="btn" id="napXem">Xem trong danh sách đề ▶</button></div>';
       $('napXem').onclick = function () { var x = DOT.filter(function (z) { return nap[0] && z.madot === nap[0].madot; })[0]; if (x) { khoiChon = khoiCua(x); moRong = x.madot; } diDen('dot'); };
       $('napFile').value = ''; $('napNhanChu').textContent = '📂 Nạp thêm file khác';

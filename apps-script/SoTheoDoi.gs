@@ -759,7 +759,7 @@ function gvDot() {
       tt: tt, mo: tt === 'MO', xemlai: khongDau(r[4]) === 'CO', lop: String(r[5] || 'TAT CA').trim(),
       batdauluc: r[6] instanceof Date ? r[6].getTime() : 0, ca: String(r[7] || '').trim(),
       giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9])};
-  }), bayGio: Date.now()};
+  }), doima: docDoiMa(), bayGio: Date.now()};
 }
 // Doi TrangThai (MO/DONG) hoac ChoXemLai (CO/KHONG) cua 1 dot trong KHO DE
 function gvDat(d) {
@@ -1115,11 +1115,76 @@ function gvHinh(d) {
 // Tao tab de (thay = true: ghi de tab cu), them/sua dong CAU HINH (de moi luon DONG, KHONG cho xem lai), thay dong KIEN THUC cua dot.
 // ---------------------------------------------------------------------
 const HEAD_DE = ['Cau', 'NoiDung', 'A', 'B', 'C', 'D', 'DapAn', 'Hinh', 'Loai', 'Diem'];
-const TAB_CAM = ['CAU HINH', 'MA', 'KIEN THUC', 'TRO CHOI', 'BO CAU', 'GIAI THICH', 'CAU HINH THEM', 'KIEN THUC THEM', 'GIAI THICH THEM', 'TU LUAN', 'TU LUAN THEM'];
+const TAB_CAM = ['CAU HINH', 'MA', 'KIEN THUC', 'TRO CHOI', 'BO CAU', 'GIAI THICH', 'CAU HINH THEM', 'KIEN THUC THEM', 'GIAI THICH THEM', 'TU LUAN', 'TU LUAN THEM', 'DOI MA'];
+// ---- DOI MA DE luc nap (trung kho): nho "ma trong file -> ma moi" o tab DOI MA (kho), chep hinh hinh/<goc>/ -> hinh/<moi>/ ----
+const TAB_DOIMA = 'DOI MA';
+function docDoiMa() {
+  try {
+    const sh = kho().getSheetByName(TAB_DOIMA); if (!sh || sh.getLastRow() < 2) return {};
+    const m = {};
+    sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) { const a = String(r[0]).trim(), b = String(r[1]).trim(); if (a && b) m[a] = b; });
+    return m;
+  } catch (e) { return {}; }
+}
+function ghiDoiMa(goc, moi) {
+  const ss = kho();
+  let sh = ss.getSheetByName(TAB_DOIMA);
+  if (!sh) { sh = ss.insertSheet(TAB_DOIMA); sh.getRange(1, 1, 1, 3).setValues([['MaTrongFile', 'MaMoi', 'Ngay']]).setFontWeight('bold'); sh.setFrozenRows(1); }
+  const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues() : [];
+  for (let i = 0; i < v.length; i++) if (String(v[i][0]).trim() === goc) { sh.getRange(i + 2, 2, 1, 2).setNumberFormat('@').setValues([[moi, new Date().toISOString().slice(0, 10)]]); return; }
+  sh.appendRow([goc, moi, new Date().toISOString().slice(0, 10)]);
+}
+function ghLayB64(gh, path) {
+  const r = ghGoi(gh, 'get', path);
+  if (r.ma !== 200 || !r.j) return null;
+  if (r.j.content) return {sha: r.j.sha, b64: String(r.j.content).replace(/\s/g, '')};
+  if (r.j.download_url) { const f = UrlFetchApp.fetch(r.j.download_url, {muteHttpExceptions: true}); if (f.getResponseCode() === 200) return {sha: r.j.sha, b64: Utilities.base64Encode(f.getBlob().getBytes())}; }
+  return null;
+}
+// Chep cac hinh de dung (hinh/<goc>/f) sang hinh/<moi>/f roi doi duong dan trong de; loi thi giu duong dan cu (van xem duoc)
+function chuyenHinhDoiMa(x, goc, moi) {
+  const re = new RegExp('hinh/' + goc.replace(/[.\-]/g, '\\$&') + '/([A-Za-z0-9_.\\-]+\\.(?:png|jpe?g|gif|webp|svg))', 'gi');
+  const tep = {};
+  const quet = function (t) { String(t || '').replace(re, function (_, f) { tep[f] = 1; return _; }); };
+  (x.cau || []).forEach(function (r) { (r || []).slice(0, 8).forEach(quet); });
+  (x.tl || []).forEach(function (r) { (r || []).forEach(quet); });
+  (x.gt || []).forEach(function (r) { (r || []).forEach(quet); });
+  const ds = Object.keys(tep);
+  if (!ds.length) return {so: 0};
+  const gh = ghCauHinh();
+  if (!gh.token) return {so: 0, loi: 'chua co GithubToken nen hinh van lay o hinh/' + goc + '/'};
+  const xong = {}, hong = [];
+  ds.forEach(function (f) {
+    try {
+      const a = ghLayB64(gh, 'hinh/' + goc + '/' + f);
+      if (!a) { hong.push(f); return; }
+      const dich = ghLayB64(gh, 'hinh/' + moi + '/' + f);
+      if (!(dich && dich.sha === a.sha)) {
+        const body = {message: 'Doi ma de ' + goc + ' -> ' + moi + ': ' + f, content: a.b64, branch: gh.nhanh};
+        if (dich) body.sha = dich.sha;
+        const r = ghGoi(gh, 'put', 'hinh/' + moi + '/' + f, body);
+        if (r.ma !== 200 && r.ma !== 201) { hong.push(f); return; }
+      }
+      xong[f] = 1;
+    } catch (e) { hong.push(f); }
+  });
+  const doi = function (t) { return typeof t !== 'string' ? t : t.replace(re, function (m0, f) { return xong[f] ? 'hinh/' + moi + '/' + f : m0; }); };
+  x.cau = (x.cau || []).map(function (r) { return Array.isArray(r) ? r.map(doi) : r; });
+  x.tl = (x.tl || []).map(function (r) { return Array.isArray(r) ? r.map(doi) : r; });
+  x.gt = (x.gt || []).map(function (r) { return Array.isArray(r) ? r.map(doi) : r; });
+  return {so: Object.keys(xong).length, loi: hong.length ? hong.length + ' hinh chua chep duoc (' + hong.slice(0, 5).join(', ') + '), van lay o hinh/' + goc + '/' : ''};
+}
 function gvNapDe(d) {
   const ds = Array.isArray(d.de) ? d.de : [];
   if (!ds.length) return {ok: false, msg: 'Chua co de nao de nap'};
   if (ds.length > 20) return {ok: false, msg: 'Moi lan nap toi da 20 de'};
+  // Doi ma (ngoai khoa vi goi GitHub lau): chep hinh sang thu muc ma moi
+  const ketHinh = {};
+  ds.forEach(function (x) {
+    const goc = String((x && x.goc) || '').trim(), moi = String((x && x.madot) || '').trim();
+    if (!goc || goc === moi || !/^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(goc) || !/^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(moi)) return;
+    try { ketHinh[moi] = chuyenHinhDoiMa(x, goc, moi); } catch (e) { ketHinh[moi] = {so: 0, loi: String(e.message || e)}; }
+  });
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
@@ -1218,9 +1283,10 @@ function gvNapDe(d) {
       if (tlV.length) tlSh.getRange(2, 1, tlV.length, 6).clearContent();
       if (tlMoi.length) tlSh.getRange(2, 1, tlMoi.length, 6).setNumberFormat('@').setValues(tlMoi);
     }
+    ds.forEach(function (x) { const goc = String((x && x.goc) || '').trim(), moi = String((x && x.madot) || '').trim(); if (goc && goc !== moi && /^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(goc)) ghiDoiMa(goc, moi); });
     SpreadsheetApp.flush();
     const r = gvDot();
-    r.nap = viec.map(function (v) { return {madot: v.madot, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, sotl: (v.tl || []).length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
+    r.nap = viec.map(function (v) { return {madot: v.madot, hinh: ketHinh[v.madot] || null, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, sotl: (v.tl || []).length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
     return r;
   } finally {
     lock.releaseLock();
