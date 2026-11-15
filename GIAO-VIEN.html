@@ -527,6 +527,13 @@ body.rong main{max-width:1200px}
 .napDe .bang td.trai{text-align:left;white-space:normal;min-width:180px;max-width:320px;font-size:14px}
 .napDe .bang td.da{font-weight:800}
 .napNho{border:2px solid #f0c36d;background:#fffaf0}
+.lyDau{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.lyO{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}.lyO div{background:var(--bg,#f4f5f9);border-radius:12px;padding:10px 12px}.lyO b{font-size:24px}.lyO span{display:block;font-size:13.5px;color:var(--muted,#5b6175)}
+.lyBangGV{width:100%;border-collapse:collapse;font-size:14.5px}.lyBangGV th,.lyBangGV td{border-bottom:1px solid var(--line,#d9dce5);padding:7px 6px;text-align:left;vertical-align:top}.lyBangGV td.n{text-align:center;white-space:nowrap}.lyBangGV small{display:block;color:var(--muted,#5b6175)}
+.lyK{margin:2px 0}.lyK.len b{color:#1e8e3e}.lyChua{margin-top:10px;font-size:14px;color:var(--muted,#5b6175)}
+.lyCan{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.lyCan span{flex:1;min-width:200px}.lyCan input{flex:1;min-width:200px;font:inherit;padding:8px 10px;border:1px solid var(--line,#d9dce5);border-radius:10px}
+.lyThe{border:1.5px solid #f0c36d;background:#fffaf0;border-radius:12px;padding:10px 12px;margin:8px 0}.lyThe.ok{border-color:#9ed3ae;background:#f3fbf5}.lyTag{font-size:12.5px;color:var(--muted,#5b6175);font-weight:600}.lyHoi{font-weight:600;margin:4px 0}
+.lyPa{margin:2px 0 2px 8px}.lyPa.da{color:#1e8e3e;font-weight:600}.lyGT{margin-top:6px;font-size:14px;background:#fff;border-radius:8px;padding:6px 8px}.lyNut{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.lyForm label{display:block;font-size:13px;font-weight:600;margin-top:6px}.lyForm input,.lyForm textarea{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--line,#d9dce5);border-radius:8px;box-sizing:border-box}
 .doiMaKhung{margin:8px 0}.doiMaHang{display:flex;gap:8px;flex-wrap:wrap}.doiMaHang input{flex:1;min-width:160px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;text-transform:uppercase}
 .napChk{display:flex;align-items:center;gap:8px;font-weight:700;margin:12px 0 0;font-size:15.5px;cursor:pointer}
 .napChk input{width:22px;height:22px;margin:0;flex:none}
@@ -853,7 +860,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <h1>Hồ sơ học sinh</h1>
     <p class="sub">Bảng điểm từng lớp. Bấm vào tên để xem tiến bộ của em đó, bấm vào điểm để mở bài làm (PDF).</p>
     <div class="loc" id="locLop" style="margin-top:12px"></div>
-    <div class="loc" id="cheDo"><button data-c="hs" class="on">👤 Học sinh</button><button data-c="nhom">👥 Nhóm (trò chơi nhóm)</button><button data-c="kt">🧭 Kiến thức</button><button data-c="sodo">🪑 Sơ đồ lớp</button></div>
+    <div class="loc" id="cheDo"><button data-c="hs" class="on">👤 Học sinh</button><button data-c="nhom">👥 Nhóm (trò chơi nhóm)</button><button data-c="kt">🧭 Kiến thức</button><button data-c="luyen">🔁 Luyện tập</button><button data-c="sodo">🪑 Sơ đồ lớp</button></div>
   </div>
   <div id="hoSo"></div>
 </section>
@@ -3247,7 +3254,92 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (b.getAttribute('data-c') === 'sodo') { moSoDo(HS_LOP ? HS_LOP.ten : null, null, 'hoso'); return; }
       HS_CHE = b.getAttribute('data-c'); [].forEach.call($('cheDo').children, function (x) { x.classList.toggle('on', x === b); }); if (HS_DL) veHoSo(); };
   });
-  function veHoSo() { if (HS_CHE === 'nhom') veNhom(); else if (HS_CHE === 'kt') veKTLop(); else veBangDiem(); }
+  function veHoSo() { if (HS_CHE === 'nhom') veNhom(); else if (HS_CHE === 'kt') veKTLop(); else if (HS_CHE === 'luyen') veLuyenLop(); else veBangDiem(); }
+  // ---------- Luyen lai phan yeu (M3): tien bo tung em + cau luyen bo sung AI soan, GV duyet ----------
+  var LYD = {};
+  function pc(x) { return x == null ? '–' : Math.round(x * 100) + '%'; }
+  function veLuyenLop(lamMoi) {
+    var l = HS_LOP, box = $('hoSo');
+    if (!l) return;
+    if (!LYD[l.ten] || lamMoi) {
+      box.innerHTML = '<div class="card"><h2>🔁 Luyện tập · Lớp ' + esc(l.ten) + '</h2><p class="sub">Đang tải…</p></div>';
+      goi(l.url, { action: 'gv_luyen', ma: MA }).then(function (j) {
+        if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi lớp này chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai phiên bản mới).' : j.msg || 'Lỗi');
+        LYD[l.ten] = j; if (HS_LOP === l && HS_CHE === 'luyen') veLuyenLop();
+      }).catch(function (e) { if (HS_LOP === l) box.innerHTML = '<div class="card"><h2>🔁 Luyện tập · Lớp ' + esc(l.ten) + '</h2><p class="loi">' + esc(e.message) + '</p></div>'; });
+      return;
+    }
+    var j = LYD[l.ten], co = j.hs.filter(function (h) { return h.lan; }).sort(function (a, b) { return b.lan - a.lan; }), chua = j.hs.filter(function (h) { return !h.lan; });
+    var tongLan = co.reduce(function (s, h) { return s + h.lan; }, 0), tongCau = co.reduce(function (s, h) { return s + h.cau; }, 0), tongDung = co.reduce(function (s, h) { return s + h.dung; }, 0);
+    var tang = 0, soKT = 0;
+    co.forEach(function (h) { h.kt.forEach(function (k) { if (k.kiemtra != null) { soKT++; if (k.cuoi > k.kiemtra) tang++; } }); });
+    var h = '<div class="card"><div class="lyDau"><h2>🔁 Luyện lại phần yếu · Lớp ' + esc(l.ten) + '</h2><span><button class="btn2" id="lyXuat">⬇ Excel</button> <button class="btn2" id="lyMoi">↻</button></span></div>' +
+      '<p class="sub">Học sinh tự luyện ở trang Xem lại (nút 🔁 Luyện lại phần yếu): 10 câu về các kiến thức em làm đúng dưới 65%, ưu tiên câu em đã sai (trộn lại phương án), làm câu nào biết đúng/sai và lời giải ngay. Không tính điểm. Cột <b>Kiểm tra → Lần đầu → Gần nhất</b>: % đúng kiến thức đó ở bài kiểm tra, ở lượt luyện đầu và lượt luyện gần nhất.</p>' +
+      '<div class="lyO"><div><b>' + co.length + '</b>/' + j.hs.length + '<span>em đã luyện</span></div><div><b>' + tongLan + '</b><span>lượt luyện</span></div><div><b>' + (tongCau ? Math.round(tongDung / tongCau * 100) + '%' : '–') + '</b><span>câu đúng (' + tongDung + '/' + tongCau + ')</span></div><div><b>' + tang + '</b>/' + soKT + '<span>kiến thức tiến bộ so với bài kiểm tra</span></div></div>';
+    if (!co.length) h += '<p class="sub">Chưa em nào luyện. Nhắc học sinh mở trang Xem lại → <b>🔁 Luyện lại phần yếu</b>.</p>';
+    else {
+      h += '<table class="lyBangGV"><thead><tr><th>Học sinh</th><th>Lượt</th><th>Đúng</th><th>Kiến thức: Kiểm tra → Lần đầu → Gần nhất</th></tr></thead><tbody>' + co.map(function (x) {
+        return '<tr><td><b>' + esc(x.hoten || x.mahs) + '</b><small>' + esc(x.mahs) + (x.cuoi ? ' · ' + esc(ngayDu(x.cuoi)) : '') + '</small></td><td class="n">' + x.lan + '</td><td class="n">' + x.dung + '/' + x.cau + '</td><td>' +
+          x.kt.map(function (k) { var len = k.kiemtra != null && k.cuoi > k.kiemtra; return '<div class="lyK' + (len ? ' len' : '') + '">' + esc(k.kt) + ': <b>' + pc(k.kiemtra) + ' → ' + pc(k.dau) + ' → ' + pc(k.cuoi) + '</b>' + (len ? ' ▲' : '') + (k.lan > 1 ? ' <small>(' + k.lan + ' lượt)</small>' : '') + '</div>'; }).join('') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+    }
+    if (chua.length) h += '<details class="lyChua"><summary>Chưa luyện: ' + chua.length + ' em</summary>' + chua.map(function (x) { return esc(x.hoten || x.mahs); }).join(', ') + '</details>';
+    h += '</div>';
+    // Cau luyen bo sung
+    var can = Object.keys(j.can || {}).map(function (k) { var p = k.split('|'); return { khoi: p[0], kt: p.slice(1).join('|'), n: j.can[k] }; }).sort(function (a, b) { return b.n - a.n; });
+    var cho = (j.them || []).filter(function (x) { return x.tt !== 'DUYET'; }), duyet = (j.them || []).filter(function (x) { return x.tt === 'DUYET'; });
+    h += '<div class="card"><h2>✨ Câu luyện bổ sung (AI soạn, thầy/cô duyệt)</h2><p class="sub">Kiến thức nào trong kho còn ít câu (dưới 3), AI soạn thêm câu luyện theo đúng yêu cầu cần đạt. Câu <b>chờ duyệt</b> chưa đến học sinh; thầy/cô sửa nếu cần rồi bấm ✓ Duyệt.</p>' +
+      (can.length ? '<div class="nhan">Học sinh vừa luyện kiến thức còn thiếu câu</div>' + can.map(function (c) { return '<div class="lyCan"><span>' + esc(c.kt) + ' <small>(khối ' + esc(c.khoi) + ' · ' + c.n + ' lượt cần)</small></span><button class="btn2 lyAI" data-kt="' + esc(c.kt) + '" data-khoi="' + esc(c.khoi) + '">✨ AI soạn 5 câu</button></div>'; }).join('') : '') +
+      '<div class="nhan">Soạn cho kiến thức khác</div><div class="lyCan"><input type="text" id="lyKTMoi" placeholder="Dán đúng tên kiến thức (yêu cầu cần đạt) như trong đề"><button class="btn2 lyAI" data-tu="1">✨ AI soạn 5 câu</button></div><p class="loi" id="lyAILoi"></p>' +
+      '<div class="nhan">Chờ duyệt (' + cho.length + ')</div>' + (cho.length ? cho.map(theLy).join('') : '<p class="sub">Không có câu nào chờ duyệt.</p>') +
+      (duyet.length ? '<details><summary class="nhan">Đã duyệt, học sinh đang dùng (' + duyet.length + ')</summary>' + duyet.map(theLy).join('') + '</details>' : '') + '</div>';
+    box.innerHTML = h;
+    $('lyMoi').onclick = function () { veLuyenLop(true); };
+    if ($('lyXuat')) $('lyXuat').onclick = function () {
+      var dong = [['MaHS', 'Họ tên', 'Số lượt', 'Câu đúng', 'Số câu', 'Kiến thức', '% Kiểm tra', '% Lần đầu', '% Gần nhất', 'Số lượt KT']];
+      co.forEach(function (x) { x.kt.forEach(function (k, i) { dong.push([x.mahs, x.hoten, i ? '' : x.lan, i ? '' : x.dung, i ? '' : x.cau, k.kt, k.kiemtra == null ? '' : Math.round(k.kiemtra * 100), Math.round(k.dau * 100), Math.round(k.cuoi * 100), k.lan]); }); });
+      chua.forEach(function (x) { dong.push([x.mahs, x.hoten, 0, '', '', '', '', '', '', '']); });
+      taiVe(taoXlsx([{ ten: 'Luyen tap ' + l.ten, rong: [11, 26, 8, 9, 8, 46, 11, 11, 11, 10], dong: dong }]), 'LuyenTap_' + tenFile(l.ten) + '.xlsx');
+    };
+    [].forEach.call(box.querySelectorAll('.lyAI'), function (b) {
+      b.onclick = function () {
+        var kt = b.getAttribute('data-tu') ? $('lyKTMoi').value.trim() : b.getAttribute('data-kt');
+        if (!kt) { $('lyKTMoi').focus(); return; }
+        b.disabled = true; b.textContent = '✨ Đang soạn… (20–40 giây)'; $('lyAILoi').textContent = '';
+        goi(l.url, { action: 'gv_luyen_ai', ma: MA, kt: kt, khoi: b.getAttribute('data-khoi') || '', so: 5 }).then(function (r) {
+          if (!r.ok) throw new Error(r.msg || 'Lỗi');
+          LYD[l.ten] = r; veLuyenLop();
+        }).catch(function (e) { b.disabled = false; b.textContent = '✨ AI soạn 5 câu'; $('lyAILoi').textContent = 'Chưa soạn được: ' + e.message; });
+      };
+    });
+    [].forEach.call(box.querySelectorAll('.lyThe'), function (el) {
+      var ma = el.getAttribute('data-ma'), x = (j.them || []).filter(function (z) { return z.ma === ma; })[0];
+      var gui = function (du, nut) {
+        nut.disabled = true;
+        goi(l.url, Object.assign({ action: 'gv_luyen_duyet', ma: MA, malt: ma }, du)).then(function (r) { if (!r.ok) throw new Error(r.msg || 'Lỗi'); LYD[l.ten] = r; veLuyenLop(); })
+          .catch(function (e) { nut.disabled = false; el.querySelector('.loi').textContent = 'Chưa lưu được: ' + e.message; });
+      };
+      el.querySelector('.lyDuyet').onclick = function () { gui({ tt: x.tt === 'DUYET' ? 'CHO' : 'DUYET' }, this); };
+      el.querySelector('.lyXoa').onclick = function () { if (confirm('Xóa câu này?')) gui({ xoa: true }, this); };
+      el.querySelector('.lySua').onclick = function () {
+        var f = el.querySelector('.lyForm'); f.hidden = !f.hidden;
+      };
+      el.querySelector('.lyLuu').onclick = function () {
+        var v = function (k) { return el.querySelector('[name="' + k + '"]').value; };
+        gui({ tt: 'DUYET', sua: { hoi: v('hoi'), A: v('A'), B: v('B'), C: v('C'), D: v('D'), da: v('da'), gt: v('gt') } }, this);
+      };
+    });
+  }
+  function theLy(x) {
+    var pa = x.loai === 'TN' ? ['A', 'B', 'C', 'D'].map(function (k) { return '<div class="lyPa' + (k === x.da ? ' da' : '') + '"><b>' + k + '.</b> ' + x.pa[k] + (k === x.da ? ' ✓' : '') + '</div>'; }).join('')
+      : x.loai === 'DS' ? ['A', 'B', 'C', 'D'].map(function (k, m) { return '<div class="lyPa"><b>' + 'abcd'[m] + ')</b> ' + x.pa[k] + ' → <b>' + (String(x.da)[m] === 'D' ? 'Đúng' : 'Sai') + '</b></div>'; }).join('')
+      : '<div class="lyPa da">Đáp số: ' + esc(x.da) + '</div>';
+    var o = function (k, nhan, v, dai) { return '<label>' + nhan + (dai ? '<textarea name="' + k + '" rows="3">' + esc(v) + '</textarea>' : '<input name="' + k + '" value="' + esc(v) + '">') + '</label>'; };
+    return '<div class="lyThe' + (x.tt === 'DUYET' ? ' ok' : '') + '" data-ma="' + esc(x.ma) + '"><div class="lyTag">' + esc(x.kt) + (x.md ? ' · ' + esc(x.md) : '') + ' · ' + (x.loai === 'DS' ? 'Đúng/Sai' : x.loai === 'TLN' ? 'Trả lời ngắn' : 'Trắc nghiệm') + ' · ' + esc(x.nguon || '') + '</div>' +
+      '<div class="lyHoi">' + x.hoi + '</div>' + pa + (x.gt ? '<div class="lyGT">💡 ' + x.gt + '</div>' : '') +
+      '<div class="lyForm" hidden>' + o('hoi', 'Câu hỏi', x.hoi, 1) + o('A', 'A', x.pa.A) + o('B', 'B', x.pa.B) + o('C', 'C', x.pa.C) + o('D', 'D', x.pa.D) + o('da', 'Đáp án (TN: A–D; Đúng/Sai: 4 chữ D/S)', x.da) + o('gt', 'Lời giải', x.gt, 1) + '<button class="btn lyLuu">💾 Lưu và duyệt</button></div>' +
+      '<div class="lyNut"><button class="btn2 lyDuyet">' + (x.tt === 'DUYET' ? '↩ Bỏ duyệt' : '✓ Duyệt') + '</button><button class="btn2 lySua">✎ Sửa</button><button class="btn2 lyXoa">🗑 Xóa</button></div><p class="loi"></p></div>';
+  }
   function soNhom(n) { var m = /(\d+)/.exec(n); return m ? Number(m[1]) : 999; }
   // ---------- Ho so nhom ----------
   var NH_SUA = null, NH_THEM = [];
