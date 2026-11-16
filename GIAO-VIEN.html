@@ -4570,13 +4570,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var soCot = 6 + (nhieuLop ? 1 : 0) + (nhom ? 1 : 0) + (coDiem ? 1 : 0);
     thuTu.forEach(function (k) {
       var dd = ngay[k].slice().sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : (a.ten || '').localeCompare(b.ten || '', 'vi') || a.t - b.t; });
-      var lan = {};
+      var lan = {}, cuoiKey = {}, chuLan = {};
       h += '<div class="card kqNgay"><div class="nhom" style="margin:0 0 8px">' + ngayChu(k) + ' · ' + dd.length + ' lượt</div>' + (coCT.length ? '<p class="chuthich" style="margin-top:0">Bấm vào một dòng để xem bài từng câu.</p>' : '') + '<div class="cuon"><table class="bang kqBang"><thead><tr><th>#</th>' +
         (nhieuLop ? '<th>Lớp</th>' : '') + '<th class="tenC">' + (nhom ? 'Nhóm' : 'Họ và tên') + '</th>' + (nhom ? '<th class="tvC">Thành viên</th>' : '') + (coDiem ? '<th>Điểm</th>' : '') + '<th>Đúng</th><th>%</th><th>Thời gian</th><th>Lúc</th>' + (nhom ? '' : '<th title="Ẩn lượt lỗi">🗑</th>') + '</tr></thead><tbody>';
       dd.forEach(function (x, i) {
         var p = phanTram(x.ds), key = x.lop + '|' + (x.ma || x.ten), coX = x.L && x.L.ct && x.bo[x.L.bo], mo = coX && KQ.moLuot === x.ml;
         lan[key] = (lan[key] || 0) + 1;
-        h += '<tr class="' + (coX ? 'kqCo' : '') + (mo ? ' mo' : '') + '"' + (coX ? ' data-ml="' + esc(x.ml) + '"' : '') + '><td>' + (i + 1) + '</td>' + (nhieuLop ? '<td>' + esc(x.lop) + '</td>' : '') + '<td class="tenC">' + (coX ? (mo ? '▾ ' : '▸ ') : '') + esc(x.ten) + (lan[key] > 1 ? '<span class="lan">lần ' + lan[key] + '</span>' : '') + '</td>' +
+        // Nhieu may cung vao 1 nhom/1 ten va choi cung luc (bat dau truoc khi luot truoc ket thuc) -> ghi "máy 2", khong phai "lần 2"
+        var bd = x.t - (Number(x.g) || 0) * 1000, cungLuc = lan[key] > 1 && cuoiKey[key] && bd < cuoiKey[key];
+        cuoiKey[key] = Math.max(cuoiKey[key] || 0, x.t); chuLan[key] = cungLuc ? 'máy' : 'lần';
+        h += '<tr class="' + (coX ? 'kqCo' : '') + (mo ? ' mo' : '') + '"' + (coX ? ' data-ml="' + esc(x.ml) + '"' : '') + '><td>' + (i + 1) + '</td>' + (nhieuLop ? '<td>' + esc(x.lop) + '</td>' : '') + '<td class="tenC">' + (coX ? (mo ? '▾ ' : '▸ ') : '') + esc(x.ten) + (lan[key] > 1 ? '<span class="lan" title="' + (chuLan[key] === 'máy' ? 'Máy khác cùng vào tên này, chơi cùng lúc' : 'Chơi lại lượt mới') + '">' + chuLan[key] + ' ' + lan[key] + '</span>' : '') + '</td>' +
           (nhom ? '<td class="tvC">' + (x.tv.length ? esc(x.tv.join(', ')) : '<span class="sub">chưa ghi thành viên</span>') + '</td>' : '') +
           (coDiem ? '<td class="' + (x.diem !== null && x.diem < 5 ? 'thapC' : '') + '"><b>' + (x.diem === null || x.diem === undefined ? '' : diem(x.diem)) + '</b></td>' : '') +
           '<td>' + (coDiem ? '' : '<b>') + esc(x.ds) + (coDiem ? '' : '</b>') + '</td><td class="' + (!coDiem && p !== null && p < 0.5 ? 'thapC' : '') + '">' + (p === null ? '' : Math.round(p * 100) + '%') + '</td><td>' + giayChu(x.g) + '</td><td>' + gio(new Date(x.t).toISOString()) + '</td>' +

@@ -2855,13 +2855,15 @@ function hsKienThuc(d) {
     });
   });
   const layBo = boDem();
+  let choXemTro = null;
   luotCuaHS(ma).forEach(function (x) {
     const ct = chamLuot(x, layBo); if (!ct) return;
     const k = 'TC:' + x.bo + ':' + ngayKhoa(x.t), luc = x.t ? new Date(x.t).toISOString() : '';
     let g = theo[k];
     if (!g) { g = theo[k] = {madot: k, ma: [], ten: '🎮 ' + tenTroGon(x), luc: luc, diem: x.diem, xem: {}, kt: {}, tro: true, _d: [0, 0]}; dot.push(g); }
     const id = 'TC#' + x.ml;
-    g.ma.push(id); g.xem[id] = 1; g._d[0] += x.diem; g._d[1]++; g.diem = Math.round(g._d[0] / g._d[1] * 100) / 100;
+    if (choXemTro === null) { choXemTro = {}; try { docTroChoi().forEach(function (t) { if (t.xemlai) choXemTro[t.matro] = 1; }); } catch (e) {} }
+    g.ma.push(id); if (choXemTro[String(x.matro).split(':')[0]]) g.xem[id] = 1; g._d[0] += x.diem; g._d[1]++; g.diem = Math.round(g._d[0] / g._d[1] * 100) / 100;
     if (luc && (!g.luc || luc < g.luc)) g.luc = luc;
     ct.forEach(function (c) {
       if (c.v === null || !c.kt) return;
