@@ -552,6 +552,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .duaDau{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .duaDau h2{font-size:19px}
 .duaDau .ma{font-size:14px;color:var(--muted)}
+.duaNgay{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}.duaNgay button{border:1.5px solid var(--line,#d9dce5);background:#fff;border-radius:999px;padding:4px 12px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}.duaNgay button.on{background:#141c2f;color:#fff;border-color:#141c2f}
 .duaChe{display:flex;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
 .duaChe button{border:0;border-left:2px solid var(--line);background:#fff;padding:7px 12px;font-size:14px;font-weight:600;color:var(--muted);border-radius:0}
 .duaChe button:first-child{border-left:0}
@@ -569,6 +570,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .duaO.dang .duaThan{background:repeating-linear-gradient(135deg,var(--warn) 0 8px,#d9a43a 8px 16px)}
 .duaO.nhat .duaThan{box-shadow:0 0 0 3px #f2c200 inset}
 .duaO.trong .duaThan{background:var(--off)}
+.ngBieu{margin:4px 0 14px}.ngBieu .duaTruc,.ngBieu .duaVung{height:170px}
 .duaTen{display:grid;grid-template-columns:30px minmax(0,1fr);gap:6px}
 .duaTen div{display:flex;gap:10px;padding:6px 10px 0;min-width:min-content}
 .duaTen span{flex:1 0 54px;max-width:96px;text-align:center;font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap}
@@ -4571,7 +4573,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     thuTu.forEach(function (k) {
       var dd = ngay[k].slice().sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : (a.ten || '').localeCompare(b.ten || '', 'vi') || a.t - b.t; });
       var lan = {}, cuoiKey = {}, chuLan = {};
-      h += '<div class="card kqNgay"><div class="nhom" style="margin:0 0 8px">' + ngayChu(k) + ' · ' + dd.length + ' lượt</div>' + (coCT.length ? '<p class="chuthich" style="margin-top:0">Bấm vào một dòng để xem bài từng câu.</p>' : '') + '<div class="cuon"><table class="bang kqBang"><thead><tr><th>#</th>' +
+      h += '<div class="card kqNgay"><div class="nhom" style="margin:0 0 8px">' + ngayChu(k) + ' · ' + dd.length + ' lượt</div>' + (nhom ? bieuNgay(dd, nhieuLop) : '') + (coCT.length ? '<p class="chuthich" style="margin-top:0">Bấm vào một dòng để xem bài từng câu.</p>' : '') + '<div class="cuon"><table class="bang kqBang"><thead><tr><th>#</th>' +
         (nhieuLop ? '<th>Lớp</th>' : '') + '<th class="tenC">' + (nhom ? 'Nhóm' : 'Họ và tên') + '</th>' + (nhom ? '<th class="tvC">Thành viên</th>' : '') + (coDiem ? '<th>Điểm</th>' : '') + '<th>Đúng</th><th>%</th><th>Thời gian</th><th>Lúc</th>' + (nhom ? '' : '<th title="Ẩn lượt lỗi">🗑</th>') + '</tr></thead><tbody>';
       dd.forEach(function (x, i) {
         var p = phanTram(x.ds), key = x.lop + '|' + (x.ma || x.ten), coX = x.L && x.L.ct && x.bo[x.L.bo], mo = coX && KQ.moLuot === x.ml;
@@ -4620,6 +4622,22 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     veDua(t, chon);
   }
 
+  // Bieu do cua 1 buoi (tro nhom): moi nhom 1 cot = diem cao nhat trong buoi, duoi cot ghi TB va so luot
+  function bieuNgay(dd, nhieuLop) {
+    var g = {};
+    dd.forEach(function (x) {
+      var d = x.diem != null ? Number(x.diem) : (phanTram(x.ds) === null ? null : phanTram(x.ds) * 10); if (d == null || isNaN(d)) return;
+      var k = (nhieuLop ? x.lop + ' · ' : '') + x.ten, o = g[k] = g[k] || { ten: k, lop: x.lop, so: soNhom(x.ten), ds: [] }; o.ds.push(d);
+    });
+    var ds = Object.keys(g).map(function (k) { var o = g[k]; o.cao = Math.max.apply(null, o.ds); o.tb = o.ds.reduce(function (a, b) { return a + b; }, 0) / o.ds.length; return o; })
+      .sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : a.so - b.so; });
+    if (!ds.length) return '';
+    var max = Math.max.apply(null, ds.map(function (o) { return o.cao; }));
+    return '<div class="ngBieu"><div class="chuthich" style="margin:0 0 4px">Biểu đồ buổi này: cột = điểm cao nhất của nhóm · dưới cột: điểm TB và số lượt</div><div class="duaKhung"><div class="duaTruc">' + [0, 2, 4, 6, 8, 10].map(function (v) { return '<span style="bottom:' + v * 10 + '%">' + v + '</span>'; }).join('') + '</div>' +
+      '<div class="duaVung"><div class="duaCot">' + ds.map(function (o) {
+        return '<div class="duaO' + (o.cao === max && max > 0 ? ' nhat' : '') + '" title="' + esc(o.ten) + ': cao nhất ' + fmtD(o.cao) + ', TB ' + fmtD(o.tb) + ', ' + o.ds.length + ' lượt"><div class="duaGT">' + fmtD(o.cao) + '</div><div class="duaThan" style="height:' + Math.max(0, Math.min(100, o.cao * 10)) + '%;transition:none"></div></div>';
+      }).join('') + '</div></div></div><div class="duaTen"><span></span><div>' + ds.map(function (o) { return '<span>' + esc(o.ten) + '<small>TB ' + fmtD(o.tb) + (o.ds.length > 1 ? ' · ' + o.ds.length + ' lượt' : '') + '</small></span>'; }).join('') + '</div></div></div>';
+  }
   // ---------- Bang dua truc tiep (tro nhom) ----------
   // Moi lop mot bieu do cot, cot = diem luot gan nhat cua nhom (thang 10). Nhom dang choi: diem hien tai, soc cheo, moc dan.
   // Tien do lay tu gv_tctd 3 giay/lan; ket qua da ve dich lay tu gv_tckq 12 giay/lan (tai lang le, khong nhap nhay).
@@ -4628,13 +4646,26 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function diem10(x) { return x == null || isNaN(x) ? null : Math.round(x * 100) / 100; }
   function soNhom(ten) { var m = /(\d+)/.exec(String(ten || '')); return m ? Number(m[1]) : 999; }
   function fmtD(x) { return x == null ? '' : String(Math.round(x * 10) / 10); }   // dau cham thap phan
-  function cotLop(t, lop) {
-    var j = KQ.data[lop] || {}, td = (KQ.td[lop] || {}).ds || [], homNay = ngayKey(Date.now() + (LECH_TC || 0));
+  // Ngay xem bang dua: GV chon (KQ.ngayChon) hoac tu dong: hom nay neu co nhom choi/dang dua, khong thi buoi gan nhat
+  function homNayDua() { return ngayKey(Date.now() + (LECH_TC || 0)); }
+  function ngayCoDua(t, chon) {
+    var co = {};
+    chon.forEach(function (l) { ((KQ.data[l.ten] || {}).nhom || []).forEach(function (x) { if (khopTro(x[1], t)) co[ngayKey(x[0])] = 1; }); });
+    return Object.keys(co).sort().reverse();
+  }
+  function ngayDua(t, chon) {
+    var hn = homNayDua(), ds = ngayCoDua(t, chon);
+    if (KQ.ngayChon && (KQ.ngayChon === hn || ds.indexOf(KQ.ngayChon) >= 0)) return KQ.ngayChon;
+    var dangHN = chon.some(function (l) { return ((KQ.td[l.ten] || {}).ds || []).some(function (x) { return ngayKey(x.t) === hn; }); });
+    return ds.indexOf(hn) >= 0 || dangHN || !ds.length ? hn : ds[0];
+  }
+  function cotLop(t, lop, ngay) {
+    var j = KQ.data[lop] || {}, td = (KQ.td[lop] || {}).ds || [], homNay = ngay || homNayDua(), laHN = homNay === homNayDua();
     var xong = (j.nhom || []).filter(function (x) { return khopTro(x[1], t) && ngayKey(x[0]) === homNay; }).map(function (x) {
       var d = x[5]; if (d == null || (d === 0 && phanTram(x[3]))) { var p = phanTram(x[3]); d = p === null ? 0 : p * 10; }
       return { nhom: x[2], t: x[0], diem: d, ml: x[6] || '', ds: chuanDS(x[3]) };
     });
-    var dangDs = td.filter(function (x) { return ngayKey(x.t) === homNay; });
+    var dangDs = laHN ? td.filter(function (x) { return ngayKey(x.t) === homNay; }) : [];
     var ten = {};
     xong.forEach(function (x) { ten[x.nhom] = 1; }); dangDs.forEach(function (x) { ten[x.nhom] = 1; });
     return Object.keys(ten).sort(function (a, b) { return soNhom(a) - soNhom(b); }).map(function (n) {
@@ -4650,15 +4681,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function veDua(t, chon) {
     var hop = $('kqDua');
     if (!t || t.kieu !== 'NHOM') { hop.innerHTML = ''; hop.dataset.tro = ''; return; }
-    if (hop.dataset.tro !== t.matro + '|' + chon.map(function (l) { return l.ten; }).join(',') + '|' + KQ.che) {
-      hop.dataset.tro = t.matro + '|' + chon.map(function (l) { return l.ten; }).join(',') + '|' + KQ.che;
-      hop.innerHTML = '<div class="card"><div class="duaDau"><div><h2>🏁 Bảng đua trực tiếp</h2><div class="ma">' +
-        (KQ.che === 'tb' ? 'Điểm trung bình các lượt hôm nay của mỗi nhóm' : 'Điểm lượt gần nhất của mỗi nhóm hôm nay · tự cập nhật trong lúc đua') + '</div></div>' +
-        '<div class="duaChe" role="group" aria-label="Cách tính cột"><button type="button" data-c="gan">Lượt gần nhất</button><button type="button" data-c="tb">TB hôm nay</button></div></div>' +
+    var ngay = ngayDua(t, chon), hn = homNayDua(), laHN = ngay === hn, cacNgay = ngayCoDua(t, chon);
+    if (cacNgay.indexOf(hn) < 0) cacNgay.unshift(hn);
+    var chuNgay = laHN ? 'hôm nay' : 'ngày ' + ngayChu(ngay).replace(/^[^,]*,\s*/, '');
+    var khoa = t.matro + '|' + chon.map(function (l) { return l.ten; }).join(',') + '|' + KQ.che + '|' + ngay + '|' + cacNgay.slice(0, 7).join(',');
+    if (hop.dataset.tro !== khoa) {
+      hop.dataset.tro = khoa;
+      hop.innerHTML = '<div class="card"><div class="duaDau"><div><h2>🏁 ' + (laHN ? 'Bảng đua trực tiếp' : 'Bảng đua ' + esc(chuNgay)) + '</h2><div class="ma">' +
+        (KQ.che === 'tb' ? 'Điểm trung bình các lượt ' + esc(chuNgay) + ' của mỗi nhóm' : 'Điểm lượt gần nhất của mỗi nhóm ' + esc(chuNgay) + (laHN ? ' · tự cập nhật trong lúc đua' : '')) + '</div></div>' +
+        '<div class="duaChe" role="group" aria-label="Cách tính cột"><button type="button" data-c="gan">Lượt gần nhất</button><button type="button" data-c="tb">TB ' + (laHN ? 'hôm nay' : 'cả buổi') + '</button></div></div>' +
+        (cacNgay.length > 1 ? '<div class="duaNgay">' + cacNgay.slice(0, 7).map(function (k) { return '<button type="button" data-ng="' + k + '"' + (k === ngay ? ' class="on"' : '') + '>' + (k === hn ? 'Hôm nay' : esc(ngayChu(k).replace(/^[^,]*,\s*/, '').replace(/\/\d{4}$/, ''))) + '</button>'; }).join('') + '</div>' : '') +
         '<div class="duaChu"><span><i></i>Đã về đích</span><span><i class="d"></i>Đang đua</span><span><i class="n"></i>Cao nhất lớp</span></div></div>' +
         chon.map(function (l) { return '<div class="card duaLop" data-lop="' + esc(l.ten) + '"><div class="duaDau"><h2>' + esc(l.ten) + '</h2><div class="ma duaTom"></div></div>' +
           '<div class="duaKhung"><div class="duaTruc">' + [0, 2, 4, 6, 8, 10].map(function (v) { return '<span style="bottom:' + v * 10 + '%">' + v + '</span>'; }).join('') + '</div>' +
-          '<div class="duaVung"><div class="duaCot"></div></div></div><div class="duaTen"><span></span><div class="duaTenDs"></div></div><p class="sub duaRong" hidden>Hôm nay chưa có nhóm nào chơi.</p></div>'; }).join('');
+          '<div class="duaVung"><div class="duaCot"></div></div></div><div class="duaTen"><span></span><div class="duaTenDs"></div></div><p class="sub duaRong" hidden>' + (laHN ? 'Hôm nay chưa có nhóm nào chơi.' : 'Ngày này chưa có nhóm nào chơi.') + '</p></div>'; }).join('');
+      hop.querySelectorAll('.duaNgay button').forEach(function (b) { b.onclick = function () { KQ.ngayChon = b.dataset.ng; veDua(t, chon); }; });
       hop.querySelectorAll('.duaChe button').forEach(function (b) {
         b.classList.toggle('on', b.dataset.c === KQ.che);
         b.onclick = function () { KQ.che = b.dataset.c; try { localStorage.setItem('gv_duache', KQ.che); } catch (e) {} veDua(t, chon); };
@@ -4666,9 +4703,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }
     chon.forEach(function (l) {
       var the = hop.querySelector('.duaLop[data-lop="' + l.ten + '"]'); if (!the) return;
-      var ds = cotLop(t, l.ten), cot = the.querySelector('.duaCot'), tenDs = the.querySelector('.duaTenDs');
+      var ds = cotLop(t, l.ten, ngay), cot = the.querySelector('.duaCot'), tenDs = the.querySelector('.duaTenDs');
       var max = Math.max.apply(null, ds.filter(function (x) { return !x.dang && x.diem != null; }).map(function (x) { return x.diem; }).concat([-1]));
+      var dangTai = KQ.data[l.ten] && KQ.data[l.ten].dang;
       the.querySelector('.duaRong').hidden = ds.length > 0;
+      if (!ds.length) the.querySelector('.duaRong').textContent = dangTai ? 'Đang tải kết quả…' : (laHN ? 'Hôm nay chưa có nhóm nào chơi. Các buổi trước: xem nút ngày ở trên hoặc biểu đồ trong từng buổi bên dưới.' : 'Ngày này chưa có nhóm nào chơi.');
       var soDang = ds.filter(function (x) { return x.dang; }).length;
       the.querySelector('.duaTom').textContent = ds.length ? ds.length + ' nhóm' + (soDang ? ' · ' + soDang + ' đang đua' : '') : '';
       // cap nhat tai cho: giu cot cu theo ten nhom de chieu cao chuyen dong
