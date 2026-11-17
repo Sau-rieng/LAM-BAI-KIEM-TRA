@@ -358,7 +358,18 @@ function xemLai(d) {
   try { baiTroHS(ma).forEach(function (b) { b.nx = ((nxMap[ma + '|' + b.dot] || {}).nx) || ''; delete b.dot; ketqua.push(b); }); } catch (e) {}
   let tx = [];
   try { const T = docTX(), dm = T.diem[ma] || {}; tx = T.cot.map(function (c) { return {ngay: c.ngay, ghichu: c.ghichu, diem: dm[c.id] === undefined ? null : dm[c.id]}; }); } catch (e) {}
-  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx};
+  // Bang diem cua em: moi bai kiem tra em da lam (ke ca de chua mo xem lai: chi diem, khong cau hoi/dap an); de giay nhieu ma = 1 dong
+  const bang = [], daCa = {};
+  try {
+    docCauHinh().forEach(function (c) {
+      if (!hopLop(c)) return;
+      const k = c.giay ? (c.ca || c.madot) : c.madot; if (daCa[k]) return;
+      const b = timBaiDaNop(c.madot, ma); if (!b) return;
+      daCa[k] = 1;
+      bang.push({madot: c.madot, ten: c.ten, luc: b.luc, diem: b.diem, giay: !!c.giay, xem: !!c.xemlai});
+    });
+  } catch (e) {}
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, bangdiem: bang};
 }
 
 // HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
@@ -380,7 +391,7 @@ function baiTroHS(ma) {
   return luotCuaHS(ma).map(function (x) {
     const ct = chamLuot(x, layBo); if (!ct) return null;
     const mo = !!choXem[String(x.matro).split(':')[0]];
-    return {madot: 'TC#' + x.ml, tro: true, ten: '🎮 ' + tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + ' · ' + Utilities.formatDate(new Date(x.t), tz, 'dd/MM HH:mm'),
+    return {buoi: tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + '|' + Utilities.formatDate(new Date(x.t), tz, 'yyyy-MM-dd'), madot: 'TC#' + x.ml, tro: true, ten: '🎮 ' + tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + ' · ' + Utilities.formatDate(new Date(x.t), tz, 'dd/MM HH:mm'),
       diem: x.diem, luc: x.t ? new Date(x.t).toISOString() : '', socaudung: ct.filter(function (c) { return c.dung; }).length, tongsocau: ct.length,
       dot: x.bo && x.t && x.kieu !== 'NHOM' ? 'TC:' + x.bo + ':' + ngayKhoa(x.t) : '',
       khoa: !mo,

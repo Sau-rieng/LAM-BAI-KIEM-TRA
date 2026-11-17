@@ -225,6 +225,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <div class="thuMuc">
       <button id="moBai"><span class="ic" aria-hidden="true" data-bt="xem"></span><b>Xem lại bài</b><span id="soBai"></span></button>
       <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true" data-bt="tn"></span><b>Tài nguyên</b><span id="soTN"></span></button>
+      <button id="moBD" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Bảng điểm của em</b><span>Mọi điểm kiểm tra, trò chơi, điểm TX</span></button>
       <button id="moTX" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Điểm TX</b><span id="soTX">Điểm thầy/cô cho trên lớp</span></button>
       <button id="moKT" class="ktBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Kiến thức cần ôn</b><span id="soKT">Em yếu phần nào, câu nào sai</span></button>
       <button id="moLuyen" class="luyenBtn"><span class="ic" aria-hidden="true" data-bt="ong"></span><b>Luyện lại phần yếu</b><span>10 câu đúng phần em còn sai, có lời giải ngay</span></button>
@@ -262,6 +263,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <h1 style="margin-top:10px">📒 Điểm TX</h1>
     <p class="sub">Điểm thường xuyên thầy/cô cho trên lớp, theo ngày.</p>
     <div id="txNoi"></div>
+  </div>
+</section>
+<section id="scrBD" class="hidden">
+  <div class="card">
+    <button class="btn2 nho" id="bdVe">◀ Quay lại</button>
+    <h1 style="margin-top:10px">📊 Bảng điểm của em</h1>
+    <div id="bdNoi"></div>
   </div>
 </section>
 <section id="scrKT" class="hidden">
@@ -329,7 +337,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var lopChon = null, duLieu = null, baiDangXem = null;
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX', 'scrLuyen'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX', 'scrLuyen', 'scrBD'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -613,6 +621,31 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       tx.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + '</td><td><b>' + String(c.diem) + '</b></td></tr>'; }).join('') + '</tbody></table>';
   };
   $('txVe').onclick = function () { man('scrHome'); };
+  // ---------- Bang diem cua em: moi diem kiem tra (ke ca de chua mo xem lai), tro choi (cao nhat moi buoi), diem TX ----------
+  $('bdVe').onclick = function () { man('scrHome'); };
+  $('moBD').onclick = function () {
+    man('scrBD');
+    var e = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    var ng = function (s) { var d = new Date(s); if (isNaN(d)) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; } return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); };
+    var so = function (x) { return String(Math.round(Number(x) * 100) / 100); };
+    var kt = (duLieu.bangdiem || []).slice().sort(function (a, b) { return String(a.luc) < String(b.luc) ? -1 : 1; });
+    var buoi = {};
+    (duLieu.bai || []).forEach(function (b) { if (!b.tro || !b.buoi) return; var o = buoi[b.buoi] = buoi[b.buoi] || { ten: b.buoi.split('|')[0], ngay: b.buoi.split('|')[1], cao: -1, luot: 0 }; o.luot++; if (Number(b.diem) > o.cao) o.cao = Number(b.diem); });
+    var tro = Object.keys(buoi).map(function (k) { return buoi[k]; }).sort(function (a, b) { return a.ngay < b.ngay ? -1 : 1; });
+    var tx = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; });
+    var cot = kt.map(function (x) { return Number(x.diem); }).concat(tro.map(function (x) { return x.cao; }));
+    var tb = cot.length ? cot.reduce(function (a, b) { return a + b; }, 0) / cot.length : null, tbTX = tx.length ? tx.reduce(function (a, c) { return a + Number(c.diem); }, 0) / tx.length : null;
+    var h = '<div class="txTB">TB kiểm tra + trò chơi: <b>' + (tb === null ? '–' : so(tb)) + '</b> (' + cot.length + ' cột) · TB điểm TX: <b>' + (tbTX === null ? '–' : so(tbTX)) + '</b></div>';
+    h += '<h2 style="margin-top:14px">📝 Bài kiểm tra</h2>' + (kt.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Bài</th><th>Điểm</th></tr></thead><tbody>' + kt.slice().reverse().map(function (x) {
+      return '<tr><td>' + ng(x.luc) + '</td><td>' + e(x.ten) + (x.giay ? ' <small>(giấy)</small>' : '') + (x.xem ? ' <button class="btn2 nho bdXem" data-md="' + e(x.madot) + '">Xem lại ▸</button>' : ' <small>· thầy/cô chưa mở xem lại</small>') + '</td><td><b>' + so(x.diem) + '</b></td></tr>';
+    }).join('') + '</tbody></table>' : '<p class="sub">Em chưa có bài kiểm tra nào.</p>');
+    h += '<h2 style="margin-top:14px">🎮 Trò chơi (điểm cao nhất mỗi buổi)</h2>' + (tro.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Trò chơi</th><th>Điểm</th></tr></thead><tbody>' + tro.slice().reverse().map(function (x) {
+      return '<tr><td>' + ng(x.ngay) + '</td><td>' + e(x.ten) + (x.luot > 1 ? ' <small>(' + x.luot + ' lượt)</small>' : '') + '</td><td><b>' + so(x.cao) + '</b></td></tr>';
+    }).join('') + '</tbody></table>' : '<p class="sub">Em chưa chơi trò nào.</p>');
+    h += '<h2 style="margin-top:14px">📒 Điểm TX</h2>' + (tx.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>' + tx.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + e(c.ghichu) + '</td><td><b>' + e(c.diem) + '</b></td></tr>'; }).join('') + '</tbody></table>' : '<p class="sub">Em chưa có điểm TX nào.</p>');
+    $('bdNoi').innerHTML = h;
+    [].forEach.call($('bdNoi').querySelectorAll('.bdXem'), function (b) { b.onclick = function () { var md = b.getAttribute('data-md'), x = (duLieu.bai || []).filter(function (z) { return z.madot === md; })[0]; if (x) { baiDangXem = x; veBai(); } }; });
+  };
 
   // ---------- Kien thuc can on tap (moi dot da lam + tong hop) ----------
   var KT = null, KT_SEL = 'tat';
