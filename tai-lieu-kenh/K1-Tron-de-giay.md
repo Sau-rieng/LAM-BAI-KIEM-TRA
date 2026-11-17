@@ -100,3 +100,6 @@ Ngoài file Excel nạp kho, gửi kèm để in:
 - Lời giải câu tự luận (cột LoiGiai của `TU LUAN THEM`) viết **theo bước, có điểm từng bước**, ví dụ "Viết đúng PTHH … (0.25) – Tính n(CO2) = 0.15 mol (0.25) – Kết luận … (0.5)". Tổng điểm các bước phải bằng cột Diem của câu.
 - Trên trang GV, ở thẻ đề giấy bấm **✍ Chấm tự luận** → **✨ AI soạn từ lời giải**. AI tách lời giải thành hướng dẫn chấm theo bước. Giáo viên sửa rồi lưu (lưu vào tab `RUBRIC` của kho).
 - Khi chấm, giáo viên chụp bài tự luận của từng em và tích các bước đạt. Máy cộng điểm vào điểm đề giấy. Học sinh xem lại thấy bước nào ✓, bước nào ✗ mất điểm, cùng lời giải.
+
+
+> **Tạm thời (từ 17/11/2026): chỉ đề kiểm tra 45 phút mới có phần tự luận** (tab `TU LUAN THEM`, rubric). Đề 10–15 phút chỉ có trắc nghiệm (TN, Đúng/Sai, Trả lời ngắn). Nút ✍ Chấm tự luận chỉ hiện ở đề giấy 45 phút.

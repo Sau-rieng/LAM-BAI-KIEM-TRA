@@ -108,3 +108,6 @@ Có `TU LUAN THEM` thì vẫn giữ trang hướng dẫn chấm trong file Word 
 - Gửi kèm file `MA-TRAN-<mã đợt>.docx` (ma trận + bản đặc tả) làm minh chứng "AI xây dựng ma trận đề".
 - Tab `KIEN THUC THEM` có thêm 2 cột **ChuDe** (Chủ đề/Chương, vd "Cấu tạo nguyên tử") và **NoiDung** (Nội dung/đơn vị kiến thức, vd "Cấu hình electron"). Cả hai lấy đúng tên trong ma trận. Câu tự luận (tab `TU LUAN THEM`) cũng có dòng trong `KIEN THUC THEM`, với Cau trùng số câu tự luận.
 - Trang GV có nút **📐 Ma trận – Đặc tả** ở màn nạp đề và ở mỗi đề trong kho. Nút này tự lập lại ma trận từ các cột trên, cảnh báo khi lệch tỉ lệ hoặc có câu thiếu nhãn, và xuất Word/Excel. Vì vậy nhãn phải đủ và đúng.
+
+
+> **Tạm thời (từ 17/11/2026): chỉ đề kiểm tra 45 phút mới có phần tự luận** (tab `TU LUAN THEM`, rubric). Đề 10–15 phút chỉ có trắc nghiệm (TN, Đúng/Sai, Trả lời ngắn). Nút ✍ Chấm tự luận chỉ hiện ở đề giấy 45 phút.
