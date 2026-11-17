@@ -104,6 +104,10 @@ function doPost(e) {
       case 'gv_vang':
       case 'gv_dathi':
       case 'gv_cau':
+      case 'gv_matrande':
+      case 'gv_suadapan':
+      case 'gv_chamlai':
+      case 'gv_aide':
       case 'gv_nhom':
       case 'gv_kienthuc':
       case 'gv_ainx':
@@ -164,6 +168,10 @@ function doPost(e) {
         if (d.action === 'gv_vang') return json(gvVang(d));
         if (d.action === 'gv_dathi') return json(gvDaThi());
         if (d.action === 'gv_cau') return json(gvCau(d));
+        if (d.action === 'gv_matrande') return json(gvMaTranDe(d));
+        if (d.action === 'gv_suadapan') return json(gvSuaDapAn(d));
+        if (d.action === 'gv_chamlai') return json(gvChamLai(d));
+        if (d.action === 'gv_aide') return json(gvAIDe(d));
         if (d.action === 'gv_nhom') return json(gvNhom(d));
         if (d.action === 'gv_kienthuc') return json(gvKienThuc(d));
         if (d.action === 'gv_ainx') return json(gvAINhanXet(d));
@@ -1124,7 +1132,7 @@ function gvHinh(d) {
 // Tao tab de (thay = true: ghi de tab cu), them/sua dong CAU HINH (de moi luon DONG, KHONG cho xem lai), thay dong KIEN THUC cua dot.
 // ---------------------------------------------------------------------
 const HEAD_DE = ['Cau', 'NoiDung', 'A', 'B', 'C', 'D', 'DapAn', 'Hinh', 'Loai', 'Diem'];
-const TAB_CAM = ['CAU HINH', 'MA', 'KIEN THUC', 'TRO CHOI', 'BO CAU', 'GIAI THICH', 'CAU HINH THEM', 'KIEN THUC THEM', 'GIAI THICH THEM', 'TU LUAN', 'TU LUAN THEM', 'DOI MA', 'LUYEN THEM'];
+const TAB_CAM = ['CAU HINH', 'MA', 'KIEN THUC', 'TRO CHOI', 'BO CAU', 'GIAI THICH', 'CAU HINH THEM', 'KIEN THUC THEM', 'GIAI THICH THEM', 'TU LUAN', 'TU LUAN THEM', 'DOI MA', 'LUYEN THEM', 'SUA DAP AN'];
 // ---- DOI MA DE luc nap (trung kho): nho "ma trong file -> ma moi" o tab DOI MA (kho), chep hinh hinh/<goc>/ -> hinh/<moi>/ ----
 const TAB_DOIMA = 'DOI MA';
 function docDoiMa() {
@@ -1746,6 +1754,153 @@ function gvDaThi() {
   return {ok: true, lop: lopNay(), dathi: dathi};
 }
 // Thong ke tung cau cua 1 dot trong lop nay (lan lam sau cung moi em): % sai, cac lua chon
+// ---------------------------------------------------------------------
+// PHAN TICH DE (M1): tra ve ma tran diem tung cau cua moi bai (quy ve cau goc khi de giay tron nhieu ma)
+//   Trang GV gop cac lop roi tinh do kho p, do phan biet D (27%), phuong an nhieu, KR-20 / Cronbach alpha.
+// ---------------------------------------------------------------------
+function chuPA(t) { return String(t || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase(); }
+function khoaGoc(q) { return String(q.goc || q.cau).split(':')[0]; }
+// Ban do 1 ma -> cau goc: {goc, tn: {chuMa: chuGoc}, ds: [vi tri goc cua y j]}
+function banDoGoc(de, ref) {
+  const R = {}; ref.forEach(function (q) { R[khoaGoc(q)] = q; });
+  return de.map(function (q) {
+    const k = khoaGoc(q), g = R[k] || q, o = {goc: k, tn: null, ds: null};
+    if (q.loai === 'TN') {
+      o.tn = {};
+      ['A', 'B', 'C', 'D'].forEach(function (L) {
+        const t = chuPA(q.pa[L]); let m = '';
+        ['A', 'B', 'C', 'D'].some(function (G) { if (t && chuPA(g.pa[G]) === t) { m = G; return true; } return false; });
+        o.tn[L] = m || L;
+      });
+    } else if (q.loai === 'DS') {
+      const p = String(q.goc || '').split(':')[1];
+      o.ds = p && /^[abcd]{4}$/.test(p) ? p.split('').map(function (c) { return 'abcd'.indexOf(c); }) : [0, 1, 2, 3];
+    }
+    return o;
+  });
+}
+function gvMaTranDe(d) {
+  const mas = (Array.isArray(d.madots) ? d.madots : [d.madot]).map(function (x) { return String(x || '').trim(); }).filter(Boolean).slice(0, 12);
+  if (!mas.length) return {ok: false, msg: 'Chua chon de'};
+  const de = {};
+  mas.forEach(function (m) { try { de[m] = docDe(m); } catch (e) {} });
+  const co = mas.filter(function (m) { return de[m]; });
+  if (!co.length) return {ok: false, msg: 'Kho chua co de ' + mas.join(', ')};
+  // De goc: ma co cau khong tron (Goc trong hoac trung Cau, khong co hoan vi), uu tien ma nho nhat
+  const laGoc = function (m) { return de[m].every(function (q) { return !q.goc || (q.goc === q.cau); }); };
+  const refMa = co.filter(laGoc)[0] || co.slice().sort()[0], ref = de[refMa];
+  const bd = {}; co.forEach(function (m) { bd[m] = banDoGoc(de[m], ref); });
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL), bai = {};
+  if (sh && sh.getLastRow() > 1) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+      const md = String(r[1]).trim(); if (!de[md]) return;
+      const ma = String(r[2]).trim(), lan = Number(r[11]) || 1, k = ma + '|' + (co.length > 1 && de[md].giay ? 'ca' : md);
+      if (!bai[k] || lan >= bai[k].lan) bai[k] = {ma: ma, md: md, made: String(r[4] || ''), lan: lan, ct: r[9]};
+    });
+  }
+  const viTri = {}; ref.forEach(function (q, i) { viTri[khoaGoc(q)] = i; });
+  const ds = Object.keys(bai).map(function (k) {
+    const b = bai[k], dd = de[b.md], chon = tachChiTiet(b.ct), kq = chamBai(dd, function (q, i) { return chon[i]; });
+    const v = ref.map(function () { return null; }), c = ref.map(function () { return ''; });
+    kq.ct.forEach(function (r, i) {
+      const m = bd[b.md][i], j = viTri[m.goc]; if (j === undefined) return;
+      v[j] = r.w ? Math.round(r.diemCau / r.w * 1000) / 1000 : (r.dung ? 1 : 0);
+      let x = r.chon || '';
+      if (m.tn && x) x = x.split('').map(function (L) { return m.tn[L] || L; }).join('');
+      if (m.ds && x) { const y = ['-', '-', '-', '-']; m.ds.forEach(function (g, t) { y[g] = x[t] || '-'; }); x = y.join(''); }
+      c[j] = x;
+    });
+    return {ma: b.ma, md: b.md, diem: kq.diem, v: v, c: c};
+  });
+  const ktM = docKienThuc();
+  return {ok: true, lop: lopNay(), goc: refMa, mas: co,
+    cau: ref.map(function (q) { const x = ktM[refMa + '|' + q.cau] || {}; return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, da: q.da, w: q.w, hinh: q.hinh, kt: x.kt || '', md: x.md || ''}; }),
+    bai: ds, sua: docSuaDapAn(co)};
+}
+// ---- Sua dap an sau khi thi (cau nghi sai dap an): ghi kho, luu lich su; trang GV goi gv_chamlai tung lop ----
+const TAB_SDA = 'SUA DAP AN';
+function docSuaDapAn(mas) {
+  const sh = kho().getSheetByName(TAB_SDA); if (!sh || sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues().filter(function (r) { return !mas || mas.indexOf(String(r[1]).trim()) >= 0; })
+    .map(function (r) { return {ngay: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), madot: String(r[1]), cau: String(r[2]), cu: String(r[3]), moi: String(r[4]), lydo: String(r[5])}; });
+}
+// d.madots (cac ma cung ca), d.goc (cau goc, vd I.3), d.moi: dap an moi theo DE GOC: TN "C" | "B;C" (nhan ca hai) | "*" (tang diem ca lop); DS "DSSD" | "*"; TLN "12.5;12,5" | "*"
+function gvSuaDapAn(d) {
+  const mas = (Array.isArray(d.madots) ? d.madots : [d.madot]).map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+  const gocCau = String(d.goc || '').trim(), moi = String(d.moi || '').trim().toUpperCase(), lydo = String(d.lydo || '').slice(0, 300);
+  if (!mas.length || !gocCau || !moi) return {ok: false, msg: 'Thieu thong tin'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const de = {}; mas.forEach(function (m) { de[m] = docDe(m); });
+    const laGoc = function (m) { return de[m].every(function (q) { return !q.goc || q.goc === q.cau; }); };
+    const refMa = mas.filter(laGoc)[0] || mas.slice().sort()[0];
+    const cu = {}, ss = kho();
+    mas.forEach(function (m) {
+      const bd = banDoGoc(de[m], de[refMa]);
+      de[m].forEach(function (q, i) {
+        if (khoaGoc(q) !== gocCau) return;
+        let da = moi;
+        if (moi !== '*' && q.loai === 'TN') { const nguoc = {}; Object.keys(bd[i].tn).forEach(function (L) { nguoc[bd[i].tn[L]] = L; }); da = moi.split(/[;\/,]/).map(function (G) { return nguoc[G.trim()] || G.trim(); }).filter(Boolean).join(';'); }
+        if (moi !== '*' && q.loai === 'DS') { const g = chuanDS(moi); da = bd[i].ds.map(function (p) { return g[p]; }).join(''); if (!/^[DS]{4}$/.test(da)) throw new Error('Dap an dung/sai can 4 chu D/S'); }
+        if (q.loai === 'TN' && moi !== '*' && !/^[ABCD](;[ABCD])*$/.test(da)) throw new Error('Dap an trac nghiem chi gom A-D');
+        const sh = ss.getSheetByName(m), v = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues();
+        for (let r = 0; r < v.length; r++) if (String(v[r][0]).trim() === q.cau) {
+          sh.getRange(r + 2, 7).setNumberFormat('@').setValue(da);
+          cu[m + '|' + q.cau] = q.da;
+          let lg = ss.getSheetByName(TAB_SDA);
+          if (!lg) { lg = ss.insertSheet(TAB_SDA); lg.getRange(1, 1, 1, 6).setValues([['Ngay', 'MaDot', 'Cau', 'DapAnCu', 'DapAnMoi', 'LyDo']]).setFontWeight('bold'); lg.setFrozenRows(1); }
+          lg.appendRow([new Date(), m, q.cau, "'" + q.da, "'" + da, lydo]);
+          break;
+        }
+      });
+    });
+    if (!Object.keys(cu).length) return {ok: false, msg: 'Khong tim thay cau ' + gocCau};
+    SpreadsheetApp.flush();
+    if (MEMO) MEMO = {};
+    return {ok: true, cu: cu};
+  } finally { lock.releaseLock(); }
+}
+// Cham lai bai cua lop nay cho cac ma vua sua: diem moi = diem cu - phan trac nghiem cham bang dap an cu + phan cham bang dap an moi
+// (giu nguyen diem tu luan / diem GV cong them neu co). d.cu: {madot|cau: dap an cu}
+function gvChamLai(d) {
+  const cu = d.cu || {}, mas = {};
+  Object.keys(cu).forEach(function (k) { mas[k.split('|')[0]] = 1; });
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
+  if (!sh || sh.getLastRow() < 2) return {ok: true, doi: 0};
+  const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues(), deMoi = {}, deCu = {};
+  Object.keys(mas).forEach(function (m) {
+    deMoi[m] = docDe(m);
+    deCu[m] = deMoi[m].map(function (q) { const o = Object.assign({}, q), k = m + '|' + q.cau; if (k in cu) o.da = q.loai === 'DS' && cu[k] !== '*' ? chuanDS(cu[k]) : String(cu[k]).toUpperCase(); return o; });
+    deCu[m].giay = deMoi[m].giay;
+  });
+  let doi = 0;
+  v.forEach(function (r, i) {
+    const m = String(r[1]).trim(); if (!deMoi[m]) return;
+    const chon = tachChiTiet(r[9]), lay = function (q, j) { return chon[j]; };
+    const a = chamBai(deCu[m], lay), b = chamBai(deMoi[m], lay);
+    if (a.diem === b.diem && a.dung === b.dung) return;
+    const moi = Math.round(((Number(r[5]) || 0) - a.diem + b.diem) * 100) / 100;
+    sh.getRange(i + 2, 6, 1, 2).setValues([[moi, b.dung]]);
+    doi++;
+  });
+  return {ok: true, doi: doi, lop: lopNay()};
+}
+// AI nhan xet de: chi gui noi dung cau + so lieu tong hop (khong ten, khong ma HS)
+function gvAIDe(d) {
+  const cau = Array.isArray(d.cau) ? d.cau.slice(0, 60) : [];
+  if (!cau.length) return {ok: false, msg: 'Chua co so lieu'};
+  const yc = 'Bạn là chuyên gia đo lường – đánh giá trong giáo dục (môn Hóa học/KHTN, chương trình GDPT 2018). Dưới đây là số liệu phân tích một đề kiểm tra sau khi học sinh làm' +
+    ' (n = ' + Number(d.n || 0) + ' bài, độ tin cậy ' + String(d.tincay || '') + ', điểm TB ' + String(d.tb || '') + ', độ lệch chuẩn ' + String(d.sd || '') + ').' +
+    ' Mỗi câu có: nội dung, phương án, đáp án, độ khó p (tỉ lệ làm đúng), độ phân biệt D (nhóm 27% cao trừ nhóm 27% thấp), tỉ lệ chọn từng phương án ở nhóm cao/thấp, yêu cầu cần đạt và mức độ.\n' +
+    'Hãy viết nhận xét ngắn gọn, khách quan bằng tiếng Việt cho giáo viên:\n' +
+    '1) Nhận xét chung về đề (độ khó, phân hóa, độ tin cậy, cân đối mức độ).\n' +
+    '2) Các câu cần xem lại (D thấp/âm, nhiễu không ai chọn, nhiễu hút nhóm giỏi, nghi sai đáp án): mỗi câu nêu lý do dựa trên số liệu và gợi ý sửa cụ thể (sửa lời dẫn, thay phương án nhiễu...).\n' +
+    '3) Lỗi sai phổ biến của học sinh rút ra từ phương án nhiễu được chọn nhiều, và gợi ý dạy lại.\n' +
+    'Không bịa số liệu ngoài dữ liệu. Trả về JSON: {"chung":"...","cau":[{"cau":"I.3","van_de":"...","goi_y":"..."}],"loi_hs":["..."],"day_lai":["..."]}\n' +
+    'DỮ LIỆU: ' + JSON.stringify(cau).slice(0, 60000);
+  const kq = goiAI(yc, null, 0.3, {thuLai: true});
+  return {ok: true, ai: kq};
+}
 function gvCau(d) {
   const madot = String(d.madot || '').trim();
   const de = docDe(madot);
@@ -2685,7 +2840,7 @@ function docDe0(v, madot, thang) {
     const loai = ['DS', 'TLN'].indexOf(khongDau(r[8])) >= 0 ? khongDau(r[8]) : 'TN';
     let da = String(r[6]).trim();
     if (loai === 'TN') da = da.toUpperCase();
-    if (loai === 'DS') da = chuanDS(da);
+    if (loai === 'DS' && da !== '*') da = chuanDS(da);
     return {
       cau: String(r[0]).trim() || String(i + 1), hoi: String(r[1]), loai: loai,
       pa: {A: String(r[2]), B: String(r[3]), C: String(r[4]), D: String(r[5])},
@@ -2726,6 +2881,7 @@ function laTLNChu(q) {
 function chamCau(q, x) {
   x = x === undefined || x === null ? '' : String(x).trim();
   if (x === '-') x = '';
+  if (q.da === '*') return {chon: q.loai === 'DS' && x ? chuanDS(x) : x.toUpperCase(), dung: true, soY: q.loai === 'DS' ? 4 : 1, diemCau: q.w};
   if (q.loai === 'DS') {
     x = x ? chuanDS(x) : '';
     let soY = 0;
@@ -2742,7 +2898,7 @@ function chamCau(q, x) {
     return {chon: x, dung: ok, soY: ok ? 1 : 0, diemCau: ok ? q.w : 0};
   }
   x = x.toUpperCase();
-  const ok = x !== '' && x === q.da;
+  const ok = x !== '' && (x === q.da || (q.da.length > 1 && q.da.split(/[;\/]/).indexOf(x) >= 0));
   return {chon: x, dung: ok, soY: ok ? 1 : 0, diemCau: ok ? q.w : 0};
 }
 // layChon(q, i) -> lua chon cua HS cho cau q

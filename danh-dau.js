@@ -39,15 +39,15 @@
       var loai = String(q.loai || '').toUpperCase();
       if (loai === 'TN') {
         var hang = o.p1[i1++]; if (!hang) return;
-        var da = chuan(q.da), ch = chuan(q.chon).replace(/[^ABCD]/g, ''), dung = ch === da && da.length === 1;
-        'ABCD'.split('').forEach(function (L, j) { if (L === da) vongDung(hang[j].p); else if (ch.indexOf(L) >= 0) gach(hang[j].p); });
-        if (ch.length > 1 && ch.indexOf(da) >= 0) gach(hang['ABCD'.indexOf(da)].p);
+        var da = chuan(q.da), dsDa = da === '*' ? [] : da.split(/[;\/,]/), ch = chuan(q.chon).replace(/[^ABCD]/g, ''), dung = da === '*' || (ch.length === 1 && dsDa.indexOf(ch) >= 0);
+        'ABCD'.split('').forEach(function (L, j) { if (dsDa.indexOf(L) >= 0) vongDung(hang[j].p); else if (ch.indexOf(L) >= 0) gach(hang[j].p); });
+        if (ch.length > 1) dsDa.forEach(function (L) { if (ch.indexOf(L) >= 0 && 'ABCD'.indexOf(L) >= 0) gach(hang['ABCD'.indexOf(L)].p); });
         dau(hang[0].p[0] - 9.6 * u, hang[0].p[1], dung);
       } else if (loai === 'DS') {
         var c4 = o.p2[i2++]; if (!c4) return;
         var d2 = chuan(q.da), c2 = chuan(q.chon), n = 0;
         c4.forEach(function (y, j) {
-          var dj = d2[j], cj = c2[j] || '', ok = (cj === 'D' || cj === 'S') && cj === dj;
+          var dj = d2[j], cj = c2[j] || '', ok = d2 === '*' || ((cj === 'D' || cj === 'S') && cj === dj);
           if (ok) n++;
           vongDung(y[dj === 'S' ? 1 : 0].p);
           if (!ok) { if (cj === 'D' || cj === '*') gach(y[0].p); if (cj === 'S' || cj === '*') gach(y[1].p); }
