@@ -1795,11 +1795,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     try { if (navigator.vibrate) navigator.vibrate(tot ? 80 : [200, 100, 200]); } catch (e) {}
   }
   function xuLyAnh(canvas, tuFile) {
-    var a = OMR.tuCanvas(canvas, 1800), r = OMR.doc(a);
+    var t0 = Date.now(), a = OMR.tuCanvas(canvas, 1800), r = OMR.doc(a);
     if (!r.ok) { Q.trangThai = 'tim'; $('qTT').textContent = r.loi; bip(false); if (tuFile) $('qXet').innerHTML = '<div class="card loi">Ảnh không đọc được: ' + esc(r.loi) + '</div>'; return; }
     if (!tuFile) ghiVanTay(canvas, r, a.s);
     var x = xetPhieu(r);
-    x.canvas = a.canvas; x.r = r;
+    x.canvas = a.canvas; x.r = r; x.t0 = t0;
     if (Q.cuoi && x.sbd === Q.cuoi.sbd && (Q.cheDo === 'chup' || x.madot === Q.cuoi.madot) && !tuFile) { Q.trangThai = 'doiTo'; $('qTT').textContent = 'Tờ này vừa ' + (Q.cheDo === 'chup' ? 'chụp' : 'chấm') + ' xong. Lật sang tờ khác.'; return; }
     if (Q.cheDo === 'chup') { bip(true); guiAnh(x, canvas); Q.trangThai = 'doiTo'; return; }
     Q.trangThai = 'doiTo';
@@ -1944,7 +1944,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function guiPhieu(x, ghide) {
     var d = tinhDiem(x), du = { action: 'gv_giay_nop', ma: MA, madot: x.madot, mahs: x.sbd, chon: x.chon, ghide: !!ghide,
-      ghichu: (x.canhLuu ? ['⚠ ' + x.canhLuu] : []).concat(x.ghi, x.daSua ? ['GV sửa tay: ' + x.daSua] : [], x.gvXem ? ['GV đã xem'] : []).join('; '), anh: x.anhId ? '' : QC.anh ? anhPhieu(x) : '', anhId: x.anhId || '' };
+      ghichu: (x.canhLuu ? ['⚠ ' + x.canhLuu] : []).concat(x.ghi, x.daSua ? ['GV sửa tay: ' + x.daSua] : [], x.gvXem ? ['GV đã xem'] : []).join('; '), anh: x.anhId ? '' : QC.anh ? anhPhieu(x) : '', anhId: x.anhId || '', ms: x.t0 && !x.daSua ? Date.now() - x.t0 : 0 };
     Q.cuoi = { sbd: x.sbd, madot: x.madot };
     Q.dangGui++; veTienDo();
     var ten = esc(Q.ten[x.sbd] || x.sbd), dd = '<b>' + diem(d.diem) + '</b> điểm · mã ' + (x.khongMa ? esc(x.khongMa) + ' (không có)' : esc(x.madot.slice(-3)));
@@ -3678,11 +3678,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function veSoLieu(ds, tu, den) {
     var ok = ds.filter(function (j) { return j.ok; }), loi = ds.filter(function (j) { return !j.ok; });
     var de = {}, nop = 0, hsNop = 0, hsXem = 0, cn = 0, nh = 0, tn = 0, hoi = 0, siSo = 0;
-    var dau = { n: 0, t: 0, d5: 0 }, sau = { n: 0, t: 0, d5: 0 }, coSS = [];
+    var dau = { n: 0, t: 0, d5: 0, d8: 0 }, sau = { n: 0, t: 0, d5: 0, d8: 0 }, coSS = [], giay = 0, suaTay = 0, msG = [], msI = [], ly = { luot: 0, em: 0, cap: 0, dau: 0, cuoi: 0 };
     ok.forEach(function (j) {
       j.de.forEach(function (m) { de[m] = 1; }); nop += j.nop; hsNop += j.hsNop; hsXem += j.hsXem; cn += j.troCN; nh += j.troNhom; tn += j.xemTN; hoi += j.hoi; siSo += j.siSo;
-      if (j.dot.length >= 2) { var a = j.dot[0], z = j.dot[j.dot.length - 1]; dau.n += a.n; dau.t += a.tong; dau.d5 += a.d5; sau.n += z.n; sau.t += z.tong; sau.d5 += z.d5; coSS.push(j.ten); }
+      if (j.dot.length >= 2) { var a = j.dot[0], z = j.dot[j.dot.length - 1]; dau.n += a.n; dau.t += a.tong; dau.d5 += a.d5; dau.d8 += a.d8 || 0; sau.n += z.n; sau.t += z.tong; sau.d5 += z.d5; sau.d8 += z.d8 || 0; coSS.push(j.ten); }
+      giay += j.giay || 0; suaTay += j.suaTay || 0;
+      if (j.ms) { msG = msG.concat(j.ms.GIAY || []); msI = msI.concat(j.ms.IPAD || []); }
+      if (j.luyen) ['luot', 'em', 'cap', 'dau', 'cuoi'].forEach(function (k) { ly[k] += j.luyen[k] || 0; });
     });
+    var tvMs = function (a) { if (!a.length) return null; var b = a.slice().sort(function (x, y) { return x - y; }); return b[Math.floor(b.length / 2)] / 1000; };
+    var chuMs = function (a, ten) { var t = tvMs(a); return t === null ? '' : ten + ': trung vị ' + (t < 10 ? so2(t) : Math.round(t)) + ' giây (' + a.length + ' bài)'; };
     var soNgay = Math.round((new Date(den) - new Date(tu)) / 864e5) + 1, cham = Number($('slCham').value) || 0, nhap = Number($('slNhap').value) || 0;
     var gio = nop * (cham + nhap) / 60, gioThang = gio * 30 / soNgay;
     var hang = [
@@ -3690,6 +3695,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       ['Số lượt chơi trò chơi (cá nhân / nhóm)', cn + ' / ' + nh],
       ['Điểm trung bình đợt đầu → đợt sau', coSS.length ? so2(dau.t / dau.n) + ' → ' + so2(sau.t / sau.n) : 'chưa đủ 2 đợt'],
       ['Tỉ lệ học sinh đạt từ 5 điểm: đầu → sau', coSS.length ? pt(dau.d5, dau.n) + '% → ' + pt(sau.d5, sau.n) + '%' : 'chưa đủ 2 đợt'],
+      ['Tỉ lệ học sinh đạt từ 8 điểm: đầu → sau', coSS.length ? pt(dau.d8, dau.n) + '% → ' + pt(sau.d8, sau.n) + '%' : 'chưa đủ 2 đợt'],
+      ['Thời gian từ lúc nộp/quét đến khi có điểm (máy tự đo)', [chuMs(msI, 'iPad'), chuMs(msG, 'phiếu giấy')].filter(String).join(' · ') || 'chưa có số đo (bắt đầu ghi từ bản cập nhật này)'],
+      ['Số phiếu giấy chấm bằng quét điện thoại / phải sửa tay', giay ? giay + ' / ' + suaTay + ' (đọc đúng ngay ' + pt(giay - suaTay, giay) + '%)' : 'chưa có'],
+      ['Luyện lại phần yếu: số lượt / số em', ly.luot + ' / ' + ly.em],
+      ['Luyện lại: % đúng lần luyện đầu → gần nhất (cùng kiến thức, từ 2 lượt)', ly.cap ? Math.round(ly.dau / ly.cap * 100) + '% → ' + Math.round(ly.cuoi / ly.cap * 100) + '% (' + ly.cap + ' lượt em–kiến thức)' : 'chưa đủ số liệu'],
       ['Tỉ lệ học sinh đã xem lại bài', pt(hsXem, hsNop) + '%'],
       ['Số lượt xem mô phỏng 3D / số câu hỏi gửi thầy cô', tn + ' / ' + hoi],
       ['Thời gian chấm, nhập điểm tiết kiệm được', 'khoảng ' + so2(gioThang) + ' giờ/tháng']
@@ -3711,8 +3721,39 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<li><b>Đợt đầu → đợt sau</b>: ở mỗi lớp có từ 2 đợt kiểm tra trở lên (' + (coSS.length ? esc(coSS.join(', ')) : 'chưa có lớp nào') + '), lấy đợt đầu tiên và đợt gần nhất trong khoảng ngày (ca nhiều mã đề = 1 đợt, mỗi em tính lần nộp sau cùng); gộp các lớp lại rồi tính điểm trung bình và tỉ lệ ≥ 5 điểm. Đợt đầu ' + dau.n + ' bài, đợt sau ' + sau.n + ' bài.</li>' +
       '<li><b>Đã xem lại</b>: số em có mở xem lại bài (tab XEM LAI) / số em có nộp bài trong khoảng ngày = ' + hsXem + '/' + hsNop + '.</li>' +
       '<li><b>Xem mô phỏng 3D</b>: số lượt mở tài nguyên (tab XEM TAI NGUYEN). <b>Câu hỏi</b>: số tin nhắn học sinh gửi (tab TIN NHAN).</li>' +
+      '<li><b>Thời gian có điểm</b>: máy tự ghi (tab NHAT KY CHAM) – iPad: từ lúc máy chủ nhận bài đến lúc chấm, tạo PDF, ghi sổ xong; phiếu giấy: từ lúc điện thoại bắt được phiếu đến lúc gửi điểm (phiếu GV sửa tay không tính). Lấy trung vị.</li>' +
+      '<li><b>Phiếu phải sửa tay</b>: phiếu giấy có ghi chú "GV sửa tay" (GV đổi SBD, mã đề hoặc ô tô sau khi máy đọc) / tổng phiếu giấy đã lưu.</li>' +
+      '<li><b>Luyện lại</b>: tab LUYEN TAP; % đúng của từng em ở từng kiến thức, lượt luyện đầu so với lượt gần nhất (chỉ tính cặp em–kiến thức luyện từ 2 lượt).</li>' +
+      '<li><b>Đối sánh theo kiến thức</b>: với mỗi kiến thức có trong từ 2 đợt kiểm tra trở lên của một lớp, % làm đúng ở đợt đầu so với đợt gần nhất (gộp các lớp, mỗi em tính lần nộp sau cùng).</li>' +
       '<li><b>Thời gian tiết kiệm</b> là <b>ước tính</b>: ' + nop + ' bài × (' + cham + ' phút chấm + ' + nhap + ' phút nhập điểm) = ' + so2(gio) + ' giờ trong ' + soNgay + ' ngày, quy ra 30 ngày.</li></ul></details>';
+    h += '<h3>Đối sánh trước/sau theo kiến thức</h3><div id="slKT"><p class="sub">Đang tính theo kiến thức…</p></div><div class="hangNut" style="justify-content:flex-start"><button class="btn2" id="slXuat">⬇ Excel số liệu minh chứng</button></div>';
     $('slKQ').innerHTML = h;
+    var KTSS = [];
+    Promise.all(DS.filter(function (l) { return ok.some(function (j) { return j.ten === l.ten; }); }).map(function (l) { return layKTLop(l).then(function (x) { return { l: l, x: x }; }, function () { return null; }); })).then(function (ds2) {
+      var G = {};
+      ds2.forEach(function (o) {
+        if (!o) return; var r = o.x.r, dots = (r.dot || []).filter(function (d) { var n = String(d.luc || '').slice(0, 10); return !n || (n >= tu && n <= den); });
+        var theo = {};
+        dots.forEach(function (d) {
+          var tong = {}; Object.keys(d.kq).forEach(function (ma) { d.kq[ma].forEach(function (v, i) { var c = d.cau[i]; if (!c || !c.kt || v == null) return; var t = tong[c.kt] = tong[c.kt] || [0, 0]; t[0] += v; t[1]++; }); });
+          Object.keys(tong).forEach(function (k) { (theo[k] = theo[k] || []).push({ luc: d.luc, d: tong[k][0], n: tong[k][1] }); });
+        });
+        Object.keys(theo).forEach(function (k) { var a = theo[k].sort(function (p, q) { return p.luc < q.luc ? -1 : 1; }); if (a.length < 2) return; var g = G[k] = G[k] || { kt: k, d1: 0, n1: 0, d2: 0, n2: 0, lop: [] }; g.d1 += a[0].d; g.n1 += a[0].n; g.d2 += a[a.length - 1].d; g.n2 += a[a.length - 1].n; g.lop.push(o.l.ten); });
+      });
+      KTSS = Object.keys(G).map(function (k) { var g = G[k]; return { kt: k, p1: g.d1 / g.n1, p2: g.d2 / g.n2, lop: g.lop.join(', ') }; }).sort(function (a, b) { return (b.p2 - b.p1) - (a.p2 - a.p1); });
+      $('slKT').innerHTML = KTSS.length ? '<div class="bang"><table class="slBang"><tr><th>Kiến thức</th><th>Đợt đầu</th><th>Đợt gần nhất</th><th>Thay đổi</th><th>Lớp</th></tr>' + KTSS.map(function (x) { var d = Math.round((x.p2 - x.p1) * 100); return '<tr><td>' + esc(x.kt) + '</td><td>' + Math.round(x.p1 * 100) + '%</td><td>' + Math.round(x.p2 * 100) + '%</td><td style="color:' + (d > 0 ? 'var(--ok)' : d < 0 ? '#c5221f' : 'inherit') + '"><b>' + (d > 0 ? '+' : '') + d + '</b></td><td>' + esc(x.lop) + '</td></tr>'; }).join('') + '</table></div>'
+        : '<p class="sub">Chưa có kiến thức nào xuất hiện ở từ 2 đợt kiểm tra của cùng một lớp trong khoảng ngày này.</p>';
+    });
+    $('slXuat').onclick = function () {
+      var t1 = [['Chỉ số', 'Kết quả']].concat(hang);
+      var t2 = [['Lớp', 'Sĩ số', 'Số đề', 'Bài nộp', 'HS nộp', 'HS xem lại', 'Số đợt', 'TB đợt đầu', '% ≥5 đầu', '% ≥8 đầu', 'TB đợt sau', '% ≥5 sau', '% ≥8 sau', 'Phiếu giấy', 'Sửa tay', 'Lượt luyện', 'Em luyện']].concat(ok.map(function (j) {
+        var a = j.dot[0], z = j.dot[j.dot.length - 1], c2 = j.dot.length >= 2;
+        return [j.ten, j.siSo, j.de.length, j.nop, j.hsNop, j.hsXem, j.dot.length, a ? Math.round(a.tong / a.n * 100) / 100 : '', a ? pt(a.d5, a.n) : '', a ? pt(a.d8 || 0, a.n) : '', c2 ? Math.round(z.tong / z.n * 100) / 100 : '', c2 ? pt(z.d5, z.n) : '', c2 ? pt(z.d8 || 0, z.n) : '', j.giay || 0, j.suaTay || 0, (j.luyen || {}).luot || 0, (j.luyen || {}).em || 0];
+      }));
+      var t3 = [['Kiến thức', '% đúng đợt đầu', '% đúng đợt gần nhất', 'Thay đổi (điểm %)', 'Lớp']].concat(KTSS.map(function (x) { return [x.kt, Math.round(x.p1 * 100), Math.round(x.p2 * 100), Math.round((x.p2 - x.p1) * 100), x.lop]; }));
+      var t4 = [['Loại', 'Số bài', 'Trung vị (giây)', 'Trung bình (giây)']].concat([['iPad', msI], ['Phiếu giấy', msG]].map(function (r) { var a = r[1]; return [r[0], a.length, tvMs(a) === null ? '' : Math.round(tvMs(a) * 100) / 100, a.length ? Math.round(a.reduce(function (s, x) { return s + x; }, 0) / a.length / 10) / 100 : '']; }));
+      taiVe(taoXlsx([{ ten: 'Chi so', rong: [62, 50], dong: t1 }, { ten: 'Tung lop', rong: [10, 7, 7, 8, 8, 9, 7, 10, 9, 9, 10, 9, 9, 10, 8, 10, 9], dong: t2 }, { ten: 'Theo kien thuc', rong: [50, 14, 16, 16, 24], dong: t3 }, { ten: 'Thoi gian cham', rong: [14, 9, 15, 17], dong: t4 }]), 'SoLieuMinhChung_' + tu + '_' + den + '.xlsx');
+    };
     $('slChep').onclick = function () {
       var t = 'Chỉ số\tKết quả\n' + hang.map(function (r) { return r[0] + '\t' + r[1]; }).join('\n');
       (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { $('slChep').textContent = '✓ Đã chép – dán vào Word'; }, function () { prompt('Chép bảng:', t); });

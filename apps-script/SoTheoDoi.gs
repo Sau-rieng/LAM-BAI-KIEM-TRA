@@ -287,7 +287,11 @@ function batDau(d) {
 // ---------------------------------------------------------------------
 // Nop bai: cham diem, tao PDF, ghi Sheet. Nop lai (do mang) khong tao ban trung.
 // ---------------------------------------------------------------------
+// M6: nhat ky thoi gian cham (ms tu luc nop/quet den luc co diem) + phieu GV sua tay
+const TAB_NKC = 'NHAT KY CHAM', HEAD_NKC = ['ThoiGian', 'Loai', 'MaDot', 'MaHS', 'ms', 'SuaTay'];
+function ghiNhatKyCham(loai, madot, ma, ms, sua) { try { layTab(TAB_NKC, HEAD_NKC).appendRow([new Date(), loai, madot, ma, Math.max(0, Math.round(Number(ms) || 0)), sua ? 1 : 0]); } catch (e) {} }
 function nopBai(d) {
+  const t0 = Date.now();
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);
   if (!hs) return {ok: false, msg: 'Ma HS khong co trong danh sach'};
@@ -318,6 +322,7 @@ function nopBai(d) {
   } finally {
     lock.releaseLock();
   }
+  ghiNhatKyCham('IPAD', madot, ma, Date.now() - t0, false);
   return {ok: true, hoten: hs.ten, diem: diem, socaudung: dung, tongsocau: tong, lan: lan};
 }
 
@@ -621,10 +626,10 @@ function gvSoLieu(d) {
   const dot = {};
   Object.keys(cuoi).forEach(function (k) {
     const r = cuoi[k], md = String(r[1]).trim(), g = caCua[md] || md, dm = Number(String(r[5]).replace(',', '.')) || 0;
-    const o = dot[g] = dot[g] || {ma: g, luc: r[0].getTime(), n: 0, tong: 0, d5: 0};
-    o.n++; o.tong += dm; if (dm >= 5) o.d5++; if (r[0].getTime() < o.luc) o.luc = r[0].getTime();
+    const o = dot[g] = dot[g] || {ma: g, luc: r[0].getTime(), n: 0, tong: 0, d5: 0, d8: 0};
+    o.n++; o.tong += dm; if (dm >= 5) o.d5++; if (dm >= 8) o.d8++; if (r[0].getTime() < o.luc) o.luc = r[0].getTime();
   });
-  const dsDot = Object.keys(dot).map(function (k) { const o = dot[k]; return {ma: o.ma, luc: o.luc, n: o.n, tong: Math.round(o.tong * 100) / 100, d5: o.d5}; })
+  const dsDot = Object.keys(dot).map(function (k) { const o = dot[k]; return {ma: o.ma, luc: o.luc, n: o.n, tong: Math.round(o.tong * 100) / 100, d5: o.d5, d8: o.d8}; })
     .sort(function (a, b) { return a.luc - b.luc; });
   // Xem lai: em da nop bai trong khoang va co mo xem lai (bat ky luc nao) bai cua de do
   const xem = {};
@@ -633,7 +638,17 @@ function gvSoLieu(d) {
   return {ok: true, lop: lopNay(), siSo: bang(TAB_DS).filter(function (r) { return String(r[0]).trim(); }).length,
     de: Object.keys(de), nop: bl.length, hsNop: Object.keys(hsNop).length, hsXem: Object.keys(xem).length, dot: dsDot,
     troCN: dem(TAB_HD, function (r) { return String(r[1]).trim(); }) + dem(TAB_KQ, function (r) { return String(r[3]).trim() !== 'NHOM'; }), troNhom: dem(TAB_CN), xemTN: dem(TAB_TN),
-    hoi: dem(TAB_TIN, function (r) { return String(r[3]).trim() === 'HS'; })};
+    hoi: dem(TAB_TIN, function (r) { return String(r[3]).trim() === 'HS'; }),
+    // M6: so phieu giay, so phieu GV sua tay, thoi gian cham, luyen tap
+    giay: bl.filter(function (r) { return String(r[4]).trim() === 'GIAY'; }).length,
+    suaTay: bl.filter(function (r) { return String(r[4]).trim() === 'GIAY' && /GV sửa tay/.test(String(r[12] || '')); }).length,
+    ms: (function () { const o = {GIAY: [], IPAD: []}; bang(TAB_NKC).forEach(function (r) { if (trong(r[0]) && o[String(r[1])] && Number(r[4]) > 0) o[String(r[1])].push(Number(r[4])); }); return o; })(),
+    luyen: (function () {
+      const ds = docLuyenTap().filter(function (x) { const t = new Date(x.luc); return !isNaN(t) && trong(t); }), em = {}, kt = {};
+      ds.forEach(function (x) { em[x.mahs] = 1; Object.keys(x.kt).forEach(function (t) { const k = x.mahs + '|' + t, v = x.kt[t], p = v[1] ? v[0] / v[1] : 0; if (!kt[k]) kt[k] = {dau: p, cuoi: p, n: 0}; kt[k].cuoi = p; kt[k].n++; }); });
+      const nhieu = Object.keys(kt).filter(function (k) { return kt[k].n >= 2; });
+      return {luot: ds.length, em: Object.keys(em).length, cap: nhieu.length, dau: nhieu.reduce(function (s, k) { return s + kt[k].dau; }, 0), cuoi: nhieu.reduce(function (s, k) { return s + kt[k].cuoi; }, 0)};
+    })()};
 }
 function ghiDaXem(d) {
   const ma = String(d.mahs || '').trim();
@@ -1071,6 +1086,7 @@ function gvGiayNop(d) {
       kq.ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|'), url, lan, String(d.ghichu || '').slice(0, 200)]);
   } finally { lock.releaseLock(); }
   if (d.anhId) datAnh(String(d.anhId), 'DA', ma);
+  if (d.ms) ghiNhatKyCham('GIAY', madot, ma, d.ms, /GV sửa tay/.test(String(d.ghichu || '')));
   return {ok: true, hoten: hs.ten, diem: kq.diem, tongW: kq.tongW, dung: kq.dung, tong: de.length, madot: madot, url: url,
     ct: kq.ct.map(function (x) { return String(x.chon || '-').replace(/\|/g, '/'); }).join('|')};
 }
