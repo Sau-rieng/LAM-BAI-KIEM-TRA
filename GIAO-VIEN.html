@@ -3809,11 +3809,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       (function () { var n = (j.vang || []).filter(function (v) { return !m[v.mahs + '|' + v.madot]; }).length; return n ? '<br><b style="color:var(--warn)">' + n + ' lượt vắng chưa thi bù.</b>' : ''; })() + '</div>' +
       '<div class="chonBai" id="chonBai"></div>' +
       '<button class="btn" id="btnTaiLop" style="background:var(--ok)"></button>' +
-      '<button class="btn" id="btnGhiBD">Ghi bảng điểm vào Google Sheet (tab BANG DIEM)</button><div id="kqGhi"></div>';
+      '<button class="btn" id="btnGhiBD">Ghi bảng điểm vào Google Sheet (tab BANG DIEM)</button><div id="kqGhi"></div>' +
+      '<button class="btn2" id="btnNXLop" style="margin-top:8px;width:100%">✨ Nhận xét cả lớp theo đợt (AI viết, thầy/cô duyệt)</button>';
     box.innerHTML = ''; box.appendChild(card);
     [].forEach.call(card.querySelectorAll('.tn button'), function (b) { b.onclick = function () { veMotHS(b.getAttribute('data-ma')); }; });
     veChonBai();
     $('btnTaiLop').onclick = xuatLop;
+    if ($('btnNXLop')) $('btnNXLop').onclick = moNXLop;
     $('btnGhiBD').onclick = function () {
       var nut = this, l = HS_LOP; nut.disabled = true; nut.textContent = 'Đang ghi...'; $('kqGhi').innerHTML = '';
       goi(l.url, { action: 'gv_bangdiem', ma: MA }).then(function (r) {
@@ -3885,6 +3887,109 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var c3 = yeu.length ? ' Cần ôn lại: ' + yeu.slice(0, 3).map(function (t) { return t[0]; }).join('; ') + '.' : (b.diem >= 8 ? ' Tiếp tục phát huy.' : ' Em xem lại các câu sai và lời giải chi tiết khi xem lại bài.');
     return c1 + c2 + c3;
   }
+  // ---------- M4: AI viet nhan xet ca nhan (khong gui ho ten; GV doc, sua roi luu) ----------
+  function soLieuNX(ma, d, j, m, x, ly) {
+    var b = m[ma + '|' + d.madot]; if (!b) return null;
+    var o = { id: String(ma).slice(-2), dot: d.nhan + ' – ' + d.ten, loai: d.tro ? 'trò chơi' : 'kiểm tra', diem: diem(b.diem) };
+    if (b.tong) o.dung = b.dung + '/' + b.tong + ' câu';
+    o.cac_dot_truoc = j.dot.filter(function (g) { return g.luc < d.luc && m[ma + '|' + g.madot]; }).slice(-4).map(function (g) { return g.nhan + ': ' + diem(m[ma + '|' + g.madot].diem); });
+    if (x) {
+      var em = x.T.hs.filter(function (z) { return z.ma === ma; })[0], mdK = {};
+      x.T.kts.forEach(function (k) { var a = Object.keys(k.md).sort(function (p, q) { return k.md[q] - k.md[p]; })[0]; if (a) mdK[k.kt] = a; });
+      if (em) {
+        var dot = [], tong = [];
+        Object.keys(em.kt).forEach(function (t) {
+          if (/^Chưa gắn nhãn/.test(t)) return;
+          var y = em.kt[t].dot[d.madot] || em.kt[t].dot[b.maDe], z = em.kt[t];
+          if (y && y.n) dot.push({ kien_thuc: t, muc_do: mdK[t] || '', dung: Math.round(y.d / y.n * 100) + '%' });
+          if (z.n) tong.push({ kien_thuc: t, dung_cong_don: Math.round(z.d / z.n * 100) + '%' });
+        });
+        o.kien_thuc_dot_nay = dot.sort(function (p, q) { return parseInt(p.dung) - parseInt(q.dung); }).slice(0, 8);
+        o.kien_thuc_yeu_cong_don = tong.filter(function (q) { return parseInt(q.dung_cong_don) < 65; }).slice(0, 5);
+      }
+    }
+    var L = ly && ly.hs ? ly.hs.filter(function (h) { return h.mahs === ma; })[0] : null;
+    if (L && L.lan) o.luyen_lai = { so_luot: L.lan, kien_thuc: L.kt.slice(0, 5).map(function (k) { return k.kt + ': kiểm tra ' + (k.kiemtra == null ? '?' : Math.round(k.kiemtra * 100) + '%') + ' → luyện gần nhất ' + Math.round(k.cuoi * 100) + '%'; }) };
+    return o;
+  }
+  function layLuyen(l) {
+    if (LYD[l.ten]) return Promise.resolve(LYD[l.ten]);
+    return goi(l.url, { action: 'gv_luyen', ma: MA }).then(function (j) { if (j.ok) LYD[l.ten] = j; return j.ok ? j : null; }, function () { return null; });
+  }
+  function aiNX(l, ds, dotTen) {
+    return goi(l.url, { action: 'gv_ainx', ma: MA, ds: ds, dot: dotTen }).then(function (r) {
+      if (!r.ok) throw new Error(/hop le/i.test(r.msg || '') ? 'Sổ lớp chưa cập nhật bản mới.' : r.msg || 'Lỗi');
+      var kq = {}; (r.nx || []).forEach(function (x) { kq[String(x.id).padStart(2, '0')] = String(x.nx || '').trim(); }); return kq;
+    });
+  }
+  function chuClaudeNX(ds, dotTen) {
+    return 'Nhờ Claude viết nhận xét cá nhân cho học sinh (số liệu đã bỏ họ tên, id = số thứ tự).\n' +
+      'Yêu cầu: mỗi em 2–4 câu, xưng "em", ấm áp, cụ thể: kết quả và xu hướng; kiến thức làm tốt; kiến thức cần ôn và cách tự cải thiện (xem lại lời giải 💡, dùng nút 🔁 Luyện lại phần yếu). Không bịa số liệu, không so sánh với bạn khác.\n' +
+      'Trả lời ĐÚNG định dạng, mỗi em một dòng:  id | nhận xét   (ví dụ: 03 | Em đạt 7.5 điểm…) và đặt tất cả trong một khối code.\n\n' +
+      'Đợt: ' + dotTen + '\n' + JSON.stringify(ds, null, 1);
+  }
+  function moNXLop() {
+    var j = V(), m = sauCung(j.bai), l = HS_LOP;
+    var nen = $('ptNen');
+    if (!nen) { nen = document.createElement('div'); nen.id = 'ptNen'; nen.className = 'ptNen'; document.body.appendChild(nen); }
+    var cac = j.dot.slice().reverse();
+    nen.innerHTML = '<div class="ptHop"><div class="ptDau"><h1>✨ Nhận xét cả lớp ' + esc(j.lop) + '</h1><button class="btn2" id="ptDong">✕ Đóng</button></div>' +
+      '<p class="sub">Chọn đợt. AI chỉ nhận số liệu (điểm, xu hướng, kiến thức, kết quả luyện lại) và số thứ tự, <b>không nhận họ tên</b>. Thầy/cô đọc, sửa rồi bấm Lưu; học sinh thấy nhận xét khi xem lại bài.</p>' +
+      '<select id="nxlDot" style="width:100%;font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line)">' + cac.map(function (d) { return '<option value="' + esc(d.madot) + '">' + esc(d.nhan + ' – ' + d.ten) + '</option>'; }).join('') + '</select>' +
+      '<div class="ptNut"><button class="btn" id="nxlAI">✨ AI viết (Gemini)</button><button class="btn2" id="nxlChep">📋 Chép số liệu cho Claude</button><button class="btn2" id="nxlDanN">📥 Dán nhận xét từ Claude</button></div>' +
+      '<div id="nxlDanO" hidden><textarea id="nxlDan" rows="6" style="width:100%;box-sizing:border-box;font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line)" placeholder="03 | Em đạt …"></textarea><button class="btn2" id="nxlDanOK">Đưa vào danh sách</button></div>' +
+      '<p class="sub" id="nxlTT"></p><div id="nxlDs"></div></div>';
+    nen.hidden = false; document.body.style.overflow = 'hidden';
+    $('ptDong').onclick = function () { nen.hidden = true; document.body.style.overflow = ''; };
+    var ST = { ds: null, d: null, nx: {} };
+    function chuanBi() {
+      var d = j.dot.filter(function (z) { return z.madot === $('nxlDot').value; })[0]; ST.d = d;
+      $('nxlTT').textContent = 'Đang gom số liệu…';
+      return Promise.all([layKTLop(l).catch(function () { return null; }), layLuyen(l)]).then(function (r) {
+        ST.ds = j.hs.map(function (h) { return soLieuNX(h.mahs, d, j, m, r[0], r[1]); }).filter(Boolean);
+        $('nxlTT').textContent = ST.ds.length + ' em có bài ở đợt này.';
+        return ST;
+      });
+    }
+    function veDs() {
+      var d = ST.d, nx = HS_DL.nx || {};
+      $('nxlDs').innerHTML = j.hs.filter(function (h) { return m[h.mahs + '|' + d.madot]; }).map(function (h) {
+        var id = String(h.mahs).slice(-2), cu = nx[h.mahs + '|' + d.madot], v = ST.nx[id] !== undefined ? ST.nx[id] : cu ? cu.nx : '';
+        return '<div class="nxDot" data-ma="' + esc(h.mahs) + '"><div class="nxDau"><b>' + esc(id + '. ' + h.hoten) + '</b> · ' + diem(m[h.mahs + '|' + d.madot].diem) + ' điểm<span class="nxTT">' + (ST.nx[id] !== undefined ? 'AI viết · chưa lưu' : cu ? '✓ đã lưu' : '') + '</span></div><textarea rows="3">' + esc(v) + '</textarea></div>';
+      }).join('') + '<button class="btn" id="nxlLuu">💾 Lưu tất cả nhận xét đã có</button><p class="sub" id="nxlKQ"></p>';
+      $('nxlLuu').onclick = function () {
+        var b = this, ds = [].map.call($('nxlDs').querySelectorAll('.nxDot'), function (o) { return { mahs: o.getAttribute('data-ma'), madot: d.madot, nx: o.querySelector('textarea').value.trim() }; }).filter(function (x) { return x.nx; });
+        if (!ds.length) return;
+        b.disabled = true; b.textContent = 'Đang lưu ' + ds.length + ' nhận xét…';
+        goi(l.url, { action: 'gv_nhanxet_nhieu', ma: MA, ds: ds }).then(function (r) {
+          if (!r.ok) throw new Error(/hop le/i.test(r.msg || '') ? 'Sổ lớp chưa cập nhật bản mới.' : r.msg);
+          HS_DL.nx = HS_DL.nx || {}; ds.forEach(function (x) { HS_DL.nx[x.mahs + '|' + x.madot] = { nx: x.nx, luc: new Date().toISOString() }; });
+          ST.nx = {}; veDs(); $('nxlKQ').textContent = '✓ Đã lưu ' + r.so + ' nhận xét. Học sinh thấy khi xem lại bài đợt này.';
+        }).catch(function (e) { b.disabled = false; b.textContent = '💾 Lưu tất cả nhận xét đã có'; $('nxlKQ').textContent = 'Chưa lưu được: ' + e.message; });
+      };
+    }
+    $('nxlDot').onchange = function () { ST.nx = {}; chuanBi().then(veDs); };
+    chuanBi().then(veDs);
+    $('nxlAI').onclick = function () {
+      var b = this; if (!ST.ds || !ST.ds.length) return;
+      b.disabled = true; b.textContent = '✨ AI đang viết… (khoảng 1 phút)';
+      var nhom = []; for (var i = 0; i < ST.ds.length; i += 20) nhom.push(ST.ds.slice(i, i + 20));
+      nhom.reduce(function (p, g) { return p.then(function () { return aiNX(l, g, ST.d.nhan + ' – ' + ST.d.ten).then(function (kq) { Object.keys(kq).forEach(function (k) { ST.nx[k] = kq[k]; }); veDs(); }); }); }, Promise.resolve())
+        .then(function () { b.disabled = false; b.textContent = '✨ AI viết lại'; $('nxlTT').textContent = 'AI đã viết ' + Object.keys(ST.nx).length + ' nhận xét. Thầy/cô đọc, sửa rồi bấm Lưu.'; })
+        .catch(function (e) { b.disabled = false; b.textContent = '✨ AI viết (Gemini)'; $('nxlTT').textContent = 'AI chưa viết được: ' + e.message + ' – có thể dùng 📋 Chép số liệu cho Claude.'; });
+    };
+    $('nxlChep').onclick = function () {
+      var t = chuClaudeNX(ST.ds || [], ST.d.nhan + ' – ' + ST.d.ten), b = this;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = '✓ Đã chép – dán vào kênh Claude'; }, function () { $('nxlDanO').hidden = false; $('nxlDan').value = t; $('nxlDan').select(); b.textContent = 'Chép thủ công đoạn bên dưới'; });
+    };
+    $('nxlDanN').onclick = function () { $('nxlDanO').hidden = false; $('nxlDan').value = ''; $('nxlDan').focus(); };
+    $('nxlDanOK').onclick = function () {
+      var n = 0;
+      $('nxlDan').value.split(/\r?\n/).forEach(function (d) { var x = /^\s*`*\s*(\d{1,2})\s*[|:.\-–)]\s*(.+?)\s*`*\s*$/.exec(d); if (x && x[2].length > 5) { ST.nx[x[1].padStart(2, '0')] = x[2]; n++; } });
+      $('nxlTT').textContent = n ? 'Đã đưa ' + n + ' nhận xét của Claude vào danh sách. Đọc, sửa rồi bấm Lưu.' : 'Không thấy dòng nào dạng "03 | nhận xét".';
+      if (n) { $('nxlDanO').hidden = true; veDs(); }
+    };
+  }
   function ganNutMotHS(ma, j, m) {
     var l = HS_LOP;
     function lam(nut, tham, hoi) {
@@ -3914,6 +4019,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var ta = o.querySelector('textarea'), md = o.getAttribute('data-dot'), tt = o.querySelector('.nxTT');
       ta.oninput = function () { tt.textContent = 'đang sửa · chưa lưu'; };
       o.querySelector('.nxLai').onclick = function () { var d = dotCua[md]; ta.value = nhanXetMay(ma, d, m[ma + '|' + md], j, m, KTX); tt.textContent = 'gợi ý của máy · chưa lưu'; };
+      o.querySelector('.nxAI').onclick = function () {
+        var nut = this, d = dotCua[md]; nut.disabled = true; nut.textContent = '✨ Đang viết…';
+        Promise.all([KTX ? Promise.resolve(KTX) : layKTLop(l).catch(function () { return null; }), layLuyen(l)]).then(function (r) {
+          var x = soLieuNX(ma, d, j, m, r[0], r[1]); if (!x) throw new Error('Không có bài đợt này');
+          return aiNX(l, [x], d.nhan + ' – ' + d.ten);
+        }).then(function (kq) { var t = kq[String(ma).slice(-2)]; if (!t) throw new Error('AI trả về rỗng'); ta.value = t; tt.textContent = 'AI viết · đọc, sửa rồi Lưu'; })
+          .catch(function (e) { tt.textContent = 'AI chưa viết được: ' + e.message; })
+          .then(function () { nut.disabled = false; nut.textContent = '✨ AI viết'; });
+      };
       function luu(nx, nut) {
         nut.disabled = true; var cu = nut.textContent; nut.textContent = 'Đang lưu…';
         goi(l.url, { action: 'gv_nhanxet', ma: MA, mahs: ma, madot: md, nx: nx }).then(function (r) {
@@ -4014,7 +4128,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       dotEm.map(function (d) {
         var b = m[ma + '|' + d.madot], luu = (HS_DL.nx || {})[ma + '|' + d.madot];
         return '<div class="nxDot" data-dot="' + esc(d.madot) + '"><div class="nxDau"><b>' + esc(d.nhan) + '</b> · ' + esc(d.ten) + ' · <b>' + diem(b.diem) + '</b> điểm<span class="nxTT">' + (luu ? '✓ đã lưu ' + ngay(luu.luc) : 'gợi ý của máy · chưa lưu') + '</span></div>' +
-          '<textarea rows="3" data-luu="' + (luu ? 1 : '') + '">' + esc(luu ? luu.nx : '') + '</textarea><div class="hangNut" style="justify-content:flex-start"><button class="btn2 nho nxLuu">💾 Lưu</button><button class="btn2 nho nxLai">↺ Viết lại theo số liệu</button>' + (luu ? '<button class="btn2 nho nxXoa">Xóa nhận xét</button>' : '') + '</div></div>';
+          '<textarea rows="3" data-luu="' + (luu ? 1 : '') + '">' + esc(luu ? luu.nx : '') + '</textarea><div class="hangNut" style="justify-content:flex-start"><button class="btn2 nho nxLuu">💾 Lưu</button><button class="btn2 nho nxLai">↺ Viết lại theo số liệu</button><button class="btn2 nho nxAI">✨ AI viết</button>' + (luu ? '<button class="btn2 nho nxXoa">Xóa nhận xét</button>' : '') + '</div></div>';
       }).join('') + '</div></div>';
     $('motHS').innerHTML = h + '</div>';
     ganNutMotHS(ma, j, m);

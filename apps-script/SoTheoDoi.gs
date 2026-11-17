@@ -105,6 +105,8 @@ function doPost(e) {
       case 'gv_dathi':
       case 'gv_cau':
       case 'gv_matrande':
+      case 'gv_ainx':
+      case 'gv_nhanxet_nhieu':
       case 'gv_dacta':
       case 'gv_suadapan':
       case 'gv_chamlai':
@@ -170,6 +172,8 @@ function doPost(e) {
         if (d.action === 'gv_dathi') return json(gvDaThi());
         if (d.action === 'gv_cau') return json(gvCau(d));
         if (d.action === 'gv_matrande') return json(gvMaTranDe(d));
+        if (d.action === 'gv_ainx') return json(gvAINX(d));
+        if (d.action === 'gv_nhanxet_nhieu') return json(gvNhanXetNhieu(d));
         if (d.action === 'gv_dacta') return json(gvDacTa(d));
         if (d.action === 'gv_suadapan') return json(gvSuaDapAn(d));
         if (d.action === 'gv_chamlai') return json(gvChamLai(d));
@@ -1628,6 +1632,24 @@ function docNhanXet() {
     if (String(r[2]).trim()) m[k] = {nx: String(r[2]), luc: r[3] instanceof Date ? r[3].toISOString() : ''};
   });
   return m;
+}
+// M4: AI viet nhan xet ca nhan (chi so lieu + so thu tu, khong ho ten); GV doc, sua roi moi luu
+const LOI_DAN_NX = 'Bạn là giáo viên Hóa học THPT tận tâm. Viết NHẬN XÉT CÁ NHÂN cho từng học sinh sau một đợt kiểm tra/trò chơi, dựa ĐÚNG số liệu cho sẵn (không bịa thêm). ' +
+  'Mỗi nhận xét 2–4 câu, xưng "em", giọng ấm áp, cụ thể: (1) kết quả đợt này và xu hướng so với các đợt trước; (2) kiến thức/mức độ làm tốt; (3) kiến thức cần ôn (nêu tên) và cách tự cải thiện cụ thể ' +
+  '(xem lại câu sai và lời giải 💡 ở trang Xem lại, dùng nút "🔁 Luyện lại phần yếu"; nếu em đã luyện và tiến bộ thì khen). Không nhắc mã số, không so sánh với bạn khác, không phán xét năng lực.';
+function gvAINX(d) {
+  const ds = Array.isArray(d.ds) ? d.ds.slice(0, 50) : [];
+  if (!ds.length) return {ok: false, msg: 'Chua co so lieu'};
+  const yc = LOI_DAN_NX + '\nĐợt: ' + String(d.dot || '').slice(0, 200) + '\nSố liệu từng em (id = số thứ tự): ' + JSON.stringify(ds).slice(0, 80000) +
+    '\nTrả về JSON: {"nx":[{"id":"03","nx":"..."}]} – đủ mọi id.';
+  const kq = goiAI(yc, null, 0.5, {thuLai: true, he: 'Bạn là giáo viên viết nhận xét học sinh bằng tiếng Việt chuẩn mực. Chỉ trả về JSON hợp lệ.'});
+  return {ok: true, nx: (kq && Array.isArray(kq.nx)) ? kq.nx : []};
+}
+function gvNhanXetNhieu(d) {
+  const ds = Array.isArray(d.ds) ? d.ds.slice(0, 80) : [];
+  let n = 0;
+  ds.forEach(function (x) { if (x && x.mahs && x.madot) { gvNhanXet({mahs: x.mahs, madot: x.madot, nx: x.nx}); n++; } });
+  return {ok: true, so: n};
 }
 function gvNhanXet(d) {
   const mahs = String(d.mahs || '').trim(), md = String(d.madot || '').trim(), nx = String(d.nx || '').trim().slice(0, 2000);
