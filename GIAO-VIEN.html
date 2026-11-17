@@ -838,7 +838,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="card">
     <h1>📥 Nạp đề mới vào kho</h1>
     <p class="sub">Chọn file <b>KHO-DE-&lt;mã đợt&gt;.xlsx</b> mà Claude gửi. Trang đọc file, cho thầy/cô xem lại đáp án, điểm và kiến thức từng câu, rồi mới ghi vào kho đề. Đề mới nạp luôn ở trạng thái <b>đóng</b>.</p>
-    <label class="napChon" id="napNhan"><input type="file" id="napFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"><span id="napNhanChu">📂 Chọn file Excel (.xlsx)</span></label>
+    <label class="napChon" id="napNhan"><input type="file" id="napFile" multiple accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"><span id="napNhanChu">📂 Chọn file Excel (.xlsx) – chọn được nhiều file một lần</span></label>
     <div class="msg" id="napMsg"></div>
   </div>
   <div id="napDs"></div>
@@ -6262,20 +6262,38 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   $('btnNap').onclick = moNap;
   $('napLai').onclick = function () { diDen('dot'); };
-  $('napFile').onchange = function () {
-    var f = this.files && this.files[0]; if (!f) return;
-    $('napMsg').textContent = ''; $('napDs').innerHTML = ''; NAP.ds = []; NAP.doiMa = {}; nutNap();
-    $('napNhan').classList.add('dang'); $('napNhanChu').textContent = 'Đang đọc ' + f.name + '…';
-    var cho = DATHI ? Promise.resolve() : (DATHI_CHO || taiDaThi());
-    f.arrayBuffer().then(docExcelTatCa).then(function (tabs) { return cho.then(function () { return tabs; }, function () { return tabs; }); }).then(function (tabs) {
-      $('napNhan').classList.remove('dang'); $('napNhanChu').textContent = '📂 ' + f.name + ' · chọn file khác';
-      NAP.ds = phanTichFile(tabs);
-      if (!NAP.ds.length) { $('napMsg').textContent = 'Không thấy tab đề nào trong file (tab đề có dòng đầu: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem).'; nutNap(); return; }
-      veNap();
-    }).catch(function (e) {
-      $('napNhan').classList.remove('dang'); $('napNhanChu').textContent = '📂 Chọn file Excel (.xlsx)';
-      $('napMsg').textContent = 'Không đọc được file: ' + e.message;
+  // Gop nhieu file: tab trung ten (CAU HINH THEM, KIEN THUC THEM...) noi dong (bo dong tieu de cua file sau)
+  function gopTabs(ds) {
+    var ra = [], theo = {};
+    ds.forEach(function (tabs) {
+      tabs.forEach(function (t) {
+        var k = String(t.ten).trim();
+        if (!theo[k]) { theo[k] = { ten: t.ten, o: (t.o || []).slice() }; ra.push(theo[k]); }
+        else theo[k].o = theo[k].o.concat((t.o || []).slice(1));
+      });
     });
+    return ra;
+  }
+  $('napFile').onchange = function () {
+    var fs = [].slice.call(this.files || []); if (!fs.length) return;
+    var ten = fs.length === 1 ? fs[0].name : fs.length + ' file';
+    $('napMsg').textContent = ''; $('napDs').innerHTML = ''; NAP.ds = []; NAP.doiMa = {}; nutNap();
+    $('napNhan').classList.add('dang'); $('napNhanChu').textContent = 'Đang đọc ' + ten + '…';
+    var cho = DATHI ? Promise.resolve() : (DATHI_CHO || taiDaThi());
+    var loiF = [];
+    Promise.all(fs.map(function (f) { return f.arrayBuffer().then(docExcelTatCa).catch(function (e) { loiF.push(f.name + ': ' + e.message); return []; }); }))
+      .then(function (ds) { return cho.then(function () { return gopTabs(ds); }, function () { return gopTabs(ds); }); }).then(function (tabs) {
+        $('napNhan').classList.remove('dang'); $('napNhanChu').textContent = '📂 ' + ten + ' · chọn file khác';
+        if (fs.length > 1) $('napNhanChu').title = fs.map(function (f) { return f.name; }).join('\n');
+        NAP.ds = phanTichFile(tabs);
+        if (loiF.length) $('napMsg').textContent = 'Không đọc được: ' + loiF.join('; ');
+        if (!NAP.ds.length) { $('napMsg').textContent = (loiF.length ? $('napMsg').textContent + ' · ' : '') + 'Không thấy tab đề nào trong file (tab đề có dòng đầu: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem).'; nutNap(); return; }
+        if (NAP.ds.length > 20) $('napMsg').textContent = 'Có ' + NAP.ds.length + ' đề: mỗi lần nạp tối đa 20 đề, bỏ tích bớt rồi nạp làm 2 lần.';
+        veNap();
+      }).catch(function (e) {
+        $('napNhan').classList.remove('dang'); $('napNhanChu').textContent = '📂 Chọn file Excel (.xlsx) – chọn được nhiều file một lần';
+        $('napMsg').textContent = 'Không đọc được file: ' + e.message;
+      });
   };
   $('napGui').onclick = function () {
     var ds = NAP.ds.filter(function (d) { return d.chon && !d.loi.length; }), b = this;
