@@ -105,6 +105,7 @@ function doPost(e) {
       case 'gv_dathi':
       case 'gv_cau':
       case 'gv_matrande':
+      case 'gv_dacta':
       case 'gv_suadapan':
       case 'gv_chamlai':
       case 'gv_aide':
@@ -169,6 +170,7 @@ function doPost(e) {
         if (d.action === 'gv_dathi') return json(gvDaThi());
         if (d.action === 'gv_cau') return json(gvCau(d));
         if (d.action === 'gv_matrande') return json(gvMaTranDe(d));
+        if (d.action === 'gv_dacta') return json(gvDacTa(d));
         if (d.action === 'gv_suadapan') return json(gvSuaDapAn(d));
         if (d.action === 'gv_chamlai') return json(gvChamLai(d));
         if (d.action === 'gv_aide') return json(gvAIDe(d));
@@ -1246,12 +1248,13 @@ function gvNapDe(d) {
         lop: String(x.lop || '').trim() ? chuanDsLop(x.lop) : lopMacDinh(Number(khoi)),
         cau: cau.map(function (r) { const o = []; for (let j = 0; j < 11; j++) o.push(r[j] === undefined || r[j] === null ? '' : String(r[j])); return o; }),
         kt: (Array.isArray(x.kt) ? x.kt : []).filter(function (r) { return Array.isArray(r) && String(r[0] || '').trim() !== ''; })
-          .map(function (r) { return [madot, String(r[0]).trim(), String(r[1] || '').trim(), String(r[2] || '').trim()]; }),
+          .map(function (r) { return [madot, String(r[0]).trim(), String(r[1] || '').trim(), String(r[2] || '').trim(), String(r[3] || '').trim(), String(r[4] || '').trim()]; }),
         gt: gt, tl: tl, tab: tab, dong: dong});
     }
     // 2) Ghi
     let kt = ss.getSheetByName('KIEN THUC');
     if (!kt) { kt = ss.insertSheet('KIEN THUC'); kt.getRange(1, 1, 1, 4).setValues([['MaDot', 'Cau', 'KienThuc', 'MucDo']]).setFontWeight('bold'); }
+    if (!String(kt.getRange(1, 5).getValue()).trim()) kt.getRange(1, 5, 1, 2).setValues([['ChuDe', 'NoiDung']]).setFontWeight('bold');
     viec.forEach(function (v) {
       if (v.chiGT) return;
       const sh = v.tab || ss.insertSheet(v.madot);
@@ -1275,11 +1278,11 @@ function gvNapDe(d) {
     });
     // KIEN THUC: bo dong cu cua cac dot vua nap (tru dot chi them loi giai), them dong moi
     const cacMa = viec.filter(function (v) { return !v.chiGT; }).map(function (v) { return v.madot; });
-    const ktV = kt.getLastRow() > 1 ? kt.getRange(2, 1, kt.getLastRow() - 1, 4).getValues() : [];
+    const ktV = kt.getLastRow() > 1 ? kt.getRange(2, 1, kt.getLastRow() - 1, 6).getValues() : [];
     const giu = ktV.filter(function (r) { return String(r[0]).trim() !== '' && cacMa.indexOf(String(r[0]).trim()) < 0; });
     const moi = giu.concat.apply(giu, viec.map(function (v) { return v.kt; }));
-    if (ktV.length) kt.getRange(2, 1, ktV.length, 4).clearContent();
-    if (moi.length) kt.getRange(2, 1, moi.length, 4).setNumberFormat('@').setValues(moi);
+    if (ktV.length) kt.getRange(2, 1, ktV.length, 6).clearContent();
+    if (moi.length) kt.getRange(2, 1, moi.length, 6).setNumberFormat('@').setValues(moi);
     // GIAI THICH: thay dong cua moi dot vua nap
     let gtSh = ss.getSheetByName('GIAI THICH');
     if (!gtSh) { gtSh = ss.insertSheet('GIAI THICH'); gtSh.getRange(1, 1, 1, 3).setValues([['MaDot', 'Cau', 'GiaiThich']]).setFontWeight('bold'); gtSh.setFrozenRows(1); }
@@ -1901,6 +1904,18 @@ function gvAIDe(d) {
   const kq = goiAI(yc, null, 0.3, {thuLai: true});
   return {ok: true, ai: kq};
 }
+// Ma tran – dac ta (M2): cau cua de goc + nhan kien thuc/muc do/chu de + tu luan
+function gvDacTa(d) {
+  const mas = (Array.isArray(d.madots) ? d.madots : [d.madot]).map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+  const de = {}; mas.forEach(function (m) { try { de[m] = docDe(m); } catch (e) {} });
+  const co = mas.filter(function (m) { return de[m]; });
+  if (!co.length) return {ok: false, msg: 'Kho chua co de'};
+  const laGoc = function (m) { return de[m].every(function (q) { return !q.goc || q.goc === q.cau; }); };
+  const goc = co.filter(laGoc)[0] || co.slice().sort()[0], ktM = docKienThuc(), c = timDot(goc) || {};
+  return {ok: true, madot: goc, ten: c.ten || goc, giay: !!c.giay,
+    cau: de[goc].map(function (q) { const x = ktM[goc + '|' + q.cau] || {}; return {cau: q.cau, loai: q.loai, w: q.w, kt: x.kt || '', md: x.md || '', cd: x.cd || '', nd: x.nd || ''}; }),
+    tl: (docTuLuan()[goc] || []).map(function (t) { const x = ktM[goc + '|' + t.cau] || {}; return {cau: t.cau, loai: 'TL', w: Number(String(t.diem).replace(',', '.')) || 0, kt: x.kt || '', md: x.md || '', cd: x.cd || '', nd: x.nd || ''}; })};
+}
 function gvCau(d) {
   const madot = String(d.madot || '').trim();
   const de = docDe(madot);
@@ -1957,9 +1972,9 @@ function docKienThuc() { return nho('kt', docKienThucGoc); }
 function docKienThucGoc() {
   const sh = kho().getSheetByName('KIEN THUC'), m = {};
   if (!sh || sh.getLastRow() < 2) return m;
-  sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+  sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(4, Math.min(6, sh.getLastColumn()))).getValues().forEach(function (r) {
     if (String(r[0]).trim() === '') return;
-    m[String(r[0]).trim() + '|' + String(r[1]).trim()] = {kt: String(r[2] || '').trim(), md: String(r[3] || '').trim()};
+    m[String(r[0]).trim() + '|' + String(r[1]).trim()] = {kt: String(r[2] || '').trim(), md: String(r[3] || '').trim(), cd: String(r[4] || '').trim(), nd: String(r[5] || '').trim()};
   });
   return m;
 }

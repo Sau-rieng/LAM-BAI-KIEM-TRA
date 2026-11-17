@@ -67,7 +67,7 @@ Tab `CAU HINH THEM`:
 
 Tab `TU LUAN THEM` (`MaDot | Cau | NoiDung | Hinh | Diem | LoiGiai`, xem `K1-Ra-de.md`): tự luận giống nhau ở mọi mã, **mỗi mã một bộ dòng** (công cụ trộn tự chép). Thiếu tab này thì học sinh không xem được lời giải tự luận; công cụ báo cảnh báo.
 
-Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo`) và `GIAI THICH THEM` (`MaDot | Cau | GiaiThich`): **mỗi mã đề đủ mọi câu**, `Cau` theo số câu của mã đó. Lời giải Phần I viết theo **chữ cái của mã đó** (đã đổi sau khi trộn).
+Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo | ChuDe | NoiDung`) và `GIAI THICH THEM` (`MaDot | Cau | GiaiThich`): **mỗi mã đề đủ mọi câu**, `Cau` theo số câu của mã đó. Lời giải Phần I viết theo **chữ cái của mã đó** (đã đổi sau khi trộn).
 
 ## 5. Trang nạp tự kiểm (lỗi thì không cho nạp)
 

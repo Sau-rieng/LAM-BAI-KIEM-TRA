@@ -65,7 +65,7 @@ Tỉ lệ mức độ gợi ý: kiểm tra ~40% Biết · 30% Hiểu · 30% Vậ
 
 Quy tắc của nút Nạp: một file có thể chứa nhiều đề (mỗi đề một tab, tên tab = mã đợt). Đề có lỗi (đáp án TN không phải A–D, Đ/S không đủ 4 chữ, thiếu phương án, trùng số câu) không nạp được. Mã đợt đã có trong kho: chỉ thay được khi đề đang đóng và chưa lớp nào làm (phải tích "Thay đề cũ"); lớp đã làm thì đổi mã đợt. Cách cũ (Tệp → Nhập → chép dòng) vẫn dùng được khi sổ chưa cập nhật.
 
-Định dạng file Claude giao (bắt buộc để nút Nạp đọc được): `.xlsx`; tab đề dòng 1 = `Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem`; tab `CAU HINH THEM` = `MaDot | TenBai | ThoiGian_phut | TrangThai | ChoXemLai | Lop`; tab `KIEN THUC THEM` = `MaDot | Cau | KienThuc | MucDo`; tab `GIAI THICH THEM` = `MaDot | Cau | GiaiThich`. Số câu (`Cau`) trong hai tab này phải trùng đúng cột Cau của tab đề. Đáp án TLN, điểm ghi dấu chấm. **Cột `Hinh`: mỗi câu có nhắc tới hình (Hình 1, sơ đồ, đồ thị…) phải ghi URL hình ở CHÍNH dòng câu đó** (`https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/hinh/<mã đợt>/imageN.png`) – trên iPad mỗi câu hiện riêng, nên nhiều câu cùng dùng một hình thì dòng nào cũng ghi. Trước khi giao, rà: câu có chữ “Hình”/“sơ đồ” mà cột Hinh trống = lỗi (trang nạp đề sẽ chặn không cho nạp). Câu chỉ có chữ như “sơ đồ phản ứng sau: …” thì ghi `-` vào cột Hinh (= không cần hình).
+Định dạng file Claude giao (bắt buộc để nút Nạp đọc được): `.xlsx`; tab đề dòng 1 = `Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai | Diem`; tab `CAU HINH THEM` = `MaDot | TenBai | ThoiGian_phut | TrangThai | ChoXemLai | Lop`; tab `KIEN THUC THEM` = `MaDot | Cau | KienThuc | MucDo | ChuDe | NoiDung`; tab `GIAI THICH THEM` = `MaDot | Cau | GiaiThich`. Số câu (`Cau`) trong hai tab này phải trùng đúng cột Cau của tab đề. Đáp án TLN, điểm ghi dấu chấm. **Cột `Hinh`: mỗi câu có nhắc tới hình (Hình 1, sơ đồ, đồ thị…) phải ghi URL hình ở CHÍNH dòng câu đó** (`https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/hinh/<mã đợt>/imageN.png`) – trên iPad mỗi câu hiện riêng, nên nhiều câu cùng dùng một hình thì dòng nào cũng ghi. Trước khi giao, rà: câu có chữ “Hình”/“sơ đồ” mà cột Hinh trống = lỗi (trang nạp đề sẽ chặn không cho nạp). Câu chỉ có chữ như “sơ đồ phản ứng sau: …” thì ghi `-` vào cột Hinh (= không cần hình).
 
 ## Đề giấy (in cho học sinh tô phiếu, máy quét chấm)
 
@@ -101,3 +101,10 @@ Có `TU LUAN THEM` thì vẫn giữ trang hướng dẫn chấm trong file Word 
 ## Đề mẫu đã làm
 
 `H10-B10-101` – Hóa 10 Bài 10 Quy tắc octet, khảo bài 15 phút, 20 câu (Biết 5 · Hiểu 12 · Vận dụng 3), 1 hình, lớp 10E01.
+
+
+## Ma trận – Đặc tả (từ 11/2026)
+- **Soạn ma trận trước, ra đề theo ma trận.** Trước khi viết câu hỏi, Claude lập ma trận theo khung Công văn 7991/BGDĐT-GDTrH. Hàng là Chủ đề/Chương → Nội dung/Đơn vị kiến thức. Cột là TNKQ nhiều lựa chọn · Đúng–Sai · Trả lời ngắn · Tự luận, mỗi dạng chia Biết/Hiểu/Vận dụng. Ma trận ghi số câu, số điểm và tỉ lệ %. Tỉ lệ mặc định theo điểm là Biết 40 – Hiểu 30 – Vận dụng 30, trừ khi giáo viên dặn khác. Gửi giáo viên duyệt ma trận rồi mới ra đề.
+- Gửi kèm file `MA-TRAN-<mã đợt>.docx` (ma trận + bản đặc tả) làm minh chứng "AI xây dựng ma trận đề".
+- Tab `KIEN THUC THEM` có thêm 2 cột **ChuDe** (Chủ đề/Chương, vd "Cấu tạo nguyên tử") và **NoiDung** (Nội dung/đơn vị kiến thức, vd "Cấu hình electron"). Cả hai lấy đúng tên trong ma trận. Câu tự luận (tab `TU LUAN THEM`) cũng có dòng trong `KIEN THUC THEM`, với Cau trùng số câu tự luận.
+- Trang GV có nút **📐 Ma trận – Đặc tả** ở màn nạp đề và ở mỗi đề trong kho. Nút này tự lập lại ma trận từ các cột trên, cảnh báo khi lệch tỉ lệ hoặc có câu thiếu nhãn, và xuất Word/Excel. Vì vậy nhãn phải đủ và đúng.
