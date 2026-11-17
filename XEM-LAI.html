@@ -88,6 +88,7 @@ img{-webkit-user-drag:none;pointer-events:none}
 .ktMuc .s button{background:#fff;border:1.5px solid var(--bad);color:var(--bad);border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;cursor:pointer}
 .ktMuc .s span.c{border:1.5px dashed #b9a;border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;color:var(--muted)}
 .ktMuc .s .ng{font-size:13.5px;color:var(--muted);font-weight:700;margin-left:4px}
+.tlBuoc{border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0}.tlBuoc .dat{color:var(--ok);margin:3px 0}.tlBuoc .mat{color:var(--bad);margin:3px 0}
 .luyenNut{display:block;width:100%;margin:4px 0 12px;background:var(--pri);color:#fff;border:0;border-radius:14px;padding:14px 16px;font-size:18px;font-weight:800;cursor:pointer;text-align:left}
 .luyenNut small{display:block;font-weight:500;font-size:14px;opacity:.85}
 .ktMuc .lyMot{margin-left:auto;background:var(--pri);color:#fff;border:0;border-radius:999px;padding:4px 12px;font-weight:700;font-size:13.5px;cursor:pointer}
@@ -543,14 +544,31 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var tl = baiDangXem.tuluan || [];
     if (!tl.length) return;
     var p = document.createElement('div'); p.className = 'ph'; p.textContent = 'Phần IV · Tự luận'; box.appendChild(p);
-    var ghi = document.createElement('p'); ghi.className = 'sub'; ghi.textContent = 'Bấm vào từng câu để xem đề và lời giải chi tiết. Điểm phần tự luận do thầy/cô chấm trên bài giấy.'; box.appendChild(ghi);
+    var TC = baiDangXem.tlcham, theoCau = {};
+    if (TC) (TC.cau || []).forEach(function (c) { theoCau[String(c.cau)] = c; });
+    var ghi = document.createElement('p'); ghi.className = 'sub';
+    ghi.innerHTML = TC ? 'Điểm tự luận: <b>' + String(TC.tong) + '</b> (thầy/cô chấm theo từng bước). Bấm từng câu để xem bước nào đạt ✓, bước nào mất điểm ✗ và lời giải chi tiết.' : 'Bấm vào từng câu để xem đề và lời giải chi tiết. Điểm phần tự luận do thầy/cô chấm trên bài giấy.';
+    box.appendChild(ghi);
+    if (TC && TC.coAnh) {
+      var nA = document.createElement('button'); nA.type = 'button'; nA.className = 'btn2'; nA.textContent = '📷 Xem ảnh bài tự luận của em'; box.appendChild(nA);
+      var imA = document.createElement('img'); imA.className = 'tlHinh'; imA.hidden = true; imA.alt = 'Bài tự luận'; box.appendChild(imA);
+      nA.onclick = function () {
+        if (!imA.hidden) { imA.hidden = true; return; }
+        nA.disabled = true; nA.textContent = 'Đang tải ảnh…';
+        fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_anhtl', mahs: duLieu.mahs, maxem: duLieu.maxem, madot: baiDangXem.madot }) }).then(function (r) { return r.json(); })
+          .then(function (j) { if (!j.ok) throw new Error(j.msg); imA.src = j.anh; imA.hidden = false; nA.textContent = '📷 Ẩn ảnh bài tự luận'; })
+          .catch(function () { nA.textContent = 'Chưa tải được ảnh'; }).then(function () { nA.disabled = false; });
+      };
+    }
     function html(t) { t = String(t || ''); return /<br|<p|<div|<ul|<ol|<table|<sub|<sup|<b>/i.test(t) ? t : t.replace(/</g, '&lt;').replace(/\n/g, '<br>'); }
     tl.forEach(function (q) {
       var the = document.createElement('div'); the.className = 'card q tlCau';
       var nut = document.createElement('button'); nut.type = 'button'; nut.className = 'tlNut'; nut.setAttribute('aria-expanded', 'false');
-      nut.innerHTML = '<b>Câu ' + String(q.cau).replace(/^IV\./, '').replace(/</g, '&lt;') + '</b>' + (q.diem ? '<span>' + String(q.diem).replace(',', '.') + ' điểm</span>' : '') + '<i>▸</i>';
+      var ch = theoCau[String(q.cau)];
+      nut.innerHTML = '<b>Câu ' + String(q.cau).replace(/^IV\./, '').replace(/</g, '&lt;') + '</b>' + (q.diem ? '<span>' + (ch ? 'đạt <b>' + ch.diem + '</b>/' : '') + String(q.diem).replace(',', '.') + ' điểm</span>' : '') + '<i>▸</i>';
       var khung = document.createElement('div'); khung.hidden = true;
       khung.innerHTML = '<div class="hoi">' + html(q.hoi) + '</div>' + (q.hinh ? '<img class="tlHinh" src="' + q.hinh + '" alt="Hình">' : '') +
+        (ch && ch.buoc && ch.buoc.length ? '<div class="tlBuoc"><div class="gtTieu">📏 Chấm theo bước</div>' + ch.buoc.map(function (b) { return '<div class="' + (b.dat ? 'dat' : 'mat') + '">' + (b.dat ? '✓' : '✗') + ' ' + String(b.nd).replace(/</g, '&lt;') + ' <b>(' + (b.dat ? '+' : '0/') + b.diem + ')</b></div>'; }).join('') + '</div>' : '') +
         (q.gt ? '<div class="giaiThich"><div class="gtTieu">💡 Lời giải chi tiết</div>' + html(q.gt) + '</div>' : '<p class="sub">Thầy/cô chưa đưa lời giải câu này.</p>');
       nut.onclick = function () { var mo = khung.hidden; khung.hidden = !mo; nut.setAttribute('aria-expanded', mo ? 'true' : 'false'); nut.querySelector('i').textContent = mo ? '▾' : '▸'; };
       var hang = document.createElement('div'); hang.className = 'nutCau';

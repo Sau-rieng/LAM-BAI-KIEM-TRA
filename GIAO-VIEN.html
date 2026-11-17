@@ -132,6 +132,12 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .mtMuc{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}.mtMuc input{width:62px;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:8px}
 .mtSo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.mtSo div{border:2px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}.mtSo div.khop{border-color:#9ed3ae}.mtSo div.lech{border-color:#f0c36d;background:#fffaf0}
 .mtSo span{display:block;font-size:13px;color:var(--muted)}.mtSo b{font-size:22px}.mtSo i{display:block;font-style:normal;font-size:12.5px;color:var(--muted)}
+.ctRBhop{border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin:10px 0}.ctRBhop summary{cursor:pointer}
+.ctCau{border-top:1px solid var(--line);padding:8px 0}.ctCauDau{margin-bottom:4px}.ctBuoc{margin:4px 0 4px 18px;padding:0}
+.ctBuocSua{display:flex;gap:6px;margin:4px 0}.ctBuocSua .nd{flex:1;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px}.ctBuocSua .dm{width:72px;font:inherit;padding:6px;border:1px solid var(--line);border-radius:8px}
+.ctChamHop{border:2px solid var(--pri);border-radius:12px;padding:8px 12px;margin:-4px 0 10px;background:#fbfcff}.ctAnh{max-width:100%;max-height:420px;display:block;margin:6px auto;border-radius:8px}
+.ctTich{display:flex;gap:8px;align-items:flex-start;padding:6px 4px;border-radius:8px;cursor:pointer}.ctTich:hover{background:var(--bg)}.ctTich input{width:20px;height:20px;margin-top:2px}.ctTich span{flex:1}
+.ctTong{font-size:17px;margin:10px 0}.ctChup{display:inline-flex;align-items:center;cursor:pointer}.kqDong.on{border-color:var(--pri)}
 .ptNen{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;overflow:auto;padding:16px}.ptNen[hidden]{display:none}
 .ptHop{max-width:980px;margin:0 auto;background:var(--card,#fff);border-radius:18px;padding:18px 20px 28px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
 .ptDau{display:flex;justify-content:space-between;align-items:center;gap:10px}.ptDau h1{margin:0}
@@ -1507,7 +1513,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var el = document.createElement('div'); el.className = 'card dot giay';
       el.innerHTML = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(k.replace(/-2\d\d$/, '')) + ' · mã đề ' + esc(g.map(function (x) { return x.madot.slice(-3); }).join(', ')) +
         ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div><span class="ttDong">đề giấy</span></div>' +
-        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button><button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button></div>' +
+        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button><button class="btn2 tlG">✍ Chấm tự luận</button><button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button></div>' +
         '<div class="lopO"></div><div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
       var o = el.querySelector('.dauDeO'), kq = el.querySelector('.giayKQ');
       function ve() {
@@ -1552,6 +1558,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       el.querySelector('.diemG').onclick = function () { var o2 = el.querySelector('.diemO'); if (o2.innerHTML) { o2.innerHTML = ''; return; } diemGiay(k, o2); };
       el.querySelector('.quetG').onclick = function () { moQuet(k); };
       el.querySelector('.kqG').onclick = function () { moQuet(k, 'ketqua'); };
+      el.querySelector('.tlG').onclick = function () { moChamTL(k, d); };
       el.querySelector('.mtG').onclick = function () { var l = lopCuaDot(d)[0] || DS[0]; moMaTran({ ten: d.ten, madots: g.map(function (x) { return x.madot; }), url: l.url }); };
       el.querySelector('.xlG').onclick = function () {
         var bt = this, moi = !d.xemlai;
@@ -2753,6 +2760,117 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var rong = [5, 22, 34].concat(dg.map(function () { return [8, 8, 9]; }).reduce(function (a, b) { return a.concat(b); }, []));
       taiVe(taoXlsx([{ ten: 'Ma tran', rong: rong.concat([9, 9, 11, 11]), dong: t1 }, { ten: 'Dac ta', rong: [5, 22, 30, 50].concat(rong.slice(3)), dong: t2 }]), tenF + '.xlsx');
     };
+  }
+  // =====================================================================
+  // M5: CHAM TU LUAN THEO RUBRIC (de giay): rubric theo buoc (AI soan tu loi giai, GV duyet) + chup bai, tich buoc dat
+  // =====================================================================
+  function moChamTL(ca, d) {
+    var lops = lopCuaDot(d), CT = { ca: ca, lop: lops[0], rb: null, cau: [], nhap: null, ds: null, em: null, anh: null };
+    var nen = $('ptNen');
+    if (!nen) { nen = document.createElement('div'); nen.id = 'ptNen'; nen.className = 'ptNen'; document.body.appendChild(nen); }
+    nen.innerHTML = '<div class="ptHop"><div class="ptDau"><h1>✍ Chấm tự luận</h1><button class="btn2" id="ptDong">✕ Đóng</button></div>' +
+      '<p class="sub"><b>' + esc(d.ten) + '</b> · ' + esc(ca.replace(/-2\d\d$/, '')) + '. Mỗi câu chấm theo các bước của hướng dẫn chấm (rubric): chụp bài tự luận của em, tích bước đạt, máy cộng điểm vào điểm đề giấy. Học sinh xem lại thấy bước nào mất điểm.</p>' +
+      '<div class="loc" id="ctLop">' + lops.map(function (l, i) { return '<button data-i="' + i + '" class="' + (i ? '' : 'on') + '">' + esc(l.ten) + '</button>'; }).join('') + '</div>' +
+      '<div id="ctRB"><p class="sub">Đang tải hướng dẫn chấm…</p></div><div id="ctDs"></div></div>';
+    nen.hidden = false; document.body.style.overflow = 'hidden';
+    $('ptDong').onclick = function () { nen.hidden = true; document.body.style.overflow = ''; };
+    [].forEach.call(nen.querySelectorAll('#ctLop button'), function (b) { b.onclick = function () { CT.lop = lops[+b.getAttribute('data-i')]; [].forEach.call(nen.querySelectorAll('#ctLop button'), function (x) { x.classList.toggle('on', x === b); }); CT.em = null; taiDs(); }; });
+    function loiSo(e) { return /hop le/i.test(e.message || e.msg || '') ? 'Sổ chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai phiên bản mới).' : (e.message || e.msg); }
+    function taiRB() {
+      goi(CT.lop.url, { action: 'gv_rubric', ma: MA, ca: ca }).then(function (j) {
+        if (!j.ok) throw j; CT.cau = j.cau; CT.rb = j.rubric; CT.nhap = null; veRB(); taiDs();
+      }).catch(function (e) { $('ctRB').innerHTML = '<p class="loi">' + esc(loiSo(e)) + '</p>'; });
+    }
+    function rbDu() { return CT.cau.length && CT.cau.every(function (q) { return CT.rb[q.cau] && CT.rb[q.cau].buoc.length; }); }
+    function veRB() {
+      var box = $('ctRB');
+      if (!CT.cau.length) { box.innerHTML = '<p class="sub">Đề này không có câu tự luận (tab TU LUAN của kho).</p>'; return; }
+      var sua = CT.nhap, h = '<details class="ctRBhop"' + (sua || !rbDu() ? ' open' : '') + '><summary><b>📏 Hướng dẫn chấm (rubric)</b> ' + (rbDu() ? '· đủ ' + CT.cau.length + ' câu ✓' : '· <span class="ptDo">chưa đủ – soạn trước khi chấm</span>') + '</summary>';
+      CT.cau.forEach(function (q) {
+        var ds = sua ? (sua[q.cau] || []) : ((CT.rb[q.cau] || {}).buoc || []), tong = ds.reduce(function (s, b) { return s + (Number(b.diem) || 0); }, 0);
+        h += '<div class="ctCau"><div class="ctCauDau"><b>Câu ' + esc(q.cau) + '</b> · ' + soMT(q.diem) + ' điểm' + (Math.abs(tong - q.diem) > 0.001 && ds.length ? ' · <span class="ptDo">tổng bước ' + soMT(tong) + ' ≠ ' + soMT(q.diem) + '</span>' : '') + '</div>';
+        if (sua) h += ds.map(function (b, i) { return '<div class="ctBuocSua" data-c="' + esc(q.cau) + '" data-i="' + i + '"><input class="nd" value="' + esc(b.nd) + '" placeholder="Nội dung bước"><input class="dm" type="number" step="0.25" min="0" value="' + (Number(b.diem) || 0) + '"><button class="btn2 nho xoaB">✕</button></div>'; }).join('') + '<button class="btn2 nho themB" data-c="' + esc(q.cau) + '">＋ Thêm bước</button>';
+        else h += ds.length ? '<ol class="ctBuoc">' + ds.map(function (b) { return '<li>' + esc(b.nd) + ' <b>(' + soMT(b.diem) + ')</b></li>'; }).join('') + '</ol>' : '<p class="sub">Chưa có bước chấm.</p>';
+        h += '</div>';
+      });
+      h += '<div class="ptNut">' + (sua ? '<button class="btn" id="ctLuuRB">💾 Lưu hướng dẫn chấm</button><button class="btn2" id="ctHuyRB">Hủy</button>' : '<button class="btn2" id="ctSuaRB">✎ Sửa</button>') + '<button class="btn2" id="ctAIRB">✨ AI soạn từ lời giải</button></div><p class="sub" id="ctRBtt"></p></details>';
+      box.innerHTML = h;
+      var docForm = function () { var o = {}; CT.cau.forEach(function (q) { o[q.cau] = [].map.call(box.querySelectorAll('.ctBuocSua[data-c="' + q.cau + '"]'), function (r) { return { nd: r.querySelector('.nd').value.trim(), diem: Number(r.querySelector('.dm').value) || 0 }; }); }); return o; };
+      if ($('ctSuaRB')) $('ctSuaRB').onclick = function () { CT.nhap = {}; CT.cau.forEach(function (q) { CT.nhap[q.cau] = ((CT.rb[q.cau] || {}).buoc || []).map(function (b) { return { nd: b.nd, diem: b.diem }; }); if (!CT.nhap[q.cau].length) CT.nhap[q.cau] = [{ nd: '', diem: q.diem }]; }); veRB(); };
+      if ($('ctHuyRB')) $('ctHuyRB').onclick = function () { CT.nhap = null; veRB(); };
+      [].forEach.call(box.querySelectorAll('.themB'), function (b) { b.onclick = function () { CT.nhap = docForm(); CT.nhap[b.getAttribute('data-c')].push({ nd: '', diem: 0.25 }); veRB(); }; });
+      [].forEach.call(box.querySelectorAll('.xoaB'), function (b) { b.onclick = function () { var r = b.parentNode; CT.nhap = docForm(); CT.nhap[r.getAttribute('data-c')].splice(+r.getAttribute('data-i'), 1); veRB(); }; });
+      [].forEach.call(box.querySelectorAll('.ctBuocSua input'), function (ip) { ip.onchange = function () { CT.nhap = docForm(); veRB(); }; });
+      $('ctAIRB').onclick = function () {
+        var b = this; b.disabled = true; b.textContent = '✨ AI đang soạn… (20–40 giây)';
+        goi(CT.lop.url, { action: 'gv_rubric_ai', ma: MA, ca: ca }).then(function (j) {
+          if (!j.ok) throw j;
+          CT.nhap = {}; CT.cau.forEach(function (q) { CT.nhap[q.cau] = j.de[q.cau] || ((CT.rb[q.cau] || {}).buoc || []).slice(); });
+          veRB(); $('ctRBtt').textContent = 'AI đã soạn. Thầy/cô đọc, sửa rồi bấm 💾 Lưu (chưa lưu thì chưa dùng để chấm).';
+        }).catch(function (e) { b.disabled = false; b.textContent = '✨ AI soạn từ lời giải'; $('ctRBtt').textContent = 'AI chưa soạn được: ' + loiSo(e); });
+      };
+      if ($('ctLuuRB')) $('ctLuuRB').onclick = function () {
+        var o = docForm(), lech = CT.cau.filter(function (q) { var t = o[q.cau].reduce(function (s, x) { return s + x.diem; }, 0); return o[q.cau].length && Math.abs(t - q.diem) > 0.001; });
+        if (lech.length && !confirm('Tổng điểm các bước của câu ' + lech.map(function (q) { return q.cau; }).join(', ') + ' khác điểm câu. Vẫn lưu?')) return;
+        var b = this; b.disabled = true; b.textContent = 'Đang lưu…';
+        goi(CT.lop.url, { action: 'gv_rubric_luu', ma: MA, ca: ca, rubric: o }).then(function (j) { if (!j.ok) throw j; CT.rb = j.rubric; CT.nhap = null; veRB(); veDs(); })
+          .catch(function (e) { b.disabled = false; b.textContent = '💾 Lưu hướng dẫn chấm'; $('ctRBtt').textContent = 'Chưa lưu được: ' + loiSo(e); });
+      };
+    }
+    function taiDs() {
+      $('ctDs').innerHTML = '<p class="sub">Đang tải danh sách lớp ' + esc(CT.lop.ten) + '…</p>';
+      goi(CT.lop.url, { action: 'gv_tl_ds', ma: MA, ca: ca }).then(function (j) { if (!j.ok) throw j; CT.ds = j; veDs(); }).catch(function (e) { $('ctDs').innerHTML = '<p class="loi">' + esc(loiSo(e)) + '</p>'; });
+    }
+    function veDs() {
+      var j = CT.ds; if (!j || !CT.rb) return;
+      var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), xong = co.filter(function (h) { return j.tl[h.mahs]; }).length;
+      var h = '<h2>Lớp ' + esc(CT.lop.ten) + ' · đã chấm tự luận ' + xong + '/' + co.length + ' em</h2>';
+      if (!rbDu()) h += '<p class="ptCanh">Soạn và lưu hướng dẫn chấm cho đủ các câu trước khi chấm.</p>';
+      h += '<div class="kqDs">' + co.map(function (x) {
+        var t = j.tl[x.mahs], dTN = Number(j.da[x.mahs].diem) || 0;
+        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"' + (rbDu() ? '' : ' disabled') + '><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t ? '✓ TL ' + soMT(t.tong) : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
+      }).join('') + '</div>';
+      if (!co.length) h += '<p class="sub">Lớp này chưa có phiếu trắc nghiệm nào được chấm. Quét phiếu trước rồi chấm tự luận.</p>';
+      $('ctDs').innerHTML = h;
+      [].forEach.call($('ctDs').querySelectorAll('.ctEm'), function (b) { b.onclick = function () { var m = b.getAttribute('data-ma'); CT.em = CT.em === m ? null : m; CT.anh = null; veDs(); if (CT.em) veCham(); }; });
+      if (CT.em && $('ctCham')) veCham();
+    }
+    function veCham() {
+      var j = CT.ds, ma = CT.em, t = j.tl[ma], box = $('ctCham'); if (!box) return;
+      var h = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 Chụp bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' + (t && t.anh ? '<span class="sub">đã có ảnh bài (chụp lại để thay)</span>' : '') + '</div><img class="ctAnh" alt="" hidden>';
+      CT.cau.forEach(function (q) {
+        var dat = t && t.cau[q.cau] ? t.cau[q.cau].dat : [];
+        h += '<div class="ctCau"><div class="ctCauDau"><b>Câu ' + esc(q.cau) + '</b> · <span class="ctDiemCau" data-c="' + esc(q.cau) + '"></span>/' + soMT(q.diem) + '</div>' + ((CT.rb[q.cau] || {}).buoc || []).map(function (b, i) {
+          return '<label class="ctTich"><input type="checkbox" data-c="' + esc(q.cau) + '" data-i="' + i + '"' + (dat.indexOf(i) >= 0 ? ' checked' : '') + '> <span>' + esc(b.nd) + '</span> <b>' + soMT(b.diem) + '</b></label>';
+        }).join('') + '<div class="ptNut" style="margin:4px 0"><button class="btn2 nho ctDu" data-c="' + esc(q.cau) + '">Đạt cả câu</button><button class="btn2 nho ctKhong" data-c="' + esc(q.cau) + '">Bỏ hết</button></div></div>';
+      });
+      h += '<div class="ctTong">Tự luận: <b id="ctTongTL">0</b> · Trắc nghiệm: ' + diem(Number(j.da[ma].diem) - (t ? t.tong : 0)) + ' → Tổng: <b id="ctTongAll"></b></div><div class="ptNut"><button class="btn" id="ctLuu">💾 Lưu, sang em tiếp theo</button></div><p class="sub" id="ctTT"></p></div>';
+      box.innerHTML = h;
+      var tinh = function () {
+        var tong = 0;
+        CT.cau.forEach(function (q) { var s = 0; [].forEach.call(box.querySelectorAll('input[data-c="' + q.cau + '"]:checked'), function (c) { s += CT.rb[q.cau].buoc[+c.getAttribute('data-i')].diem; }); box.querySelector('.ctDiemCau[data-c="' + q.cau + '"]').textContent = soMT(s); tong += s; });
+        $('ctTongTL').textContent = soMT(tong); $('ctTongAll').textContent = diem(Math.round((Number(j.da[ma].diem) - (t ? t.tong : 0) + tong) * 100) / 100);
+      };
+      [].forEach.call(box.querySelectorAll('.ctTich input'), function (c) { c.onchange = tinh; });
+      [].forEach.call(box.querySelectorAll('.ctDu, .ctKhong'), function (b) { b.onclick = function () { var v = b.classList.contains('ctDu'); [].forEach.call(box.querySelectorAll('input[data-c="' + b.getAttribute('data-c') + '"]'), function (c) { c.checked = v; }); tinh(); }; });
+      tinh();
+      box.querySelector('.ctChup input').onchange = function () { var f = this.files[0]; if (!f) return; txNen(f).then(function (u) { CT.anh = u; var im = box.querySelector('.ctAnh'); im.src = u; im.hidden = false; }); };
+      $('ctLuu').onclick = function () {
+        var b = this, cham = {};
+        CT.cau.forEach(function (q) { cham[q.cau] = [].map.call(box.querySelectorAll('input[data-c="' + q.cau + '"]:checked'), function (c) { return +c.getAttribute('data-i'); }); });
+        b.disabled = true; b.textContent = 'Đang lưu…';
+        goi(CT.lop.url, { action: 'gv_tl_luu', ma: MA, ca: ca, mahs: ma, cham: cham, anh: CT.anh || undefined }).then(function (r) {
+          if (!r.ok) throw r;
+          var cu = j.tl[ma] ? j.tl[ma].tong : 0; j.da[ma].diem = Math.round((Number(j.da[ma].diem) - cu + r.tong) * 100) / 100; j.tl[ma] = r.tl;
+          delete HS_CACHE[CT.lop.ten]; delete KT_LOP[CT.lop.ten];
+          var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), i = co.map(function (h) { return h.mahs; }).indexOf(ma);
+          var tiep = co.slice(i + 1).concat(co.slice(0, i)).filter(function (h) { return !j.tl[h.mahs]; })[0];
+          CT.em = tiep ? tiep.mahs : null; CT.anh = null; veDs();
+          var el = CT.em && $('ctDs').querySelector('.ctEm.on'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }).catch(function (e) { b.disabled = false; b.textContent = '💾 Lưu, sang em tiếp theo'; $('ctTT').textContent = 'Chưa lưu được: ' + loiSo(e); });
+      };
+    }
+    taiRB();
   }
   // ---------- Phan tich cau: sap tu cau sai nhieu nhat ----------
   var CAU_CACHE = {}, CAU_MO = {};

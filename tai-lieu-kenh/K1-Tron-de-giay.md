@@ -95,3 +95,8 @@ Ngoài file Excel nạp kho, gửi kèm để in:
 - [ ] Đủ file Word + PDF cho từng mã và file đáp án; mở file PDF xem lại hình, bảng, số trang.
 - [ ] Đề có tự luận thì file nạp có tab `TU LUAN THEM` đủ các mã.
 - [ ] Công cụ không còn cảnh báo (hoặc đã sửa tay phần cảnh báo).
+
+## Chấm tự luận theo rubric (từ 11/2026)
+- Lời giải câu tự luận (cột LoiGiai của `TU LUAN THEM`) viết **theo bước, có điểm từng bước**, ví dụ "Viết đúng PTHH … (0.25) – Tính n(CO2) = 0.15 mol (0.25) – Kết luận … (0.5)". Tổng điểm các bước phải bằng cột Diem của câu.
+- Trên trang GV, ở thẻ đề giấy bấm **✍ Chấm tự luận** → **✨ AI soạn từ lời giải**. AI tách lời giải thành hướng dẫn chấm theo bước. Giáo viên sửa rồi lưu (lưu vào tab `RUBRIC` của kho).
+- Khi chấm, giáo viên chụp bài tự luận của từng em và tích các bước đạt. Máy cộng điểm vào điểm đề giấy. Học sinh xem lại thấy bước nào ✓, bước nào ✗ mất điểm, cùng lời giải.
