@@ -887,7 +887,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 </section>
 
 <section id="scrHoSo" class="hidden">
-  <div class="top"><button class="btn2" id="btnLai2">◀ Trang chủ</button><div><button class="btn2" id="btnSoLieu">📊 Số liệu tổng hợp</button> <button class="btn2" id="btnTaiHS">↻ Làm mới</button></div></div>
+  <div class="top"><button class="btn2" id="btnLai2">◀ Trang chủ</button><div><button class="btn2" id="btnTXHS">📒 Điểm TX</button> <button class="btn2" id="btnSoLieu">📊 Số liệu tổng hợp</button> <button class="btn2" id="btnTaiHS">↻ Làm mới</button></div></div>
   <div class="card">
     <h1>Hồ sơ học sinh</h1>
     <p class="sub">Bảng điểm từng lớp. Bấm vào tên để xem tiến bộ của em đó, bấm vào điểm để mở bài làm (PDF).</p>
@@ -3661,6 +3661,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   };
   $('btnLai2').onclick = function () { diDen('home'); };
   // ---------- So lieu tong hop cac lop (ho so du thi) ----------
+  $('btnTXHS').onclick = function () { if (HS_LOP) TX.lop = HS_LOP.ten; diDen('tx'); };
   $('btnSoLieu').onclick = function () { man('scrHoSoSL'); if (!$('slDen').value) { var d = new Date(); $('slDen').value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); } };
   $('slLai').onclick = function () { man('scrHoSo'); };
   function nd(s) { var p = String(s).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : s; }
