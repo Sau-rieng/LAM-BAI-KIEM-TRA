@@ -32,3 +32,8 @@ Ghi chú: Kiểm tra miệng
 - Nếu có danh sách lớp trong kênh: báo những STT có tên không khớp danh sách (ví dụ "STT 12 ghi Trân nhưng DS là Trâm").
   Trong khối code vẫn giữ nguyên chữ như trên ảnh.
 - Không viết thêm gì khác.
+
+## Nộp vở bằng mã QR (cột 📗)
+- Mỗi HS tải **🏷 Nhãn vở** trong Tài khoản HS (QR chứa `KPHH-VO <SBD>`), in và dán lên bìa vở.
+- GV: Trang chủ → Kiểm tra → Điểm TX → **📗 Quét nộp vở** (ngày lấy theo ô Ngày). Máy tự nhận lớp theo 6 số đầu SBD, hiện tên em khi đã ghi; quét lại báo "đã ghi".
+- Sổ ghi cột `yyyy-mm-dd#v` (ghi chú "Nộp vở"), giá trị `V` = đã nộp, không tính vào TB TX. Muốn chấm điểm vở: bấm tiêu đề cột 📗 → Sửa điểm; để trống vẫn giữ dấu ✓.

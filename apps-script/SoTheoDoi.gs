@@ -93,6 +93,7 @@ function doPost(e) {
       case 'gv_hoso':
       case 'gv_anbai':
       case 'gv_tx':
+      case 'gv_tx_vo':
       case 'gv_luyen':
       case 'gv_luyen_ai':
       case 'gv_luyen_duyet':
@@ -167,6 +168,7 @@ function doPost(e) {
         if (d.action === 'gv_luyen') return json(gvLuyen());
         if (d.action === 'gv_luyen_ai') return json(gvLuyenAI(d));
         if (d.action === 'gv_luyen_duyet') return json(gvLuyenDuyet(d));
+        if (d.action === 'gv_tx_vo') return json(gvTxVo(d));
         if (d.action === 'gv_tx') return json({ok: true, lop: lopNay(), hs: dsLopTX(), tx: docTX()});
         if (d.action === 'gv_tx_luu') return json(gvTxLuu(d));
         if (d.action === 'gv_tx_xoa') return json(gvTxXoa(d));
@@ -357,7 +359,7 @@ function xemLai(d) {
   });
   try { baiTroHS(ma).forEach(function (b) { b.nx = ((nxMap[ma + '|' + b.dot] || {}).nx) || ''; delete b.dot; ketqua.push(b); }); } catch (e) {}
   let tx = [];
-  try { const T = docTX(), dm = T.diem[ma] || {}; tx = T.cot.map(function (c) { return {ngay: c.ngay, ghichu: c.ghichu, diem: dm[c.id] === undefined ? null : dm[c.id]}; }); } catch (e) {}
+  try { const T = docTX(), dm = T.diem[ma] || {}; tx = T.cot.map(function (c) { return {ngay: c.ngay, ghichu: c.ghichu, diem: dm[c.id] === undefined ? null : dm[c.id], nop: !!((T.nop[ma] || {})[c.id]), vo: /#v$/.test(c.id)}; }); } catch (e) {}
   // Bang diem cua em: moi bai kiem tra em da lam (ke ca de chua mo xem lai: chi diem, khong cau hoi/dap an); de giay nhieu ma = 1 dong
   const bang = [], daCa = {};
   try {
@@ -1835,17 +1837,18 @@ function dsLopTX() {
 const TAB_TX = 'DIEM TX', HEAD_TX = ['Cot', 'Ngay', 'GhiChu', 'MaHS', 'Diem', 'ThoiGian', 'Anh'];
 function ngayTX(v) { return v instanceof Date ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd') : String(v || '').trim().slice(0, 10); }
 function docTX() {
-  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TX), cot = {}, diem = {};
-  if (!sh || sh.getLastRow() < 2) return {cot: [], diem: {}};
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TX), cot = {}, diem = {}, nop = {};
+  if (!sh || sh.getLastRow() < 2) return {cot: [], diem: {}, nop: {}};
   sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TX.length).getValues().forEach(function (r) {
     const id = String(r[0]).trim(); if (!id) return;
     if (!cot[id]) cot[id] = {id: id, ngay: ngayTX(r[1]), ghichu: String(r[2] || ''), anh: String(r[6] || '')};
     if (!cot[id].anh && r[6]) cot[id].anh = String(r[6]);
     const ma = String(r[3]).trim().replace(/^'/, ''), v = String(r[4]).replace(',', '.').trim();
-    if (ma && v !== '') (diem[ma] = diem[ma] || {})[id] = Number(v);
+    if (ma && /#v$/.test(id) && v !== '') (nop[ma] = nop[ma] || {})[id] = r[5] instanceof Date ? r[5].toISOString() : String(r[5] || '');
+    if (ma && v !== '' && v.toUpperCase() !== 'V' && !isNaN(Number(v))) (diem[ma] = diem[ma] || {})[id] = Number(v);
   });
   const ds = Object.keys(cot).map(function (k) { return cot[k]; }).sort(function (a, b) { return a.id < b.id ? -1 : 1; });
-  return {cot: ds, diem: diem};
+  return {cot: ds, diem: diem, nop: nop};
 }
 function gvTxLuu(d) {
   const ngay = String(d.ngay || '').trim();
@@ -1856,12 +1859,17 @@ function gvTxLuu(d) {
   try {
     const sh = layTab(TAB_TX, HEAD_TX);
     let id = String(d.id || '').trim(), anhCu = '';
+    const nopCu = {};
     const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, HEAD_TX.length).getValues() : [];
     if (!id) {   // cot moi: yyyy-mm-dd#so thu tu trong ngay
       let so = 0; v.forEach(function (r) { const m = String(r[0]).match(/^(\d{4}-\d{2}-\d{2})#(\d+)$/); if (m && m[1] === ngay) so = Math.max(so, Number(m[2])); });
       id = ngay + '#' + (so + 1);
     } else {
-      for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === id) { if (!anhCu && v[i][6]) anhCu = String(v[i][6]); sh.deleteRow(i + 2); }
+      for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === id) {
+        if (!anhCu && v[i][6]) anhCu = String(v[i][6]);
+        const m0 = String(v[i][3]).trim().replace(/^'/, ''); if (/#v$/.test(id) && m0) nopCu[m0] = v[i][5];   // cot nop vo: giu dau da nop
+        sh.deleteRow(i + 2);
+      }
     }
     let anh = anhCu;
     if (d.anh && /^data:(image\/jpeg|application\/pdf);base64,/.test(String(d.anh))) {
@@ -1878,9 +1886,25 @@ function gvTxLuu(d) {
       if (!hs[ma] || x === '' || isNaN(Number(x)) || Number(x) < 0 || Number(x) > 10) return;
       moi.push([id, ngD, ghi, "'" + ma, Number(x), bay, anh]);
     });
+    Object.keys(nopCu).forEach(function (ma) { if (!moi.some(function (r) { return r[3] === "'" + ma; })) moi.push([id, ngD, ghi, "'" + ma, 'V', nopCu[ma] || bay, anh]); });
     if (!moi.length) moi.push([id, ngD, ghi, '', '', bay, anh]);   // cot rong van giu (de GV nhap sau)
     sh.getRange(sh.getLastRow() + 1, 1, moi.length, HEAD_TX.length).setValues(moi);
     return {ok: true, id: id, so: moi.filter(function (r) { return r[3]; }).length, anh: anh};
+  } finally { lock.releaseLock(); }
+}
+// Quet QR nhan vo: ghi "da nop vo" (V) vao cot "Nop vo <ngay>" (id yyyy-mm-dd#v) cua lop; quet trung thi bo qua
+function gvTxVo(d) {
+  const ma = String(d.mahs || '').replace(/\D/g, ''), ngay = String(d.ngay || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay)) return {ok: false, msg: 'Ngay khong hop le'};
+  const hs = timHS(ma); if (!hs) return {ok: false, msg: 'SBD ' + ma + ' khong co trong lop ' + lopNay()};
+  const id = ngay + '#v';
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = layTab(TAB_TX, HEAD_TX), n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 4).getValues() : [];
+    if (v.some(function (r) { return String(r[0]).trim() === id && String(r[3]).trim().replace(/^'/, '') === ma; })) return {ok: true, trung: true, mahs: ma, hoten: hs.ten, lop: lopNay()};
+    sh.appendRow([id, new Date(ngay + 'T07:00:00'), 'Nộp vở', "'" + ma, 'V', new Date(), '']);
+    const so = v.filter(function (r) { return String(r[0]).trim() === id && String(r[3]).trim(); }).length + 1;
+    return {ok: true, mahs: ma, hoten: hs.ten, lop: lopNay(), so: so, siso: dsLopTX().length};
   } finally { lock.releaseLock(); }
 }
 function gvTxXoa(d) {

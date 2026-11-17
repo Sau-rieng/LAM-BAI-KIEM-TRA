@@ -148,7 +148,8 @@ img{-webkit-user-drag:none;pointer-events:none}
 .xtTai .vong{width:44px;height:44px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--pri);animation:quay 1s linear infinite}
 @keyframes quay{to{transform:rotate(360deg)}}
 #wm{position:fixed;inset:0;pointer-events:none;z-index:50;background-repeat:repeat;opacity:.09;display:none}
-@media print{body>*{display:none!important}body:after{content:"Trang này không được in.";display:block;font:20px sans-serif;padding:40px}}
+@media print{body:not(.inNhan)>*{display:none!important}body:not(.inNhan):after{content:"Trang này không được in.";display:block;font:20px sans-serif;padding:40px}body.inNhan>*:not(#nhanIn){display:none!important}body.inNhan #nhanIn{display:flex!important;flex-wrap:wrap;gap:4mm}#nhanIn img{width:6.5cm;border:1px dashed #999}}
+#nhanIn{display:none}.nhanXem{text-align:center;margin:12px 0}.nhanXem canvas{max-width:100%;border:1px dashed #9aa6b8;border-radius:8px;background:#fff}.nhanNut{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}.nhanSo{font:inherit;padding:8px;border:1px solid var(--line);border-radius:10px;width:70px}
 
 /* ===== Giao dien hoa hoc ===== */
 body{background:#f2f6fc}
@@ -226,6 +227,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       <button id="moBai"><span class="ic" aria-hidden="true" data-bt="xem"></span><b>Xem lại bài</b><span id="soBai"></span></button>
       <button id="moTN" class="tnBtn"><span class="ic" aria-hidden="true" data-bt="tn"></span><b>Tài nguyên</b><span id="soTN"></span></button>
       <button id="moBD" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Bảng điểm của em</b><span>Mọi điểm kiểm tra, trò chơi, điểm TX</span></button>
+      <button id="moNhan" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>🏷 Nhãn vở (mã QR)</b><span>Tải về, in và dán lên vở để nộp vở</span></button>
       <button id="moTX" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Điểm TX</b><span id="soTX">Điểm thầy/cô cho trên lớp</span></button>
       <button id="moKT" class="ktBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Kiến thức cần ôn</b><span id="soKT">Em yếu phần nào, câu nào sai</span></button>
       <button id="moLuyen" class="luyenBtn"><span class="ic" aria-hidden="true" data-bt="ong"></span><b>Luyện lại phần yếu</b><span>10 câu đúng phần em còn sai, có lời giải ngay</span></button>
@@ -263,6 +265,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <h1 style="margin-top:10px">📒 Điểm TX</h1>
     <p class="sub">Điểm thường xuyên thầy/cô cho trên lớp, theo ngày.</p>
     <div id="txNoi"></div>
+  </div>
+</section>
+<section id="scrNhan" class="hidden">
+  <div class="card">
+    <button class="btn2 nho" id="nhanVe">◀ Quay lại</button>
+    <h1 style="margin-top:10px">🏷 Nhãn vở của em</h1>
+    <p class="sub">In nhãn này (cỡ nhãn vở), dán lên bìa vở. Khi nộp vở, thầy/cô quét mã QR là ghi nhận em đã nộp vào điểm TX. Mỗi em một mã riêng — không dán nhãn của bạn khác.</p>
+    <div class="nhanXem"><canvas id="nhanCv" width="900" height="360"></canvas></div>
+    <div class="nhanNut"><a class="btn" id="nhanTai" download="nhan-vo.png" style="width:auto;display:inline-flex;align-items:center;text-decoration:none;padding:10px 16px">⬇ Tải nhãn (PNG)</a><label class="sub" style="display:flex;align-items:center;gap:6px">Số nhãn in <input type="number" id="nhanSo" class="nhanSo" min="1" max="12" value="1"></label><button class="btn2" id="nhanInN">🖨 In nhãn</button></div>
+    <p class="sub" id="nhanTT"></p>
   </div>
 </section>
 <section id="scrBD" class="hidden">
@@ -319,11 +331,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 </section>
 
 </main>
+<div id="nhanIn"></div>
 <div class="xemTN" id="xemTN" hidden role="dialog" aria-modal="true" aria-labelledby="xtTen">
   <div class="xtBar"><b id="xtTen"></b><button id="xtDong">✕ Đóng</button></div>
   <div class="xtKhung" id="xtKhung"><div class="xtTai" id="xtTai"><div class="vong"></div><span>Đang tải tài nguyên…</span></div></div>
 </div>
 <script src="cau-hinh-lop.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="phieu-omr.js"></script>
 <script src="quet-omr.js"></script>
 <script src="danh-dau.js"></script>
@@ -337,7 +351,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var lopChon = null, duLieu = null, baiDangXem = null;
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX', 'scrLuyen', 'scrBD'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX', 'scrLuyen', 'scrBD', 'scrNhan'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -602,7 +616,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var nTro = duLieu.bai.filter(function (b) { return b.tro; }).length, nKT = duLieu.bai.length - nTro;
     $('soBai').textContent = duLieu.bai.length ? (nKT ? nKT + ' bài giáo viên đã mở' : '') + (nKT && nTro ? ' · ' : '') + (nTro ? nTro + ' lượt trò chơi' : '') : 'Chưa có bài nào mở xem lại';
     var nTX = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; }).length;
-    $('soTX').textContent = nTX ? nTX + ' lần có điểm' : 'Điểm thầy/cô cho trên lớp';
+    var nVo = (duLieu.tx || []).filter(function (c) { return c.nop && (c.diem === null || c.diem === undefined); }).length;
+    $('soTX').textContent = nTX || nVo ? (nTX ? nTX + ' lần có điểm' : '') + (nTX && nVo ? ' · ' : '') + (nVo ? nVo + ' lần nộp vở' : '') : 'Điểm thầy/cô cho trên lớp';
     var n = dsTN().length;
     $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
     demTin(duLieu.tinMoi || 0);
@@ -613,14 +628,49 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('moTX').onclick = function () {
     man('scrTX');
     var tx = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; });
-    if (!tx.length) { $('txNoi').innerHTML = '<p class="sub">Em chưa có điểm TX nào.</p>'; return; }
-    var tb = Math.round(tx.reduce(function (a, c) { return a + Number(c.diem); }, 0) / tx.length * 100) / 100;
+    var hien = (duLieu.tx || []).filter(function (c) { return (c.diem !== null && c.diem !== undefined) || c.nop; });
+    if (!hien.length) { $('txNoi').innerHTML = '<p class="sub">Em chưa có điểm TX nào.</p>'; return; }
+    var tb = tx.length ? Math.round(tx.reduce(function (a, c) { return a + Number(c.diem); }, 0) / tx.length * 100) / 100 : null;
     function ng(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : s; }
-    $('txNoi').innerHTML = '<div class="txTB">Trung bình điểm TX: <b>' + String(tb) + '</b> · ' + tx.length + ' lần</div>' +
+    $('txNoi').innerHTML = '<div class="txTB">Trung bình điểm TX: <b>' + (tb === null ? '–' : String(tb)) + '</b> · ' + tx.length + ' lần có điểm' + txVoChu() + '</div>' +
       '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm TX</th></tr></thead><tbody>' +
-      tx.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + '</td><td><b>' + String(c.diem) + '</b></td></tr>'; }).join('') + '</tbody></table>';
+      hien.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + '</td><td>' + txO(c) + '</td></tr>'; }).join('') + '</tbody></table>';
   };
   $('txVe').onclick = function () { man('scrHome'); };
+  function txO(c) { return c.diem !== null && c.diem !== undefined ? '<b>' + String(c.diem) + '</b>' : '<b style="color:#1e7d32">✓</b> <small>đã nộp vở</small>'; }
+  function txVoChu() { var v = (duLieu.tx || []).filter(function (c) { return c.vo; }); var n = v.filter(function (c) { return c.nop || (c.diem !== null && c.diem !== undefined); }).length; return v.length ? ' · 📗 nộp vở ' + n + '/' + v.length + ' lần' : ''; }
+  // ---------- Nhan vo (ma QR): HS tai ve, in, dan len vo; GV quet o trang giao vien -> ghi ✓ nop vo vao diem TX ----------
+  function veNhan() {
+    var cv = $('nhanCv'), g = cv.getContext('2d'), W = cv.width, H = cv.height;
+    if (!window.QRCode) { $('nhanTT').textContent = 'Đang tải bộ tạo mã QR…'; setTimeout(function () { if (!$('scrNhan').classList.contains('hidden')) veNhan(); }, 500); return; }
+    $('nhanTT').textContent = '';
+    var tam = document.createElement('div'); new window.QRCode(tam, { text: 'KPHH-VO ' + duLieu.mahs, width: 300, height: 300, correctLevel: window.QRCode.CorrectLevel.M });
+    var q = tam.querySelector('canvas');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    g.strokeStyle = '#172033'; g.lineWidth = 6; g.strokeRect(3, 3, W - 6, H - 6);
+    g.drawImage(q, 30, 30, 300, 300);
+    var x = 360, mw = W - x - 30;
+    g.fillStyle = '#b8235a'; g.font = '700 30px "Be Vietnam Pro",Arial,sans-serif'; g.fillText('KHÁM PHÁ HÓA HỌC · VỞ', x, 72);
+    g.fillStyle = '#172033'; var co = 54, ten = duLieu.hoten || '';
+    do { g.font = '800 ' + co + 'px "Be Vietnam Pro",Arial,sans-serif'; co -= 2; } while (g.measureText(ten).width > mw && co > 30);
+    if (g.measureText(ten).width > mw) {   // tên dài: xuống 2 dòng
+      var tu = ten.split(' '), d1 = '', i = 0; while (i < tu.length && g.measureText((d1 + ' ' + tu[i]).trim()).width <= mw) { d1 = (d1 + ' ' + tu[i]).trim(); i++; }
+      g.fillText(d1, x, 160); g.fillText(tu.slice(i).join(' '), x, 160 + co + 8);
+    } else g.fillText(ten, x, 175);
+    g.font = '600 36px "Be Vietnam Pro",Arial,sans-serif'; g.fillStyle = '#334';
+    g.fillText('Lớp ' + (lopChon ? lopChon.ten : ''), x, 262); g.fillText('SBD ' + duLieu.mahs, x, 312);
+    var url = cv.toDataURL('image/png'); $('nhanTai').href = url; $('nhanTai').download = 'nhan-vo-' + duLieu.mahs + '.png';
+    return url;
+  }
+  $('moNhan').onclick = function () { man('scrNhan'); veNhan(); };
+  $('nhanVe').onclick = function () { man('scrHome'); };
+  $('nhanInN').onclick = function () {
+    var url = veNhan(); if (!url) return;
+    var n = Math.max(1, Math.min(12, Number($('nhanSo').value) || 1)), o = $('nhanIn'); o.innerHTML = '';
+    for (var i = 0; i < n; i++) { var im = document.createElement('img'); im.src = url; im.alt = 'Nhãn vở'; o.appendChild(im); }
+    document.body.classList.add('inNhan');
+    setTimeout(function () { window.print(); setTimeout(function () { document.body.classList.remove('inNhan'); }, 800); }, 150);
+  };
   // ---------- Bang diem cua em: moi diem kiem tra (ke ca de chua mo xem lai), tro choi (cao nhat moi buoi), diem TX ----------
   $('bdVe').onclick = function () { man('scrHome'); };
   $('moBD').onclick = function () {
@@ -642,7 +692,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     h += '<h2 style="margin-top:14px">🎮 Trò chơi (điểm cao nhất mỗi buổi)</h2>' + (tro.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Trò chơi</th><th>Điểm</th></tr></thead><tbody>' + tro.slice().reverse().map(function (x) {
       return '<tr><td>' + ng(x.ngay) + '</td><td>' + e(x.ten) + (x.luot > 1 ? ' <small>(' + x.luot + ' lượt)</small>' : '') + '</td><td><b>' + so(x.cao) + '</b></td></tr>';
     }).join('') + '</tbody></table>' : '<p class="sub">Em chưa chơi trò nào.</p>');
-    h += '<h2 style="margin-top:14px">📒 Điểm TX</h2>' + (tx.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>' + tx.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + e(c.ghichu) + '</td><td><b>' + e(c.diem) + '</b></td></tr>'; }).join('') + '</tbody></table>' : '<p class="sub">Em chưa có điểm TX nào.</p>');
+    var txH = (duLieu.tx || []).filter(function (c) { return (c.diem !== null && c.diem !== undefined) || c.nop; });
+    h += '<h2 style="margin-top:14px">📒 Điểm TX</h2>' + (txH.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>' + txH.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + e(c.ghichu) + '</td><td>' + txO(c) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="sub">Em chưa có điểm TX nào.</p>');
     $('bdNoi').innerHTML = h;
     [].forEach.call($('bdNoi').querySelectorAll('.bdXem'), function (b) { b.onclick = function () { var md = b.getAttribute('data-md'), x = (duLieu.bai || []).filter(function (z) { return z.madot === md; })[0]; if (x) { baiDangXem = x; veBai(); } }; });
   };
