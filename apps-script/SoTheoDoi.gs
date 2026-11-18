@@ -95,6 +95,7 @@ function doPost(e) {
       case 'gv_tx':
       case 'gv_tx_vo':
       case 'gv_tx_vo_chot':
+      case 'gv_luyen_hs':
       case 'gv_luyen':
       case 'gv_luyen_ai':
       case 'gv_luyen_duyet':
@@ -167,6 +168,7 @@ function doPost(e) {
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_anbai') return json(gvAnBai(d));
         if (d.action === 'gv_luyen') return json(gvLuyen());
+        if (d.action === 'gv_luyen_hs') return json(gvLuyenHS(d));
         if (d.action === 'gv_luyen_ai') return json(gvLuyenAI(d));
         if (d.action === 'gv_luyen_duyet') return json(gvLuyenDuyet(d));
         if (d.action === 'gv_tx_vo') return json(gvTxVo(d));
@@ -3473,6 +3475,50 @@ function gvLuyen() {
   });
   let can = {}; try { can = JSON.parse(CacheService.getScriptCache().get('lt_can') || '{}'); } catch (e) {}
   return {ok: true, lop: lopNay(), hs: hs, can: can, them: docLuyenThem(khoiLop(), false)};
+}
+// GV xem 1 em: kien thuc yeu da/chua ren luyen; da luyen thi: % kiem tra truoc luyen -> cac luot luyen -> kiem tra sau luyen, cau van sai
+function gvLuyenHS(d) {
+  MEMO = {};
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs) return {ok: false, msg: 'Khong tim thay hoc sinh'};
+  const kq = hsKienThuc({mahs: ma, maxem: hs.maxem}); if (!kq.ok) return kq;
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_LT), luyen = [];
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_LT.length).getValues().forEach(function (r) {
+    if (String(r[1]).trim() !== ma) return;
+    let kt = {}, ct = []; try { kt = JSON.parse(r[5] || '{}'); } catch (e) {} try { ct = JSON.parse(r[6] || '[]'); } catch (e) {}
+    luyen.push({luc: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), kt: kt, ct: ct});
+  });
+  luyen.sort(function (a, b) { return a.luc < b.luc ? -1 : 1; });
+  const K = {}, lay = function (t, md) { return K[t] = K[t] || {kt: t, md: md || '', d: 0, n: 0, luot: [], dot: [], cuoiCt: null}; };
+  kq.dot.forEach(function (g) { g.kt.forEach(function (k) { const o = lay(k.kt, k.md); o.d += k.d; o.n += k.n; o.dot.push({luc: g.luc || '', ten: g.ten, d: k.d, n: k.n}); }); });
+  luyen.forEach(function (x) {
+    Object.keys(x.kt).forEach(function (t) { const v = x.kt[t], o = lay(t); o.luot.push({luc: x.luc, d: Math.round(v[0] * 100) / 100, n: v[1]}); o.cuoiCt = x.ct; });
+  });
+  const layBo = boDem(), deDoc = {}; let them = null;
+  const layCau = function (ng) {
+    try {
+      let q = null;
+      if (/^TC:/.test(ng)) { const p = ng.slice(3).split('|'), b = layBo(p[0]); q = b && cauTroMap(b)[p[1]]; }
+      else if (/^LT:/.test(ng)) { if (!them) them = docLuyenThem(0, false); q = them.filter(function (x) { return x.ma === ng.slice(3); })[0]; }
+      else { const p = ng.split('|'); if (!(p[0] in deDoc)) { try { deDoc[p[0]] = docDe(p[0]); } catch (e) { deDoc[p[0]] = null; } } q = deDoc[p[0]] && deDoc[p[0]].filter(function (z) { return String(z.cau) === p[1]; })[0]; }
+      if (!q) return null;
+      const da = String(q.da || ''), pa = q.pa || {};
+      return {loai: q.loai, hoi: boThe(q.hoi).slice(0, 400), dapan: q.loai === 'TN' && pa[da] ? boThe(pa[da]) : q.loai === 'DS' ? ['A', 'B', 'C', 'D'].map(function (k, i) { return k.toLowerCase() + ') ' + boThe(pa[k] || '').slice(0, 120) + ' → ' + (da[i] === 'D' ? 'Đúng' : 'Sai'); }).join(' · ') : da};
+    } catch (e) { return null; }
+  };
+  const pt = function (d, n) { return n ? Math.round(d / n * 100) / 100 : null; };
+  const da = [], chua = [];
+  Object.keys(K).forEach(function (t) {
+    const o = K[t], p = pt(o.d, o.n);
+    if (!o.luot.length) { if (p !== null && p < LUYEN_NGUONG) chua.push({kt: t, md: o.md, p: p}); return; }
+    const dau = o.luot[0].luc, tr = [0, 0], sa = [0, 0], sauDot = [];
+    o.dot.forEach(function (g) { if (g.luc && g.luc > dau) { sa[0] += g.d; sa[1] += g.n; sauDot.push({luc: g.luc, ten: g.ten, p: pt(g.d, g.n)}); } else { tr[0] += g.d; tr[1] += g.n; } });
+    const sai = [];
+    (o.cuoiCt || []).forEach(function (c) { if (c[1] === t && c[2] !== '' && Number(c[3]) < 1 && sai.length < 6) { const q = layCau(String(c[0])); if (q) sai.push(q); } });
+    da.push({kt: t, md: o.md, truoc: pt(tr[0], tr[1]), sau: pt(sa[0], sa[1]), sauDot: sauDot, luot: o.luot, sai: sai});
+  });
+  chua.sort(function (a, b) { return a.p - b.p; });
+  return {ok: true, mahs: ma, hoten: hs.ten, soLuot: luyen.length, da: da, chua: chua};
 }
 // GV nho AI soan cau luyen cho 1 kien thuc (vao tab LUYEN THEM trang thai CHO, GV duyet moi dung)
 function gvLuyenAI(d) {

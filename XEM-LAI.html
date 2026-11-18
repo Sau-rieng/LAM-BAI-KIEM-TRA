@@ -903,9 +903,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (!TIN.length) { box.innerHTML = '<div class="trong">Chưa có tin nhắn. Em hãy gửi thắc mắc đầu tiên.</div>'; return; }
     var tenBai = {}; (duLieu.bai || []).forEach(function (b) { tenBai[b.madot] = b.ten; });
     box.innerHTML = TIN.map(function (x) {
-      var ve = x.madot && x.cau ? '<span class="ve">về Câu ' + esc(String(x.cau).replace(/^I{1,3}\./, '')) + ' · ' + esc(tenBai[x.madot] || x.madot) + '</span>' : '';
-      return '<div class="bong ' + (x.tu === 'GV' ? 'gv' : 'hs') + '">' + ve + esc(x.nd) + '<span class="luc">' + (x.tu === 'GV' ? 'Thầy/cô · ' : '') + gioTin(x.t) + '</span></div>';
+      var ly = x.madot === 'LUYEN' && x.cau, ve = !ly && x.madot && x.cau ? '<span class="ve">về Câu ' + esc(String(x.cau).replace(/^I{1,3}\./, '')) + ' · ' + esc(tenBai[x.madot] || x.madot) + '</span>' : '';
+      return '<div class="bong ' + (x.tu === 'GV' ? 'gv' : 'hs') + '">' + ve + esc(x.nd).replace(/\n/g, '<br>') + (ly ? '<div><button class="btn2 nho tinLy" data-kt="' + esc(x.cau) + '" style="margin-top:8px">🔁 Luyện ngay</button></div>' : '') + '<span class="luc">' + (x.tu === 'GV' ? 'Thầy/cô · ' : '') + gioTin(x.t) + '</span></div>';
     }).join('');
+    [].forEach.call(box.querySelectorAll('.tinLy'), function (b) { b.onclick = function () { batDauLuyen('tat', b.getAttribute('data-kt').split(' ;; ')); }; });
     box.scrollTop = box.scrollHeight;
   }
   function goiTin(du) {
