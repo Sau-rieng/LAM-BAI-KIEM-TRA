@@ -35,5 +35,8 @@ Ghi chú: Kiểm tra miệng
 
 ## Nộp vở bằng mã QR (cột 📗)
 - Mỗi HS tải **🏷 Nhãn vở** trong Tài khoản HS (QR chứa `KPHH-VO <SBD>`), in và dán lên bìa vở.
-- GV: Trang chủ → Kiểm tra → Điểm TX → **📗 Quét nộp vở** (ngày lấy theo ô Ngày). Máy tự nhận lớp theo 6 số đầu SBD, hiện tên em khi đã ghi; quét lại báo "đã ghi".
-- Sổ ghi cột `yyyy-mm-dd#v` (ghi chú "Nộp vở"), giá trị `V` = đã nộp, không tính vào TB TX. Muốn chấm điểm vở: bấm tiêu đề cột 📗 → Sửa điểm; để trống vẫn giữ dấu ✓.
+- GV: Trang chủ → Kiểm tra → Điểm TX → chọn lớp → **📗 Quét nộp vở** (ngày lấy theo ô Ngày). Chọn **Nộp đúng hạn** hoặc **⏰ Nộp trễ** trên màn hình quét (đổi được giữa chừng). Chỉ nhận vở của lớp đang chọn; ghi được thì hiện tên em.
+- Bấm **Xong** → danh sách các em chưa quét, tích **Không nộp** rồi **Lưu Không nộp**. Em đã chốt KN mà sau đó mang vở tới quét thì đổi thành X.
+- Sổ ghi cột `yyyy-mm-dd#v` (ghi chú "Nộp vở"), giá trị `V` đúng hạn (X, +1), `T` trễ (X nền vàng, +0.5), `K` không nộp (KN, −1).
+- Cột **Điểm vở** = tổng các lần, chỉ hiển thị, không cộng vào TB TX. Sửa trạng thái: bấm tiêu đề cột 📗 → Sửa điểm → chọn từng em.
+- HS thấy "Nộp vở đúng hạn / trễ / Không nộp" và Điểm vở trong Tài khoản HS.

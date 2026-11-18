@@ -616,7 +616,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var nTro = duLieu.bai.filter(function (b) { return b.tro; }).length, nKT = duLieu.bai.length - nTro;
     $('soBai').textContent = duLieu.bai.length ? (nKT ? nKT + ' bài giáo viên đã mở' : '') + (nKT && nTro ? ' · ' : '') + (nTro ? nTro + ' lượt trò chơi' : '') : 'Chưa có bài nào mở xem lại';
     var nTX = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; }).length;
-    var nVo = (duLieu.tx || []).filter(function (c) { return c.nop && (c.diem === null || c.diem === undefined); }).length;
+    var nVo = (duLieu.tx || []).filter(function (c) { return c.nop && c.nop !== 'K' && (c.diem === null || c.diem === undefined); }).length;
     $('soTX').textContent = nTX || nVo ? (nTX ? nTX + ' lần có điểm' : '') + (nTX && nVo ? ' · ' : '') + (nVo ? nVo + ' lần nộp vở' : '') : 'Điểm thầy/cô cho trên lớp';
     var n = dsTN().length;
     $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
@@ -637,8 +637,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       hien.slice().reverse().map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + '</td><td>' + txO(c) + '</td></tr>'; }).join('') + '</tbody></table>';
   };
   $('txVe').onclick = function () { man('scrHome'); };
-  function txO(c) { return c.diem !== null && c.diem !== undefined ? '<b>' + String(c.diem) + '</b>' : '<b style="color:#1e7d32">✓</b> <small>đã nộp vở</small>'; }
-  function txVoChu() { var v = (duLieu.tx || []).filter(function (c) { return c.vo; }); var n = v.filter(function (c) { return c.nop || (c.diem !== null && c.diem !== undefined); }).length; return v.length ? ' · 📗 nộp vở ' + n + '/' + v.length + ' lần' : ''; }
+  function voTT(c) { return c.nop === true ? 'V' : c.nop || ''; }
+  function txO(c) {
+    if (c.diem !== null && c.diem !== undefined) return '<b>' + String(c.diem) + '</b>';
+    var t = voTT(c);
+    return t === 'K' ? '<b style="background:#fbd5d5;color:#a52714;padding:0 6px;border-radius:6px">KN</b> <small>Không nộp vở (−1)</small>' : t === 'T' ? '<b style="background:#ffe066;padding:0 6px;border-radius:6px">X</b> <small>Nộp vở trễ (+0.5)</small>' : '<b>X</b> <small>Nộp vở đúng hạn (+1)</small>';
+  }
+  function txVoChu() {
+    var v = (duLieu.tx || []).filter(function (c) { return c.vo && voTT(c); }); if (!v.length) return '';
+    var n = v.filter(function (c) { return voTT(c) !== 'K'; }).length, d = Math.round(v.reduce(function (a, c) { return a + ({ V: 1, T: 0.5, K: -1 }[voTT(c)] || 0); }, 0) * 100) / 100;
+    return ' · 📗 nộp vở ' + n + '/' + v.length + ' lần · Điểm vở ' + (d > 0 ? '+' : '') + d;
+  }
   // ---------- Nhan vo (ma QR): HS tai ve, in, dan len vo; GV quet o trang giao vien -> ghi ✓ nop vo vao diem TX ----------
   function veNhan() {
     var cv = $('nhanCv'), g = cv.getContext('2d'), W = cv.width, H = cv.height;
