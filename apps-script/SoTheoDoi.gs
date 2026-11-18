@@ -77,6 +77,7 @@ function doPost(e) {
       case 'hs_kienthuc': return json(hsKienThuc(d));
       case 'hs_luyen': return json(hsLuyen(d));
       case 'hs_luyen_nop': return json(hsLuyenNop(d));
+      case 'hs_ks_nop': return json(hsKSNop(d));
       case 'daxem':  return json(ghiDaXem(d));
       case 'xemtn':  return json(ghiXemTN(d));
       case 'tn_gui': return json(hsGuiTin(d));
@@ -95,6 +96,11 @@ function doPost(e) {
       case 'gv_tx':
       case 'gv_tx_vo':
       case 'gv_tx_vo_chot':
+      case 'gv_ks_dot':
+      case 'gv_ks_luu':
+      case 'gv_ks_xoa':
+      case 'gv_ks_kq':
+      case 'gv_ks_ai':
       case 'gv_luyen_hs':
       case 'gv_luyen':
       case 'gv_luyen_ai':
@@ -167,6 +173,11 @@ function doPost(e) {
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_anbai') return json(gvAnBai(d));
+        if (d.action === 'gv_ks_dot') return json(gvKSDot());
+        if (d.action === 'gv_ks_luu') return json(gvKSLuu(d));
+        if (d.action === 'gv_ks_xoa') return json(gvKSXoa(d));
+        if (d.action === 'gv_ks_kq') return json(gvKSKQ());
+        if (d.action === 'gv_ks_ai') return json(gvKSAI(d));
         if (d.action === 'gv_luyen') return json(gvLuyen());
         if (d.action === 'gv_luyen_hs') return json(gvLuyenHS(d));
         if (d.action === 'gv_luyen_ai') return json(gvLuyenAI(d));
@@ -375,7 +386,7 @@ function xemLai(d) {
       bang.push({madot: c.madot, ten: c.ten, luc: b.luc, diem: b.diem, giay: !!c.giay, xem: !!c.xemlai});
     });
   } catch (e) {}
-  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, bangdiem: bang};
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, bangdiem: bang, ks: ksChoHS(ma)};
 }
 
 // HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
@@ -660,6 +671,16 @@ function gvSoLieu(d) {
     giay: bl.filter(function (r) { return String(r[4]).trim() === 'GIAY'; }).length,
     suaTay: bl.filter(function (r) { return String(r[4]).trim() === 'GIAY' && /GV sửa tay/.test(String(r[12] || '')); }).length,
     ms: (function () { const o = {GIAY: [], IPAD: []}; bang(TAB_NKC).forEach(function (r) { if (trong(r[0]) && o[String(r[1])] && Number(r[4]) > 0) o[String(r[1])].push(Number(r[4])); }); return o; })(),
+    ks: (function () {   // khao sat HS trong khoang ngay: so phieu, tong diem dong y (thang 5), so em tu thay tien bo
+      const o = {phieu: 0, tong: 0, n: 0, tien: 0, coTien: 0}, sh = SpreadsheetApp.getActive().getSheetByName(TAB_KS);
+      if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().forEach(function (r) {
+        const t = new Date(String(r[1] instanceof Date ? r[1].toISOString() : r[1]).slice(0, 10) + 'T12:00:00'); if (isNaN(t) || !trong(t)) return;
+        let tl = null; try { tl = JSON.parse(r[2]); } catch (e) {} if (!tl) return;
+        o.phieu++; Object.keys(tl).forEach(function (k) { if (/^d_/.test(k) && typeof tl[k] === 'number') { o.tong += tl[k]; o.n++; } });
+        if (tl.tien) { o.coTien++; if (/^Tiến bộ/.test(tl.tien)) o.tien++; }
+      });
+      return o;
+    })(),
     luyen: (function () {
       const ds = docLuyenTap().filter(function (x) { const t = new Date(x.luc); return !isNaN(t) && trong(t); }), em = {}, kt = {};
       ds.forEach(function (x) { em[x.mahs] = 1; Object.keys(x.kt).forEach(function (t) { const k = x.mahs + '|' + t, v = x.kt[t], p = v[1] ? v[0] / v[1] : 0; if (!kt[k]) kt[k] = {dau: p, cuoi: p, n: 0}; kt[k].cuoi = p; kt[k].n++; }); });
@@ -3519,6 +3540,106 @@ function gvLuyenHS(d) {
   });
   chua.sort(function (a, b) { return a.p - b.p; });
   return {ok: true, mahs: ma, hoten: hs.ten, soLuot: luyen.length, da: da, chua: chua};
+}
+// ---------------------------------------------------------------------
+// KHAO SAT HS: GV mo dot (kho, tab KHAO SAT DOT: dung chung moi lop) co gio mo/dong + lop; HS lam trong Tai khoan.
+//  Phieu an danh: tab KHAO SAT (so lop) chi luu dot + ngay + tra loi; tab KHAO SAT DA LAM luu ai da lam (de GV biet em nao chua lam).
+// ---------------------------------------------------------------------
+const TAB_KSD = 'KHAO SAT DOT', HEAD_KSD = ['Ma', 'Ten', 'Mo', 'Dong', 'Lop', 'Tao'];
+const TAB_KS = 'KHAO SAT', HEAD_KS = ['Dot', 'Ngay', 'TraLoi'];
+const TAB_KSL = 'KHAO SAT DA LAM', HEAD_KSL = ['Dot', 'MaHS', 'ThoiGian'];
+function tabKho(ten, head) {
+  const ss = kho(); let sh = ss.getSheetByName(ten);
+  if (!sh) { sh = ss.insertSheet(ten); sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold'); sh.setFrozenRows(1); }
+  return sh;
+}
+function docKSDot() {
+  const sh = kho().getSheetByName(TAB_KSD);
+  if (!sh || sh.getLastRow() < 2) return [];
+  const iso = function (v) { return v instanceof Date ? v.toISOString() : String(v || ''); };
+  return sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_KSD.length).getValues().map(function (r) {
+    return {ma: String(r[0]).trim(), ten: String(r[1]).trim(), mo: iso(r[2]), dong: iso(r[3]), lop: String(r[4] || 'TAT').split(',').map(function (x) { return x.trim(); }).filter(String)};
+  }).filter(function (x) { return x.ma; });
+}
+function ksCuaLop(x) { const l = khongDau(lopNay()); return x.lop.indexOf('TAT') >= 0 || x.lop.some(function (t) { return khongDau(t) === l; }); }
+function ksDangMo(x) { const n = new Date(); return (!x.mo || new Date(x.mo) <= n) && (!x.dong || new Date(x.dong) >= n); }
+function docKSDaLam() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_KSL), o = {};
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) { const d = String(r[0]).trim(); (o[d] = o[d] || {})[String(r[1]).trim().replace(/^'/, '')] = 1; });
+  return o;
+}
+// Cho xemLai: cac dot dang mo cua lop + em da lam chua
+function ksChoHS(ma) {
+  try {
+    const mo = docKSDot().filter(function (x) { return ksCuaLop(x) && ksDangMo(x); }); if (!mo.length) return [];
+    const da = docKSDaLam();
+    return mo.map(function (x) { return {ma: x.ma, ten: x.ten, dong: x.dong, da: !!(da[x.ma] || {})[ma]}; });
+  } catch (e) { return []; }
+}
+function hsKSNop(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs || !hs.maxem || String(d.maxem || '').trim() !== hs.maxem) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  const dot = docKSDot().filter(function (x) { return x.ma === String(d.dot || ''); })[0];
+  if (!dot || !ksCuaLop(dot)) return {ok: false, msg: 'Không có đợt khảo sát này.'};
+  if (!ksDangMo(dot)) return {ok: false, msg: 'Đợt khảo sát đã đóng.'};
+  const tl = {}, vao = d.tl && typeof d.tl === 'object' ? d.tl : {};
+  Object.keys(vao).slice(0, 60).forEach(function (k) {
+    if (!/^[a-z_]{1,20}$/.test(k)) return;
+    const v = vao[k];
+    if (Array.isArray(v)) tl[k] = v.slice(0, 20).map(function (x) { return String(x).slice(0, 120); });
+    else if (typeof v === 'number') tl[k] = Math.max(1, Math.min(5, Math.round(v)));
+    else if (v != null && String(v).trim()) tl[k] = String(v).trim().slice(0, 1000);
+  });
+  if (!Object.keys(tl).length) return {ok: false, msg: 'Em chưa trả lời câu nào.'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    if ((docKSDaLam()[dot.ma] || {})[ma]) return {ok: true, trung: true};
+    layTab(TAB_KS, HEAD_KS).appendRow([dot.ma, Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd'), JSON.stringify(tl)]);
+    layTab(TAB_KSL, HEAD_KSL).appendRow([dot.ma, "'" + ma, new Date()]);
+  } finally { lock.releaseLock(); }
+  return {ok: true};
+}
+function gvKSDot() { return {ok: true, dot: docKSDot()}; }
+function gvKSLuu(d) {
+  const ten = String(d.ten || '').trim().slice(0, 120); if (!ten) return {ok: false, msg: 'Chưa có tên đợt'};
+  const mo = new Date(d.mo), dong = new Date(d.dong);
+  if (isNaN(mo) || isNaN(dong) || dong <= mo) return {ok: false, msg: 'Giờ mở/đóng chưa hợp lệ'};
+  const lop = (Array.isArray(d.lop) && d.lop.length ? d.lop : ['TAT']).map(String).join(',');
+  const sh = tabKho(TAB_KSD, HEAD_KSD), n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 1).getValues() : [];
+  let ma = String(d.maDot || '').trim();
+  for (let i = 0; ma && i < v.length; i++) if (String(v[i][0]).trim() === ma) { sh.getRange(i + 2, 2, 1, 4).setValues([[ten, mo, dong, lop]]); return gvKSDot(); }
+  ma = 'KS' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyMMddHHmmss');
+  sh.appendRow([ma, ten, mo, dong, lop, new Date()]);
+  return gvKSDot();
+}
+function gvKSXoa(d) {
+  const sh = kho().getSheetByName(TAB_KSD); if (!sh) return gvKSDot();
+  const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues() : [];
+  for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === String(d.maDot || '')) sh.deleteRow(i + 2);
+  return gvKSDot();
+}
+// Ket qua lop nay: moi dot -> danh sach phieu (an danh, tron thu tu) + em da lam
+function gvKSKQ() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_KS), dot = {};
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().forEach(function (r) {
+    const d = String(r[0]).trim(); if (!d) return; let tl = null; try { tl = JSON.parse(r[2]); } catch (e) {}
+    if (tl) (dot[d] = dot[d] || {tl: [], da: []}).tl.push(tl);
+  });
+  const da = docKSDaLam();
+  Object.keys(da).forEach(function (d) { (dot[d] = dot[d] || {tl: [], da: []}).da = Object.keys(da[d]); });
+  Object.keys(dot).forEach(function (d) { tron(dot[d].tl); });
+  return {ok: true, lop: lopNay(), hs: dsLopTX(), dot: dot};
+}
+// AI tom tat y kien tu viet (khong co ten HS)
+function gvKSAI(d) {
+  const yk = d.ykien && typeof d.ykien === 'object' ? d.ykien : {};
+  const yc = 'Dưới đây là ý kiến tự viết (ẩn danh) của học sinh trong phiếu khảo sát về việc dùng trang học tập "Khám phá Hóa học" (Tài khoản học sinh: xem lại bài, lời giải, kiến thức cần ôn, luyện lại phần yếu, bảng điểm, hỏi thầy cô) và làm bài kiểm tra, chơi trò chơi trên iPad. Phạm vi: ' + String(d.ten || '').slice(0, 200) + '.\n' +
+    'Hãy tóm tắt cho giáo viên, tiếng Việt, ngắn gọn, gộp ý trùng, ghi số lượng học sinh nêu (ước lượng) trong ngoặc, KHÔNG bịa ý không có:\n' +
+    '- uu: ưu điểm học sinh thích; - nhuoc: nhược điểm, khó khăn, lỗi gặp phải; - ipad: vấn đề riêng khi làm bài / chơi trên iPad; - dexuat: đề xuất của học sinh; - viec: 3–5 việc giáo viên nên làm trước tiên để giúp học sinh học tốt hơn.\n' +
+    'Ý kiến: ' + JSON.stringify(yk).slice(0, 60000) + '\nTrả về JSON: {"uu":["..."],"nhuoc":["..."],"ipad":["..."],"dexuat":["..."],"viec":["..."]}';
+  const kq = goiAI(yc, null, 0.3, {thuLai: true, he: 'Bạn là chuyên gia giáo dục phân tích phản hồi học sinh. Chỉ trả về JSON hợp lệ.'});
+  if (!kq || typeof kq !== 'object') return {ok: false, msg: 'AI chưa trả lời được, thử lại'};
+  return {ok: true, uu: kq.uu || [], nhuoc: kq.nhuoc || [], ipad: kq.ipad || [], dexuat: kq.dexuat || [], viec: kq.viec || []};
 }
 // GV nho AI soan cau luyen cho 1 kien thuc (vao tab LUYEN THEM trang thai CHO, GV duyet moi dung)
 function gvLuyenAI(d) {
