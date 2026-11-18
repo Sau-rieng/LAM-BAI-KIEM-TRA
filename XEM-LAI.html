@@ -274,7 +274,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="card">
     <button class="btn2 nho" id="ksVe">◀ Tài khoản</button>
     <h1 style="margin-top:10px" id="ksTieu">📋 Khảo sát</h1>
-    <p class="sub">Phiếu <b>ẩn danh</b>: thầy/cô chỉ biết em đã làm hay chưa, không biết em trả lời gì. Em trả lời thật lòng để thầy/cô làm trang và giờ học tốt hơn. Khoảng 4 phút.</p>
+    <p class="sub">Phiếu <b>ẩn danh</b>: thầy/cô chỉ biết em đã làm hay chưa, không biết em trả lời gì. Em trả lời thật lòng để thầy/cô làm trang và giờ học tốt hơn. Khoảng 3 phút, 15 câu.</p>
     <div id="ksNoi"></div>
   </div>
 </section>
@@ -693,7 +693,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (!x || !window.KS_CAU) { b.hidden = true; return; }
     b.hidden = false; b.classList.toggle('da', !!x.da); b.setAttribute('data-ma', x.ma);
     $('ksTen').textContent = '📋 ' + x.ten;
-    $('ksChu').textContent = x.da ? '✓ Em đã làm khảo sát này. Cảm ơn em!' : 'Em chưa làm · mở đến ' + ngGio(x.dong) + ' · khoảng 4 phút, ẩn danh';
+    $('ksChu').textContent = x.da ? '✓ Em đã làm khảo sát này. Cảm ơn em!' : 'Em chưa làm · mở đến ' + ngGio(x.dong) + ' · 15 câu, khoảng 3 phút, ẩn danh';
   }
   function veKSForm() {
     var so = 0, h = '', phan = '';
