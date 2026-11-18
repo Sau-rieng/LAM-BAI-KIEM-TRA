@@ -3643,7 +3643,11 @@ function luuPDFBaiLam(thuMuc, c, ma, ten, now, giay, diem, dung, tong, ct, lan, 
 // ---------------------------------------------------------------------
 // Tien ich
 // ---------------------------------------------------------------------
-function lopNay() { return SpreadsheetApp.getActive().getName().replace('SO THEO DOI', '').trim() || 'LOP'; }
+// Ten lop lay tu ten file so: chap nhan "SO THEO DOI 12CLB", "SOTHEODOI-12CLB", "Sổ theo dõi_12CLB", "Bản sao của ..."
+function lopNay() {
+  const t = khongDau(SpreadsheetApp.getActive().getName()).replace(/^(BAN SAO CUA|COPY OF)\s+/, '');
+  return t.replace(/^SO\s*THEO\s*DOI[\s\-_:.]*/, '').replace(/\s+/g, ' ').trim() || 'LOP';
+}
 function khongDau(s) {
   return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').trim().toUpperCase();
 }
