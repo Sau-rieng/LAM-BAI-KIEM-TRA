@@ -135,7 +135,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .ctRBhop{border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin:10px 0}.ctRBhop summary{cursor:pointer}
 .ctCau{border-top:1px solid var(--line);padding:8px 0}.ctCauDau{margin-bottom:4px}.ctBuoc{margin:4px 0 4px 18px;padding:0}
 .ctBuocSua{display:flex;gap:6px;margin:4px 0}.ctBuocSua .nd{flex:1;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px}.ctBuocSua .dm{width:72px;font:inherit;padding:6px;border:1px solid var(--line);border-radius:8px}
-.ctChamHop{border:2px solid var(--pri);border-radius:12px;padding:8px 12px;margin:-4px 0 10px;background:#fbfcff}.ctAnh{max-width:100%;max-height:420px;display:block;margin:6px auto;border-radius:8px}
+.ctChamHop{border:2px solid var(--pri);border-radius:12px;padding:8px 12px;margin:-4px 0 10px;background:#fbfcff}.ctAnh{max-width:100%;max-height:420px;display:block;margin:6px auto;border-radius:8px;cursor:zoom-in}.ctAnh.to{max-height:none;cursor:zoom-out}.ctLy{display:block;color:#5b6175;font-size:12.5px;margin-top:2px}.ctNX{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:700;margin:6px 0}.ctNX input{font:inherit;font-weight:400;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
 .ctTich{display:flex;gap:8px;align-items:flex-start;padding:6px 4px;border-radius:8px;cursor:pointer}.ctTich:hover{background:var(--bg)}.ctTich input{width:20px;height:20px;margin-top:2px}.ctTich span{flex:1}
 .ctTong{font-size:17px;margin:10px 0}.ctChup{display:inline-flex;align-items:center;cursor:pointer}.kqDong.on{border-color:var(--pri)}
 .ptNen{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;overflow:auto;padding:16px}.ptNen[hidden]{display:none}
@@ -641,6 +641,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .qTren{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0}.qTren span{color:var(--muted);font-size:14px}
 .qKhung{position:relative;background:#000;border-radius:12px;overflow:hidden}.qKhung video{display:block;width:100%;max-height:70vh;object-fit:contain}.qKhung canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .qTT{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;padding:10px 12px;font-size:16px;text-align:center}
+.qMatSau{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 64px);transform:translateX(-50%);z-index:3;font:inherit;font-weight:800;font-size:18px;padding:14px 22px;border-radius:999px;border:3px solid #fff;background:#1a56db;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.45);max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qMatSau[hidden]{display:none}.qMatSau:disabled{opacity:.7}
 .qKQ{position:absolute;left:10px;right:10px;top:10px;border-radius:12px;padding:12px 14px;font-size:19px;line-height:1.35;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);text-align:center}.qKQ small{display:block;font-size:14px;opacity:.9}.qKQ.cho{background:#b06000}.qKQ.ok{background:#137333}.qKQ.loi{background:#c5221f}.qKQ.xanh{background:#1a56db}
 .qKhung.khongCam video,.qKhung.khongCam canvas{display:none}.qKhung.khongCam{min-height:120px}
 .qMoi{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#e6f4ea;border-radius:10px;padding:10px 12px;font-size:16px}.qMoi b.d{font-size:20px}
@@ -980,7 +981,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div id="quetChon"></div>
   <div id="quetMan" class="hidden">
     <div class="qTren"><div><b id="qTen"></b><span id="qTienDo"></span></div><button class="btn2" id="qDung">✕ Thoát</button></div>
-    <div class="qKhung" id="qKhung"><video id="qVideo" playsinline muted autoplay></video><canvas id="qVe"></canvas><div class="qKQ" id="qKQ" hidden></div><div class="qTT" id="qTT">Đang mở camera…</div></div>
+    <div class="qKhung" id="qKhung"><video id="qVideo" playsinline muted autoplay></video><canvas id="qVe"></canvas><div class="qKQ" id="qKQ" hidden></div><button class="qMatSau" id="qMatSau" hidden></button><div class="qTT" id="qTT">Đang mở camera…</div></div>
     <div class="qNut"><label class="btn2">📁 Chọn ảnh có sẵn<input type="file" id="qFile" accept="image/*" multiple hidden></label><span id="qCho" class="sub"></span></div>
     <div id="qXet"></div>
     <div class="card"><div id="qDa" class="sub">Chưa có tờ nào.</div></div>
@@ -1813,7 +1814,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     Promise.all([goiBatKy({ action: 'gv_degiay', ma: MA, ca: ca }), goi(l.url, { action: 'gv_giay_lop', ma: MA, ca: ca })]).then(function (r) {
       var de = r[0], lp = r[1];
       if (!de.ok || !lp.ok) { var m = (de.ok ? lp : de).msg || ''; throw new Error(/khong hop le/i.test(m) ? 'Sổ theo dõi chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : m); }
-      Q = { ca: ca, lop: l, de: de.ma, hs: lp.hs, da: lp.da, ten: {}, hang: [], dangGui: 0, trangThai: 'tim', cuoi: null, mat: 0, cheDo: cheDo || 'ngay', moi: null, soChup: 0, cho: lp.cho || 0 };
+      Q = { ca: ca, lop: l, de: de.ma, hs: lp.hs, da: lp.da, ten: {}, hang: [], dangGui: 0, trangThai: 'tim', cuoi: null, mat: 0, cheDo: cheDo || 'ngay', moi: null, soChup: 0, cho: lp.cho || 0,
+        coTL: DOT.some(function (d) { return d.giay && (d.ca || d.madot) === ca && Number(d.phut) >= 45; }), matSau: null, aiTL: 0 };
+      $('qMatSau').hidden = true;
       lp.hs.forEach(function (x) { Q.ten[x.mahs] = x.hoten; });
       $('quetChon').classList.add('hidden'); $('quetMan').classList.remove('hidden');
       $('qTen').textContent = (Q.cheDo === 'chup' ? '📸 Chụp: ' : Q.cheDo === 'cham' ? '🗂 Chấm ảnh: ' : '') + de.ma[0].ten + ' · ' + lopTen + (Q.cheDo === 'cham' ? '' : ' · vuốt sang phải để thoát'); veTienDo(); veDaCham(); $('qXet').innerHTML = ''; hienKQ(null);
@@ -1826,7 +1829,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function veTienDo() {
     var n = Object.keys(Q.da).length, tong = Q.hs.length;
     $('qTienDo').textContent = Q.cheDo === 'chup' ? ' · đã chụp ' + Q.soChup + ' tờ' + (Q.dangGui ? ' · đang gửi ' + Q.dangGui : '')
-      : ' · đã chấm ' + n + '/' + tong + ' em' + (Q.dangGui ? ' · đang gửi ' + Q.dangGui + ' tờ' : '');
+      : ' · đã chấm ' + n + '/' + tong + ' em' + (Q.dangGui ? ' · đang gửi ' + Q.dangGui + ' tờ' : '') + (Q.aiTL ? ' · AI đang chấm ' + Q.aiTL + ' bài tự luận' : '');
   }
   // Ô kết quả lớn trên khung camera: tờ vừa chụp/chấm
   function hienKQ(lop, chinh, phu) {
@@ -1890,7 +1893,32 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var full = document.createElement('canvas'); full.width = v.videoWidth; full.height = v.videoHeight; full.getContext('2d').drawImage(v, 0, 0);
     setTimeout(function () { xuLyAnh(full); }, 30);
   }
+  // ---- Mặt sau (tự luận): quét mặt trước xong → lật tờ → bấm 📷 → ảnh ghép vào bài em đó → AI chấm nháp (GV duyệt ở ✍ Chấm tự luận) ----
+  function moMatSau(sbd) {
+    Q.matSau = { sbd: sbd, ten: Q.ten[sbd] || sbd };
+    var b = $('qMatSau'); b.hidden = false; b.disabled = false; b.textContent = '📷 Chụp mặt sau · ' + Q.matSau.ten;
+  }
+  $('qMatSau').onclick = function () {
+    var v = $('qVideo'), m = Q && Q.matSau; if (!m || !v.videoWidth) return;
+    var k = Math.min(1, 1800 / Math.max(v.videoWidth, v.videoHeight)), c = document.createElement('canvas');
+    c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    var anh = c.toDataURL('image/jpeg', 0.85), b = this; b.disabled = true; b.textContent = 'Đang lưu mặt sau…'; bip(true);
+    Q.matSau = null;
+    goi(Q.lop.url, { action: 'gv_tl_anh', ma: MA, ca: Q.ca, mahs: m.sbd, anh: anh }).then(function (j) {
+      if (!j.ok) throw new Error(/hop le/i.test(j.msg || '') ? 'Sổ lớp chưa cập nhật bản mới.' : j.msg || 'lỗi');
+      b.hidden = true; hienKQ('xanh', '📷 Đã ghép mặt sau · ' + esc(m.ten), 'AI đang chấm nháp tự luận · quét tờ tiếp theo');
+      Q.aiTL++; veTienDo();
+      var q = Q; goiLau(q.lop.url, { action: 'gv_tl_ai', ma: MA, ca: q.ca, mahs: m.sbd }, 120000).then(function (r) {
+        q.aiTL--; if (Q === q) { veTienDo(); if (r.ok) { Q.moi = { html: '🤖 <b>' + esc(m.sbd.slice(-2)) + '</b> ' + esc(m.ten) + ' · tự luận AI chấm nháp <b>' + diem(r.tl && r.tl.nhap ? r.tl.nhap.tong : 0) + '</b> <small>chờ duyệt</small>' }; veDaCham(); } }
+      }).catch(function () { q.aiTL--; if (Q === q) veTienDo(); });
+    }).catch(function (e) { b.disabled = false; Q.matSau = m; b.textContent = '📷 Chụp lại mặt sau · ' + m.ten; hienKQ('loi', '✗ Chưa lưu được mặt sau', esc(e.message)); bip(false); });
+  };
+  function goiLau(url, du, ms) {
+    var hetGio = new Promise(function (_, loi) { setTimeout(function () { loi(new Error('quá ' + Math.round(ms / 1000) + ' giây không trả lời')); }, ms); });
+    return Promise.race([fetch(url, { method: 'POST', body: JSON.stringify(du) }).then(function (r) { return r.json(); }), hetGio]);
+  }
   function thoatQuet() {
+    $('qMatSau').hidden = true;
     dungCamera(); if (Q) Q.tiep = null; hienKQ(null); $('quetMan').classList.remove('toanMan');
     try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {}); } catch (e) {}
     moQuet(Q && Q.ca);
@@ -2087,7 +2115,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (j.ok) {
         var cu2 = Q.da[x.sbd] || {};
         Q.da[x.sbd] = { madot: j.madot, diem: j.diem, ct: j.ct || ctKey(x), anh: j.url || cu2.anh || '', ghi: du.ghichu };
-        if (Q.cuoi && Q.cuoi.sbd === x.sbd) hienKQ(x.canhLuu ? 'cho' : 'ok', '✓ ' + ten + ' · ' + dd, x.canhLuu ? '⚠ Đã lưu, có cảnh báo – xem ở 📋 Kết quả' : 'Đã lưu vào sổ lớp ' + esc(Q.lop.ten));
+        if (Q.cuoi && Q.cuoi.sbd === x.sbd) hienKQ(x.canhLuu ? 'cho' : 'ok', '✓ ' + ten + ' · ' + dd, x.canhLuu ? '⚠ Đã lưu, có cảnh báo – xem ở 📋 Kết quả' : 'Đã lưu vào sổ lớp ' + esc(Q.lop.ten) + (Q.coTL && Q.cheDo === 'ngay' ? ' · lật mặt sau, bấm 📷' : ''));
+        if (Q.coTL && Q.cheDo === 'ngay' && Q.cuoi && Q.cuoi.sbd === x.sbd) moMatSau(x.sbd);
         Q.moi = { html: '✓ <b>' + esc(x.sbd.slice(-2)) + '</b> ' + ten + ' · <b class="d">' + diem(j.diem) + '</b> <small>mã ' + esc(j.madot.slice(-3)) + ' · đã lưu</small>' };
         veDaCham(); veTienDo(); if (Q.xong) Q.xong(); return;
       }
@@ -2952,28 +2981,45 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }
     function veDs() {
       var j = CT.ds; if (!j || !CT.rb) return;
-      var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), xong = co.filter(function (h) { return j.tl[h.mahs]; }).length;
-      var h = '<h2>Lớp ' + esc(CT.lop.ten) + ' · đã chấm tự luận ' + xong + '/' + co.length + ' em</h2>';
+      var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), xong = co.filter(function (h) { return j.tl[h.mahs] && j.tl[h.mahs].duyet; }).length;
+      var choAI = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.anh && !t.duyet && !t.nhap; }), nhap = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.nhap && !t.duyet; }).length;
+      var h = '<h2>Lớp ' + esc(CT.lop.ten) + ' · đã duyệt tự luận ' + xong + '/' + co.length + ' em' + (nhap ? ' · ' + nhap + ' bài AI chấm nháp chờ duyệt' : '') + '</h2>';
       if (!rbDu()) h += '<p class="ptCanh">Soạn và lưu hướng dẫn chấm cho đủ các câu trước khi chấm.</p>';
+      else h += '<p class="sub">Ảnh mặt sau: chụp ngay khi quét phiếu (nút 📷 Chụp mặt sau) hoặc chụp trong từng em. AI đọc ảnh, chấm nháp theo bước; thầy/cô xem, sửa rồi bấm <b>✓ Duyệt</b> mới cộng điểm và học sinh mới thấy.</p>' +
+        (choAI.length ? '<div class="ptNut"><button class="btn2" id="ctAITat">🤖 AI chấm nháp ' + choAI.length + ' em đã có ảnh</button><span class="sub" id="ctAITT"></span></div>' : '');
       h += '<div class="kqDs">' + co.map(function (x) {
         var t = j.tl[x.mahs], dTN = Number(j.da[x.mahs].diem) || 0;
-        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"' + (rbDu() ? '' : ' disabled') + '><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t ? '✓ TL ' + soMT(t.tong) : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
+        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"' + (rbDu() ? '' : ' disabled') + '><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t && t.duyet ? '✓ TL ' + soMT(t.tong) : t && t.nhap ? '🤖 nháp ' + soMT(t.nhap.tong) + ' · chờ duyệt' : t && t.anh ? '📷 có ảnh' : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
       }).join('') + '</div>';
       if (!co.length) h += '<p class="sub">Lớp này chưa có phiếu trắc nghiệm nào được chấm. Quét phiếu trước rồi chấm tự luận.</p>';
       $('ctDs').innerHTML = h;
       [].forEach.call($('ctDs').querySelectorAll('.ctEm'), function (b) { b.onclick = function () { var m = b.getAttribute('data-ma'); CT.em = CT.em === m ? null : m; CT.anh = null; veDs(); if (CT.em) veCham(); }; });
+      if ($('ctAITat')) $('ctAITat').onclick = function () {
+        var bt = this, ds = choAI.slice(), n = 0, loi = 0; bt.disabled = true;
+        var chay = function () {
+          if (!ds.length) { bt.textContent = '🤖 Xong: ' + n + ' em' + (loi ? ' · ' + loi + ' em lỗi' : ''); veDs(); return; }
+          var x = ds.shift(); $('ctAITT').textContent = 'Đang chấm ' + x.hoten + '… (' + (n + loi + 1) + '/' + choAI.length + ')';
+          goiLau(CT.lop.url, { action: 'gv_tl_ai', ma: MA, ca: ca, mahs: x.mahs }, 120000).then(function (r) { if (r.ok) { n++; j.tl[x.mahs] = r.tl; } else loi++; }).catch(function () { loi++; }).then(chay);
+        };
+        chay();
+      };
       if (CT.em && $('ctCham')) veCham();
     }
     function veCham() {
       var j = CT.ds, ma = CT.em, t = j.tl[ma], box = $('ctCham'); if (!box) return;
-      var h = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 Chụp bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' + (t && t.anh ? '<span class="sub">đã có ảnh bài (chụp lại để thay)</span>' : '') + '</div><img class="ctAnh" alt="" hidden>';
+      var nguon = t && t.duyet ? t.cau : t && t.nhap ? t.nhap.cau : {}, laNhap = !!(t && t.nhap && !t.duyet), aiCau = t && t.nhap ? t.nhap.cau : {};
+      var h = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 ' + (t && t.anh ? 'Chụp lại' : 'Chụp') + ' bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' +
+        (t && t.anh ? (t.duyet ? '<span class="sub">✓ Đã duyệt · sửa tích rồi bấm Duyệt để lưu lại</span>' : '<button class="btn2" id="ctAIEm">🤖 ' + (t.nhap ? 'AI chấm lại' : 'AI chấm nháp') + '</button>') : '<span class="sub">Chưa có ảnh mặt sau.</span>') + '</div>' +
+        (laNhap ? '<div class="ptCanh">🤖 AI đã chấm nháp (đã tích sẵn). Thầy/cô so với ảnh, sửa nếu cần rồi bấm <b>✓ Duyệt</b>. Chưa duyệt thì chưa cộng điểm, học sinh chưa thấy.</div>' : '') +
+        '<img class="ctAnh" alt="Ảnh bài tự luận" hidden>';
       CT.cau.forEach(function (q) {
-        var dat = t && t.cau[q.cau] ? t.cau[q.cau].dat : [];
+        var x = nguon[q.cau] || {}, dat = x.dat || [], ly = x.lydo || [];
         h += '<div class="ctCau"><div class="ctCauDau"><b>Câu ' + esc(q.cau) + '</b> · <span class="ctDiemCau" data-c="' + esc(q.cau) + '"></span>/' + soMT(q.diem) + '</div>' + ((CT.rb[q.cau] || {}).buoc || []).map(function (b, i) {
-          return '<label class="ctTich"><input type="checkbox" data-c="' + esc(q.cau) + '" data-i="' + i + '"' + (dat.indexOf(i) >= 0 ? ' checked' : '') + '> <span>' + esc(b.nd) + '</span> <b>' + soMT(b.diem) + '</b></label>';
-        }).join('') + '<div class="ptNut" style="margin:4px 0"><button class="btn2 nho ctDu" data-c="' + esc(q.cau) + '">Đạt cả câu</button><button class="btn2 nho ctKhong" data-c="' + esc(q.cau) + '">Bỏ hết</button></div></div>';
+          return '<label class="ctTich"><input type="checkbox" data-c="' + esc(q.cau) + '" data-i="' + i + '"' + (dat.indexOf(i) >= 0 ? ' checked' : '') + '> <span>' + esc(b.nd) + (ly[i] ? '<small class="ctLy">🤖 ' + esc(ly[i]) + '</small>' : '') + '</span> <b>' + soMT(b.diem) + '</b></label>';
+        }).join('') + '<label class="ctNX">Nhận xét cho HS <input data-nx="' + esc(q.cau) + '" maxlength="300" value="' + esc(x.nx || '') + '" placeholder="(không bắt buộc)"></label>' +
+          '<div class="ptNut" style="margin:4px 0"><button class="btn2 nho ctDu" data-c="' + esc(q.cau) + '">Đạt cả câu</button><button class="btn2 nho ctKhong" data-c="' + esc(q.cau) + '">Bỏ hết</button></div></div>';
       });
-      h += '<div class="ctTong">Tự luận: <b id="ctTongTL">0</b> · Trắc nghiệm: ' + diem(Number(j.da[ma].diem) - (t ? t.tong : 0)) + ' → Tổng: <b id="ctTongAll"></b></div><div class="ptNut"><button class="btn" id="ctLuu">💾 Lưu, sang em tiếp theo</button></div><p class="sub" id="ctTT"></p></div>';
+      h += '<div class="ctTong">Tự luận: <b id="ctTongTL">0</b> · Trắc nghiệm: ' + diem(Number(j.da[ma].diem) - (t ? t.tong : 0)) + ' → Tổng: <b id="ctTongAll"></b></div><div class="ptNut"><button class="btn" id="ctLuu">✓ Duyệt, sang em tiếp theo</button></div><p class="sub" id="ctTT"></p></div>';
       box.innerHTML = h;
       var tinh = function () {
         var tong = 0;
@@ -2983,20 +3029,44 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       [].forEach.call(box.querySelectorAll('.ctTich input'), function (c) { c.onchange = tinh; });
       [].forEach.call(box.querySelectorAll('.ctDu, .ctKhong'), function (b) { b.onclick = function () { var v = b.classList.contains('ctDu'); [].forEach.call(box.querySelectorAll('input[data-c="' + b.getAttribute('data-c') + '"]'), function (c) { c.checked = v; }); tinh(); }; });
       tinh();
-      box.querySelector('.ctChup input').onchange = function () { var f = this.files[0]; if (!f) return; txNen(f).then(function (u) { CT.anh = u; var im = box.querySelector('.ctAnh'); im.src = u; im.hidden = false; }); };
+      box.querySelector('.ctChup input').onchange = function () {
+        var f = this.files[0]; if (!f) return;
+        txNen(f).then(function (u) {
+          var im = box.querySelector('.ctAnh'); im.src = u; im.hidden = false; $('ctTT').textContent = 'Đang lưu ảnh…';
+          return goi(CT.lop.url, { action: 'gv_tl_anh', ma: MA, ca: ca, mahs: ma, anh: u }).then(function (r) { if (!r.ok) throw r; CT.anhCo = u; t = j.tl[ma] = Object.assign(j.tl[ma] || { cau: {}, tong: 0 }, { anh: r.anh }); veDs(); $('ctTT').textContent = 'Đã lưu ảnh. Bấm 🤖 AI chấm nháp hoặc tự tích.'; });
+        }).catch(function (e) { $('ctTT').textContent = 'Chưa lưu được ảnh: ' + loiSo(e); });
+      };
+      var im0 = box.querySelector('.ctAnh');
+      if (t && t.anh) {
+        if (CT.anhCo && CT.anhMa === ma) { im0.src = CT.anhCo; im0.hidden = false; }
+        else goi(CT.lop.url, { action: 'gv_tl_layanh', ma: MA, ca: ca, mahs: ma }).then(function (r) { if (r.ok && CT.em === ma) { CT.anhCo = r.anh; CT.anhMa = ma; im0.src = r.anh; im0.hidden = false; } }).catch(function () {});
+      }
+      im0.onclick = function () { im0.classList.toggle('to'); };
+      if ($('ctAIEm')) $('ctAIEm').onclick = function () {
+        var b = this; b.disabled = true; b.textContent = '🤖 AI đang đọc bài… (20–60 giây)';
+        goiLau(CT.lop.url, { action: 'gv_tl_ai', ma: MA, ca: ca, mahs: ma, lai: 1 }, 120000).then(function (r) {
+          if (!r.ok) throw r; j.tl[ma] = r.tl; veDs();
+          if (!r.docDuoc) $('ctTT').textContent = '⚠ AI báo ảnh khó đọc – thầy/cô xem kỹ hoặc chụp lại.';
+        }).catch(function (e) { b.disabled = false; b.textContent = '🤖 AI chấm nháp'; $('ctTT').textContent = 'AI chưa chấm được: ' + loiSo(e); });
+      };
       $('ctLuu').onclick = function () {
-        var b = this, cham = {};
-        CT.cau.forEach(function (q) { cham[q.cau] = [].map.call(box.querySelectorAll('input[data-c="' + q.cau + '"]:checked'), function (c) { return +c.getAttribute('data-i'); }); });
+        var b = this, cham = {}, lydo = {}, nx = {};
+        CT.cau.forEach(function (q) {
+          cham[q.cau] = [].map.call(box.querySelectorAll('input[data-c="' + q.cau + '"]:checked'), function (c) { return +c.getAttribute('data-i'); });
+          var a = aiCau[q.cau] || nguon[q.cau] || {}, ad = a.dat || [];
+          lydo[q.cau] = ((CT.rb[q.cau] || {}).buoc || []).map(function (_, i) { return (ad.indexOf(i) >= 0) === (cham[q.cau].indexOf(i) >= 0) ? ((a.lydo || [])[i] || '') : ''; });
+          var o = box.querySelector('input[data-nx="' + q.cau + '"]'); nx[q.cau] = o ? o.value.trim() : '';
+        });
         b.disabled = true; b.textContent = 'Đang lưu…';
-        goi(CT.lop.url, { action: 'gv_tl_luu', ma: MA, ca: ca, mahs: ma, cham: cham, anh: CT.anh || undefined }).then(function (r) {
+        goi(CT.lop.url, { action: 'gv_tl_luu', ma: MA, ca: ca, mahs: ma, cham: cham, lydo: lydo, nx: nx }).then(function (r) {
           if (!r.ok) throw r;
-          var cu = j.tl[ma] ? j.tl[ma].tong : 0; j.da[ma].diem = Math.round((Number(j.da[ma].diem) - cu + r.tong) * 100) / 100; j.tl[ma] = r.tl;
+          var cu = j.tl[ma] && j.tl[ma].duyet ? j.tl[ma].tong : 0; j.da[ma].diem = Math.round((Number(j.da[ma].diem) - cu + r.tong) * 100) / 100; j.tl[ma] = r.tl;
           delete HS_CACHE[CT.lop.ten]; delete KT_LOP[CT.lop.ten];
           var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), i = co.map(function (h) { return h.mahs; }).indexOf(ma);
-          var tiep = co.slice(i + 1).concat(co.slice(0, i)).filter(function (h) { return !j.tl[h.mahs]; })[0];
+          var tiep = co.slice(i + 1).concat(co.slice(0, i)).filter(function (h) { return !(j.tl[h.mahs] && j.tl[h.mahs].duyet); })[0];
           CT.em = tiep ? tiep.mahs : null; CT.anh = null; veDs();
           var el = CT.em && $('ctDs').querySelector('.ctEm.on'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        }).catch(function (e) { b.disabled = false; b.textContent = '💾 Lưu, sang em tiếp theo'; $('ctTT').textContent = 'Chưa lưu được: ' + loiSo(e); });
+        }).catch(function (e) { b.disabled = false; b.textContent = '✓ Duyệt, sang em tiếp theo'; $('ctTT').textContent = 'Chưa lưu được: ' + loiSo(e); });
       };
     }
     taiRB();

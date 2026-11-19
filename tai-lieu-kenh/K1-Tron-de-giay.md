@@ -103,3 +103,8 @@ Ngoài file Excel nạp kho, gửi kèm để in:
 
 
 > **Tạm thời (từ 17/11/2026): chỉ đề kiểm tra 45 phút mới có phần tự luận** (tab `TU LUAN THEM`, rubric). Đề 10–15 phút chỉ có trắc nghiệm (TN, Đúng/Sai, Trả lời ngắn). Nút ✍ Chấm tự luận chỉ hiện ở đề giấy 45 phút.
+
+## Tự luận mặt sau (đề 45 phút)
+- Quét phiếu: lưu xong mặt trước, máy hiện nút **📷 Chụp mặt sau · <tên em>** → lật tờ, bấm → ảnh tự ghép vào bài em đó, AI chấm nháp theo hướng dẫn chấm (rubric).
+- Kiểm tra → đề giấy → **✍ Chấm tự luận**: AI đã tích sẵn bước + lý do; GV so ảnh, sửa, ghi nhận xét, bấm **✓ Duyệt** mới cộng điểm và HS mới thấy. Có nút AI chấm hàng loạt các em đã có ảnh.
+- HS xem lại: ảnh phiếu mặt trước, ảnh mặt sau, từng bước ✓/✗ kèm lý do, nhận xét, lời giải chi tiết.

@@ -120,6 +120,9 @@ function doPost(e) {
       case 'gv_rubric_ai':
       case 'gv_tl_ds':
       case 'gv_tl_luu':
+      case 'gv_tl_anh':
+      case 'gv_tl_layanh':
+      case 'gv_tl_ai':
       case 'gv_ainx':
       case 'gv_nhanxet_nhieu':
       case 'gv_dacta':
@@ -200,6 +203,9 @@ function doPost(e) {
         if (d.action === 'gv_rubric_ai') return json(gvRubricAI(d));
         if (d.action === 'gv_tl_ds') return json(gvTLDs(d));
         if (d.action === 'gv_tl_luu') return json(gvTLLuu(d));
+        if (d.action === 'gv_tl_ai') return json(gvTLAI(d));
+        if (d.action === 'gv_tl_layanh') return json(gvTLLayAnh(d));
+        if (d.action === 'gv_tl_anh') return json(gvTLAnh(d));
         if (d.action === 'gv_ainx') return json(gvAINX(d));
         if (d.action === 'gv_nhanxet_nhieu') return json(gvNhanXetNhieu(d));
         if (d.action === 'gv_dacta') return json(gvDacTa(d));
@@ -363,7 +369,7 @@ function xemLai(d) {
     ketqua.push({
       madot: c.madot, ten: c.ten + (bai.lan > 1 && !c.giay ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
       giay: !!c.giay, coAnh: !!(c.giay && idTuUrl(bai.file)), nx: ((nxMap[ma + '|' + (c.ca || c.madot)] || nxMap[ma + '|' + c.madot]) || {}).nx || '',
-      tlcham: c.giay ? (function () { const ca = c.ca || c.madot, x = docTLDiem(ca)[ma]; if (!x) return null; const rb = docRubric(ca); return {tong: x.tong, coAnh: !!x.anh, cau: Object.keys(x.cau).map(function (k) { return {cau: k, diem: x.cau[k].diem, buoc: ((rb[k] || {}).buoc || []).map(function (b, i) { return {nd: b.nd, diem: b.diem, dat: x.cau[k].dat.indexOf(i) >= 0}; })}; })}; })() : null,
+      tlcham: c.giay ? (function () { const ca = c.ca || c.madot, x = docTLDiem(ca)[ma]; if (!x) return null; const rb = docRubric(ca); if (!x.duyet) return null; return {tong: x.tong, coAnh: !!x.anh, cau: Object.keys(x.cau).map(function (k) { return {cau: k, diem: x.cau[k].diem, nx: x.cau[k].nx || '', buoc: ((rb[k] || {}).buoc || []).map(function (b, i) { return {nd: b.nd, diem: b.diem, dat: x.cau[k].dat.indexOf(i) >= 0, lydo: x.cau[k].lydo[i] || ''}; })}; })}; })() : null,
       tuluan: c.giay ? ((tlMap = tlMap || docTuLuan())[c.madot] || []).map(function (t) { return {cau: t.cau, hoi: t.hoi, hinh: t.hinh && t.hinh !== '-' ? anhDataUri(/^hinh\//.test(t.hinh) ? 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/' + t.hinh : t.hinh) : '', diem: t.diem, gt: t.gt}; }) : [], tongDiem: c.giay ? de.reduce(function (a, q) { return a + (Number(q.w) || 0); }, 0) : null,
       goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
       cau: kq.ct.map(function (q) {
@@ -976,7 +982,7 @@ function gvGiayLop(d) {
 //   Diem tu luan cong vao diem de giay (BAI LAM), luu chi tiet o tab TU LUAN DIEM cua so lop; HS xem lai thay buoc mat diem
 // ---------------------------------------------------------------------
 const TAB_RB = 'RUBRIC', HEAD_RB = ['Ca', 'Cau', 'Buoc', 'NoiDung', 'Diem', 'TrangThai', 'Nguon', 'Ngay'];
-const TAB_TLD = 'TU LUAN DIEM', HEAD_TLD = ['Ca', 'MaHS', 'Cau', 'Dat', 'Diem', 'AnhId', 'ThoiGian'];
+const TAB_TLD = 'TU LUAN DIEM', HEAD_TLD = ['Ca', 'MaHS', 'Cau', 'Dat', 'Diem', 'AnhId', 'ThoiGian', 'TT', 'LyDo'];   // TT: DUYET (GV da duyet, cong diem) | NHAP (AI cham nhap); Cau _ANH: chi luu anh mat sau
 function tlGoc(ca) {
   const mas = maCa(ca); if (!mas.length) return null;
   const tl = docTuLuan(); const m = mas.filter(function (x) { return tl[x] && tl[x].length; }).sort()[0];
@@ -1029,31 +1035,37 @@ function gvRubricAI(d) {
   (kq && Array.isArray(kq.rubric) ? kq.rubric : []).forEach(function (x) { if (x && x.cau !== undefined && Array.isArray(x.buoc)) ra[String(x.cau)] = x.buoc.map(function (b) { return {nd: String(b.nd || ''), diem: Math.round((Number(b.diem) || 0) * 4) / 4}; }); });
   return {ok: true, de: ra};
 }
-function docTLDiem(ca) {
+// Diem tu luan theo em: chi bai GV da duyet (cau, tong); coNhap: kem ban AI cham nhap (o.nhap = {cau, tong}) va em chi moi co anh
+function docTLDiem(ca, coNhap) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD), m = {};
   if (!sh || sh.getLastRow() < 2) return m;
   sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TLD.length).getValues().forEach(function (r) {
     if (String(r[0]).trim() !== ca) return;
-    const ma = String(r[1]).trim(), o = m[ma] = m[ma] || {cau: {}, anh: '', tong: 0};
-    let dat = []; try { dat = JSON.parse(r[3] || '[]'); } catch (e) {}
-    o.cau[String(r[2]).trim()] = {dat: dat, diem: Number(r[4]) || 0}; o.tong = Math.round((o.tong + (Number(r[4]) || 0)) * 100) / 100;
-    if (String(r[5] || '').trim()) o.anh = String(r[5]).trim();
+    const ma = String(r[1]).trim(), c = String(r[2]).trim(), tt = String(r[7] || '').trim() || 'DUYET';
+    if (String(r[5] || '').trim()) (m[ma] = m[ma] || {cau: {}, anh: '', tong: 0, duyet: false}).anh = String(r[5]).trim();
+    if (c === '_ANH' || (tt === 'NHAP' && !coNhap)) return;
+    const o = m[ma] = m[ma] || {cau: {}, anh: '', tong: 0, duyet: false};
+    let dat = [], ly = {}; try { dat = JSON.parse(r[3] || '[]'); } catch (e) {} try { ly = JSON.parse(r[8] || '{}'); } catch (e) {}
+    const x = {dat: dat, diem: Number(r[4]) || 0, lydo: Array.isArray(ly.b) ? ly.b : [], nx: String(ly.nx || '')};
+    if (tt === 'NHAP') { const n = o.nhap = o.nhap || {cau: {}, tong: 0}; n.cau[c] = x; n.tong = Math.round((n.tong + x.diem) * 100) / 100; }
+    else { o.cau[c] = x; o.tong = Math.round((o.tong + x.diem) * 100) / 100; o.duyet = true; }
   });
+  Object.keys(m).forEach(function (k) { if (!m[k].duyet && !m[k].nhap && !coNhap) delete m[k]; });
   return m;
 }
 function tongTL(ca, ma) { const x = docTLDiem(ca)[ma]; return x ? x.tong : 0; }
 // So lop: danh sach em + diem trac nghiem + diem tu luan da cham
 function gvTLDs(d) {
   const ca = String(d.ca || '').trim(), l = gvGiayLop({ca: ca}); if (!l.ok) return l;
-  return {ok: true, lop: l.lop, hs: l.hs, da: l.da, tl: docTLDiem(ca)};
+  return {ok: true, lop: l.lop, hs: l.hs, da: l.da, tl: docTLDiem(ca, true)};
 }
 // Luu diem tu luan 1 em: d.cham {cau: [chi so buoc dat]}, d.anh (data:image/jpeg) tuy chon
 function gvTLLuu(d) {
   const ca = String(d.ca || '').trim(), ma = String(d.mahs || '').trim(), hs = timHS(ma);
   if (!hs) return {ok: false, msg: 'Khong co SBD ' + ma};
   const rb = docRubric(ca), cham = d.cham || {};
-  const dong = [], cu = docTLDiem(ca)[ma] || {cau: {}, anh: '', tong: 0};
-  let anhId = cu.anh;
+  const dong = [], cu = docTLDiem(ca)[ma] || {cau: {}, anh: '', tong: 0}, tat = docTLDiem(ca, true)[ma] || {}, lydo = d.lydo || {}, nxs = d.nx || {};
+  let anhId = tat.anh || cu.anh;
   if (d.anh && /^data:image\/jpeg;base64,/.test(String(d.anh))) {
     try {
       const tm = layThuMuc(layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), ca), 'TU LUAN');
@@ -1064,7 +1076,8 @@ function gvTLLuu(d) {
   Object.keys(rb).forEach(function (c) {
     const dat = (Array.isArray(cham[c]) ? cham[c] : (cu.cau[c] || {}).dat || []).map(Number).filter(function (i) { return i >= 0 && i < rb[c].buoc.length; });
     const dm = Math.round(dat.reduce(function (s, i) { return s + rb[c].buoc[i].diem; }, 0) * 100) / 100;
-    tong += dm; dong.push([ca, ma, c, JSON.stringify(dat), dm, anhId || '', new Date()]);
+    const ly = Array.isArray(lydo[c]) ? lydo[c].slice(0, rb[c].buoc.length).map(function (x) { return String(x || '').slice(0, 200); }) : ((cu.cau[c] || {}).lydo || []);
+    tong += dm; dong.push([ca, ma, c, JSON.stringify(dat), dm, anhId || '', new Date(), 'DUYET', JSON.stringify({b: ly, nx: String(nxs[c] !== undefined ? nxs[c] : (cu.cau[c] || {}).nx || '').slice(0, 300)})]);
   });
   tong = Math.round(tong * 100) / 100;
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -1082,7 +1095,71 @@ function gvTLLuu(d) {
       }
     }
   } finally { lock.releaseLock(); }
-  return {ok: true, mahs: ma, tong: tong, tl: docTLDiem(ca)[ma] || null};
+  return {ok: true, mahs: ma, tong: tong, tl: docTLDiem(ca, true)[ma] || null};
+}
+function tlThuMuc(ca) { return layThuMuc(layThuMuc(layThuMuc(layThuMuc(DriveApp.getRootFolder(), THU_MUC_GOC), lopNay()), ca), 'TU LUAN'); }
+function tlXoaDong(ca, ma, loc) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD); if (!sh || sh.getLastRow() < 2) return;
+  const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TLD.length).getValues();
+  for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === ca && String(v[i][1]).trim() === ma && loc(v[i])) sh.deleteRow(i + 2);
+}
+// Quet phieu xong chup mat sau (tu luan): luu anh, gan vao bai em (chua cham)
+function gvTLAnh(d) {
+  const ca = String(d.ca || '').trim(), ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs) return {ok: false, msg: 'Khong co SBD ' + ma};
+  if (!maCa(ca).length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
+  if (!/^data:image\/jpeg;base64,/.test(String(d.anh || ''))) return {ok: false, msg: 'Thieu anh'};
+  const id = tlThuMuc(ca).createFile(Utilities.newBlob(Utilities.base64Decode(String(d.anh).split(',')[1]), 'image/jpeg', 'TU LUAN - ' + ma + ' - ' + hs.ten + '.jpg')).getId();
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = layTab(TAB_TLD, HEAD_TLD);
+    if (sh.getLastColumn() < HEAD_TLD.length) sh.getRange(1, 1, 1, HEAD_TLD.length).setValues([HEAD_TLD]);
+    tlXoaDong(ca, ma, function (r) { return String(r[2]).trim() === '_ANH'; });
+    const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, 1, 4).setNumberFormat('@');
+    sh.getRange(r0, 1, 1, HEAD_TLD.length).setValues([[ca, ma, '_ANH', '[]', 0, id, new Date(), 'ANH', '']]);
+    // bai da cham (nhap/duyet) cung tro sang anh moi
+    const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 2).getValues() : [];
+    v.forEach(function (r, i) { if (String(r[0]).trim() === ca && String(r[1]).trim() === ma) sh.getRange(i + 2, 6).setValue(id); });
+  } finally { lock.releaseLock(); }
+  return {ok: true, mahs: ma, hoten: hs.ten, anh: id};
+}
+function gvTLLayAnh(d) {
+  const x = docTLDiem(String(d.ca || '').trim(), true)[String(d.mahs || '').trim()];
+  if (!x || !x.anh) return {ok: false, msg: 'Chua co anh'};
+  return {ok: true, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(DriveApp.getFileById(x.anh).getBlob().getBytes())};
+}
+// AI cham nhap tu luan 1 em theo rubric (doc anh bai viet tay) -> dong NHAP; GV duyet moi cong diem
+function gvTLAI(d) {
+  const ca = String(d.ca || '').trim(), ma = String(d.mahs || '').trim();
+  const r = gvRubric({ca: ca}); if (!r.ok) return r;
+  const rb = r.rubric, cau = r.cau.filter(function (q) { return rb[q.cau] && rb[q.cau].buoc.length; });
+  if (!cau.length || cau.length < r.cau.length) return {ok: false, msg: 'Chua du huong dan cham (rubric) cho cac cau'};
+  const x = docTLDiem(ca, true)[ma];
+  if (!x || !x.anh) return {ok: false, msg: 'Chua co anh bai tu luan'};
+  if (x.duyet && !d.lai) return {ok: false, msg: 'Bai da duyet'};
+  const b64 = Utilities.base64Encode(DriveApp.getFileById(x.anh).getBlob().getBytes());
+  const yc = 'Ảnh là bài làm TỰ LUẬN viết tay môn Hóa học của một học sinh (mặt sau phiếu trả lời). Hãy đọc kỹ bài làm và chấm theo HƯỚNG DẪN CHẤM từng bước dưới đây.\n' +
+    'Quy tắc: một bước chỉ ĐẠT khi trên bài có nội dung đúng tương ứng (chấp nhận cách làm khác nếu đúng bản chất, kết quả đúng). Không đọc được, bỏ trống hoặc sai → KHÔNG đạt. Không đoán thay học sinh.\n' +
+    'Với mỗi bước ghi lý do rất ngắn (≤ 15 từ, tiếng Việt, nói học sinh đã viết gì / thiếu gì). Mỗi câu thêm 1 nhận xét ngắn giúp học sinh sửa (≤ 30 từ). Số thập phân dùng dấu chấm.\n' +
+    'Đề và hướng dẫn chấm: ' + JSON.stringify(cau.map(function (q) { return {cau: q.cau, diem: q.diem, de: String(q.hoi).replace(/<[^>]*>/g, ' ').slice(0, 1200), buoc: rb[q.cau].buoc.map(function (b, i) { return {so: i, nd: b.nd, diem: b.diem}; })}; })) +
+    '\nTrả về JSON: {"doc_duoc":true,"cau":[{"cau":"1","dat":[0,2],"lydo":["lý do bước 0","lý do bước 1",...],"nhanxet":"..."}]}';
+  const kq = goiAI(yc, {b64: b64, mime: 'image/jpeg'}, 0.1, {thuLai: true, he: 'Bạn là giáo viên Hóa học chấm bài cẩn thận, công bằng. Chỉ trả về JSON hợp lệ.'});
+  if (!kq || !Array.isArray(kq.cau)) return {ok: false, msg: 'AI chua cham duoc, thu lai'};
+  const dong = [];
+  cau.forEach(function (q) {
+    const a = kq.cau.filter(function (z) { return String(z.cau).replace(/^IV\./, '') === String(q.cau).replace(/^IV\./, ''); })[0] || {};
+    const n = rb[q.cau].buoc.length, dat = (Array.isArray(a.dat) ? a.dat : []).map(Number).filter(function (i, k, s) { return i >= 0 && i < n && s.indexOf(i) === k; });
+    const dm = Math.round(dat.reduce(function (t, i) { return t + rb[q.cau].buoc[i].diem; }, 0) * 100) / 100;
+    dong.push([ca, ma, q.cau, JSON.stringify(dat), dm, x.anh, new Date(), 'NHAP', JSON.stringify({b: (Array.isArray(a.lydo) ? a.lydo : []).slice(0, n).map(function (t) { return String(t || '').slice(0, 200); }), nx: String(a.nhanxet || '').slice(0, 300)})]);
+  });
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = layTab(TAB_TLD, HEAD_TLD);
+    if (sh.getLastColumn() < HEAD_TLD.length) sh.getRange(1, 1, 1, HEAD_TLD.length).setValues([HEAD_TLD]);
+    tlXoaDong(ca, ma, function (r) { return String(r[7]).trim() === 'NHAP'; });
+    const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, dong.length, 4).setNumberFormat('@'); sh.getRange(r0, 1, dong.length, HEAD_TLD.length).setValues(dong);
+  } finally { lock.releaseLock(); }
+  return {ok: true, mahs: ma, docDuoc: kq.doc_duoc !== false, tl: docTLDiem(ca, true)[ma] || null};
 }
 // HS xem anh bai tu luan cua minh (khi de da cho xem lai)
 function hsAnhTL(d) {

@@ -24,7 +24,7 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 - Bảo mật: không xin mã GV thật, không đọc/chép file KHO DE (có mã + khóa AI), token GitHub chỉ ở tab MA.
 
 ## 5. Tính năng đã có (đến 19/11/2026)
-- **Kiểm tra**: iPad + phiếu giấy quét điện thoại; nạp nhiều file Excel; đổi mã đề khi trùng (tab DOI MA); M1 Phân tích đề (sửa đáp án, chấm lại); M2 Ma trận – Đặc tả (CV 7991); M5 chấm tự luận theo rubric (chỉ đề ≥45 phút).
+- **Kiểm tra**: iPad + phiếu giấy quét điện thoại; nạp nhiều file Excel; đổi mã đề khi trùng (tab DOI MA); M1 Phân tích đề (sửa đáp án, chấm lại); M2 Ma trận – Đặc tả (CV 7991); M5 chấm tự luận theo rubric (chỉ đề ≥45 phút): quét mặt trước xong bấm 📷 Chụp mặt sau → ghép vào bài em, AI chấm nháp, GV ✓ Duyệt mới cộng điểm/HS thấy (tab TU LUAN DIEM cột TT: DUYET/NHAP, _ANH).
 - **Trò chơi**: cá nhân/nhóm, xuất phát chung, kết quả theo buổi, nút "Cho HS xem lại" (mặc định tắt).
 - **Điểm TX**: chụp ảnh/PDF/Excel/dán (Claude đọc)/nhập tay; **📗 Quét nộp vở** bằng QR nhãn vở (`VO<SBD>`, nhãn cũ `KPHH-VO <SBD>` vẫn nhận; nhãn hỏng gõ 2 số cuối SBD): chọn lớp, chế độ Đúng hạn (X, +1) / Trễ (X nền vàng, +0.5), Xong → chốt Không nộp (KN, −1); cột "Điểm vở" chỉ hiển thị, không vào TB TX.
 - **Tài khoản HS**: Xem lại bài + 💡, Kiến thức cần ôn, Luyện lại phần yếu (10 câu, không tính điểm), Bảng điểm của em, Điểm TX, Nhãn vở (QR), Hỏi thầy/cô, Tài nguyên, **Khảo sát** (khi GV mở đợt).
