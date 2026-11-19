@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mô Phỏng 3D Cấu Trúc Tinh Thể NaCl</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Three.js r128 & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at 50% 42%, #ffffff 0%, #f1f5f9 58%, #e2e8f0 100%);
+            color: #0f172a;
+            user-select: none;
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+
+        /* Custom sleek scrollbars for control panel */
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Custom range slider styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            background: #1d4ed8;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+            cursor: pointer;
+        }
+        input[type="range"]:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Glassmorphism panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.1), 0 4px 12px -4px rgba(15, 23, 42, 0.05);
+        }
+
+        /* Toggle Switch */
+        .toggle-track {
+            transition: background-color 0.2s ease;
+        }
+        .toggle-thumb {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Subtle entrance animation */
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .animate-card {
+            animation: slideUpFade 0.22s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Vùng hiển thị WebGL 3D -->
+    <div id="canvas-container" aria-label="Không gian mô phỏng 3D tinh thể NaCl"></div>
+
+    <!-- Thanh tiêu đề góc trên bên trái -->
+    <header class="fixed top-3 left-3 sm:top-4 sm:left-4 z-20 pointer-events-none max-w-[calc(100vw-130px)] sm:max-w-md">
+        <div class="glass-panel rounded-2xl px-4 py-3 pointer-events-auto inline-flex flex-col gap-1">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center shadow-sm shrink-0">
+                    <!-- Biểu tượng khối lập phương 3D -->
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
+                        Mạng Tinh Thể Ion NaCl
+                    </h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">
+                        Natri Clorua • Mô phỏng 3D tương tác
+                    </p>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100 mt-0.5">
+                <span>Kéo để xoay 360°</span>
+                <span class="text-slate-300">•</span>
+                <span>Cuộn/Chụm để thu phóng</span>
+                <span class="text-slate-300">•</span>
+                <span>Chạm ion để xem thông tin</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Thanh công cụ nhanh góc trên bên phải -->
+    <div class="fixed top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2">
+        <!-- Nút tự động xoay -->
+        <button id="btn-autorotate" title="Bật/tắt tự động xoay"
+            class="glass-panel h-11 px-3 rounded-xl flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-white transition-all active:scale-95">
+            <svg id="icon-autorotate" class="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span class="hidden md:inline">Tự xoay</span>
+        </button>
+
+        <!-- Nút đặt lại góc nhìn -->
+        <button id="btn-reset-camera" title="Đặt lại góc nhìn ban đầu"
+            class="glass-panel h-11 px-3 rounded-xl flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-white transition-all active:scale-95">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span class="hidden md:inline">Đặt lại góc nhìn</span>
+        </button>
+
+        <!-- Nút mở/thu gọn bảng điều khiển -->
+        <button id="btn-toggle-panel" title="Thu gọn / Mở rộng bảng điều khiển"
+            class="glass-panel h-11 px-3.5 rounded-xl flex items-center gap-2 text-xs font-semibold text-slate-800 hover:text-blue-600 hover:bg-white transition-all active:scale-95">
+            <svg id="icon-panel-toggle" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            <span id="label-panel-toggle" class="hidden sm:inline">Điều khiển</span>
+        </button>
+    </div>
+
+    <!-- Bảng điều khiển bên phải (Có thể thu gọn/mở rộng) -->
+    <aside id="control-panel"
+        class="fixed top-16 right-3 sm:top-[72px] sm:right-4 bottom-3 sm:bottom-4 w-[calc(100vw-24px)] max-w-[330px] z-20 transition-all duration-300 ease-out transform translate-x-0 opacity-100 pointer-events-auto flex flex-col">
+        <div class="glass-panel rounded-2xl flex flex-col max-h-full overflow-hidden">
+            <!-- Đầu bảng -->
+            <div class="px-4 py-3 border-b border-slate-200/80 flex items-center justify-between shrink-0 bg-white/50">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Bảng Điều Khiển</h2>
+                </div>
+                <button id="btn-close-panel-mobile" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Thu gọn bảng">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Nội dung cuộn được -->
+            <div class="p-4 space-y-5 overflow-y-auto custom-scroll">
+
+                <!-- 1. Chế độ hiển thị -->
+                <section class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700">Chế độ hiển thị</label>
+                        <span id="badge-view-mode" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Tỉ lệ thực 1.77:1</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100/90 rounded-xl">
+                        <button id="mode-ball-stick" data-mode="ball-stick"
+                            class="view-mode-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition-all bg-white text-blue-600 shadow-sm">
+                            Cầu - Thanh
+                        </button>
+                        <button id="mode-space-filling" data-mode="space-filling"
+                            class="view-mode-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                            Đặc khít
+                        </button>
+                    </div>
+
+                    <!-- Bật/tắt khung ô mạng cơ sở -->
+                    <button id="toggle-unit-cell" type="button"
+                        class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/80 border border-slate-200/70 transition-colors">
+                        <div class="text-left">
+                            <div class="text-xs font-semibold text-slate-700">Khung ô mạng cơ sở</div>
+                            <div class="text-[10px] text-slate-500">Hình lập phương 3×3×3</div>
+                        </div>
+                        <div id="track-unit-cell" class="toggle-track w-10 h-6 rounded-full bg-blue-600 p-1 flex items-center">
+                            <div id="thumb-unit-cell" class="toggle-thumb w-4 h-4 rounded-full bg-white shadow-sm translate-x-4"></div>
+                        </div>
+                    </button>
+                </section>
+
+                <hr class="border-slate-200/70">
+
+                <!-- 2. Kích thước mạng tinh thể -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700">Kích thước mạng tinh thể</label>
+                        <span id="ion-count-label" class="text-[11px] font-medium text-slate-500">27 ion</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button data-size="3" class="size-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-blue-600 text-white border-blue-600 shadow-sm">
+                            3×3×3
+                            <span class="block text-[10px] font-normal opacity-85">1 ô mạng</span>
+                        </button>
+                        <button data-size="4" class="size-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-slate-700 border-slate-200 hover:border-blue-300">
+                            4×4×4
+                            <span class="block text-[10px] font-normal text-slate-400">64 ion</span>
+                        </button>
+                        <button data-size="5" class="size-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-slate-700 border-slate-200 hover:border-blue-300">
+                            5×5×5
+                            <span class="block text-[10px] font-normal text-slate-400">125 ion</span>
+                        </button>
+                    </div>
+                </section>
+
+                <hr class="border-slate-200/70">
+
+                <!-- 3. Làm nổi bật số phối trí 6 (Bát diện) -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700">Số phối trí 6 (Bát diện)</label>
+                        <span class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Trực quan</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button data-coord="none" class="coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-slate-800 text-white border-slate-800 shadow-sm">
+                            Tắt
+                        </button>
+                        <button data-coord="Na" class="coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-blue-600 border-slate-200 hover:border-blue-400">
+                            Tâm Na⁺
+                        </button>
+                        <button data-coord="Cl" class="coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-emerald-600 border-slate-200 hover:border-emerald-400">
+                            Tâm Cl⁻
+                        </button>
+                    </div>
+                    <p id="coord-hint" class="hidden text-[11px] leading-relaxed text-slate-600 bg-amber-50/90 border border-amber-200/80 rounded-xl px-3 py-2">
+                        <!-- Cập nhật động bằng JS -->
+                    </p>
+                </section>
+
+                <hr class="border-slate-200/70">
+
+                <!-- 4. Cắt lớp theo trục Y -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700">Cắt lớp (Trục Y)</label>
+                        <span id="layer-status-label" class="text-[11px] font-medium text-slate-500">Tất cả các lớp</span>
+                    </div>
+                    <div id="layer-buttons-container" class="flex flex-wrap gap-1.5">
+                        <!-- Các nút lớp được tạo động theo kích thước mạng -->
+                    </div>
+                </section>
+
+                <hr class="border-slate-200/70">
+
+                <!-- 5. Thanh trượt tách giãn mạng (Explode View) -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="slider-explode" class="text-xs font-bold text-slate-700">Tách giãn mạng (Explode)</label>
+                        <span id="explode-value" class="text-xs font-bold text-blue-600 tabular-nums">0%</span>
+                    </div>
+                    <input id="slider-explode" type="range" min="0" max="100" value="0" step="1">
+                    <div class="flex justify-between text-[10px] text-slate-400">
+                        <span>Liên kết kín</span>
+                        <span>Giãn rộng</span>
+                    </div>
+                </section>
+
+                <hr class="border-slate-200/70">
+
+                <!-- 6. Dao động nhiệt -->
+                <section class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-bold text-slate-700">Dao động nhiệt</div>
+                            <div class="text-[10px] text-slate-500">Chuyển động quanh vị trí cân bằng</div>
+                        </div>
+                        <button id="toggle-thermal" type="button" aria-label="Bật tắt dao động nhiệt"
+                            class="toggle-track w-10 h-6 rounded-full bg-slate-300 p-1 flex items-center cursor-pointer">
+                            <div id="thumb-thermal" class="toggle-thumb w-4 h-4 rounded-full bg-white shadow-sm translate-x-0"></div>
+                        </button>
+                    </div>
+                    <div id="thermal-slider-box" class="space-y-1.5 opacity-50 transition-opacity">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-500 font-medium">Nhiệt độ mô phỏng</span>
+                            <span id="thermal-temp-label" class="font-bold text-orange-600 tabular-nums">300 °C</span>
+                        </div>
+                        <input id="slider-thermal" type="range" min="25" max="800" value="300" step="5" disabled>
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>25 °C (Phòng)</span>
+                            <span>800 °C (Gần nóng chảy)</span>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </aside>
+
+    <!-- Chú thích màu sắc & Tóm tắt kiến thức góc dưới bên trái -->
+    <div id="legend-wrapper" class="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 max-w-[calc(100vw-24px)] sm:max-w-[300px]">
+        <!-- Nút thu gọn / mở rộng hộp kiến thức -->
+        <div class="glass-panel rounded-2xl overflow-hidden transition-all duration-300">
+            <button id="btn-toggle-legend" class="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-white/60 transition-colors">
+                <div class="flex items-center gap-3">
+                    <!-- Chú thích Na+ -->
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-inner ring-1 ring-blue-300"></span>
+                        <span class="text-xs font-bold text-slate-800">Na⁺</span>
+                        <span class="text-[10px] text-slate-500 hidden sm:inline">(102 pm)</span>
+                    </div>
+                    <!-- Chú thích Cl- -->
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-4 h-4 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-inner ring-1 ring-emerald-300"></span>
+                        <span class="text-xs font-bold text-slate-800">Cl⁻</span>
+                        <span class="text-[10px] text-slate-500 hidden sm:inline">(181 pm)</span>
+                    </div>
+                </div>
+                <svg id="icon-legend-chevron" class="w-4 h-4 text-slate-400 transition-transform duration-200 rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <!-- Tóm tắt kiến thức tinh thể NaCl -->
+            <div id="legend-details" class="px-3.5 pb-3 pt-1 border-t border-slate-200/70 space-y-1.5 text-[11px] text-slate-600">
+                <div class="flex justify-between gap-2">
+                    <span class="text-slate-500">Kiểu mạng:</span>
+                    <span class="font-semibold text-slate-800 text-right">Lập phương tâm mặt (FCC)</span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <span class="text-slate-500">Tỉ lệ ion:</span>
+                    <span class="font-semibold text-slate-800">Na⁺ : Cl⁻ = 1 : 1</span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <span class="text-slate-500">Tỉ lệ bán kính:</span>
+                    <span class="font-semibold text-slate-800">r(Cl⁻) : r(Na⁺) ≈ 1.77 : 1</span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <span class="text-slate-500">Nhiệt độ nóng chảy:</span>
+                    <span class="font-semibold text-orange-600">801 °C</span>
+                </div>
+                <div class="pt-1 border-t border-slate-100 text-[10.5px] text-slate-500 leading-snug">
+                    <strong class="text-slate-700">Tính chất:</strong> Tinh thể không màu, <strong class="text-slate-700">cứng và giòn</strong>, tan tốt trong nước, dẫn điện khi nóng chảy hoặc trong dung dịch.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thẻ thông tin chi tiết khi nhấp vào một Ion -->
+    <div id="ion-info-card" class="hidden fixed top-20 left-3 sm:top-[106px] sm:left-4 z-30 w-[calc(100vw-24px)] max-w-[290px]">
+        <div class="glass-panel rounded-2xl p-4 animate-card border-l-4" id="ion-card-border">
+            <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <div id="ion-card-dot" class="w-8 h-8 rounded-full shadow-md flex items-center justify-center text-white text-xs font-extrabold shrink-0">
+                        Na⁺
+                    </div>
+                    <div>
+                        <h3 id="ion-card-name" class="text-sm font-bold text-slate-900 leading-tight">Ion Natri (Na⁺)</h3>
+                        <p id="ion-card-subtitle" class="text-[11px] font-medium text-slate-500">Cation kim loại kiềm</p>
+                    </div>
+                </div>
+                <button id="btn-close-ion-card" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Đóng thẻ thông tin">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between py-1 border-b border-slate-100">
+                    <span class="text-slate-500">Điện tích</span>
+                    <span id="ion-card-charge" class="font-bold text-slate-800 px-2 py-0.5 rounded-md bg-slate-100">+1</span>
+                </div>
+                <div class="flex items-center justify-between py-1 border-b border-slate-100">
+                    <span class="text-slate-500">Cấu hình electron</span>
+                    <span id="ion-card-config" class="font-semibold text-slate-800 font-mono text-[11px]">1s² 2s² 2p⁶</span>
+                </div>
+                <div class="flex items-center justify-between py-1 border-b border-slate-100">
+                    <span class="text-slate-500">Bán kính ion</span>
+                    <span id="ion-card-radius" class="font-bold text-slate-800">102 pm</span>
+                </div>
+                <div class="flex items-center justify-between py-1 border-b border-slate-100">
+                    <span class="text-slate-500">Số phối trí</span>
+                    <span id="ion-card-coord" class="font-bold text-emerald-600">6 (Bát diện đều)</span>
+                </div>
+                <div class="flex items-center justify-between pt-0.5">
+                    <span class="text-slate-500">Vị trí lưới (x, y, z)</span>
+                    <span id="ion-card-pos" class="font-mono text-[11px] font-semibold text-slate-600">(1, 1, 1)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * MÔ PHỎNG 3D CẤU TRÚC MẠNG TINH THỂ ION NATRI CLORUA (NaCl)
+         * Sử dụng Three.js r128 + OrbitControls
+         * ============================================================================
+         */
+
+        // Hằng số khoa học & hình học thực tế của tinh thể NaCl
+        const ION_DATA = {
+            Na: {
+                symbol: 'Na⁺',
+                name: 'Ion Natri (Na⁺)',
+                subtitle: 'Cation kim loại kiềm',
+                charge: '+1',
+                config: '1s² 2s² 2p⁶',
+                radiusPm: 102,
+                colorHex: 0x3b82f6,     // Xanh dương bóng đẹp
+                emissiveHex: 0x1d4ed8,
+                badgeBg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+                borderColor: 'border-l-blue-500'
+            },
+            Cl: {
+                symbol: 'Cl⁻',
+                name: 'Ion Clorua (Cl⁻)',
+                subtitle: 'Anion phi kim halogen',
+                charge: '-1',
+                config: '1s² 2s² 2p⁶ 3s² 3p⁶',
+                radiusPm: 181,
+                colorHex: 0x22c55e,     // Xanh lá cây bóng đẹp
+                emissiveHex: 0x15803d,
+                badgeBg: 'bg-gradient-to-br from-emerald-400 to-emerald-600',
+                borderColor: 'border-l-emerald-500'
+            }
+        };
+
+        // Khoảng cách tâm-tâm giữa 2 ion kề nhau trong không gian 3D
+        const LATTICE_STEP = 2.0;
+        const TOTAL_RADII_PM = ION_DATA.Na.radiusPm + ION_DATA.Cl.radiusPm; // 283 pm
+
+        // Bán kính trong chế độ Đặc khít (Space-Filling): tổng bán kính Na+ và Cl- đúng bằng LATTICE_STEP
+        const SPACE_FILLING_RADIUS = {
+            Na: LATTICE_STEP * (ION_DATA.Na.radiusPm / TOTAL_RADII_PM), // ~0.7208
+            Cl: LATTICE_STEP * (ION_DATA.Cl.radiusPm / TOTAL_RADII_PM)  // ~1.2792
+        };
+
+        // Bán kính trong chế độ Cầu - Thanh (Ball & Stick): giữ nguyên tỉ lệ 1.77 : 1
+        const BALL_STICK_SCALE = 0.44;
+        const BALL_STICK_RADIUS = {
+            Na: SPACE_FILLING_RADIUS.Na * BALL_STICK_SCALE, // ~0.317
+            Cl: SPACE_FILLING_RADIUS.Cl * BALL_STICK_SCALE  // ~0.563
+        };
+
+        // Trạng thái toàn cục của ứng dụng
+        const appState = {
+            latticeSize: 3,             // 3, 4, hoặc 5
+            viewMode: 'ball-stick',     // 'ball-stick' hoặc 'space-filling'
+            showUnitCell: true,         // Hiển thị khung ô mạng cơ sở 3x3x3
+            coordinationMode: 'none',   // 'none', 'Na', hoặc 'Cl'
+            parityOffset: 0,            // 0: góc (0,0,0) là Cl-; 1: góc (0,0,0) là Na+ (dùng cho tâm bát diện 3x3x3)
+            activeLayer: 'all',         // 'all' hoặc chỉ số lớp 0..N-1
+            explodeFactor: 0,           // 0..1
+            thermalEnabled: false,
+            temperature: 300,           // 25..800 °C
+            autoRotate: false,
+            selectedIonId: null,
+            panelOpen: true,
+            legendExpanded: true
+        };
+
+        // Biến Three.js cốt lõi
+        let scene, camera, renderer, controls;
+        let crystalGroup, ionsGroup, bondsGroup, unitCellGroup, octahedronGroup, selectionRing;
+        let sharedSphereGeo, sharedCylinderGeo;
+
+        // Danh sách đối tượng mô phỏng
+        let ionEntries = [];       // { id, mesh, type, ix, iy, iz, basePos, currentPos, phase, freq, targetScale, currentScale, targetOpacity }
+        let bondEntries = [];      // { mesh, ionA, ionB }
+        let unitCellLines = null;  // LineSegments của khung ô mạng cơ sở
+        let unitCellBaseVerts = []; // Tọa độ gốc của các đoạn thẳng khung ô mạng cơ sở
+
+        // Đối tượng bát diện (Coordination 6)
+        let octaFaceMesh = null;
+        let octaEdgeLines = null;
+        let octaCenterBonds = [];
+        let octaData = null;       // { centerIon, neighborIons: [ +x, -x, +y, -y, +z, -z ] }
+
+        // Raycaster cho tương tác nhấp/chạm
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        let pointerDownPos = { x: 0, y: 0 };
+
+        // Hoạt ảnh camera mượt mà (Reset Camera)
+        let cameraAnim = null;
+
+        // Đồng hồ thời gian cho dao động nhiệt
+        const clock = new THREE.Clock();
+
+        /**
+         * Khởi tạo môi trường Three.js, ánh sáng studio 3 điểm và bộ điều khiển
+         */
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth || window.innerWidth;
+            const height = container.clientHeight || window.innerHeight;
+
+            // 1. Khởi tạo Scene (nền trong suốt để lộ nền CSS gradient trắng xám sạch sẽ)
+            scene = new THREE.Scene();
+
+            // 2. Khởi tạo Camera phối cảnh
+            camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 200);
+            setDefaultCameraPosition(false);
+
+            // 3. Khởi tạo WebGLRenderer chất lượng cao
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.08;
+            container.appendChild(renderer.domElement);
+
+            // 4. Thiết lập ánh sáng Studio 3 điểm mềm mại
+            // Ánh sáng môi trường bán cầu (trắng sáng trên, xám xanh dịu dưới)
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 0.72);
+            hemiLight.position.set(0, 20, 0);
+            scene.add(hemiLight);
+
+            // Key Light (Đèn chính - ấm nhẹ, đổ bóng mềm)
+            const keyLight = new THREE.DirectionalLight(0xfffcf5, 0.95);
+            keyLight.position.set(12, 18, 14);
+            keyLight.castShadow = true;
+            keyLight.shadow.mapSize.width = 2048;
+            keyLight.shadow.mapSize.height = 2048;
+            keyLight.shadow.camera.near = 2;
+            keyLight.shadow.camera.far = 50;
+            const d = 12;
+            keyLight.shadow.camera.left = -d;
+            keyLight.shadow.camera.right = d;
+            keyLight.shadow.camera.top = d;
+            keyLight.shadow.camera.bottom = -d;
+            keyLight.shadow.bias = -0.0005;
+            scene.add(keyLight);
+
+            // Fill Light (Đèn phụ - mát nhẹ giúp làm mềm vùng tối)
+            const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.55);
+            fillLight.position.set(-14, 6, 10);
+            scene.add(fillLight);
+
+            // Rim / Back Light (Đèn viền sau - tạo độ bóng nổi khối 3D cho các ion)
+            const rimLight = new THREE.DirectionalLight(0xffffff, 0.65);
+            rimLight.position.set(-4, 12, -16);
+            scene.add(rimLight);
+
+            // 5. Khởi tạo OrbitControls mượt mà cho chuột & cảm ứng đa điểm
+            if (typeof THREE.OrbitControls !== 'undefined') {
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.065;
+                controls.rotateSpeed = 0.75;
+                controls.zoomSpeed = 0.95;
+                controls.panSpeed = 0.75;
+                controls.minDistance = 4.5;
+                controls.maxDistance = 38;
+                controls.autoRotate = false;
+                controls.autoRotateSpeed = 1.6;
+            }
+
+            // 6. Tạo hình học dùng chung để tối ưu hiệu năng 60 FPS
+            sharedSphereGeo = new THREE.SphereGeometry(1, 36, 28);
+            sharedCylinderGeo = new THREE.CylinderGeometry(0.065, 0.065, 1, 14, 1);
+
+            // 7. Các nhóm chứa đối tượng 3D
+            crystalGroup = new THREE.Group();
+            ionsGroup = new THREE.Group();
+            bondsGroup = new THREE.Group();
+            unitCellGroup = new THREE.Group();
+            octahedronGroup = new THREE.Group();
+
+            crystalGroup.add(ionsGroup);
+            crystalGroup.add(bondsGroup);
+            crystalGroup.add(unitCellGroup);
+            crystalGroup.add(octahedronGroup);
+            scene.add(crystalGroup);
+
+            // 8. Tạo vòng sáng đánh dấu ion đang được chọn
+            const ringGeo = new THREE.TorusGeometry(1.18, 0.055, 16, 48);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xf59e0b,
+                transparent: true,
+                opacity: 0.92
+            });
+            selectionRing = new THREE.Mesh(ringGeo, ringMat);
+            selectionRing.visible = false;
+            scene.add(selectionRing);
+
+            // 9. Lắng nghe sự kiện thay đổi kích thước cửa sổ & tương tác nhấp/chạm
+            window.addEventListener('resize', onWindowResize);
+            setupPointerInteraction(renderer.domElement);
+        }
+
+        /**
+         * Tính khoảng cách camera tối ưu theo kích thước mạng tinh thể
+         */
+        function getIdealCameraPosition() {
+            const scaleDist = appState.latticeSize === 3 ? 1.0 : (appState.latticeSize === 4 ? 1.28 : 1.56);
+            return new THREE.Vector3(7.6 * scaleDist, 6.2 * scaleDist, 9.2 * scaleDist);
+        }
+
+        /**
+         * Đặt lại góc nhìn camera (có hoặc không có chuyển động mượt)
+         */
+        function setDefaultCameraPosition(animate = true) {
+            const targetPos = getIdealCameraPosition();
+            const targetLookAt = new THREE.Vector3(0, 0, 0);
+
+            if (!animate || !controls) {
+                camera.position.copy(targetPos);
+                if (controls) {
+                    controls.target.copy(targetLookAt);
+                    controls.update();
+                } else {
+                    camera.lookAt(targetLookAt);
+                }
+                cameraAnim = null;
+                return;
+            }
+
+            cameraAnim = {
+                startPos: camera.position.clone(),
+                endPos: targetPos,
+                startTarget: controls.target.clone(),
+                endTarget: targetLookAt,
+                progress: 0
+            };
+        }
+
+        /**
+         * Dọn dẹp toàn bộ đối tượng cũ trước khi dựng lại mạng tinh thể mới
+         */
+        function clearLattice() {
+            // Dọn ions
+            ionEntries.forEach(entry => {
+                entry.mesh.material.dispose();
+                ionsGroup.remove(entry.mesh);
+            });
+            ionEntries = [];
+
+            // Dọn thanh liên kết
+            bondEntries.forEach(entry => {
+                entry.mesh.material.dispose();
+                bondsGroup.remove(entry.mesh);
+            });
+            bondEntries = [];
+
+            // Dọn khung ô mạng cơ sở
+            while (unitCellGroup.children.length > 0) {
+                const child = unitCellGroup.children[0];
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) child.material.dispose();
+                unitCellGroup.remove(child);
+            }
+            unitCellLines = null;
+            unitCellBaseVerts = [];
+
+            // Dọn bát diện phối trí 6
+            clearOctahedron();
+
+            // Ẩn lựa chọn hiện tại
+            deselectIon();
+        }
+
+        /**
+         * Dọn dẹp hình bát diện số phối trí 6
+         */
+        function clearOctahedron() {
+            while (octahedronGroup.children.length > 0) {
+                const child = octahedronGroup.children[0];
+                if (child.geometry && child.geometry !== sharedCylinderGeo) child.geometry.dispose();
+                if (child.material) child.material.dispose();
+                octahedronGroup.remove(child);
+            }
+            octaFaceMesh = null;
+            octaEdgeLines = null;
+            octaCenterBonds = [];
+            octaData = null;
+        }
+
+        /**
+         * Xây dựng mạng tinh thể lập phương NaCl kích thước N x N x N
+         */
+        function buildLattice() {
+            clearLattice();
+
+            const N = appState.latticeSize;
+            const halfOffset = ((N - 1) * LATTICE_STEP) / 2;
+            const ionMap = new Map();
+
+            let idCounter = 0;
+
+            // 1. Tạo các ion Na+ và Cl- xen kẽ đều đặn theo 3 trục x, y, z
+            for (let ix = 0; ix < N; ix++) {
+                for (let iy = 0; iy < N; iy++) {
+                    for (let iz = 0; iz < N; iz++) {
+                        // Xác định loại ion theo tính chẵn lẻ tổng tọa độ + parityOffset
+                        const isCl = ((ix + iy + iz + appState.parityOffset) % 2 === 0);
+                        const type = isCl ? 'Cl' : 'Na';
+                        const info = ION_DATA[type];
+
+                        // Chất liệu bóng đẹp MeshPhysicalMaterial (hiệu ứng clearcoat chuẩn studio)
+                        const material = new THREE.MeshPhysicalMaterial({
+                            color: info.colorHex,
+                            roughness: 0.22,
+                            metalness: 0.05,
+                            clearcoat: 0.85,
+                            clearcoatRoughness: 0.14,
+                            reflectivity: 0.7,
+                            transparent: true,
+                            opacity: 1.0
+                        });
+
+                        const mesh = new THREE.Mesh(sharedSphereGeo, material);
+                        mesh.castShadow = true;
+                        mesh.receiveShadow = true;
+
+                        const basePos = new THREE.Vector3(
+                            ix * LATTICE_STEP - halfOffset,
+                            iy * LATTICE_STEP - halfOffset,
+                            iz * LATTICE_STEP - halfOffset
+                        );
+
+                        const targetRadius = appState.viewMode === 'space-filling'
+                            ? SPACE_FILLING_RADIUS[type]
+                            : BALL_STICK_RADIUS[type];
+
+                        mesh.position.copy(basePos);
+                        mesh.scale.setScalar(targetRadius);
+
+                        const id = idCounter++;
+                        mesh.userData = { ionId: id };
+
+                        const entry = {
+                            id,
+                            mesh,
+                            type,
+                            ix,
+                            iy,
+                            iz,
+                            basePos,
+                            currentPos: basePos.clone(),
+                            // Pha và tần số ngẫu nhiên cho dao động nhiệt tự nhiên
+                            phase: new THREE.Vector3(
+                                Math.random() * Math.PI * 2,
+                                Math.random() * Math.PI * 2,
+                                Math.random() * Math.PI * 2
+                            ),
+                            freq: new THREE.Vector3(
+                                8 + Math.random() * 5,
+                                8 + Math.random() * 5,
+                                8 + Math.random() * 5
+                            ),
+                            targetRadius,
+                            currentRadius: targetRadius,
+                            targetOpacity: 1.0,
+                            visible: true
+                        };
+
+                        ionsGroup.add(mesh);
+                        ionEntries.push(entry);
+                        ionMap.set(`${ix},${iy},${iz}`, entry);
+                    }
+                }
+            }
+
+            // 2. Tạo các thanh liên kết / lưới mạng lập phương nối ion kề nhau theo x, y, z
+            const directions = [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1]
+            ];
+
+            for (const ionA of ionEntries) {
+                for (const [dx, dy, dz] of directions) {
+                    const keyB = `${ionA.ix + dx},${ionA.iy + dy},${ionA.iz + dz}`;
+                    const ionB = ionMap.get(keyB);
+                    if (ionB) {
+                        const bondMat = new THREE.MeshStandardMaterial({
+                            color: 0x94a3b8,
+                            roughness: 0.35,
+                            metalness: 0.25,
+                            transparent: true,
+                            opacity: 0.72
+                        });
+                        const bondMesh = new THREE.Mesh(sharedCylinderGeo, bondMat);
+                        bondsGroup.add(bondMesh);
+                        bondEntries.push({
+                            mesh: bondMesh,
+                            ionA,
+                            ionB,
+                            isVertical: dy !== 0
+                        });
+                    }
+                }
+            }
+
+            // 3. Tạo khung ô mạng cơ sở (Unit Cell Wireframe) bao quanh 1 khối 3x3x3
+            buildUnitCellWireframe(N, halfOffset);
+
+            // 4. Xây dựng lại danh sách nút cắt lớp theo kích thước mạng mới
+            renderLayerButtons();
+
+            // 5. Cập nhật chế độ số phối trí 6 (nếu đang bật) và trạng thái hiển thị
+            rebuildCoordinationOctahedron(ionMap);
+            updateVisibilityAndStyles();
+            updateGeometryPositions(0);
+
+            // Cập nhật số lượng ion hiển thị
+            document.getElementById('ion-count-label').textContent = `${N * N * N} ion`;
+        }
+
+        /**
+         * Tạo khung dây hình lập phương biểu diễn 1 ô mạng cơ sở (3x3x3 ion, cạnh = 2 * LATTICE_STEP)
+         */
+        function buildUnitCellWireframe(N, halfOffset) {
+            // Chọn khối 3x3x3 bắt đầu từ chỉ số startIdx (để nằm gọn ở góc hoặc tâm)
+            const startIdx = N === 5 ? 1 : 0;
+            const endIdx = startIdx + 2;
+
+            const minX = startIdx * LATTICE_STEP - halfOffset;
+            const maxX = endIdx * LATTICE_STEP - halfOffset;
+            const minY = minX;
+            const maxY = maxX;
+            const minZ = minX;
+            const maxZ = maxX;
+
+            // 8 đỉnh của hình lập phương ô mạng cơ sở
+            const corners = [
+                new THREE.Vector3(minX, minY, minZ), // 0
+                new THREE.Vector3(maxX, minY, minZ), // 1
+                new THREE.Vector3(maxX, maxY, minZ), // 2
+                new THREE.Vector3(minX, maxY, minZ), // 3
+                new THREE.Vector3(minX, minY, maxZ), // 4
+                new THREE.Vector3(maxX, minY, maxZ), // 5
+                new THREE.Vector3(maxX, maxY, maxZ), // 6
+                new THREE.Vector3(minX, maxY, maxZ)  // 7
+            ];
+
+            // 12 cạnh của hình lập phương
+            const edgePairs = [
+                [0, 1], [1, 2], [2, 3], [3, 0],
+                [4, 5], [5, 6], [6, 7], [7, 4],
+                [0, 4], [1, 5], [2, 6], [3, 7]
+            ];
+
+            unitCellBaseVerts = [];
+            const positions = new Float32Array(edgePairs.length * 2 * 3);
+
+            edgePairs.forEach(([a, b], idx) => {
+                unitCellBaseVerts.push(corners[a].clone(), corners[b].clone());
+                positions[idx * 6 + 0] = corners[a].x;
+                positions[idx * 6 + 1] = corners[a].y;
+                positions[idx * 6 + 2] = corners[a].z;
+                positions[idx * 6 + 3] = corners[b].x;
+                positions[idx * 6 + 4] = corners[b].y;
+                positions[idx * 6 + 5] = corners[b].z;
+            });
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const mat = new THREE.LineBasicMaterial({
+                color: 0x0f172a,
+                transparent: true,
+                opacity: 0.65
+            });
+
+            unitCellLines = new THREE.LineSegments(geo, mat);
+            unitCellGroup.add(unitCellLines);
+            unitCellGroup.visible = appState.showUnitCell;
+        }
+
+        /**
+         * Xây dựng hình bát diện đều minh họa Số Phối Trí 6 (1 ion tâm + 6 ion trái dấu kề nhất)
+         */
+        function rebuildCoordinationOctahedron(ionMapInput) {
+            clearOctahedron();
+
+            const coordHint = document.getElementById('coord-hint');
+            if (appState.coordinationMode === 'none') {
+                coordHint.classList.add('hidden');
+                return;
+            }
+
+            // Tạo bản đồ tra cứu nếu chưa truyền vào
+            const ionMap = ionMapInput || new Map(ionEntries.map(e => [`${e.ix},${e.iy},${e.iz}`, e]));
+            const N = appState.latticeSize;
+            const targetType = appState.coordinationMode; // 'Na' hoặc 'Cl'
+
+            // Tìm ion thuộc loại targetType nằm sâu bên trong (có đủ 6 ion lân cận ±x, ±y, ±z) và gần tâm nhất
+            let bestIon = null;
+            let bestDistSq = Infinity;
+            const centerCoord = (N - 1) / 2;
+
+            for (const entry of ionEntries) {
+                if (entry.type !== targetType) continue;
+                if (entry.ix > 0 && entry.ix < N - 1 &&
+                    entry.iy > 0 && entry.iy < N - 1 &&
+                    entry.iz > 0 && entry.iz < N - 1) {
+                    const dx = entry.ix - centerCoord;
+                    const dy = entry.iy - centerCoord;
+                    const dz = entry.iz - centerCoord;
+                    const distSq = dx * dx + dy * dy + dz * dz;
+                    if (distSq < bestDistSq) {
+                        bestDistSq = distSq;
+                        bestIon = entry;
+                    }
+                }
+            }
+
+            if (!bestIon) return;
+
+            // Lấy 6 ion trái dấu bao quanh gần nhất theo thứ tự: +x, -x, +y, -y, +z, -z
+            const neighbors = [
+                ionMap.get(`${bestIon.ix + 1},${bestIon.iy},${bestIon.iz}`), // v0: +x
+                ionMap.get(`${bestIon.ix - 1},${bestIon.iy},${bestIon.iz}`), // v1: -x
+                ionMap.get(`${bestIon.ix},${bestIon.iy + 1},${bestIon.iz}`), // v2: +y
+                ionMap.get(`${bestIon.ix},${bestIon.iy - 1},${bestIon.iz}`), // v3: -y
+                ionMap.get(`${bestIon.ix},${bestIon.iy},${bestIon.iz + 1}`), // v4: +z
+                ionMap.get(`${bestIon.ix},${bestIon.iy},${bestIon.iz - 1}`)  // v5: -z
+            ];
+
+            octaData = {
+                centerIon: bestIon,
+                neighborIons: neighbors,
+                highlightIds: new Set([bestIon.id, ...neighbors.map(n => n.id)])
+            };
+
+            // 1. Tạo 8 mặt tam giác bán trong suốt của hình bát diện đều
+            const faceGeo = new THREE.BufferGeometry();
+            const facePositions = new Float32Array(8 * 3 * 3); // 8 mặt x 3 đỉnh x 3 tọa độ
+            faceGeo.setAttribute('position', new THREE.BufferAttribute(facePositions, 3));
+
+            const accentColor = targetType === 'Na' ? 0x3b82f6 : 0x10b981;
+            const faceMat = new THREE.MeshPhysicalMaterial({
+                color: accentColor,
+                transparent: true,
+                opacity: 0.22,
+                roughness: 0.15,
+                metalness: 0.05,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            octaFaceMesh = new THREE.Mesh(faceGeo, faceMat);
+            octahedronGroup.add(octaFaceMesh);
+
+            // 2. Tạo 12 cạnh sắc nét của hình bát diện
+            const edgeGeo = new THREE.BufferGeometry();
+            const edgePositions = new Float32Array(12 * 2 * 3); // 12 cạnh x 2 đỉnh x 3 tọa độ
+            edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgePositions, 3));
+
+            const edgeMat = new THREE.LineBasicMaterial({
+                color: targetType === 'Na' ? 0x1d4ed8 : 0x047857,
+                transparent: true,
+                opacity: 0.9
+            });
+            octaEdgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+            octahedronGroup.add(octaEdgeLines);
+
+            // 3. Tạo 6 thanh liên kết nổi bật nối từ ion trung tâm ra 6 đỉnh bát diện
+            octaCenterBonds = neighbors.map(nIon => {
+                const mat = new THREE.MeshStandardMaterial({
+                    color: 0xf59e0b,
+                    roughness: 0.25,
+                    metalness: 0.2,
+                    emissive: 0xd97706,
+                    emissiveIntensity: 0.25
+                });
+                const mesh = new THREE.Mesh(sharedCylinderGeo, mat);
+                octahedronGroup.add(mesh);
+                return { mesh, targetIon: nIon };
+            });
+
+            // Hiển thị chú thích giáo dục
+            const centerSymbol = targetType === 'Na' ? 'Na⁺' : 'Cl⁻';
+            const neighborSymbol = targetType === 'Na' ? 'Cl⁻' : 'Na⁺';
+            coordHint.innerHTML = `Mỗi ion <strong>${centerSymbol}</strong> ở tâm được bao quanh bởi <strong>6 ion ${neighborSymbol}</strong> gần nhất tạo thành hình <strong>bát diện đều</strong>.`;
+            coordHint.classList.remove('hidden');
+        }
+
+        /**
+         * Cập nhật hình học bát diện mỗi khung hình (tương thích hoàn hảo với Explode & Dao động nhiệt)
+         */
+        function updateOctahedronGeometry() {
+            if (!octaData || !octaFaceMesh || !octaEdgeLines) return;
+
+            const v = octaData.neighborIons.map(n => n.currentPos);
+            // v[0]:+x, v[1]:-x, v[2]:+y, v[3]:-y, v[4]:+z, v[5]:-z
+
+            // 8 mặt tam giác
+            const faces = [
+                [2, 0, 4], [2, 4, 1], [2, 1, 5], [2, 5, 0], // 4 mặt trên
+                [3, 4, 0], [3, 1, 4], [3, 5, 1], [3, 0, 5]  // 4 mặt dưới
+            ];
+            const faceAttr = octaFaceMesh.geometry.attributes.position;
+            let fIdx = 0;
+            for (const [a, b, c] of faces) {
+                faceAttr.setXYZ(fIdx++, v[a].x, v[a].y, v[a].z);
+                faceAttr.setXYZ(fIdx++, v[b].x, v[b].y, v[b].z);
+                faceAttr.setXYZ(fIdx++, v[c].x, v[c].y, v[c].z);
+            }
+            faceAttr.needsUpdate = true;
+            octaFaceMesh.geometry.computeVertexNormals();
+
+            // 12 cạnh bát diện
+            const edges = [
+                [2, 0], [2, 4], [2, 1], [2, 5],
+                [3, 0], [3, 4], [3, 1], [3, 5],
+                [0, 4], [4, 1], [1, 5], [5, 0]
+            ];
+            const edgeAttr = octaEdgeLines.geometry.attributes.position;
+            let eIdx = 0;
+            for (const [a, b] of edges) {
+                edgeAttr.setXYZ(eIdx++, v[a].x, v[a].y, v[a].z);
+                edgeAttr.setXYZ(eIdx++, v[b].x, v[b].y, v[b].z);
+            }
+            edgeAttr.needsUpdate = true;
+
+            // 6 thanh nối từ ion tâm đến 6 đỉnh
+            const cPos = octaData.centerIon.currentPos;
+            const upVec = new THREE.Vector3(0, 1, 0);
+            const dirVec = new THREE.Vector3();
+
+            for (const item of octaCenterBonds) {
+                const tPos = item.targetIon.currentPos;
+                dirVec.subVectors(tPos, cPos);
+                const len = dirVec.length();
+                item.mesh.position.copy(cPos).addScaledVector(dirVec, 0.5);
+                item.mesh.scale.set(1.35, len, 1.35);
+                if (len > 0.0001) {
+                    item.mesh.quaternion.setFromUnitVectors(upVec, dirVec.normalize());
+                }
+                // Ẩn thanh nối khi đang ở chế độ đặc khít (nhưng vẫn giữ mặt & cạnh bát diện)
+                item.mesh.visible = appState.viewMode === 'ball-stick';
+            }
+        }
+
+        /**
+         * Cập nhật trạng thái hiển thị, độ mờ (opacity) và bán kính mục tiêu của toàn bộ ion & thanh liên kết
+         */
+        function updateVisibilityAndStyles() {
+            const isSpaceFilling = appState.viewMode === 'space-filling';
+            const isCoordActive = appState.coordinationMode !== 'none' && octaData !== null;
+            const filterLayer = appState.activeLayer !== 'all';
+            const layerIdx = filterLayer ? Number(appState.activeLayer) : -1;
+
+            // Cập nhật các ion
+            for (const entry of ionEntries) {
+                entry.targetRadius = isSpaceFilling
+                    ? SPACE_FILLING_RADIUS[entry.type]
+                    : BALL_STICK_RADIUS[entry.type];
+
+                // Kiểm tra lọc cắt lớp theo trục Y
+                const inLayer = !filterLayer || entry.iy === layerIdx;
+                entry.visible = inLayer;
+                entry.mesh.visible = inLayer;
+
+                // Xác định độ trong suốt (làm mờ các ion không thuộc cụm bát diện khi bật chế độ số phối trí 6)
+                if (isCoordActive) {
+                    const isHighlighted = octaData.highlightIds.has(entry.id);
+                    entry.targetOpacity = isHighlighted ? 1.0 : 0.13;
+                    entry.mesh.material.depthWrite = isHighlighted;
+                    entry.mesh.castShadow = isHighlighted;
+                } else {
+                    entry.targetOpacity = 1.0;
+                    entry.mesh.material.depthWrite = true;
+                    entry.mesh.castShadow = true;
+                }
+            }
+
+            // Cập nhật các thanh liên kết
+            bondsGroup.visible = !isSpaceFilling;
+            for (const bond of bondEntries) {
+                const bothVisible = bond.ionA.visible && bond.ionB.visible;
+                bond.mesh.visible = !isSpaceFilling && bothVisible;
+
+                if (isCoordActive) {
+                    const isOctaBond =
+                        (bond.ionA.id === octaData.centerIon.id && octaData.highlightIds.has(bond.ionB.id)) ||
+                        (bond.ionB.id === octaData.centerIon.id && octaData.highlightIds.has(bond.ionA.id));
+                    bond.mesh.material.opacity = isOctaBond ? 0.0 : 0.1;
+                } else {
+                    bond.mesh.material.opacity = 0.72;
+                }
+            }
+
+            // Ẩn/hiện bát diện khi cắt lớp
+            if (octahedronGroup) {
+                octahedronGroup.visible = isCoordActive && !filterLayer;
+            }
+
+            // Ẩn/hiện khung ô mạng cơ sở
+            if (unitCellGroup) {
+                unitCellGroup.visible = appState.showUnitCell;
+            }
+        }
+
+        /**
+         * Cập nhật vị trí ion, thanh liên kết, khung ô mạng cơ sở và bát diện theo thời gian thực
+         * (Xử lý mượt mà Explode View + Dao động nhiệt + Chuyển đổi bán kính)
+         */
+        function updateGeometryPositions(elapsedTime) {
+            const explodeMult = 1 + appState.explodeFactor * 1.15;
+
+            // Tính biên độ & tốc độ dao động nhiệt dựa trên nhiệt độ (25°C -> 800°C)
+            const tempNorm = (appState.temperature - 25) / (800 - 25); // 0..1
+            const vibAmp = appState.thermalEnabled ? (0.025 + tempNorm * 0.145) : 0;
+            const vibSpeed = 1.0 + tempNorm * 1.65;
+
+            // 1. Cập nhật từng ion
+            for (const entry of ionEntries) {
+                // Vị trí sau tách giãn mạng
+                const ex = entry.basePos.x * explodeMult;
+                const ey = entry.basePos.y * explodeMult;
+                const ez = entry.basePos.z * explodeMult;
+
+                // Cộng thêm dao động nhiệt quanh vị trí cân bằng
+                if (vibAmp > 0) {
+                    const t = elapsedTime * vibSpeed;
+                    entry.currentPos.set(
+                        ex + Math.sin(t * entry.freq.x + entry.phase.x) * vibAmp,
+                        ey + Math.cos(t * entry.freq.y + entry.phase.y) * vibAmp,
+                        ez + Math.sin(t * entry.freq.z + entry.phase.z) * vibAmp
+                    );
+                } else {
+                    entry.currentPos.set(ex, ey, ez);
+                }
+
+                entry.mesh.position.copy(entry.currentPos);
+
+                // Nội suy mượt mà bán kính (chuyển đổi giữa Cầu-Thanh và Đặc khít)
+                entry.currentRadius += (entry.targetRadius - entry.currentRadius) * 0.16;
+                entry.mesh.scale.setScalar(entry.currentRadius);
+
+                // Nội suy mượt mà độ mờ (opacity)
+                const curOp = entry.mesh.material.opacity;
+                if (Math.abs(curOp - entry.targetOpacity) > 0.005) {
+                    entry.mesh.material.opacity += (entry.targetOpacity - curOp) * 0.15;
+                } else {
+                    entry.mesh.material.opacity = entry.targetOpacity;
+                }
+            }
+
+            // 2. Cập nhật vị trí & hướng của các thanh liên kết
+            if (bondsGroup.visible) {
+                const upVec = new THREE.Vector3(0, 1, 0);
+                const dirVec = new THREE.Vector3();
+
+                for (const bond of bondEntries) {
+                    if (!bond.mesh.visible) continue;
+                    const pA = bond.ionA.currentPos;
+                    const pB = bond.ionB.currentPos;
+                    dirVec.subVectors(pB, pA);
+                    const dist = dirVec.length();
+
+                    bond.mesh.position.copy(pA).addScaledVector(dirVec, 0.5);
+                    bond.mesh.scale.set(1, dist, 1);
+                    if (dist > 0.0001) {
+                        bond.mesh.quaternion.setFromUnitVectors(upVec, dirVec.normalize());
+                    }
+                }
+            }
+
+            // 3. Cập nhật khung ô mạng cơ sở theo độ tách giãn mạng
+            if (unitCellLines && unitCellGroup.visible) {
+                const posAttr = unitCellLines.geometry.attributes.position;
+                for (let i = 0; i < unitCellBaseVerts.length; i++) {
+                    const bv = unitCellBaseVerts[i];
+                    posAttr.setXYZ(i, bv.x * explodeMult, bv.y * explodeMult, bv.z * explodeMult);
+                }
+                posAttr.needsUpdate = true;
+            }
+
+            // 4. Cập nhật hình bát diện số phối trí 6
+            if (octaData && octahedronGroup.visible) {
+                updateOctahedronGeometry();
+            }
+
+            // 5. Cập nhật vòng sáng chọn ion (luôn hướng về phía camera)
+            if (appState.selectedIonId !== null && selectionRing.visible) {
+                const selEntry = ionEntries.find(e => e.id === appState.selectedIonId);
+                if (selEntry && selEntry.visible) {
+                    selectionRing.position.copy(selEntry.currentPos);
+                    selectionRing.scale.setScalar(selEntry.currentRadius * 1.08);
+                    selectionRing.lookAt(camera.position);
+                } else {
+                    selectionRing.visible = false;
+                }
+            }
+        }
+
+        /**
+         * Thiết lập sự kiện nhấp chuột / chạm vào ion trong không gian 3D
+         */
+        function setupPointerInteraction(domElement) {
+            domElement.addEventListener('pointerdown', (e) => {
+                pointerDownPos.x = e.clientX;
+                pointerDownPos.y = e.clientY;
+            });
+
+            domElement.addEventListener('pointerup', (e) => {
+                // Chỉ tính là nhấp chọn ion nếu con trỏ di chuyển ít hơn 6px (không phải thao tác kéo xoay)
+                const dx = e.clientX - pointerDownPos.x;
+                const dy = e.clientY - pointerDownPos.y;
+                if (Math.hypot(dx, dy) > 6) return;
+
+                const rect = domElement.getBoundingClientRect();
+                pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+                raycaster.setFromCamera(pointer, camera);
+
+                // Chỉ kiểm tra va chạm với các ion đang hiển thị
+                const visibleMeshes = ionEntries
+                    .filter(entry => entry.visible && entry.targetOpacity > 0.25)
+                    .map(entry => entry.mesh);
+
+                const intersects = raycaster.intersectObjects(visibleMeshes, false);
+
+                if (intersects.length > 0) {
+                    const hitId = intersects[0].object.userData.ionId;
+                    selectIon(hitId);
+                } else {
+                    deselectIon();
+                }
+            });
+        }
+
+        /**
+         * Chọn một ion và hiển thị thẻ thông tin chi tiết
+         */
+        function selectIon(ionId) {
+            const entry = ionEntries.find(e => e.id === ionId);
+            if (!entry) return;
+
+            appState.selectedIonId = ionId;
+            selectionRing.visible = true;
+            selectionRing.position.copy(entry.currentPos);
+            selectionRing.scale.setScalar(entry.currentRadius * 1.08);
+
+            const info = ION_DATA[entry.type];
+            const card = document.getElementById('ion-info-card');
+            const borderEl = document.getElementById('ion-card-border');
+            const dotEl = document.getElementById('ion-card-dot');
+
+            borderEl.className = `glass-panel rounded-2xl p-4 animate-card border-l-4 ${info.borderColor}`;
+            dotEl.className = `w-8 h-8 rounded-full shadow-md flex items-center justify-center text-white text-xs font-extrabold shrink-0 ${info.badgeBg}`;
+            dotEl.textContent = info.symbol;
+
+            document.getElementById('ion-card-name').textContent = info.name;
+            document.getElementById('ion-card-subtitle').textContent = info.subtitle;
+            document.getElementById('ion-card-charge').textContent = info.charge;
+            document.getElementById('ion-card-config').textContent = info.config;
+            document.getElementById('ion-card-radius').textContent = `${info.radiusPm} pm`;
+            document.getElementById('ion-card-coord').textContent = '6 (Bát diện đều)';
+            document.getElementById('ion-card-pos').textContent = `(${entry.ix + 1}, ${entry.iy + 1}, ${entry.iz + 1})`;
+
+            card.classList.remove('hidden');
+        }
+
+        /**
+         * Bỏ chọn ion và ẩn thẻ thông tin
+         */
+        function deselectIon() {
+            appState.selectedIonId = null;
+            if (selectionRing) selectionRing.visible = false;
+            document.getElementById('ion-info-card').classList.add('hidden');
+        }
+
+        /**
+         * Vẽ lại các nút cắt lớp theo kích thước mạng hiện tại (3, 4 hoặc 5 lớp)
+         */
+        function renderLayerButtons() {
+            const container = document.getElementById('layer-buttons-container');
+            container.innerHTML = '';
+
+            // Nút "Tất cả"
+            const allBtn = document.createElement('button');
+            allBtn.textContent = 'Tất cả';
+            allBtn.dataset.layer = 'all';
+            allBtn.className = getLayerBtnClass(appState.activeLayer === 'all');
+            allBtn.addEventListener('click', () => setActiveLayer('all'));
+            container.appendChild(allBtn);
+
+            // Các nút từng lớp theo trục Y (Lớp 1 ở đáy -> Lớp N ở đỉnh)
+            for (let i = 0; i < appState.latticeSize; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = `Lớp ${i + 1}`;
+                btn.dataset.layer = String(i);
+                btn.className = getLayerBtnClass(String(appState.activeLayer) === String(i));
+                btn.addEventListener('click', () => setActiveLayer(i));
+                container.appendChild(btn);
+            }
+        }
+
+        function getLayerBtnClass(isActive) {
+            return isActive
+                ? 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition-all'
+                : 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
+        }
+
+        function setActiveLayer(layer) {
+            appState.activeLayer = layer;
+            const statusLabel = document.getElementById('layer-status-label');
+            statusLabel.textContent = layer === 'all' ? 'Tất cả các lớp' : `Đang xem Lớp ${Number(layer) + 1}`;
+            renderLayerButtons();
+            updateVisibilityAndStyles();
+        }
+
+        /**
+         * Gắn kết tất cả sự kiện cho giao diện điều khiển
+         */
+        function bindUIEvents() {
+            // 1. Chế độ hiển thị (Cầu - Thanh / Đặc khít)
+            document.querySelectorAll('.view-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    appState.viewMode = btn.dataset.mode;
+                    document.querySelectorAll('.view-mode-btn').forEach(b => {
+                        const active = b.dataset.mode === appState.viewMode;
+                        b.className = active
+                            ? 'view-mode-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition-all bg-white text-blue-600 shadow-sm'
+                            : 'view-mode-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900';
+                    });
+                    updateVisibilityAndStyles();
+                });
+            });
+
+            // 2. Bật/tắt khung ô mạng cơ sở
+            const btnUnitCell = document.getElementById('toggle-unit-cell');
+            btnUnitCell.addEventListener('click', () => {
+                appState.showUnitCell = !appState.showUnitCell;
+                const track = document.getElementById('track-unit-cell');
+                const thumb = document.getElementById('thumb-unit-cell');
+                track.classList.toggle('bg-blue-600', appState.showUnitCell);
+                track.classList.toggle('bg-slate-300', !appState.showUnitCell);
+                thumb.classList.toggle('translate-x-4', appState.showUnitCell);
+                thumb.classList.toggle('translate-x-0', !appState.showUnitCell);
+                updateVisibilityAndStyles();
+            });
+
+            // 3. Kích thước mạng tinh thể (3x3x3, 4x4x4, 5x5x5)
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const newSize = Number(btn.dataset.size);
+                    if (newSize === appState.latticeSize) return;
+                    appState.latticeSize = newSize;
+                    appState.activeLayer = 'all';
+                    document.getElementById('layer-status-label').textContent = 'Tất cả các lớp';
+
+                    document.querySelectorAll('.size-btn').forEach(b => {
+                        const active = Number(b.dataset.size) === newSize;
+                        b.className = active
+                            ? 'size-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-blue-600 text-white border-blue-600 shadow-sm'
+                            : 'size-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-slate-700 border-slate-200 hover:border-blue-300';
+                        const sub = b.querySelector('span');
+                        if (sub) {
+                            sub.className = active
+                                ? 'block text-[10px] font-normal opacity-85'
+                                : 'block text-[10px] font-normal text-slate-400';
+                        }
+                    });
+
+                    buildLattice();
+                    setDefaultCameraPosition(true);
+                });
+            });
+
+            // 4. Chế độ làm nổi bật số phối trí 6 (Bát diện)
+            document.querySelectorAll('.coord-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.dataset.coord;
+                    appState.coordinationMode = mode;
+
+                    // Nếu đang bật cắt lớp thì tự động về "Tất cả" để thấy rõ toàn bộ hình bát diện
+                    if (mode !== 'none' && appState.activeLayer !== 'all') {
+                        appState.activeLayer = 'all';
+                        document.getElementById('layer-status-label').textContent = 'Tất cả các lớp';
+                        renderLayerButtons();
+                    }
+
+                    // Cập nhật style nút
+                    document.querySelectorAll('.coord-btn').forEach(b => {
+                        const m = b.dataset.coord;
+                        const isActive = m === mode;
+                        if (m === 'none') {
+                            b.className = isActive
+                                ? 'coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-slate-800 text-white border-slate-800 shadow-sm'
+                                : 'coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-slate-600 border-slate-200 hover:border-slate-400';
+                        } else if (m === 'Na') {
+                            b.className = isActive
+                                ? 'coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-blue-600 text-white border-blue-600 shadow-sm'
+                                : 'coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-blue-600 border-slate-200 hover:border-blue-400';
+                        } else {
+                            b.className = isActive
+                                ? 'coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                : 'coord-btn py-2 px-2 rounded-xl text-xs font-semibold border transition-all bg-white text-emerald-600 border-slate-200 hover:border-emerald-400';
+                        }
+                    });
+
+                    // Với mạng 3x3x3 chỉ có 1 vị trí tâm (1,1,1): tự động đảo pha mạng để chọn đúng ion tâm Na+ hoặc Cl-
+                    if (appState.latticeSize === 3 && mode !== 'none') {
+                        const desiredParity = mode === 'Na' ? 0 : 1;
+                        if (appState.parityOffset !== desiredParity) {
+                            appState.parityOffset = desiredParity;
+                            buildLattice();
+                            return;
+                        }
+                    }
+
+                    rebuildCoordinationOctahedron();
+                    updateVisibilityAndStyles();
+                });
+            });
+
+            // 5. Thanh trượt tách giãn mạng (Explode View)
+            const explodeSlider = document.getElementById('slider-explode');
+            const explodeValue = document.getElementById('explode-value');
+            explodeSlider.addEventListener('input', (e) => {
+                const val = Number(e.target.value);
+                appState.explodeFactor = val / 100;
+                explodeValue.textContent = `${val}%`;
+            });
+
+            // 6. Công tắc & thanh trượt Dao động nhiệt
+            const btnThermal = document.getElementById('toggle-thermal');
+            const thermalSlider = document.getElementById('slider-thermal');
+            const thermalBox = document.getElementById('thermal-slider-box');
+            const thermalTempLabel = document.getElementById('thermal-temp-label');
+
+            btnThermal.addEventListener('click', () => {
+                appState.thermalEnabled = !appState.thermalEnabled;
+                const thumb = document.getElementById('thumb-thermal');
+                btnThermal.classList.toggle('bg-orange-500', appState.thermalEnabled);
+                btnThermal.classList.toggle('bg-slate-300', !appState.thermalEnabled);
+                thumb.classList.toggle('translate-x-4', appState.thermalEnabled);
+                thumb.classList.toggle('translate-x-0', !appState.thermalEnabled);
+                thermalSlider.disabled = !appState.thermalEnabled;
+                thermalBox.classList.toggle('opacity-50', !appState.thermalEnabled);
+            });
+
+            thermalSlider.addEventListener('input', (e) => {
+                appState.temperature = Number(e.target.value);
+                thermalTempLabel.textContent = `${appState.temperature} °C`;
+            });
+
+            // 7. Nút Tự động xoay (Auto Rotate)
+            const btnAutoRotate = document.getElementById('btn-autorotate');
+            const iconAutoRotate = document.getElementById('icon-autorotate');
+            btnAutoRotate.addEventListener('click', () => {
+                appState.autoRotate = !appState.autoRotate;
+                if (controls) controls.autoRotate = appState.autoRotate;
+                btnAutoRotate.classList.toggle('text-blue-600', appState.autoRotate);
+                btnAutoRotate.classList.toggle('ring-2', appState.autoRotate);
+                btnAutoRotate.classList.toggle('ring-blue-500/40', appState.autoRotate);
+                iconAutoRotate.classList.toggle('animate-spin', appState.autoRotate);
+            });
+
+            // 8. Nút Đặt lại góc nhìn (Reset Camera)
+            document.getElementById('btn-reset-camera').addEventListener('click', () => {
+                setDefaultCameraPosition(true);
+            });
+
+            // 9. Thu gọn / Mở rộng bảng điều khiển
+            const panel = document.getElementById('control-panel');
+            const togglePanelFn = (forceState) => {
+                appState.panelOpen = typeof forceState === 'boolean' ? forceState : !appState.panelOpen;
+                if (appState.panelOpen) {
+                    panel.classList.remove('translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+                    panel.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+                } else {
+                    panel.classList.add('translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+                    panel.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+                }
+            };
+            document.getElementById('btn-toggle-panel').addEventListener('click', () => togglePanelFn());
+            document.getElementById('btn-close-panel-mobile').addEventListener('click', () => togglePanelFn(false));
+
+            // Thu gọn mặc định trên màn hình điện thoại nhỏ để ưu tiên không gian 3D
+            if (window.innerWidth < 768) {
+                togglePanelFn(false);
+            }
+
+            // 10. Thu gọn / Mở rộng hộp chú thích & kiến thức
+            const btnToggleLegend = document.getElementById('btn-toggle-legend');
+            const legendDetails = document.getElementById('legend-details');
+            const legendChevron = document.getElementById('icon-legend-chevron');
+
+            const setLegendState = (expanded) => {
+                appState.legendExpanded = expanded;
+                legendDetails.classList.toggle('hidden', !expanded);
+                legendChevron.classList.toggle('rotate-180', !expanded);
+            };
+            btnToggleLegend.addEventListener('click', () => setLegendState(!appState.legendExpanded));
+            if (window.innerWidth < 640) {
+                setLegendState(false);
+            }
+
+            // 11. Nút đóng thẻ thông tin ion
+            document.getElementById('btn-close-ion-card').addEventListener('click', deselectIon);
+        }
+
+        /**
+         * Xử lý thay đổi kích thước màn hình (Responsive Canvas)
+         */
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth || window.innerWidth;
+            const height = container.clientHeight || window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        /**
+         * Vòng lặp hoạt ảnh 60 FPS
+         */
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+
+            // Xử lý chuyển động mượt khi bấm Đặt lại góc nhìn
+            if (cameraAnim && controls) {
+                cameraAnim.progress += 0.055;
+                const t = Math.min(cameraAnim.progress, 1);
+                // Ease-out cubic
+                const ease = 1 - Math.pow(1 - t, 3);
+
+                camera.position.lerpVectors(cameraAnim.startPos, cameraAnim.endPos, ease);
+                controls.target.lerpVectors(cameraAnim.startTarget, cameraAnim.endTarget, ease);
+
+                if (t >= 1) {
+                    cameraAnim = null;
+                }
+            }
+
+            if (controls) {
+                controls.update();
+            }
+
+            // Cập nhật vị trí, kích thước, dao động nhiệt & bát diện
+            updateGeometryPositions(elapsedTime);
+
+            renderer.render(scene, camera);
+        }
+
+        /**
+         * Khởi chạy toàn bộ ứng dụng sau khi trang tải hoàn tất
+         */
+        window.onload = function () {
+            try {
+                initThreeJS();
+                bindUIEvents();
+                buildLattice();
+                animate();
+            } catch (err) {
+                console.error('Lỗi khởi tạo mô phỏng 3D NaCl:', err);
+            }
+        };
+    </script>
+</body>
+</html>
