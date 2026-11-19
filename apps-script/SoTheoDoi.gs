@@ -185,7 +185,7 @@ function doPost(e) {
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_anbai') return json(gvAnBai(d));
         if (d.action === 'gv_baomat') return json(gvBaoMat(d));
-        if (d.action === 'gv_baomat_xem') return json(gvBaoMatXem());
+        if (d.action === 'gv_baomat_xem') return json(gvBaoMatXem(d));
         if (d.action === 'gv_nhatky') return json(gvNhatKy());
         if (d.action === 'gv_nk_hoantac') return json(gvNkHoanTac(d));
         if (d.action === 'gv_ks_dot') return json(gvKSDot());
@@ -861,7 +861,9 @@ const TAB_NKD = 'NHAT KY DIEM', HEAD_NKD = ['ThoiGian', 'ThaoTac', 'MaHS', 'HoTe
 const TAB_KTD = 'KIEM TRA DIEM', HEAD_KTD = ['Khoa', 'Diem'];
 var BM_TB = '', BM_MSG = '';
 function bmGhi(loai, muc, dt, ct) {
-  try { tabKho(TAB_BM, HEAD_BM).appendRow([new Date(), lopNay(), loai, muc, String(dt || '').slice(0, 200), String(ct || '').slice(0, 800), BM_TB, '']); } catch (e) {}
+  // Yeu cau / doi ma tu may GV da dang nhap dung truoc do: tu danh dau OK (van luu de xem lai)
+  const tb = String(BM_TB || '').split(' · ')[0], tuMayGV = /^(QUEN_MA|DOI_MA_QL)$/.test(loai) && tb && mayTin().indexOf(tb) >= 0;
+  try { tabKho(TAB_BM, HEAD_BM).appendRow([new Date(), lopNay(), loai, muc, String(dt || '').slice(0, 200), String(ct || '').slice(0, 800), BM_TB, tuMayGV ? 'OK (máy GV)' : '']); } catch (e) {}
 }
 function bmDem(k, phut) { const c = CacheService.getScriptCache(), n = (Number(c.get(k)) || 0) + 1; c.put(k, String(n), phut * 60); return n; }
 function bmKhoa(k) { return !!CacheService.getScriptCache().get(k); }
@@ -983,15 +985,19 @@ function gvBaoMat(d) {
   const q = docMa().quanly, sh = kho().getSheetByName(TAB_BM), tu = Date.now() - 60 * 864e5, su = [];
   if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BM.length).getValues().forEach(function (r, i) {
     const t = r[0] instanceof Date ? r[0] : new Date(r[0]); if (isNaN(t) || t.getTime() < tu) return;
-    su.push({dong: i + 2, luc: t.toISOString(), lop: String(r[1]), loai: String(r[2]), muc: String(r[3]), dt: String(r[4]), ct: String(r[5]), tb: String(r[6]), xem: !!String(r[7])});
+    su.push({dong: i + 2, luc: t.toISOString(), lop: String(r[1]), loai: String(r[2]), muc: String(r[3]), dt: String(r[4]), ct: String(r[5]), tb: String(r[6]), xem: !!String(r[7]), ok: String(r[7])});
   });
   su.reverse();
   return {ok: true, lop: lopNay(), su: su.slice(0, 200), moi: su.filter(function (x) { return !x.xem; }).length, lech: lech,
     maYeu: !q || q.length < 8 || /^\d+$/.test(q), khoaGV: bmKhoa('kql')};
 }
-function gvBaoMatXem() {
-  const sh = kho().getSheetByName(TAB_BM);
-  if (sh && sh.getLastRow() > 1) { const r = sh.getRange(2, 8, sh.getLastRow() - 1, 1), v = r.getValues(); v.forEach(function (x) { if (!String(x[0])) x[0] = 'x'; }); r.setValues(v); }
+// GV xac nhan su viec (OK = dung la toi / da xu ly): 1 dong (d.dong) hoac tat ca
+function gvBaoMatXem(d) {
+  const sh = kho().getSheetByName(TAB_BM), dau = 'OK ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM HH:mm');
+  if (!sh || sh.getLastRow() < 2) return {ok: true};
+  const dong = Number(d && d.dong);
+  if (dong >= 2 && dong <= sh.getLastRow()) { sh.getRange(dong, 8).setValue(dau); return {ok: true}; }
+  const r = sh.getRange(2, 8, sh.getLastRow() - 1, 1), v = r.getValues(); v.forEach(function (x) { if (!String(x[0])) x[0] = dau; }); r.setValues(v);
   return {ok: true};
 }
 // Quen ma quan ly: gui ma 6 so (10 phut) ve Gmail chu so (nguoi trien khai) -> nhap ma + dat ma moi
