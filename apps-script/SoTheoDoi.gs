@@ -406,7 +406,7 @@ function xemLai(d) {
       bang.push({madot: c.madot, ten: c.ten, luc: b.luc, diem: b.diem, giay: !!c.giay, xem: !!c.xemlai});
     });
   } catch (e) {}
-  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, bangdiem: bang, ks: ksChoHS(ma)};
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, bangdiem: bang, ks: ksChoHS(ma), cacLop: (function () { try { return (tkMap()[ma] || {}).cl || []; } catch (e) { return []; } })()};
 }
 
 // HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
@@ -2299,6 +2299,7 @@ function gvDaThi() {
   const dathi = {};
   Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
   let siso = 0, dakt = {}; try { siso = dsLopTX().length; dakt = docDaKT(); } catch (e) {}
+  try { dongBoTK(); } catch (e) {}
   return {ok: true, lop: lopNay(), dathi: dathi, siso: siso, dakt: dakt};
 }
 // De giay "da kiem tra" theo lop: mac dinh tu tich khi co bai quet; GV tich/bo tich tay luu o kho (tab DA KIEM TRA)
@@ -3558,9 +3559,64 @@ function timHS(ma) {
   const n = Math.max(sh.getLastRow() - 1, 1);
   const rows = sh.getRange(2, 1, n, 4).getValues();
   for (let i = 0; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() === ma) return {ten: String(rows[i][1]).trim(), maxem: String(rows[i][3]).trim()};
+    if (String(rows[i][0]).trim() === ma) {
+      let mx = String(rows[i][3]).trim();
+      if (ma.slice(0, 6) !== tienToLop()) { const t = tkMap()[ma]; if (t && t.mx) mx = t.mx; }   // em hoc lop phu: mat khau theo lop chinh
+      return {ten: String(rows[i][1]).trim(), maxem: mx};
+    }
   }
   return null;
+}
+// ---------------------------------------------------------------------
+// TAI KHOAN CHUNG: 1 SBD + 1 mat khau cho em hoc nhieu lop (VD 12G01 + 12CLB + 12AFTER).
+// Lop chinh = lop co tien to SBD trung voi SBD cua em; cac lop phu ghi cung SBD do trong DANHSACH.
+// Kho tab TAI KHOAN: MaHS | MaXem (cua lop chinh) | LopChinh | CacLop | CapNhat — moi so dong bo khi GV mo trang (toi da 30 phut/lan).
+// ---------------------------------------------------------------------
+const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat'];
+function tienToLop() {
+  const c = CacheService.getScriptCache(); let t = c.get('tiento'); if (t !== null) return t;
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), dem = {};
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { const m = String(r[0]).trim(); if (/^\d{8}$/.test(m)) dem[m.slice(0, 6)] = (dem[m.slice(0, 6)] || 0) + 1; });
+  t = Object.keys(dem).sort(function (a, b) { return dem[b] - dem[a]; })[0] || '';
+  c.put('tiento', t, 21600); return t;
+}
+var TK_NHO = null;
+function tkMap() {
+  if (TK_NHO) return TK_NHO;
+  const c = CacheService.getScriptCache(), s = c.get('tk_map');
+  if (s) { try { return TK_NHO = JSON.parse(s); } catch (e) {} }
+  const m = {}, sh = kho().getSheetByName(TAB_TK);
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String)}; });
+  try { c.put('tk_map', JSON.stringify(m), 300); } catch (e) {}
+  return TK_NHO = m;
+}
+function dongBoTK(ep) {
+  const P = PropertiesService.getScriptProperties();
+  if (!ep && Date.now() - Number(P.getProperty('tk_luc') || 0) < 30 * 60000) return 0;
+  P.setProperty('tk_luc', String(Date.now()));
+  const ss = SpreadsheetApp.getActive(), ds = ss.getSheetByName(TAB_DS); if (!ds || ds.getLastRow() < 2) return 0;
+  const lop = lopNay(), tt = tienToLop(), sh = tabKho(TAB_TK, HEAD_TK);
+  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 4).getValues() : [], vt = {};
+  v.forEach(function (r, i) { vt[String(r[0]).trim()] = i; });
+  const dsR = ds.getRange(2, 1, ds.getLastRow() - 1, 4), dsV = dsR.getValues(), them = [];
+  let doiDS = false, doiKho = false;
+  dsV.forEach(function (r) {
+    const ma = String(r[0]).trim(); if (!/^\d{8}$/.test(ma)) return;
+    const mx = String(r[3]).trim(), chinh = ma.slice(0, 6) === tt;
+    let i = vt[ma];
+    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date()]); vt[ma] = -1; return; }
+    if (i < 0) return;
+    const x = v[i], cl = String(x[3]).split(',').map(function (z) { return z.trim(); }).filter(String);
+    if (cl.indexOf(lop) < 0) { cl.push(lop); x[3] = cl.join(','); doiKho = true; }
+    if (chinh) { if (String(x[1]).trim() !== mx || String(x[2]).trim() !== lop) { x[1] = mx; x[2] = lop; doiKho = true; } }
+    else if (String(x[1]).trim() && String(x[1]).trim() !== mx) { r[3] = String(x[1]).trim(); doiDS = true; }   // lop phu: chep mat khau lop chinh sang
+    else if (!String(x[1]).trim() && mx) { x[1] = mx; doiKho = true; }
+  });
+  if (doiKho) sh.getRange(2, 1, v.length, 4).setNumberFormat('@').setValues(v);
+  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 4).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 5).setValues(them); }
+  if (doiDS) ds.getRange(2, 4, dsV.length, 1).setNumberFormat('@').setValues(dsV.map(function (r) { return [r[3]]; }));
+  CacheService.getScriptCache().remove('tk_map'); TK_NHO = null;
+  return them.length + (doiKho ? 1 : 0);
 }
 // Hoc sinh xem danh gia kien thuc cua minh: moi dot da lam (khong can GV mo xem lai, khong lo dap an).
 // Ca thi nhieu ma de gop 1 dot. Tra ve tung kien thuc: so diem dung/so cau, cac cau sai.

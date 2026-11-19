@@ -36,6 +36,10 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 - Sự việc ghi tab **BAO MAT** (kho); Nhật ký điểm tab **NHAT KY DIEM** (mỗi sổ) + hoàn tác; kiểm tra điểm sửa ngoài trang GV (ảnh chụp tab KIEM TRA DIEM, mỗi 3 giờ). Xem ở Cài đặt → 🛡 Bảo mật; trang chủ hiện băng ⚠ khi có sự việc mới.
 - Mọi thao tác ghi điểm mới phải gọi `nkGhi(...)` với khóa `TX|id|ma` hoặc `BL|madot|ma|lan`, nếu không sẽ bị báo nhầm là sửa ngoài hệ thống.
 
+## 5c. Tài khoản chung nhiều lớp (20/11)
+- Em học nhiều lớp (12G01 + 12CLB + 12AFTER) dùng 1 SBD: GV ghi SBD lớp chính (tiền tố trùng lớp chính) vào DANHSACH lớp phụ. Mật khẩu (mã xem bài) lấy theo lớp chính, kho tab **TAI KHOAN** (MaHS, MaXem, LopChinh, CacLop) đồng bộ khi GV mở trang (≤30 phút/lần, `dongBoTK`), lớp phụ tự chép mật khẩu. Đổi mật khẩu ở sổ lớp chính.
+- Ô SBD ở XEM-LAI, LAM-BAI, các trò chơi nhận 2 số cuối hoặc đủ 8 số. Tài khoản HS gộp bài/bảng điểm/TX/khảo sát các lớp (nhãn lớp); Kiến thức cần ôn có nút chọn lớp. Quét nộp vở: sổ lớp đang quét tự kiểm tra em có trong danh sách.
+
 ## 6. Việc còn treo / nhắc GV
 - Dán SoTheoDoi.gs mới vào tất cả sổ (nhiều thay đổi từ 17–19/11 chưa chắc đã triển khai).
 - Đổi tên file sổ 12CLB thành `SO THEO DOI 12CLB` nếu chưa triển khai bản mới.

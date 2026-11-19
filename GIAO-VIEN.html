@@ -1409,15 +1409,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var now = Date.now();
     if (VO.gan[sbd] && now - VO.gan[sbd] < 4000) return;   // cùng quyển còn trong khung
     VO.gan[sbd] = now;
-    var l = voLopSBD(sbd);
-    if (!l || l.ten !== VO.l.ten) { voBao('xau', '', 'Vở này (' + sbd + ') ' + (l ? 'của lớp ' + l.ten : 'không thuộc lớp nào') + ' — đang quét lớp ' + VO.l.ten + '.'); bip(false); return; }
+    var l = VO.l;   // em học nhiều lớp dùng chung 1 SBD: để sổ lớp đang quét tự kiểm tra em có trong danh sách không
     if (VO.xong[sbd]) { voBao('trung', VO.xong[sbd].hoten, 'Đã ghi rồi · ' + (VO.xong[sbd].tt === 'T' ? 'nộp trễ' : 'đúng hạn')); bip(true); return; }
     if (VO.dang[sbd]) return;
     var tre = VO.tre;
     VO.dang[sbd] = 1; voBao('', '', 'Đang ghi ' + sbd + '…');
     goi(l.url, { action: 'gv_tx_vo', ma: MA, mahs: sbd, ngay: VO.ngay, tre: tre ? 1 : 0 }).then(function (r) {
       delete VO.dang[sbd];
-      if (!r.ok) throw new Error(/hop le/i.test(r.msg || '') ? 'Sổ lớp ' + l.ten + ' chưa cập nhật bản mới.' : r.msg || 'lỗi');
+      if (!r.ok) throw new Error(/hop le/i.test(r.msg || '') ? 'Sổ lớp ' + l.ten + ' chưa cập nhật bản mới.' : /khong co trong lop/i.test(r.msg || '') ? 'Vở này (' + sbd + (voLopSBD(sbd) ? ', lớp ' + voLopSBD(sbd).ten : '') + ') không có trong danh sách lớp ' + l.ten + '.' : r.msg || 'lỗi');
       var tt = r.tt || (tre ? 'T' : 'V');
       VO.xong[sbd] = { hoten: r.hoten, tt: tt }; if (r.siso) VO.siso = r.siso;
       var d = new Date(); VO.ds.push({ hoten: r.hoten, tt: tt, trung: !!r.trung, gio: ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) });

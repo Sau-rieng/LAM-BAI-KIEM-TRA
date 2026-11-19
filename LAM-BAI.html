@@ -99,8 +99,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <p class="sub">Chọn lớp, nhập SBD và mã làm bài thầy/cô cho.</p>
     <label for="lop" id="nhanLop">Lớp</label>
     <select id="lop"><option value="">– Chọn lớp –</option></select>
-    <label for="sbd">Số báo danh (nhập 2 số cuối)</label>
-    <div class="sbd"><span class="pre" id="pre">------</span><input id="sbd" inputmode="numeric" maxlength="2" autocomplete="off"></div>
+    <label for="sbd">Số báo danh (2 số cuối, hoặc đủ 8 số nếu em học nhiều lớp)</label>
+    <div class="sbd"><span class="pre" id="pre">------</span><input id="sbd" inputmode="numeric" maxlength="8" autocomplete="off"></div>
     <label for="magv" id="nhanMaGV">Mã làm bài</label>
     <input id="magv" type="password" inputmode="numeric" autocomplete="off">
     <button class="btn" id="btnTim">Tìm tên</button>
@@ -248,9 +248,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('msg').className = 'msg'; $('msg').textContent = '';
     if (!lopChon) return loi('Em chưa chọn lớp.');
     var s2 = $('sbd').value.trim();
-    if (!/^\d{2}$/.test(s2)) return loi('Hãy nhập đúng 2 số cuối của SBD.');
+    if (!/^\d{2}$/.test(s2) && !/^\d{8}$/.test(s2)) return loi('Hãy nhập 2 số cuối của SBD (hoặc đủ 8 số).');
     if (!$('magv').value.trim() && !QR.k) return loi('Em chưa nhập mã làm bài.');
-    var ma = lopChon.tiento + s2;
+    var ma = s2.length === 8 ? s2 : lopChon.tiento + s2;
     $('msg').textContent = 'Đang tìm tên...';
     $('btnTim').disabled = true;
     fetch(lopChon.url + '?mahs=' + encodeURIComponent(ma))
