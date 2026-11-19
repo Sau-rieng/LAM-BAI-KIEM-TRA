@@ -175,9 +175,9 @@
     function cotSo(col) { var c = []; col.forEach(function (x, d) { if (x.to) c.push(d); }); return c; }
     var canh = [];
     function chuoi(cols, ten) {
-      var s = '', loi = false;
-      cols.forEach(function (col, i) { var c = cotSo(col); if (c.length === 1) s += c[0]; else { s += c.length ? '*' : '_'; loi = true; } if (col.some(function (x) { return x.nghi; })) canh.push({ vung: ten, cot: i + 1 }); });
-      return { s: s, loi: loi };
+      var s = '', loi = false, cot = [];
+      cols.forEach(function (col, i) { var c = cotSo(col); cot.push(c); if (c.length === 1) s += c[0]; else { s += c.length ? '*' : '_'; loi = true; } if (col.some(function (x) { return x.nghi; })) canh.push({ vung: ten, cot: i + 1 }); });
+      return { s: s, loi: loi, cot: cot };
     }
     var sbd = chuoi(o.sbd, 'SBD'), made = chuoi(o.made, 'Mã đề');
     var p1 = o.p1.map(function (row) { var c = []; row.forEach(function (x, j) { if (x.to) c.push('ABCD'[j]); }); return { chon: c.join(''), mo: row.some(function (x) { return x.nghi; }) }; });
