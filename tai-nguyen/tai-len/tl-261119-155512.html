@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mô Phỏng 3D: Sự Hình Thành Liên Kết Ion CaCl₂</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Three.js r128 & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 55%, #e2e8f0 100%);
+      color: #0f172a;
+    }
+
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      touch-action: none;
+    }
+
+    /* Lớp nhãn 2D chiếu từ tọa độ 3D */
+    #labels-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+    }
+
+    .nucleus-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.01em;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+      transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, transform 0.2s ease;
+    }
+
+    .nucleus-ca {
+      background: rgba(255, 255, 255, 0.94);
+      border: 2px solid #4f46e5;
+      color: #3730a3;
+    }
+
+    .nucleus-cl {
+      background: rgba(255, 255, 255, 0.94);
+      border: 2px solid #059669;
+      color: #065f46;
+    }
+
+    .e-badge {
+      position: absolute;
+      transform: translate(-50%, -140%);
+      min-width: 21px;
+      height: 21px;
+      padding: 0 5px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
+    }
+
+    .e-badge-ca {
+      background: #f59e0b;
+      color: #ffffff;
+      border: 1.5px solid #fef3c7;
+    }
+
+    .e-badge-cl {
+      background: #0284c7;
+      color: #ffffff;
+      border: 1.5px solid #e0f2fe;
+    }
+
+    .e-badge-slot {
+      background: rgba(255, 247, 237, 0.95);
+      color: #c2410c;
+      border: 1.5px dashed #ea580c;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      height: auto;
+      transform: translate(-50%, -145%);
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
+    }
+
+    .bond-badge {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1.5px solid #7c3aed;
+      color: #5b21b6;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.22);
+      opacity: 0;
+      transition: opacity 0.45s ease;
+    }
+
+    .bond-badge.visible {
+      opacity: 1;
+    }
+
+    /* Glassmorphism sáng, độ tương phản cao cho trình chiếu & iPad */
+    .light-panel {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Thanh trượt tốc độ quay */
+    input[type="range"].speed-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      outline: none;
+    }
+    input[type="range"].speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4f46e5;
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.45);
+    }
+    input[type="range"].speed-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4f46e5;
+      border: 2px solid #ffffff;
+      cursor: pointer;
+    }
+
+    .ctrl-btn {
+      transition: all 0.16s ease;
+    }
+    .ctrl-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+    .ctrl-btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <!-- Khung chứa WebGL 3D -->
+  <div id="canvas-container"></div>
+
+  <!-- Lớp nhãn chiếu từ không gian 3D -->
+  <div id="labels-layer">
+    <div id="label-cl-left" class="nucleus-label nucleus-cl">Cl (+17)</div>
+    <div id="label-ca-center" class="nucleus-label nucleus-ca">Ca (+20)</div>
+    <div id="label-cl-right" class="nucleus-label nucleus-cl">Cl (+17)</div>
+
+    <div id="label-bond-left" class="bond-badge">⚡ Hút tĩnh điện</div>
+    <div id="label-bond-right" class="bond-badge">⚡ Hút tĩnh điện</div>
+
+    <!-- Nhãn số thứ tự các electron lớp ngoài cùng -->
+    <div id="valence-badges-container"></div>
+  </div>
+
+  <!-- Giao diện điều khiển HUD -->
+  <div class="fixed inset-0 z-10 pointer-events-none flex flex-col justify-between p-2 sm:p-3.5">
+
+    <!-- PHẦN TRÊN: TIÊU ĐỀ & GIẢI THÍCH BƯỚC HIỆN TẠI -->
+    <header class="w-full max-w-7xl mx-auto flex flex-col gap-2">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <!-- Tiêu đề chính -->
+        <div class="light-panel pointer-events-auto rounded-2xl px-3.5 py-2 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 via-indigo-600 to-emerald-500 flex items-center justify-center font-extrabold text-white text-xs shadow-md shrink-0">
+            CaCl₂
+          </div>
+          <div>
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 leading-tight">
+              Mô Phỏng 3D: Sự Tạo Thành Liên Kết Ion CaCl₂
+            </h1>
+            <p class="text-[11px] text-slate-600 font-medium leading-tight">
+              Kéo để xoay 3D • Chụm/Cuộn để phóng to, thu nhỏ • Đếm chính xác từng electron
+            </p>
+          </div>
+        </div>
+
+        <!-- Phương trình tổng quát -->
+        <div id="equation-pill" class="light-panel pointer-events-auto rounded-2xl px-3.5 py-2 flex items-center gap-2 border-indigo-200">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Phương trình:</span>
+          <span id="equation-text" class="text-xs sm:text-sm font-extrabold text-slate-800 font-mono">
+            Cl + Ca + Cl
+          </span>
+        </div>
+      </div>
+
+      <!-- Thanh giải thích ngắn gọn theo sách giáo khoa -->
+      <div id="step-banner" class="light-panel pointer-events-auto rounded-xl px-3.5 py-2 flex items-center gap-2.5 border-l-4 border-l-amber-500">
+        <span id="step-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 animate-pulse"></span>
+        <p id="step-description" class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">
+          Trạng thái ban đầu: Nguyên tử Ca có 2e lớp ngoài cùng (2-8-8-2); mỗi nguyên tử Cl chỉ có 7e lớp ngoài cùng (2-8-7), còn thiếu 1e để đạt 8e bền vững.
+        </p>
+      </div>
+    </header>
+
+    <!-- PHẦN DƯỚI: 3 THẺ THÔNG TIN NGUYÊN TỬ + THANH ĐIỀU KHIỂN -->
+    <div class="w-full max-w-7xl mx-auto flex flex-col gap-2">
+
+      <!-- 3 Thẻ thông tin thời gian thực (Cl trái - Ca giữa - Cl phải) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <!-- Thẻ Cl trái -->
+        <div id="card-cl-left" class="light-panel pointer-events-auto rounded-2xl px-3 py-2 border-l-4 border-l-emerald-600 transition-all duration-300">
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="flex items-center gap-1.5">
+              <span id="cl-left-badge" class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold text-xs">Cl</span>
+              <h2 id="cl-left-title" class="text-xs font-bold text-slate-900">Chlorine (Trái)</h2>
+            </div>
+            <span id="cl-left-charge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              17p, 17e (Trung hòa)
+            </span>
+          </div>
+          <div class="mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
+            <span id="cl-left-config" class="font-mono font-bold text-emerald-700">1s²2s²2p⁶3s²3p⁵</span>
+            <span id="cl-left-shells" class="font-bold text-slate-700">Lớp e: 2 - 8 - 7 (thiếu 1e)</span>
+          </div>
+        </div>
+
+        <!-- Thẻ Ca giữa -->
+        <div id="card-ca-center" class="light-panel pointer-events-auto rounded-2xl px-3 py-2 border-l-4 border-l-indigo-600 transition-all duration-300">
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="flex items-center gap-1.5">
+              <span id="ca-badge" class="px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 border border-indigo-300 font-extrabold text-xs">Ca</span>
+              <h2 id="ca-title" class="text-xs font-bold text-slate-900">Calcium (Giữa)</h2>
+            </div>
+            <span id="ca-charge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              20p, 20e (Trung hòa)
+            </span>
+          </div>
+          <div class="mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
+            <span id="ca-config" class="font-mono font-bold text-indigo-700">1s²2s²2p⁶3s²3p⁶4s²</span>
+            <span id="ca-shells" class="font-bold text-slate-700">Lớp e: 2 - 8 - 8 - 2</span>
+          </div>
+        </div>
+
+        <!-- Thẻ Cl phải -->
+        <div id="card-cl-right" class="light-panel pointer-events-auto rounded-2xl px-3 py-2 border-l-4 border-l-emerald-600 transition-all duration-300">
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="flex items-center gap-1.5">
+              <span id="cl-right-badge" class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold text-xs">Cl</span>
+              <h2 id="cl-right-title" class="text-xs font-bold text-slate-900">Chlorine (Phải)</h2>
+            </div>
+            <span id="cl-right-charge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              17p, 17e (Trung hòa)
+            </span>
+          </div>
+          <div class="mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
+            <span id="cl-right-config" class="font-mono font-bold text-emerald-700">1s²2s²2p⁶3s²3p⁵</span>
+            <span id="cl-right-shells" class="font-bold text-slate-700">Lớp e: 2 - 8 - 7 (thiếu 1e)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thanh công cụ điều khiển (tối ưu nút lớn cho iPad) -->
+      <div class="light-panel pointer-events-auto rounded-2xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+
+        <!-- Nhóm 1: Điều khiển phản ứng -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <button id="btn-transfer" class="ctrl-btn px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-orange-500/25 flex items-center gap-1.5">
+            <span>⚡</span>
+            <span>Chuyển 2e (Ca → 2 Cl)</span>
+          </button>
+
+          <button id="btn-reset" class="ctrl-btn px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs flex items-center gap-1.5">
+            <span>↺</span>
+            <span>Làm lại</span>
+          </button>
+
+          <button id="btn-pause" class="ctrl-btn px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs flex items-center gap-1.5">
+            <span id="pause-icon">⏸</span>
+            <span id="pause-text">Tạm dừng</span>
+          </button>
+        </div>
+
+        <!-- Nhóm 2: Góc nhìn & Đánh số -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <div class="flex items-center bg-slate-200/80 rounded-xl p-0.5 border border-slate-300">
+            <button id="btn-view-3d" class="ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm">
+              Góc nhìn 3D
+            </button>
+            <button id="btn-view-front" class="ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900">
+              Trực diện (Dễ đếm)
+            </button>
+          </div>
+
+          <button id="btn-numbering" class="ctrl-btn px-3 py-2 rounded-xl bg-sky-100 text-sky-900 border border-sky-300 font-bold text-xs flex items-center gap-1.5">
+            <span>🔢</span>
+            <span>Đánh số e ngoài: <strong id="numbering-state">BẬT</strong></span>
+          </button>
+        </div>
+
+        <!-- Nhóm 3: Thanh trượt tốc độ quay (0 -> 2x) -->
+        <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-300">
+          <label for="speed-slider" class="text-[11px] font-bold text-slate-700 whitespace-nowrap">
+            Tốc độ quay:
+          </label>
+          <input id="speed-slider" type="range" min="0" max="2.0" step="0.05" value="0.40" class="speed-slider w-20 sm:w-24" />
+          <span id="speed-value" class="text-[11px] font-mono font-extrabold text-indigo-700 w-9 text-right">0.40x</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * MÔ PHỎNG 3D SỰ HÌNH THÀNH LIÊN KẾT ION CALCIUM CHLORIDE (CaCl₂)
+     * ----------------------------------------------------------------------------
+     * Độ chính xác hóa học tuyệt đối:
+     * 1. Cl (Trái, Z=17): 3 lớp vỏ (2 - 8 - 7). Lớp 3 có 7e đánh số 1..7 + 1 vị trí trống hướng về Ca.
+     * 2. Ca (Giữa, Z=20): 4 lớp vỏ (2 - 8 - 8 - 2). Lớp 4 có 2e màu vàng cam nổi bật đánh số 1 và 2.
+     * 3. Cl (Phải, Z=17): 3 lớp vỏ (2 - 8 - 7). Lớp 3 có 7e đánh số 1..7 + 1 vị trí trống hướng về Ca.
+     *
+     * Diễn biến:
+     * - Nhấn "Chuyển 2e (Ca → 2 Cl)": 2e lớp 4 của Ca đồng thời tách ra, bay theo 2 quỹ đạo cong 3D
+     *   đối xứng có vệt sáng vào đúng vị trí trống thứ 8 của mỗi nguyên tử Cl.
+     * - Sau khi đáp: Mỗi Cl đủ 8e (hiện số "8") -> Cl⁻ (2-8-8); lớp 4 trống của Ca mờ dần và biến mất,
+     *   Ca co nhẹ -> Ca²⁺ (2-8-8); 3 ion tiến lại gần nhau kèm đường sức hút tĩnh điện tạo CaCl₂.
+     * ============================================================================
+     */
+
+    // --- Biến Three.js cốt lõi ---
+    let scene, camera, renderer, controls, clock;
+
+    // --- Hằng số bán kính các lớp vỏ & vị trí nguyên tử ---
+    const SHELL_RADII = [1.05, 1.75, 2.45, 3.15]; // Lớp 1, Lớp 2, Lớp 3, Lớp 4
+    const INITIAL_CL_X = 6.75; // Vị trí X ban đầu của hai nguyên tử Cl (-6.75 và +6.75)
+    const BONDED_CL_X = 5.45;  // Vị trí X sau khi hình thành lực hút tĩnh điện tạo CaCl₂
+    const ATOM_Y = 0.2;        // Nâng nhẹ tâm mô hình lên trên để cân đối giữa Header và Bottom HUD
+
+    // --- Các nhóm 3D của 3 nguyên tử ---
+    let clLeftGroup, caGroup, clRightGroup;
+    let clLeftShells = [], caShells = [], clRightShells = [];
+
+    // --- Đối tượng đặc biệt để điều khiển hoạt ảnh ---
+    let caOuterRingMesh;             // Vòng tròn lớp 4 của Ca (sẽ mờ dần & biến mất sau khi nhường 2e)
+    let caValenceElectrons = [];     // [e1 (sang trái), e2 (sang phải)]
+    let clLeftValenceElectrons = []; // 7e lớp ngoài của Cl trái
+    let clRightValenceElectrons = [];// 7e lớp ngoài của Cl phải
+    let clLeftEmptySlot;             // Vòng nét đứt đánh dấu vị trí trống thứ 8 của Cl trái
+    let clRightEmptySlot;            // Vòng nét đứt đánh dấu vị trí trống thứ 8 của Cl phải
+
+    // --- Hiệu ứng vệt sáng & đường sức lực hút tĩnh điện ---
+    let trailParticles = [];
+    let electrostaticGroup;
+    let electrostaticLines = [];
+    let electrostaticPulses = [];
+
+    // --- Texture phát sáng tạo bằng Canvas (không dùng URL ảnh ngoài) ---
+    let glowTexAmber, glowTexBlue, glowTexEmerald, glowTexIndigo, glowTexPurple;
+
+    // --- Trạng thái mô phỏng ---
+    const STATE = {
+      INITIAL: 'INITIAL',
+      TRANSFERRING: 'TRANSFERRING',
+      BONDING: 'BONDING',
+      COMPLETE: 'COMPLETE'
+    };
+    let simState = STATE.INITIAL;
+    let isPaused = false;
+    let showNumbering = true;
+    let rotationSpeed = 0.40;
+    let viewMode = '3d'; // '3d' hoặc 'front'
+
+    // --- Biến tiến trình hoạt ảnh ---
+    let transferProgress = 0;
+    const TRANSFER_DURATION = 2.4; // giây
+    let startPosLeft = new THREE.Vector3();
+    let startPosRight = new THREE.Vector3();
+
+    let bondingProgress = 0;
+    const BONDING_DURATION = 1.6; // giây
+
+    // --- Chuyển góc camera mượt mà ---
+    let cameraLerp = {
+      active: false,
+      targetPos: new THREE.Vector3(),
+      targetLook: new THREE.Vector3(0, 0, 0)
+    };
+
+    // --- Tham chiếu DOM ---
+    const labelClLeft = document.getElementById('label-cl-left');
+    const labelCaCenter = document.getElementById('label-ca-center');
+    const labelClRight = document.getElementById('label-cl-right');
+    const labelBondLeft = document.getElementById('label-bond-left');
+    const labelBondRight = document.getElementById('label-bond-right');
+    const valenceBadgesContainer = document.getElementById('valence-badges-container');
+
+    let badgeCa1, badgeCa2;
+    let badgeClLeftSlot, badgeClRightSlot;
+    let badgesClLeft = [], badgesClRight = [];
+
+    /**
+     * Tạo texture hạt sáng tròn mượt bằng HTML5 Canvas
+     */
+    function createGlowTexture(c1, c2, c3) {
+      const size = 128;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(size / 2, size / 2, 2, size / 2, size / 2, size / 2);
+      grad.addColorStop(0, c1);
+      grad.addColorStop(0.4, c2);
+      grad.addColorStop(1, c3);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    /**
+     * Tính khoảng cách Z tối ưu của camera để cả 3 nguyên tử luôn nằm gọn trên màn hình máy tính và iPad
+     */
+    function getResponsiveCameraZ(basePaddingHalfWidth = 10.6) {
+      const aspect = window.innerWidth / window.innerHeight;
+      const vFovRad = THREE.MathUtils.degToRad(camera.fov);
+      const tanHalfV = Math.tan(vFovRad / 2);
+      const zForWidth = basePaddingHalfWidth / (tanHalfV * Math.max(aspect, 0.55));
+      const zForHeight = 5.4 / tanHalfV;
+      return Math.max(zForWidth, zForHeight, 15.5);
+    }
+
+    /**
+     * Khởi tạo cảnh 3D Three.js
+     */
+    function initScene() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+
+      const aspect = window.innerWidth / window.innerHeight;
+      camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 200);
+      setCameraPreset('3d', true);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // OrbitControls mượt mà cho chuột và cảm ứng iPad
+      if (typeof THREE.OrbitControls !== 'undefined') {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.minDistance = 8;
+        controls.maxDistance = 42;
+        controls.target.set(0, 0, 0);
+        controls.addEventListener('start', () => {
+          cameraLerp.active = false;
+        });
+      }
+
+      // Hệ thống chiếu sáng rõ nét trên nền sáng
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      scene.add(ambientLight);
+
+      const dirLightMain = new THREE.DirectionalLight(0xffffff, 0.9);
+      dirLightMain.position.set(10, 16, 18);
+      scene.add(dirLightMain);
+
+      const dirLightFill = new THREE.DirectionalLight(0xe0f2fe, 0.55);
+      dirLightFill.position.set(-14, -8, 12);
+      scene.add(dirLightFill);
+
+      // Tạo các texture ánh sáng
+      glowTexAmber   = createGlowTexture('rgba(255,251,235,1)', 'rgba(245,158,11,0.75)', 'rgba(245,158,11,0)');
+      glowTexBlue    = createGlowTexture('rgba(224,242,254,0.95)', 'rgba(2,132,199,0.45)', 'rgba(2,132,199,0)');
+      glowTexEmerald = createGlowTexture('rgba(209,250,229,0.9)', 'rgba(5,150,105,0.4)', 'rgba(5,150,105,0)');
+      glowTexIndigo  = createGlowTexture('rgba(224,231,255,0.9)', 'rgba(79,70,229,0.4)', 'rgba(79,70,229,0)');
+      glowTexPurple  = createGlowTexture('rgba(243,232,255,1)', 'rgba(124,58,237,0.7)', 'rgba(124,58,237,0)');
+
+      // Xây dựng 3 nguyên tử xếp hàng ngang: Cl (trái) - Ca (giữa) - Cl (phải)
+      createChlorineAtom('left');
+      createCalciumAtom();
+      createChlorineAtom('right');
+
+      // Tạo hiệu ứng đường sức hút tĩnh điện (ẩn ban đầu)
+      createElectrostaticEffect();
+
+      // Tạo các nhãn số thứ tự electron lớp ngoài cùng
+      createValenceBadges();
+
+      clock = new THREE.Clock();
+
+      bindUIEvents();
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    /**
+     * Tạo hạt nhân 3D dạng cụm nucleon nổi khối
+     */
+    function createNucleus(primaryColor, secondaryColor, glowTex, radius = 0.52) {
+      const group = new THREE.Group();
+
+      const coreGeo = new THREE.SphereGeometry(radius, 32, 32);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: primaryColor,
+        roughness: 0.28,
+        metalness: 0.12
+      });
+      group.add(new THREE.Mesh(coreGeo, coreMat));
+
+      // Cụm hạt proton/neutron nổi nhẹ tạo độ khối 3D
+      const subGeo = new THREE.SphereGeometry(radius * 0.29, 16, 16);
+      const matA = new THREE.MeshStandardMaterial({ color: primaryColor, roughness: 0.32 });
+      const matB = new THREE.MeshStandardMaterial({ color: secondaryColor, roughness: 0.35 });
+      const dirs = [
+        [1, 0.3, 0.4], [-1, -0.2, 0.45], [0.25, 1, 0.3], [-0.3, -1, 0.35],
+        [0.65, 0.65, -0.55], [-0.7, 0.5, -0.5], [0.55, -0.6, -0.55], [-0.5, -0.55, 0.7]
+      ];
+      dirs.forEach((d, idx) => {
+        const m = new THREE.Mesh(subGeo, idx % 2 === 0 ? matA : matB);
+        m.position.copy(new THREE.Vector3(d[0], d[1], d[2]).normalize().multiplyScalar(radius * 0.82));
+        group.add(m);
+      });
+
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTex,
+        transparent: true,
+        depthWrite: false
+      }));
+      sprite.scale.set(radius * 3.8, radius * 3.8, 1);
+      group.add(sprite);
+
+      return group;
+    }
+
+    /**
+     * Tạo vòng quỹ đạo lớp vỏ 3D rõ nét trên nền sáng
+     */
+    function createOrbitRing(radius, colorHex, opacity = 0.65, tube = 0.022) {
+      const geo = new THREE.TorusGeometry(radius, tube, 16, 128);
+      const mat = new THREE.MeshBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.Mesh(geo, mat);
+    }
+
+    /**
+     * Tạo một electron 3D (màu vàng cam nổi bật cho 2e ngoài cùng của Ca, màu xanh dương đậm cho các e còn lại)
+     */
+    function createElectron(isCaValence = false) {
+      const group = new THREE.Group();
+      const r = isCaValence ? 0.19 : 0.145;
+      const color = isCaValence ? 0xf59e0b : 0x0284c7;
+      const emissive = isCaValence ? 0xd97706 : 0x0369a1;
+      const glowTex = isCaValence ? glowTexAmber : glowTexBlue;
+
+      const geo = new THREE.SphereGeometry(r, 24, 24);
+      const mat = new THREE.MeshStandardMaterial({
+        color: color,
+        emissive: emissive,
+        emissiveIntensity: isCaValence ? 0.55 : 0.25,
+        roughness: 0.2,
+        metalness: 0.1
+      });
+      group.add(new THREE.Mesh(geo, mat));
+
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTex,
+        transparent: true,
+        depthWrite: false
+      }));
+      const scale = isCaValence ? 0.95 : 0.56;
+      sprite.scale.set(scale, scale, 1);
+      group.add(sprite);
+
+      return group;
+    }
+
+    /**
+     * Tạo dấu hiệu vị trí trống thứ 8 (vòng tròn nét đứt màu cam đậm dễ nhìn trên nền sáng)
+     */
+    function createEmptySlotMarker() {
+      const group = new THREE.Group();
+      const segments = 12;
+      const r = 0.23;
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0xea580c,
+        transparent: true,
+        opacity: 0.95,
+        side: THREE.DoubleSide
+      });
+
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        const arcLen = (Math.PI * 2 / segments) * 0.55;
+        const dashGeo = new THREE.RingGeometry(r - 0.032, r + 0.032, 8, 1, angle, arcLen);
+        group.add(new THREE.Mesh(dashGeo, mat));
+      }
+
+      // Nền tròn mờ nhẹ bên trong vòng nét đứt
+      const fillGeo = new THREE.CircleGeometry(r - 0.035, 24);
+      const fillMat = new THREE.MeshBasicMaterial({
+        color: 0xffedd5,
+        transparent: true,
+        opacity: 0.75,
+        side: THREE.DoubleSide
+      });
+      group.add(new THREE.Mesh(fillGeo, fillMat));
+
+      return group;
+    }
+
+    /**
+     * Xây dựng nguyên tử Chlorine (Cl, Z=17): 2 - 8 - 7 + 1 vị trí trống hướng về phía Ca
+     * @param {'left' | 'right'} side
+     */
+    function createChlorineAtom(side) {
+      const isLeft = side === 'left';
+      const group = new THREE.Group();
+      group.position.set(isLeft ? -INITIAL_CL_X : INITIAL_CL_X, ATOM_Y, 0);
+      scene.add(group);
+
+      // Hạt nhân Cl màu xanh ngọc lục bảo
+      group.add(createNucleus(0x059669, 0x6ee7b7, glowTexEmerald, 0.50));
+
+      const shells = [];
+
+      // Lớp 1: Đúng 2 electron (cách đều 180°)
+      const s1 = new THREE.Group();
+      s1.add(createOrbitRing(SHELL_RADII[0], 0x10b981, 0.6));
+      for (let i = 0; i < 2; i++) {
+        const angle = i * Math.PI + (isLeft ? 0 : Math.PI / 2);
+        const e = createElectron(false);
+        e.position.set(Math.cos(angle) * SHELL_RADII[0], Math.sin(angle) * SHELL_RADII[0], 0);
+        s1.add(e);
+      }
+      group.add(s1);
+      shells.push(s1);
+
+      // Lớp 2: Đúng 8 electron (cách đều 45°)
+      const s2 = new THREE.Group();
+      s2.add(createOrbitRing(SHELL_RADII[1], 0x059669, 0.52));
+      for (let i = 0; i < 8; i++) {
+        const angle = i * (Math.PI / 4);
+        const e = createElectron(false);
+        e.position.set(Math.cos(angle) * SHELL_RADII[1], Math.sin(angle) * SHELL_RADII[1], 0);
+        s2.add(e);
+      }
+      group.add(s2);
+      shells.push(s2);
+
+      // Lớp 3: Đúng 7 electron + 1 vị trí trống hướng về phía Ca ở giữa
+      const s3 = new THREE.Group();
+      s3.add(createOrbitRing(SHELL_RADII[2], 0x047857, 0.65, 0.025));
+
+      // Nếu Cl ở bên trái, vị trí trống ở góc 0 (hướng sang phải về Ca)
+      // Nếu Cl ở bên phải, vị trí trống ở góc π (hướng sang trái về Ca)
+      const emptyAngle = isLeft ? 0 : Math.PI;
+      const emptySlot = createEmptySlotMarker();
+      emptySlot.position.set(
+        Math.cos(emptyAngle) * SHELL_RADII[2],
+        Math.sin(emptyAngle) * SHELL_RADII[2],
+        0
+      );
+      s3.add(emptySlot);
+
+      const valenceList = [];
+      for (let k = 1; k <= 7; k++) {
+        // Sắp xếp đều 7 electron còn lại mỗi 45° theo chiều dễ đếm 1 → 7
+        const angle = isLeft
+          ? emptyAngle + k * (Math.PI / 4)
+          : emptyAngle - k * (Math.PI / 4);
+        const e = createElectron(false);
+        e.position.set(Math.cos(angle) * SHELL_RADII[2], Math.sin(angle) * SHELL_RADII[2], 0);
+        s3.add(e);
+        valenceList.push(e);
+      }
+
+      group.add(s3);
+      shells.push(s3);
+
+      if (isLeft) {
+        clLeftGroup = group;
+        clLeftShells = shells;
+        clLeftEmptySlot = emptySlot;
+        clLeftValenceElectrons = valenceList;
+      } else {
+        clRightGroup = group;
+        clRightShells = shells;
+        clRightEmptySlot = emptySlot;
+        clRightValenceElectrons = valenceList;
+      }
+    }
+
+    /**
+     * Xây dựng nguyên tử Calcium (Ca, Z=20): 4 lớp vỏ phân bố chính xác 2 - 8 - 8 - 2
+     */
+    function createCalciumAtom() {
+      caGroup = new THREE.Group();
+      caGroup.position.set(0, ATOM_Y, 0);
+      scene.add(caGroup);
+
+      // Hạt nhân Ca màu xanh chàm nổi bật
+      caGroup.add(createNucleus(0x4f46e5, 0xa5b4fc, glowTexIndigo, 0.56));
+
+      // Lớp 1: Đúng 2 electron (180°)
+      const s1 = new THREE.Group();
+      s1.add(createOrbitRing(SHELL_RADII[0], 0x6366f1, 0.58));
+      for (let i = 0; i < 2; i++) {
+        const angle = i * Math.PI + Math.PI / 4;
+        const e = createElectron(false);
+        e.position.set(Math.cos(angle) * SHELL_RADII[0], Math.sin(angle) * SHELL_RADII[0], 0);
+        s1.add(e);
+      }
+      caGroup.add(s1);
+      caShells.push(s1);
+
+      // Lớp 2: Đúng 8 electron (45°)
+      const s2 = new THREE.Group();
+      s2.add(createOrbitRing(SHELL_RADII[1], 0x4f46e5, 0.52));
+      for (let i = 0; i < 8; i++) {
+        const angle = i * (Math.PI / 4);
+        const e = createElectron(false);
+        e.position.set(Math.cos(angle) * SHELL_RADII[1], Math.sin(angle) * SHELL_RADII[1], 0);
+        s2.add(e);
+      }
+      caGroup.add(s2);
+      caShells.push(s2);
+
+      // Lớp 3: Đúng 8 electron (45°)
+      const s3 = new THREE.Group();
+      s3.add(createOrbitRing(SHELL_RADII[2], 0x4338ca, 0.56));
+      for (let i = 0; i < 8; i++) {
+        const angle = i * (Math.PI / 4) + Math.PI / 8;
+        const e = createElectron(false);
+        e.position.set(Math.cos(angle) * SHELL_RADII[2], Math.sin(angle) * SHELL_RADII[2], 0);
+        s3.add(e);
+      }
+      caGroup.add(s3);
+      caShells.push(s3);
+
+      // Lớp 4: Đúng 2 electron màu vàng cam nổi bật (đặt đối diện nhau tại π và 0 hướng sang 2 nguyên tử Cl)
+      const s4 = new THREE.Group();
+      caOuterRingMesh = createOrbitRing(SHELL_RADII[3], 0xd97706, 0.72, 0.026);
+      s4.add(caOuterRingMesh);
+
+      const e1 = createElectron(true); // Electron số 1 (bên trái -> sẽ bay sang Cl trái)
+      e1.position.set(-SHELL_RADII[3], 0, 0);
+      s4.add(e1);
+
+      const e2 = createElectron(true); // Electron số 2 (bên phải -> sẽ bay sang Cl phải)
+      e2.position.set(SHELL_RADII[3], 0, 0);
+      s4.add(e2);
+
+      caValenceElectrons = [e1, e2];
+
+      caGroup.add(s4);
+      caShells.push(s4);
+    }
+
+    /**
+     * Tạo hiệu ứng các đường sức hút tĩnh điện giữa Ca²⁺ và hai ion Cl⁻ hai bên
+     */
+    function createElectrostaticEffect() {
+      electrostaticGroup = new THREE.Group();
+      electrostaticGroup.visible = false;
+      scene.add(electrostaticGroup);
+
+      // Tạo 2 cặp đường cong đối xứng ở hai khoảng trống (giữa Cl⁻ trái - Ca²⁺ và Ca²⁺ - Cl⁻ phải)
+      const sides = [-1, 1];
+      const yOffsets = [-1.05, -0.38, 0.38, 1.05];
+
+      sides.forEach((sign) => {
+        yOffsets.forEach((oy, idx) => {
+          const xInner = sign * (SHELL_RADII[2] * 0.94 + 0.05);
+          const xOuter = sign * (BONDED_CL_X - SHELL_RADII[2] - 0.05);
+          const xMid = (xInner + xOuter) / 2;
+
+          const curve = new THREE.QuadraticBezierCurve3(
+            new THREE.Vector3(xInner, ATOM_Y + oy * 0.55, 0),
+            new THREE.Vector3(xMid, ATOM_Y + oy * 1.15, idx % 2 === 0 ? 0.35 : -0.35),
+            new THREE.Vector3(xOuter, ATOM_Y + oy * 0.55, 0)
+          );
+
+          const tubeGeo = new THREE.TubeGeometry(curve, 24, 0.024, 8, false);
+          const tubeMat = new THREE.MeshBasicMaterial({
+            color: idx % 2 === 0 ? 0x7c3aed : 0x2563eb,
+            transparent: true,
+            opacity: 0
+          });
+          const mesh = new THREE.Mesh(tubeGeo, tubeMat);
+          electrostaticGroup.add(mesh);
+          electrostaticLines.push(mesh);
+
+          // Hạt sáng nhỏ chạy dọc đường sức để thể hiện lực hút
+          const pulseSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: glowTexPurple,
+            transparent: true,
+            opacity: 0,
+            depthWrite: false
+          }));
+          pulseSprite.scale.set(0.38, 0.38, 1);
+          electrostaticGroup.add(pulseSprite);
+          electrostaticPulses.push({ sprite: pulseSprite, curve, offset: idx * 0.25 });
+        });
+      });
+    }
+
+    /**
+     * Khởi tạo các nhãn số thứ tự HTML bám theo electron lớp ngoài cùng
+     */
+    function createValenceBadges() {
+      valenceBadgesContainer.innerHTML = '';
+      badgesClLeft = [];
+      badgesClRight = [];
+
+      // 2 nhãn cho 2 electron lớp 4 của Ca
+      badgeCa1 = document.createElement('div');
+      badgeCa1.className = 'e-badge e-badge-ca';
+      badgeCa1.textContent = '1';
+      valenceBadgesContainer.appendChild(badgeCa1);
+
+      badgeCa2 = document.createElement('div');
+      badgeCa2.className = 'e-badge e-badge-ca';
+      badgeCa2.textContent = '2';
+      valenceBadgesContainer.appendChild(badgeCa2);
+
+      // 7 nhãn (1..7) cho Cl trái
+      for (let i = 1; i <= 7; i++) {
+        const b = document.createElement('div');
+        b.className = 'e-badge e-badge-cl';
+        b.textContent = String(i);
+        valenceBadgesContainer.appendChild(b);
+        badgesClLeft.push(b);
+      }
+
+      // 7 nhãn (1..7) cho Cl phải
+      for (let i = 1; i <= 7; i++) {
+        const b = document.createElement('div');
+        b.className = 'e-badge e-badge-cl';
+        b.textContent = String(i);
+        valenceBadgesContainer.appendChild(b);
+        badgesClRight.push(b);
+      }
+
+      // 2 nhãn vị trí trống cho Cl trái & Cl phải
+      badgeClLeftSlot = document.createElement('div');
+      badgeClLeftSlot.className = 'e-badge e-badge-slot';
+      badgeClLeftSlot.textContent = 'Trống (8?)';
+      valenceBadgesContainer.appendChild(badgeClLeftSlot);
+
+      badgeClRightSlot = document.createElement('div');
+      badgeClRightSlot.className = 'e-badge e-badge-slot';
+      badgeClRightSlot.textContent = 'Trống (8?)';
+      valenceBadgesContainer.appendChild(badgeClRightSlot);
+    }
+
+    /**
+     * Chiếu tọa độ 3D ra tọa độ 2D trên màn hình
+     */
+    function projectToScreen(worldPos) {
+      const v = worldPos.clone().project(camera);
+      return {
+        x: (v.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-v.y * 0.5 + 0.5) * window.innerHeight,
+        visible: v.z < 1
+      };
+    }
+
+    /**
+     * Đặt vị trí một phần tử DOM theo tọa độ 3D
+     */
+    function placeLabel(el, worldPos, displayMode = 'block') {
+      const sc = projectToScreen(worldPos);
+      el.style.left = `${sc.x}px`;
+      el.style.top = `${sc.y}px`;
+      el.style.display = sc.visible ? displayMode : 'none';
+    }
+
+    /**
+     * Cập nhật toàn bộ nhãn nổi mỗi khung hình
+     */
+    function updateFloatingLabels() {
+      const tmp = new THREE.Vector3();
+
+      // Nhãn 3 hạt nhân
+      clLeftGroup.getWorldPosition(tmp);
+      placeLabel(labelClLeft, tmp);
+
+      caGroup.getWorldPosition(tmp);
+      placeLabel(labelCaCenter, tmp);
+
+      clRightGroup.getWorldPosition(tmp);
+      placeLabel(labelClRight, tmp);
+
+      // Nhãn lực hút tĩnh điện hai bên Ca²⁺
+      placeLabel(labelBondLeft, new THREE.Vector3(-BONDED_CL_X / 2, ATOM_Y + 2.85, 0));
+      placeLabel(labelBondRight, new THREE.Vector3(BONDED_CL_X / 2, ATOM_Y + 2.85, 0));
+
+      // Bật / tắt đánh số electron lớp ngoài cùng
+      valenceBadgesContainer.style.display = showNumbering ? 'block' : 'none';
+      if (!showNumbering) return;
+
+      // 2 electron vàng của Ca (hoặc số 8 sau khi vào Cl)
+      caValenceElectrons[0].getWorldPosition(tmp);
+      placeLabel(badgeCa1, tmp, 'flex');
+
+      caValenceElectrons[1].getWorldPosition(tmp);
+      placeLabel(badgeCa2, tmp, 'flex');
+
+      // 7 electron ngoài của Cl trái
+      for (let i = 0; i < 7; i++) {
+        clLeftValenceElectrons[i].getWorldPosition(tmp);
+        placeLabel(badgesClLeft[i], tmp, 'flex');
+      }
+
+      // 7 electron ngoài của Cl phải
+      for (let i = 0; i < 7; i++) {
+        clRightValenceElectrons[i].getWorldPosition(tmp);
+        placeLabel(badgesClRight[i], tmp, 'flex');
+      }
+
+      // Nhãn vị trí trống (chỉ hiển thị trước khi nhận electron)
+      if (clLeftEmptySlot.visible) {
+        clLeftEmptySlot.getWorldPosition(tmp);
+        placeLabel(badgeClLeftSlot, tmp, 'flex');
+      } else {
+        badgeClLeftSlot.style.display = 'none';
+      }
+
+      if (clRightEmptySlot.visible) {
+        clRightEmptySlot.getWorldPosition(tmp);
+        placeLabel(badgeClRightSlot, tmp, 'flex');
+      } else {
+        badgeClRightSlot.style.display = 'none';
+      }
+    }
+
+    /**
+     * Bắt đầu giai đoạn 1: Chuyển đồng thời 2 electron lớp ngoài của Ca sang 2 nguyên tử Cl
+     */
+    function startTransfer() {
+      if (simState !== STATE.INITIAL) return;
+
+      if (isPaused) togglePause(false);
+
+      simState = STATE.TRANSFERRING;
+      transferProgress = 0;
+      document.getElementById('btn-transfer').disabled = true;
+
+      // Cập nhật giải thích & phương trình
+      updateStepBanner(
+        'Giai đoạn 1 (Nhường – Nhận electron): Nguyên tử Ca đồng thời nhường 2e lớp ngoài cùng cho hai nguyên tử Cl; mỗi nguyên tử Cl nhận 1e vào đúng vị trí trống thứ 8.',
+        'sky'
+      );
+      document.getElementById('equation-text').textContent = 'Cl + Ca + Cl  ⟶  (Đang chuyển 2e...)';
+
+      // Đổi nhãn trên 2 electron đang bay
+      badgeCa1.textContent = '1e⁻';
+      badgeCa2.textContent = '1e⁻';
+
+      // Tách 2 electron vàng ra khỏi lớp 4 của Ca để bay tự do trong không gian scene
+      const eLeft = caValenceElectrons[0];
+      const eRight = caValenceElectrons[1];
+
+      eLeft.getWorldPosition(startPosLeft);
+      eRight.getWorldPosition(startPosRight);
+
+      caShells[3].remove(eLeft);
+      caShells[3].remove(eRight);
+
+      scene.add(eLeft);
+      scene.add(eRight);
+
+      eLeft.position.copy(startPosLeft);
+      eRight.position.copy(startPosRight);
+    }
+
+    /**
+     * Sinh hạt sáng vệt bay (trail) cho electron đang di chuyển
+     */
+    function spawnTrailParticle(pos) {
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTexAmber,
+        transparent: true,
+        opacity: 0.85,
+        depthWrite: false
+      }));
+      sprite.position.copy(pos);
+      sprite.scale.set(0.46, 0.46, 1);
+      scene.add(sprite);
+      trailParticles.push({ sprite, life: 1.0 });
+    }
+
+    /**
+     * Cập nhật độ mờ và kích thước các hạt vệt bay
+     */
+    function updateTrailParticles(dt) {
+      for (let i = trailParticles.length - 1; i >= 0; i--) {
+        const p = trailParticles[i];
+        p.life -= dt * 1.65;
+        if (p.life <= 0) {
+          scene.remove(p.sprite);
+          p.sprite.material.dispose();
+          trailParticles.splice(i, 1);
+        } else {
+          p.sprite.material.opacity = p.life * 0.8;
+          const s = 0.46 * p.life;
+          p.sprite.scale.set(s, s, 1);
+        }
+      }
+    }
+
+    /**
+     * Giai đoạn 2: Hai electron đáp khít vào 2 vị trí trống -> Hình thành ion Cl⁻, Ca²⁺, Cl⁻
+     */
+    function completeDocking() {
+      const eLeft = caValenceElectrons[0];
+      const eRight = caValenceElectrons[1];
+
+      // Gắn eLeft vào đúng vị trí trống trên lớp 3 của Cl trái
+      scene.remove(eLeft);
+      clLeftShells[2].add(eLeft);
+      eLeft.position.copy(clLeftEmptySlot.position);
+      clLeftEmptySlot.visible = false;
+
+      // Gắn eRight vào đúng vị trí trống trên lớp 3 của Cl phải
+      scene.remove(eRight);
+      clRightShells[2].add(eRight);
+      eRight.position.copy(clRightEmptySlot.position);
+      clRightEmptySlot.visible = false;
+
+      // Lúc này cả hai nguyên tử Cl mới chính thức đủ 8e lớp ngoài cùng -> hiện số "8"
+      badgeCa1.textContent = '8';
+      badgeCa2.textContent = '8';
+
+      // Đổi nhãn hạt nhân thành ion Cl⁻, Ca²⁺, Cl⁻
+      labelClLeft.textContent = 'Cl⁻ (+17)';
+      labelCaCenter.textContent = 'Ca²⁺ (+20)';
+      labelClRight.textContent = 'Cl⁻ (+17)';
+
+      // Cập nhật 3 thẻ thông tin khoa học bên dưới
+      updateCardsToIons();
+
+      // Chuyển sang giai đoạn 3: Mờ lớp 4 của Ca + hút tĩnh điện tạo CaCl₂
+      simState = STATE.BONDING;
+      bondingProgress = 0;
+      electrostaticGroup.visible = true;
+
+      updateStepBanner(
+        'Giai đoạn 2 & 3 (Hình thành ion & Hút tĩnh điện): Tạo thành ion Ca²⁺ (2-8-8) và hai ion Cl⁻ (2-8-8). Các ion trái dấu hút nhau bằng lực hút tĩnh điện tạo phân tử CaCl₂.',
+        'emerald'
+      );
+      document.getElementById('equation-text').textContent = 'Cl + Ca + Cl → Cl⁻ + Ca²⁺ + Cl⁻ → CaCl₂';
+    }
+
+    /**
+     * Cập nhật 3 thẻ HUD sang trạng thái ion sau phản ứng
+     */
+    function updateCardsToIons() {
+      // Cl trái -> Cl⁻
+      document.getElementById('cl-left-badge').textContent = 'Cl⁻';
+      document.getElementById('cl-left-title').textContent = 'Anion chloride (Trái)';
+      document.getElementById('cl-left-charge').textContent = '17p, 18e (Ion âm -1)';
+      document.getElementById('cl-left-charge').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+      document.getElementById('cl-left-config').textContent = '1s²2s²2p⁶3s²3p⁶';
+      document.getElementById('cl-left-shells').textContent = 'Lớp e: 2 - 8 - 8 (Đủ 8e)';
+
+      // Ca giữa -> Ca²⁺
+      document.getElementById('ca-badge').textContent = 'Ca²⁺';
+      document.getElementById('ca-title').textContent = 'Cation calcium (Giữa)';
+      document.getElementById('ca-charge').textContent = '20p, 18e (Ion dương +2)';
+      document.getElementById('ca-charge').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-300';
+      document.getElementById('ca-config').textContent = '1s²2s²2p⁶3s²3p⁶';
+      document.getElementById('ca-shells').textContent = 'Lớp e: 2 - 8 - 8 (Đủ 8e)';
+
+      // Cl phải -> Cl⁻
+      document.getElementById('cl-right-badge').textContent = 'Cl⁻';
+      document.getElementById('cl-right-title').textContent = 'Anion chloride (Phải)';
+      document.getElementById('cl-right-charge').textContent = '17p, 18e (Ion âm -1)';
+      document.getElementById('cl-right-charge').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+      document.getElementById('cl-right-config').textContent = '1s²2s²2p⁶3s²3p⁶';
+      document.getElementById('cl-right-shells').textContent = 'Lớp e: 2 - 8 - 8 (Đủ 8e)';
+    }
+
+    /**
+     * Đặt lại toàn bộ mô phỏng về trạng thái ban đầu
+     */
+    function resetSimulation() {
+      simState = STATE.INITIAL;
+      transferProgress = 0;
+      bondingProgress = 0;
+
+      // Dọn sạch các hạt vệt bay
+      for (const p of trailParticles) {
+        scene.remove(p.sprite);
+        p.sprite.material.dispose();
+      }
+      trailParticles = [];
+
+      // Đưa 3 nguyên tử về vị trí ban đầu và tỷ lệ chuẩn
+      clLeftGroup.position.set(-INITIAL_CL_X, ATOM_Y, 0);
+      caGroup.position.set(0, ATOM_Y, 0);
+      caGroup.scale.set(1, 1, 1);
+      clRightGroup.position.set(INITIAL_CL_X, ATOM_Y, 0);
+
+      // Đặt lại góc quay về 0 để 2e của Ca và 2 vị trí trống của Cl hướng thẳng vào nhau
+      clLeftShells.forEach(s => { s.rotation.z = 0; });
+      caShells.forEach(s => { s.rotation.z = 0; });
+      clRightShells.forEach(s => { s.rotation.z = 0; });
+
+      // Trả 2 electron vàng về lại lớp 4 của Ca
+      const eLeft = caValenceElectrons[0];
+      const eRight = caValenceElectrons[1];
+      if (eLeft.parent) eLeft.parent.remove(eLeft);
+      if (eRight.parent) eRight.parent.remove(eRight);
+
+      caShells[3].add(eLeft);
+      caShells[3].add(eRight);
+      eLeft.position.set(-SHELL_RADII[3], 0, 0);
+      eRight.position.set(SHELL_RADII[3], 0, 0);
+
+      // Hiện lại lớp 4 của Ca
+      caOuterRingMesh.visible = true;
+      caOuterRingMesh.material.opacity = 0.72;
+      caShells[3].scale.set(1, 1, 1);
+
+      // Hiện lại 2 vị trí trống của hai nguyên tử Cl
+      clLeftEmptySlot.visible = true;
+      clRightEmptySlot.visible = true;
+
+      // Ẩn hiệu ứng lực hút tĩnh điện
+      electrostaticGroup.visible = false;
+      electrostaticLines.forEach(m => { m.material.opacity = 0; });
+      electrostaticPulses.forEach(p => { p.sprite.material.opacity = 0; });
+      labelBondLeft.classList.remove('visible');
+      labelBondRight.classList.remove('visible');
+
+      // Đặt lại các nhãn số & nhãn hạt nhân
+      badgeCa1.textContent = '1';
+      badgeCa2.textContent = '2';
+      labelClLeft.textContent = 'Cl (+17)';
+      labelCaCenter.textContent = 'Ca (+20)';
+      labelClRight.textContent = 'Cl (+17)';
+
+      // Đặt lại 3 thẻ HUD
+      document.getElementById('cl-left-badge').textContent = 'Cl';
+      document.getElementById('cl-left-title').textContent = 'Chlorine (Trái)';
+      document.getElementById('cl-left-charge').textContent = '17p, 17e (Trung hòa)';
+      document.getElementById('cl-left-charge').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200';
+      document.getElementById('cl-left-config').textContent = '1s²2s²2p⁶3s²3p⁵';
+      document.getElementById('cl-left-shells').textContent = 'Lớp e: 2 - 8 - 7 (thiếu 1e)';
+
+      document.getElementById('ca-badge').textContent = 'Ca';
+      document.getElementById('ca-title').textContent = 'Calcium (Giữa)';
+      document.getElementById('ca-charge').textContent = '20p, 20e (Trung hòa)';
+      document.getElementById('ca-charge').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200';
+      document.getElementById('ca-config').textContent = '1s²2s²2p⁶3s²3p⁶4s²';
+      document.getElementById('ca-shells').textContent = 'Lớp e: 2 - 8 - 8 - 2';
+
+      document.getElementById('cl-right-badge').textContent = 'Cl';
+      document.getElementById('cl-right-title').textContent = 'Chlorine (Phải)';
+      document.getElementById('cl-right-charge').textContent = '17p, 17e (Trung hòa)';
+      document.getElementById('cl-right-charge').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200';
+      document.getElementById('cl-right-config').textContent = '1s²2s²2p⁶3s²3p⁵';
+      document.getElementById('cl-right-shells').textContent = 'Lớp e: 2 - 8 - 7 (thiếu 1e)';
+
+      // Đặt lại thanh giải thích & phương trình
+      updateStepBanner(
+        'Trạng thái ban đầu: Nguyên tử Ca có 2e lớp ngoài cùng (2-8-8-2); mỗi nguyên tử Cl chỉ có 7e lớp ngoài cùng (2-8-7), còn thiếu 1e để đạt 8e bền vững.',
+        'amber'
+      );
+      document.getElementById('equation-text').textContent = 'Cl + Ca + Cl';
+      document.getElementById('btn-transfer').disabled = false;
+    }
+
+    /**
+     * Cập nhật thanh giải thích ở đầu trang
+     */
+    function updateStepBanner(text, theme) {
+      const banner = document.getElementById('step-banner');
+      const dot = document.getElementById('step-dot');
+      document.getElementById('step-description').textContent = text;
+
+      if (theme === 'sky') {
+        banner.className = 'light-panel pointer-events-auto rounded-xl px-3.5 py-2 flex items-center gap-2.5 border-l-4 border-l-sky-500';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0 animate-ping';
+      } else if (theme === 'emerald') {
+        banner.className = 'light-panel pointer-events-auto rounded-xl px-3.5 py-2 flex items-center gap-2.5 border-l-4 border-l-emerald-600';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0';
+      } else {
+        banner.className = 'light-panel pointer-events-auto rounded-xl px-3.5 py-2 flex items-center gap-2.5 border-l-4 border-l-amber-500';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 animate-pulse';
+      }
+    }
+
+    /**
+     * Tạm dừng hoặc tiếp tục chuyển động quay của các electron
+     */
+    function togglePause(forceState) {
+      isPaused = typeof forceState === 'boolean' ? forceState : !isPaused;
+      document.getElementById('pause-icon').textContent = isPaused ? '▶' : '⏸';
+      document.getElementById('pause-text').textContent = isPaused ? 'Tiếp tục' : 'Tạm dừng';
+      const btn = document.getElementById('btn-pause');
+      if (isPaused) {
+        btn.className = 'ctrl-btn px-3 py-2 rounded-xl bg-amber-100 text-amber-900 border border-amber-400 font-bold text-xs flex items-center gap-1.5';
+      } else {
+        btn.className = 'ctrl-btn px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs flex items-center gap-1.5';
+      }
+    }
+
+    /**
+     * Chuyển đổi giữa Góc nhìn 3D và Trực diện (Dễ đếm)
+     */
+    function setCameraPreset(mode, instant = false) {
+      viewMode = mode;
+      const btn3d = document.getElementById('btn-view-3d');
+      const btnFront = document.getElementById('btn-view-front');
+
+      if (mode === '3d') {
+        btn3d.className = 'ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm';
+        btnFront.className = 'ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900';
+      } else {
+        btnFront.className = 'ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm';
+        btn3d.className = 'ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-900';
+      }
+
+      const zDist = getResponsiveCameraZ(10.6);
+      const targetPos = mode === '3d'
+        ? new THREE.Vector3(0, 5.4, zDist * 0.96)
+        : new THREE.Vector3(0, 0.1, zDist);
+      const targetLook = new THREE.Vector3(0, 0, 0);
+
+      if (instant) {
+        camera.position.copy(targetPos);
+        camera.lookAt(targetLook);
+        if (controls) {
+          controls.target.copy(targetLook);
+          controls.update();
+        }
+      } else {
+        cameraLerp.targetPos.copy(targetPos);
+        cameraLerp.targetLook.copy(targetLook);
+        cameraLerp.active = true;
+      }
+    }
+
+    /**
+     * Gắn toàn bộ sự kiện cho các nút chức năng và thanh trượt
+     */
+    function bindUIEvents() {
+      document.getElementById('btn-transfer').addEventListener('click', startTransfer);
+      document.getElementById('btn-reset').addEventListener('click', resetSimulation);
+      document.getElementById('btn-pause').addEventListener('click', () => togglePause());
+
+      document.getElementById('btn-view-3d').addEventListener('click', () => setCameraPreset('3d', false));
+      document.getElementById('btn-view-front').addEventListener('click', () => setCameraPreset('front', false));
+
+      document.getElementById('btn-numbering').addEventListener('click', () => {
+        showNumbering = !showNumbering;
+        const btn = document.getElementById('btn-numbering');
+        document.getElementById('numbering-state').textContent = showNumbering ? 'BẬT' : 'TẮT';
+        if (showNumbering) {
+          btn.className = 'ctrl-btn px-3 py-2 rounded-xl bg-sky-100 text-sky-900 border border-sky-300 font-bold text-xs flex items-center gap-1.5';
+        } else {
+          btn.className = 'ctrl-btn px-3 py-2 rounded-xl bg-slate-100 text-slate-500 border border-slate-300 font-bold text-xs flex items-center gap-1.5';
+        }
+      });
+
+      const slider = document.getElementById('speed-slider');
+      const speedText = document.getElementById('speed-value');
+      slider.addEventListener('input', (e) => {
+        rotationSpeed = parseFloat(e.target.value);
+        speedText.textContent = `${rotationSpeed.toFixed(2)}x`;
+      });
+    }
+
+    /**
+     * Tự động cập nhật tỷ lệ khung hình khi xoay màn hình iPad hoặc đổi kích thước cửa sổ
+     */
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    /**
+     * Nội suy đường cong Bezier bậc 3 trong không gian 3D
+     */
+    function cubicBezier3D(p0, c1, c2, p3, t) {
+      const inv = 1 - t;
+      return new THREE.Vector3()
+        .addScaledVector(p0, inv * inv * inv)
+        .addScaledVector(c1, 3 * inv * inv * t)
+        .addScaledVector(c2, 3 * inv * t * t)
+        .addScaledVector(p3, t * t * t);
+    }
+
+    /**
+     * Vòng lặp hoạt ảnh chính 60fps
+     */
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const elapsed = clock.getElapsedTime();
+
+      // 1. Làm mượt độ nghiêng không gian 3D của các lớp vỏ khi đổi giữa "Góc nhìn 3D" và "Trực diện (Dễ đếm)"
+      const tiltTarget = viewMode === '3d' ? 0.14 : 0;
+      const lerpTilt = 0.08;
+      clLeftShells[0].rotation.x = THREE.MathUtils.lerp(clLeftShells[0].rotation.x, tiltTarget, lerpTilt);
+      clLeftShells[1].rotation.y = THREE.MathUtils.lerp(clLeftShells[1].rotation.y, -tiltTarget * 0.7, lerpTilt);
+      clRightShells[0].rotation.x = THREE.MathUtils.lerp(clRightShells[0].rotation.x, -tiltTarget, lerpTilt);
+      clRightShells[1].rotation.y = THREE.MathUtils.lerp(clRightShells[1].rotation.y, tiltTarget * 0.7, lerpTilt);
+      caShells[0].rotation.x = THREE.MathUtils.lerp(caShells[0].rotation.x, tiltTarget, lerpTilt);
+      caShells[1].rotation.y = THREE.MathUtils.lerp(caShells[1].rotation.y, tiltTarget * 0.7, lerpTilt);
+      caShells[2].rotation.x = THREE.MathUtils.lerp(caShells[2].rotation.x, -tiltTarget * 0.5, lerpTilt);
+
+      // 2. Quay đều các lớp vỏ electron (dừng hoàn toàn khi Tạm dừng hoặc tốc độ = 0)
+      if (!isPaused && rotationSpeed > 0) {
+        const w = rotationSpeed * 0.85;
+
+        // Cl trái
+        clLeftShells[0].rotation.z += w * 1.35 * dt;
+        clLeftShells[1].rotation.z -= w * 0.85 * dt;
+        clLeftShells[2].rotation.z += w * 0.50 * dt;
+
+        // Ca giữa
+        caShells[0].rotation.z -= w * 1.40 * dt;
+        caShells[1].rotation.z += w * 0.90 * dt;
+        caShells[2].rotation.z -= w * 0.65 * dt;
+        caShells[3].rotation.z += w * 0.45 * dt;
+
+        // Cl phải
+        clRightShells[0].rotation.z -= w * 1.35 * dt;
+        clRightShells[1].rotation.z += w * 0.85 * dt;
+        clRightShells[2].rotation.z -= w * 0.50 * dt;
+      }
+
+      // Nhấp nháy nhẹ ở 2 vị trí trống để học sinh dễ nhận biết
+      if (!isPaused) {
+        const pulse = 1 + Math.sin(elapsed * 5.0) * 0.13;
+        if (clLeftEmptySlot.visible) {
+          clLeftEmptySlot.scale.set(pulse, pulse, 1);
+          clLeftEmptySlot.rotation.z += dt * 1.1;
+        }
+        if (clRightEmptySlot.visible) {
+          clRightEmptySlot.scale.set(pulse, pulse, 1);
+          clRightEmptySlot.rotation.z -= dt * 1.1;
+        }
+      }
+
+      // 3. Hoạt ảnh Giai đoạn 1: 2 electron vàng bay đồng thời theo quỹ đạo cong 3D đối xứng sang 2 nguyên tử Cl
+      if (simState === STATE.TRANSFERRING && !isPaused) {
+        transferProgress += dt / TRANSFER_DURATION;
+        const t = Math.min(transferProgress, 1.0);
+        const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+        // Lấy tọa độ thế giới hiện tại của 2 vị trí trống trên Cl trái và Cl phải
+        const targetLeft = new THREE.Vector3();
+        const targetRight = new THREE.Vector3();
+        clLeftEmptySlot.getWorldPosition(targetLeft);
+        clRightEmptySlot.getWorldPosition(targetRight);
+
+        // Đường cong 3D cho e1 (Ca -> Cl trái): vồng lên trên (+Y) và nhô ra trước (+Z)
+        const c1L = new THREE.Vector3(THREE.MathUtils.lerp(startPosLeft.x, targetLeft.x, 0.35), Math.max(startPosLeft.y, targetLeft.y) + 3.0, 2.2);
+        const c2L = new THREE.Vector3(THREE.MathUtils.lerp(startPosLeft.x, targetLeft.x, 0.70), Math.max(startPosLeft.y, targetLeft.y) + 2.4, 1.5);
+        const posL = cubicBezier3D(startPosLeft, c1L, c2L, targetLeft, ease);
+
+        // Đường cong 3D đối xứng cho e2 (Ca -> Cl phải)
+        const c1R = new THREE.Vector3(THREE.MathUtils.lerp(startPosRight.x, targetRight.x, 0.35), Math.max(startPosRight.y, targetRight.y) + 3.0, 2.2);
+        const c2R = new THREE.Vector3(THREE.MathUtils.lerp(startPosRight.x, targetRight.x, 0.70), Math.max(startPosRight.y, targetRight.y) + 2.4, 1.5);
+        const posR = cubicBezier3D(startPosRight, c1R, c2R, targetRight, ease);
+
+        caValenceElectrons[0].position.copy(posL);
+        caValenceElectrons[1].position.copy(posR);
+
+        // Tạo vệt sáng dọc đường bay của cả 2 electron
+        spawnTrailParticle(posL);
+        spawnTrailParticle(posR);
+
+        if (transferProgress >= 1.0) {
+          completeDocking();
+        }
+      }
+
+      // 4. Hoạt ảnh Giai đoạn 2 & 3: Lớp 4 trống của Ca mờ biến mất, Ca co nhẹ, 3 ion tiến lại gần nhau & hiện đường sức hút tĩnh điện
+      if (simState === STATE.BONDING && !isPaused) {
+        bondingProgress += dt / BONDING_DURATION;
+        const b = Math.min(bondingProgress, 1.0);
+        const easeOut = 1 - Math.pow(1 - b, 3);
+
+        // Mờ dần & thu gọn lớp vỏ thứ 4 trống của Ca
+        caOuterRingMesh.material.opacity = 0.72 * (1 - easeOut);
+        const ringShrink = 1 - 0.14 * easeOut;
+        caShells[3].scale.set(ringShrink, ringShrink, 1);
+        if (b >= 1.0) {
+          caOuterRingMesh.visible = false;
+        }
+
+        // Ion Ca²⁺ co nhẹ kích thước (mất lớp vỏ ngoài cùng và lực hút hạt nhân mạnh hơn)
+        const caScale = THREE.MathUtils.lerp(1.0, 0.94, easeOut);
+        caGroup.scale.set(caScale, caScale, caScale);
+
+        // Kéo hai ion Cl⁻ tiến gần lại ion Ca²⁺ ở giữa
+        const curClX = THREE.MathUtils.lerp(INITIAL_CL_X, BONDED_CL_X, easeOut);
+        clLeftGroup.position.x = -curClX;
+        clRightGroup.position.x = curClX;
+
+        // Hiện dần các đường sức hút tĩnh điện
+        electrostaticLines.forEach(m => {
+          m.material.opacity = easeOut * 0.65;
+        });
+        electrostaticPulses.forEach(p => {
+          p.sprite.material.opacity = easeOut * 0.9;
+        });
+
+        if (b >= 0.6) {
+          labelBondLeft.classList.add('visible');
+          labelBondRight.classList.add('visible');
+        }
+
+        if (bondingProgress >= 1.0) {
+          simState = STATE.COMPLETE;
+        }
+      }
+
+      // 5. Hiệu ứng sóng động cho đường sức lực hút tĩnh điện ở trạng thái Bonding / Complete
+      if ((simState === STATE.BONDING || simState === STATE.COMPLETE) && !isPaused) {
+        if (simState === STATE.COMPLETE) {
+          electrostaticLines.forEach((m, idx) => {
+            m.material.opacity = 0.42 + 0.30 * Math.sin(elapsed * 3.5 + idx * 0.8);
+          });
+        }
+        electrostaticPulses.forEach((p) => {
+          const u = (elapsed * 0.65 + p.offset) % 1.0;
+          const pt = p.curve.getPoint(u);
+          p.sprite.position.copy(pt);
+        });
+      }
+
+      // Cập nhật các hạt vệt sáng
+      updateTrailParticles(dt);
+
+      // Chuyển camera mượt mà khi bấm đổi góc nhìn
+      if (cameraLerp.active) {
+        camera.position.lerp(cameraLerp.targetPos, 0.09);
+        if (controls) {
+          controls.target.lerp(cameraLerp.targetLook, 0.09);
+        }
+        if (camera.position.distanceTo(cameraLerp.targetPos) < 0.05) {
+          cameraLerp.active = false;
+        }
+      }
+
+      if (controls) {
+        controls.update();
+      }
+
+      renderer.render(scene, camera);
+      updateFloatingLabels();
+    }
+
+    // Khởi chạy sau khi trang tải hoàn tất
+    window.onload = function () {
+      initScene();
+      animate();
+    };
+  </script>
+</body>
+</html>
