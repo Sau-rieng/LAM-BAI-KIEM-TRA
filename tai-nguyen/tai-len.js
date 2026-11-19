@@ -200,17 +200,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261120-055935",
-  "file": "tai-len/tl-261120-055935.html",
-  "anh": "",
-  "ten": "Sơ đồ tư duy Chương 1: Ester – Lipid (Hóa học 12 – KNTT)",
-  "khoi": "12",
-  "bai": "",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261120-061657",
   "file": "tai-len/tl-261120-061657.html",
   "anh": "",
