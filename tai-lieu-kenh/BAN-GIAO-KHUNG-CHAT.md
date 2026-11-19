@@ -26,7 +26,7 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 ## 5. Tính năng đã có (đến 19/11/2026)
 - **Kiểm tra**: iPad + phiếu giấy quét điện thoại; nạp nhiều file Excel; đổi mã đề khi trùng (tab DOI MA); M1 Phân tích đề (sửa đáp án, chấm lại); M2 Ma trận – Đặc tả (CV 7991); M5 chấm tự luận theo rubric (chỉ đề ≥45 phút).
 - **Trò chơi**: cá nhân/nhóm, xuất phát chung, kết quả theo buổi, nút "Cho HS xem lại" (mặc định tắt).
-- **Điểm TX**: chụp ảnh/PDF/Excel/dán (Claude đọc)/nhập tay; **📗 Quét nộp vở** bằng QR nhãn vở (`KPHH-VO <SBD>`): chọn lớp, chế độ Đúng hạn (X, +1) / Trễ (X nền vàng, +0.5), Xong → chốt Không nộp (KN, −1); cột "Điểm vở" chỉ hiển thị, không vào TB TX.
+- **Điểm TX**: chụp ảnh/PDF/Excel/dán (Claude đọc)/nhập tay; **📗 Quét nộp vở** bằng QR nhãn vở (`VO<SBD>`, nhãn cũ `KPHH-VO <SBD>` vẫn nhận; nhãn hỏng gõ 2 số cuối SBD): chọn lớp, chế độ Đúng hạn (X, +1) / Trễ (X nền vàng, +0.5), Xong → chốt Không nộp (KN, −1); cột "Điểm vở" chỉ hiển thị, không vào TB TX.
 - **Tài khoản HS**: Xem lại bài + 💡, Kiến thức cần ôn, Luyện lại phần yếu (10 câu, không tính điểm), Bảng điểm của em, Điểm TX, Nhãn vở (QR), Hỏi thầy/cô, Tài nguyên, **Khảo sát** (khi GV mở đợt).
 - **Hồ sơ HS**: từng em (kiến thức, **🔁 Rèn luyện phần yếu**: đã/chưa luyện, tiến bộ trước→luyện→sau, câu vẫn sai, nút Nhắc gửi vào Hỏi thầy/cô kèm nút "Luyện ngay"), nhận xét AI (M4), Luyện tập cả lớp, **📋 Khảo sát** (đợt có giờ mở/đóng, ẩn danh – chỉ biết ai đã/chưa làm, biểu đồ, so sánh lớp/đợt, AI tóm tắt, chép sang Claude, Excel).
 - **Số liệu minh chứng (M6)** cho cuộc thi đổi mới sáng tạo (chấm 5/12, dùng thật trước 30/11): có thêm số phiếu khảo sát, mức đồng ý TB, % HS tự thấy tiến bộ.

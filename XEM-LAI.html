@@ -283,6 +283,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <button class="btn2 nho" id="nhanVe">◀ Quay lại</button>
     <h1 style="margin-top:10px">🏷 Nhãn vở của em</h1>
     <p class="sub">In nhãn này (cỡ nhãn vở), dán lên bìa vở. Khi nộp vở, thầy/cô quét mã QR là ghi nhận em đã nộp vào điểm TX. Mỗi em một mã riêng — không dán nhãn của bạn khác.</p>
+    <p class="sub">Khi in: dùng đúng file PNG tải về, <b>không kéo méo</b>, không chụp màn hình hay gửi qua Zalo/Messenger rồi mới in (ảnh bị nén làm mã QR hỏng).</p>
     <div class="nhanXem"><canvas id="nhanCv" width="900" height="360"></canvas></div>
     <div class="nhanNut"><a class="btn" id="nhanTai" download="nhan-vo.png" style="width:auto;display:inline-flex;align-items:center;text-decoration:none;padding:10px 16px">⬇ Tải nhãn (PNG)</a><label class="sub" style="display:flex;align-items:center;gap:6px">Số nhãn in <input type="number" id="nhanSo" class="nhanSo" min="1" max="12" value="1"></label><button class="btn2" id="nhanInN">🖨 In nhãn</button></div>
     <p class="sub" id="nhanTT"></p>
@@ -666,7 +667,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var cv = $('nhanCv'), g = cv.getContext('2d'), W = cv.width, H = cv.height;
     if (!window.QRCode) { $('nhanTT').textContent = 'Đang tải bộ tạo mã QR…'; setTimeout(function () { if (!$('scrNhan').classList.contains('hidden')) veNhan(); }, 500); return; }
     $('nhanTT').textContent = '';
-    var tam = document.createElement('div'); new window.QRCode(tam, { text: 'KPHH-VO ' + duLieu.mahs, width: 300, height: 300, correctLevel: window.QRCode.CorrectLevel.M });
+    var tam = document.createElement('div'); new window.QRCode(tam, { text: 'VO' + duLieu.mahs, width: 294, height: 294, correctLevel: window.QRCode.CorrectLevel.Q });   // mã ngắn → ô to, sửa lỗi mức Q: in mờ, nhòe vẫn quét được
     var q = tam.querySelector('canvas');
     g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
     g.strokeStyle = '#172033'; g.lineWidth = 6; g.strokeRect(3, 3, W - 6, H - 6);
