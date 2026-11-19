@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sơ đồ tư duy & Luyện tập Chương 1: Ester – Lipid (Hóa 12 – KNTT)</title>
+  <style>
+    :root {
+      --page-bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --pill-bg: #f1f3f5;
+      --pill-hover: #e5e7eb;
+      --line-color: #64748b;
+
+      /* Blue - Root & Ester */
+      --blue-fill: #dceeff;
+      --blue-border: #3b82f6;
+      --blue-text: #1e3a8a;
+      --blue-soft: #f0f7ff;
+
+      /* Green - Lipid */
+      --green-fill: #dcfce7;
+      --green-border: #22a055;
+      --green-text: #14532d;
+      --green-soft: #f0fdf4;
+
+      /* Purple - Soap */
+      --purple-fill: #ede9fe;
+      --purple-border: #8b5cf6;
+      --purple-text: #4c1d95;
+      --purple-soft: #f5f3ff;
+
+      /* Feedback colors */
+      --ok-bg: #ecfdf5;
+      --ok-border: #10b981;
+      --ok-text: #065f46;
+      --err-bg: #fef2f2;
+      --err-border: #ef4444;
+      --err-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px 16px 40px;
+      line-height: 1.55;
+    }
+
+    /* Top subtle toolbar */
+    .toolbar {
+      max-width: 1120px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tab-btn:hover {
+      background: #f9fafb;
+      color: var(--text);
+    }
+
+    .tab-btn.active[data-filter="all"] { background: #1f2937; color: #fff; border-color: #1f2937; }
+    .tab-btn.active[data-filter="ester"] { background: var(--blue-border); color: #fff; border-color: var(--blue-border); }
+    .tab-btn.active[data-filter="lipid"] { background: var(--green-border); color: #fff; border-color: var(--green-border); }
+    .tab-btn.active[data-filter="soap"] { background: var(--purple-border); color: #fff; border-color: var(--purple-border); }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .action-btn:hover {
+      background: #f3f4f6;
+      color: var(--text);
+    }
+
+    .action-btn.primary-quiz {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .action-btn.primary-quiz:hover {
+      background: #1d4ed8;
+    }
+
+    /* Main White Mindmap Canvas */
+    .canvas-card {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 28px 28px 34px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Root Pill */
+    .root-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .root-pill {
+      background: var(--blue-fill);
+      border: 2px solid var(--blue-border);
+      border-radius: 999px;
+      padding: 12px 38px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      min-width: 290px;
+    }
+
+    .root-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.18);
+    }
+
+    .root-pill .title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .root-pill .sub {
+      font-size: 0.86rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Root inline accordion */
+    .root-drawer {
+      max-width: 700px;
+      width: 100%;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .root-drawer.open {
+      max-height: 520px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+
+    /* SVG Connector between root and 3 columns */
+    .tree-connectors {
+      width: 100%;
+      height: 52px;
+      display: block;
+      margin: 2px 0;
+    }
+
+    /* 3 Columns Grid */
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .columns.single-col {
+      grid-template-columns: minmax(0, 560px);
+      justify-content: center;
+    }
+
+    .branch-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .branch-col.hidden {
+      display: none;
+    }
+
+    /* Branch Header Pill */
+    .branch-pill {
+      border-radius: 999px;
+      padding: 11px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+
+    .branch-pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .branch-pill .b-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .branch-pill .b-sub {
+      font-size: 0.84rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .branch-col[data-branch="ester"] .branch-pill { background: var(--blue-fill); border-color: var(--blue-border); }
+    .branch-col[data-branch="ester"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(59, 130, 246, 0.16); }
+
+    .branch-col[data-branch="lipid"] .branch-pill { background: var(--green-fill); border-color: var(--green-border); }
+    .branch-col[data-branch="lipid"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(34, 160, 85, 0.16); }
+
+    .branch-col[data-branch="soap"] .branch-pill { background: var(--purple-fill); border-color: var(--purple-border); }
+    .branch-col[data-branch="soap"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(139, 92, 246, 0.16); }
+
+    /* Dotted Vertical Tree List under each Branch */
+    .sub-tree {
+      position: relative;
+      margin-top: 14px;
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sub-tree::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -14px;
+      bottom: 24px;
+      border-left: 2px dotted var(--line-color);
+    }
+
+    .node-item {
+      position: relative;
+    }
+
+    .node-item::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 23px;
+      width: 14px;
+      border-top: 2px dotted var(--line-color);
+    }
+
+    /* Sub-node Pill Button */
+    .sub-pill {
+      width: 100%;
+      background: var(--pill-bg);
+      border: 1.5px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+
+    .sub-pill:hover {
+      background: var(--pill-hover);
+      border-color: #cbd5e1;
+    }
+
+    .sub-pill .pill-label {
+      flex: 1;
+      text-align: center;
+      padding-left: 14px;
+    }
+
+    .sub-pill .chev {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      transition: transform 0.22s ease;
+      flex-shrink: 0;
+    }
+
+    .node-item.open .sub-pill .chev {
+      transform: rotate(180deg);
+    }
+
+    .branch-col[data-branch="ester"] .node-item.open .sub-pill {
+      background: var(--blue-fill);
+      border-color: var(--blue-border);
+      color: var(--blue-text);
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.14);
+    }
+
+    .branch-col[data-branch="lipid"] .node-item.open .sub-pill {
+      background: var(--green-fill);
+      border-color: var(--green-border);
+      color: var(--green-text);
+      box-shadow: 0 3px 10px rgba(34, 160, 85, 0.14);
+    }
+
+    .branch-col[data-branch="soap"] .node-item.open .sub-pill {
+      background: var(--purple-fill);
+      border-color: var(--purple-border);
+      color: var(--purple-text);
+      box-shadow: 0 3px 10px rgba(139, 92, 246, 0.14);
+    }
+
+    /* Accordion Expandable Content */
+    .drawer {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.34s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .node-item.open .drawer {
+      max-height: 1500px;
+      opacity: 1;
+      margin-top: 8px;
+    }
+
+    .drawer-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left-width: 4px;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 0.87rem;
+      color: #1f2937;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .branch-col[data-branch="ester"] .drawer-inner,
+    .root-drawer .drawer-inner {
+      border-left-color: var(--blue-border);
+      background: var(--blue-soft);
+    }
+
+    .branch-col[data-branch="lipid"] .drawer-inner {
+      border-left-color: var(--green-border);
+      background: var(--green-soft);
+    }
+
+    .branch-col[data-branch="soap"] .drawer-inner {
+      border-left-color: var(--purple-border);
+      background: var(--purple-soft);
+    }
+
+    .drawer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .drawer-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .zoom-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .zoom-btn:hover { background: #f1f5f9; }
+
+    .d-list {
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .d-list li strong { color: #0f172a; }
+
+    /* Chemical Equation Box */
+    .eq {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin: 7px 0;
+      overflow-x: auto;
+    }
+
+    .eq-note {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .eq-formula {
+      font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+      font-size: 0.96rem;
+      color: #0f172a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .arr {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.05;
+      margin: 0 3px;
+    }
+
+    .arr .cond {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.68rem;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .arr .sym {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.8rem;
+    }
+
+    .mini-table th, .mini-table td {
+      border: 1px solid #e2e8f0;
+      padding: 5px 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .tip {
+      margin-top: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 0.8rem;
+      color: #78350f;
+    }
+
+    /* Practice Launcher Bar inside each Drawer */
+    .practice-bar {
+      margin-top: 11px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .practice-bar .p-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .practice-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .q-count-select {
+      padding: 4px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .start-quiz-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.12s ease;
+    }
+
+    .start-quiz-btn:hover {
+      filter: brightness(0.93);
+      transform: translateY(-1px);
+    }
+
+    .branch-col[data-branch="ester"] .start-quiz-btn { background: var(--blue-border); }
+    .branch-col[data-branch="lipid"] .start-quiz-btn { background: var(--green-border); }
+    .branch-col[data-branch="soap"] .start-quiz-btn { background: var(--purple-border); }
+    .root-drawer .start-quiz-btn { background: #1f2937; }
+
+    .footer-hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 22px;
+    }
+
+    /* Modal Backdrop (used for Zoom & Quiz) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 22px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-close {
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover { background: #cbd5e1; }
+
+    .modal-body {
+      padding: 20px 22px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid #e5e7eb;
+      background: #f8fafc;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Quiz Styling inside Modal */
+    .quiz-setup-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+
+    .quiz-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+
+    .quiz-card.correct-card {
+      border-color: var(--ok-border);
+      background: #fafefd;
+    }
+
+    .quiz-card.wrong-card {
+      border-color: var(--err-border);
+      background: #fffafa;
+    }
+
+    .quiz-card.hidden-review {
+      display: none;
+    }
+
+    .q-text {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .q-num {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+
+    .opt-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .opt-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: #ffffff;
+      transition: all 0.15s ease;
+    }
+
+    .opt-label:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .opt-label input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .opt-label.is-selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .opt-label.is-correct {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok-text);
+      font-weight: 600;
+    }
+
+    .opt-label.is-wrong {
+      background: var(--err-bg);
+      border-color: var(--err-border);
+      color: var(--err-text);
+      font-weight: 600;
+    }
+
+    .opt-badge {
+      margin-left: auto;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .exp-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .exp-box.exp-ok {
+      background: var(--ok-bg);
+      border: 1px solid #a7f3d0;
+      color: var(--ok-text);
+    }
+
+    .exp-box.exp-err {
+      background: var(--err-bg);
+      border: 1px solid #fecaca;
+      color: var(--err-text);
+    }
+
+    /* Result Summary Banner */
+    .result-banner {
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1.5px solid #bfdbfe;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .score-big {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .score-msg {
+      font-size: 0.88rem;
+      color: #334155;
+      margin-top: 2px;
+    }
+
+    .review-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .rf-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rf-btn.active {
+      background: #1f2937;
+      color: #ffffff;
+      border-color: #1f2937;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    .progress-text {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    
+    /* Full-screen Zoom Modal for Classroom Presentation */
+    #zoomModal {
+      padding: 0;
+      background: #ffffff;
+    }
+
+    #zoomModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #zoomModal .modal-header {
+      padding: 20px 36px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #zoomModal .modal-title {
+      font-size: 1.65rem;
+      color: #0f172a;
+    }
+
+    #zoomModal .modal-close {
+      width: 44px;
+      height: 44px;
+      font-size: 1.35rem;
+    }
+
+    #zoomModal .modal-body {
+      padding: 32px 48px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #ffffff;
+    }
+
+    #zoomModal .zoom-content-wrap {
+      width: 100%;
+      max-width: 1080px;
+      font-size: 1.38rem;
+      line-height: 1.75;
+    }
+
+    #zoomModal .d-list {
+      gap: 14px;
+      padding-left: 26px;
+    }
+
+    #zoomModal .eq {
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 12px;
+      background: #f8fafc;
+      border-left: 5px solid #3b82f6;
+    }
+
+    #zoomModal .eq-note {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    #zoomModal .eq-formula {
+      font-size: 1.55rem;
+      gap: 8px;
+    }
+
+    #zoomModal .arr .cond {
+      font-size: 0.95rem;
+    }
+
+    #zoomModal .arr .sym {
+      font-size: 1.6rem;
+    }
+
+    #zoomModal .mini-table {
+      font-size: 1.22rem;
+      margin: 18px 0;
+    }
+
+    #zoomModal .mini-table th,
+    #zoomModal .mini-table td {
+      padding: 12px 16px;
+    }
+
+    #zoomModal .tip {
+      font-size: 1.18rem;
+      padding: 14px 18px;
+      margin-top: 18px;
+      border-radius: 12px;
+    }
+
+    
+    /* Full-screen Quiz Modal for Comfortable Reading & Practice */
+    #quizModal {
+      padding: 0;
+      background: #f8fafc;
+    }
+
+    #quizModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #quizModal .modal-header {
+      padding: 18px 36px;
+      background: #ffffff;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #quizModal .modal-title {
+      font-size: 1.45rem;
+      color: #0f172a;
+    }
+
+    #quizModal .modal-subtitle {
+      font-size: 0.92rem;
+    }
+
+    #quizModal .modal-close {
+      width: 42px;
+      height: 42px;
+      font-size: 1.3rem;
+    }
+
+    #quizModal .modal-body {
+      padding: 24px 36px 36px;
+      background: #f8fafc;
+    }
+
+    #quizModal .quiz-inner-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    #quizModal .quiz-setup-bar {
+      font-size: 0.96rem;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    #quizModal .quiz-card {
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    #quizModal .q-text {
+      font-size: 1.12rem;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    #quizModal .q-num {
+      font-size: 0.86rem;
+      padding: 3px 10px;
+    }
+
+    #quizModal .opt-label {
+      font-size: 1.04rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .exp-box {
+      font-size: 0.96rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .score-big {
+      font-size: 1.6rem;
+    }
+
+    #quizModal .score-msg {
+      font-size: 1rem;
+    }
+
+    #quizModal .modal-footer {
+      padding: 16px 36px;
+      background: #ffffff;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    #quizModal .progress-text {
+      font-size: 0.98rem;
+    }
+
+    #quizModal .btn-primary,
+    #quizModal .btn-secondary {
+      font-size: 0.96rem;
+      padding: 10px 20px;
+    }
+
+    @media (max-width: 700px) {
+      #quizModal .modal-header,
+      #quizModal .modal-body,
+      #quizModal .modal-footer,
+      #zoomModal .modal-header,
+      #zoomModal .modal-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      #quizModal .q-text { font-size: 1rem; }
+      #quizModal .opt-label { font-size: 0.95rem; }
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .canvas-card { padding: 20px 14px 24px; }
+      .tree-connectors { display: none; }
+      .columns { grid-template-columns: 1fr; gap: 20px; margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="tab-btn active" data-filter="all">Tất cả</button>
+      <button class="tab-btn" data-filter="ester">1. Ester</button>
+      <button class="tab-btn" data-filter="lipid">2. Lipid &amp; Chất béo</button>
+      <button class="tab-btn" data-filter="soap">3. Xà phòng &amp; Giặt rửa</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="action-btn primary-quiz" id="btnChapterQuiz">📝 Luyện tập tổng hợp (10–30 câu)</button>
+      <button class="action-btn" id="btnExpandAll">Mở tất cả</button>
+      <button class="action-btn" id="btnCollapseAll">Thu gọn hết</button>
+    </div>
+  </div>
+
+  <main class="canvas-card">
+    <!-- ROOT NODE -->
+    <div class="root-wrap">
+      <div class="root-pill" id="rootPill" role="button" tabindex="0" aria-expanded="false">
+        <div class="title">Chương 1: Ester – Lipid</div>
+        <div class="sub">Hóa học 12 · KNTT</div>
+      </div>
+
+      <div class="root-drawer" id="rootDrawer">
+        <div class="drawer-inner">
+          <div class="drawer-top">
+            <span class="drawer-tag">Tổng quan Chương 1</span>
+          </div>
+          <ul class="d-list">
+            <li><strong>Bài 1 – Ester – Lipid:</strong> Khái niệm, danh pháp, tính chất vật lí, tính chất hóa học và điều chế Ester; cấu tạo và tính chất của Chất béo (Triglyceride), acid béo Omega-3 &amp; Omega-6.</li>
+            <li><strong>Bài 2 – Xà phòng và Chất giặt rửa:</strong> Cấu tạo đầu ưa nước – đuôi kị nước, cơ chế giặt rửa micelle, phân biệt xà phòng, chất giặt rửa tổng hợp và tự nhiên.</li>
+          </ul>
+          <div class="practice-bar">
+            <span class="p-label">📝 Luyện tập cả Chương 1 (150 câu Biết &amp; Hiểu):</span>
+            <div class="practice-controls">
+              <select class="q-count-select" id="rootQuizCount">
+                <option value="10">10 câu</option>
+                <option value="15">15 câu</option>
+                <option value="20" selected>20 câu</option>
+                <option value="30">30 câu</option>
+              </select>
+              <button class="start-quiz-btn" data-quiz-topic="all">Làm bài ngay</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOTTED SVG CONNECTORS -->
+    <svg class="tree-connectors" id="treeConnectors" viewBox="0 0 900 56" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 450 2 L 450 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 165 20 Q 145 20 145 38 L 145 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 735 20 Q 755 20 755 38 L 755 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 139 43 L 145 50 L 151 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 444 43 L 450 50 L 456 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 749 43 L 755 50 L 761 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- 3 BRANCH COLUMNS -->
+    <div class="columns" id="columnsGrid">
+
+      <!-- COLUMN 1: ESTER -->
+      <section class="branch-col" data-branch="ester">
+        <div class="branch-pill" data-branch-toggle="ester" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Ester">
+          <div class="b-title">1. Ester</div>
+          <div class="b-sub">RCOOR'</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 1.1 -->
+          <div class="node-item" data-node="ester-ct">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Cấu tạo &amp; Danh pháp</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Ester • Cấu tạo &amp; Danh pháp</span>
+                  <button class="zoom-btn" data-zoom="ester-ct">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Khái niệm:</strong> Thay nhóm –OH ở nhóm carboxyl (–COOH) bằng nhóm –OR'.</li>
+                  <li><strong>Công thức:</strong> Đơn chức <strong>RCOOR'</strong> (R là H hoặc gốc HC; R' là gốc HC). No, đơn chức, mạch hở: <strong>C<sub>n</sub>H<sub>2n</sub>O<sub>2</sub></strong> (n ≥ 2).</li>
+                  <li><strong>Danh pháp:</strong> Tên gốc <strong>R'</strong> + tên gốc acid <strong>RCOO</strong> (đổi đuôi <em>-ic</em> → <em>-ate</em>).</li>
+                </ul>
+                <table class="mini-table">
+                  <thead><tr><th>Công thức</th><th>Tên gọi</th></tr></thead>
+                  <tbody>
+                    <tr><td>HCOOCH<sub>3</sub></td><td>Methyl formate</td></tr>
+                    <tr><td>CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></td><td>Ethyl acetate</td></tr>
+                    <tr><td>CH<sub>2</sub>=CH–COOCH<sub>3</sub></td><td>Methyl acrylate</td></tr>
+                    <tr><td>CH<sub>3</sub>COOCH=CH<sub>2</sub></td><td>Vinyl acetate</td></tr>
+                  </tbody>
+                </table>
+                <div class="tip"><strong>Lưu ý:</strong> Số đồng phân ester no đơn chức C<sub>n</sub>H<sub>2n</sub>O<sub>2</sub> = 2<sup>n–2</sup> (với n ≤ 4: C<sub>2</sub> có 1, C<sub>3</sub> có 2, C<sub>4</sub> có 4).</div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Ester)</option>
+                      <option value="30">30 câu (+ôn nhánh Ester)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ester-ct">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.2 -->
+          <div class="node-item" data-node="ester-vl">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tính chất vật lí</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Ester • Vật lí</span>
+                  <button class="zoom-btn" data-zoom="ester-vl">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Nhiệt độ sôi thấp</strong> hơn hẳn acid và alcohol cùng số C (vì không tạo liên kết hydrogen giữa các phân tử ester).</li>
+                  <li><strong>Độ tan:</strong> Ít tan hoặc không tan trong nước, <strong>nhẹ hơn nước</strong> (nổi lên trên).</li>
+                  <li><strong>Mùi thơm hoa quả:</strong> <em>Isoamyl acetate</em> (chuối chín), <em>ethyl butyrate</em> (dứa), <em>benzyl acetate</em> (hoa nhài).</li>
+                </ul>
+                <div class="eq">
+                  <div class="eq-note">Thứ tự nhiệt độ sôi (cùng M):</div>
+                  <div class="eq-formula">Carboxylic acid &gt; Alcohol &gt; Ester</div>
+                </div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Ester)</option>
+                      <option value="30">30 câu (+ôn nhánh Ester)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ester-vl">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.3 -->
+          <div class="node-item" data-node="ester-hh">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tính chất hóa học</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Ester • Hóa học</span>
+                  <button class="zoom-btn" data-zoom="ester-hh">Phóng to ⤢</button>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">1. Thủy phân môi trường acid (thuận nghịch):</div>
+                  <div class="eq-formula">
+                    RCOOR' + H<sub>2</sub>O
+                    <span class="arr"><span class="cond">H<sup>+</sup>, t°</span><span class="sym">⇌</span></span>
+                    RCOOH + R'OH
+                  </div>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">2. Thủy phân môi trường kiềm / Xà phòng hóa (một chiều):</div>
+                  <div class="eq-formula">
+                    RCOOR' + NaOH
+                    <span class="arr"><span class="cond">t°</span><span class="sym">→</span></span>
+                    RCOONa + R'OH
+                  </div>
+                </div>
+                <div class="tip"><strong>Đặc biệt:</strong> Ester của phenol tác dụng NaOH tỉ lệ 1:2 tạo 2 muối + H<sub>2</sub>O; ester gốc formate (HCOOR') có phản ứng tráng bạc.</div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Ester)</option>
+                      <option value="30">30 câu (+ôn nhánh Ester)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ester-hh">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.4 -->
+          <div class="node-item" data-node="ester-dc">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Điều chế Ester</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Ester • Điều chế</span>
+                  <button class="zoom-btn" data-zoom="ester-dc">Phóng to ⤢</button>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">Phản ứng ester hóa (thuận nghịch):</div>
+                  <div class="eq-formula">
+                    RCOOH + R'OH
+                    <span class="arr"><span class="cond">H<sub>2</sub>SO<sub>4</sub> đặc, t°</span><span class="sym">⇌</span></span>
+                    RCOOR' + H<sub>2</sub>O
+                  </div>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Vai trò H<sub>2</sub>SO<sub>4</sub> đặc:</strong> Vừa làm xúc tác, vừa hút nước để tăng hiệu suất tạo ester.</li>
+                  <li><strong>Tách ester:</strong> Thêm dd NaCl bão hòa để lớp ester tách hẳn và nổi lên trên.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Ester)</option>
+                      <option value="30">30 câu (+ôn nhánh Ester)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ester-dc">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: LIPID & CHẤT BÉO -->
+      <section class="branch-col" data-branch="lipid">
+        <div class="branch-pill" data-branch-toggle="lipid" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Lipid">
+          <div class="b-title">2. Lipid &amp; Chất béo</div>
+          <div class="b-sub">Triglyceride</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 2.1 -->
+          <div class="node-item" data-node="lipid-kn">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Khái niệm &amp; Acid béo</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Lipid • Khái niệm &amp; Acid béo</span>
+                  <button class="zoom-btn" data-zoom="lipid-kn">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Lipid:</strong> Hợp chất hữu cơ trong tế bào sống, không tan trong nước, tan trong dung môi không phân cực (gồm chất béo, sáp, steroid, phospholipid...).</li>
+                  <li><strong>Chất béo (Triglyceride):</strong> Triester của glycerol C<sub>3</sub>H<sub>5</sub>(OH)<sub>3</sub> với acid béo. Công thức: <strong>(RCOO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub></strong>.</li>
+                </ul>
+                <table class="mini-table">
+                  <thead><tr><th>Acid béo</th><th>Công thức</th><th>Loại</th></tr></thead>
+                  <tbody>
+                    <tr><td>Palmitic</td><td>C<sub>15</sub>H<sub>31</sub>COOH</td><td>No (M<sub>CB</sub>=806)</td></tr>
+                    <tr><td>Stearic</td><td>C<sub>17</sub>H<sub>35</sub>COOH</td><td>No (M<sub>CB</sub>=890)</td></tr>
+                    <tr><td>Oleic</td><td>C<sub>17</sub>H<sub>33</sub>COOH</td><td>1 C=C (884)</td></tr>
+                    <tr><td>Linoleic</td><td>C<sub>17</sub>H<sub>31</sub>COOH</td><td>2 C=C, <strong>Ω-6</strong> (878)</td></tr>
+                  </tbody>
+                </table>
+                <div class="tip"><strong>Omega-3 &amp; Omega-6:</strong> Acid béo không no có nối đôi đầu tiên ở C số 3 hoặc số 6 tính từ nhóm –CH<sub>3</sub>, rất tốt cho tim mạch và não bộ.</div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Lipid)</option>
+                      <option value="30">30 câu (+ôn nhánh Lipid)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="lipid-kn">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.2 -->
+          <div class="node-item" data-node="lipid-vl">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tính chất vật lí</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Lipid • Vật lí</span>
+                  <button class="zoom-btn" data-zoom="lipid-vl">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Không tan trong nước</strong>, nhẹ hơn nước; tan tốt trong dung môi hữu cơ không phân cực (xăng, benzene, chloroform...).</li>
+                  <li><strong>Trạng thái rắn (Mỡ động vật):</strong> Chứa chủ yếu gốc <strong>acid béo no</strong> (palmitic, stearic).</li>
+                  <li><strong>Trạng thái lỏng (Dầu thực vật):</strong> Chứa chủ yếu gốc <strong>acid béo không no</strong> (oleic, linoleic).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Lipid)</option>
+                      <option value="30">30 câu (+ôn nhánh Lipid)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="lipid-vl">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 -->
+          <div class="node-item" data-node="lipid-hh">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tính chất hóa học</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Lipid • Hóa học</span>
+                  <button class="zoom-btn" data-zoom="lipid-hh">Phóng to ⤢</button>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">1. Phản ứng xà phòng hóa:</div>
+                  <div class="eq-formula">
+                    (RCOO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub> + 3NaOH
+                    <span class="arr"><span class="cond">t°</span><span class="sym">→</span></span>
+                    3RCOONa + C<sub>3</sub>H<sub>5</sub>(OH)<sub>3</sub>
+                  </div>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">2. Hydrogen hóa (lỏng → rắn, làm bơ margarine):</div>
+                  <div class="eq-formula">
+                    (C<sub>17</sub>H<sub>33</sub>COO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub> + 3H<sub>2</sub>
+                    <span class="arr"><span class="cond">Ni, t°, p</span><span class="sym">→</span></span>
+                    (C<sub>17</sub>H<sub>35</sub>COO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub>
+                  </div>
+                </div>
+                <ul class="d-list">
+                  <li><strong>3. Oxi hóa bởi O<sub>2</sub> không khí:</strong> Các nối đôi C=C bị oxi hóa chậm tạo mùi khó chịu → hiện tượng <strong>dầu mỡ bị ôi thiu</strong>.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Lipid)</option>
+                      <option value="30">30 câu (+ôn nhánh Lipid)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="lipid-hh">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: XÀ PHÒNG & GIẶT RỬA -->
+      <section class="branch-col" data-branch="soap">
+        <div class="branch-pill" data-branch-toggle="soap" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Xà phòng">
+          <div class="b-title">3. Xà phòng &amp; Giặt rửa</div>
+          <div class="b-sub">RCOONa / R-OSO<sub>3</sub>Na</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 3.1 -->
+          <div class="node-item" data-node="soap-cc">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Cấu tạo &amp; Cơ chế</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Giặt rửa • Cấu tạo &amp; Cơ chế</span>
+                  <button class="zoom-btn" data-zoom="soap-cc">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Đầu ưa nước (phân cực):</strong> Nhóm ion –COO<sup>–</sup>, –OSO<sub>3</sub><sup>–</sup>, –SO<sub>3</sub><sup>–</sup> (tan trong nước).</li>
+                  <li><strong>Đuôi kị nước (không phân cực):</strong> Gốc hydrocarbon mạch dài R– (bám vào dầu mỡ).</li>
+                  <li><strong>Cơ chế:</strong> Đuôi kị nước cắm vào vết dầu mỡ, đầu ưa nước quay ra ngoài nước → tạo các hạt <strong>micelle</strong> tách vết bẩn khỏi vải và cuốn trôi theo nước.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Giặt rửa)</option>
+                      <option value="30">30 câu (+ôn nhánh Giặt rửa)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="soap-cc">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.2 -->
+          <div class="node-item" data-node="soap-xp">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Xà phòng</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Giặt rửa • Xà phòng</span>
+                  <button class="zoom-btn" data-zoom="soap-xp">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Thành phần chính:</strong> Muối sodium hoặc potassium của acid béo (<strong>RCOONa</strong>, <strong>RCOOK</strong>).</li>
+                  <li><strong>Sản xuất:</strong> Đun chất béo với NaOH/KOH (rồi thêm NaCl bão hòa tách xà phòng) hoặc oxi hóa alkane dầu mỏ.</li>
+                  <li><strong>Với nước cứng:</strong> <strong>Mất tác dụng giặt rửa</strong> do tạo kết tủa với ion Ca<sup>2+</sup>, Mg<sup>2+</sup>.</li>
+                  <li><strong>Môi trường:</strong> Dễ bị phân hủy sinh học, thân thiện môi trường.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Giặt rửa)</option>
+                      <option value="30">30 câu (+ôn nhánh Giặt rửa)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="soap-xp">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3 -->
+          <div class="node-item" data-node="soap-th">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Chất giặt rửa TH</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Giặt rửa • Tổng hợp &amp; Tự nhiên</span>
+                  <button class="zoom-btn" data-zoom="soap-th">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Chất giặt rửa tổng hợp:</strong> Muối <strong>R–OSO<sub>3</sub>Na</strong> (alkylsulfate) hoặc <strong>R–C<sub>6</sub>H<sub>4</sub>–SO<sub>3</sub>Na</strong> (alkylbenzenesulfonate), sản xuất từ dầu mỏ.</li>
+                  <li><strong>Ưu điểm lớn:</strong> Giặt rửa tốt trong <strong>nước cứng</strong> (không tạo kết tủa với Ca<sup>2+</sup>, Mg<sup>2+</sup>).</li>
+                  <li><strong>Nhược điểm:</strong> Khó phân hủy sinh học hơn xà phòng, dễ gây ô nhiễm nước.</li>
+                  <li><strong>Chất giặt rửa tự nhiên:</strong> Saponin trong quả <strong>bồ kết, bồ hòn</strong> — rất an toàn, thân thiện môi trường.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Giặt rửa)</option>
+                      <option value="30">30 câu (+ôn nhánh Giặt rửa)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="soap-th">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <p class="footer-hint">💡 Nhấp vào từng ô trên sơ đồ để xem kiến thức &amp; chọn số câu luyện tập (10–30 câu, mức độ Biết &amp; Hiểu) ngay bên dưới mỗi mục.</p>
+  </main>
+
+  <!-- Zoom Modal (for presenting theory) -->
+  <div class="modal-backdrop" id="zoomModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="zoomTitle">Chi tiết</div>
+        </div>
+        <button class="modal-close" id="zoomClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="zoomBody"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal -->
+  <div class="modal-backdrop" id="quizModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="quizTitle">Luyện tập</div>
+          <div class="modal-subtitle" id="quizSubtitle">Mức độ: Nhận biết &amp; Thông hiểu</div>
+        </div>
+        <button class="modal-close" id="quizClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+      <div class="modal-footer" id="quizFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_BANKS = {"ester-ct": {"title": "1.1. Cấu tạo & Danh pháp Ester", "questions": [{"q": "Khi thay nhóm –OH ở nhóm carboxyl của carboxylic acid bằng nhóm –OR' thì thu được hợp chất nào sau đây?", "opts": ["Ester", "Alcohol", "Aldehyde", "Ketone"], "ans": 0, "exp": "Theo định nghĩa SGK Hóa 12 KNTT, thay nhóm –OH trong nhóm –COOH bằng nhóm –OR' thu được ester (RCOOR')."}, {"q": "Nhóm chức đặc trưng của ester là", "opts": ["–COO–", "–COOH", "–CHO", "–OH"], "ans": 0, "exp": "Ester có nhóm chức đặc trưng là –COO–; còn –COOH là carboxylic acid, –CHO là aldehyde, –OH là alcohol/phenol."}, {"q": "Công thức tổng quát của ester no, đơn chức, mạch hở là", "opts": ["CₙH₂ₙO₂ (n ≥ 2)", "CₙH₂ₙO₂ (n ≥ 1)", "CₙH₂ₙ₋₂O₂ (n ≥ 2)", "CₙH₂ₙ₊₂O₂ (n ≥ 2)"], "ans": 0, "exp": "Ester no, đơn chức, mạch hở có công thức CₙH₂ₙO₂ với n ≥ 2 (ester nhỏ nhất là HCOOCH₃ có 2 nguyên tử C)."}, {"q": "Chất nào sau đây là ester?", "opts": ["CH₃COOC₂H₅", "CH₃COOH", "C₂H₅OH", "CH₃CHO"], "ans": 0, "exp": "CH₃COOC₂H₅ có nhóm chức ester –COO– gắn với gốc hydrocarbon C₂H₅. Các chất còn lại lần lượt là acid, alcohol và aldehyde."}, {"q": "Trong công thức ester đơn chức RCOOR', điều kiện của gốc R' là", "opts": ["Bắt buộc là gốc hydrocarbon", "Có thể là nguyên tử H", "Bắt buộc là gốc alkyl no", "Bắt buộc có vòng benzene"], "ans": 0, "exp": "R' phải là gốc hydrocarbon (no hoặc không no, mạch hở hoặc vòng). Nếu R' là H thì hợp chất trở thành carboxylic acid (RCOOH)."}, {"q": "Tên gọi của ester HCOOCH₃ là", "opts": ["Methyl formate", "Ethyl formate", "Methyl acetate", "Formyl methanoate"], "ans": 0, "exp": "Gốc R' là –CH₃ (methyl), gốc acid HCOO– là formate → tên gọi là methyl formate."}, {"q": "Tên gọi của ester CH₃COOC₂H₅ là", "opts": ["Ethyl acetate", "Methyl propionate", "Ethyl formate", "Methyl acetate"], "ans": 0, "exp": "Gốc R' là –C₂H₅ (ethyl), gốc acid CH₃COO– là acetate → tên gọi là ethyl acetate."}, {"q": "Công thức cấu tạo của methyl acetate là", "opts": ["CH₃COOCH₃", "HCOOC₂H₅", "CH₃COOC₂H₅", "C₂H₅COOCH₃"], "ans": 0, "exp": "Methyl là gốc –CH₃; acetate là gốc CH₃COO– → ghép lại thành CH₃COOCH₃."}, {"q": "Công thức cấu tạo của ethyl formate là", "opts": ["HCOOC₂H₅", "CH₃COOCH₃", "C₂H₅COOCH₃", "CH₃COOC₂H₅"], "ans": 0, "exp": "Ethyl là gốc –C₂H₅; formate là gốc HCOO– → công thức là HCOOC₂H₅."}, {"q": "Tên gọi của ester CH₂=CH–COOCH₃ là", "opts": ["Methyl acrylate", "Vinyl acetate", "Vinyl formate", "Methyl methacrylate"], "ans": 0, "exp": "Gốc R' là –CH₃ (methyl), gốc acid CH₂=CH–COO– là acrylate → methyl acrylate."}, {"q": "Công thức cấu tạo của vinyl acetate là", "opts": ["CH₃COOCH=CH₂", "CH₂=CHCOOCH₃", "HCOOCH=CH₂", "CH₃COOC₂H₅"], "ans": 0, "exp": "Vinyl là gốc –CH=CH₂ gắn vào O; acetate là gốc CH₃COO– → CH₃COOCH=CH₂."}, {"q": "Ứng với công thức phân tử C₃H₆O₂ có bao nhiêu đồng phân cấu tạo là ester?", "opts": ["2", "1", "3", "4"], "ans": 0, "exp": "C₃H₆O₂ có 2 đồng phân ester là HCOOC₂H₅ (ethyl formate) và CH₃COOCH₃ (methyl acetate). (Chú ý: C₂H₅COOH là acid, không phải ester)."}, {"q": "Ứng với công thức phân tử C₄H₈O₂ có bao nhiêu đồng phân cấu tạo là ester?", "opts": ["4", "2", "3", "6"], "ans": 0, "exp": "Áp dụng công thức 2ⁿ⁻² (n = 4) → 4 đồng phân ester: HCOOCH₂CH₂CH₃, HCOOCH(CH₃)₂, CH₃COOC₂H₅ và C₂H₅COOCH₃."}, {"q": "Ester X có công thức phân tử C₂H₄O₂. Tên gọi của X là", "opts": ["Methyl formate", "Ethyl formate", "Methyl acetate", "Acetic acid"], "ans": 0, "exp": "Ester có 2 nguyên tử C chỉ có duy nhất một công thức là HCOOCH₃ (methyl formate). Acetic acid (CH₃COOH) là đồng phân acid, không phải ester."}, {"q": "Cặp chất nào sau đây là đồng phân cấu tạo của nhau?", "opts": ["Vinyl acetate và methyl acrylate", "Ethyl acetate và methyl formate", "Methyl acetate và ethyl formate", "Methyl formate và ethyl acetate"], "ans": 0, "exp": "Vinyl acetate (CH₃COOCH=CH₂) và methyl acrylate (CH₂=CHCOOCH₃) đều có cùng công thức phân tử C₄H₆O₂ nhưng khác cấu tạo nên là đồng phân của nhau."}]}, "ester-vl": {"title": "1.2. Tính chất vật lí của Ester", "questions": [{"q": "Vì sao ester có nhiệt độ sôi thấp hơn nhiều so với carboxylic acid và alcohol có cùng số nguyên tử carbon?", "opts": ["Giữa các phân tử ester không tạo được liên kết hydrogen", "Phân tử khối của ester nhỏ hơn rất nhiều", "Ester tan tốt hơn trong nước", "Ester không có nguyên tử oxygen trong phân tử"], "ans": 0, "exp": "Ester không có nguyên tử H linh động gắn với O nên không tạo được liên kết hydrogen liên phân tử, dẫn đến nhiệt độ sôi thấp hơn hẳn acid và alcohol."}, {"q": "Độ tan trong nước và khối lượng riêng của đa số ester so với nước là", "opts": ["Ít tan hoặc không tan trong nước, nhẹ hơn nước", "Tan vô hạn trong nước, nặng hơn nước", "Tan tốt trong nước, nhẹ hơn nước", "Không tan trong nước, nặng hơn nước"], "ans": 0, "exp": "Đa số ester ít tan hoặc không tan trong nước (vì tạo liên kết hydrogen rất yếu với nước) và nhẹ hơn nước nên thường nổi thành lớp trên mặt nước."}, {"q": "Ester nào sau đây có mùi thơm đặc trưng của chuối chín?", "opts": ["Isoamyl acetate", "Benzyl acetate", "Ethyl butyrate", "Methyl salicylate"], "ans": 0, "exp": "Isoamyl acetate (CH₃COOCH₂CH₂CH(CH₃)₂) có mùi chuối chín; benzyl acetate mùi hoa nhài; ethyl butyrate mùi dứa chín."}, {"q": "Ester benzyl acetate có mùi thơm đặc trưng của", "opts": ["Hoa nhài", "Chuối chín", "Dứa chín", "Hoa hồng"], "ans": 0, "exp": "Benzyl acetate (CH₃COOCH₂C₆H₅) là ester tạo mùi thơm đặc trưng của hoa nhài."}, {"q": "Ester ethyl butyrate có mùi thơm đặc trưng của quả nào sau đây?", "opts": ["Dứa chín", "Chuối chín", "Cam chín", "Táo chín"], "ans": 0, "exp": "Ethyl butyrate (C₃H₇COOC₂H₅) có mùi thơm của dứa chín."}, {"q": "Sắp xếp các chất sau (có cùng phân tử khối M = 60) theo chiều nhiệt độ sôi tăng dần: CH₃COOH, HCOOCH₃, CH₃CH₂CH₂OH.", "opts": ["HCOOCH₃ < CH₃CH₂CH₂OH < CH₃COOH", "CH₃COOH < CH₃CH₂CH₂OH < HCOOCH₃", "CH₃CH₂CH₂OH < HCOOCH₃ < CH₃COOH", "HCOOCH₃ < CH₃COOH < CH₃CH₂CH₂OH"], "ans": 0, "exp": "HCOOCH₃ không có liên kết hydrogen nên sôi thấp nhất (32 °C); CH₃CH₂CH₂OH có liên kết hydrogen (97 °C); CH₃COOH có liên kết hydrogen bền hơn nên sôi cao nhất (118 °C)."}, {"q": "Chất nào sau đây có nhiệt độ sôi thấp nhất?", "opts": ["CH₃COOCH₃", "C₂H₅COOH", "CH₃CH₂CH₂OH", "CH₃COOH"], "ans": 0, "exp": "CH₃COOCH₃ là ester không tạo được liên kết hydrogen giữa các phân tử nên có nhiệt độ sôi thấp hơn các acid và alcohol tương ứng."}, {"q": "Khi nhỏ vài giọt ethyl acetate vào ống nghiệm chứa nước và lắc nhẹ, sau đó để yên thì hiện tượng quan sát được là", "opts": ["Chất lỏng tách thành hai lớp, lớp ester nổi lên trên", "Chất lỏng đồng nhất, trong suốt", "Chất lỏng tách thành hai lớp, lớp ester chìm xuống dưới", "Xuất hiện kết tủa trắng đục"], "ans": 0, "exp": "Ethyl acetate ít tan trong nước và có khối lượng riêng nhỏ hơn nước (≈ 0,9 g/cm³) nên tách lớp và nổi lên trên."}, {"q": "Ở điều kiện thường, các ester có phân tử khối nhỏ và trung bình thường tồn tại ở trạng thái nào?", "opts": ["Lỏng", "Khí", "Rắn", "Plasma"], "ans": 0, "exp": "Ở điều kiện thường, các ester nhỏ và trung bình là chất lỏng; những ester có phân tử khối rất lớn (như sáp ong, mỡ) ở trạng thái rắn."}, {"q": "Trong các chất có cùng công thức phân tử C₃H₆O₂ sau đây, chất nào có nhiệt độ sôi cao nhất?", "opts": ["CH₃CH₂COOH", "CH₃COOCH₃", "HCOOC₂H₅", "Cả ba có nhiệt độ sôi bằng nhau"], "ans": 0, "exp": "CH₃CH₂COOH là carboxylic acid tạo liên kết hydrogen liên phân tử bền vững nên có nhiệt độ sôi cao hơn hẳn hai đồng phân ester."}, {"q": "Phát biểu nào sau đây là ĐÚNG về tính chất vật lí của ester?", "opts": ["Nhiều ester có mùi thơm dễ chịu nên được dùng làm hương liệu", "Tất cả các ester đều tan vô hạn trong nước", "Ester có nhiệt độ sôi cao hơn carboxylic acid cùng số carbon", "Các ester đều là chất khí ở điều kiện thường"], "ans": 0, "exp": "Nhiều ester có mùi thơm hoa quả đặc trưng nên được ứng dụng làm hương liệu trong công nghiệp thực phẩm và mỹ phẩm."}, {"q": "Vì sao ester ít tan trong nước hơn so với alcohol có cùng số nguyên tử carbon?", "opts": ["Ester tạo liên kết hydrogen với nước kém hơn nhiều so với alcohol", "Ester phản ứng mạnh với nước ngay ở nhiệt độ thường", "Ester có phân tử khối lớn hơn alcohol rất nhiều", "Ester không chứa nguyên tử oxygen"], "ans": 0, "exp": "Alcohol có nhóm –OH phân cực mạnh nên tạo liên kết hydrogen tốt với nước, còn ester chỉ tạo liên kết hydrogen yếu với nước nên ít tan."}, {"q": "Chất nào sau đây có nhiệt độ sôi cao nhất trong các chất cùng có 4 nguyên tử carbon?", "opts": ["CH₃CH₂CH₂COOH", "CH₃COOC₂H₅", "HCOOC₃H₇", "C₂H₅COOCH₃"], "ans": 0, "exp": "CH₃CH₂CH₂COOH là carboxylic acid có liên kết hydrogen liên phân tử bền, còn 3 chất kia đều là ester không có liên kết hydrogen liên phân tử."}, {"q": "So sánh nhiệt độ sôi giữa ethyl acetate (M = 88) và butan-1-ol (M = 74), nhận xét nào đúng?", "opts": ["Butan-1-ol có nhiệt độ sôi cao hơn ethyl acetate", "Ethyl acetate có nhiệt độ sôi cao hơn butan-1-ol vì có M lớn hơn", "Hai chất có nhiệt độ sôi bằng nhau", "Không thể so sánh vì khác nhóm chức"], "ans": 0, "exp": "Dù M nhỏ hơn một chút, butan-1-ol (117 °C) vẫn sôi cao hơn hẳn ethyl acetate (77 °C) nhờ có liên kết hydrogen liên phân tử."}, {"q": "Phát biểu nào sau đây KHÔNG đúng khi nói về tính chất vật lí của ester?", "opts": ["Ester nặng hơn nước nên chìm xuống đáy khi cho vào nước", "Ester thường hòa tan tốt nhiều chất hữu cơ nên dùng làm dung môi", "Nhiệt độ sôi của ester tăng dần khi phân tử khối tăng", "Isoamyl acetate có mùi chuối chín"], "ans": 0, "exp": "Đa số ester nhẹ hơn nước (D < 1 g/cm³) nên nổi lên trên mặt nước, không chìm xuống đáy."}]}, "ester-hh": {"title": "1.3. Tính chất hóa học của Ester", "questions": [{"q": "Phản ứng hóa học đặc trưng nhất của ester là", "opts": ["Phản ứng thủy phân", "Phản ứng cộng H₂", "Phản ứng trùng hợp", "Phản ứng tách nước"], "ans": 0, "exp": "Nhóm chức –COO– của ester đặc trưng bởi phản ứng thủy phân (trong môi trường acid hoặc môi trường kiềm)."}, {"q": "Phản ứng thủy phân ester trong môi trường acid có đặc điểm là", "opts": ["Phản ứng thuận nghịch", "Phản ứng một chiều", "Xảy ra mãnh liệt ở nhiệt độ thường", "Tạo ra muối và alcohol"], "ans": 0, "exp": "Thủy phân ester trong môi trường acid là phản ứng thuận nghịch: RCOOR' + H₂O ⇌ RCOOH + R'OH (xúc tác H⁺, t°)."}, {"q": "Phản ứng thủy phân ester trong môi trường kiềm (NaOH, KOH) còn được gọi là phản ứng gì?", "opts": ["Phản ứng xà phòng hóa", "Phản ứng ester hóa", "Phản ứng trung hòa", "Phản ứng oxi hóa"], "ans": 0, "exp": "Thủy phân ester trong môi trường kiềm là phản ứng một chiều, còn gọi là phản ứng xà phòng hóa."}, {"q": "Đun nóng ethyl acetate (CH₃COOC₂H₅) với dung dịch NaOH thu được sản phẩm là", "opts": ["CH₃COONa và C₂H₅OH", "CH₃COOH và C₂H₅ONa", "HCOONa và C₂H₅OH", "C₂H₅COONa và CH₃OH"], "ans": 0, "exp": "CH₃COOC₂H₅ + NaOH → CH₃COONa (sodium acetate) + C₂H₅OH (ethanol)."}, {"q": "Thủy phân methyl formate (HCOOCH₃) trong dung dịch H₂SO₄ loãng, đun nóng thu được", "opts": ["HCOOH và CH₃OH", "CH₃COOH và CH₃OH", "HCOONa và CH₃OH", "HCOOH và C₂H₅OH"], "ans": 0, "exp": "HCOOCH₃ + H₂O ⇌ HCOOH (formic acid) + CH₃OH (methanol)."}, {"q": "Đun nóng methyl acetate (CH₃COOCH₃) với dung dịch KOH thu được muối nào sau đây?", "opts": ["CH₃COOK", "HCOOK", "C₂H₅COOK", "CH₃OK"], "ans": 0, "exp": "CH₃COOCH₃ + KOH → CH₃COOK + CH₃OH."}, {"q": "Vì sao phản ứng thủy phân ester trong môi trường kiềm là phản ứng một chiều?", "opts": ["Vì muối carboxylate tạo thành không tác dụng lại với alcohol để tạo ester", "Vì dung dịch kiềm bay hơi hết khi đun nóng", "Vì alcohol tạo thành phản ứng ngay với NaOH", "Vì phản ứng tỏa nhiệt rất mạnh"], "ans": 0, "exp": "Muối RCOONa không phản ứng với alcohol R'OH nên phản ứng không xảy ra theo chiều nghịch."}, {"q": "Thủy phân ester X bằng dung dịch NaOH đun nóng thu được CH₃COONa và CH₃OH. Công thức của X là", "opts": ["CH₃COOCH₃", "HCOOC₂H₅", "CH₃COOC₂H₅", "C₂H₅COOCH₃"], "ans": 0, "exp": "Muối CH₃COONa ứng với gốc acid CH₃COO–; alcohol CH₃OH ứng với gốc –CH₃ → X là CH₃COOCH₃."}, {"q": "Thủy phân hoàn toàn ester Y bằng dung dịch NaOH thu được HCOONa và C₂H₅OH. Tên gọi của Y là", "opts": ["Ethyl formate", "Methyl acetate", "Ethyl acetate", "Methyl formate"], "ans": 0, "exp": "Gốc acid là HCOO– (formate) và gốc alcohol là –C₂H₅ (ethyl) → Y là HCOOC₂H₅ (ethyl formate)."}, {"q": "Ester nào sau đây có khả năng tham gia phản ứng với thuốc thử Tollens (phản ứng tráng bạc)?", "opts": ["HCOOC₂H₅", "CH₃COOC₂H₅", "CH₃COOCH₃", "C₂H₅COOCH₃"], "ans": 0, "exp": "Các ester của formic acid (HCOOR') có chứa nhóm –CHO trong cấu tạo nên tham gia phản ứng tráng bạc với thuốc thử Tollens."}, {"q": "Thủy phân ethyl propionate (C₂H₅COOC₂H₅) trong dung dịch NaOH đun nóng thu được", "opts": ["C₂H₅COONa và C₂H₅OH", "CH₃COONa và C₂H₅OH", "C₂H₅COONa và CH₃OH", "HCOONa và C₃H₇OH"], "ans": 0, "exp": "C₂H₅COOC₂H₅ + NaOH → C₂H₅COONa + C₂H₅OH."}, {"q": "Đun sôi hỗn hợp gồm ethyl acetate và dung dịch NaOH dư cho đến khi phản ứng hoàn toàn, hiện tượng thu được là", "opts": ["Thu được dung dịch đồng nhất (không còn tách lớp)", "Hỗn hợp vẫn tách thành hai lớp rõ rệt", "Có kết tủa trắng lắng xuống đáy", "Có khí không màu thoát ra mạnh"], "ans": 0, "exp": "Ban đầu ester không tan tạo 2 lớp. Sau khi xà phòng hóa hoàn toàn, sản phẩm CH₃COONa và C₂H₅OH đều tan tốt trong nước nên thu được dung dịch đồng nhất."}, {"q": "Khi đun nóng ester CH₃COOC₂H₅ với dung dịch H₂SO₄ loãng (phản ứng thủy phân acid), sau một thời gian để nguội sẽ thấy", "opts": ["Chất lỏng vẫn tách lớp vì phản ứng thuận nghịch, ester còn dư", "Thu được dung dịch hoàn toàn đồng nhất", "Có kết tủa vàng xuất hiện", "Toàn bộ ester biến mất hoàn toàn"], "ans": 0, "exp": "Thủy phân trong môi trường acid là phản ứng thuận nghịch nên luôn còn ester chưa phản ứng, dẫn đến chất lỏng vẫn tách lớp."}, {"q": "Đốt cháy hoàn toàn một ester no, đơn chức, mạch hở luôn thu được số mol CO₂ và H₂O thỏa mãn", "opts": ["n(CO₂) = n(H₂O)", "n(CO₂) > n(H₂O)", "n(CO₂) < n(H₂O)", "n(CO₂) = 2 × n(H₂O)"], "ans": 0, "exp": "Ester no, đơn chức, mạch hở có công thức CₙH₂ₙO₂, khi đốt cháy tạo n mol CO₂ và n mol H₂O nên n(CO₂) = n(H₂O)."}, {"q": "Khi thủy phân phenyl acetate (CH₃COOC₆H₅) trong dung dịch NaOH dư, đun nóng, tỉ lệ mol phản ứng giữa ester và NaOH là", "opts": ["1 : 2", "1 : 1", "1 : 3", "2 : 1"], "ans": 0, "exp": "CH₃COOC₆H₅ + 2NaOH → CH₃COONa + C₆H₅ONa + H₂O (vì phenol sinh ra tiếp tục tác dụng với NaOH)."}]}, "ester-dc": {"title": "1.4. Điều chế & Ứng dụng Ester", "questions": [{"q": "Phản ứng giữa carboxylic acid và alcohol có xúc tác H₂SO₄ đặc, đun nóng tạo thành ester và nước được gọi là", "opts": ["Phản ứng ester hóa", "Phản ứng xà phòng hóa", "Phản ứng trung hòa", "Phản ứng trùng hợp"], "ans": 0, "exp": "Phản ứng RCOOH + R'OH ⇌ RCOOR' + H₂O (H₂SO₄ đặc, t°) được gọi là phản ứng ester hóa."}, {"q": "Chất xúc tác thường dùng trong phản ứng điều chế ester từ carboxylic acid và alcohol là", "opts": ["H₂SO₄ đặc", "NaOH đặc", "HCl loãng", "Bột Ni"], "ans": 0, "exp": "H₂SO₄ đặc vừa đóng vai trò chất xúc tác vừa có tính háo nước giúp hút H₂O sinh ra."}, {"q": "Trong phản ứng ester hóa, H₂SO₄ đặc có hai vai trò chính là gì?", "opts": ["Làm chất xúc tác và hút nước để chuyển dịch cân bằng theo chiều thuận", "Làm chất oxi hóa và tạo môi trường kiềm", "Làm giảm nhiệt độ sôi của ester và tạo mùi thơm", "Trung hòa carboxylic acid dư và tạo kết tủa"], "ans": 0, "exp": "H₂SO₄ đặc làm tăng tốc độ phản ứng (xúc tác) và hút nước làm giảm nồng độ H₂O, đẩy cân bằng chuyển dịch sang phải tạo nhiều ester hơn."}, {"q": "Để điều chế ethyl acetate (CH₃COOC₂H₅), cần đun nóng cặp chất nào sau đây với H₂SO₄ đặc?", "opts": ["CH₃COOH và C₂H₅OH", "HCOOH và C₂H₅OH", "CH₃COOH và CH₃OH", "C₂H₅COOH và CH₃OH"], "ans": 0, "exp": "CH₃COOH + C₂H₅OH ⇌ CH₃COOC₂H₅ + H₂O (xúc tác H₂SO₄ đặc, t°)."}, {"q": "Để điều chế methyl formate (HCOOCH₃), cần thực hiện phản ứng ester hóa giữa", "opts": ["HCOOH và CH₃OH", "CH₃COOH và CH₃OH", "HCOOH và C₂H₅OH", "C₂H₅COOH và CH₃OH"], "ans": 0, "exp": "HCOOH + CH₃OH ⇌ HCOOCH₃ + H₂O."}, {"q": "Trong thí nghiệm điều chế ethyl acetate, sau khi đun nóng và làm lạnh, người ta thêm dung dịch NaCl bão hòa vào ống nghiệm nhằm mục đích gì?", "opts": ["Giúp ester tách lớp dễ dàng và nổi rõ lên trên", "Làm chất xúc tác cho phản ứng xảy ra nhanh hơn", "Hòa tan hoàn toàn ester vào nước", "Trung hòa lượng H₂SO₄ đặc còn dư"], "ans": 0, "exp": "Dung dịch NaCl bão hòa làm tăng khối lượng riêng lớp nước và giảm độ tan của ester, giúp lớp ester nổi tách biệt rõ rệt phía trên."}, {"q": "Biện pháp nào sau đây KHÔNG làm tăng hiệu suất của phản ứng ester hóa?", "opts": ["Thêm nước vào hỗn hợp phản ứng", "Dùng dư carboxylic acid hoặc alcohol", "Dùng H₂SO₄ đặc để hút nước", "Chưng cất tách bớt ester ngay khi tạo thành"], "ans": 0, "exp": "Thêm nước (sản phẩm) sẽ làm cân bằng chuyển dịch theo chiều nghịch (chiều thủy phân), làm giảm hiệu suất tạo ester."}, {"q": "Phản ứng ester hóa giữa acetic acid và ethanol có đặc điểm nào sau đây?", "opts": ["Thuận nghịch, cần đun nóng và có xúc tác acid mạnh", "Một chiều, xảy ra nhanh ở nhiệt độ thường", "Không cần chất xúc tác, hiệu suất luôn đạt 100%", "Chỉ xảy ra trong môi trường kiềm"], "ans": 0, "exp": "Phản ứng ester hóa là phản ứng thuận nghịch, tốc độ chậm nên cần đun nóng và dùng xúc tác H₂SO₄ đặc."}, {"q": "Ester nào sau đây KHÔNG thể điều chế trực tiếp bằng phản ứng giữa carboxylic acid và alcohol tương ứng?", "opts": ["Vinyl acetate (CH₃COOCH=CH₂)", "Ethyl acetate (CH₃COOC₂H₅)", "Methyl formate (HCOOCH₃)", "Isoamyl acetate"], "ans": 0, "exp": "Alcohol tương ứng CH₂=CH–OH không bền (tự chuyển thành aldehyde CH₃CHO), nên vinyl acetate không điều chế trực tiếp bằng phản ứng ester hóa."}, {"q": "Ứng dụng phổ biến của ethyl acetate và butyl acetate trong công nghiệp là", "opts": ["Làm dung môi pha sơn, mực in, tách chiết chất hữu cơ", "Làm phân bón hóa học", "Làm nhiên liệu cho động cơ diesel", "Làm chất khử trùng nước sinh hoạt"], "ans": 0, "exp": "Ethyl acetate và butyl acetate hòa tan tốt nhiều chất hữu cơ, bay hơi nhanh nên rất phổ biến làm dung môi pha sơn."}, {"q": "Poly(methyl methacrylate) — loại nhựa trong suốt dùng làm thủy tinh hữu cơ (kính máy bay, kính bảo hộ) — được tổng hợp từ ester nào?", "opts": ["Methyl methacrylate", "Ethyl acetate", "Methyl formate", "Isoamyl acetate"], "ans": 0, "exp": "Trùng hợp methyl methacrylate (CH₂=C(CH₃)COOCH₃) thu được poly(methyl methacrylate) (PMMA), gọi là thủy tinh hữu cơ."}, {"q": "Trong thí nghiệm điều chế ethyl acetate, cần đun nóng hỗn hợp ở nhiệt độ thích hợp (khoảng 65–70 °C) thay vì đun sôi quá mạnh vì", "opts": ["Tránh làm bay hơi quá nhanh chất tham gia (ethanol) và tránh phản ứng phụ", "Ở nhiệt độ cao hơn ester bị đóng băng", "H₂SO₄ đặc không hoạt động ở nhiệt độ cao", "Acetic acid không phản ứng khi nhiệt độ trên 70 °C"], "ans": 0, "exp": "Đun vừa phải giúp phản ứng xảy ra êm dịu, hạn chế thất thoát ethanol (sôi ở 78 °C) và tránh H₂SO₄ đặc làm than hóa/tách nước alcohol."}, {"q": "Trong phản ứng ester hóa RCOOH + R'OH ⇌ RCOOR' + H₂O, nguyên tử O trong phân tử H₂O tách ra từ đâu?", "opts": ["Từ nhóm –OH của carboxylic acid", "Từ nhóm –OH của alcohol", "Từ phân tử H₂SO₄ đặc", "Từ oxygen không khí"], "ans": 0, "exp": "Bằng phương pháp đồng vị phóng xạ, người ta chứng minh nhóm –OH tách ra từ carboxylic acid kết hợp với –H từ alcohol tạo thành H₂O."}, {"q": "Để điều chế isoamyl acetate (mùi chuối chín), người ta đun nóng acetic acid với alcohol nào sau đây?", "opts": ["Isoamyl alcohol", "Ethanol", "Methanol", "Benzyl alcohol"], "ans": 0, "exp": "Acetic acid + isoamyl alcohol ⇌ isoamyl acetate + H₂O."}, {"q": "Phát biểu nào sau đây là SAI về điều chế và ứng dụng ester?", "opts": ["Phản ứng ester hóa luôn đạt hiệu suất 100% khi có H₂SO₄ đặc", "Nhiều ester có mùi thơm được dùng trong công nghiệp thực phẩm, mỹ phẩm", "Ethyl acetate được dùng làm dung môi pha sơn", "Đun nóng hỗn hợp acid và alcohol có H₂SO₄ đặc tạo thành ester"], "ans": 0, "exp": "Phản ứng ester hóa là phản ứng thuận nghịch nên hiệu suất luôn nhỏ hơn 100%."}]}, "lipid-kn": {"title": "2.1. Khái niệm Lipid & Acid béo", "questions": [{"q": "Chất béo là triester của acid béo với alcohol nào sau đây?", "opts": ["Glycerol", "Ethanol", "Ethylene glycol", "Methanol"], "ans": 0, "exp": "Chất béo (triglyceride) là triester của glycerol C₃H₅(OH)₃ với các acid béo."}, {"q": "Tên gọi chung của chất béo là", "opts": ["Triglyceride", "Polysaccharide", "Polypeptide", "Monosaccharide"], "ans": 0, "exp": "Chất béo là triester của glycerol với acid béo, gọi chung là triglyceride (hay triacylglycerol)."}, {"q": "Phát biểu nào sau đây đúng về mối quan hệ giữa lipid và chất béo?", "opts": ["Chất béo là một loại lipid, nhưng không phải mọi lipid đều là chất béo", "Mọi lipid đều là chất béo", "Chất béo không thuộc nhóm lipid", "Lipid chỉ gồm chất béo và đường glucose"], "ans": 0, "exp": "Lipid là nhóm hợp chất hữu cơ rộng gồm chất béo, sáp, steroid, phospholipid... Do đó chất béo là lipid, nhưng ngược lại thì không đúng."}, {"q": "Đặc điểm chung của các acid béo tự nhiên là", "opts": ["Carboxylic acid đơn chức, mạch carbon dài, không phân nhánh, thường có số C chẵn", "Carboxylic acid đa chức, mạch ngắn", "Carboxylic acid có mạch phân nhánh và số C lẻ", "Alcohol đa chức có mạch carbon dài"], "ans": 0, "exp": "Acid béo là carboxylic acid đơn chức, mạch dài (thường 12–24 C), không phân nhánh và có số nguyên tử carbon chẵn."}, {"q": "Công thức hóa học của palmitic acid là", "opts": ["C₁₅H₃₁COOH", "C₁₇H₃₅COOH", "C₁₇H₃₃COOH", "C₁₇H₃₁COOH"], "ans": 0, "exp": "Palmitic acid là acid béo no có 16 nguyên tử C: C₁₅H₃₁COOH."}, {"q": "Công thức hóa học của stearic acid là", "opts": ["C₁₇H₃₅COOH", "C₁₅H₃₁COOH", "C₁₇H₃₃COOH", "C₁₇H₃₁COOH"], "ans": 0, "exp": "Stearic acid là acid béo no có 18 nguyên tử C: C₁₇H₃₅COOH."}, {"q": "Công thức hóa học của oleic acid là", "opts": ["C₁₇H₃₃COOH", "C₁₇H₃₅COOH", "C₁₅H₃₁COOH", "C₁₇H₃₁COOH"], "ans": 0, "exp": "Oleic acid là acid béo không no (1 liên kết đôi C=C dạng cis), có 18 C: C₁₇H₃₃COOH."}, {"q": "Công thức hóa học của linoleic acid là", "opts": ["C₁₇H₃₁COOH", "C₁₇H₃₃COOH", "C₁₇H₃₅COOH", "C₁₅H₃₁COOH"], "ans": 0, "exp": "Linoleic acid là acid béo không no có 2 liên kết đôi C=C, công thức C₁₇H₃₁COOH (thuộc nhóm Omega-6)."}, {"q": "Acid béo nào sau đây là acid béo KHÔNG no?", "opts": ["Oleic acid", "Palmitic acid", "Stearic acid", "Acetic acid"], "ans": 0, "exp": "Oleic acid (C₁₇H₃₃COOH) có 1 nối đôi C=C nên là acid béo không no; palmitic và stearic là acid béo no; acetic acid không phải acid béo."}, {"q": "Công thức phân tử của tristearin là", "opts": ["(C₁₇H₃₅COO)₃C₃H₅", "(C₁₅H₃₁COO)₃C₃H₅", "(C₁₇H₃₃COO)₃C₃H₅", "(C₁₇H₃₁COO)₃C₃H₅"], "ans": 0, "exp": "Tristearin tạo bởi glycerol và 3 gốc stearic acid (C₁₇H₃₅COO–) → (C₁₇H₃₅COO)₃C₃H₅."}, {"q": "Tên gọi của chất béo có công thức (C₁₅H₃₁COO)₃C₃H₅ là", "opts": ["Tripalmitin", "Tristearin", "Triolein", "Trilinolein"], "ans": 0, "exp": "Gốc C₁₅H₃₁COO– là gốc palmitate → triester của glycerol với 3 gốc này là tripalmitin."}, {"q": "Trong phân tử một chất béo (triglyceride) có bao nhiêu nguyên tử oxygen?", "opts": ["6", "2", "3", "4"], "ans": 0, "exp": "Chất béo là triester nên có 3 nhóm chức –COO–, tương ứng 3 × 2 = 6 nguyên tử oxygen."}, {"q": "Acid béo thuộc nhóm Omega-3 có liên kết đôi C=C đầu tiên nằm ở vị trí carbon số mấy tính từ nhóm –CH₃ ở cuối mạch?", "opts": ["Số 3", "Số 6", "Số 9", "Số 1"], "ans": 0, "exp": "Đánh số từ nguyên tử C của nhóm –CH₃ cuối mạch: nối đôi đầu tiên ở vị trí số 3 là Omega-3, ở vị trí số 6 là Omega-6."}, {"q": "Linoleic acid (C₁₇H₃₁COOH) thuộc nhóm acid béo nào sau đây?", "opts": ["Omega-6", "Omega-3", "Acid béo no", "Acid béo vòng"], "ans": 0, "exp": "Linoleic acid có nối đôi C=C đầu tiên ở vị trí C số 6 tính từ nhóm methyl (–CH₃) nên thuộc nhóm Omega-6."}, {"q": "Vai trò sinh học quan trọng của acid béo Omega-3 và Omega-6 đối với cơ thể người là", "opts": ["Cần thiết cho sự phát triển não bộ, thị lực và hỗ trợ bảo vệ tim mạch", "Thay thế hoàn toàn nước trong cơ thể", "Chỉ dùng để tạo xương chắc khỏe như calcium", "Cơ thể người tự tổng hợp đủ nên không cần bổ sung từ thức ăn"], "ans": 0, "exp": "Cơ thể người không tự tổng hợp được Omega-3 và Omega-6 nên cần bổ sung qua thực phẩm (cá biển, dầu thực vật); chúng rất có lợi cho tim mạch, não bộ và thị giác."}]}, "lipid-vl": {"title": "2.2. Tính chất vật lí của Chất béo", "questions": [{"q": "Ở điều kiện thường, chất béo chứa chủ yếu các gốc acid béo NO (như mỡ lợn, mỡ bò) tồn tại ở trạng thái nào?", "opts": ["Rắn", "Lỏng", "Khí", "Hòa tan trong nước"], "ans": 0, "exp": "Các gốc acid béo no có mạch thẳng xếp khít nhau, lực tương tác van der Waals mạnh hơn nên nhiệt độ nóng chảy cao hơn → trạng thái rắn."}, {"q": "Ở điều kiện thường, chất béo chứa chủ yếu các gốc acid béo KHÔNG no (như dầu đậu nành, dầu ô liu) tồn tại ở trạng thái nào?", "opts": ["Lỏng", "Rắn", "Khí", "Tinh thể cứng"], "ans": 0, "exp": "Liên kết đôi C=C dạng cis làm mạch carbon bị gấp khúc, khó xếp khít nhau nên nhiệt độ nóng chảy thấp → trạng thái lỏng."}, {"q": "Chất nào sau đây tồn tại ở trạng thái LỎNG ở điều kiện thường?", "opts": ["Triolein", "Tristearin", "Tripalmitin", "Mỡ bò"], "ans": 0, "exp": "Triolein (C₁₇H₃₃COO)₃C₃H₅ chứa gốc oleic acid không no nên ở trạng thái lỏng; tristearin và tripalmitin chứa gốc no nên ở trạng thái rắn."}, {"q": "Chất nào sau đây tồn tại ở trạng thái RẮN ở điều kiện thường?", "opts": ["Tristearin", "Triolein", "Trilinolein", "Dầu lạc"], "ans": 0, "exp": "Tristearin (C₁₇H₃₅COO)₃C₃H₅ là chất béo no nên ở trạng thái rắn ở điều kiện thường."}, {"q": "Tính tan của chất béo trong nước và trong dung môi hữu cơ không phân cực là", "opts": ["Không tan trong nước, tan tốt trong dung môi hữu cơ không phân cực", "Tan tốt trong nước, không tan trong xăng", "Không tan trong cả nước và dung môi hữu cơ", "Tan vô hạn trong nước lạnh"], "ans": 0, "exp": "Chất béo có mạch hydrocarbon dài kị nước nên không tan trong nước, nhưng tan tốt trong các dung môi không phân cực như xăng, benzene, chloroform..."}, {"q": "Khi đổ dầu ăn vào cốc nước, hiện tượng nào xảy ra?", "opts": ["Dầu ăn không tan và nổi thành lớp trên mặt nước", "Dầu ăn chìm xuống đáy cốc", "Dầu ăn tan hoàn toàn tạo dung dịch trong suốt", "Dầu ăn kết tủa thành chất rắn màu trắng"], "ans": 0, "exp": "Chất béo không tan trong nước và nhẹ hơn nước (khối lượng riêng nhỏ hơn 1 g/cm³) nên nổi lên trên."}, {"q": "Nhóm dung môi nào sau đây có thể hòa tan tốt dầu mỡ (chất béo)?", "opts": ["Xăng, benzene, chloroform", "Nước cất, dung dịch muối ăn", "Nước lạnh, nước đá", "Dung dịch đường glucose"], "ans": 0, "exp": "Chất béo tan tốt trong các dung môi hữu cơ không phân cực như xăng, benzene, ether, chloroform."}, {"q": "Vì sao dầu thực vật thường ở trạng thái lỏng còn mỡ động vật thường ở trạng thái rắn ở nhiệt độ phòng?", "opts": ["Dầu thực vật giàu gốc acid béo không no, còn mỡ động vật giàu gốc acid béo no", "Dầu thực vật có phân tử khối nhỏ hơn mỡ động vật rất nhiều", "Mỡ động vật tan trong nước còn dầu thực vật không tan", "Dầu thực vật không phải là triglyceride"], "ans": 0, "exp": "Trạng thái rắn/lỏng phụ thuộc vào tỉ lệ gốc acid béo no (rắn) và không no (lỏng) trong thành phần chất béo."}, {"q": "Phát biểu nào sau đây là ĐÚNG về tính chất vật lí của chất béo?", "opts": ["Chất béo nhẹ hơn nước và không tan trong nước", "Chất béo có nhiệt độ nóng chảy xác định như đơn chất tinh khiết", "Mọi chất béo đều ở trạng thái rắn ở nhiệt độ thường", "Dầu thực vật nặng hơn nước"], "ans": 0, "exp": "Tất cả các chất béo đều nhẹ hơn nước và không tan trong nước. (Chất béo tự nhiên là hỗn hợp nhiều triglyceride nên nóng chảy trong một khoảng nhiệt độ)."}, {"q": "Cấu hình không gian phổ biến của liên kết đôi C=C trong các acid béo không no tự nhiên (như oleic acid) là", "opts": ["Dạng cis", "Dạng trans", "Mạch thẳng không gấp khúc", "Liên kết ba C≡C"], "ans": 0, "exp": "Các acid béo không no tự nhiên chủ yếu có cấu hình cis, tạo chỗ gấp khúc làm giảm lực hút giữa các phân tử → nhiệt độ nóng chảy thấp."}, {"q": "Chất nào sau đây có bản chất KHÔNG phải là chất béo?", "opts": ["Dầu nhờn bôi trơn xe máy", "Dầu đậu nành", "Mỡ lợn", "Dầu ô liu"], "ans": 0, "exp": "Dầu nhờn bôi trơn máy là hỗn hợp các hydrocarbon tách từ dầu mỏ, không phải triglyceride (chất béo)."}, {"q": "Vì sao trong tự nhiên, dầu ăn giúp cơ thể hấp thụ tốt các vitamin A, D, E, K?", "opts": ["Vì các vitamin A, D, E, K tan tốt trong chất béo (dung môi không phân cực)", "Vì chất béo biến đổi hóa học thành vitamin A, D, E, K", "Vì chất béo hòa tan tốt trong nước nên mang vitamin đi", "Vì chất béo trung hòa acid dạ dày"], "ans": 0, "exp": "Các vitamin A, D, E, K là vitamin tan trong dầu (không tan trong nước) nên cần có chất béo trong khẩu phần ăn để hòa tan và hấp thụ."}, {"q": "Khi bị vết dầu mỡ bám trên quần áo, người ta có thể dùng xăng để tẩy sơ trước khi giặt vì", "opts": ["Chất béo tan tốt trong dung môi không phân cực như xăng", "Xăng phản ứng xà phòng hóa với chất béo", "Xăng làm chất béo đông cứng lại rồi rơi ra", "Xăng hòa tan cả sợi vải và chất béo"], "ans": 0, "exp": "Xăng là hỗn hợp hydrocarbon không phân cực nên hòa tan tốt dầu mỡ (chất béo)."}, {"q": "So sánh nhiệt độ nóng chảy giữa tristearin và triolein, nhận xét nào đúng?", "opts": ["Tristearin có nhiệt độ nóng chảy cao hơn triolein", "Triolein có nhiệt độ nóng chảy cao hơn tristearin", "Hai chất có nhiệt độ nóng chảy bằng nhau", "Cả hai đều là chất khí ở 25 °C"], "ans": 0, "exp": "Tristearin là chất béo no (rắn ở điều kiện thường, nóng chảy ~72 °C), còn triolein không no (lỏng ở điều kiện thường, nóng chảy ~5 °C)."}, {"q": "Phát biểu nào sau đây SAI khi nói về dầu thực vật và mỡ động vật?", "opts": ["Dầu thực vật có thể hòa tan tốt trong nước nóng", "Cả dầu thực vật và mỡ động vật đều nhẹ hơn nước", "Mỡ động vật thường rắn ở nhiệt độ thường do chứa nhiều gốc acid béo no", "Dầu thực vật thường lỏng ở nhiệt độ thường do chứa nhiều gốc acid béo không no"], "ans": 0, "exp": "Chất béo không tan trong nước kể cả nước nóng (chỉ nổi trên bề mặt nước)."}]}, "lipid-hh": {"title": "2.3. Tính chất hóa học của Chất béo", "questions": [{"q": "Thủy phân hoàn toàn bất kỳ chất béo nào trong dung dịch NaOH đun nóng đều thu được muối của acid béo và", "opts": ["Glycerol", "Ethanol", "Ethylene glycol", "Acetic acid"], "ans": 0, "exp": "(RCOO)₃C₃H₅ + 3NaOH → 3RCOONa + C₃H₅(OH)₃ (glycerol)."}, {"q": "Thủy phân chất béo trong môi trường acid (H₂SO₄ loãng, đun nóng) thu được sản phẩm là", "opts": ["Acid béo và glycerol", "Muối của acid béo và glycerol", "Acid béo và ethanol", "Xà phòng và nước"], "ans": 0, "exp": "(RCOO)₃C₃H₅ + 3H₂O ⇌ 3RCOOH (acid béo) + C₃H₅(OH)₃ (glycerol)."}, {"q": "Để chuyển hóa chất béo lỏng (dầu thực vật) thành chất béo rắn (bơ nhân tạo / margarine), người ta thực hiện phản ứng nào?", "opts": ["Phản ứng hydrogen hóa (cộng H₂)", "Phản ứng xà phòng hóa", "Phản ứng ester hóa", "Phản ứng thủy phân acid"], "ans": 0, "exp": "Cộng H₂ (xúc tác Ni, t°, p) vào các liên kết đôi C=C chuyển chất béo không no (lỏng) thành chất béo no (rắn)."}, {"q": "Chất xúc tác thường dùng trong phản ứng hydrogen hóa triolein thành tristearin là", "opts": ["Ni (đun nóng, áp suất)", "H₂SO₄ đặc", "NaOH", "Dung dịch Br₂"], "ans": 0, "exp": "Phản ứng cộng H₂ vào nối đôi C=C của chất béo không no dùng xúc tác Ni, nhiệt độ và áp suất thích hợp."}, {"q": "1 mol triolein (C₁₇H₃₃COO)₃C₃H₅ tác dụng tối đa với bao nhiêu mol H₂ (xúc tác Ni, t°, p) để tạo thành tristearin?", "opts": ["3 mol", "1 mol", "2 mol", "6 mol"], "ans": 0, "exp": "Mỗi gốc C₁₇H₃₃COO– có 1 nối đôi C=C, nên 1 phân tử triolein có 3 nối đôi C=C → cộng tối đa 3 mol H₂."}, {"q": "1 mol chất béo (RCOO)₃C₃H₅ phản ứng hoàn toàn với dung dịch NaOH theo tỉ lệ mol chất béo : NaOH là", "opts": ["1 : 3", "1 : 1", "1 : 2", "3 : 1"], "ans": 0, "exp": "Chất béo là triester (có 3 nhóm –COO–) nên 1 mol chất béo phản ứng với 3 mol NaOH tạo 3 mol muối và 1 mol glycerol."}, {"q": "Nguyên nhân chính gây ra hiện tượng dầu mỡ để lâu ngày trong không khí bị ôi thiu (có mùi khó chịu) là", "opts": ["Các liên kết đôi C=C trong chất béo không no bị oxi hóa chậm bởi oxygen không khí", "Chất béo bị bay hơi hết thành chất khí", "Chất béo tác dụng với khí nitrogen trong không khí", "Chất béo tự phản ứng với nước tạo ra xà phòng"], "ans": 0, "exp": "Oxygen không khí oxi hóa chậm các liên kết đôi C=C tạo ra các hợp chất peroxide, aldehyde có mùi hôi khó chịu và có hại cho sức khỏe."}, {"q": "Đun nóng tristearin (C₁₇H₃₅COO)₃C₃H₅ với dung dịch NaOH thu được muối có công thức là", "opts": ["C₁₇H₃₅COONa", "C₁₅H₃₁COONa", "C₁₇H₃₃COONa", "C₁₇H₃₁COONa"], "ans": 0, "exp": "(C₁₇H₃₅COO)₃C₃H₅ + 3NaOH → 3C₁₇H₃₅COONa (sodium stearate) + C₃H₅(OH)₃."}, {"q": "Đun nóng tripalmitin với dung dịch KOH thu được sản phẩm gồm", "opts": ["C₁₅H₃₁COOK và C₃H₅(OH)₃", "C₁₇H₃₅COOK và C₃H₅(OH)₃", "C₁₅H₃₁COOH và C₃H₅(OH)₃", "C₁₅H₃₁COOK và C₂H₅OH"], "ans": 0, "exp": "Tripalmitin (C₁₅H₃₁COO)₃C₃H₅ tác dụng KOH tạo muối potassium palmitate (C₁₅H₃₁COOK) và glycerol C₃H₅(OH)₃."}, {"q": "Chất béo nào sau đây KHÔNG tham gia phản ứng cộng H₂ (Ni, t°)?", "opts": ["Tripalmitin", "Triolein", "Trilinolein", "Dầu đậu nành"], "ans": 0, "exp": "Tripalmitin (C₁₅H₃₁COO)₃C₃H₅ chỉ chứa các gốc acid béo no (không có nối đôi C=C ở gốc hydrocarbon) nên không cộng H₂."}, {"q": "Sản phẩm thu được khi hydrogen hóa hoàn toàn triolein (C₁₇H₃₃COO)₃C₃H₅ là", "opts": ["Tristearin", "Tripalmitin", "Trilinolein", "Glycerol"], "ans": 0, "exp": "Cộng 3H₂ vào 3 nối đôi C=C của triolein chuyển gốc C₁₇H₃₃– thành C₁₇H₃₅–, thu được tristearin (C₁₇H₃₅COO)₃C₃H₅."}, {"q": "Vì sao không nên sử dụng lại dầu ăn đã chiên rán nhiều lần ở nhiệt độ cao?", "opts": ["Dầu ăn bị oxi hóa và phân hủy tạo ra các chất độc hại cho sức khỏe", "Dầu ăn chuyển hoàn toàn thành glycerol", "Dầu ăn chuyển thành nước và mất khả năng chiên rán", "Dầu ăn không còn tan trong xăng"], "ans": 0, "exp": "Ở nhiệt độ cao có không khí, dầu ăn bị oxi hóa mạnh sinh ra các aldehyde, chất béo dạng trans và hợp chất độc hại."}, {"q": "Chất nào sau đây có thể làm mất màu dung dịch nước bromine (Br₂) ở điều kiện thường?", "opts": ["Triolein", "Tristearin", "Tripalmitin", "Ethyl acetate"], "ans": 0, "exp": "Triolein có 3 liên kết đôi C=C trong phân tử nên phản ứng cộng được với Br₂ làm mất màu dung dịch bromine."}, {"q": "1 mol trilinolein (C₁₇H₃₁COO)₃C₃H₅ tác dụng tối đa với bao nhiêu mol H₂ (Ni, t°)?", "opts": ["6 mol", "3 mol", "2 mol", "4 mol"], "ans": 0, "exp": "Mỗi gốc C₁₇H₃₁COO– có 2 nối đôi C=C → 1 phân tử trilinolein có 3 × 2 = 6 nối đôi C=C → cộng tối đa 6 mol H₂."}, {"q": "Phản ứng nào sau đây chứng minh chất béo có bản chất là ester?", "opts": ["Phản ứng thủy phân trong môi trường acid hoặc kiềm", "Phản ứng cháy tạo CO₂ và H₂O", "Phản ứng không tan trong nước", "Phản ứng cộng H₂"], "ans": 0, "exp": "Phản ứng thủy phân (cắt đứt liên kết –COO–) tạo acid béo/muối và glycerol là tính chất đặc trưng của nhóm chức ester."}]}, "soap-cc": {"title": "3.1. Cấu tạo & Cơ chế giặt rửa", "questions": [{"q": "Cấu tạo chung của phân tử xà phòng và chất giặt rửa tổng hợp gồm hai phần nào?", "opts": ["Một đầu ưa nước (phân cực) và một đuôi kị nước (không phân cực)", "Hai đầu đều ưa nước", "Hai đầu đều kị nước", "Một đầu acid và một đầu base mạnh"], "ans": 0, "exp": "Phân tử xà phòng và chất giặt rửa có cấu tạo lưỡng tính: đầu ưa nước (nhóm ion phân cực) và đuôi kị nước (mạch hydrocarbon dài)."}, {"q": "Trong phân tử xà phòng RCOONa, phần nào là đuôi kị nước?", "opts": ["Gốc hydrocarbon mạch dài R–", "Nhóm –COO⁻", "Ion Na⁺", "Cả nhóm –COONa"], "ans": 0, "exp": "Gốc hydrocarbon mạch dài R– không phân cực nên kị nước (nhưng lại ưa dầu mỡ)."}, {"q": "Trong phân tử xà phòng RCOONa, phần nào là đầu ưa nước?", "opts": ["Nhóm carboxylate (–COO⁻)", "Gốc hydrocarbon R–", "Nhóm –CH₃ ở cuối mạch", "Các liên kết C–H"], "ans": 0, "exp": "Nhóm ion –COO⁻ phân cực mạnh nên tương tác tốt với nước (đầu ưa nước)."}, {"q": "Trong cơ chế giặt rửa vết dầu mỡ trên vải, phần nào của phân tử xà phòng bám (thâm nhập) vào vết dầu mỡ?", "opts": ["Đuôi kị nước (gốc hydrocarbon)", "Đầu ưa nước (nhóm ion)", "Ion Na⁺", "Phân tử nước"], "ans": 0, "exp": "Đuôi kị nước không phân cực tương hợp với dầu mỡ nên thâm nhập vào vết dầu mỡ, còn đầu ưa nước hướng ra phía ngoài nước."}, {"q": "Khi vết dầu mỡ bị xà phòng bao bọc tách khỏi sợi vải và phân tán thành các hạt nhỏ lơ lửng trong nước, các hạt này được gọi là", "opts": ["Micelle", "Polymer", "Triglyceride", "Isomer"], "ans": 0, "exp": "Các phân tử chất giặt rửa bao quanh giọt dầu mỡ (đuôi vào trong, đầu ưa nước ra ngoài) tạo thành hạt micelle dễ bị nước cuốn trôi."}, {"q": "Vai trò đầu tiên của chất giặt rửa khi hòa tan vào nước là", "opts": ["Làm giảm sức căng bề mặt của nước, giúp nước thấm ướt sợi vải dễ hơn", "Làm tăng sức căng bề mặt của nước", "Đốt cháy vết dầu mỡ thành khí CO₂", "Làm kết tủa hoàn toàn các ion trong nước"], "ans": 0, "exp": "Chất hoạt động bề mặt làm giảm sức căng bề mặt của nước, giúp nước thấm sâu vào sợi vải để tiếp xúc với vết bẩn."}, {"q": "Phần đầu ưa nước trong chất giặt rửa tổng hợp thường là nhóm nào sau đây?", "opts": ["–OSO₃⁻ hoặc –SO₃⁻", "–CH₃", "–C₁₇H₃₅", "–CH=CH₂"], "ans": 0, "exp": "Chất giặt rửa tổng hợp có đầu ưa nước là nhóm sulfate (–OSO₃⁻) hoặc sulfonate (–SO₃⁻)."}, {"q": "Tại sao nước sạch thông thường khó rửa sạch vết dầu mỡ bám trên bát đĩa?", "opts": ["Vì nước phân cực còn dầu mỡ không phân cực nên chúng không hòa tan vào nhau", "Vì dầu mỡ phản ứng mạnh với nước tạo chất rắn", "Vì nước nặng hơn dầu mỡ quá nhiều", "Vì dầu mỡ có liên kết hydrogen quá bền với bát đĩa"], "ans": 0, "exp": "Nước là dung môi phân cực, dầu mỡ là chất không phân cực nên không hòa tan nhau; cần chất giặt rửa làm cầu nối (đầu ưa nước – đuôi ưa dầu)."}, {"q": "Trong hạt micelle chứa giọt dầu mỡ ở môi trường nước, hướng sắp xếp của các phân tử chất giặt rửa là", "opts": ["Đuôi kị nước hướng vào trong giọt dầu mỡ, đầu ưa nước hướng ra ngoài nước", "Đầu ưa nước hướng vào trong giọt dầu mỡ, đuôi kị nước hướng ra ngoài nước", "Sắp xếp hoàn toàn ngẫu nhiên không theo hướng nào", "Chỉ có ion Na⁺ bám vào giọt dầu mỡ"], "ans": 0, "exp": "Đuôi kị nước cắm vào giọt dầu mỡ ở tâm, đầu ưa nước quay ra ngoài tiếp xúc với nước giúp giọt dầu phân tán bền vững và bị rửa trôi."}, {"q": "Từ 'kị nước' ở phần đuôi hydrocarbon của phân tử xà phòng đồng nghĩa với tính chất nào?", "opts": ["Ưa dầu mỡ (tan tốt trong chất không phân cực)", "Tan tốt trong nước", "Phân cực mạnh", "Tạo liên kết hydrogen với nước"], "ans": 0, "exp": "Đuôi hydrocarbon không phân cực nên không ưa nước (kị nước) nhưng lại tương thích tốt với dầu mỡ (ưa dầu)."}, {"q": "Cơ chế làm sạch vết bẩn dầu mỡ của xà phòng và chất giặt rửa tổng hợp là", "opts": ["Giống nhau (đều nhờ cấu tạo đầu ưa nước và đuôi kị nước tạo micelle)", "Hoàn toàn khác nhau", "Xà phòng hòa tan vải còn chất giặt rửa tổng hợp không hòa tan vải", "Chỉ chất giặt rửa tổng hợp mới tạo được micelle"], "ans": 0, "exp": "Cả xà phòng và chất giặt rửa tổng hợp đều hoạt động theo cùng một cơ chế nhũ hóa tạo micelle cuốn trôi dầu mỡ."}, {"q": "Loại vết bẩn nào sau đây được làm sạch hiệu quả nhất nhờ cơ chế đầu ưa nước – đuôi kị nước của xà phòng?", "opts": ["Vết dầu ăn, mỡ động vật", "Vết gỉ sắt lâu ngày", "Vết mực bút xóa khô cứng", "Cặn đá vôi CaCO₃"], "ans": 0, "exp": "Cơ chế tạo micelle đặc biệt hiệu quả với các vết bẩn hữu cơ không phân cực như dầu ăn, mỡ, mồ hôi dầu."}, {"q": "Nếu gốc hydrocarbon trong phân tử xà phòng quá ngắn (ví dụ CH₃COONa chỉ có 1 C ở gốc R) thì chất này có tác dụng giặt rửa không?", "opts": ["Không, vì đuôi kị nước quá ngắn không đủ khả năng bám vào dầu mỡ", "Có, giặt rửa mạnh hơn xà phòng thông thường", "Có, vì tan rất tốt trong nước", "Chỉ giặt rửa được trong nước cứng"], "ans": 0, "exp": "Để có tính giặt rửa, đuôi hydrocarbon phải đủ dài (thường từ 12–18 C) mới có tính kị nước/ưa dầu rõ rệt để bám vào vết bẩn."}, {"q": "Nhận định nào sau đây ĐÚNG về cơ chế giặt rửa?", "opts": ["Quá trình giặt rửa chủ yếu là quá trình vật lí (nhũ hóa, phân tán vết bẩn) hơn là phản ứng hóa học phá hủy dầu mỡ", "Xà phòng đốt cháy hoàn toàn dầu mỡ trên sợi vải", "Xà phòng biến dầu mỡ thành đường tan trong nước", "Đầu ưa nước bám chặt vào vết dầu mỡ để kéo đi"], "ans": 0, "exp": "Xà phòng không phá hủy hóa học vết dầu mỡ mà tách và phân tán chúng thành các hạt micelle lơ lửng để nước cuốn trôi."}, {"q": "Khi vò hoặc khuấy trộn quần áo trong nước xà phòng, tác dụng của thao tác cơ học này là", "opts": ["Giúp tách các giọt dầu mỡ đã được xà phòng bao bọc ra khỏi sợi vải nhanh hơn", "Làm phân hủy phân tử xà phòng", "Tạo thêm ion Ca²⁺ và Mg²⁺ trong nước", "Làm tăng sức căng bề mặt của nước"], "ans": 0, "exp": "Tác động cơ học (vò, khuấy) kết hợp với tác dụng giảm sức căng bề mặt giúp đẩy các hạt micelle chứa vết bẩn rời khỏi sợi vải."}]}, "soap-xp": {"title": "3.2. Xà phòng", "questions": [{"q": "Thành phần chính của xà phòng là", "opts": ["Muối sodium hoặc potassium của các acid béo", "Muối calcium hoặc magnesium của các acid béo", "Muối sodium alkylsulfate", "Glycerol và acid béo tự do"], "ans": 0, "exp": "Xà phòng có thành phần chính là muối sodium (RCOONa) hoặc potassium (RCOOK) của các acid béo."}, {"q": "Chất nào sau đây là thành phần chính của xà phòng?", "opts": ["C₁₇H₃₅COONa", "CH₃COONa", "C₁₂H₂₅OSO₃Na", "(C₁₇H₃₅COO)₃C₃H₅"], "ans": 0, "exp": "C₁₇H₃₅COONa (sodium stearate) là muối của acid béo → thành phần chính của xà phòng. C₁₂H₂₅OSO₃Na là chất giặt rửa tổng hợp."}, {"q": "Trong công nghiệp và thực tế, xà phòng được sản xuất bằng cách đun chất béo với dung dịch nào?", "opts": ["NaOH hoặc KOH", "H₂SO₄ loãng", "NaCl bão hòa", "Ca(OH)₂"], "ans": 0, "exp": "Đun chất béo với NaOH tạo xà phòng cứng (RCOONa), với KOH tạo xà phòng mềm/lỏng (RCOOK)."}, {"q": "Vì sao không nên dùng xà phòng để giặt rửa trong nước cứng (nước chứa nhiều ion Ca²⁺, Mg²⁺)?", "opts": ["Xà phòng tạo muối kết tủa không tan với Ca²⁺, Mg²⁺ làm mất tác dụng giặt rửa", "Xà phòng bốc cháy khi gặp nước cứng", "Xà phòng làm nước cứng đổi màu đen", "Xà phòng không tan trong nước mềm nhưng tan quá mạnh trong nước cứng"], "ans": 0, "exp": "2RCOO⁻ + Ca²⁺ → (RCOO)₂Ca↓ (và tương tự với Mg²⁺). Kết tủa bám lên sợi vải vừa làm hao xà phòng vừa giảm hiệu quả giặt rửa."}, {"q": "Kết tủa tạo thành khi dùng xà phòng sodium stearate (C₁₇H₃₅COONa) trong nước cứng chứa ion Ca²⁺ là", "opts": ["(C₁₇H₃₅COO)₂Ca", "CaCO₃", "Ca(OH)₂", "C₁₇H₃₅COOH"], "ans": 0, "exp": "Ion C₁₇H₃₅COO⁻ kết hợp với Ca²⁺ tạo muối calcium stearate (C₁₇H₃₅COO)₂Ca không tan."}, {"q": "Trong thí nghiệm điều chế xà phòng từ dầu ăn và dung dịch NaOH, sau khi đun sôi hỗn hợp người ta cho thêm dung dịch NaCl bão hòa để làm gì?", "opts": ["Làm giảm độ tan của xà phòng giúp xà phòng tách thành lớp rắn nổi lên trên", "Tăng độ tan của xà phòng vào nước", "Làm chất tạo mùi thơm cho xà phòng", "Chuyển muối sodium thành muối potassium"], "ans": 0, "exp": "Thêm NaCl bão hòa làm giảm độ tan của muối acid béo (hiệu ứng ion chung) và tăng khối lượng riêng lớp nước, khiến xà phòng nổi lên trên dễ lọc tách."}, {"q": "Ngoài nguyên liệu là chất béo, xà phòng còn có thể được sản xuất từ nguồn nguyên liệu nào?", "opts": ["Dầu mỏ (oxi hóa alkane mạch dài thành acid béo rồi trung hòa bằng kiềm)", "Đá vôi và than đá", "Tinh bột và đường mía", "Khí nitrogen trong không khí"], "ans": 0, "exp": "Trong công nghiệp, người ta còn oxi hóa alkane mạch dài từ dầu mỏ tạo acid béo, sau đó cho tác dụng với NaOH/KOH để tạo xà phòng."}, {"q": "Ưu điểm nổi bật của xà phòng về mặt môi trường so với nhiều chất giặt rửa tổng hợp là", "opts": ["Dễ bị vi sinh vật phân hủy sinh học nên thân thiện với môi trường", "Không bao giờ bị phân hủy trong tự nhiên", "Dùng rất tốt trong nước biển và nước cứng", "Diệt sạch mọi vi sinh vật dưới nước"], "ans": 0, "exp": "Xà phòng có mạch carbon không phân nhánh nguồn gốc tự nhiên nên dễ bị vi sinh vật phân hủy sinh học, ít gây ô nhiễm nguồn nước."}, {"q": "Sản phẩm phụ có giá trị thu được cùng với xà phòng khi thủy phân chất béo bằng dung dịch NaOH là", "opts": ["Glycerol", "Ethanol", "Methanol", "Acetic acid"], "ans": 0, "exp": "Phản ứng xà phòng hóa chất béo luôn tạo ra glycerol C₃H₅(OH)₃ — được dùng nhiều trong mỹ phẩm giữ ẩm và dược phẩm."}, {"q": "Để sản xuất xà phòng bánh (xà phòng cứng), người ta thường dùng dung dịch kiềm nào?", "opts": ["NaOH", "KOH", "NH₃", "Ba(OH)₂"], "ans": 0, "exp": "Muối sodium của acid béo (RCOONa) tạo xà phòng cứng (dạng bánh), còn muối potassium (RCOOK) thường tạo xà phòng mềm/lỏng."}, {"q": "Trong quá trình nấu xà phòng từ mỡ động vật và dung dịch NaOH, vì sao cần khuấy đều và thêm từng ít nước nếu hỗn hợp cạn?", "opts": ["Để phản ứng thủy phân xảy ra đều, không bị cháy khét ở đáy cốc", "Để làm lạnh hỗn hợp nhanh hơn", "Để xà phòng kết tủa ngay lập tức", "Để ngăn glycerol hình thành"], "ans": 0, "exp": "Khuấy đều giúp chất béo và dung dịch NaOH tiếp xúc tốt; bổ sung nước giữ thể tích không đổi giúp phản ứng diễn ra hoàn toàn và tránh cháy khét."}, {"q": "Trong một bánh xà phòng thương mại, ngoài muối của acid béo còn có thể có các chất phụ gia nào?", "opts": ["Chất tạo hương, chất tạo màu, chất giữ ẩm (như glycerol), chất diệt khuẩn", "Acid mạnh H₂SO₄ đặc", "Muối CaCl₂ và MgCl₂", "Xăng và dầu hỏa"], "ans": 0, "exp": "Xà phòng thương mại gồm thành phần chính (RCOONa/RCOOK) kết hợp phụ gia tạo mùi thơm, màu sắc, giữ ẩm cho da..."}, {"q": "Cho 2 muối: (1) C₁₅H₃₁COONa và (2) C₁₇H₃₅COOK. Chất nào dùng làm xà phòng?", "opts": ["Cả (1) và (2)", "Chỉ (1)", "Chỉ (2)", "Không chất nào"], "ans": 0, "exp": "Cả muối sodium và muối potassium của các acid béo (palmitic, stearic...) đều là thành phần chính của xà phòng."}, {"q": "Nước cứng là loại nước chứa nhiều ion nào sau đây?", "opts": ["Ca²⁺ và Mg²⁺", "Na⁺ và K⁺", "Cl⁻ và NO₃⁻", "H⁺ và OH⁻"], "ans": 0, "exp": "Nước cứng là nước chứa nhiều cation Ca²⁺ và Mg²⁺ — đây chính là các ion tạo kết tủa với xà phòng."}, {"q": "Phát biểu nào sau đây SAI khi nói về xà phòng?", "opts": ["Xà phòng giặt rửa rất tốt trong nước cứng vì không tạo kết tủa", "Xà phòng dễ bị phân hủy sinh học, thân thiện với môi trường", "Xà phòng có thể điều chế từ dầu thực vật hoặc mỡ động vật", "Thành phần chính của xà phòng là muối Na hoặc K của acid béo"], "ans": 0, "exp": "Xà phòng bị mất tác dụng trong nước cứng do tạo kết tủa (RCOO)₂Ca và (RCOO)₂Mg."}]}, "soap-th": {"title": "3.3. Chất giặt rửa tổng hợp & tự nhiên", "questions": [{"q": "Thành phần chính của chất giặt rửa tổng hợp thường là", "opts": ["Muối sodium alkylsulfate (R–OSO₃Na) hoặc sodium alkylbenzenesulfonate (R–C₆H₄–SO₃Na)", "Muối sodium hoặc potassium của acid béo (RCOONa, RCOOK)", "Triester của glycerol với acid béo", "Hỗn hợp NaCl và NaOH"], "ans": 0, "exp": "Chất giặt rửa tổng hợp có thành phần chính là R–OSO₃Na hoặc R–C₆H₄–SO₃Na."}, {"q": "Chất nào sau đây là chất giặt rửa tổng hợp?", "opts": ["CH₃[CH₂]₁₁OSO₃Na", "C₁₇H₃₅COONa", "C₁₅H₃₁COOK", "CH₃COOC₂H₅"], "ans": 0, "exp": "CH₃[CH₂]₁₁OSO₃Na (sodium lauryl sulfate) có nhóm –OSO₃Na nên là chất giặt rửa tổng hợp."}, {"q": "Nguồn nguyên liệu chính để sản xuất chất giặt rửa tổng hợp trong công nghiệp là", "opts": ["Các sản phẩm từ dầu mỏ", "Mỡ động vật", "Quả bồ kết, bồ hòn", "Tinh bột và cellulose"], "ans": 0, "exp": "Chất giặt rửa tổng hợp được sản xuất bằng con đường tổng hợp hóa học từ các sản phẩm của dầu mỏ."}, {"q": "Ưu điểm lớn nhất của chất giặt rửa tổng hợp so với xà phòng là gì?", "opts": ["Giặt rửa tốt ngay cả trong nước cứng", "Dễ bị phân hủy sinh học hơn xà phòng", "Hoàn toàn không gây ô nhiễm nguồn nước", "Được chiết xuất trực tiếp từ cây cỏ tự nhiên"], "ans": 0, "exp": "Muối của Ca²⁺, Mg²⁺ với gốc alkylsulfate và alkylbenzenesulfonate vẫn tan được trong nước, không tạo kết tủa nên giặt rửa tốt trong nước cứng."}, {"q": "Vì sao chất giặt rửa tổng hợp vẫn giữ được tác dụng giặt rửa trong nước cứng?", "opts": ["Vì muối của Ca²⁺ và Mg²⁺ với các gốc –OSO₃⁻, –SO₃⁻ tan được trong nước", "Vì chất giặt rửa tổng hợp làm bay hơi ion Ca²⁺, Mg²⁺", "Vì chất giặt rửa tổng hợp không có đầu ưa nước", "Vì chất giặt rửa tổng hợp chỉ dùng cho nước nóng"], "ans": 0, "exp": "Khác với xà phòng, chất giặt rửa tổng hợp không tạo muối kết tủa với Ca²⁺ và Mg²⁺."}, {"q": "Nhược điểm đáng chú ý của chất giặt rửa tổng hợp (đặc biệt loại có mạch hydrocarbon phân nhánh) là", "opts": ["Khó bị phân hủy sinh học, dễ gây ô nhiễm môi trường nước", "Không giặt rửa được trong nước cứng", "Giá thành sản xuất quá cao so với chất giặt rửa tự nhiên", "Không tạo được bọt khi hòa tan vào nước"], "ans": 0, "exp": "Chất giặt rửa tổng hợp (nhất là loại có gốc hydrocarbon phân nhánh) rất khó bị vi sinh vật phân hủy, gây ô nhiễm sông hồ."}, {"q": "Loại quả tự nhiên nào sau đây từ lâu đã được dân gian dùng để gội đầu, giặt rửa nhờ chứa hoạt chất saponin?", "opts": ["Quả bồ kết, quả bồ hòn", "Quả chanh, quả cam", "Quả chuối, quả dứa", "Quả dừa, quả lạc"], "ans": 0, "exp": "Quả bồ kết và quả bồ hòn chứa saponin — một chất giặt rửa tự nhiên có khả năng tạo bọt và làm sạch nhẹ nhàng."}, {"q": "Hoạt chất có tác dụng giặt rửa tự nhiên trong quả bồ kết và quả bồ hòn là", "opts": ["Saponin", "Glycerol", "Glucose", "Triglyceride"], "ans": 0, "exp": "Saponin là hợp chất tự nhiên có tính hoạt động bề mặt, tạo bọt tốt khi tiếp xúc với nước."}, {"q": "Ưu điểm nổi bật của chất giặt rửa tự nhiên (từ bồ kết, bồ hòn) là", "opts": ["Rất an toàn cho da, dễ phân hủy sinh học và thân thiện môi trường", "Sản xuất công nghiệp cực nhanh với giá rẻ nhất", "Tẩy trắng mạnh hơn thuốc tẩy chlorine", "Chứa nhiều sản phẩm từ dầu mỏ"], "ans": 0, "exp": "Chất giặt rửa tự nhiên dịu nhẹ, an toàn cho da và phân hủy hoàn toàn trong tự nhiên; nhược điểm là khó sản xuất quy mô lớn và giá thành cao."}, {"q": "Nhược điểm của chất giặt rửa tự nhiên so với chất giặt rửa tổng hợp là", "opts": ["Khó sản xuất ở quy mô công nghiệp lớn, giá thành thường cao hơn", "Gây ô nhiễm môi trường nước nghiêm trọng", "Gây kích ứng da mạnh", "Không thể tạo bọt trong nước"], "ans": 0, "exp": "Nguồn nguyên liệu thực vật phụ thuộc mùa vụ, quy trình chiết xuất tốn công nên khó sản xuất đại trà giá rẻ như chất giặt rửa tổng hợp."}, {"q": "Công thức nào sau đây biểu diễn muối sodium alkylbenzenesulfonate?", "opts": ["R–C₆H₄–SO₃Na", "R–OSO₃Na", "R–COONa", "R–COOK"], "ans": 0, "exp": "R–C₆H₄–SO₃Na có vòng benzene (–C₆H₄–) và nhóm sulfonate (–SO₃Na) → sodium alkylbenzenesulfonate."}, {"q": "Để giặt sạch quần áo bằng nguồn nước giếng khoan có độ cứng cao (nhiều Ca²⁺, Mg²⁺), nên chọn loại nào sau đây để đạt hiệu quả tốt nhất?", "opts": ["Bột giặt chứa chất giặt rửa tổng hợp", "Xà phòng bánh thông thường", "Nước cất không có chất giặt rửa", "Dung dịch muối ăn NaCl"], "ans": 0, "exp": "Chất giặt rửa tổng hợp không bị kết tủa bởi ion Ca²⁺, Mg²⁺ nên phát huy hiệu quả tối đa trong nước cứng."}, {"q": "Trong 3 loại: (1) Xà phòng, (2) Chất giặt rửa tổng hợp, (3) Chất giặt rửa tự nhiên; loại nào có khả năng phân hủy sinh học KÉM nhất?", "opts": ["Chất giặt rửa tổng hợp", "Xà phòng", "Chất giặt rửa tự nhiên", "Cả ba phân hủy nhanh như nhau"], "ans": 0, "exp": "Chất giặt rửa tổng hợp có nguồn gốc dầu mỏ (nhất là mạch nhánh) khó bị vi sinh vật phân hủy sinh học hơn nhiều so với xà phòng và chất giặt rửa tự nhiên."}, {"q": "Sản phẩm gia dụng nào sau đây thường chứa thành phần chính là chất giặt rửa tổng hợp?", "opts": ["Bột giặt máy, nước rửa chén công nghiệp", "Bơ thực vật margarine", "Dầu ăn thực vật", "Giấm ăn"], "ans": 0, "exp": "Hầu hết bột giặt, nước giặt, nước rửa chén công nghiệp hiện nay sử dụng chất giặt rửa tổng hợp để làm sạch mạnh và dùng được với mọi nguồn nước."}, {"q": "Phát biểu nào sau đây là ĐÚNG khi so sánh xà phòng và chất giặt rửa tổng hợp?", "opts": ["Cả hai đều có cấu tạo gồm đầu ưa nước và đuôi kị nước", "Cả hai đều bị mất tác dụng trong nước cứng", "Cả hai đều là muối sodium của acid béo", "Cả hai đều được sản xuất duy nhất từ mỡ động vật"], "ans": 0, "exp": "Điểm chung cốt lõi của xà phòng và chất giặt rửa tổng hợp là cấu tạo phân tử gồm đầu ưa nước và đuôi kị nước."}]}};
+
+    const BRANCH_TOPICS = {
+      ester: ['ester-ct', 'ester-vl', 'ester-hh', 'ester-dc'],
+      lipid: ['lipid-kn', 'lipid-vl', 'lipid-hh'],
+      soap:  ['soap-cc', 'soap-xp', 'soap-th']
+    };
+
+    const rootPill = document.getElementById('rootPill');
+    const rootDrawer = document.getElementById('rootDrawer');
+    const nodeItems = document.querySelectorAll('.node-item');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const branchCols = document.querySelectorAll('.branch-col');
+    const columnsGrid = document.getElementById('columnsGrid');
+    const treeConnectors = document.getElementById('treeConnectors');
+
+    /* ================= MIND MAP INTERACTION ================= */
+    function toggleRoot() {
+      const isOpen = rootDrawer.classList.toggle('open');
+      rootPill.setAttribute('aria-expanded', isOpen);
+    }
+    rootPill.addEventListener('click', toggleRoot);
+    rootPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRoot(); }
+    });
+
+    nodeItems.forEach(item => {
+      const btn = item.querySelector('.sub-pill');
+      btn.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        nodeItems.forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            other.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (!wasOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          item.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-branch-toggle]').forEach(header => {
+      header.addEventListener('click', () => {
+        const col = header.closest('.branch-col');
+        const items = col.querySelectorAll('.node-item');
+        const anyOpen = Array.from(items).some(i => i.classList.contains('open'));
+        items.forEach(i => {
+          i.classList.toggle('open', !anyOpen);
+          i.querySelector('.sub-pill').setAttribute('aria-expanded', String(!anyOpen));
+        });
+      });
+    });
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+        if (filter === 'all') {
+          branchCols.forEach(col => col.classList.remove('hidden'));
+          columnsGrid.classList.remove('single-col');
+          treeConnectors.style.display = '';
+        } else {
+          branchCols.forEach(col => {
+            col.classList.toggle('hidden', col.dataset.branch !== filter);
+          });
+          columnsGrid.classList.add('single-col');
+          treeConnectors.style.display = 'none';
+        }
+      });
+    });
+
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      nodeItems.forEach(item => {
+        if (!item.closest('.branch-col').classList.contains('hidden')) {
+          item.classList.add('open');
+          item.querySelector('.sub-pill').setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      rootDrawer.classList.remove('open');
+      rootPill.setAttribute('aria-expanded', 'false');
+      nodeItems.forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    /* ================= ZOOM MODAL (FULLSCREEN) ================= */
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomTitle = document.getElementById('zoomTitle');
+    const zoomBody = document.getElementById('zoomBody');
+
+    function closeZoomModal() {
+      zoomModal.classList.remove('show');
+      if (document.fullscreenElement === zoomModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.querySelectorAll('.zoom-btn').forEach(zbtn => {
+      zbtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = zbtn.closest('.node-item');
+        const label = item.querySelector('.pill-label').textContent.trim();
+        const branchName = item.closest('.branch-col').querySelector('.b-title').textContent.trim();
+        const innerClone = item.querySelector('.drawer-inner').cloneNode(true);
+        const topBar = innerClone.querySelector('.drawer-top');
+        const pBar = innerClone.querySelector('.practice-bar');
+        if (topBar) topBar.remove();
+        if (pBar) pBar.remove();
+
+        zoomTitle.textContent = `${branchName} — ${label}`;
+        zoomBody.innerHTML = '';
+        innerClone.className = 'zoom-content-wrap';
+        innerClone.removeAttribute('style');
+        zoomBody.appendChild(innerClone);
+        zoomModal.classList.add('show');
+
+        // Request native browser fullscreen for true edge-to-edge presentation
+        if (zoomModal.requestFullscreen) {
+          zoomModal.requestFullscreen().catch(() => {});
+        } else if (zoomModal.webkitRequestFullscreen) {
+          zoomModal.webkitRequestFullscreen();
+        }
+      });
+    });
+
+    document.getElementById('zoomClose').addEventListener('click', closeZoomModal);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        if (zoomModal.classList.contains('show')) {
+          zoomModal.classList.remove('show');
+        }
+        if (quizModal.classList.contains('show')) {
+          quizModal.classList.remove('show');
+        }
+      }
+    });
+
+    /* ================= QUIZ ENGINE ================= */
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSubtitle = document.getElementById('quizSubtitle');
+    const quizBody = document.getElementById('quizBody');
+    const quizFooter = document.getElementById('quizFooter');
+
+    let activeQuiz = {
+      topic: null,
+      count: 10,
+      questions: [],
+      userAnswers: {},
+      submitted: false
+    };
+
+    function shuffleArray(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getBranchOfTopic(topicId) {
+      for (const [b, list] of Object.entries(BRANCH_TOPICS)) {
+        if (list.includes(topicId)) return b;
+      }
+      return null;
+    }
+
+    function buildQuestionSet(topicId, desiredCount) {
+      let pool = [];
+      let label = '';
+
+      if (topicId === 'all') {
+        label = 'Tổng hợp Chương 1: Ester – Lipid';
+        Object.values(QUIZ_BANKS).forEach(bank => {
+          bank.questions.forEach(q => pool.push({ ...q, source: bank.title }));
+        });
+        pool = shuffleArray(pool).slice(0, desiredCount);
+      } else {
+        const primaryBank = QUIZ_BANKS[topicId];
+        label = primaryBank.title;
+        const primaryQs = shuffleArray(primaryBank.questions.map(q => ({ ...q, source: primaryBank.title })));
+
+        if (desiredCount <= primaryQs.length) {
+          pool = primaryQs.slice(0, desiredCount);
+        } else {
+          // Take all questions from this sub-topic first, then supplement from sibling topics in the same branch
+          pool = primaryQs.slice();
+          const branch = getBranchOfTopic(topicId);
+          const siblings = (BRANCH_TOPICS[branch] || []).filter(id => id !== topicId);
+          let extra = [];
+          siblings.forEach(sibId => {
+            QUIZ_BANKS[sibId].questions.forEach(q => extra.push({ ...q, source: QUIZ_BANKS[sibId].title }));
+          });
+          extra = shuffleArray(extra);
+          const needed = desiredCount - pool.length;
+          pool = pool.concat(extra.slice(0, needed));
+        }
+      }
+
+      // Shuffle options for each question while tracking correct option index
+      const prepared = pool.map((q, idx) => {
+        const indexedOpts = q.opts.map((text, i) => ({ text, isCorrect: i === q.ans }));
+        const shuffledOpts = shuffleArray(indexedOpts);
+        const newAns = shuffledOpts.findIndex(o => o.isCorrect);
+        return {
+          idx,
+          q: q.q,
+          opts: shuffledOpts.map(o => o.text),
+          ans: newAns,
+          exp: q.exp,
+          source: q.source
+        };
+      });
+
+      return { label, questions: prepared };
+    }
+
+    function openQuiz(topicId, count) {
+      const { label, questions } = buildQuestionSet(topicId, count);
+      activeQuiz = {
+        topic: topicId,
+        count: questions.length,
+        questions,
+        userAnswers: {},
+        submitted: false
+      };
+
+      quizTitle.textContent = `Luyện tập: ${label}`;
+      quizSubtitle.textContent = `${questions.length} câu trắc nghiệm • Mức độ Biết & Hiểu (có giải thích chi tiết sau khi nộp)`;
+      renderQuizTaking();
+      quizModal.classList.add('show');
+      quizBody.scrollTop = 0;
+
+      // Open quiz in native fullscreen if not already fullscreen
+      if (!document.fullscreenElement) {
+        if (quizModal.requestFullscreen) {
+          quizModal.requestFullscreen().catch(() => {});
+        } else if (quizModal.webkitRequestFullscreen) {
+          quizModal.webkitRequestFullscreen();
+        }
+      }
+    }
+
+    const LETTERS = ['A', 'B', 'C', 'D'];
+
+    function renderQuizTaking() {
+      const countOptions = [10, 15, 20, 30];
+      const setupBar = `
+        <div class="quiz-setup-bar">
+          <span>Chọn nhanh số câu muốn luyện tập:</span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${countOptions.map(n => `
+              <button class="rf-btn ${activeQuiz.count === n ? 'active' : ''}" data-change-count="${n}">${n} câu</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => `
+        <div class="quiz-card" data-qidx="${i}">
+          <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+          <div class="opt-list">
+            ${item.opts.map((optText, oIdx) => `
+              <label class="opt-label" data-q="${i}" data-o="${oIdx}">
+                <input type="radio" name="q_${i}" value="${oIdx}" />
+                <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${setupBar}${cardsHtml}</div>`;
+
+      // Change question count buttons
+      quizBody.querySelectorAll('[data-change-count]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openQuiz(activeQuiz.topic, parseInt(btn.dataset.changeCount, 10));
+        });
+      });
+
+      // Option selection listeners
+      quizBody.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const qIdx = parseInt(radio.name.split('_')[1], 10);
+          const oIdx = parseInt(radio.value, 10);
+          activeQuiz.userAnswers[qIdx] = oIdx;
+
+          const card = quizBody.querySelector(`.quiz-card[data-qidx="${qIdx}"]`);
+          card.querySelectorAll('.opt-label').forEach(lbl => {
+            lbl.classList.toggle('is-selected', parseInt(lbl.dataset.o, 10) === oIdx);
+          });
+          updateProgressFooter();
+        });
+      });
+
+      updateProgressFooter();
+    }
+
+    function updateProgressFooter() {
+      const answeredCount = Object.keys(activeQuiz.userAnswers).length;
+      const total = activeQuiz.questions.length;
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đã chọn: <strong>${answeredCount} / ${total}</strong> câu</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCancelQuiz">Đóng</button>
+          <button class="btn-primary" id="btnSubmitQuiz">Nộp bài &amp; Xem giải thích</button>
+        </div>
+      `;
+      document.getElementById('btnCancelQuiz').addEventListener('click', closeQuizModal);
+      document.getElementById('btnSubmitQuiz').addEventListener('click', submitQuiz);
+    }
+
+    function submitQuiz() {
+      const total = activeQuiz.questions.length;
+      const answered = Object.keys(activeQuiz.userAnswers).length;
+      if (answered < total) {
+        const proceed = confirm(`Bạn mới làm ${answered}/${total} câu. Các câu chưa chọn sẽ bị tính là sai. Bạn vẫn muốn nộp bài chứ?`);
+        if (!proceed) return;
+      }
+
+      activeQuiz.submitted = true;
+      let correctCount = 0;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => {
+        const userAns = activeQuiz.userAnswers.hasOwnProperty(i) ? activeQuiz.userAnswers[i] : -1;
+        const isCorrect = userAns === item.ans;
+        if (isCorrect) correctCount++;
+
+        const optsHtml = item.opts.map((optText, oIdx) => {
+          let cls = 'opt-label';
+          let badge = '';
+          if (oIdx === item.ans) {
+            cls += ' is-correct';
+            badge = '<span class="opt-badge">✓ Đáp án đúng</span>';
+          } else if (oIdx === userAns && !isCorrect) {
+            cls += ' is-wrong';
+            badge = '<span class="opt-badge">✕ Bạn chọn</span>';
+          }
+          return `
+            <div class="${cls}" style="cursor:default;">
+              <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              ${badge}
+            </div>
+          `;
+        }).join('');
+
+        let expHtml = '';
+        if (isCorrect) {
+          expHtml = `
+            <div class="exp-box exp-ok">
+              <strong>✓ Chính xác!</strong> ${item.exp}
+            </div>
+          `;
+        } else {
+          const chosenReason = userAns === -1
+            ? 'Bạn chưa chọn đáp án cho câu này.'
+            : `Bạn đã chọn <strong>${LETTERS[userAns]}</strong> (chưa đúng). Đáp án đúng là <strong>${LETTERS[item.ans]}</strong>.`;
+          expHtml = `
+            <div class="exp-box exp-err">
+              <strong>✕ Vì sao sai?</strong> ${chosenReason}<br/>
+              <strong>Giải thích:</strong> ${item.exp}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="quiz-card ${isCorrect ? 'correct-card' : 'wrong-card'}" data-is-correct="${isCorrect}">
+            <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+            <div class="opt-list">${optsHtml}</div>
+            ${expHtml}
+          </div>
+        `;
+      }).join('');
+
+      const pct = Math.round((correctCount / total) * 100);
+      const wrongCount = total - correctCount;
+      let msg = 'Cần ôn lại kỹ lý thuyết ở sơ đồ rồi làm lại nhé!';
+      if (pct >= 90) msg = 'Xuất sắc! Bạn nắm rất chắc kiến thức phần này.';
+      else if (pct >= 70) msg = 'Khá tốt! Hãy xem kỹ giải thích ở các câu làm sai để đạt điểm tối đa.';
+      else if (pct >= 50) msg = 'Đạt mức trung bình. Xem lại các câu sai bên dưới để củng cố kiến thức.';
+
+      const bannerHtml = `
+        <div class="result-banner">
+          <div>
+            <div class="score-big">Kết quả: ${correctCount} / ${total} câu đúng (${pct}%)</div>
+            <div class="score-msg">${msg}</div>
+          </div>
+          <div class="review-filters">
+            <button class="rf-btn active" data-review-filter="all">Tất cả (${total})</button>
+            <button class="rf-btn" data-review-filter="wrong">Chỉ xem câu sai (${wrongCount})</button>
+          </div>
+        </div>
+      `;
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${bannerHtml}${cardsHtml}</div>`;
+      quizBody.scrollTop = 0;
+
+      // Filter buttons (All vs Wrong only)
+      quizBody.querySelectorAll('[data-review-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.reviewFilter;
+          quizBody.querySelectorAll('[data-review-filter]').forEach(b => b.classList.toggle('active', b === btn));
+          quizBody.querySelectorAll('.quiz-card').forEach(card => {
+            if (mode === 'wrong' && card.dataset.isCorrect === 'true') {
+              card.classList.add('hidden-review');
+            } else {
+              card.classList.remove('hidden-review');
+            }
+          });
+        });
+      });
+
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đúng: <strong>${correctCount}</strong> • Sai: <strong>${wrongCount}</strong></span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCloseAfter">Quay lại sơ đồ</button>
+          <button class="btn-primary" id="btnRetryQuiz">🔄 Làm lại (đảo câu hỏi)</button>
+        </div>
+      `;
+      document.getElementById('btnCloseAfter').addEventListener('click', closeQuizModal);
+      document.getElementById('btnRetryQuiz').addEventListener('click', () => openQuiz(activeQuiz.topic, activeQuiz.count));
+    }
+
+    function closeQuizModal() {
+      quizModal.classList.remove('show');
+      if (document.fullscreenElement === quizModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.getElementById('quizClose').addEventListener('click', closeQuizModal);
+    quizModal.addEventListener('click', e => { if (e.target === quizModal) closeQuizModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeZoomModal();
+        closeQuizModal();
+      }
+    });
+
+    // Attach start quiz buttons inside every sub-node drawer and root drawer
+    document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.dataset.quizTopic;
+        const bar = btn.closest('.practice-bar');
+        const select = bar.querySelector('.q-count-select');
+        const count = select ? parseInt(select.value, 10) : 10;
+        openQuiz(topicId, count);
+      });
+    });
+
+    // Toolbar full-chapter quiz button
+    document.getElementById('btnChapterQuiz').addEventListener('click', () => {
+      openQuiz('all', 20);
+    });
+  </script>
+</body>
+</html>
