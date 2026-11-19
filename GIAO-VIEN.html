@@ -652,7 +652,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .lyH{font-size:16px;margin:14px 0 6px}.lyKT{border:1px solid var(--line);border-radius:12px;margin:6px 0;background:#fff}.lyKT summary{cursor:pointer;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}.lyKT summary::-webkit-details-marker{display:none}.lyKT summary:before{content:'▸';color:#889}.lyKT[open] summary:before{content:'▾'}.lyTen{font-weight:700;flex:1 1 60%}.lyTen small,.lyChuaDs small{color:#778;font-weight:600}.lyTom{flex-basis:100%;font-size:13.5px;color:#556;padding-left:16px}.lyNhan{font-size:12.5px;font-weight:800;padding:2px 10px;border-radius:999px;border:1.5px solid}.lyRo{background:#d8f3dc;color:#1b5e20;border-color:#1b5e20}.lyCo{background:#effaf0;color:#2e7d32;border-color:#81c784}.lyChua{background:#fff4cc;color:#7a5b00;border-color:#d4a600;border-style:dashed}.lyKem{background:#fde7e7;color:#a52714;border-color:#a52714;border-style:dotted;border-width:2px}.lyCT{padding:0 12px 12px}.lyBang{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0}.lyBang th,.lyBang td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}.lyThanh{display:inline-block;width:80px;height:9px;border:1px solid #889;border-radius:5px;vertical-align:middle;overflow:hidden}.lyThanh i{display:block;height:100%;background:#2e7d32}.lySai{margin:4px 0 8px;padding-left:20px;font-size:14px}.lySai li{margin:6px 0}.lyDA{color:#1b5e20;font-size:13px;margin-top:2px}.lyChuaDs div{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
 .txEm b.txV{color:#1e7d32}.txBang td.txV{color:#1e7d32;font-weight:800;background:#eef8ee}.txBang td.voV,.txEm b.voV{font-weight:800}.txBang td.voT,.txEm b.voT{font-weight:800;background:#ffe066}.txBang td.voK,.txEm b.voK{font-weight:800;background:#fbd5d5;color:#a52714}.txEm b.voT,.txEm b.voK{padding:0 6px;border-radius:6px}.txBang .voC{background:#f3f7ee}.txNhap select{font:inherit;font-weight:700;padding:5px;border:1px solid var(--line);border-radius:8px}.txNhap label.voT{background:#fff4cc}.txNhap label.voK{background:#fde7e7}
 .voChe{display:flex;gap:8px;padding:0 12px 10px}.voChe button{flex:1;font:inherit;font-weight:800;font-size:16px;padding:12px;border-radius:12px;border:2px solid #3a4452;background:#1b222c;color:#cfd6e0}.voChe button.on[data-tre="0"]{background:#fff;color:#111;border-color:#fff}.voChe button.on[data-tre="1"]{background:#ffd43b;color:#111;border-color:#ffd43b}.voKQ.tre{background:#ffd43b;color:#111}
-#voChot{position:absolute;inset:0;background:#0b0f14;overflow:auto;padding:14px 14px 90px;z-index:2}#voChot[hidden]{display:none}#voChot label{display:flex;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid #2a323d;font-size:16px}#voChot input{width:22px;height:22px}.voChotNut{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:12px;background:#141a22}.voChotNut button{flex:1}
+
 #voNen{position:fixed;inset:0;z-index:90;background:#0b0f14;color:#fff;display:flex;flex-direction:column}#voNen[hidden]{display:none}.voTren{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px}.voTren b{font-size:17px}.voKhung{position:relative;flex:1;min-height:0;overflow:hidden;background:#000}.voKhung video{width:100%;height:100%;object-fit:cover}.voO{position:absolute;left:50%;top:45%;width:min(62vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}.voKQ{position:absolute;left:12px;right:12px;bottom:14px;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.7);font-size:15px;text-align:center}.voKQ.tot{background:#1e7d32}.voKQ.trung{background:#6b5d00}.voKQ.xau{background:#a52714}.voKQ big{display:block;font-size:26px;font-weight:800;line-height:1.25}.voDs{max-height:30vh;overflow:auto;padding:8px 12px 14px;font-size:14px;background:#141a22}.voDs div{padding:4px 0;border-bottom:1px solid #2a323d}.voDs .sub{color:#aab}
 .kqHang{display:flex;gap:6px;align-items:center}.kqHang .kqDong{flex:1}
 .nxDot{border-top:1px solid var(--line);padding:10px 0}.nxDot textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin:6px 0}.nxTT{float:right;font-size:13px;color:var(--muted)}.emXoa,.emXoaL{align-self:center}
@@ -971,7 +971,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <div id="voNen" hidden role="dialog" aria-modal="true" aria-label="Quét nộp vở">
   <div class="voTren"><div><b id="voTieu">📗 Quét nộp vở</b><div class="sub" id="voDem" style="color:#cde"></div></div><button class="btn2" id="voXong">✓ Xong</button></div>
   <div class="voChe" role="group" aria-label="Chế độ nộp"><button data-tre="0" class="on">X Nộp đúng hạn</button><button data-tre="1">⏰ Nộp trễ</button></div>
-  <div class="voKhung"><div id="voChot" hidden></div><video id="voVideo" playsinline muted autoplay></video><div class="voO"></div><div class="voKQ" id="voKQ">Đang mở camera…</div></div>
+  <div class="voKhung"><video id="voVideo" playsinline muted autoplay></video><div class="voO"></div><div class="voKQ" id="voKQ">Đang mở camera…</div></div>
   <div class="voDs" id="voDs"><div class="sub">Đưa nhãn QR trên vở vào khung. Mỗi em quét một lần; quét lại sẽ báo “đã ghi”.</div></div>
 </div>
 <section id="scrQuet" class="hidden">
@@ -1121,13 +1121,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     DS.forEach(function (l) { var b = document.createElement('button'); b.textContent = l.ten; b.className = l.ten === TX.lop ? 'on' : ''; b.onclick = function () { TX.lop = l.ten; TX.sua = null; try { localStorage.setItem('gv_txlop', l.ten); } catch (e) {} moTX(); }; o.appendChild(b); });
     veTX(); taiTX();
   }
+  function txSuaCot(j, c) {
+    var T = j.tx || { diem: {}, nop: {} }, nhap = {}, vo = /#v$/.test(c.id);
+    j.hs.forEach(function (x) { var v = (T.diem[x.mahs] || {})[c.id], st = ((T.nop || {})[x.mahs] || {})[c.id]; if (vo) nhap[x.mahs] = st || ''; else if (v !== undefined) nhap[x.mahs] = String(v); });
+    TX.sua = { id: c.id, ngay: c.ngay, ghichu: c.ghichu, nhap: nhap, nghi: {}, lech: [], anh: '', vo: vo }; veTX();
+    var t = $('txThem'); if (t) t.scrollIntoView({ behavior: 'smooth' });
+  }
   function taiTX() {
     var l = txLopObj(); if (!l) return;
     if (!TX.data[l.ten]) TX.data[l.ten] = { dang: true };
     veTX();
     goi(l.url, { action: 'gv_tx', ma: MA }).then(function (j) {
       TX.data[l.ten] = j.ok ? j : { loi: /hop le/i.test(j.msg || '') ? 'Sổ lớp ' + l.ten + ' chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai phiên bản mới).' : j.msg || 'lỗi' };
-      veTX();
+      var mv = TX.moVo; TX.moVo = null;
+      var c = mv && j.ok && (j.tx.cot || []).filter(function (z) { return z.id === mv; })[0];
+      if (c) txSuaCot(j, c); else veTX();
     }).catch(function (e) { TX.data[l.ten] = { loi: 'Không kết nối được (' + e.message + ')' }; veTX(); });
   }
   // Khớp một dòng máy đọc với danh sách lớp: SBD > tên đầy đủ > STT > tên ngắn (duy nhất)
@@ -1276,7 +1284,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         '<div class="txHang"><label>Ngày <input type="date" id="txNgay2" value="' + esc(S.ngay) + '"' + (S.id ? ' disabled' : '') + '></label><label class="txGhi">Ghi chú cột <input id="txGhi2" value="' + esc(S.ghichu) + '" maxlength="80"></label></div>';
       if (S.cot && S.cot.length > 1) h += '<p class="sub">File có nhiều cột điểm, đang lấy cột: <select id="txCot">' + S.cot.map(function (c) { return '<option value="' + c.i + '"' + (c.i === S.chon ? ' selected' : '') + '>' + esc(c.ten) + '</option>'; }).join('') + '</select></p>';
       if (S.anh) h += '<details class="txAnhXem"><summary>Xem ảnh đã đọc</summary>' + (/^data:application\/pdf/.test(S.anh) ? '<p class="sub">(file PDF)</p>' : '<img src="' + S.anh + '" alt="Ảnh điểm">') + '</details>';
-      if (S.vo) h += '<p class="sub">📗 Cột nộp vở: chọn trạng thái từng em (X đúng hạn +1 · X trễ +0.5 · KN không nộp −1 · – chưa ghi).</p>';
+      if (S.vo) {
+        var trong = j.hs.filter(function (x) { return !S.nhap[x.mahs]; }).length;
+        h += '<p class="sub">📗 Cột nộp vở: chỉnh trạng thái từng em (X đúng hạn +1 · X trễ +0.5 · KN không nộp −1 · – chưa ghi). Bấm <b>Lưu</b> để ghi, <b>Hủy</b> để thoát không đổi gì.</p>' +
+          (trong ? '<div class="hangNut" style="justify-content:flex-start"><button class="btn2" id="txVoKN">Đặt KN cho ' + trong + ' em còn trống</button></div>' : '');
+      }
       else h += '<p class="sub">' + nNhap + ' em có điểm. Ô <span class="txNghiMau">vàng</span>: máy không chắc (chữ khó đọc, khớp theo tên ngắn hoặc STT) – xem lại. Để trống = em không có điểm lần này.</p>';
       if (S.lech && S.lech.length) h += '<div class="xdBox">Máy đọc được nhưng chưa ghép được: <ul>' + S.lech.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>Nhập tay các em này vào bảng bên dưới.</div>';
       h += '<div class="txNhap">' + j.hs.map(function (x, i) {
@@ -1289,6 +1301,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       [].forEach.call(th.querySelectorAll('.txNhap input'), function (ip) { ip.oninput = function () { var v = ip.value.replace(',', '.').trim(); S.nhap[ip.getAttribute('data-ma')] = v; delete S.nghi[ip.getAttribute('data-ma')]; ip.parentNode.className = (v !== '' ? 'co' : '') + (v !== '' && (isNaN(Number(v)) || Number(v) > 10 || Number(v) < 0) ? ' sai' : ''); }; });
       var cs = $('txCot'); if (cs) cs.onchange = function () { var kq = txApDong(S.lay(Number(cs.value)), j); S.nhap = kq.nhap; S.nghi = kq.nghi; S.lech = kq.lech; S.chon = Number(cs.value); veTX(); };
       $('txHuy').onclick = function () { TX.sua = null; veTX(); };
+      if ($('txVoKN')) $('txVoKN').onclick = function () { j.hs.forEach(function (x) { if (!S.nhap[x.mahs]) S.nhap[x.mahs] = 'K'; }); veTX(); };
       $('txLuu').onclick = function () {
         var bt = this, sai = Object.keys(S.nhap).filter(function (k) { var v = S.nhap[k]; return !S.vo && v !== '' && (isNaN(Number(v)) || Number(v) < 0 || Number(v) > 10); });
         if (sai.length) { $('txTT2').innerHTML = '<span class="loi">Có ' + sai.length + ' ô điểm không hợp lệ (phải từ 0 đến 10).</span>'; return; }
@@ -1318,10 +1331,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           (c.anh ? '<a class="btn2 nho" href="' + esc(c.anh) + '" target="_blank" rel="noopener">🖼 Ảnh gốc</a>' : '') + '<button class="btn2 nho txXoa">🗑 Xóa cột</button><button class="btn2 nho txDong">Đóng</button></div></div>';
         mn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         mn.querySelector('.txDong').onclick = function () { mn.innerHTML = ''; };
-        mn.querySelector('.txSua').onclick = function () {
-          var nhap = {}, vo = /#v$/.test(c.id); j.hs.forEach(function (x) { var v = (T.diem[x.mahs] || {})[c.id], st = (T.nop[x.mahs] || {})[c.id]; if (vo) nhap[x.mahs] = st || ''; else if (v !== undefined) nhap[x.mahs] = String(v); });
-          TX.sua = { id: c.id, ngay: c.ngay, ghichu: c.ghichu, nhap: nhap, nghi: {}, lech: [], anh: '', vo: vo }; veTX(); $('txThem').scrollIntoView({ behavior: 'smooth' });
-        };
+        mn.querySelector('.txSua').onclick = function () { txSuaCot(j, c); };
         mn.querySelector('.txXoa').onclick = function () {
           if (!confirm('Xóa cột điểm ' + txNgay(c.id) + ' của lớp ' + l.ten + '? Không khôi phục được.')) return;
           var bt = this; bt.disabled = true;
@@ -1344,7 +1354,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('voDem').textContent = VO.l.ten + ' · ' + (VO.ds.length ? VO.ds.length + (VO.siso ? '/' + VO.siso : '') + ' vở · đúng hạn ' + dung + ' · trễ ' + tre : 'chưa quét vở nào');
     if (VO.ds.length) $('voDs').innerHTML = VO.ds.slice().reverse().map(function (x) { return '<div>' + (x.tt === 'T' ? '<b style="background:#ffd43b;color:#111;padding:0 5px;border-radius:5px">X</b> ' : '<b>X</b> ') + esc(x.hoten) + ' <span class="sub">· ' + (x.tt === 'T' ? 'trễ' : 'đúng hạn') + ' · ' + esc(x.gio) + (x.trung ? ' · đã ghi trước đó' : '') + '</span></div>'; }).join('');
   }
-  function voCheDo(tre) { VO.tre = !!tre; [].forEach.call(document.querySelectorAll('.voChe button'), function (b) { b.classList.toggle('on', (b.getAttribute('data-tre') === '1') === VO.tre); }); }
+  function voCheDo(tre) {
+    VO.tre = !!tre;
+    var v = $('voVideo'), song = VO.st && VO.st.getTracks().some(function (t) { return t.readyState === 'live'; });
+    if (VO.st && !song) voMoCam(); else if (v.srcObject && v.paused) { var pl = v.play(); if (pl && pl.catch) pl.catch(function () {}); } [].forEach.call(document.querySelectorAll('.voChe button'), function (b) { b.classList.toggle('on', (b.getAttribute('data-tre') === '1') === VO.tre); }); }
   [].forEach.call(document.querySelectorAll('.voChe button'), function (b) { b.onclick = function () { if (VO) voCheDo(b.getAttribute('data-tre') === '1'); }; });
   function voGhi(sbd) {
     var now = Date.now();
@@ -1384,12 +1397,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     VO = { ngay: ngay, l: l, ds: [], xong: {}, dang: {}, gan: {}, siso: 0, dung: false, tre: false };
     var p = ngay.split('-');
     $('voTieu').textContent = '📗 Nộp vở ' + l.ten + ' · ' + p[2] + '/' + p[1];
-    $('voChot').hidden = true; $('voXong').disabled = false; voCheDo(false);
-    $('voDs').innerHTML = '<div class="sub">Chọn <b>Nộp đúng hạn</b> hoặc <b>Nộp trễ</b> rồi đưa nhãn QR trên vở vào khung. Chỉ nhận vở lớp ' + esc(l.ten) + '. Bấm “Xong” để chốt các em không nộp.</div>';
+    $('voXong').disabled = false; voCheDo(false);
+    $('voDs').innerHTML = '<div class="sub">Chọn <b>Nộp đúng hạn</b> hoặc <b>Nộp trễ</b> rồi đưa nhãn QR trên vở vào khung. Chỉ nhận vở lớp ' + esc(l.ten) + '. Quét xong bấm “Xong” để thoát; sau đó tích KN cho em không nộp hoặc sửa trạng thái.</div>';
     voVeDs(); voBao('', '', 'Đang mở camera…'); $('voNen').hidden = false;
-    var bdOk = Promise.resolve(false);
-    if ('BarcodeDetector' in window) bdOk = Promise.resolve(window.BarcodeDetector.getSupportedFormats ? window.BarcodeDetector.getSupportedFormats() : ['qr_code']).then(function (f) { return f.indexOf('qr_code') >= 0; }).catch(function () { return false; });
-    bdOk.then(function (co) { if (co) VO.bd = new window.BarcodeDetector({ formats: ['qr_code'] }); else return voJsQR(); }).then(function () {
+    voMoCam();
+  }
+  function voMoCam() {
+    var bdOk = Promise.resolve(!!VO.bd);
+    if (!VO.bd && 'BarcodeDetector' in window) bdOk = Promise.resolve(window.BarcodeDetector.getSupportedFormats ? window.BarcodeDetector.getSupportedFormats() : ['qr_code']).then(function (f) { return f.indexOf('qr_code') >= 0; }).catch(function () { return false; });
+    clearTimeout(VO.hen); if (VO.st) VO.st.getTracks().forEach(function (t) { t.stop(); });
+    bdOk.then(function (co) { if (co) { if (!VO.bd) VO.bd = new window.BarcodeDetector({ formats: ['qr_code'] }); } else return voJsQR(); }).then(function () {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('máy này không mở được camera trong trình duyệt');
       return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
     }).then(function (st) {
@@ -1399,36 +1416,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }).catch(function (e) { voBao('xau', '', 'Không mở được camera: ' + e.message); });
   }
   window.__voGhi = function (t) { var s = voDocMa(t); if (s && VO) voGhi(s); };   // dùng khi thử tự động
-  function voDong() {
-    var l = VO && VO.l; VO = null; $('voNen').hidden = true; $('voChot').hidden = true;
-    if (l) { delete HS_CACHE[l.ten]; delete TX.data[l.ten]; }
-    if (!$('scrTX').classList.contains('hidden')) taiTX();
-  }
-  // Xong: tắt camera → liệt kê các em chưa có trạng thái ở cột vở hôm nay, GV tích "Không nộp" rồi lưu
+  // Xong: tắt camera, thoát ra bảng; mở luôn phần chỉnh cột nộp vở hôm đó (GV tích KN / sửa đúng hạn, trễ hoặc Hủy để thoát)
   $('voXong').onclick = function () {
     if (!VO) return; VO.dung = true; clearTimeout(VO.hen);
     if (VO.st) VO.st.getTracks().forEach(function (t) { t.stop(); });
     $('voVideo').srcObject = null;
-    var l = VO.l, ngay = VO.ngay, ch = $('voChot'); $('voXong').disabled = true;
-    ch.hidden = false; ch.innerHTML = '<p>Đang lấy danh sách lớp ' + esc(l.ten) + '…</p>';
-    goi(l.url, { action: 'gv_tx', ma: MA }).then(function (j) {
-      if (!j.ok) throw new Error(j.msg || 'lỗi');
-      var id = ngay + '#v', nop = (j.tx && j.tx.nop) || {}, chua = j.hs.filter(function (x) { return !(nop[x.mahs] || {})[id]; });
-      if (!chua.length) { ch.innerHTML = '<h3>Cả lớp ' + esc(l.ten) + ' đã có trạng thái nộp vở.</h3><div class="voChotNut"><button class="luu" id="voDong">Đóng</button></div>'; $('voDong').onclick = voDong; return; }
-      ch.innerHTML = '<h3>Chốt nộp vở · ' + esc(l.ten) + '</h3><p class="sub" style="color:#aab">' + chua.length + ' em chưa quét. Tích các em <b>Không nộp</b> (KN, −1 điểm vở). Em nào bỏ tích sẽ để trống.</p>' +
-        '<label><input type="checkbox" id="voTatCa" checked> <b>Chọn tất cả</b></label>' +
-        chua.map(function (x) { return '<label><input type="checkbox" class="voChK" value="' + esc(x.mahs) + '" checked> ' + esc(x.hoten) + ' <span class="sub" style="color:#889">' + esc(x.mahs) + '</span></label>'; }).join('') +
-        '<div class="voChotNut"><button class="btn2" id="voBoQua">Bỏ qua</button><button class="luu" id="voLuuK">Lưu Không nộp</button></div>';
-      $('voTatCa').onchange = function () { var c = this.checked; [].forEach.call(ch.querySelectorAll('.voChK'), function (x) { x.checked = c; }); };
-      $('voBoQua').onclick = voDong;
-      $('voLuuK').onclick = function () {
-        var ds = [].filter.call(ch.querySelectorAll('.voChK'), function (x) { return x.checked; }).map(function (x) { return x.value; }), bt = this;
-        if (!ds.length) { voDong(); return; }
-        bt.disabled = true; bt.textContent = 'Đang lưu…';
-        goi(l.url, { action: 'gv_tx_vo_chot', ma: MA, ngay: ngay, ds: ds }).then(function (r) { if (!r.ok) throw new Error(r.msg || 'lỗi'); voDong(); })
-          .catch(function (e) { bt.disabled = false; bt.textContent = 'Lưu Không nộp'; alert('Chưa lưu được: ' + e.message); });
-      };
-    }).catch(function (e) { ch.innerHTML = '<p>Không lấy được danh sách: ' + esc(e.message) + '</p><div class="voChotNut"><button class="luu" id="voDong">Đóng</button></div>'; $('voDong').onclick = voDong; });
+    var co = VO.ds.length, id = VO.ngay + '#v', l = VO.l; VO = null; $('voNen').hidden = true;
+    delete HS_CACHE[l.ten]; delete TX.data[l.ten];
+    TX.moVo = co ? id : null;
+    if (!$('scrTX').classList.contains('hidden')) taiTX();
   };
   $('txXuat').onclick = function () {
     var l = txLopObj(), j = l && TX.data[l.ten]; if (!j || !j.tx) return;
