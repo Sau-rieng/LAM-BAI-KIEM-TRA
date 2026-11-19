@@ -653,6 +653,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .lienKet{background:none;border:0;color:var(--pri);font:inherit;text-decoration:underline;cursor:pointer;margin-top:10px;padding:4px 0}#qmBox{margin-top:10px;display:grid;gap:6px}#qmBox input{font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px}
 .kqTo{display:inline-block;font-size:12px;font-weight:800;color:#b3261e;border:1.5px solid #b3261e;border-radius:999px;padding:0 7px;margin-left:4px;background:#fde7e7}
 .bmNgan{margin:6px 0 0;padding-left:18px;font-size:14px}.bmDaOK{color:#1e7d32;font-weight:700}
+.locGiay{margin:4px 0 10px}.ktLop{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}.ktC{display:inline-flex;align-items:center;gap:5px;font-size:14px;padding:3px 10px 3px 4px;border-radius:999px;border:1.5px solid #c7ccd6;background:#f3f4f7;color:#555}.ktC.do{border-color:#d4a600;background:#fff4cc;color:#5c4700}.ktC.du{border-color:#1e7d32;background:#e3f4e5;color:#1b5e20}.ktC.da b{text-decoration:none}.ktTich{font:inherit;font-size:18px;line-height:1;border:0;background:none;cursor:pointer;padding:0 2px;color:inherit}.card.dot.giay.xongKT{opacity:.72}.card.dot.giay.xongKT:hover{opacity:1}
 .bmBan{display:block;margin:0 0 12px;padding:12px 14px;border-radius:12px;background:#fff4cc;border:2px solid #d4a600;color:#3a2c00}.bmBan.do{background:#fde7e7;border-color:#c5221f;color:#5c0d0a}.bmBan[hidden]{display:none}.bmTT{margin:6px 0;padding-left:4px;list-style:none}.bmTT li{margin:6px 0}.bmDs{display:grid;gap:8px;max-height:460px;overflow:auto}.bmSu{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff}.bmSu.moi{border-left:5px solid #d4a600}.bmSu.cao.moi{border-left-color:#c5221f}.bmMuc{font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px;border:1px solid #889}.bmSu.cao .bmMuc{border-color:#c5221f;color:#c5221f}.bmNKB td,.bmNKB th{font-size:13px}
 .lyH{font-size:16px;margin:14px 0 6px}.lyKT{border:1px solid var(--line);border-radius:12px;margin:6px 0;background:#fff}.lyKT summary{cursor:pointer;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}.lyKT summary::-webkit-details-marker{display:none}.lyKT summary:before{content:'▸';color:#889}.lyKT[open] summary:before{content:'▾'}.lyTen{font-weight:700;flex:1 1 60%}.lyTen small,.lyChuaDs small{color:#778;font-weight:600}.lyTom{flex-basis:100%;font-size:13.5px;color:#556;padding-left:16px}.lyNhan{font-size:12.5px;font-weight:800;padding:2px 10px;border-radius:999px;border:1.5px solid}.lyRo{background:#d8f3dc;color:#1b5e20;border-color:#1b5e20}.lyCo{background:#effaf0;color:#2e7d32;border-color:#81c784}.lyChua{background:#fff4cc;color:#7a5b00;border-color:#d4a600;border-style:dashed}.lyKem{background:#fde7e7;color:#a52714;border-color:#a52714;border-style:dotted;border-width:2px}.lyCT{padding:0 12px 12px}.lyBang{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0}.lyBang th,.lyBang td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}.lyThanh{display:inline-block;width:80px;height:9px;border:1px solid #889;border-radius:5px;vertical-align:middle;overflow:hidden}.lyThanh i{display:block;height:100%;background:#2e7d32}.lySai{margin:4px 0 8px;padding-left:20px;font-size:14px}.lySai li{margin:6px 0}.lyDA{color:#1b5e20;font-size:13px;margin-top:2px}.lyChuaDs div{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
 .txEm b.txV{color:#1e7d32}.txBang td.txV{color:#1e7d32;font-weight:800;background:#eef8ee}.txBang td.voV,.txEm b.voV{font-weight:800}.txBang td.voT,.txEm b.voT{font-weight:800;background:#ffe066}.txBang td.voK,.txEm b.voK{font-weight:800;background:#fbd5d5;color:#a52714}.txEm b.voT,.txEm b.voK{padding:0 6px;border-radius:6px}.txBang .voC{background:#f3f7ee}.txNhap select{font:inherit;font-weight:700;padding:5px;border:1px solid var(--line);border-radius:8px}.txNhap label.voT{background:#fff4cc}.txNhap label.voK{background:#fde7e7}
@@ -1674,21 +1675,53 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // ---------- ĐỀ GIẤY: in đề (PDF trên trình duyệt, 2 cột, đen trắng) + in đáp án ----------
   var DAU_DE = { so: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO ĐỒNG NAI', truong: 'TRƯỜNG ', ky: 'KIỂM TRA', nam: '' };
   try { Object.assign(DAU_DE, JSON.parse(localStorage.getItem('gv_daude') || '{}')); } catch (e) {}
-  var GIAY_MO = {};
+  var GIAY_MO = {}, LOC_GIAY = (function () { try { return localStorage.getItem('gv_locgiay') || 'tat'; } catch (e) { return 'tat'; } })();
+  // Tình trạng kiểm tra từng lớp của 1 đề giấy: số bài đã quét / sĩ số; "đã kiểm tra" tự tích khi có bài, GV tích/bỏ tay
+  function ktGiay(k, g) {
+    var d = g[0], lops = chuan(d.lop) === 'TATCA' || !d.lop ? DS.map(function (l) { return l.ten; }) : String(d.lop).split(',').map(function (x) { return x.trim(); }).filter(String);
+    return lops.map(function (t) {
+      var n = 0; g.forEach(function (x) { n += ((DATHI || {})[x.madot] || {})[t] || 0; });
+      var tay = (DAKT[k] || {})[t], da = tay === 'CO' ? true : tay === 'KHONG' ? false : n > 0;
+      return { lop: t, n: n, siso: SISO[t] || 0, da: da, tay: tay || '' };
+    });
+  }
   function veNhomGiay(box, ds) {
     if (!ds.length) return;
     var ca = {}, thu = [];
     ds.forEach(function (d) { var k = d.ca || d.madot; if (!ca[k]) { ca[k] = []; thu.push(k); } ca[k].push(d); });
     var nP = document.createElement('button'); nP.className = 'suaDe'; nP.textContent = '🧾 In phiếu trả lời trắc nghiệm (phiếu trống, dùng chung mọi bài)';
     nP.onclick = inPhieu; box.appendChild(nP);
-    thu.sort().reverse().forEach(function (k) {
+    var tt = {}; thu.forEach(function (k) { var a = ktGiay(k, ca[k]); tt[k] = { ds: a, xong: a.length && a.every(function (x) { return x.da; }) }; });
+    var nXong = thu.filter(function (k) { return tt[k].xong; }).length;
+    var loc = document.createElement('div'); loc.className = 'ksLoc locGiay';
+    [['tat', 'Tất cả ' + thu.length], ['chua', 'Chưa kiểm tra xong ' + (thu.length - nXong)], ['da', '✓ Đã kiểm tra ' + nXong]].forEach(function (x) {
+      var b = document.createElement('button'); b.textContent = x[1]; if (LOC_GIAY === x[0]) b.className = 'on';
+      b.onclick = function () { LOC_GIAY = x[0]; try { localStorage.setItem('gv_locgiay', x[0]); } catch (e) {} veDot(); }; loc.appendChild(b);
+    });
+    box.appendChild(loc);
+    if (!DATHI) { var cho = document.createElement('div'); cho.className = 'sub'; cho.textContent = 'Đang đếm số bài đã quét của từng lớp…'; box.appendChild(cho); }
+    thu.sort().reverse().sort(function (a, b) { return (tt[a].xong ? 1 : 0) - (tt[b].xong ? 1 : 0); }).forEach(function (k) {
+      if (LOC_GIAY === 'chua' && tt[k].xong || LOC_GIAY === 'da' && !tt[k].xong) return;
       var g = ca[k].sort(function (a, b) { return a.madot < b.madot ? -1 : 1; }), d = g[0];
-      var el = document.createElement('div'); el.className = 'card dot giay';
+      var el = document.createElement('div'); el.className = 'card dot giay' + (tt[k].xong ? ' xongKT' : '');
       el.innerHTML = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(k.replace(/-2\d\d$/, '')) + ' · mã đề ' + esc(g.map(function (x) { return x.madot.slice(-3); }).join(', ')) +
-        ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div><span class="ttDong">đề giấy</span></div>' +
+        ' · ' + d.phut + ' phút · Lớp: ' + esc(d.lop) + '</div></div><span class="ttDong">' + (tt[k].xong ? '✓ đã kiểm tra' : 'đề giấy') + '</span></div>' +
+        '<div class="ktLop">' + tt[k].ds.map(function (x) {
+          var muc = !x.n ? 'chua' : x.siso && x.n >= x.siso ? 'du' : 'do';
+          return '<span class="ktC ' + muc + (x.da ? ' da' : '') + '"><button class="ktTich" data-l="' + esc(x.lop) + '" aria-pressed="' + x.da + '" title="' + (x.da ? 'Bỏ tích đã kiểm tra' : 'Tích đã kiểm tra') + '">' + (x.da ? '☑' : '☐') + '</button><b>' + esc(x.lop) + '</b> ' + (DATHI ? '📷 ' + x.n + (x.siso ? '/' + x.siso : '') : '…') + (x.tay ? ' <small>(tay)</small>' : '') + '</span>';
+        }).join('') + '</div>' +
         '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button>' + (Number(d.phut) >= 45 ? '<button class="btn2 tlG">✍ Chấm tự luận</button>' : '') + '<button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button></div>' +
         '<div class="lopO"></div><div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
       var o = el.querySelector('.dauDeO'), kq = el.querySelector('.giayKQ');
+      [].forEach.call(el.querySelectorAll('.ktTich'), function (b) {
+        b.onclick = function () {
+          var t = b.getAttribute('data-l'), x = tt[k].ds.filter(function (z) { return z.lop === t; })[0];
+          var moi = x.da ? (x.n > 0 ? 'KHONG' : '') : (x.n > 0 ? '' : 'CO');   // về mặc định nếu trùng với tự động
+          b.disabled = true;
+          goiBatKy({ action: 'gv_dakt_luu', ma: MA, ca: k, lop: t, tt: moi }).then(function (j) { if (!j.ok) throw new Error(j.msg || 'lỗi'); DAKT = j.dakt || DAKT; veDot(); })
+            .catch(function (e) { b.disabled = false; alert('Chưa lưu được: ' + e.message); });
+        };
+      });
       function ve() {
         if (!GIAY_MO[k]) { o.innerHTML = ''; return; }
         o.innerHTML = '<div class="xdBox"><b>Đầu đề in</b> <span class="sub">(lưu trên máy này cho các lần in sau)</span>' +
@@ -2592,11 +2625,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       })();
   }
   // Hoi tung so lop: da thi dot nao, bao nhieu em (so chua co ma moi thi dung gv_hoso)
-  var DATHI_CHO = null;
+  var DATHI_CHO = null, SISO = {}, DAKT = {};
   function taiDaThi() {
     return DATHI_CHO = Promise.all(DS.map(function (l) {
       return goi(l.url, { action: 'gv_dathi', ma: MA }).then(function (j) {
-        if (j.ok) return { lop: l.ten, dathi: j.dathi };
+        if (j.ok) { if (j.siso) SISO[l.ten] = j.siso; if (j.dakt) DAKT = j.dakt; return { lop: l.ten, dathi: j.dathi }; }
         if (!/hop le/i.test(j.msg || '')) return null;
         return goi(l.url, { action: 'gv_hoso', ma: MA }).then(function (h) {
           if (!h.ok) return null;

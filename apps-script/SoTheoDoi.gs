@@ -104,6 +104,7 @@ function doPost(e) {
       case 'gv_baomat_xem':
       case 'gv_nhatky':
       case 'gv_nk_hoantac':
+      case 'gv_dakt_luu':
       case 'gv_ks_dot':
       case 'gv_ks_luu':
       case 'gv_ks_xoa':
@@ -188,6 +189,7 @@ function doPost(e) {
         if (d.action === 'gv_baomat_xem') return json(gvBaoMatXem(d));
         if (d.action === 'gv_nhatky') return json(gvNhatKy());
         if (d.action === 'gv_nk_hoantac') return json(gvNkHoanTac(d));
+        if (d.action === 'gv_dakt_luu') return json(gvDaKTLuu(d));
         if (d.action === 'gv_ks_dot') return json(gvKSDot());
         if (d.action === 'gv_ks_luu') return json(gvKSLuu(d));
         if (d.action === 'gv_ks_xoa') return json(gvKSXoa(d));
@@ -2296,7 +2298,23 @@ function gvDaThi() {
   }
   const dathi = {};
   Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
-  return {ok: true, lop: lopNay(), dathi: dathi};
+  let siso = 0, dakt = {}; try { siso = dsLopTX().length; dakt = docDaKT(); } catch (e) {}
+  return {ok: true, lop: lopNay(), dathi: dathi, siso: siso, dakt: dakt};
+}
+// De giay "da kiem tra" theo lop: mac dinh tu tich khi co bai quet; GV tich/bo tich tay luu o kho (tab DA KIEM TRA)
+const TAB_DAKT = 'DA KIEM TRA', HEAD_DAKT = ['Ca', 'Lop', 'TrangThai', 'Luc'];
+function docDaKT() {
+  const sh = kho().getSheetByName(TAB_DAKT), o = {};
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().forEach(function (r) { const ca = String(r[0]).trim(), l = String(r[1]).trim(); if (ca && l && String(r[2]).trim()) (o[ca] = o[ca] || {})[l] = String(r[2]).trim(); });
+  return o;
+}
+function gvDaKTLuu(d) {
+  const ca = String(d.ca || '').trim(), l = String(d.lop || '').trim(), tt = String(d.tt || '').trim();
+  if (!ca || !l || ['CO', 'KHONG', ''].indexOf(tt) < 0) return {ok: false, msg: 'Thieu thong tin'};
+  const sh = tabKho(TAB_DAKT, HEAD_DAKT), n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 2).getValues() : [];
+  let i = -1; v.forEach(function (r, j) { if (String(r[0]).trim() === ca && String(r[1]).trim() === l) i = j; });
+  if (i >= 0) sh.getRange(i + 2, 3, 1, 2).setValues([[tt, new Date()]]); else sh.appendRow([ca, l, tt, new Date()]);
+  return {ok: true, dakt: docDaKT()};
 }
 // Thong ke tung cau cua 1 dot trong lop nay (lan lam sau cung moi em): % sai, cac lua chon
 // ---------------------------------------------------------------------
