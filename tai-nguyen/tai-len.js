@@ -176,6 +176,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261119-155611",
+  "file": "tai-len/tl-261119-155611.html",
+  "anh": "",
+  "ten": "Mô Phỏng 3D: Sự Tạo Thành Ion Na⁺ và Cl⁻",
+  "khoi": "10",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
