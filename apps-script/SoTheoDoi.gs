@@ -69,6 +69,8 @@ function doPost(e) {
     if (d.loai === 'nhom') return json(ghiChoiNhom(d));
     switch (d.action) {
       case 'batdau': return json(batDau(d));
+      case 'gv_quenma': return json(gvQuenMa());
+      case 'gv_doima_otp': return json(gvDoiMaOTP(d));
       case 'mokhoa': { const okMk = String(d.ma || '').trim() === docMa().mokhoa; if (!okMk) bmSaiMoKhoa(d, 'kiểm tra'); return json({ok: okMk}); }
       case 'nop':    return json(nopBai(d));
       case 'chobai': return json(trangThaiDot(d.madot));
@@ -992,6 +994,39 @@ function gvBaoMatXem() {
   if (sh && sh.getLastRow() > 1) { const r = sh.getRange(2, 8, sh.getLastRow() - 1, 1), v = r.getValues(); v.forEach(function (x) { if (!String(x[0])) x[0] = 'x'; }); r.setValues(v); }
   return {ok: true};
 }
+// Quen ma quan ly: gui ma 6 so (10 phut) ve Gmail chu so (nguoi trien khai) -> nhap ma + dat ma moi
+function anEmail(e) { const p = String(e || '').split('@'); return p.length < 2 ? '' : p[0].slice(0, 2) + '***@' + p[1]; }
+function gvQuenMa() {
+  if (bmDem('qm_gio', 60) > 3) return {ok: false, msg: 'Đã gửi 3 lần trong 1 giờ. Thử lại sau hoặc mở file KHO DE → tab MA để xem mã.'};
+  const em = Session.getEffectiveUser().getEmail();
+  if (!em) return {ok: false, msg: 'Không xác định được Gmail chủ sổ.'};
+  const otp = String(Math.floor(100000 + Math.random() * 900000)), c = CacheService.getScriptCache();
+  c.put('qm_otp', otp, 600); c.remove('qm_sai');
+  try {
+    MailApp.sendEmail(em, 'Khám phá Hóa học – mã đổi mã quản lý: ' + otp,
+      'Mã xác nhận để đặt lại mã quản lý trang giáo viên: ' + otp + '\n\nMã có hiệu lực 10 phút. Nếu thầy/cô KHÔNG yêu cầu, có người đang thử lấy quyền trang giáo viên – bỏ qua email này và xem Cài đặt → Bảo mật.\n\nYêu cầu từ: ' + (BM_TB || 'không rõ thiết bị') + ' · lớp ' + lopNay());
+  } catch (e) { c.remove('qm_otp'); return {ok: false, quyen: true, msg: 'Sổ này chưa được cấp quyền gửi mail. Mở Apps Script của sổ, chọn hàm capQuyenMail rồi bấm ▶ Chạy một lần.'}; }
+  bmGhi('QUEN_MA', 'Vừa', 'Mã quản lý', 'Có yêu cầu gửi mã đặt lại mã quản lý về Gmail ' + anEmail(em) + '. Nếu không phải thầy/cô, có người đang thử chiếm trang GV.');
+  return {ok: true, gui: anEmail(em)};
+}
+function gvDoiMaOTP(d) {
+  const c = CacheService.getScriptCache(), otp = c.get('qm_otp');
+  if (!otp) return {ok: false, msg: 'Mã xác nhận đã hết hạn hoặc chưa gửi. Bấm gửi lại.'};
+  if (String(d.otp || '').trim() !== otp) {
+    if (bmDem('qm_sai', 10) >= 5) { c.remove('qm_otp'); bmGhi('DO_MA_OTP', 'Cao', 'Mã xác nhận Gmail', 'Nhập sai mã xác nhận đổi mã quản lý 5 lần → hủy mã.'); return {ok: false, msg: 'Sai 5 lần, mã đã bị hủy. Gửi lại mã mới.'}; }
+    return {ok: false, msg: 'Mã xác nhận chưa đúng.'};
+  }
+  const moi = String(d.moi || '').trim();
+  if (moi.length < 8 || !/[A-Za-z]/.test(moi) || !/\d/.test(moi) || /\s/.test(moi)) return {ok: false, msg: 'Mã mới cần ≥ 8 ký tự, có cả chữ và số, không dấu cách.'};
+  const sh = kho().getSheetByName('MA'), v = sh.getDataRange().getValues(); let r = -1;
+  v.forEach(function (x, i) { if (khongDau(x[0]).replace(/\s+/g, '') === 'MAQUANLY') r = i; });
+  if (r >= 0) sh.getRange(r + 1, 2).setNumberFormat('@').setValue(moi); else sh.appendRow(['MaQuanLy', moi]);
+  c.remove('qm_otp'); c.remove('kql'); c.remove('sql');
+  bmGhi('DOI_MA_QL', 'Vừa', 'Mã quản lý', 'Đã đặt lại mã quản lý bằng mã xác nhận gửi về Gmail.');
+  return {ok: true};
+}
+// Chay 1 lan trong trinh soan Apps Script de cap quyen gui mail (cho chuc nang Quen ma)
+function capQuyenMail() { MailApp.sendEmail(Session.getEffectiveUser().getEmail(), 'Khám phá Hóa học – đã cấp quyền gửi mail', 'Sổ ' + lopNay() + ' đã gửi được mail. Chức năng "Quên mã" trên trang giáo viên đã sẵn sàng.'); }
 function kiemMaQL(m) {
   const q = docMa().quanly;
   return !!q && String(m || '').trim() === q;
