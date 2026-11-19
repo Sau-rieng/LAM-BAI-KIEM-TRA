@@ -31,6 +31,11 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 - **Hồ sơ HS**: từng em (kiến thức, **🔁 Rèn luyện phần yếu**: đã/chưa luyện, tiến bộ trước→luyện→sau, câu vẫn sai, nút Nhắc gửi vào Hỏi thầy/cô kèm nút "Luyện ngay"), nhận xét AI (M4), Luyện tập cả lớp, **📋 Khảo sát** (đợt có giờ mở/đóng, ẩn danh – chỉ biết ai đã/chưa làm, biểu đồ, so sánh lớp/đợt, AI tóm tắt, chép sang Claude, Excel).
 - **Số liệu minh chứng (M6)** cho cuộc thi đổi mới sáng tạo (chấm 5/12, dùng thật trước 30/11): có thêm số phiếu khảo sát, mức đồng ý TB, % HS tự thấy tiến bộ.
 
+## 5b. Bảo mật (19/11)
+- Mã xem bài sai 5 lần/15 phút → khóa SBD 15 phút; sai mã quản lý 8 lần/10 phút → chặn thao tác GV 30 phút trừ máy đã đăng nhập đúng (thiết bị `tb` lưu localStorage `gv_tb`, danh sách Script Properties `may_tin`); dò mã mở khóa → báo.
+- Sự việc ghi tab **BAO MAT** (kho); Nhật ký điểm tab **NHAT KY DIEM** (mỗi sổ) + hoàn tác; kiểm tra điểm sửa ngoài trang GV (ảnh chụp tab KIEM TRA DIEM, mỗi 3 giờ). Xem ở Cài đặt → 🛡 Bảo mật; trang chủ hiện băng ⚠ khi có sự việc mới.
+- Mọi thao tác ghi điểm mới phải gọi `nkGhi(...)` với khóa `TX|id|ma` hoặc `BL|madot|ma|lan`, nếu không sẽ bị báo nhầm là sửa ngoài hệ thống.
+
 ## 6. Việc còn treo / nhắc GV
 - Dán SoTheoDoi.gs mới vào tất cả sổ (nhiều thay đổi từ 17–19/11 chưa chắc đã triển khai).
 - Đổi tên file sổ 12CLB thành `SO THEO DOI 12CLB` nếu chưa triển khai bản mới.
