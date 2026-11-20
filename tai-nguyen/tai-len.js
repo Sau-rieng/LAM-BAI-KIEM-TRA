@@ -253,6 +253,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261120-192302",
+  "file": "tai-len/tl-261120-192302.html",
+  "anh": "",
+  "ten": "Sơ đồ tư duy & Luyện tập Chương 1: Cấu tạo nguyên tử (Hóa 10 – KNTT)",
+  "khoi": "10",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
