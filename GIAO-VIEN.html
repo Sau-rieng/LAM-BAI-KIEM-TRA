@@ -5938,7 +5938,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       ['MaTroChoi', 'Mã vào chơi', 'Học sinh nhập khi vào trò chơi (mọi trò dùng chung).', 'MaGV'],
       ['MaMoKhoaTroChoi', 'Mã mở khóa trò chơi', 'Mở khóa khi học sinh rời màn hình chơi, mở lượt chơi mới.', 'MaMoKhoa']] },
     { ten: 'Quản lý', ds: [
-      ['MaQuanLy', 'Mã đăng nhập', 'Đăng nhập trang giáo viên này. Đổi xong, lần sau đăng nhập bằng mã mới.']] }
+      ['MaQuanLy', 'Mã đăng nhập', 'Đăng nhập trang giáo viên này. Đổi xong, lần sau đăng nhập bằng mã mới.'],
+      ['MaXemGV', 'Mật khẩu tài khoản GV (SBD …00)', 'Mã xem bài của tài khoản GV đóng vai học sinh ở mọi lớp. Chỉ mở được trên máy đã đăng nhập trang GV. Chưa đặt thì dùng 0000.']] }
   ];
   function taiMa(sau) {
     goiBatKy({ action: 'gv_ma', ma: MA }).then(function (j) {

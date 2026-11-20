@@ -41,7 +41,7 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 - Ô SBD ở XEM-LAI, LAM-BAI, các trò chơi nhận 2 số cuối hoặc đủ 8 số. Tài khoản HS gộp bài/bảng điểm/TX/khảo sát các lớp (nhãn lớp); Kiến thức cần ôn có nút chọn lớp. Quét nộp vở: sổ lớp đang quét tự kiểm tra em có trong danh sách.
 
 ## 5d. Tài khoản GV đóng vai HS (20/11)
-- Mỗi lớp tự có SBD `<tiền tố lớp>00` (VD 26100100), tên GV, mã xem bài 0000 – không thêm vào DANHSACH, không vào sĩ số.
+- Mỗi lớp tự có SBD `<tiền tố lớp>00` (VD 26100100), tên GV, mật khẩu = dòng MaXemGV ở tab MA kho (đặt ở Cài đặt → Mã; chưa đặt = 0000) – không thêm vào DANHSACH, không vào sĩ số.
 - Chỉ mở được trên máy đã đăng nhập trang GV (XEM-LAI gửi kèm `gv_tb`, server so `may_tin` của sổ đó); máy lạ nhập đúng 0000 → chặn + cảnh báo THU_TK_GV.
 - Bài/điểm/trò chơi/luyện tập của SBD …00 bị ẩn khỏi mọi thống kê trang GV (cờ `AN_GV` + `boGV(rows, cột MaHS)`); khảo sát của GV không lưu phiếu; quét vở không nhận …00. Hàm đọc dữ liệu mới cho trang GV phải lọc bằng `boGV`.
 

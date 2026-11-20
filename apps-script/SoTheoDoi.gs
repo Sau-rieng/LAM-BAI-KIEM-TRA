@@ -876,7 +876,7 @@ function dungMaXem(hs, d) {
   const nhap = String(d.maxem || '').trim();
   let ok = !!(hs && hs.maxem && nhap === hs.maxem);
   if (ok && hs.gv && mayTin().indexOf(String(d.tb || '').trim()) < 0) {
-    if (bmDem('tkgv', 10) === 1) bmGhi('THU_TK_GV', 'Vừa', 'SBD ' + String(d.mahs || '').trim() + ' (tài khoản GV)', 'Có người nhập đúng mã 0000 của tài khoản GV nhưng trên máy chưa từng đăng nhập trang GV → đã chặn. Nếu không phải thầy/cô thì có thể HS đang thử vào tài khoản GV.');
+    if (bmDem('tkgv', 10) === 1) bmGhi('THU_TK_GV', 'Vừa', 'SBD ' + String(d.mahs || '').trim() + ' (tài khoản GV)', 'Có người nhập đúng mật khẩu của tài khoản GV nhưng trên máy chưa từng đăng nhập trang GV → đã chặn. Nếu không phải thầy/cô thì có thể HS đang thử vào tài khoản GV.');
     BM_MSG = 'Tài khoản GV chỉ mở được trên máy đã đăng nhập trang giáo viên (mở lớp này ở trang GV trên máy này một lần).'; return false;
   }
   if (!ok && nhap !== '') {
@@ -3209,7 +3209,7 @@ function gvTcKetQua(d) {
   return {ok: true, lop: lopNay(), siSo: siSo, canhan: canhan, nhom: nhom, thanhvien: tv, luot: d.chitiet ? luot : {}, bo: bo, ten: ten};
 }
 // Cac ma trong tab MA (chi giao vien da dang nhap bang ma quan ly moi doc / doi duoc)
-const MA_TEN = ['MaGV', 'MaMoKhoa', 'MaLamLai', 'MaQuanLy', 'MaTroChoi', 'MaMoKhoaTroChoi'];
+const MA_TEN = ['MaGV', 'MaMoKhoa', 'MaLamLai', 'MaQuanLy', 'MaTroChoi', 'MaMoKhoaTroChoi', 'MaXemGV'];
 function gvMa() {
   const m = {};
   kho().getSheetByName('MA').getDataRange().getValues().forEach(function (r) { m[khongDau(r[0]).replace(/\s+/g, '')] = String(r[1]).trim(); });
@@ -3390,7 +3390,7 @@ function docMa() {
   return {gv: m['MAGV'] || '', mokhoa: m['MAMOKHOA'] || '', lamlai: m['MALAMLAI'] || '', quanly: m['MAQUANLY'] || '',
     // Ma rieng cho tro choi; chua dat thi tam dung ma kiem tra
     tcvao: m['MATROCHOI'] || m['MAGV'] || '', tcmokhoa: m['MAMOKHOATROCHOI'] || m['MAMOKHOA'] || '',
-    coTc: !!m['MATROCHOI'], coTcMk: !!m['MAMOKHOATROCHOI']};
+    coTc: !!m['MATROCHOI'], coTcMk: !!m['MAMOKHOATROCHOI'], xemgv: m['MAXEMGV'] || ''};
 }
 // Tab <MaDot>: Cau | NoiDung | A | B | C | D | DapAn | Hinh | Loai (TN/DS/TLN) | Diem
 //   TN : trac nghiem 4 phuong an, DapAn = A/B/C/D
@@ -3572,7 +3572,7 @@ function timHS(ma) {
       return {ten: String(rows[i][1]).trim(), maxem: mx};
     }
   }
-  if (laGV(ma) && ma.slice(0, 6) === tienToLop()) return {ten: 'GV', maxem: MX_GV, gv: true};   // tai khoan GV dong vai HS (khong nam trong DANHSACH)
+  if (laGV(ma) && ma.slice(0, 6) === tienToLop()) return {ten: 'GV', maxem: mxGV(), gv: true};   // tai khoan GV dong vai HS (khong nam trong DANHSACH)
   return null;
 }
 // ---------------------------------------------------------------------
@@ -3580,7 +3580,7 @@ function timHS(ma) {
 // Khong co trong DANHSACH (khong vao si so); bai/diem/tro choi/luyen tap cua SBD nay bi an khoi moi thong ke tren trang GV (AN_GV).
 // ---------------------------------------------------------------------
 var AN_GV = false;
-const MX_GV = '0000';
+function mxGV() { let m = ''; try { m = docMaNhanh().xemgv; } catch (e) {} return m || '0000'; }   // kho tab MA dong MaXemGV (dat o Cai dat → Ma); chua dat = 0000
 function laGV(ma) { return /^\d{6}00$/.test(String(ma == null ? '' : ma).replace(/^'/, '').trim()); }
 function boGV(v, c) { return AN_GV ? v.filter(function (r) { return !laGV(r[c]); }) : v; }
 // ---------------------------------------------------------------------
