@@ -357,7 +357,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <script src="quet-omr.js"></script>
 <script src="danh-dau.js"></script>
 <script src="hinh/giao-dien/bieu-tuong.js"></script>
-<script>[].forEach.call(document.querySelectorAll("[data-bt]"),function(e){if(window.BT)e.innerHTML=BT[e.getAttribute("data-bt")];});</script>
+<script>
+  // May da dang nhap trang GV (cung trang web) gui kem ma thiet bi → mo duoc tai khoan GV (SBD ...00, ma 0000)
+  (function () { var tb = ''; try { tb = localStorage.getItem('gv_tb') || ''; } catch (e) {} if (!tb || !window.fetch) return; var f = window.fetch;
+    window.fetch = function (u, o) { try { if (o && o.method === 'POST' && typeof o.body === 'string' && o.body.indexOf('"maxem"') >= 0) { var b = JSON.parse(o.body); b.tb = tb; o = Object.assign({}, o, { body: JSON.stringify(b) }); } } catch (e) {} return f.call(this, u, o); }; })();[].forEach.call(document.querySelectorAll("[data-bt]"),function(e){if(window.BT)e.innerHTML=BT[e.getAttribute("data-bt")];});</script>
 <script>document.write('<script src="tai-nguyen/danh-muc.js?v=' + Date.now() + '"><\/script>');</script>
 <script>document.write('<script src="tai-nguyen/tai-len.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
@@ -389,6 +392,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         .then(function (r) { return r.json(); })
         .then(function (j) {
           if (!j.ok && /SBD hoac ma xem/i.test(j.msg || '')) { $('btnXem').disabled = false; return loi('SBD hoặc mã xem bài chưa đúng.'); }
+          if (!j.ok && /Tài khoản GV/.test(j.msg || '')) { $('btnXem').disabled = false; return loi(j.msg); }
           if (!j.ok) throw new Error(j.msg || 'loi');
           $('btnXem').disabled = false;
           duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; KT = null; KT_SEL = 'tat'; $('maxem').value = ''; $('msg').textContent = '';

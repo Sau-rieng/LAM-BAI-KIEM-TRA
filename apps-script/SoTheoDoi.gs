@@ -60,7 +60,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  CH_NHO = null;
+  CH_NHO = null; AN_GV = false; BM_MSG = '';
   try {
     const d = JSON.parse(e.postData.contents);
     BM_TB = (String(d.tb || '').slice(0, 40) + ' · ' + String(d.ua || '').slice(0, 160)).replace(/^ · $/, '');
@@ -181,6 +181,7 @@ function doPost(e) {
       case 'gv_tc_themkhung':
       case 'gv_tc_xoakhung':
         if (!kiemGV(d)) return json({ok: false, loi: 'ma', khoa: !!BM_MSG, msg: BM_MSG || 'Ma quan ly chua dung'});
+        AN_GV = true;   // trang GV: an bai/diem cua tai khoan GV (SBD ...00) khoi moi thong ke
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
@@ -369,7 +370,7 @@ function nopBai(d) {
 function xemLai(d) {
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const ketqua = [];
   const gtMap = docGiaiThich(), nxMap = docNhanXet();
   let tlMap = null;
@@ -412,7 +413,7 @@ function xemLai(d) {
 // HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
 function hsAnhPhieu(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma), madot = String(d.madot || '').trim();
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const c = timDot(madot);
   if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
   const bai = timBaiDaNop(madot, ma), id = bai ? idTuUrl(bai.file) : '';
@@ -453,7 +454,7 @@ function ghiXemTN(d) {
 function gvTaiNguyen() {
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(TAB_TN), xem = [];
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+  if (sh && sh.getLastRow() > 1) boGV(sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues(), 2).forEach(function (r) {
     if (String(r[1]).trim()) xem.push([r[0] instanceof Date ? r[0].getTime() : 0, String(r[1]).trim(), String(r[2]).trim(), String(r[3]).trim()]);
   });
   const ds = ss.getSheetByName(TAB_DS);
@@ -647,7 +648,7 @@ function gvTnLay(d) { return layHtmlTN(d.matn, true); }
 function tnLay(d) {
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const r = layHtmlTN(d.matn, false);
   if (r.ok) ghiDong(TAB_TN, HEAD_TN, [new Date(), String(d.matn).trim().slice(0, 80), ma, hs.ten]);
   return r;
@@ -659,7 +660,8 @@ function gvSoLieu(d) {
   const tu = String(d.tu || '0000-00-00'), den = String(d.den || '9999-99-99');
   const trong = function (v) { const n = ngayCua(v); return n && n >= tu && n <= den; };
   const ss = SpreadsheetApp.getActive();
-  const bang = function (ten) { const sh = ss.getSheetByName(ten); if (!sh || sh.getLastRow() < 2) return []; const v = sh.getDataRange().getValues(); v.shift(); return v; };
+  const cotMa = {}; cotMa[TAB_BL] = 2; cotMa[TAB_XL] = 2; cotMa[TAB_HD] = 2; cotMa[TAB_KQ] = 4; cotMa[TAB_TN] = 2; cotMa[TAB_TIN] = 1; cotMa[TAB_NKC] = 3;
+  const bang = function (ten) { const sh = ss.getSheetByName(ten); if (!sh || sh.getLastRow() < 2) return []; const v = sh.getDataRange().getValues(); v.shift(); return ten in cotMa ? boGV(v, cotMa[ten]) : v; };
   const caCua = {};
   try { docCauHinh().forEach(function (c) { if (c.ca) caCua[c.madot] = c.ca; }); } catch (e) {}
   // Bai lam trong khoang: luot nop + lan nop sau cung moi em moi de
@@ -762,7 +764,7 @@ function docKQTroGoc() {
     return {t: r[0] instanceof Date ? r[0].getTime() : 0, matro: String(r[1]).trim(), ten: String(r[2]).trim(), kieu: String(r[3]).trim(),
       mahs: String(r[4]).trim(), hoten: String(r[5]).trim(), nhom: String(r[6]).trim(), tv: String(r[7] || '').split(',').filter(String),
       diem: Number(r[8]) || 0, ds: docDS(r[9]), giay: Number(r[10]) || 0, ml: String(r[11]).trim(), bo: String(r[12]).trim(), ct: ct, lydo: String(r[14] || '')};
-  }).filter(function (x) { return x.matro; });
+  }).filter(function (x) { return x.matro && !(AN_GV && laGV(x.mahs)); });
 }
 // ---- Tro khung: doi cau trong bo sang dang cau de (de dung chung cham diem, xem lai, danh gia kien thuc) ----
 const THANG_DS_TRO = [0, 0.3, 0.7, 1.2, 2];
@@ -871,7 +873,12 @@ function bmDem(k, phut) { const c = CacheService.getScriptCache(), n = (Number(c
 function bmKhoa(k) { return !!CacheService.getScriptCache().get(k); }
 function bmDatKhoa(k, phut) { CacheService.getScriptCache().put(k, '1', phut * 60); }
 function dungMaXem(hs, d) {
-  const nhap = String(d.maxem || '').trim(), ok = !!(hs && hs.maxem && nhap === hs.maxem);
+  const nhap = String(d.maxem || '').trim();
+  let ok = !!(hs && hs.maxem && nhap === hs.maxem);
+  if (ok && hs.gv && mayTin().indexOf(String(d.tb || '').trim()) < 0) {
+    if (bmDem('tkgv', 10) === 1) bmGhi('THU_TK_GV', 'Vừa', 'SBD ' + String(d.mahs || '').trim() + ' (tài khoản GV)', 'Có người nhập đúng mã 0000 của tài khoản GV nhưng trên máy chưa từng đăng nhập trang GV → đã chặn. Nếu không phải thầy/cô thì có thể HS đang thử vào tài khoản GV.');
+    BM_MSG = 'Tài khoản GV chỉ mở được trên máy đã đăng nhập trang giáo viên (mở lớp này ở trang GV trên máy này một lần).'; return false;
+  }
   if (!ok && nhap !== '') {
     const ma = String(d.mahs || '').trim(), n = bmDem('sx_' + ma, 15), tong = bmDem('sx_tat', 10);
     if (n >= 5 && !bmKhoa('kx_' + ma)) { bmDatKhoa('kx_' + ma, 15); bmGhi('KHOA_MA_XEM', 'Cao', 'SBD ' + ma + (hs ? ' · ' + hs.ten : ' (không có trong lớp)'), 'Nhập sai mã xem bài 5 lần trong 15 phút → khóa tài khoản này 15 phút. Có thể có người đang dò mã để xem/làm thay bài của em này.'); }
@@ -1167,7 +1174,7 @@ function gvGiayLop(d) {
   const dsh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), hs = [];
   if (dsh && dsh.getLastRow() > 1) dsh.getRange(2, 1, dsh.getLastRow() - 1, 2).getValues().forEach(function (r) { if (String(r[0]).trim()) hs.push({mahs: String(r[0]).trim(), hoten: String(r[1]).trim()}); });
   const da = {}, sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 13).getValues().forEach(function (r) {
+  if (sh && sh.getLastRow() > 1) boGV(sh.getRange(2, 1, sh.getLastRow() - 1, 13).getValues(), 2).forEach(function (r) {
     if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7], ct: String(r[9] || ''), anh: String(r[10] || ''), ghi: String(r[12] || '')};
   });
   return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da, cho: demAnhCho(ca)};
@@ -1362,7 +1369,7 @@ function gvTLAI(d) {
 // HS xem anh bai tu luan cua minh (khi de da cho xem lai)
 function hsAnhTL(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma), c = timDot(String(d.madot || '').trim());
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
   const x = docTLDiem(c.ca || c.madot)[ma]; if (!x || !x.anh) return {ok: false, msg: 'Khong co anh'};
   return {ok: true, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(DriveApp.getFileById(x.anh).getBlob().getBytes())};
@@ -2007,7 +2014,7 @@ function hoSoLop() {
   const bai = [], dauTien = {};
   const bl = ss.getSheetByName(TAB_BL);
   if (bl && bl.getLastRow() > 1) {
-    bl.getRange(2, 1, bl.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+    boGV(bl.getRange(2, 1, bl.getLastRow() - 1, HEAD_BL.length).getValues(), 2).forEach(function (r) {
       const madot = String(r[1]).trim(), ma = String(r[2]).trim();
       if (!madot || !ma) return;
       const luc = r[0] instanceof Date ? r[0].getTime() : 0;
@@ -2020,7 +2027,7 @@ function hoSoLop() {
   const choi = [];
   const hd = ss.getSheetByName(TAB_HD);
   if (hd && hd.getLastRow() > 1) {
-    hd.getRange(2, 1, hd.getLastRow() - 1, HEAD_HD.length).getValues().forEach(function (r) {
+    boGV(hd.getRange(2, 1, hd.getLastRow() - 1, HEAD_HD.length).getValues(), 2).forEach(function (r) {
       const m = /^(\d+(?:[.,]\d+)?)\/(\d+)$/.exec(docDS(r[6]));
       if (!m) return;
       choi.push({mahs: String(r[2]).trim(), tro: String(r[1]).trim(), ten: String(r[4] || r[1]).trim(),
@@ -2208,7 +2215,7 @@ function gvTxLuu(d) {
 function gvTxVo(d) {
   const ma = String(d.mahs || '').replace(/\D/g, ''), ngay = String(d.ngay || '').trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay)) return {ok: false, msg: 'Ngay khong hop le'};
-  const hs = timHS(ma); if (!hs) return {ok: false, msg: 'SBD ' + ma + ' khong co trong lop ' + lopNay()};
+  const hs = timHS(ma); if (!hs || hs.gv) return {ok: false, msg: 'SBD ' + ma + ' khong co trong lop ' + lopNay()};
   const id = ngay + '#v';
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
@@ -2290,7 +2297,7 @@ function gvDaThi() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
   const m = {};
   if (sh && sh.getLastRow() > 1) {
-    sh.getRange(2, 2, sh.getLastRow() - 1, 2).getValues().forEach(function (r) {
+    boGV(sh.getRange(2, 2, sh.getLastRow() - 1, 2).getValues(), 1).forEach(function (r) {
       const d = String(r[0]).trim(), ma = String(r[1]).trim();
       if (!d || !ma) return;
       (m[d] = m[d] || {})[ma] = 1;
@@ -2356,7 +2363,7 @@ function gvMaTranDe(d) {
   const bd = {}; co.forEach(function (m) { bd[m] = banDoGoc(de[m], ref); });
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL), bai = {};
   if (sh && sh.getLastRow() > 1) {
-    sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+    boGV(sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues(), 2).forEach(function (r) {
       const md = String(r[1]).trim(); if (!de[md]) return;
       const ma = String(r[2]).trim(), lan = Number(r[11]) || 1, k = ma + '|' + (co.length > 1 && de[md].giay ? 'ca' : md);
       if (!bai[k] || lan >= bai[k].lan) bai[k] = {ma: ma, md: md, made: String(r[4] || ''), lan: lan, ct: r[9]};
@@ -2485,7 +2492,7 @@ function gvCau(d) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
   const bai = {};
   if (sh && sh.getLastRow() > 1) {
-    sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+    boGV(sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues(), 2).forEach(function (r) {
       if (String(r[1]).trim() !== madot) return;
       const ma = String(r[2]).trim(), lan = Number(r[11]) || 1;
       if (!bai[ma] || lan >= bai[ma].lan) bai[ma] = {lan: lan, ct: r[9]};
@@ -2546,7 +2553,7 @@ function gvKienThuc(d) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
   const bai = {}, thuTu = [], dau = {};
   if (sh && sh.getLastRow() > 1) {
-    sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+    boGV(sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues(), 2).forEach(function (r) {
       const md = String(r[1]).trim(), ma = String(r[2]).trim(), lan = Number(r[11]) || 1;
       if (!md || !ma || (madot && md !== madot)) return;
       if (!bai[md]) { bai[md] = {}; thuTu.push(md); }
@@ -3170,7 +3177,7 @@ function gvTcKetQua(d) {
   function tg(v) { return v instanceof Date ? v.getTime() : (v ? new Date(v).getTime() || 0 : 0); }
   const canhan = [], nhom = [];
   const hd = ss.getSheetByName(TAB_HD);
-  if (hd && hd.getLastRow() > 1) hd.getRange(2, 1, hd.getLastRow() - 1, HEAD_HD.length).getValues().forEach(function (r) {
+  if (hd && hd.getLastRow() > 1) boGV(hd.getRange(2, 1, hd.getLastRow() - 1, HEAD_HD.length).getValues(), 2).forEach(function (r) {
     const mt = String(r[1]).trim();
     if (!mt || (loc && mt !== loc && mt.indexOf(loc + ':') !== 0)) return;
     canhan.push([tg(r[0]), mt, String(r[2]).trim(), String(r[3]).trim(), docDS(r[6]), Number(r[7]) || 0, mt.indexOf(':') > 0 && r[5] !== '' ? Number(String(r[5]).replace(',', '.')) : null, '']);
@@ -3565,8 +3572,17 @@ function timHS(ma) {
       return {ten: String(rows[i][1]).trim(), maxem: mx};
     }
   }
+  if (laGV(ma) && ma.slice(0, 6) === tienToLop()) return {ten: 'GV', maxem: MX_GV, gv: true};   // tai khoan GV dong vai HS (khong nam trong DANHSACH)
   return null;
 }
+// ---------------------------------------------------------------------
+// TAI KHOAN GV DONG VAI HS: moi lop co SBD <tien to lop>00, ten GV, ma xem 0000 – chi mo duoc tren may da dang nhap trang GV.
+// Khong co trong DANHSACH (khong vao si so); bai/diem/tro choi/luyen tap cua SBD nay bi an khoi moi thong ke tren trang GV (AN_GV).
+// ---------------------------------------------------------------------
+var AN_GV = false;
+const MX_GV = '0000';
+function laGV(ma) { return /^\d{6}00$/.test(String(ma == null ? '' : ma).replace(/^'/, '').trim()); }
+function boGV(v, c) { return AN_GV ? v.filter(function (r) { return !laGV(r[c]); }) : v; }
 // ---------------------------------------------------------------------
 // TAI KHOAN CHUNG: 1 SBD + 1 mat khau cho em hoc nhieu lop (VD 12G01 + 12CLB + 12AFTER).
 // Lop chinh = lop co tien to SBD trung voi SBD cua em; cac lop phu ghi cung SBD do trong DANHSACH.
@@ -3623,7 +3639,7 @@ function dongBoTK(ep) {
 function hsKienThuc(d) {
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const kt = docKienThuc(), theo = {}, dot = [];
   docCauHinh().forEach(function (c) {
     if (!hopLop(c)) return;
@@ -3713,7 +3729,7 @@ function docLuyenThem(khoi, chiDuyet) {
 function hsLuyen(d) {
   MEMO = {};
   const ma = String(d.mahs || '').trim(), hs = timHS(ma);
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const kq = hsKienThuc(d); if (!kq.ok) return kq;
   const pham = String(d.pham || 'tat');
   const dot = pham === 'tat' ? kq.dot : kq.dot.filter(function (g) { return g.madot === pham; });
@@ -3804,7 +3820,7 @@ function ghiCanThem(khoi, ds) {
 }
 function hsLuyenNop(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma);
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   let p = null; try { p = JSON.parse(CacheService.getScriptCache().get('lt_' + String(d.id || '')) || 'null'); } catch (e) {}
   if (!p || p.ma !== ma) return {ok: false, msg: 'Bai luyen da het han, em tao bai moi nhe'};
   const chon = Array.isArray(d.chon) ? d.chon : [];
@@ -3832,7 +3848,7 @@ function docLuyenTap() {
   return sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_LT.length).getValues().map(function (r) {
     let kt = {}; try { kt = JSON.parse(r[5] || '{}'); } catch (e) {}
     return {luc: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), mahs: String(r[1]).trim(), pham: String(r[2]), lam: Number(r[3]) || 0, dung: Number(r[4]) || 0, kt: kt};
-  }).filter(function (x) { return x.mahs; });
+  }).filter(function (x) { return x.mahs && !(AN_GV && laGV(x.mahs)); });
 }
 function docLuyenHS(ma) { return docLuyenTap().filter(function (x) { return x.mahs === ma; }).map(function (x) { return {luc: x.luc, lam: x.lam, dung: x.dung, kt: x.kt}; }); }
 // GV: tien bo luyen tap cua lop: moi em so lan, % dung theo kien thuc o bai kiem tra (truoc) -> o cac lan luyen (sau)
@@ -3932,7 +3948,7 @@ function ksCuaLop(x) { const l = khongDau(lopNay()); return x.lop.indexOf('TAT')
 function ksDangMo(x) { const n = new Date(); return (!x.mo || new Date(x.mo) <= n) && (!x.dong || new Date(x.dong) >= n); }
 function docKSDaLam() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_KSL), o = {};
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) { const d = String(r[0]).trim(); (o[d] = o[d] || {})[String(r[1]).trim().replace(/^'/, '')] = 1; });
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) { const d = String(r[0]).trim(), m = String(r[1]).trim().replace(/^'/, ''); if (AN_GV && laGV(m)) return; (o[d] = o[d] || {})[m] = 1; });
   return o;
 }
 // Cho xemLai: cac dot dang mo cua lop + em da lam chua
@@ -3945,7 +3961,7 @@ function ksChoHS(ma) {
 }
 function hsKSNop(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma);
-  if (!dungMaXem(hs, d)) return {ok: false, msg: 'SBD hoac ma xem bai chua dung'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const dot = docKSDot().filter(function (x) { return x.ma === String(d.dot || ''); })[0];
   if (!dot || !ksCuaLop(dot)) return {ok: false, msg: 'Không có đợt khảo sát này.'};
   if (!ksDangMo(dot)) return {ok: false, msg: 'Đợt khảo sát đã đóng.'};
@@ -3961,7 +3977,7 @@ function hsKSNop(d) {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     if ((docKSDaLam()[dot.ma] || {})[ma]) return {ok: true, trung: true};
-    layTab(TAB_KS, HEAD_KS).appendRow([dot.ma, Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd'), JSON.stringify(tl)]);
+    if (!hs.gv) layTab(TAB_KS, HEAD_KS).appendRow([dot.ma, Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd'), JSON.stringify(tl)]);
     layTab(TAB_KSL, HEAD_KSL).appendRow([dot.ma, "'" + ma, new Date()]);
   } finally { lock.releaseLock(); }
   return {ok: true};
@@ -4381,7 +4397,7 @@ function cacDotDaLam() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
   if (!sh || sh.getLastRow() < 2) return [];
   const ds = [];
-  sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().forEach(function (r) {
+  boGV(sh.getRange(2, 2, sh.getLastRow() - 1, 2).getValues(), 1).forEach(function (r) {
     const m = String(r[0]).trim();
     if (m && ds.indexOf(m) < 0) ds.push(m);
   });
@@ -4397,7 +4413,7 @@ function dotGanNhat() {
 // Lay bai nop cua mot dot; moi HS chi lay LAN LAM CUOI.
 function docBaiNop(madot) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
-  const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues();
+  const v = boGV(sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues(), 2);
   const theoHS = {};
   v.forEach(function (r) {
     if (String(r[1]).trim() !== madot) return;

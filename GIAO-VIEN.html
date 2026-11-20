@@ -5951,7 +5951,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   // ---------- BẢO MẬT: sự việc (dò mã, khóa tạm, điểm sửa ngoài hệ thống), nhật ký thay đổi điểm + hoàn tác ----------
   var BM = null, BMNK = {};
-  var BM_LOAI = { KHOA_MA_XEM: 'Dò mã xem bài của 1 em', DO_MA_HANG_LOAT: 'Dò mã xem bài hàng loạt', DO_MA_MO_KHOA: 'Dò mã mở khóa', SAI_MA_QL: 'Nhập sai mã quản lý', KHOA_GV: 'Chặn trang GV 30 phút', SUA_NGOAI_HE_THONG: 'Điểm bị sửa ngoài trang GV', QUEN_MA: 'Yêu cầu gửi mã đặt lại về Gmail', DOI_MA_QL: 'Đã đổi mã quản lý (qua Gmail)', DO_MA_OTP: 'Dò mã xác nhận Gmail' };
+  var BM_LOAI = { KHOA_MA_XEM: 'Dò mã xem bài của 1 em', DO_MA_HANG_LOAT: 'Dò mã xem bài hàng loạt', DO_MA_MO_KHOA: 'Dò mã mở khóa', SAI_MA_QL: 'Nhập sai mã quản lý', KHOA_GV: 'Chặn trang GV 30 phút', SUA_NGOAI_HE_THONG: 'Điểm bị sửa ngoài trang GV', QUEN_MA: 'Yêu cầu gửi mã đặt lại về Gmail', DOI_MA_QL: 'Đã đổi mã quản lý (qua Gmail)', DO_MA_OTP: 'Dò mã xác nhận Gmail', THU_TK_GV: 'Thử vào tài khoản GV (SBD …00) từ máy lạ' };
   function taiBaoMat(ep) {
     if (window.LAM_DEMO || !DS.length) return;
     var gop = { su: [], moi: 0, lech: 0, maYeu: false, khoaGV: false, loi: [] }, i = 0;
