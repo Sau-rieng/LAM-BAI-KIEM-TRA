@@ -373,6 +373,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
+  // Trang GV bam "Xem nhu hoc sinh": tu chon lop, dien SBD + mat khau va dang nhap
+  setTimeout(function () {
+    var x = null; try { x = JSON.parse(localStorage.getItem('gv_xemhs') || 'null'); localStorage.removeItem('gv_xemhs'); } catch (e) {}
+    if (!x || Date.now() - x.t > 120000) return;
+    var i = -1; DS.forEach(function (l, k) { if (l.tiento === x.tt) i = k; }); if (i < 0) return;
+    $('lop').value = i; $('lop').onchange(); $('sbd').value = x.sbd; $('maxem').value = x.mx; $('btnXem').click();
+  }, 0);
 
   $('btnXem').onclick = function () {
     $('msg').className = 'msg'; $('msg').textContent = '';

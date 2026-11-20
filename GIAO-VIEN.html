@@ -746,6 +746,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 @media (max-width:900px){.homeBa{grid-template-columns:1fr}}
 .the3{background:#fff;border:1px solid #e1ebf7;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(23,32,51,.04),0 6px 18px rgba(31,95,191,.06);text-align:left;display:flex;flex-direction:column;gap:4px;font-weight:400;color:var(--ink)}
 .the3 h2{font-size:17px;margin-bottom:4px}
+.xhO{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.xhO select,.xhO input{font-size:16px;padding:7px 8px;border:1.5px solid #cfdcee;border-radius:10px;background:#fff}.xhSbd{display:inline-flex;align-items:center;border:1.5px solid #cfdcee;border-radius:10px;padding-left:8px;background:#f6f9fd}.xhSbd input{border:0;width:5.5em;border-radius:0 10px 10px 0}#xhPre{color:#6b7a90;font-variant-numeric:tabular-nums}#xhMa{width:8em}
 .the3 .moRow{padding:9px 0}
 .moRow2{border-top:1px solid var(--line);padding:8px 0}
 .moRow2 b{display:block;font-size:15px}
@@ -837,6 +838,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <button class="the3 qrThe" id="oQR"><span class="bt3" id="qrIcon"></span><b>Mã QR vào thi</b><span>Chiếu lên cho học sinh quét: các em vào trang chọn lớp và điền thông tin.</span><i class="nut3">Mở mã QR ▸</i></button>
     <div id="bmBan" hidden></div><div class="the3" id="homeMo"></div>
     <div class="the3" id="homeTroThe"></div>
+    <div class="the3" id="xhThe"><h2>👁 Xem như học sinh</h2><p class="sub">Đăng nhập Tài khoản HS bằng tài khoản GV (SBD <b>00</b>) để xem các em thấy gì. Mật khẩu đổi ở Cài đặt → Mã.</p>
+      <div class="xhO"><select id="xhLop"></select><span class="xhSbd"><span id="xhPre">------</span><input id="xhSo" inputmode="numeric" maxlength="8" value="00"></span><input id="xhMa" type="password" inputmode="numeric" placeholder="Mật khẩu" autocomplete="off"></div>
+      <button class="btn2 nut3b" id="xhMo">Mở Tài khoản HS ▸</button><div class="msg" id="xhMsg"></div></div>
   </div>
   <div id="oNhom"></div>
   <button class="raNho" id="raNho">Thoát tài khoản</button>
@@ -4848,6 +4852,23 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
 
   // ---------- Trang chu ----------
+  // ---- Xem nhu hoc sinh: mo XEM-LAI va tu dang nhap (truyen qua localStorage, het han 2 phut, doc xong xoa) ----
+  (function () {
+    var sel = $('xhLop'); if (!sel) return;
+    var lops = DS.filter(function (l) { return window.LAM_DEMO || !/DEMO/i.test(l.ten); });
+    lops.forEach(function (l) { var o = document.createElement('option'); o.value = l.tiento; o.textContent = l.ten; sel.appendChild(o); });
+    try { var nho = localStorage.getItem('gv_xhlop'); if (nho && lops.some(function (l) { return l.tiento === nho; })) sel.value = nho; } catch (e) {}
+    var ve = function () { $('xhPre').textContent = sel.value || '------'; }; ve();
+    sel.onchange = function () { ve(); try { localStorage.setItem('gv_xhlop', sel.value); } catch (e) {} };
+    $('xhMo').onclick = function () {
+      var so = $('xhSo').value.trim(), ma = $('xhMa').value.trim(), m = $('xhMsg');
+      if (!/^\d{2}$/.test(so) && !/^\d{8}$/.test(so)) { m.textContent = 'SBD gồm 2 số cuối (hoặc đủ 8 số).'; return; }
+      if (!ma) { m.textContent = 'Nhập mật khẩu.'; return; }
+      try { localStorage.setItem('gv_xemhs', JSON.stringify({ tt: sel.value, sbd: so, mx: ma, t: Date.now() })); } catch (e) { m.textContent = 'Máy không cho lưu tạm, hãy mở Tài khoản HS và đăng nhập tay.'; return; }
+      m.textContent = ''; $('xhMa').value = '';
+      var w = window.open('XEM-LAI.html' + (window.LAM_DEMO ? '?demo' : ''), '_blank'); if (!w) location.href = 'XEM-LAI.html' + (window.LAM_DEMO ? '?demo' : '');
+    };
+  })();
   function veHome() {
     var n = new Date(), THU = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
     $('chaoNgay').textContent = THU[n.getDay()] + ', ' + ('0' + n.getDate()).slice(-2) + '/' + ('0' + (n.getMonth() + 1)).slice(-2) + '/' + n.getFullYear() + (window.LAM_DEMO ? ' · bản dùng thử' : '');
