@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sơ đồ tư duy & Luyện tập Chương 2: Bảng tuần hoàn các nguyên tố hóa học (Hóa 10 – KNTT)</title>
+  <style>
+    :root {
+      --page-bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --pill-bg: #f1f3f5;
+      --pill-hover: #e5e7eb;
+      --line-color: #64748b;
+
+      /* Blue - Root & Monosaccharide */
+      --blue-fill: #dceeff;
+      --blue-border: #3b82f6;
+      --blue-text: #1e3a8a;
+      --blue-soft: #f0f7ff;
+
+      /* Green - Disaccharide */
+      --green-fill: #dcfce7;
+      --green-border: #22a055;
+      --green-text: #14532d;
+      --green-soft: #f0fdf4;
+
+      /* Purple - Polysaccharide */
+      --purple-fill: #ede9fe;
+      --purple-border: #8b5cf6;
+      --purple-text: #4c1d95;
+      --purple-soft: #f5f3ff;
+
+      /* Feedback colors */
+      --ok-bg: #ecfdf5;
+      --ok-border: #10b981;
+      --ok-text: #065f46;
+      --err-bg: #fef2f2;
+      --err-border: #ef4444;
+      --err-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px 16px 40px;
+      line-height: 1.55;
+    }
+
+    /* Top subtle toolbar */
+    .toolbar {
+      max-width: 1120px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tab-btn:hover {
+      background: #f9fafb;
+      color: var(--text);
+    }
+
+    .tab-btn.active[data-filter="all"] { background: #1f2937; color: #fff; border-color: #1f2937; }
+    .tab-btn.active[data-filter="ct"] { background: var(--blue-border); color: #fff; border-color: var(--blue-border); }
+    .tab-btn.active[data-filter="bd"] { background: var(--green-border); color: #fff; border-color: var(--green-border); }
+    .tab-btn.active[data-filter="dl"] { background: var(--purple-border); color: #fff; border-color: var(--purple-border); }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .action-btn:hover {
+      background: #f3f4f6;
+      color: var(--text);
+    }
+
+    .action-btn.primary-quiz {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .action-btn.primary-quiz:hover {
+      background: #1d4ed8;
+    }
+
+    /* Main White Mindmap Canvas */
+    .canvas-card {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 28px 28px 34px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Root Pill */
+    .root-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .root-pill {
+      background: var(--blue-fill);
+      border: 2px solid var(--blue-border);
+      border-radius: 999px;
+      padding: 12px 38px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      min-width: 290px;
+    }
+
+    .root-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.18);
+    }
+
+    .root-pill .title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .root-pill .sub {
+      font-size: 0.86rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Root inline accordion */
+    .root-drawer {
+      max-width: 720px;
+      width: 100%;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .root-drawer.open {
+      max-height: 540px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+
+    /* SVG Connector between root and 3 columns */
+    .tree-connectors {
+      width: 100%;
+      height: 52px;
+      display: block;
+      margin: 2px 0;
+    }
+
+    /* 3 Columns Grid */
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .columns.single-col {
+      grid-template-columns: minmax(0, 560px);
+      justify-content: center;
+    }
+
+    .branch-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .branch-col.hidden {
+      display: none;
+    }
+
+    /* Branch Header Pill */
+    .branch-pill {
+      border-radius: 999px;
+      padding: 11px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+
+    .branch-pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .branch-pill .b-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .branch-pill .b-sub {
+      font-size: 0.84rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .branch-col[data-branch="ct"] .branch-pill { background: var(--blue-fill); border-color: var(--blue-border); }
+    .branch-col[data-branch="ct"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(59, 130, 246, 0.16); }
+
+    .branch-col[data-branch="bd"] .branch-pill { background: var(--green-fill); border-color: var(--green-border); }
+    .branch-col[data-branch="bd"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(34, 160, 85, 0.16); }
+
+    .branch-col[data-branch="dl"] .branch-pill { background: var(--purple-fill); border-color: var(--purple-border); }
+    .branch-col[data-branch="dl"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(139, 92, 246, 0.16); }
+
+    /* Dotted Vertical Tree List under each Branch */
+    .sub-tree {
+      position: relative;
+      margin-top: 14px;
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sub-tree::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -14px;
+      bottom: 24px;
+      border-left: 2px dotted var(--line-color);
+    }
+
+    .node-item {
+      position: relative;
+    }
+
+    .node-item::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 23px;
+      width: 14px;
+      border-top: 2px dotted var(--line-color);
+    }
+
+    /* Sub-node Pill Button */
+    .sub-pill {
+      width: 100%;
+      background: var(--pill-bg);
+      border: 1.5px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+
+    .sub-pill:hover {
+      background: var(--pill-hover);
+      border-color: #cbd5e1;
+    }
+
+    .sub-pill .pill-label {
+      flex: 1;
+      text-align: center;
+      padding-left: 14px;
+    }
+
+    .sub-pill .chev {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      transition: transform 0.22s ease;
+      flex-shrink: 0;
+    }
+
+    .node-item.open .sub-pill .chev {
+      transform: rotate(180deg);
+    }
+
+    .branch-col[data-branch="ct"] .node-item.open .sub-pill {
+      background: var(--blue-fill);
+      border-color: var(--blue-border);
+      color: var(--blue-text);
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.14);
+    }
+
+    .branch-col[data-branch="bd"] .node-item.open .sub-pill {
+      background: var(--green-fill);
+      border-color: var(--green-border);
+      color: var(--green-text);
+      box-shadow: 0 3px 10px rgba(34, 160, 85, 0.14);
+    }
+
+    .branch-col[data-branch="dl"] .node-item.open .sub-pill {
+      background: var(--purple-fill);
+      border-color: var(--purple-border);
+      color: var(--purple-text);
+      box-shadow: 0 3px 10px rgba(139, 92, 246, 0.14);
+    }
+
+    /* Accordion Expandable Content */
+    .drawer {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.34s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .node-item.open .drawer {
+      max-height: 1600px;
+      opacity: 1;
+      margin-top: 8px;
+    }
+
+    .drawer-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left-width: 4px;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 0.87rem;
+      color: #1f2937;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .branch-col[data-branch="ct"] .drawer-inner,
+    .root-drawer .drawer-inner {
+      border-left-color: var(--blue-border);
+      background: var(--blue-soft);
+    }
+
+    .branch-col[data-branch="bd"] .drawer-inner {
+      border-left-color: var(--green-border);
+      background: var(--green-soft);
+    }
+
+    .branch-col[data-branch="dl"] .drawer-inner {
+      border-left-color: var(--purple-border);
+      background: var(--purple-soft);
+    }
+
+    .drawer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .drawer-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .zoom-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .zoom-btn:hover { background: #f1f5f9; }
+
+    .d-list {
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .d-list li strong { color: #0f172a; }
+
+    /* Chemical Equation Box */
+    .eq {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin: 7px 0;
+      overflow-x: auto;
+    }
+
+    .eq-note {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .eq-formula {
+      font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+      font-size: 0.96rem;
+      color: #0f172a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .arr {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.05;
+      margin: 0 3px;
+    }
+
+    .arr .cond {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.68rem;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .arr .sym {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.8rem;
+    }
+
+    .mini-table th, .mini-table td {
+      border: 1px solid #e2e8f0;
+      padding: 5px 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .tip {
+      margin-top: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 0.8rem;
+      color: #78350f;
+    }
+
+    /* Practice Launcher Bar inside each Drawer */
+    .practice-bar {
+      margin-top: 11px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .practice-bar .p-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .practice-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .q-count-select {
+      padding: 4px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .start-quiz-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.12s ease;
+    }
+
+    .start-quiz-btn:hover {
+      filter: brightness(0.93);
+      transform: translateY(-1px);
+    }
+
+    .branch-col[data-branch="ct"] .start-quiz-btn { background: var(--blue-border); }
+    .branch-col[data-branch="bd"] .start-quiz-btn { background: var(--green-border); }
+    .branch-col[data-branch="dl"] .start-quiz-btn { background: var(--purple-border); }
+    .root-drawer .start-quiz-btn { background: #1f2937; }
+
+    .footer-hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 22px;
+    }
+
+    /* Modal Backdrop (used for Zoom & Quiz) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 22px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-close {
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover { background: #cbd5e1; }
+
+    .modal-body {
+      padding: 20px 22px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid #e5e7eb;
+      background: #f8fafc;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Quiz Styling inside Modal */
+    .quiz-setup-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+
+    .quiz-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+
+    .quiz-card.correct-card {
+      border-color: var(--ok-border);
+      background: #fafefd;
+    }
+
+    .quiz-card.wrong-card {
+      border-color: var(--err-border);
+      background: #fffafa;
+    }
+
+    .quiz-card.hidden-review {
+      display: none;
+    }
+
+    .q-text {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .q-num {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+
+    .opt-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .opt-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: #ffffff;
+      transition: all 0.15s ease;
+    }
+
+    .opt-label:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .opt-label input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .opt-label.is-selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .opt-label.is-correct {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok-text);
+      font-weight: 600;
+    }
+
+    .opt-label.is-wrong {
+      background: var(--err-bg);
+      border-color: var(--err-border);
+      color: var(--err-text);
+      font-weight: 600;
+    }
+
+    .opt-badge {
+      margin-left: auto;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .exp-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .exp-box.exp-ok {
+      background: var(--ok-bg);
+      border: 1px solid #a7f3d0;
+      color: var(--ok-text);
+    }
+
+    .exp-box.exp-err {
+      background: var(--err-bg);
+      border: 1px solid #fecaca;
+      color: var(--err-text);
+    }
+
+    /* Result Summary Banner */
+    .result-banner {
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1.5px solid #bfdbfe;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .score-big {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .score-msg {
+      font-size: 0.88rem;
+      color: #334155;
+      margin-top: 2px;
+    }
+
+    .review-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .rf-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rf-btn.active {
+      background: #1f2937;
+      color: #ffffff;
+      border-color: #1f2937;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    .progress-text {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Full-screen Zoom Modal for Classroom Presentation */
+    #zoomModal {
+      padding: 0;
+      background: #ffffff;
+    }
+
+    #zoomModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #zoomModal .modal-header {
+      padding: 20px 36px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #zoomModal .modal-title {
+      font-size: 1.65rem;
+      color: #0f172a;
+    }
+
+    #zoomModal .modal-close {
+      width: 44px;
+      height: 44px;
+      font-size: 1.35rem;
+    }
+
+    #zoomModal .modal-body {
+      padding: 32px 48px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #ffffff;
+    }
+
+    #zoomModal .zoom-content-wrap {
+      width: 100%;
+      max-width: 1080px;
+      font-size: 1.38rem;
+      line-height: 1.75;
+    }
+
+    #zoomModal .d-list {
+      gap: 14px;
+      padding-left: 26px;
+    }
+
+    #zoomModal .eq {
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 12px;
+      background: #f8fafc;
+      border-left: 5px solid #3b82f6;
+    }
+
+    #zoomModal .eq-note {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    #zoomModal .eq-formula {
+      font-size: 1.55rem;
+      gap: 8px;
+    }
+
+    #zoomModal .arr .cond {
+      font-size: 0.95rem;
+    }
+
+    #zoomModal .arr .sym {
+      font-size: 1.6rem;
+    }
+
+    #zoomModal .mini-table {
+      font-size: 1.22rem;
+      margin: 18px 0;
+    }
+
+    #zoomModal .mini-table th,
+    #zoomModal .mini-table td {
+      padding: 12px 16px;
+    }
+
+    #zoomModal .tip {
+      font-size: 1.18rem;
+      padding: 14px 18px;
+      margin-top: 18px;
+      border-radius: 12px;
+    }
+
+    /* Full-screen Quiz Modal for Comfortable Reading & Practice */
+    #quizModal {
+      padding: 0;
+      background: #f8fafc;
+    }
+
+    #quizModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #quizModal .modal-header {
+      padding: 18px 36px;
+      background: #ffffff;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #quizModal .modal-title {
+      font-size: 1.45rem;
+      color: #0f172a;
+    }
+
+    #quizModal .modal-subtitle {
+      font-size: 0.92rem;
+    }
+
+    #quizModal .modal-close {
+      width: 42px;
+      height: 42px;
+      font-size: 1.3rem;
+    }
+
+    #quizModal .modal-body {
+      padding: 24px 36px 36px;
+      background: #f8fafc;
+    }
+
+    #quizModal .quiz-inner-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    #quizModal .quiz-setup-bar {
+      font-size: 0.96rem;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    #quizModal .quiz-card {
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    #quizModal .q-text {
+      font-size: 1.12rem;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    #quizModal .q-num {
+      font-size: 0.86rem;
+      padding: 3px 10px;
+    }
+
+    #quizModal .opt-label {
+      font-size: 1.04rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .exp-box {
+      font-size: 0.96rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .score-big {
+      font-size: 1.6rem;
+    }
+
+    #quizModal .score-msg {
+      font-size: 1rem;
+    }
+
+    #quizModal .modal-footer {
+      padding: 16px 36px;
+      background: #ffffff;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    #quizModal .progress-text {
+      font-size: 0.98rem;
+    }
+
+    #quizModal .btn-primary,
+    #quizModal .btn-secondary {
+      font-size: 0.96rem;
+      padding: 10px 20px;
+    }
+
+    /* Custom In-Modal Confirm Box (never exits fullscreen) */
+    .confirm-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+      backdrop-filter: blur(2px);
+    }
+
+    .confirm-overlay.show {
+      display: flex;
+    }
+
+    .confirm-card {
+      background: #ffffff;
+      border-radius: 16px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      border: 1px solid #e2e8f0;
+    }
+
+    .confirm-card h3 {
+      font-size: 1.15rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .confirm-card p {
+      font-size: 0.96rem;
+      color: #334155;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    @media (max-width: 700px) {
+      #quizModal .modal-header,
+      #quizModal .modal-body,
+      #quizModal .modal-footer,
+      #zoomModal .modal-header,
+      #zoomModal .modal-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      #quizModal .q-text { font-size: 1rem; }
+      #quizModal .opt-label { font-size: 0.95rem; }
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .canvas-card { padding: 20px 14px 24px; }
+      .tree-connectors { display: none; }
+      .columns { grid-template-columns: 1fr; gap: 20px; margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="tab-btn active" data-filter="all">Tất cả</button>
+      <button class="tab-btn" data-filter="ct">1. Cấu tạo Bảng tuần hoàn</button>
+      <button class="tab-btn" data-filter="bd">2. Xu hướng biến đổi</button>
+      <button class="tab-btn" data-filter="dl">3. Định luật &amp; Ý nghĩa</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="action-btn primary-quiz" id="btnChapterQuiz">📝 Luyện tập tổng hợp (10–30 câu)</button>
+      <button class="action-btn" id="btnExpandAll">Mở tất cả</button>
+      <button class="action-btn" id="btnCollapseAll">Thu gọn hết</button>
+    </div>
+  </div>
+
+  <main class="canvas-card">
+    <!-- ROOT NODE -->
+    <div class="root-wrap">
+      <div class="root-pill" id="rootPill" role="button" tabindex="0" aria-expanded="false">
+        <div class="title">Chương 2: Bảng tuần hoàn các nguyên tố hóa học</div>
+        <div class="sub">Hóa học 10 · KNTT</div>
+      </div>
+
+      <div class="root-drawer" id="rootDrawer">
+        <div class="drawer-inner">
+          <div class="drawer-top">
+            <span class="drawer-tag">Tổng quan Chương 2 (Hóa 10)</span>
+          </div>
+          <ul class="d-list">
+            <li><strong>Bài 5 – Cấu tạo của bảng tuần hoàn:</strong> 3 nguyên tắc sắp xếp (tăng dần Z, cùng số lớp → chu kì, cùng số e hóa trị → nhóm), ô nguyên tố, 7 chu kì, 8 nhóm A, 8 nhóm B, 4 khối s/p/d/f và cách xác định vị trí từ cấu hình e.</li>
+            <li><strong>Bài 6 &amp; 7 – Xu hướng biến đổi tính chất:</strong> Biến đổi tuần hoàn của bán kính nguyên tử, độ âm điện (Pauling), tính kim loại – phi kim, thành phần và tính acid – base của oxide cao nhất &amp; hydroxide.</li>
+            <li><strong>Bài 8 – Định luật tuần hoàn &amp; Ý nghĩa:</strong> Nội dung định luật tuần hoàn, so sánh tính chất nguyên tố và mối liên hệ hai chiều giữa Vị trí ↔ Cấu tạo ↔ Tính chất.</li>
+          </ul>
+          <div class="practice-bar">
+            <span class="p-label">📝 Luyện tập cả Chương 2 (135 câu Biết &amp; Hiểu):</span>
+            <div class="practice-controls">
+              <select class="q-count-select" id="rootQuizCount">
+                <option value="10">10 câu</option>
+                <option value="15">15 câu</option>
+                <option value="20" selected>20 câu</option>
+                <option value="30">30 câu</option>
+              </select>
+              <button class="start-quiz-btn" data-quiz-topic="all">Làm bài ngay</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOTTED SVG CONNECTORS -->
+    <svg class="tree-connectors" id="treeConnectors" viewBox="0 0 900 56" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 450 2 L 450 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 165 20 Q 145 20 145 38 L 145 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 735 20 Q 755 20 755 38 L 755 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 139 43 L 145 50 L 151 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 444 43 L 450 50 L 456 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 749 43 L 755 50 L 761 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- 3 BRANCH COLUMNS -->
+    <div class="columns" id="columnsGrid">
+
+      <!-- COLUMN 1: CẤU TẠO BẢNG TUẦN HOÀN -->
+      <section class="branch-col" data-branch="ct">
+        <div class="branch-pill" data-branch-toggle="ct" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Cấu tạo Bảng tuần hoàn">
+          <div class="b-title">1. Cấu tạo Bảng tuần hoàn</div>
+          <div class="b-sub">Ô · Chu kì · Nhóm</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 1.1 -->
+          <div class="node-item" data-node="ct-nt">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Nguyên tắc &amp; Ô nguyên tố</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Cấu tạo • Nguyên tắc &amp; Ô nguyên tố</span>
+                  <button class="zoom-btn" data-zoom="ct-nt">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>3 nguyên tắc sắp xếp:</strong>
+                    <br>1. Theo chiều <strong>tăng dần điện tích hạt nhân (Z)</strong>.
+                    <br>2. Cùng <strong>số lớp electron</strong> → xếp vào 1 hàng (<strong>chu kì</strong>).
+                    <br>3. Cùng <strong>số electron hóa trị</strong> → xếp vào 1 cột (<strong>nhóm</strong>).
+                  </li>
+                  <li><strong>Ô nguyên tố:</strong> STT ô = <strong>Z</strong> = số p = số e. Cho biết Z, kí hiệu, tên, nguyên tử khối trung bình, độ âm điện, cấu hình electron...</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 1)</option>
+                      <option value="30">30 câu (+ôn nhánh 1)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ct-nt">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.2 -->
+          <div class="node-item" data-node="ct-ck">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Chu kì, Nhóm &amp; Khối nguyên tố</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Cấu tạo • Chu kì &amp; Nhóm</span>
+                  <button class="zoom-btn" data-zoom="ct-ck">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>7 chu kì:</strong> 3 chu kì nhỏ (CK 1: 2 NT; CK 2: 8 NT; CK 3: 8 NT) và 4 chu kì lớn (CK 4, 5: 18 NT; CK 6, 7: 32 NT).</li>
+                  <li><strong>18 cột = 8 nhóm A + 8 nhóm B:</strong> Nhóm VIIIB chiếm 3 cột.
+                    <br>• <strong>Nhóm A</strong> gồm các nguyên tố khối <strong>s</strong> và <strong>p</strong>.
+                    <br>• <strong>Nhóm B</strong> gồm các nguyên tố khối <strong>d</strong> và <strong>f</strong>.
+                  </li>
+                  <li><strong>Tên nhóm đặc trưng:</strong> IA (kim loại kiềm, trừ H), IIA (kiềm thổ), VIIA (halogen), VIIIA (khí hiếm).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 1)</option>
+                      <option value="30">30 câu (+ôn nhánh 1)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ct-ck">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.3 -->
+          <div class="node-item" data-node="ct-vt">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Xác định vị trí từ cấu hình e</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Cấu tạo • Quy tắc xác định vị trí</span>
+                  <button class="zoom-btn" data-zoom="ct-vt">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Số thứ tự ô</strong> = số hiệu nguyên tử <strong>Z</strong> (= tổng số electron).</li>
+                  <li><strong>Số thứ tự chu kì</strong> = <strong>số lớp electron</strong>.</li>
+                  <li><strong>Số thứ tự nhóm A</strong> = <strong>số electron lớp ngoài cùng</strong> (áp dụng cho nguyên tố s, p; riêng He: 1s² ở nhóm VIIIA).</li>
+                  <li><em>Ví dụ:</em> Cl (Z = 17): 1s<sup>2</sup>2s<sup>2</sup>2p<sup>6</sup>3s<sup>2</sup>3p<sup>5</sup> → <strong>Ô 17, chu kì 3, nhóm VIIA</strong>.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 1)</option>
+                      <option value="30">30 câu (+ôn nhánh 1)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="ct-vt">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: XU HƯỚNG BIẾN ĐỔI TÍNH CHẤT -->
+      <section class="branch-col" data-branch="bd">
+        <div class="branch-pill" data-branch-toggle="bd" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Xu hướng biến đổi">
+          <div class="b-title">2. Xu hướng biến đổi</div>
+          <div class="b-sub">r · χ · KL/PK · Oxide &amp; Hydroxide</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 2.1 -->
+          <div class="node-item" data-node="bd-bk">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Bán kính &amp; Độ âm điện</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Biến đổi • Bán kính (r) &amp; Độ âm điện (χ)</span>
+                  <button class="zoom-btn" data-zoom="bd-bk">Phóng to ⤢</button>
+                </div>
+                <table class="mini-table">
+                  <thead><tr><th>Đại lượng</th><th>Trong 1 chu kì (trái → phải)</th><th>Trong 1 nhóm A (trên → dưới)</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>Bán kính (r)</strong></td><td><strong>Giảm dần</strong> (cùng số lớp, Z tăng)</td><td><strong>Tăng dần</strong> (số lớp e tăng)</td></tr>
+                    <tr><td><strong>Độ âm điện (χ)</strong></td><td><strong>Tăng dần</strong> (hút e mạnh hơn)</td><td><strong>Giảm dần</strong> (hút e yếu hơn)</td></tr>
+                  </tbody>
+                </table>
+                <div class="tip"><strong>Lưu ý:</strong> Theo thang Pauling, <strong>Fluorine (F)</strong> có độ âm điện lớn nhất (<strong>3,98</strong>).</div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 2)</option>
+                      <option value="30">30 câu (+ôn nhánh 2)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="bd-bk">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.2 -->
+          <div class="node-item" data-node="bd-kl">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tính kim loại &amp; Phi kim</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Biến đổi • Tính kim loại &amp; Phi kim</span>
+                  <button class="zoom-btn" data-zoom="bd-kl">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Tính kim loại:</strong> Khả năng <strong>nhường e</strong>. Trong 1 chu kì (trái → phải) <strong>giảm dần</strong>; trong 1 nhóm A (trên → dưới) <strong>tăng dần</strong>. Kim loại mạnh nhất (bền): <strong>Cs</strong>.</li>
+                  <li><strong>Tính phi kim:</strong> Khả năng <strong>nhận e</strong>. Trong 1 chu kì (trái → phải) <strong>tăng dần</strong>; trong 1 nhóm A (trên → dưới) <strong>giảm dần</strong>. Phi kim mạnh nhất: <strong>F</strong>.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 2)</option>
+                      <option value="30">30 câu (+ôn nhánh 2)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="bd-kl">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 -->
+          <div class="node-item" data-node="bd-ox">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Oxide cao nhất &amp; Hydroxide</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Biến đổi • Oxide &amp; Hydroxide</span>
+                  <button class="zoom-btn" data-zoom="bd-ox">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Hóa trị cao nhất với O</strong> = STT nhóm A (R<sub>2</sub>O → R<sub>2</sub>O<sub>7</sub>).</li>
+                  <li><strong>Hóa trị với H (nhóm IVA–VIIA)</strong> = <strong>8 – STT nhóm A</strong> (RH<sub>4</sub>, RH<sub>3</sub>, H<sub>2</sub>R, HR).</li>
+                  <li><strong>Trong 1 chu kì (trái → phải):</strong> Tính <strong>base giảm</strong>, tính <strong>acid tăng</strong>.
+                    <br><em>Ví dụ CK 3:</em> NaOH (base mạnh) &gt; Mg(OH)<sub>2</sub> &gt; Al(OH)<sub>3</sub> (lưỡng tính) → H<sub>2</sub>SiO<sub>3</sub> &lt; H<sub>3</sub>PO<sub>4</sub> &lt; H<sub>2</sub>SO<sub>4</sub> &lt; HClO<sub>4</sub> (acid mạnh nhất).
+                  </li>
+                  <li><strong>Trong 1 nhóm A (trên → dưới):</strong> Tính <strong>base tăng</strong>, tính <strong>acid giảm</strong>.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 2)</option>
+                      <option value="30">30 câu (+ôn nhánh 2)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="bd-ox">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: ĐỊNH LUẬT TUẦN HOÀN & Ý NGHĨA -->
+      <section class="branch-col" data-branch="dl">
+        <div class="branch-pill" data-branch-toggle="dl" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Định luật & Ý nghĩa">
+          <div class="b-title">3. Định luật &amp; Ý nghĩa</div>
+          <div class="b-sub">Vị trí ↔ Cấu tạo ↔ Tính chất</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 3.1 -->
+          <div class="node-item" data-node="dl-nd">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Định luật tuần hoàn</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Định luật tuần hoàn</span>
+                  <button class="zoom-btn" data-zoom="dl-nd">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Nội dung:</strong> Tính chất của các nguyên tố và đơn chất, cũng như thành phần và tính chất của các hợp chất tạo nên từ các nguyên tố đó <strong>biến đổi tuần hoàn theo chiều tăng của điện tích hạt nhân nguyên tử</strong>.</li>
+                  <li><strong>Nguyên nhân:</strong> Do sự biến đổi tuần hoàn <strong>cấu hình electron lớp ngoài cùng</strong> của nguyên tử các nguyên tố khi Z tăng dần.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 3)</option>
+                      <option value="30">30 câu (+ôn nhánh 3)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="dl-nd">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.2 -->
+          <div class="node-item" data-node="dl-ss">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">So sánh tính chất nguyên tố</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Vận dụng • So sánh tính chất</span>
+                  <button class="zoom-btn" data-zoom="dl-ss">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Cách so sánh 3 nguyên tố lân cận (dùng nguyên tố trung gian):</strong>
+                    <br>• Ví dụ: Mg (12), Na (11), K (19) → Cùng CK3: Mg &lt; Na; cùng nhóm IA: Na &lt; K ⇒ Tính KL: <strong>Mg &lt; Na &lt; K</strong>.
+                    <br>• Ví dụ: S (16), O (8), F (9) → Cùng nhóm VIA: S &lt; O; cùng CK2: O &lt; F ⇒ Tính PK &amp; χ: <strong>S &lt; O &lt; F</strong>.
+                  </li>
+                  <li><strong>So sánh acid/base:</strong> Suy trực tiếp từ tính kim loại/phi kim của nguyên tố trung tâm (vd: H<sub>3</sub>PO<sub>4</sub> &lt; H<sub>2</sub>SO<sub>4</sub> &lt; HClO<sub>4</sub>; Mg(OH)<sub>2</sub> &lt; NaOH &lt; KOH).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 3)</option>
+                      <option value="30">30 câu (+ôn nhánh 3)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="dl-ss">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3 -->
+          <div class="node-item" data-node="dl-yn">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Ý nghĩa Bảng tuần hoàn</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Ý nghĩa của Bảng tuần hoàn</span>
+                  <button class="zoom-btn" data-zoom="dl-yn">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Biết vị trí → suy ra cấu tạo &amp; tính chất:</strong> Ô (Z) → số p, e; Chu kì → số lớp e; Nhóm A → số e lớp ngoài cùng → kim loại/phi kim/khí hiếm, công thức oxide cao nhất, hydroxide và tính acid/base.</li>
+                  <li><strong>Biết cấu tạo (cấu hình e) → suy ra vị trí &amp; tính chất:</strong> Dễ dàng định vị ô, chu kì, nhóm và so sánh với các nguyên tố lân cận.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 3)</option>
+                      <option value="30">30 câu (+ôn nhánh 3)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="dl-yn">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <p class="footer-hint">💡 Nhấp vào từng ô trên sơ đồ để xem kiến thức &amp; chọn số câu luyện tập (10–30 câu, mức độ Biết &amp; Hiểu) ngay bên dưới mỗi mục.</p>
+  </main>
+
+  <!-- Zoom Modal (for presenting theory fullscreen) -->
+  <div class="modal-backdrop" id="zoomModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="zoomTitle">Chi tiết</div>
+        </div>
+        <button class="modal-close" id="zoomClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="zoomBody"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal (fullscreen + in-modal confirm) -->
+  <div class="modal-backdrop" id="quizModal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="position: relative;">
+      <div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true">
+        <div class="confirm-card">
+          <h3>Xác nhận nộp bài</h3>
+          <p id="confirmText"></p>
+          <div class="confirm-actions">
+            <button class="btn-secondary" id="confirmCancel">Làm tiếp</button>
+            <button class="btn-primary" id="confirmOk">Vẫn nộp bài</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="quizTitle">Luyện tập</div>
+          <div class="modal-subtitle" id="quizSubtitle">Mức độ: Nhận biết &amp; Thông hiểu</div>
+        </div>
+        <button class="modal-close" id="quizClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+      <div class="modal-footer" id="quizFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_BANKS = {"ct-nt": {"title": "1.1. Nguyên tắc sắp xếp & Ô nguyên tố", "questions": [{"q": "Trong bảng tuần hoàn các nguyên tố hóa học hiện đại, các nguyên tố được sắp xếp theo chiều tăng dần của đại lượng nào?", "opts": ["Điện tích hạt nhân nguyên tử (Z)", "Nguyên tử khối trung bình", "Số neutron trong hạt nhân", "Bán kính nguyên tử"], "ans": 0, "exp": "Nguyên tắc 1 của bảng tuần hoàn hiện đại: các nguyên tố được sắp xếp theo chiều tăng dần của điện tích hạt nhân nguyên tử (Z)."}, {"q": "Các nguyên tố có cùng số lớp electron trong nguyên tử được xếp thành một", "opts": ["Hàng (chu kì)", "Cột (nhóm)", "Ô nguyên tố", "Phân lớp"], "ans": 0, "exp": "Nguyên tắc 2: các nguyên tố có cùng số lớp electron trong nguyên tử được xếp thành một hàng (chu kì)."}, {"q": "Các nguyên tố có cùng số electron hóa trị trong nguyên tử thường được xếp thành một", "opts": ["Cột (nhóm)", "Hàng (chu kì)", "Ô nguyên tố", "Lớp electron"], "ans": 0, "exp": "Nguyên tắc 3: các nguyên tố có cùng số electron hóa trị trong nguyên tử được xếp thành một cột (nhóm), nên có tính chất hóa học tương tự nhau."}, {"q": "Số thứ tự của ô nguyên tố trong bảng tuần hoàn luôn bằng đại lượng nào sau đây?", "opts": ["Số hiệu nguyên tử (Z)", "Số khối (A)", "Số neutron (N)", "Số lớp electron"], "ans": 0, "exp": "Số thứ tự ô nguyên tố = số hiệu nguyên tử Z = số proton = số electron."}, {"q": "Nhà bác học người Nga đã phát minh ra Định luật tuần hoàn và Bảng tuần hoàn các nguyên tố hóa học (năm 1869) là", "opts": ["D. I. Mendeleev", "E. Rutherford", "J. J. Thomson", "N. Bohr"], "ans": 0, "exp": "Năm 1869, D. I. Mendeleev công bố Bảng tuần hoàn (khi đó sắp xếp theo chiều tăng khối lượng nguyên tử)."}, {"q": "Thông tin nào sau đây KHÔNG có trong một ô nguyên tố của bảng tuần hoàn chuẩn?", "opts": ["Số lượng neutron của từng đồng vị", "Số hiệu nguyên tử (Z)", "Kí hiệu hóa học và tên nguyên tố", "Nguyên tử khối trung bình"], "ans": 0, "exp": "Ô nguyên tố cho biết Z, kí hiệu, tên nguyên tố, nguyên tử khối trung bình, độ âm điện, cấu hình electron, số oxi hóa... không ghi trực tiếp số neutron của từng đồng vị."}, {"q": "Nguyên tố Aluminium (Al) nằm ở ô thứ 13 trong bảng tuần hoàn. Số proton và số electron của nguyên tử Al lần lượt là", "opts": ["13 và 13", "13 và 14", "13 và 27", "14 và 13"], "ans": 0, "exp": "Số thứ tự ô = Z = số proton = số electron = 13."}, {"q": "Nguyên tố Phosphorus (P) có điện tích hạt nhân là +15. Trong bảng tuần hoàn, P nằm ở ô thứ mấy?", "opts": ["Ô thứ 15", "Ô thứ 31", "Ô thứ 16", "Ô thứ 5"], "ans": 0, "exp": "Điện tích hạt nhân +15 ⇒ Z = 15 ⇒ nằm ở ô thứ 15."}, {"q": "Electron hóa trị của một nguyên tố nhóm A là", "opts": ["Các electron ở lớp ngoài cùng", "Tất cả các electron trong nguyên tử", "Các electron ở lớp K", "Các electron ở phân lớp d"], "ans": 0, "exp": "Đối với các nguyên tố nhóm A (nguyên tố s và p), số electron hóa trị bằng đúng số electron ở lớp ngoài cùng."}, {"q": "Bảng tuần hoàn hiện nay gồm có bao nhiêu nguyên tố hóa học?", "opts": ["118 nguyên tố", "92 nguyên tố", "108 nguyên tố", "120 nguyên tố"], "ans": 0, "exp": "Bảng tuần hoàn hiện đại có 118 nguyên tố (từ Z = 1 là Hydrogen đến Z = 118 là Oganesson)."}, {"q": "Khi sắp xếp theo chiều tăng dần điện tích hạt nhân, có trường hợp nguyên tố đứng sau lại có nguyên tử khối trung bình nhỏ hơn nguyên tố đứng trước (ví dụ Ar có Z=18, Ā=39,95 đứng trước K có Z=19, Ā=39,10). Điều này chứng tỏ", "opts": ["Bảng tuần hoàn sắp xếp theo chiều tăng dần điện tích hạt nhân Z, không phải theo nguyên tử khối", "Bảng tuần hoàn bị xếp sai vị trí", "Kali có ít proton hơn Argon", "Argon là kim loại kiềm"], "ans": 0, "exp": "Z(Ar) = 18 < Z(K) = 19 nên Ar bắt buộc đứng trước K dù nguyên tử khối trung bình của Ar lớn hơn K."}, {"q": "Cho nguyên tử X có 17 electron ở lớp vỏ. Số thứ tự ô của X trong bảng tuần hoàn là", "opts": ["17", "7", "35", "18"], "ans": 0, "exp": "Số e = Z = 17 ⇒ ô thứ 17 (nguyên tố Chlorine)."}, {"q": "Trong một ô nguyên tố, giá trị độ âm điện cho biết", "opts": ["Khả năng hút electron của nguyên tử đó khi tạo thành liên kết hóa học", "Khối lượng của hạt nhân", "Số lớp electron của nguyên tử", "Nhiệt độ sôi của đơn chất"], "ans": 0, "exp": "Độ âm điện đặc trưng cho khả năng hút electron liên kết của nguyên tử một nguyên tố hóa học."}, {"q": "Cấu tạo của bảng tuần hoàn các nguyên tố hóa học gồm 3 thành phần cơ bản là", "opts": ["Ô nguyên tố, chu kì và nhóm nguyên tố", "Hạt nhân, vỏ electron và orbital", "Kim loại, phi kim và khí hiếm", "Acid, base và muối"], "ans": 0, "exp": "Bảng tuần hoàn được cấu tạo từ các ô nguyên tố xếp thành các hàng ngang (chu kì) và các cột dọc (nhóm)."}, {"q": "Phát biểu nào sau đây SAI về nguyên tắc sắp xếp bảng tuần hoàn?", "opts": ["Các nguyên tố được sắp xếp theo chiều tăng dần số neutron", "Các nguyên tố được sắp xếp theo chiều tăng dần điện tích hạt nhân", "Các nguyên tố có cùng số lớp electron được xếp thành một hàng (chu kì)", "Các nguyên tố có cùng số electron hóa trị được xếp thành một cột (nhóm)"], "ans": 0, "exp": "Các nguyên tố được sắp xếp theo chiều tăng dần điện tích hạt nhân (số proton Z), không phải theo số neutron."}]}, "ct-ck": {"title": "1.2. Chu kì, Nhóm & Phân loại nguyên tố", "questions": [{"q": "Bảng tuần hoàn các nguyên tố hóa học hiện đại có bao nhiêu chu kì?", "opts": ["7 chu kì (3 chu kì nhỏ và 4 chu kì lớn)", "8 chu kì", "6 chu kì", "18 chu kì"], "ans": 0, "exp": "Bảng tuần hoàn có 7 chu kì: chu kì 1, 2, 3 là chu kì nhỏ; chu kì 4, 5, 6, 7 là chu kì lớn."}, {"q": "Số lượng nguyên tố trong chu kì 1, chu kì 2 và chu kì 3 lần lượt là", "opts": ["2, 8, 8", "2, 8, 18", "8, 8, 18", "2, 18, 32"], "ans": 0, "exp": "Chu kì 1 có 2 nguyên tố (H, He); chu kì 2 có 8 nguyên tố (Li → Ne); chu kì 3 có 8 nguyên tố (Na → Ar)."}, {"q": "Số lượng nguyên tố trong chu kì 4 và chu kì 5 lần lượt là", "opts": ["18 và 18", "8 và 18", "18 và 32", "32 và 32"], "ans": 0, "exp": "Chu kì 4 và 5 đều là chu kì lớn, mỗi chu kì có 18 nguyên tố (chu kì 6 và 7 mỗi chu kì có 32 nguyên tố)."}, {"q": "Bảng tuần hoàn gồm 18 cột được chia thành bao nhiêu nhóm A và bao nhiêu nhóm B?", "opts": ["8 nhóm A (IA đến VIIIA) và 8 nhóm B (IB đến VIIIB)", "10 nhóm A và 8 nhóm B", "8 nhóm A và 10 nhóm B", "9 nhóm A và 9 nhóm B"], "ans": 0, "exp": "Có 8 nhóm A (8 cột) và 8 nhóm B (10 cột, trong đó nhóm VIIIB chiếm 3 cột liên tiếp)."}, {"q": "Nhóm nguyên tố nào sau đây chiếm 3 cột trong bảng tuần hoàn?", "opts": ["Nhóm VIIIB", "Nhóm VIIIA", "Nhóm IA", "Nhóm IB"], "ans": 0, "exp": "Nhóm VIIIB gồm 3 cột (cột 8, 9, 10 trong bảng 18 cột, tiêu biểu là bộ ba Fe, Co, Ni)."}, {"q": "Theo cấu hình electron, các nguyên tố hóa học được chia thành 4 khối nguyên tố là", "opts": ["Nguyên tố s, p, d và f", "Nguyên tố K, L, M và N", "Nguyên tố kim loại, phi kim, á kim và khí hiếm", "Nguyên tố IA, IIA, IIIA và IVA"], "ans": 0, "exp": "Dựa vào phân lớp có electron cuối cùng điền vào, các nguyên tố được chia thành 4 khối: s, p, d và f."}, {"q": "Các nguyên tố thuộc nhóm A trong bảng tuần hoàn là những nguyên tố thuộc khối nào?", "opts": ["Khối s và khối p", "Khối d và khối f", "Chỉ có khối s", "Chỉ có khối d"], "ans": 0, "exp": "Nhóm A gồm các nguyên tố s (IA, IIA và He) và các nguyên tố p (IIIA đến VIIIA, trừ He)."}, {"q": "Các nguyên tố thuộc nhóm B trong bảng tuần hoàn là những nguyên tố thuộc khối nào?", "opts": ["Khối d và khối f", "Khối s và khối p", "Chỉ có khối p", "Khối s và khối d"], "ans": 0, "exp": "Nhóm B gồm các nguyên tố chuyển tiếp thuộc khối d và khối f (họ lanthanide và actinide)."}, {"q": "Tên gọi thông thường của các nguyên tố thuộc nhóm IA (trừ H), nhóm IIA, nhóm VIIA và nhóm VIIIA lần lượt là", "opts": ["Kim loại kiềm, kim loại kiềm thổ, halogen, khí hiếm", "Halogen, khí hiếm, kim loại kiềm, kim loại kiềm thổ", "Kim loại kiềm thổ, kim loại kiềm, khí hiếm, halogen", "Kim loại chuyển tiếp, halogen, khí hiếm, kim loại kiềm"], "ans": 0, "exp": "Nhóm IA: kim loại kiềm; nhóm IIA: kim loại kiềm thổ; nhóm VIIA: halogen; nhóm VIIIA: khí hiếm."}, {"q": "Nguyên tố nào sau đây là nguyên tố khối s?", "opts": ["Sodium (Na: 1s² 2s² 2p⁶ 3s¹)", "Oxygen (O: 1s² 2s² 2p⁴)", "Chlorine (Cl: [Ne] 3s² 3p⁵)", "Iron (Fe: [Ar] 3d⁶ 4s²)"], "ans": 0, "exp": "Electron cuối cùng của Na điền vào phân lớp 3s nên Na là nguyên tố khối s (O, Cl là khối p; Fe là khối d)."}, {"q": "Mỗi chu kì (trừ chu kì 1) luôn bắt đầu bằng một nguyên tố thuộc nhóm nào và kết thúc bằng một nguyên tố thuộc nhóm nào?", "opts": ["Bắt đầu bằng kim loại kiềm (nhóm IA) và kết thúc bằng khí hiếm (nhóm VIIIA)", "Bắt đầu bằng halogen (VIIA) và kết thúc bằng kim loại kiềm (IA)", "Bắt đầu bằng khí hiếm và kết thúc bằng phi kim", "Bắt đầu bằng kim loại chuyển tiếp và kết thúc bằng kim loại kiềm thổ"], "ans": 0, "exp": "Từ chu kì 2 đến 7, mỗi chu kì đều mở đầu bằng 1 kim loại kiềm (ns¹) và kết thúc bằng 1 khí hiếm (ns² np⁶)."}, {"q": "Hai họ nguyên tố Lanthanide và Actinide (thuộc khối f) được xếp thành hai hàng riêng ở cuối bảng tuần hoàn, thực chất chúng thuộc chu kì nào?", "opts": ["Chu kì 6 (Lanthanide) và chu kì 7 (Actinide)", "Chu kì 4 và chu kì 5", "Chu kì 2 và chu kì 3", "Chu kì 1 và chu kì 2"], "ans": 0, "exp": "Họ Lanthanide thuộc chu kì 6 (nhóm IIIB), họ Actinide thuộc chu kì 7 (nhóm IIIB)."}, {"q": "Nhóm nguyên tố nào sau đây chỉ chứa toàn các nguyên tố KIM LOẠI?", "opts": ["Nhóm IIA (kim loại kiềm thổ) và các nhóm B", "Nhóm IA (vì có Hydrogen)", "Nhóm VIIA (halogen)", "Nhóm VIIIA (khí hiếm)"], "ans": 0, "exp": "Nhóm IIA và tất cả các nhóm B chỉ gồm các kim loại. (Nhóm IA có H là phi kim)."}, {"q": "Nguyên tố Argon (Ar, Z = 18) có cấu hình electron 1s² 2s² 2p⁶ 3s² 3p⁶ thuộc khối nguyên tố nào?", "opts": ["Khối p", "Khối s", "Khối d", "Khối f"], "ans": 0, "exp": "Electron cuối cùng điền vào phân lớp 3p nên Ar là nguyên tố khối p."}, {"q": "Tất cả các nguyên tố thuộc nhóm VIIA (F, Cl, Br, I, At) đều có bao nhiêu electron ở lớp ngoài cùng?", "opts": ["7 electron", "1 electron", "8 electron", "2 electron"], "ans": 0, "exp": "Số thứ tự nhóm A bằng số electron lớp ngoài cùng → nhóm VIIA có 7e lớp ngoài cùng."}]}, "ct-vt": {"title": "1.3. Xác định vị trí từ cấu hình electron", "questions": [{"q": "Mối liên hệ giữa cấu hình electron nguyên tử và SỐ THỨ TỰ CHU KÌ là", "opts": ["Số thứ tự chu kì = số lớp electron của nguyên tử", "Số thứ tự chu kì = số electron lớp ngoài cùng", "Số thứ tự chu kì = số hiệu nguyên tử Z", "Số thứ tự chu kì = số phân lớp electron"], "ans": 0, "exp": "Nguyên tử có bao nhiêu lớp electron thì thuộc chu kì bấy nhiêu (ví dụ có 3 lớp e → chu kì 3)."}, {"q": "Đối với các nguyên tố nhóm A, số thứ tự của nhóm A luôn bằng", "opts": ["Số electron ở lớp ngoài cùng", "Số lớp electron", "Số electron ở phân lớp s", "Số proton trong hạt nhân"], "ans": 0, "exp": "STT nhóm A = số electron lớp ngoài cùng (trừ He có 2e nhưng ở nhóm VIIIA)."}, {"q": "Nguyên tử Magnesium (Mg, Z = 12) có cấu hình electron là 1s² 2s² 2p⁶ 3s². Vị trí của Mg trong bảng tuần hoàn là", "opts": ["Ô 12, chu kì 3, nhóm IIA", "Ô 12, chu kì 2, nhóm IIIA", "Ô 12, chu kì 3, nhóm IIB", "Ô 12, chu kì 4, nhóm IIA"], "ans": 0, "exp": "Z = 12 → ô 12; có 3 lớp e → chu kì 3; nguyên tố s có 2e lớp ngoài cùng → nhóm IIA."}, {"q": "Nguyên tử Chlorine (Cl, Z = 17) có cấu hình electron 1s² 2s² 2p⁶ 3s² 3p⁵. Vị trí của Cl trong bảng tuần hoàn là", "opts": ["Ô 17, chu kì 3, nhóm VIIA", "Ô 17, chu kì 3, nhóm VA", "Ô 17, chu kì 7, nhóm IIIA", "Ô 17, chu kì 3, nhóm VIIB"], "ans": 0, "exp": "Z = 17 → ô 17; 3 lớp e → chu kì 3; nguyên tố p có 2 + 5 = 7e lớp ngoài cùng → nhóm VIIA."}, {"q": "Nguyên tử Oxygen (O, Z = 8) có cấu hình electron 1s² 2s² 2p⁴. Oxygen nằm ở chu kì và nhóm nào?", "opts": ["Chu kì 2, nhóm VIA", "Chu kì 2, nhóm IVA", "Chu kì 4, nhóm IIA", "Chu kì 2, nhóm VIB"], "ans": 0, "exp": "2 lớp e → chu kì 2; nguyên tố p có 2 + 4 = 6e lớp ngoài cùng → nhóm VIA."}, {"q": "Nguyên tử Potassium (K, Z = 19) có cấu hình electron [Ar] 4s¹. Vị trí của K trong bảng tuần hoàn là", "opts": ["Ô 19, chu kì 4, nhóm IA", "Ô 19, chu kì 3, nhóm IA", "Ô 19, chu kì 4, nhóm IB", "Ô 19, chu kì 1, nhóm IVA"], "ans": 0, "exp": "Z = 19 → ô 19; 4 lớp e → chu kì 4; nguyên tố s có 1e lớp ngoài cùng → nhóm IA."}, {"q": "Nguyên tố X nằm ở chu kì 3, nhóm VA trong bảng tuần hoàn. Cấu hình electron lớp ngoài cùng của nguyên tử X là", "opts": ["3s² 3p³", "3s² 3p⁵", "2s² 2p³", "3s¹ 3p⁴"], "ans": 0, "exp": "Chu kì 3 → lớp ngoài cùng là lớp 3; nhóm VA → có 5e lớp ngoài cùng → 3s² 3p³ (Phosphorus, Z = 15)."}, {"q": "Nguyên tố Y nằm ở chu kì 2, nhóm VIIA. Số hiệu nguyên tử Z của Y là", "opts": ["9 (Fluorine)", "7", "17", "10"], "ans": 0, "exp": "Chu kì 2, nhóm VIIA → cấu hình 1s² 2s² 2p⁵ → Z = 2 + 2 + 5 = 9 (F)."}, {"q": "Nguyên tử Calcium (Ca, Z = 20) có cấu hình [Ar] 4s². Calcium thuộc chu kì và nhóm nào?", "opts": ["Chu kì 4, nhóm IIA", "Chu kì 4, nhóm IIB", "Chu kì 2, nhóm IVA", "Chu kì 3, nhóm IIA"], "ans": 0, "exp": "4 lớp e → chu kì 4; nguyên tố s có 2e lớp ngoài cùng → nhóm IIA."}, {"q": "Nguyên tố X thuộc chu kì 3, nhóm IA. Số hiệu nguyên tử của X là", "opts": ["11 (Sodium)", "3", "19", "13"], "ans": 0, "exp": "Chu kì 3, nhóm IA → 1s² 2s² 2p⁶ 3s¹ → Z = 11 (Na)."}, {"q": "Nguyên tử Sulfur (S, Z = 16) thuộc chu kì và nhóm nào trong bảng tuần hoàn?", "opts": ["Chu kì 3, nhóm VIA", "Chu kì 3, nhóm IVA", "Chu kì 2, nhóm VIA", "Chu kì 3, nhóm VIB"], "ans": 0, "exp": "S (Z = 16): 1s² 2s² 2p⁶ 3s² 3p⁴ → 3 lớp e (chu kì 3), 6e ngoài cùng (nhóm VIA)."}, {"q": "Nguyên tử Helium (He, Z = 2) có cấu hình 1s² nhưng được xếp vào nhóm nào trong bảng tuần hoàn?", "opts": ["Nhóm VIIIA (khí hiếm)", "Nhóm IIA", "Nhóm IA", "Nhóm IIB"], "ans": 0, "exp": "He có lớp vỏ K bão hòa bền vững (1s²) với tính chất khí hiếm nên được xếp vào nhóm VIIIA."}, {"q": "Nguyên tử X có cấu hình electron 1s² 2s² 2p⁶ 3s² 3p³. Số lớp electron và số electron lớp ngoài cùng của X lần lượt là", "opts": ["3 và 5", "3 và 3", "5 và 3", "2 và 5"], "ans": 0, "exp": "Lớp lớn nhất là n = 3 (3 lớp e); lớp 3 có 3s² 3p³ → 2 + 3 = 5e lớp ngoài cùng."}, {"q": "Cặp nguyên tố nào sau đây nằm trong CÙNG một nhóm A?", "opts": ["Li (Z = 3) và Na (Z = 11)", "Na (Z = 11) và Mg (Z = 12)", "C (Z = 6) và N (Z = 7)", "O (Z = 8) và F (Z = 9)"], "ans": 0, "exp": "Li (1s² 2s¹) và Na ([Ne] 3s¹) đều là nguyên tố s có 1e lớp ngoài cùng → cùng thuộc nhóm IA."}, {"q": "Cặp nguyên tố nào sau đây nằm trong CÙNG một chu kì?", "opts": ["Na (Z = 11) và Cl (Z = 17)", "F (Z = 9) và Cl (Z = 17)", "Li (Z = 3) và K (Z = 19)", "O (Z = 8) và S (Z = 16)"], "ans": 0, "exp": "Na và Cl đều có 3 lớp electron nên cùng nằm ở chu kì 3."}]}, "bd-bk": {"title": "2.1. Bán kính nguyên tử & Độ âm điện", "questions": [{"q": "Trong một CHU KÌ, theo chiều tăng dần của điện tích hạt nhân (từ trái sang phải), bán kính nguyên tử của các nguyên tố nhóm A biến đổi như thế nào?", "opts": ["Giảm dần", "Tăng dần", "Không thay đổi", "Tăng rồi giảm"], "ans": 0, "exp": "Trong 1 chu kì, số lớp electron không đổi nhưng điện tích hạt nhân tăng dần → lực hút hạt nhân với lớp vỏ mạnh hơn → bán kính nguyên tử GIẢM dần."}, {"q": "Trong một NHÓM A, theo chiều tăng dần của điện tích hạt nhân (từ trên xuống dưới), bán kính nguyên tử biến đổi như thế nào?", "opts": ["Tăng dần", "Giảm dần", "Không thay đổi", "Giảm rồi tăng"], "ans": 0, "exp": "Trong 1 nhóm A từ trên xuống dưới, số lớp electron tăng dần nên bán kính nguyên tử TĂNG dần."}, {"q": "Vì sao trong một chu kì, từ trái sang phải, bán kính nguyên tử lại giảm dần?", "opts": ["Vì các nguyên tố có cùng số lớp electron nhưng điện tích hạt nhân tăng, hút lớp vỏ electron mạnh hơn", "Vì số lớp electron giảm dần", "Vì số electron giảm dần", "Vì lực đẩy giữa các proton giảm"], "ans": 0, "exp": "Cùng số lớp e nhưng Z tăng làm lực hút tĩnh điện giữa hạt nhân và các electron lớp ngoài cùng tăng → vỏ nguyên tử co lại."}, {"q": "Độ âm điện (χ) của một nguyên tử là đại lượng đặc trưng cho", "opts": ["Khả năng hút electron của nguyên tử đó khi tạo thành liên kết hóa học", "Khả năng nhường proton của hạt nhân", "Kích thước của hạt nhân", "Số lớp electron của nguyên tử"], "ans": 0, "exp": "Theo định nghĩa, độ âm điện đặc trưng cho khả năng hút electron liên kết của nguyên tử."}, {"q": "Trong một CHU KÌ, theo chiều từ trái sang phải (tăng dần Z), độ âm điện của các nguyên tố nhóm A thường biến đổi như thế nào?", "opts": ["Tăng dần", "Giảm dần", "Không đổi", "Giảm mạnh về 0"], "ans": 0, "exp": "Từ trái sang phải trong chu kì, bán kính giảm và điện tích hạt nhân tăng → khả năng hút electron tăng → độ âm điện TĂNG dần."}, {"q": "Trong một NHÓM A, theo chiều từ trên xuống dưới (tăng dần Z), độ âm điện của các nguyên tố biến đổi như thế nào?", "opts": ["Giảm dần", "Tăng dần", "Không đổi", "Tăng rồi giảm"], "ans": 0, "exp": "Từ trên xuống dưới trong nhóm A, bán kính nguyên tử tăng → hạt nhân ở xa lớp ngoài cùng hơn, hút e yếu hơn → độ âm điện GIẢM dần."}, {"q": "Nguyên tố nào sau đây có độ âm điện LỚN nhất trong bảng tuần hoàn (theo thang Pauling, χ = 3,98)?", "opts": ["Fluorine (F)", "Oxygen (O)", "Chlorine (Cl)", "Caesium (Cs)"], "ans": 0, "exp": "Fluorine (F, chu kì 2, nhóm VIIA) có độ âm điện lớn nhất bảng tuần hoàn (3,98)."}, {"q": "Cho các nguyên tố thuộc chu kì 3: Na (Z = 11), Mg (Z = 12), Al (Z = 13), Cl (Z = 17). Nguyên tử có bán kính LỚN nhất là", "opts": ["Na", "Mg", "Al", "Cl"], "ans": 0, "exp": "Trong chu kì 3, bán kính giảm dần từ trái sang phải (Na > Mg > Al > Cl) → Na có bán kính lớn nhất."}, {"q": "Cho các nguyên tố thuộc nhóm IA: Li (Z = 3), Na (Z = 11), K (Z = 19), Rb (Z = 37). Nguyên tử có bán kính LỚN nhất là", "opts": ["Rb", "Li", "Na", "K"], "ans": 0, "exp": "Trong nhóm IA, bán kính tăng dần từ trên xuống dưới (Li < Na < K < Rb) → Rb có bán kính lớn nhất."}, {"q": "Cho các nguyên tố thuộc chu kì 2: Li (Z = 3), C (Z = 6), O (Z = 8), F (Z = 9). Thứ tự TĂNG dần độ âm điện là", "opts": ["Li < C < O < F", "F < O < C < Li", "C < Li < O < F", "O < F < C < Li"], "ans": 0, "exp": "Trong chu kì 2, độ âm điện tăng dần theo chiều tăng Z: Li < C < O < F."}, {"q": "Cho các nguyên tố thuộc nhóm VIIA: F (Z = 9), Cl (Z = 17), Br (Z = 35), I (Z = 53). Thứ tự GIẢM dần độ âm điện là", "opts": ["F > Cl > Br > I", "I > Br > Cl > F", "Cl > F > Br > I", "F > Br > Cl > I"], "ans": 0, "exp": "Trong nhóm VIIA, từ trên xuống dưới độ âm điện giảm dần: F > Cl > Br > I."}, {"q": "Nguyên tử nào sau đây có bán kính NHỎ nhất trong dãy: O (Z = 8), F (Z = 9), S (Z = 16), Cl (Z = 17)?", "opts": ["F", "O", "S", "Cl"], "ans": 0, "exp": "O và F có 2 lớp e (nhỏ hơn S, Cl có 3 lớp e); trong chu kì 2 thì r(F) < r(O) → F nhỏ nhất."}, {"q": "Xu hướng biến đổi của bán kính nguyên tử và độ âm điện trong cùng một chu kì hoặc cùng một nhóm A có mối quan hệ như thế nào?", "opts": ["Biến đổi ngược chiều nhau (bán kính tăng thì độ âm điện giảm và ngược lại)", "Biến đổi cùng chiều nhau", "Không có mối liên hệ nào", "Cả hai đều không đổi"], "ans": 0, "exp": "Bán kính nhỏ → lực hút hạt nhân mạnh → độ âm điện lớn (và ngược lại)."}, {"q": "Dãy các nguyên tố nào sau đây được sắp xếp theo chiều TĂNG dần bán kính nguyên tử?", "opts": ["F, O, N, C (cùng chu kì 2)", "C, N, O, F", "K, Na, Li", "I, Br, Cl, F"], "ans": 0, "exp": "Trong chu kì 2, bán kính giảm từ C → N → O → F nên theo chiều tăng dần là F < O < N < C."}, {"q": "Thang độ âm điện phổ biến nhất được sử dụng trong sách giáo khoa Hóa học 10 KNTT là thang độ âm điện của nhà bác học nào?", "opts": ["Linus Pauling", "D. I. Mendeleev", "E. Rutherford", "J. Chadwick"], "ans": 0, "exp": "Bảng giá trị độ âm điện trong SGK là thang độ âm điện Pauling (F = 3,98; O = 3,44; Cl = 3,16; Na = 0,93...)."}]}, "bd-kl": {"title": "2.2. Tính kim loại & Tính phi kim", "questions": [{"q": "Tính kim loại là tính chất của một nguyên tố mà nguyên tử của nó dễ", "opts": ["Nhường electron để trở thành ion dương (cation)", "Nhận electron để trở thành ion âm (anion)", "Nhường proton", "Nhận neutron"], "ans": 0, "exp": "Nguyên tử càng dễ nhường electron thì tính kim loại của nguyên tố đó càng mạnh."}, {"q": "Tính phi kim là tính chất của một nguyên tố mà nguyên tử của nó dễ", "opts": ["Nhận electron để trở thành ion âm (anion)", "Nhường electron để trở thành ion dương (cation)", "Tách hạt nhân", "Phóng xạ"], "ans": 0, "exp": "Nguyên tử càng dễ nhận electron thì tính phi kim của nguyên tố đó càng mạnh."}, {"q": "Trong một CHU KÌ, theo chiều tăng dần của điện tích hạt nhân (từ trái sang phải), tính kim loại và tính phi kim biến đổi như thế nào?", "opts": ["Tính kim loại giảm dần, đồng thời tính phi kim tăng dần", "Tính kim loại tăng dần, tính phi kim giảm dần", "Cả tính kim loại và tính phi kim đều tăng dần", "Cả tính kim loại và tính phi kim đều giảm dần"], "ans": 0, "exp": "Từ trái sang phải trong chu kì: bán kính giảm, lực hút hạt nhân tăng → khó nhường e (tính kim loại giảm), dễ nhận e (tính phi kim tăng)."}, {"q": "Trong một NHÓM A, theo chiều từ trên xuống dưới (tăng dần Z), tính kim loại và tính phi kim biến đổi như thế nào?", "opts": ["Tính kim loại tăng dần, đồng thời tính phi kim giảm dần", "Tính kim loại giảm dần, tính phi kim tăng dần", "Cả hai đều tăng dần", "Cả hai đều không đổi"], "ans": 0, "exp": "Từ trên xuống dưới trong nhóm A: số lớp e tăng, bán kính tăng → electron lớp ngoài cùng xa hạt nhân, dễ tách ra → tính kim loại TĂNG, tính phi kim GIẢM."}, {"q": "Phi kim hoạt động mạnh nhất trong bảng tuần hoàn là nguyên tố nào?", "opts": ["Fluorine (F)", "Oxygen (O)", "Chlorine (Cl)", "Nitrogen (N)"], "ans": 0, "exp": "Fluorine ở góc trên bên phải (nhóm VIIA, chu kì 2), có độ âm điện lớn nhất nên là phi kim mạnh nhất."}, {"q": "Trong các nguyên tố kim loại kiềm bền (không phóng xạ), kim loại hoạt động mạnh nhất là", "opts": ["Caesium (Cs)", "Lithium (Li)", "Sodium (Na)", "Potassium (K)"], "ans": 0, "exp": "Trong nhóm IA từ trên xuống dưới tính kim loại tăng dần: Li < Na < K < Rb < Cs (Fr ở dưới Cs nhưng là nguyên tố phóng xạ rất hiếm)."}, {"q": "Cho các nguyên tố chu kì 3: Na (Z = 11), Mg (Z = 12), Al (Z = 13). Thứ tự GIẢM dần tính kim loại là", "opts": ["Na > Mg > Al", "Al > Mg > Na", "Mg > Na > Al", "Na > Al > Mg"], "ans": 0, "exp": "Cùng chu kì 3, từ trái sang phải tính kim loại giảm dần: Na > Mg > Al."}, {"q": "Cho các nguyên tố nhóm IIA: Mg (Z = 12), Ca (Z = 20), Ba (Z = 56). Thứ tự TĂNG dần tính kim loại là", "opts": ["Mg < Ca < Ba", "Ba < Ca < Mg", "Ca < Mg < Ba", "Mg < Ba < Ca"], "ans": 0, "exp": "Cùng nhóm IIA, từ trên xuống dưới tính kim loại tăng dần: Mg < Ca < Ba."}, {"q": "Cho các nguyên tố chu kì 3: Si (Z = 14), P (Z = 15), S (Z = 16), Cl (Z = 17). Nguyên tố có tính phi kim MẠNH nhất là", "opts": ["Cl", "S", "P", "Si"], "ans": 0, "exp": "Cùng chu kì 3, từ trái sang phải tính phi kim tăng dần: Si < P < S < Cl → Cl mạnh nhất."}, {"q": "Cho các nguyên tố nhóm VIIA: F (Z = 9), Cl (Z = 17), Br (Z = 35), I (Z = 53). Thứ tự GIẢM dần tính phi kim là", "opts": ["F > Cl > Br > I", "I > Br > Cl > F", "Cl > F > Br > I", "F > Br > Cl > I"], "ans": 0, "exp": "Cùng nhóm VIIA, từ trên xuống dưới tính phi kim giảm dần: F > Cl > Br > I."}, {"q": "Kim loại nào sau đây có tính kim loại MẠNH nhất trong dãy: Li (Z = 3), Na (Z = 11), K (Z = 19), Mg (Z = 12)?", "opts": ["K (Potassium)", "Na", "Mg", "Li"], "ans": 0, "exp": "K ở chu kì 4, nhóm IA (dưới Na) nên tính kim loại mạnh hơn Na, Li; còn Na mạnh hơn Mg → K mạnh nhất."}, {"q": "Cho 3 nguyên tố: O (Z = 8), F (Z = 9), S (Z = 16). Thứ tự TĂNG dần tính phi kim là", "opts": ["S < O < F", "F < O < S", "O < S < F", "S < F < O"], "ans": 0, "exp": "Cùng nhóm VIA: S < O; cùng chu kì 2: O < F → S < O < F."}, {"q": "Nguyên tố có độ âm điện càng LỚN thì tính chất của nó như thế nào?", "opts": ["Tính phi kim càng mạnh, tính kim loại càng yếu", "Tính kim loại càng mạnh, tính phi kim càng yếu", "Cả hai đều mạnh", "Là khí hiếm"], "ans": 0, "exp": "Độ âm điện lớn → hút electron mạnh → tính phi kim càng mạnh."}, {"q": "Phản ứng nào sau đây minh họa tính kim loại của K mạnh hơn Na (cùng nhóm IA)?", "opts": ["K phản ứng với nước ở nhiệt độ thường mãnh liệt hơn Na (bốc cháy ngay)", "K không phản ứng với nước còn Na có phản ứng", "Na tan nhanh hơn K trong nước", "Cả hai đều không phản ứng với nước"], "ans": 0, "exp": "K dễ nhường electron hơn Na nên phản ứng với nước mãnh liệt hơn nhiều so với Na."}, {"q": "Phát biểu nào sau đây SAI?", "opts": ["Trong một nhóm A, từ trên xuống dưới tính phi kim tăng dần", "Trong một chu kì, từ trái sang phải tính kim loại giảm dần", "Trong một nhóm A, từ trên xuống dưới tính kim loại tăng dần", "Fluorine là phi kim mạnh nhất trong bảng tuần hoàn"], "ans": 0, "exp": "Trong nhóm A từ trên xuống dưới, bán kính tăng → khả năng nhận electron giảm → tính phi kim GIẢM dần."}]}, "bd-ox": {"title": "2.3. Oxide cao nhất & Hydroxide", "questions": [{"q": "Đối với các nguyên tố nhóm A (trừ F, O và khí hiếm), hóa trị cao nhất của nguyên tố với OXYGEN bằng", "opts": ["Số thứ tự của nhóm A", "8 trừ đi số thứ tự nhóm A", "Số thứ tự chu kì", "Số lớp electron"], "ans": 0, "exp": "Hóa trị cao nhất với oxygen = STT nhóm A (ví dụ S ở nhóm VIA có hóa trị cao nhất với O là VI → SO₃)."}, {"q": "Đối với các nguyên tố phi kim nhóm IVA đến VIIA, hóa trị trong hợp chất khí với HYDROGEN bằng", "opts": ["8 trừ đi số thứ tự nhóm A", "Số thứ tự nhóm A", "Số thứ tự chu kì", "Luôn bằng 1"], "ans": 0, "exp": "Tổng hóa trị cao nhất với O và hóa trị trong hợp chất khí với H luôn bằng 8 (ví dụ Cl nhóm VIIA: hóa trị với O là VII, với H là 8–7 = I → HCl)."}, {"q": "Nguyên tố Sulfur (S) thuộc nhóm VIA. Công thức oxide cao nhất và hợp chất khí với hydrogen của S lần lượt là", "opts": ["SO₃ và H₂S", "SO₂ và H₂S", "SO₃ và H₃S", "SO₂ và HS"], "ans": 0, "exp": "Nhóm VIA: hóa trị cao nhất với O là VI → SO₃; hóa trị với H là 8 – 6 = II → H₂S."}, {"q": "Nguyên tố Chlorine (Cl) thuộc nhóm VIIA. Công thức oxide cao nhất và hydroxide tương ứng của Cl là", "opts": ["Cl₂O₇ và HClO₄", "Cl₂O₅ và HClO₃", "ClO₂ và HClO₂", "Cl₂O₇ và HCl"], "ans": 0, "exp": "Nhóm VIIA: hóa trị cao nhất là VII → oxide cao nhất Cl₂O₇; hydroxide tương ứng là perchloric acid HClO₄."}, {"q": "Trong một CHU KÌ, theo chiều từ trái sang phải, tính acid và tính base của các oxide cao nhất và hydroxide tương ứng biến đổi như thế nào?", "opts": ["Tính base giảm dần, đồng thời tính acid tăng dần", "Tính base tăng dần, tính acid giảm dần", "Cả tính acid và tính base đều tăng", "Không thay đổi"], "ans": 0, "exp": "Trong chu kì từ trái sang phải: tính kim loại giảm, tính phi kim tăng → tính base của oxide/hydroxide GIẢM dần, tính acid TĂNG dần."}, {"q": "Trong một NHÓM A, theo chiều từ trên xuống dưới, tính base của các oxide cao nhất và hydroxide tương ứng biến đổi như thế nào?", "opts": ["Tăng dần (đồng thời tính acid giảm dần)", "Giảm dần", "Không thay đổi", "Chuyển hoàn toàn thành acid mạnh"], "ans": 0, "exp": "Từ trên xuống dưới nhóm A, tính kim loại tăng dần → tính base của oxide và hydroxide TĂNG dần."}, {"q": "Xét dãy oxide cao nhất của các nguyên tố chu kì 3: Na₂O, MgO, Al₂O₃, SiO₂, P₂O₅, SO₃, Cl₂O₇. Oxide nào có tính LƯỠNG TÍNH?", "opts": ["Al₂O₃", "Na₂O", "MgO", "SO₃"], "ans": 0, "exp": "Na₂O, MgO là basic oxide; Al₂O₃ là oxide lưỡng tính (tác dụng cả acid và base mạnh); SiO₂, P₂O₅, SO₃, Cl₂O₇ là acidic oxide."}, {"q": "Xét dãy hydroxide của các nguyên tố chu kì 3: NaOH, Mg(OH)₂, Al(OH)₃, H₂SiO₃, H₃PO₄, H₂SO₄, HClO₄. Acid MẠNH nhất trong dãy này là", "opts": ["HClO₄", "H₂SO₄", "H₃PO₄", "H₂SiO₃"], "ans": 0, "exp": "Trong chu kì 3, tính acid tăng dần từ H₂SiO₃ < H₃PO₄ < H₂SO₄ < HClO₄ → HClO₄ là acid mạnh nhất."}, {"q": "Trong dãy hydroxide: NaOH, Mg(OH)₂, Al(OH)₃, thứ tự GIẢM dần tính base là", "opts": ["NaOH > Mg(OH)₂ > Al(OH)₃", "Al(OH)₃ > Mg(OH)₂ > NaOH", "Mg(OH)₂ > NaOH > Al(OH)₃", "Cả ba có tính base bằng nhau"], "ans": 0, "exp": "Cùng chu kì 3, tính kim loại Na > Mg > Al → tính base: NaOH (base mạnh) > Mg(OH)₂ (base trung bình) > Al(OH)₃ (lưỡng tính)."}, {"q": "Nguyên tố X thuộc nhóm VA. Công thức oxide cao nhất của X là", "opts": ["X₂O₅", "XO₅", "X₂O₃", "XO₂"], "ans": 0, "exp": "Nhóm VA → hóa trị cao nhất với O là V → công thức oxide cao nhất là X₂O₅ (ví dụ N₂O₅, P₂O₅)."}, {"q": "Nguyên tố R có công thức hợp chất khí với hydrogen là RH₄. Công thức oxide cao nhất của R là", "opts": ["RO₂", "R₂O₅", "RO₃", "R₂O₇"], "ans": 0, "exp": "RH₄ → hóa trị với H là IV ⇒ hóa trị cao nhất với O là 8 – 4 = IV → công thức oxide cao nhất là RO₂ (nhóm IVA: CO₂, SiO₂)."}, {"q": "Nguyên tố X có công thức oxide cao nhất là XO₃. Công thức hợp chất khí với hydrogen của X là", "opts": ["H₂X", "HX", "XH₃", "XH₄"], "ans": 0, "exp": "XO₃ → hóa trị cao nhất với O là VI ⇒ hóa trị với H là 8 – 6 = II → H₂X."}, {"q": "Trong nhóm IA, so sánh tính base giữa LiOH, NaOH và KOH, thứ tự TĂNG dần tính base là", "opts": ["LiOH < NaOH < KOH", "KOH < NaOH < LiOH", "NaOH < LiOH < KOH", "LiOH < KOH < NaOH"], "ans": 0, "exp": "Trong nhóm IA từ trên xuống dưới, tính kim loại tăng (Li < Na < K) → tính base tăng: LiOH < NaOH < KOH."}, {"q": "Trong chu kì 3, oxide cao nhất nào sau đây có tính ACID mạnh nhất?", "opts": ["Cl₂O₇", "SO₃", "P₂O₅", "SiO₂"], "ans": 0, "exp": "Tính acid tăng dần từ trái sang phải chu kì 3: SiO₂ < P₂O₅ < SO₃ < Cl₂O₇."}, {"q": "Hydroxide nào sau đây có tính LƯỠNG TÍNH (vừa tác dụng với dung dịch HCl, vừa tác dụng với dung dịch NaOH)?", "opts": ["Al(OH)₃", "NaOH", "Mg(OH)₂", "H₂SO₄"], "ans": 0, "exp": "Al(OH)₃ là hydroxide lưỡng tính (tác dụng cả acid mạnh và base mạnh)."}]}, "dl-nd": {"title": "3.1. Định luật tuần hoàn", "questions": [{"q": "Nội dung đúng của Định luật tuần hoàn các nguyên tố hóa học là: Tính chất của các nguyên tố và đơn chất, cũng như thành phần và tính chất của các hợp chất tạo nên từ các nguyên tố đó biến đổi tuần hoàn theo chiều tăng của", "opts": ["Điện tích hạt nhân nguyên tử", "Nguyên tử khối", "Số neutron", "Bán kính nguyên tử"], "ans": 0, "exp": "Định luật tuần hoàn hiện đại phát biểu sự biến đổi tuần hoàn theo chiều tăng của điện tích hạt nhân nguyên tử (Z)."}, {"q": "Nguyên nhân sâu xa dẫn đến sự biến đổi tuần hoàn tính chất của các nguyên tố hóa học là gì?", "opts": ["Sự biến đổi tuần hoàn cấu hình electron lớp ngoài cùng của nguyên tử các nguyên tố khi Z tăng dần", "Sự tăng dần của khối lượng hạt nhân", "Sự thay đổi số neutron trong hạt nhân", "Sự thay đổi nhiệt độ phòng"], "ans": 0, "exp": "Khi Z tăng, cấu hình electron lớp ngoài cùng lặp lại một cách tuần hoàn (từ ns¹ đến ns² np⁶) làm tính chất hóa học lặp lại tuần hoàn."}, {"q": "Đại lượng nào sau đây biến đổi TUẦN HOÀN theo chiều tăng dần của điện tích hạt nhân nguyên tử?", "opts": ["Số electron lớp ngoài cùng, độ âm điện, bán kính nguyên tử, tính kim loại – phi kim", "Số hiệu nguyên tử Z", "Số proton trong hạt nhân", "Tổng số electron trong nguyên tử"], "ans": 0, "exp": "Số proton, tổng số e, Z chỉ tăng liên tục (không tuần hoàn); còn số e lớp ngoài cùng, bán kính, độ âm điện, hóa trị cao nhất biến đổi tuần hoàn."}, {"q": "Đại lượng nào sau đây KHÔNG biến đổi tuần hoàn mà chỉ tăng liên tục theo chiều tăng điện tích hạt nhân?", "opts": ["Số proton trong hạt nhân", "Hóa trị cao nhất với oxygen", "Độ âm điện", "Tính phi kim"], "ans": 0, "exp": "Số proton (Z) tăng liên tục 1, 2, 3... không lặp lại tuần hoàn."}, {"q": "Khi đi từ đầu đến cuối chu kì 2 (từ Li đến F) và chu kì 3 (từ Na đến Cl), hóa trị cao nhất với oxygen của các nguyên tố biến đổi tuần hoàn như thế nào?", "opts": ["Tăng từ I đến VII (trừ F không có hóa trị VII với O)", "Giảm từ VII về I", "Luôn bằng IV", "Không thay đổi"], "ans": 0, "exp": "Hóa trị cao nhất với O tăng đều từ nhóm IA (I) đến nhóm VIIA (VII), rồi lặp lại ở chu kì tiếp theo."}, {"q": "Vì sao các nguyên tố trong cùng một nhóm A (ví dụ nhóm IA: Li, Na, K, Rb, Cs) lại có tính chất hóa học tương tự nhau?", "opts": ["Vì nguyên tử của chúng có cấu hình electron lớp ngoài cùng tương tự nhau (cùng số electron hóa trị)", "Vì chúng có cùng số lớp electron", "Vì chúng có cùng số khối", "Vì chúng có cùng bán kính nguyên tử"], "ans": 0, "exp": "Cùng số electron lớp ngoài cùng (cùng số e hóa trị) là nguyên nhân khiến các nguyên tố cùng nhóm A có tính chất hóa học giống nhau."}, {"q": "Ở trạng thái cơ bản, cấu hình electron lớp ngoài cùng của các nguyên tố khí hiếm (trừ He) lặp lại tuần hoàn ở cuối mỗi chu kì là", "opts": ["ns² np⁶", "ns¹", "ns²", "ns² np⁵"], "ans": 0, "exp": "Cuối mỗi chu kì (từ chu kì 2 trở đi) đều kết thúc bằng khí hiếm có cấu hình lớp ngoài cùng bền vững ns² np⁶."}, {"q": "Sự biến đổi 'tuần hoàn' trong hóa học có nghĩa là gì?", "opts": ["Tính chất biến đổi theo một quy luật nhất định rồi lặp lại tương tự sau mỗi chu kì", "Tính chất luôn giữ nguyên không bao giờ thay đổi", "Tính chất chỉ tăng mãi không bao giờ giảm", "Tính chất thay đổi hoàn toàn ngẫu nhiên"], "ans": 0, "exp": "Tuần hoàn là lặp đi lặp lại theo chu kì (ví dụ mỗi chu kì lại bắt đầu từ kim loại mạnh, giảm dần sang phi kim mạnh rồi kết thúc ở khí hiếm)."}, {"q": "Trong bảng tuần hoàn, nếu xét từ đầu đến cuối mỗi chu kì (trừ khí hiếm), tính chất của các đơn chất biến đổi tuần hoàn từ", "opts": ["Kim loại điển hình → kim loại yếu → phi kim yếu → phi kim điển hình", "Phi kim điển hình → kim loại điển hình", "Khí hiếm → kim loại → phi kim", "Chỉ toàn là kim loại"], "ans": 0, "exp": "Mỗi chu kì bắt đầu bằng kim loại kiềm mạnh (IA), yếu dần sang nhóm IIIA/IVA, rồi chuyển sang phi kim mạnh dần tới halogen (VIIA)."}, {"q": "Công thức tổng quát của oxide cao nhất lặp lại tuần hoàn ở các chu kì từ nhóm IA đến VIIA lần lượt là", "opts": ["R₂O, RO, R₂O₃, RO₂, R₂O₅, RO₃, R₂O₇", "RO, R₂O, RO₂, R₂O₃, RO₃, R₂O₅, RO₇", "RH, RH₂, RH₃, RH₄", "R₂O₇, RO₃, R₂O₅, RO₂, R₂O₃, RO, R₂O"], "ans": 0, "exp": "Tương ứng hóa trị cao nhất từ I đến VII: R₂O (IA), RO (IIA), R₂O₃ (IIIA), RO₂ (IVA), R₂O₅ (VA), RO₃ (VIA), R₂O₇ (VIIA)."}, {"q": "Công thức tổng quát của hợp chất khí với hydrogen của các phi kim từ nhóm IVA đến VIIA lần lượt là", "opts": ["RH₄, RH₃, H₂R, HR", "HR, H₂R, RH₃, RH₄", "RH, RH₂, RH₃, RH₄", "RH₄, RH₅, RH₆, RH₇"], "ans": 0, "exp": "Hóa trị với H giảm từ IV → III → II → I: RH₄ (IVA), RH₃ (VA), H₂R (VIA), HR (VIIA)."}, {"q": "Nguyên tố nào sau đây bắt đầu cho một chu kì mới có cấu hình lớp ngoài cùng giống hệt Lithium (2s¹)?", "opts": ["Sodium (3s¹) và Potassium (4s¹)", "Beryllium (2s²)", "Neon (2s² 2p⁶)", "Fluorine (2s² 2p⁵)"], "ans": 0, "exp": "Li (2s¹), Na (3s¹), K (4s¹) đều mở đầu các chu kì 2, 3, 4 với 1e lớp ngoài cùng."}, {"q": "Mendeleev đã chứng minh sức mạnh tiên đoán của Định luật tuần hoàn bằng cách nào?", "opts": ["Để trống nhiều ô trong bảng tuần hoàn và dự đoán chính xác tính chất của các nguyên tố chưa được phát hiện lúc đó (như Ga, Sc, Ge)", "Loại bỏ hết các nguyên tố phi kim", "Sắp xếp các nguyên tố theo bảng chữ cái A, B, C", "Chỉ xếp 20 nguyên tố đầu tiên"], "ans": 0, "exp": "Mendeleev đã tiên đoán chính xác khối lượng, tỉ khối, công thức oxide của Gallium (Ga), Scandium (Sc), Germanium (Ge) trước khi chúng được tìm thấy."}, {"q": "Theo định luật tuần hoàn, sự biến đổi tính chất của các hợp chất (oxide, hydroxide) phụ thuộc trực tiếp vào", "opts": ["Sự biến đổi tuần hoàn cấu hình electron và tính kim loại – phi kim của nguyên tố tạo nên chúng", "Màu sắc của lọ đựng hóa chất", "Trạng thái rắn hay lỏng của nước", "Áp suất khí quyển"], "ans": 0, "exp": "Tính kim loại/phi kim của nguyên tố quyết định tính base/acid của oxide và hydroxide tương ứng."}, {"q": "Phát biểu nào sau đây ĐÚNG về Định luật tuần hoàn?", "opts": ["Tính chất của đơn chất và hợp chất biến đổi tuần hoàn theo chiều tăng của điện tích hạt nhân nguyên tử", "Tính chất của các nguyên tố biến đổi tuần hoàn theo chiều tăng của số neutron", "Số lớp electron của các nguyên tố biến đổi tuần hoàn trong một nhóm A", "Điện tích hạt nhân biến đổi tuần hoàn theo chiều tăng số khối"], "ans": 0, "exp": "Đây là phát biểu chính xác của Định luật tuần hoàn hiện đại."}]}, "dl-ss": {"title": "3.2. So sánh tính chất các nguyên tố", "questions": [{"q": "Cho 3 nguyên tố: Na (Z = 11), Mg (Z = 12), K (Z = 19). Thứ tự TĂNG dần tính kim loại là", "opts": ["Mg < Na < K", "K < Na < Mg", "Na < Mg < K", "Mg < K < Na"], "ans": 0, "exp": "Cùng chu kì 3: Mg < Na; cùng nhóm IA: Na < K ⇒ Mg < Na < K."}, {"q": "Cho 3 nguyên tố: P (Z = 15), S (Z = 16), Cl (Z = 17). Thứ tự TĂNG dần tính acid của các hydroxide H₃PO₄, H₂SO₄, HClO₄ là", "opts": ["H₃PO₄ < H₂SO₄ < HClO₄", "HClO₄ < H₂SO₄ < H₃PO₄", "H₂SO₄ < H₃PO₄ < HClO₄", "H₃PO₄ < HClO₄ < H₂SO₄"], "ans": 0, "exp": "Trong chu kì 3, tính phi kim P < S < Cl → tính acid của hydroxide tăng dần: H₃PO₄ < H₂SO₄ < HClO₄."}, {"q": "Cho 3 nguyên tố: O (Z = 8), F (Z = 9), S (Z = 16). Thứ tự GIẢM dần độ âm điện là", "opts": ["F > O > S", "S > O > F", "O > F > S", "F > S > O"], "ans": 0, "exp": "Cùng chu kì 2: F > O; cùng nhóm VIA: O > S ⇒ F > O > S."}, {"q": "Cho 3 nguyên tố: Na (Z = 11), Al (Z = 13), K (Z = 19). Thứ tự TĂNG dần bán kính nguyên tử là", "opts": ["Al < Na < K", "K < Na < Al", "Na < Al < K", "Al < K < Na"], "ans": 0, "exp": "Cùng chu kì 3: r(Al) < r(Na); cùng nhóm IA: r(Na) < r(K) ⇒ Al < Na < K."}, {"q": "Cho 3 nguyên tố: C (Z = 6), N (Z = 7), O (Z = 8). Nguyên tố có tính phi kim MẠNH nhất là", "opts": ["O", "N", "C", "Cả ba bằng nhau"], "ans": 0, "exp": "Cùng chu kì 2, từ trái sang phải tính phi kim tăng dần: C < N < O → O mạnh nhất."}, {"q": "Cho 3 hydroxide: KOH, NaOH, Mg(OH)₂. Thứ tự GIẢM dần tính base là", "opts": ["KOH > NaOH > Mg(OH)₂", "Mg(OH)₂ > NaOH > KOH", "NaOH > KOH > Mg(OH)₂", "KOH > Mg(OH)₂ > NaOH"], "ans": 0, "exp": "Tính kim loại: K > Na > Mg → tính base: KOH > NaOH > Mg(OH)₂."}, {"q": "Cho 3 nguyên tố: Be (Z = 4), Mg (Z = 12), Ca (Z = 20). Nguyên tử có bán kính NHỎ nhất là", "opts": ["Be", "Mg", "Ca", "Cả ba bằng nhau"], "ans": 0, "exp": "Cùng nhóm IIA, từ trên xuống dưới bán kính tăng: r(Be) < r(Mg) < r(Ca) → Be nhỏ nhất."}, {"q": "Cho 3 nguyên tố: N (Z = 7), O (Z = 8), P (Z = 15). Thứ tự TĂNG dần tính phi kim là", "opts": ["P < N < O", "O < N < P", "N < P < O", "P < O < N"], "ans": 0, "exp": "Cùng nhóm VA: P < N; cùng chu kì 2: N < O ⇒ P < N < O."}, {"q": "Cho 3 oxide: SiO₂, P₂O₅, SO₃. Thứ tự TĂNG dần tính acid là", "opts": ["SiO₂ < P₂O₅ < SO₃", "SO₃ < P₂O₅ < SiO₂", "P₂O₅ < SiO₂ < SO₃", "SiO₂ < SO₃ < P₂O₅"], "ans": 0, "exp": "Si (14), P (15), S (16) cùng chu kì 3 → tính phi kim tăng dần → tính acid của oxide tăng: SiO₂ < P₂O₅ < SO₃."}, {"q": "Cho 3 nguyên tố: Al (Z = 13), Mg (Z = 12), Ca (Z = 20). Thứ tự GIẢM dần tính kim loại là", "opts": ["Ca > Mg > Al", "Al > Mg > Ca", "Mg > Ca > Al", "Ca > Al > Mg"], "ans": 0, "exp": "Cùng nhóm IIA: Ca > Mg; cùng chu kì 3: Mg > Al ⇒ Ca > Mg > Al."}, {"q": "Cho 3 nguyên tố: F (Z = 9), Cl (Z = 17), S (Z = 16). Thứ tự TĂNG dần tính phi kim là", "opts": ["S < Cl < F", "F < Cl < S", "Cl < S < F", "S < F < Cl"], "ans": 0, "exp": "Cùng chu kì 3: S < Cl; cùng nhóm VIIA: Cl < F ⇒ S < Cl < F."}, {"q": "Cho các nguyên tử: Li (Z = 3), Na (Z = 11), K (Z = 19). Thứ tự TĂNG dần độ âm điện là", "opts": ["K < Na < Li", "Li < Na < K", "Na < K < Li", "K < Li < Na"], "ans": 0, "exp": "Trong nhóm IA từ trên xuống dưới độ âm điện giảm (Li > Na > K) → tăng dần là K < Na < Li."}, {"q": "So sánh tính base của hai hydroxide: Mg(OH)₂ và Ca(OH)₂ (biết Mg ở chu kì 3, Ca ở chu kì 4, cùng nhóm IIA), nhận xét nào đúng?", "opts": ["Ca(OH)₂ có tính base mạnh hơn Mg(OH)₂", "Mg(OH)₂ có tính base mạnh hơn Ca(OH)₂", "Hai chất có tính base bằng nhau", "Cả hai đều là acid mạnh"], "ans": 0, "exp": "Trong nhóm IIA, Ca đứng dưới Mg nên tính kim loại Ca > Mg → Ca(OH)₂ có tính base mạnh hơn Mg(OH)₂."}, {"q": "So sánh tính acid của H₂CO₃ và H₂SiO₃ (biết C ở chu kì 2, Si ở chu kì 3, cùng nhóm IVA), nhận xét nào đúng?", "opts": ["H₂CO₃ có tính acid mạnh hơn H₂SiO₃", "H₂SiO₃ có tính acid mạnh hơn H₂CO₃", "Hai acid có độ mạnh bằng nhau", "Cả hai đều là base mạnh"], "ans": 0, "exp": "Trong nhóm IVA, C đứng trên Si nên tính phi kim C > Si → H₂CO₃ có tính acid mạnh hơn H₂SiO₃."}, {"q": "Cho 4 nguyên tố: Na (11), Mg (12), Al (13), K (19). Nguyên tố có độ âm điện NHỎ nhất là", "opts": ["K", "Na", "Mg", "Al"], "ans": 0, "exp": "K có tính kim loại mạnh nhất trong 4 nguyên tố → bán kính lớn nhất → độ âm điện nhỏ nhất."}]}, "dl-yn": {"title": "3.3. Ý nghĩa của Bảng tuần hoàn", "questions": [{"q": "Hai ý nghĩa quan trọng nhất của bảng tuần hoàn các nguyên tố hóa học là", "opts": ["Từ vị trí suy ra cấu tạo nguyên tử & tính chất nguyên tố; ngược lại từ cấu tạo nguyên tử suy ra vị trí & tính chất", "Chỉ dùng để tra cứu tên tiếng Anh của nguyên tố", "Chỉ dùng để tính khối lượng riêng của chất lỏng", "Chỉ áp dụng cho các hợp chất hữu cơ"], "ans": 0, "exp": "Bảng tuần hoàn tạo cầu nối chặt chẽ hai chiều giữa: Vị trí ↔ Cấu tạo nguyên tử ↔ Tính chất hóa học."}, {"q": "Biết nguyên tố X nằm ở ô 11, chu kì 3, nhóm IA. Kết luận nào sau đây về X là ĐÚNG?", "opts": ["X có 11p, 11e, 3 lớp e, 1e lớp ngoài cùng; là kim loại mạnh, oxide cao nhất X₂O (basic oxide), hydroxide XOH (base mạnh)", "X là phi kim mạnh, tạo oxide acid XO", "X là khí hiếm không tham gia phản ứng", "X có 3 electron ở lớp ngoài cùng"], "ans": 0, "exp": "Ô 11 → 11p, 11e; chu kì 3 → 3 lớp e; nhóm IA → 1e ngoài cùng → kim loại kiềm mạnh (Na), oxide Na₂O, hydroxide NaOH."}, {"q": "Biết nguyên tố Y nằm ở ô 16, chu kì 3, nhóm VIA. Kết luận nào sau đây về Y là ĐÚNG?", "opts": ["Y là phi kim, oxide cao nhất là YO₃ (acidic oxide), hợp chất khí với H là H₂Y, hydroxide H₂YO₄ là acid mạnh", "Y là kim loại mạnh, hydroxide Y(OH)₆ là base mạnh", "Y có 6 lớp electron", "Y có công thức oxide cao nhất là Y₂O₃"], "ans": 0, "exp": "Y là Sulfur (S): 6e ngoài cùng (phi kim), oxide cao nhất SO₃, khí với H là H₂S, hydroxide H₂SO₄ (acid mạnh)."}, {"q": "Biết nguyên tử nguyên tố M có cấu hình electron 1s² 2s² 2p⁶ 3s² 3p⁵. Nhận định nào sau đây về M là ĐÚNG?", "opts": ["M ở ô 17, chu kì 3, nhóm VIIA; là phi kim mạnh, tạo oxide cao nhất M₂O₇ và acid HMO₄ rất mạnh", "M ở chu kì 3, nhóm VA; là kim loại yếu", "M là khí hiếm ở nhóm VIIIA", "M tạo hợp chất khí với H có công thức MH₃"], "ans": 0, "exp": "Z = 17 (Cl): chu kì 3, nhóm VIIA → phi kim mạnh, oxide Cl₂O₇, acid HClO₄ rất mạnh, hợp chất với H là HCl."}, {"q": "Biết nguyên tử nguyên tố R có cấu hình electron 1s² 2s² 2p⁶ 3s². Nhận định nào sau đây về R là SAI?", "opts": ["Oxide cao nhất của R có công thức RO và là acidic oxide", "R nằm ở ô 12, chu kì 3, nhóm IIA", "R là kim loại (Magnesium)", "Hydroxide của R có công thức R(OH)₂ và có tính base"], "ans": 0, "exp": "R là kim loại Mg (nhóm IIA) nên oxide cao nhất MgO là BASIC oxide, không phải acidic oxide."}, {"q": "Dựa vào vị trí trong bảng tuần hoàn (chu kì 3, nhóm IIIA), ta có thể dự đoán nguyên tố Aluminium (Al, Z = 13) có tính chất nào?", "opts": ["Oxide cao nhất Al₂O₃ và hydroxide Al(OH)₃ đều có tính lưỡng tính", "Al là phi kim mạnh hơn Chlorine", "Al(OH)₃ là base mạnh hơn NaOH", "Al có 5 electron ở lớp ngoài cùng"], "ans": 0, "exp": "Al nằm ở vùng ranh giới kim loại – phi kim (chu kì 3, nhóm IIIA), có Al₂O₃ và Al(OH)₃ đều lưỡng tính."}, {"q": "Khi biết một nguyên tố X nằm ở chu kì 2, nhóm VIIA (Fluorine), có thể suy ra ngay cấu tạo nguyên tử của X là", "opts": ["Có 2 lớp electron và 7 electron ở lớp ngoài cùng (1s² 2s² 2p⁵)", "Có 7 lớp electron và 2 electron lớp ngoài cùng", "Có 2 proton và 7 neutron", "Có 17 electron"], "ans": 0, "exp": "Chu kì 2 → 2 lớp e; nhóm VIIA → 7e lớp ngoài cùng → 1s² 2s² 2p⁵."}, {"q": "Biết nguyên tố X thuộc chu kì 4, nhóm IA (Potassium, Z = 19). So với nguyên tố đứng ngay trên nó là Na (Z = 11) và đứng ngay bên phải nó là Ca (Z = 20), tính kim loại của X như thế nào?", "opts": ["X có tính kim loại mạnh hơn cả Na và Ca", "X có tính kim loại yếu hơn cả Na và Ca", "X mạnh hơn Ca nhưng yếu hơn Na", "X mạnh hơn Na nhưng yếu hơn Ca"], "ans": 0, "exp": "Trong nhóm IA: K > Na; trong chu kì 4: K > Ca ⇒ K mạnh hơn cả Na và Ca."}, {"q": "Biết nguyên tố A có Z = 15 (Phosphorus). Công thức oxide cao nhất và hydroxide tương ứng của A là", "opts": ["P₂O₅ và H₃PO₄", "P₂O₃ và H₃PO₃", "PO₂ và H₂PO₄", "P₂O₅ và HPO₄"], "ans": 0, "exp": "Z = 15 → 1s² 2s² 2p⁶ 3s² 3p³ (chu kì 3, nhóm VA) → oxide cao nhất P₂O₅, hydroxide tương ứng H₃PO₄."}, {"q": "Nguyên tố X có Z = 14 (Silicon). Từ cấu hình electron 1s² 2s² 2p⁶ 3s² 3p², ta suy ra hợp chất khí với hydrogen và oxide cao nhất của X lần lượt là", "opts": ["SiH₄ và SiO₂", "SiH₂ và SiO", "SiH₃ và Si₂O₅", "H₂Si và SiO₃"], "ans": 0, "exp": "Z = 14 → nhóm IVA → hóa trị với O là IV (SiO₂) và với H là 8–4 = IV (SiH₄)."}, {"q": "Nếu một nguyên tố X có cấu hình electron lớp ngoài cùng là 3s² 3p⁶ thì có thể dự đoán tính chất hóa học của X là", "opts": ["Rất trơ về mặt hóa học (khí hiếm Argon)", "Kim loại kiềm rất hoạt động", "Phi kim rất mạnh", "Tạo oxide lưỡng tính"], "ans": 0, "exp": "Cấu hình 3s² 3p⁶ bão hòa bền vững (8e ngoài cùng) → khí hiếm, hầu như không phản ứng."}, {"q": "Nguyên tố X nằm ở ô 20 trong bảng tuần hoàn. Từ vị trí này, KHÔNG thể suy ra trực tiếp thông tin nào sau đây?", "opts": ["Số neutron chính xác của mọi đồng vị của X", "Số proton = 20 và số electron = 20", "Vị trí chu kì 4, nhóm IIA", "X là kim loại kiềm thổ, tạo oxide XO"], "ans": 0, "exp": "Từ Z = 20 suy ra cấu hình, chu kì, nhóm và tính chất hóa học; không suy ra được số neutron cụ thể nếu không cho số khối A."}, {"q": "Biết nguyên tố X nằm ở chu kì 3, nhóm VIA và nguyên tố Y nằm ở chu kì 3, nhóm VIIA. So sánh nào sau đây ĐÚNG?", "opts": ["Y có độ âm điện lớn hơn X và tính phi kim mạnh hơn X", "X có độ âm điện lớn hơn Y", "Y có bán kính nguyên tử lớn hơn X", "Oxide cao nhất của X có tính acid mạnh hơn của Y"], "ans": 0, "exp": "Cùng chu kì 3, Y (nhóm VIIA) đứng bên phải X (nhóm VIA) → Y có độ âm điện lớn hơn, tính phi kim mạnh hơn và bán kính nhỏ hơn X."}, {"q": "Nguyên tố X thuộc chu kì 2, nhóm IVA (Carbon). Công thức hợp chất khí với hydrogen và oxide cao nhất của X là", "opts": ["CH₄ và CO₂", "CH₃ và CO", "CH₄ và CO", "CH₂ và CO₂"], "ans": 0, "exp": "Nhóm IVA → hợp chất khí với H là CH₄ (methane), oxide cao nhất là CO₂ (carbon dioxide)."}, {"q": "Trong thực tế học tập và nghiên cứu hóa học, bảng tuần hoàn giúp ích lớn nhất ở điểm nào?", "opts": ["Hệ thống hóa kiến thức, dễ dàng dự đoán tính chất của nguyên tố và hợp chất mà không cần học thuộc lòng rời rạc", "Thay thế hoàn toàn việc làm thí nghiệm hóa học", "Giúp biết ngay giá bán của các kim loại trên thị trường", "Chỉ dùng để đếm số lượng nguyên tố"], "ans": 0, "exp": "Nhờ quy luật biến đổi tuần hoàn, chỉ cần biết vị trí nguyên tố là có thể suy luận hệ thống về cấu tạo và tính chất hóa học."}]}};
+
+    const BRANCH_TOPICS = {
+      ct: ['ct-nt', 'ct-ck', 'ct-vt'],
+      bd: ['bd-bk', 'bd-kl', 'bd-ox'],
+      dl: ['dl-nd', 'dl-ss', 'dl-yn']
+    };
+
+    const rootPill = document.getElementById('rootPill');
+    const rootDrawer = document.getElementById('rootDrawer');
+    const nodeItems = document.querySelectorAll('.node-item');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const branchCols = document.querySelectorAll('.branch-col');
+    const columnsGrid = document.getElementById('columnsGrid');
+    const treeConnectors = document.getElementById('treeConnectors');
+
+    /* ================= MIND MAP INTERACTION ================= */
+    function toggleRoot() {
+      const isOpen = rootDrawer.classList.toggle('open');
+      rootPill.setAttribute('aria-expanded', isOpen);
+    }
+    rootPill.addEventListener('click', toggleRoot);
+    rootPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRoot(); }
+    });
+
+    nodeItems.forEach(item => {
+      const btn = item.querySelector('.sub-pill');
+      btn.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        nodeItems.forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            other.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (!wasOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          item.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-branch-toggle]').forEach(header => {
+      header.addEventListener('click', () => {
+        const col = header.closest('.branch-col');
+        const items = col.querySelectorAll('.node-item');
+        const anyOpen = Array.from(items).some(i => i.classList.contains('open'));
+        items.forEach(i => {
+          i.classList.toggle('open', !anyOpen);
+          i.querySelector('.sub-pill').setAttribute('aria-expanded', String(!anyOpen));
+        });
+      });
+    });
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+        if (filter === 'all') {
+          branchCols.forEach(col => col.classList.remove('hidden'));
+          columnsGrid.classList.remove('single-col');
+          treeConnectors.style.display = '';
+        } else {
+          branchCols.forEach(col => {
+            col.classList.toggle('hidden', col.dataset.branch !== filter);
+          });
+          columnsGrid.classList.add('single-col');
+          treeConnectors.style.display = 'none';
+        }
+      });
+    });
+
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      nodeItems.forEach(item => {
+        if (!item.closest('.branch-col').classList.contains('hidden')) {
+          item.classList.add('open');
+          item.querySelector('.sub-pill').setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      rootDrawer.classList.remove('open');
+      rootPill.setAttribute('aria-expanded', 'false');
+      nodeItems.forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    /* ================= ZOOM MODAL (FULLSCREEN) ================= */
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomTitle = document.getElementById('zoomTitle');
+    const zoomBody = document.getElementById('zoomBody');
+
+    function closeZoomModal() {
+      zoomModal.classList.remove('show');
+      if (document.fullscreenElement === zoomModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.querySelectorAll('.zoom-btn').forEach(zbtn => {
+      zbtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = zbtn.closest('.node-item');
+        const label = item.querySelector('.pill-label').textContent.trim();
+        const branchName = item.closest('.branch-col').querySelector('.b-title').textContent.trim();
+        const innerClone = item.querySelector('.drawer-inner').cloneNode(true);
+        const topBar = innerClone.querySelector('.drawer-top');
+        const pBar = innerClone.querySelector('.practice-bar');
+        if (topBar) topBar.remove();
+        if (pBar) pBar.remove();
+
+        zoomTitle.textContent = `${branchName} — ${label}`;
+        zoomBody.innerHTML = '';
+        innerClone.className = 'zoom-content-wrap';
+        innerClone.removeAttribute('style');
+        zoomBody.appendChild(innerClone);
+        zoomModal.classList.add('show');
+
+        if (zoomModal.requestFullscreen) {
+          zoomModal.requestFullscreen().catch(() => {});
+        } else if (zoomModal.webkitRequestFullscreen) {
+          zoomModal.webkitRequestFullscreen();
+        }
+      });
+    });
+
+    document.getElementById('zoomClose').addEventListener('click', closeZoomModal);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        if (zoomModal.classList.contains('show')) {
+          zoomModal.classList.remove('show');
+        }
+      }
+    });
+
+    /* ================= QUIZ ENGINE ================= */
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSubtitle = document.getElementById('quizSubtitle');
+    const quizBody = document.getElementById('quizBody');
+    const quizFooter = document.getElementById('quizFooter');
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    const confirmText = document.getElementById('confirmText');
+
+    let activeQuiz = {
+      topic: null,
+      count: 10,
+      questions: [],
+      userAnswers: {},
+      submitted: false
+    };
+
+    function shuffleArray(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getBranchOfTopic(topicId) {
+      for (const [b, list] of Object.entries(BRANCH_TOPICS)) {
+        if (list.includes(topicId)) return b;
+      }
+      return null;
+    }
+
+    function buildQuestionSet(topicId, desiredCount) {
+      let pool = [];
+      let label = '';
+
+      if (topicId === 'all') {
+        label = 'Tổng hợp Chương 2: Bảng tuần hoàn (Hóa 10)';
+        Object.values(QUIZ_BANKS).forEach(bank => {
+          bank.questions.forEach(q => pool.push({ ...q, source: bank.title }));
+        });
+        pool = shuffleArray(pool).slice(0, desiredCount);
+      } else {
+        const primaryBank = QUIZ_BANKS[topicId];
+        label = primaryBank.title;
+        const primaryQs = shuffleArray(primaryBank.questions.map(q => ({ ...q, source: primaryBank.title })));
+
+        if (desiredCount <= primaryQs.length) {
+          pool = primaryQs.slice(0, desiredCount);
+        } else {
+          pool = primaryQs.slice();
+          const branch = getBranchOfTopic(topicId);
+          const siblings = (BRANCH_TOPICS[branch] || []).filter(id => id !== topicId);
+          let extra = [];
+          siblings.forEach(sibId => {
+            QUIZ_BANKS[sibId].questions.forEach(q => extra.push({ ...q, source: QUIZ_BANKS[sibId].title }));
+          });
+          extra = shuffleArray(extra);
+          const needed = desiredCount - pool.length;
+          pool = pool.concat(extra.slice(0, needed));
+        }
+      }
+
+      const prepared = pool.map((q, idx) => {
+        const indexedOpts = q.opts.map((text, i) => ({ text, isCorrect: i === q.ans }));
+        const shuffledOpts = shuffleArray(indexedOpts);
+        const newAns = shuffledOpts.findIndex(o => o.isCorrect);
+        return {
+          idx,
+          q: q.q,
+          opts: shuffledOpts.map(o => o.text),
+          ans: newAns,
+          exp: q.exp,
+          source: q.source
+        };
+      });
+
+      return { label, questions: prepared };
+    }
+
+    function openQuiz(topicId, count) {
+      const { label, questions } = buildQuestionSet(topicId, count);
+      activeQuiz = {
+        topic: topicId,
+        count: questions.length,
+        questions,
+        userAnswers: {},
+        submitted: false
+      };
+
+      confirmOverlay.classList.remove('show');
+      quizTitle.textContent = `Luyện tập: ${label}`;
+      quizSubtitle.textContent = `${questions.length} câu trắc nghiệm • Mức độ Biết & Hiểu (có giải thích chi tiết sau khi nộp)`;
+      renderQuizTaking();
+      quizModal.classList.add('show');
+      quizBody.scrollTop = 0;
+
+      if (!document.fullscreenElement) {
+        if (quizModal.requestFullscreen) {
+          quizModal.requestFullscreen().catch(() => {});
+        } else if (quizModal.webkitRequestFullscreen) {
+          quizModal.webkitRequestFullscreen();
+        }
+      }
+    }
+
+    const LETTERS = ['A', 'B', 'C', 'D'];
+
+    function renderQuizTaking() {
+      const countOptions = [10, 15, 20, 30];
+      const setupBar = `
+        <div class="quiz-setup-bar">
+          <span>Chọn nhanh số câu muốn luyện tập:</span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${countOptions.map(n => `
+              <button class="rf-btn ${activeQuiz.count === n ? 'active' : ''}" data-change-count="${n}">${n} câu</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => `
+        <div class="quiz-card" data-qidx="${i}">
+          <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+          <div class="opt-list">
+            ${item.opts.map((optText, oIdx) => `
+              <label class="opt-label" data-q="${i}" data-o="${oIdx}">
+                <input type="radio" name="q_${i}" value="${oIdx}" />
+                <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${setupBar}${cardsHtml}</div>`;
+
+      quizBody.querySelectorAll('[data-change-count]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openQuiz(activeQuiz.topic, parseInt(btn.dataset.changeCount, 10));
+        });
+      });
+
+      quizBody.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const qIdx = parseInt(radio.name.split('_')[1], 10);
+          const oIdx = parseInt(radio.value, 10);
+          activeQuiz.userAnswers[qIdx] = oIdx;
+
+          const card = quizBody.querySelector(`.quiz-card[data-qidx="${qIdx}"]`);
+          card.querySelectorAll('.opt-label').forEach(lbl => {
+            lbl.classList.toggle('is-selected', parseInt(lbl.dataset.o, 10) === oIdx);
+          });
+          updateProgressFooter();
+        });
+      });
+
+      updateProgressFooter();
+    }
+
+    function updateProgressFooter() {
+      const answeredCount = Object.keys(activeQuiz.userAnswers).length;
+      const total = activeQuiz.questions.length;
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đã chọn: <strong>${answeredCount} / ${total}</strong> câu</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCancelQuiz">Đóng</button>
+          <button class="btn-primary" id="btnSubmitQuiz">Nộp bài &amp; Xem giải thích</button>
+        </div>
+      `;
+      document.getElementById('btnCancelQuiz').addEventListener('click', closeQuizModal);
+      document.getElementById('btnSubmitQuiz').addEventListener('click', submitQuiz);
+    }
+
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+    });
+    document.getElementById('confirmOk').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+      finalizeSubmitQuiz();
+    });
+
+    function submitQuiz() {
+      const total = activeQuiz.questions.length;
+      const answered = Object.keys(activeQuiz.userAnswers).length;
+      if (answered < total) {
+        confirmText.textContent = `Bạn mới làm ${answered}/${total} câu. Các câu chưa chọn sẽ bị tính là sai. Bạn vẫn muốn nộp bài chứ?`;
+        confirmOverlay.classList.add('show');
+        return;
+      }
+      finalizeSubmitQuiz();
+    }
+
+    function finalizeSubmitQuiz() {
+      const total = activeQuiz.questions.length;
+      activeQuiz.submitted = true;
+      let correctCount = 0;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => {
+        const userAns = activeQuiz.userAnswers.hasOwnProperty(i) ? activeQuiz.userAnswers[i] : -1;
+        const isCorrect = userAns === item.ans;
+        if (isCorrect) correctCount++;
+
+        const optsHtml = item.opts.map((optText, oIdx) => {
+          let cls = 'opt-label';
+          let badge = '';
+          if (oIdx === item.ans) {
+            cls += ' is-correct';
+            badge = '<span class="opt-badge">✓ Đáp án đúng</span>';
+          } else if (oIdx === userAns && !isCorrect) {
+            cls += ' is-wrong';
+            badge = '<span class="opt-badge">✕ Bạn chọn</span>';
+          }
+          return `
+            <div class="${cls}" style="cursor:default;">
+              <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              ${badge}
+            </div>
+          `;
+        }).join('');
+
+        let expHtml = '';
+        if (isCorrect) {
+          expHtml = `
+            <div class="exp-box exp-ok">
+              <strong>✓ Chính xác!</strong> ${item.exp}
+            </div>
+          `;
+        } else {
+          const chosenReason = userAns === -1
+            ? 'Bạn chưa chọn đáp án cho câu này.'
+            : `Bạn đã chọn <strong>${LETTERS[userAns]}</strong> (chưa đúng). Đáp án đúng là <strong>${LETTERS[item.ans]}</strong>.`;
+          expHtml = `
+            <div class="exp-box exp-err">
+              <strong>✕ Vì sao sai?</strong> ${chosenReason}<br/>
+              <strong>Giải thích:</strong> ${item.exp}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="quiz-card ${isCorrect ? 'correct-card' : 'wrong-card'}" data-is-correct="${isCorrect}">
+            <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+            <div class="opt-list">${optsHtml}</div>
+            ${expHtml}
+          </div>
+        `;
+      }).join('');
+
+      const pct = Math.round((correctCount / total) * 100);
+      const wrongCount = total - correctCount;
+      let msg = 'Cần ôn lại kỹ lý thuyết ở sơ đồ rồi làm lại nhé!';
+      if (pct >= 90) msg = 'Xuất sắc! Bạn nắm rất chắc kiến thức phần này.';
+      else if (pct >= 70) msg = 'Khá tốt! Hãy xem kỹ giải thích ở các câu làm sai để đạt điểm tối đa.';
+      else if (pct >= 50) msg = 'Đạt mức trung bình. Xem lại các câu sai bên dưới để củng cố kiến thức.';
+
+      const bannerHtml = `
+        <div class="result-banner">
+          <div>
+            <div class="score-big">Kết quả: ${correctCount} / ${total} câu đúng (${pct}%)</div>
+            <div class="score-msg">${msg}</div>
+          </div>
+          <div class="review-filters">
+            <button class="rf-btn active" data-review-filter="all">Tất cả (${total})</button>
+            <button class="rf-btn" data-review-filter="wrong">Chỉ xem câu sai (${wrongCount})</button>
+          </div>
+        </div>
+      `;
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${bannerHtml}${cardsHtml}</div>`;
+      quizBody.scrollTop = 0;
+
+      quizBody.querySelectorAll('[data-review-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.reviewFilter;
+          quizBody.querySelectorAll('[data-review-filter]').forEach(b => b.classList.toggle('active', b === btn));
+          quizBody.querySelectorAll('.quiz-card').forEach(card => {
+            if (mode === 'wrong' && card.dataset.isCorrect === 'true') {
+              card.classList.add('hidden-review');
+            } else {
+              card.classList.remove('hidden-review');
+            }
+          });
+        });
+      });
+
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đúng: <strong>${correctCount}</strong> • Sai: <strong>${wrongCount}</strong></span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCloseAfter">Quay lại sơ đồ</button>
+          <button class="btn-primary" id="btnRetryQuiz">🔄 Làm lại (đảo câu hỏi)</button>
+        </div>
+      `;
+      document.getElementById('btnCloseAfter').addEventListener('click', closeQuizModal);
+      document.getElementById('btnRetryQuiz').addEventListener('click', () => openQuiz(activeQuiz.topic, activeQuiz.count));
+    }
+
+    function closeQuizModal() {
+      confirmOverlay.classList.remove('show');
+      quizModal.classList.remove('show');
+      if (document.fullscreenElement === quizModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.getElementById('quizClose').addEventListener('click', closeQuizModal);
+    quizModal.addEventListener('click', e => { if (e.target === quizModal) closeQuizModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (confirmOverlay.classList.contains('show')) {
+          confirmOverlay.classList.remove('show');
+        } else {
+          closeZoomModal();
+          closeQuizModal();
+        }
+      }
+    });
+
+    document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.dataset.quizTopic;
+        const bar = btn.closest('.practice-bar');
+        const select = bar.querySelector('.q-count-select');
+        const count = select ? parseInt(select.value, 10) : 10;
+        openQuiz(topicId, count);
+      });
+    });
+
+    document.getElementById('btnChapterQuiz').addEventListener('click', () => {
+      openQuiz('all', 20);
+    });
+  </script>
+</body>
+</html>
