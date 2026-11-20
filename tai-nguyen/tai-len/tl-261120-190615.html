@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sơ đồ tư duy & Luyện tập Chương 5: Pin điện và điện phân (Hóa 12 – KNTT)</title>
+  <style>
+    :root {
+      --page-bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --pill-bg: #f1f3f5;
+      --pill-hover: #e5e7eb;
+      --line-color: #64748b;
+
+      /* Blue - Root & Monosaccharide */
+      --blue-fill: #dceeff;
+      --blue-border: #3b82f6;
+      --blue-text: #1e3a8a;
+      --blue-soft: #f0f7ff;
+
+      /* Green - Disaccharide */
+      --green-fill: #dcfce7;
+      --green-border: #22a055;
+      --green-text: #14532d;
+      --green-soft: #f0fdf4;
+
+      /* Purple - Polysaccharide */
+      --purple-fill: #ede9fe;
+      --purple-border: #8b5cf6;
+      --purple-text: #4c1d95;
+      --purple-soft: #f5f3ff;
+
+      /* Feedback colors */
+      --ok-bg: #ecfdf5;
+      --ok-border: #10b981;
+      --ok-text: #065f46;
+      --err-bg: #fef2f2;
+      --err-border: #ef4444;
+      --err-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px 16px 40px;
+      line-height: 1.55;
+    }
+
+    /* Top subtle toolbar */
+    .toolbar {
+      max-width: 1120px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tab-btn:hover {
+      background: #f9fafb;
+      color: var(--text);
+    }
+
+    .tab-btn.active[data-filter="all"] { background: #1f2937; color: #fff; border-color: #1f2937; }
+    .tab-btn.active[data-filter="tdc"] { background: var(--blue-border); color: #fff; border-color: var(--blue-border); }
+    .tab-btn.active[data-filter="pin"] { background: var(--green-border); color: #fff; border-color: var(--green-border); }
+    .tab-btn.active[data-filter="dp"] { background: var(--purple-border); color: #fff; border-color: var(--purple-border); }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .action-btn:hover {
+      background: #f3f4f6;
+      color: var(--text);
+    }
+
+    .action-btn.primary-quiz {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .action-btn.primary-quiz:hover {
+      background: #1d4ed8;
+    }
+
+    /* Main White Mindmap Canvas */
+    .canvas-card {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 28px 28px 34px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Root Pill */
+    .root-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .root-pill {
+      background: var(--blue-fill);
+      border: 2px solid var(--blue-border);
+      border-radius: 999px;
+      padding: 12px 38px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      min-width: 290px;
+    }
+
+    .root-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.18);
+    }
+
+    .root-pill .title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .root-pill .sub {
+      font-size: 0.86rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Root inline accordion */
+    .root-drawer {
+      max-width: 720px;
+      width: 100%;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .root-drawer.open {
+      max-height: 540px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+
+    /* SVG Connector between root and 3 columns */
+    .tree-connectors {
+      width: 100%;
+      height: 52px;
+      display: block;
+      margin: 2px 0;
+    }
+
+    /* 3 Columns Grid */
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .columns.single-col {
+      grid-template-columns: minmax(0, 560px);
+      justify-content: center;
+    }
+
+    .branch-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .branch-col.hidden {
+      display: none;
+    }
+
+    /* Branch Header Pill */
+    .branch-pill {
+      border-radius: 999px;
+      padding: 11px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+
+    .branch-pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .branch-pill .b-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .branch-pill .b-sub {
+      font-size: 0.84rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .branch-col[data-branch="tdc"] .branch-pill { background: var(--blue-fill); border-color: var(--blue-border); }
+    .branch-col[data-branch="tdc"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(59, 130, 246, 0.16); }
+
+    .branch-col[data-branch="pin"] .branch-pill { background: var(--green-fill); border-color: var(--green-border); }
+    .branch-col[data-branch="pin"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(34, 160, 85, 0.16); }
+
+    .branch-col[data-branch="dp"] .branch-pill { background: var(--purple-fill); border-color: var(--purple-border); }
+    .branch-col[data-branch="dp"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(139, 92, 246, 0.16); }
+
+    /* Dotted Vertical Tree List under each Branch */
+    .sub-tree {
+      position: relative;
+      margin-top: 14px;
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sub-tree::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -14px;
+      bottom: 24px;
+      border-left: 2px dotted var(--line-color);
+    }
+
+    .node-item {
+      position: relative;
+    }
+
+    .node-item::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 23px;
+      width: 14px;
+      border-top: 2px dotted var(--line-color);
+    }
+
+    /* Sub-node Pill Button */
+    .sub-pill {
+      width: 100%;
+      background: var(--pill-bg);
+      border: 1.5px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+
+    .sub-pill:hover {
+      background: var(--pill-hover);
+      border-color: #cbd5e1;
+    }
+
+    .sub-pill .pill-label {
+      flex: 1;
+      text-align: center;
+      padding-left: 14px;
+    }
+
+    .sub-pill .chev {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      transition: transform 0.22s ease;
+      flex-shrink: 0;
+    }
+
+    .node-item.open .sub-pill .chev {
+      transform: rotate(180deg);
+    }
+
+    .branch-col[data-branch="tdc"] .node-item.open .sub-pill {
+      background: var(--blue-fill);
+      border-color: var(--blue-border);
+      color: var(--blue-text);
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.14);
+    }
+
+    .branch-col[data-branch="pin"] .node-item.open .sub-pill {
+      background: var(--green-fill);
+      border-color: var(--green-border);
+      color: var(--green-text);
+      box-shadow: 0 3px 10px rgba(34, 160, 85, 0.14);
+    }
+
+    .branch-col[data-branch="dp"] .node-item.open .sub-pill {
+      background: var(--purple-fill);
+      border-color: var(--purple-border);
+      color: var(--purple-text);
+      box-shadow: 0 3px 10px rgba(139, 92, 246, 0.14);
+    }
+
+    /* Accordion Expandable Content */
+    .drawer {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.34s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .node-item.open .drawer {
+      max-height: 1600px;
+      opacity: 1;
+      margin-top: 8px;
+    }
+
+    .drawer-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left-width: 4px;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 0.87rem;
+      color: #1f2937;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .branch-col[data-branch="tdc"] .drawer-inner,
+    .root-drawer .drawer-inner {
+      border-left-color: var(--blue-border);
+      background: var(--blue-soft);
+    }
+
+    .branch-col[data-branch="pin"] .drawer-inner {
+      border-left-color: var(--green-border);
+      background: var(--green-soft);
+    }
+
+    .branch-col[data-branch="dp"] .drawer-inner {
+      border-left-color: var(--purple-border);
+      background: var(--purple-soft);
+    }
+
+    .drawer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .drawer-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .zoom-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .zoom-btn:hover { background: #f1f5f9; }
+
+    .d-list {
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .d-list li strong { color: #0f172a; }
+
+    /* Chemical Equation Box */
+    .eq {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin: 7px 0;
+      overflow-x: auto;
+    }
+
+    .eq-note {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .eq-formula {
+      font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+      font-size: 0.96rem;
+      color: #0f172a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .arr {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.05;
+      margin: 0 3px;
+    }
+
+    .arr .cond {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.68rem;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .arr .sym {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.8rem;
+    }
+
+    .mini-table th, .mini-table td {
+      border: 1px solid #e2e8f0;
+      padding: 5px 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .tip {
+      margin-top: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 0.8rem;
+      color: #78350f;
+    }
+
+    /* Practice Launcher Bar inside each Drawer */
+    .practice-bar {
+      margin-top: 11px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .practice-bar .p-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .practice-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .q-count-select {
+      padding: 4px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .start-quiz-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.12s ease;
+    }
+
+    .start-quiz-btn:hover {
+      filter: brightness(0.93);
+      transform: translateY(-1px);
+    }
+
+    .branch-col[data-branch="tdc"] .start-quiz-btn { background: var(--blue-border); }
+    .branch-col[data-branch="pin"] .start-quiz-btn { background: var(--green-border); }
+    .branch-col[data-branch="dp"] .start-quiz-btn { background: var(--purple-border); }
+    .root-drawer .start-quiz-btn { background: #1f2937; }
+
+    .footer-hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 22px;
+    }
+
+    /* Modal Backdrop (used for Zoom & Quiz) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 22px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-close {
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover { background: #cbd5e1; }
+
+    .modal-body {
+      padding: 20px 22px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid #e5e7eb;
+      background: #f8fafc;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Quiz Styling inside Modal */
+    .quiz-setup-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+
+    .quiz-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+
+    .quiz-card.correct-card {
+      border-color: var(--ok-border);
+      background: #fafefd;
+    }
+
+    .quiz-card.wrong-card {
+      border-color: var(--err-border);
+      background: #fffafa;
+    }
+
+    .quiz-card.hidden-review {
+      display: none;
+    }
+
+    .q-text {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .q-num {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+
+    .opt-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .opt-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: #ffffff;
+      transition: all 0.15s ease;
+    }
+
+    .opt-label:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .opt-label input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .opt-label.is-selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .opt-label.is-correct {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok-text);
+      font-weight: 600;
+    }
+
+    .opt-label.is-wrong {
+      background: var(--err-bg);
+      border-color: var(--err-border);
+      color: var(--err-text);
+      font-weight: 600;
+    }
+
+    .opt-badge {
+      margin-left: auto;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .exp-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .exp-box.exp-ok {
+      background: var(--ok-bg);
+      border: 1px solid #a7f3d0;
+      color: var(--ok-text);
+    }
+
+    .exp-box.exp-err {
+      background: var(--err-bg);
+      border: 1px solid #fecaca;
+      color: var(--err-text);
+    }
+
+    /* Result Summary Banner */
+    .result-banner {
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1.5px solid #bfdbfe;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .score-big {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .score-msg {
+      font-size: 0.88rem;
+      color: #334155;
+      margin-top: 2px;
+    }
+
+    .review-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .rf-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rf-btn.active {
+      background: #1f2937;
+      color: #ffffff;
+      border-color: #1f2937;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    .progress-text {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Full-screen Zoom Modal for Classroom Presentation */
+    #zoomModal {
+      padding: 0;
+      background: #ffffff;
+    }
+
+    #zoomModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #zoomModal .modal-header {
+      padding: 20px 36px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #zoomModal .modal-title {
+      font-size: 1.65rem;
+      color: #0f172a;
+    }
+
+    #zoomModal .modal-close {
+      width: 44px;
+      height: 44px;
+      font-size: 1.35rem;
+    }
+
+    #zoomModal .modal-body {
+      padding: 32px 48px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #ffffff;
+    }
+
+    #zoomModal .zoom-content-wrap {
+      width: 100%;
+      max-width: 1080px;
+      font-size: 1.38rem;
+      line-height: 1.75;
+    }
+
+    #zoomModal .d-list {
+      gap: 14px;
+      padding-left: 26px;
+    }
+
+    #zoomModal .eq {
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 12px;
+      background: #f8fafc;
+      border-left: 5px solid #3b82f6;
+    }
+
+    #zoomModal .eq-note {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    #zoomModal .eq-formula {
+      font-size: 1.55rem;
+      gap: 8px;
+    }
+
+    #zoomModal .arr .cond {
+      font-size: 0.95rem;
+    }
+
+    #zoomModal .arr .sym {
+      font-size: 1.6rem;
+    }
+
+    #zoomModal .mini-table {
+      font-size: 1.22rem;
+      margin: 18px 0;
+    }
+
+    #zoomModal .mini-table th,
+    #zoomModal .mini-table td {
+      padding: 12px 16px;
+    }
+
+    #zoomModal .tip {
+      font-size: 1.18rem;
+      padding: 14px 18px;
+      margin-top: 18px;
+      border-radius: 12px;
+    }
+
+    /* Full-screen Quiz Modal for Comfortable Reading & Practice */
+    #quizModal {
+      padding: 0;
+      background: #f8fafc;
+    }
+
+    #quizModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #quizModal .modal-header {
+      padding: 18px 36px;
+      background: #ffffff;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #quizModal .modal-title {
+      font-size: 1.45rem;
+      color: #0f172a;
+    }
+
+    #quizModal .modal-subtitle {
+      font-size: 0.92rem;
+    }
+
+    #quizModal .modal-close {
+      width: 42px;
+      height: 42px;
+      font-size: 1.3rem;
+    }
+
+    #quizModal .modal-body {
+      padding: 24px 36px 36px;
+      background: #f8fafc;
+    }
+
+    #quizModal .quiz-inner-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    #quizModal .quiz-setup-bar {
+      font-size: 0.96rem;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    #quizModal .quiz-card {
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    #quizModal .q-text {
+      font-size: 1.12rem;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    #quizModal .q-num {
+      font-size: 0.86rem;
+      padding: 3px 10px;
+    }
+
+    #quizModal .opt-label {
+      font-size: 1.04rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .exp-box {
+      font-size: 0.96rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .score-big {
+      font-size: 1.6rem;
+    }
+
+    #quizModal .score-msg {
+      font-size: 1rem;
+    }
+
+    #quizModal .modal-footer {
+      padding: 16px 36px;
+      background: #ffffff;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    #quizModal .progress-text {
+      font-size: 0.98rem;
+    }
+
+    #quizModal .btn-primary,
+    #quizModal .btn-secondary {
+      font-size: 0.96rem;
+      padding: 10px 20px;
+    }
+
+    /* Custom In-Modal Confirm Box (never exits fullscreen) */
+    .confirm-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+      backdrop-filter: blur(2px);
+    }
+
+    .confirm-overlay.show {
+      display: flex;
+    }
+
+    .confirm-card {
+      background: #ffffff;
+      border-radius: 16px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      border: 1px solid #e2e8f0;
+    }
+
+    .confirm-card h3 {
+      font-size: 1.15rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .confirm-card p {
+      font-size: 0.96rem;
+      color: #334155;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    @media (max-width: 700px) {
+      #quizModal .modal-header,
+      #quizModal .modal-body,
+      #quizModal .modal-footer,
+      #zoomModal .modal-header,
+      #zoomModal .modal-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      #quizModal .q-text { font-size: 1rem; }
+      #quizModal .opt-label { font-size: 0.95rem; }
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .canvas-card { padding: 20px 14px 24px; }
+      .tree-connectors { display: none; }
+      .columns { grid-template-columns: 1fr; gap: 20px; margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="tab-btn active" data-filter="all">Tất cả</button>
+      <button class="tab-btn" data-filter="tdc">1. Thế điện cực chuẩn</button>
+      <button class="tab-btn" data-filter="pin">2. Pin điện hóa</button>
+      <button class="tab-btn" data-filter="dp">3. Điện phân</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="action-btn primary-quiz" id="btnChapterQuiz">📝 Luyện tập tổng hợp (10–30 câu)</button>
+      <button class="action-btn" id="btnExpandAll">Mở tất cả</button>
+      <button class="action-btn" id="btnCollapseAll">Thu gọn hết</button>
+    </div>
+  </div>
+
+  <main class="canvas-card">
+    <!-- ROOT NODE -->
+    <div class="root-wrap">
+      <div class="root-pill" id="rootPill" role="button" tabindex="0" aria-expanded="false">
+        <div class="title">Chương 5: Pin điện và điện phân</div>
+        <div class="sub">Hóa học 12 · KNTT</div>
+      </div>
+
+      <div class="root-drawer" id="rootDrawer">
+        <div class="drawer-inner">
+          <div class="drawer-top">
+            <span class="drawer-tag">Tổng quan Chương 5</span>
+          </div>
+          <ul class="d-list">
+            <li><strong>Bài 15 – Thế điện cực và nguồn điện hóa học:</strong> Cặp oxi hóa – khử (Ox/Kh), thế điện cực chuẩn E° (so với điện cực hydrogen chuẩn 0 V), so sánh tính khử/oxi hóa, dự đoán chiều phản ứng, pin Galvani (cấu tạo, cầu muối, E°<sub>pin</sub>) và các loại pin thực tế.</li>
+            <li><strong>Bài 16 – Điện phân:</strong> Nguyên tắc điện phân (dòng điện một chiều), điện phân nóng chảy (NaCl, Al<sub>2</sub>O<sub>3</sub> + cryolite), điện phân dung dịch (CuSO<sub>4</sub>, NaCl có/không màng ngăn) và ứng dụng (sản xuất, tinh luyện, mạ điện).</li>
+          </ul>
+          <div class="practice-bar">
+            <span class="p-label">📝 Luyện tập cả Chương 5 (135 câu Biết &amp; Hiểu):</span>
+            <div class="practice-controls">
+              <select class="q-count-select" id="rootQuizCount">
+                <option value="10">10 câu</option>
+                <option value="15">15 câu</option>
+                <option value="20" selected>20 câu</option>
+                <option value="30">30 câu</option>
+              </select>
+              <button class="start-quiz-btn" data-quiz-topic="all">Làm bài ngay</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOTTED SVG CONNECTORS -->
+    <svg class="tree-connectors" id="treeConnectors" viewBox="0 0 900 56" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 450 2 L 450 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 165 20 Q 145 20 145 38 L 145 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 735 20 Q 755 20 755 38 L 755 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 139 43 L 145 50 L 151 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 444 43 L 450 50 L 456 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 749 43 L 755 50 L 761 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- 3 BRANCH COLUMNS -->
+    <div class="columns" id="columnsGrid">
+
+      <!-- COLUMN 1: THẾ ĐIỆN CỰC CHUẨN -->
+      <section class="branch-col" data-branch="tdc">
+        <div class="branch-pill" data-branch-toggle="tdc" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Thế điện cực chuẩn">
+          <div class="b-title">1. Thế điện cực chuẩn</div>
+          <div class="b-sub">Ox/Kh · E°(M<sup>n+</sup>/M)</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 1.1 -->
+          <div class="node-item" data-node="tdc-kn">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Cặp Ox/Kh &amp; Thế điện cực</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Thế điện cực • Khái niệm</span>
+                  <button class="zoom-btn" data-zoom="tdc-kn">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Cặp oxi hóa – khử (Ox/Kh):</strong> Dạng oxi hóa và dạng khử của cùng một nguyên tố (vd: Zn<sup>2+</sup>/Zn, Cu<sup>2+</sup>/Cu, Fe<sup>3+</sup>/Fe<sup>2+</sup>). Bán phản ứng: M<sup>n+</sup> + ne ⇌ M.</li>
+                  <li><strong>Điều kiện chuẩn:</strong> Nồng độ ion tan = <strong>1 M</strong>, áp suất khí = <strong>1 bar</strong>, nhiệt độ <strong>25 °C (298 K)</strong>.</li>
+                  <li><strong>Điện cực chuẩn hydrogen (SHE):</strong> Quy ước <strong>E°(2H<sup>+</sup>/H<sub>2</sub>) = 0,00 V</strong> (dùng bản Pt làm điện cực trơ). Đơn vị của E° là Vôn (V).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 1)</option>
+                      <option value="30">30 câu (+ôn nhánh 1)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="tdc-kn">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.2 -->
+          <div class="node-item" data-node="tdc-yn">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Bảng E° &amp; Ý nghĩa</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Thế điện cực • Ý nghĩa</span>
+                  <button class="zoom-btn" data-zoom="tdc-yn">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>E° càng nhỏ (càng âm):</strong> Tính khử của dạng khử (M) càng <strong>mạnh</strong>; tính oxi hóa của dạng oxi hóa (M<sup>n+</sup>) càng <strong>yếu</strong>.</li>
+                  <li><strong>E° càng lớn (càng dương):</strong> Tính oxi hóa của M<sup>n+</sup> càng <strong>mạnh</strong>; tính khử của M càng <strong>yếu</strong>.</li>
+                  <li><strong>So với H (0 V):</strong> Kim loại có E° &lt; 0 đẩy được H<sub>2</sub> khỏi dung dịch HCl, H<sub>2</sub>SO<sub>4</sub> loãng; kim loại có E° &gt; 0 (Cu, Ag, Au) không phản ứng.</li>
+                </ul>
+                <table class="mini-table">
+                  <thead><tr><th>Cặp Ox/Kh</th><th>E° (V)</th><th>Cặp Ox/Kh</th><th>E° (V)</th></tr></thead>
+                  <tbody>
+                    <tr><td>Mg<sup>2+</sup>/Mg</td><td>–2,36</td><td>2H<sup>+</sup>/H<sub>2</sub></td><td><strong>0,00</strong></td></tr>
+                    <tr><td>Al<sup>3+</sup>/Al</td><td>–1,68</td><td>Cu<sup>2+</sup>/Cu</td><td>+0,34</td></tr>
+                    <tr><td>Zn<sup>2+</sup>/Zn</td><td>–0,76</td><td>Fe<sup>3+</sup>/Fe<sup>2+</sup></td><td>+0,77</td></tr>
+                    <tr><td>Fe<sup>2+</sup>/Fe</td><td>–0,44</td><td>Ag<sup>+</sup>/Ag</td><td>+0,80</td></tr>
+                  </tbody>
+                </table>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 1)</option>
+                      <option value="30">30 câu (+ôn nhánh 1)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="tdc-yn">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.3 -->
+          <div class="node-item" data-node="tdc-pu">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Chiều phản ứng Ox–Kh</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Thế điện cực • Dự đoán chiều phản ứng</span>
+                  <button class="zoom-btn" data-zoom="tdc-pu">Phóng to ⤢</button>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">Quy tắc alpha (E°(X<sup>n+</sup>/X) &lt; E°(Y<sup>m+</sup>/Y)):</div>
+                  <div class="eq-formula">Ox<sub>mạnh</sub> (Y<sup>m+</sup>) + Kh<sub>mạnh</sub> (X) → Ox<sub>yếu</sub> (X<sup>n+</sup>) + Kh<sub>yếu</sub> (Y)</div>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Ví dụ hay gặp:</strong>
+                    <br>• Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu (–0,76 &lt; +0,34)
+                    <br>• Cu + 2Fe<sup>3+</sup> → Cu<sup>2+</sup> + 2Fe<sup>2+</sup> (+0,34 &lt; +0,77)
+                    <br>• Fe<sup>2+</sup> + Ag<sup>+</sup> → Fe<sup>3+</sup> + Ag (+0,77 &lt; +0,80)
+                  </li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 1)</option>
+                      <option value="30">30 câu (+ôn nhánh 1)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="tdc-pu">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: PIN ĐIỆN HÓA -->
+      <section class="branch-col" data-branch="pin">
+        <div class="branch-pill" data-branch-toggle="pin" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Pin điện hóa">
+          <div class="b-title">2. Pin điện hóa</div>
+          <div class="b-sub">Hóa năng → Điện năng</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 2.1 -->
+          <div class="node-item" data-node="pin-ct">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Cấu tạo &amp; Hoạt động Galvani</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Pin điện • Pin Galvani (Zn–Cu)</span>
+                  <button class="zoom-btn" data-zoom="pin-ct">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Anode (cực âm –):</strong> Kim loại có E° nhỏ hơn (Zn), xảy ra <strong>quá trình oxi hóa</strong>: Zn → Zn<sup>2+</sup> + 2e (thanh Zn tan dần, khối lượng giảm).</li>
+                  <li><strong>Cathode (cực dương +):</strong> Kim loại có E° lớn hơn (Cu), xảy ra <strong>quá trình khử</strong>: Cu<sup>2+</sup> + 2e → Cu (Cu bám vào, khối lượng tăng).</li>
+                  <li><strong>Dòng electron (mạch ngoài):</strong> Chạy từ <strong>Anode (–) → Cathode (+)</strong>.</li>
+                  <li><strong>Cầu muối (KCl / KNO<sub>3</sub> bão hòa):</strong> Khép kín mạch điện và trung hòa điện tích hai dung dịch.</li>
+                  <li><strong>Sơ đồ pin:</strong> (–) Zn | Zn<sup>2+</sup>(1 M) || Cu<sup>2+</sup>(1 M) | Cu (+).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Pin)</option>
+                      <option value="30">30 câu (+ôn nhánh Pin)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="pin-ct">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.2 -->
+          <div class="node-item" data-node="pin-sdd">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Sức điện động chuẩn (E°<sub>pin</sub>)</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Pin điện • Sức điện động chuẩn</span>
+                  <button class="zoom-btn" data-zoom="pin-sdd">Phóng to ⤢</button>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">Công thức tính sức điện động chuẩn (luôn &gt; 0):</div>
+                  <div class="eq-formula"><strong>E°<sub>pin</sub> = E°<sub>cathode (+)</sub> – E°<sub>anode (–)</sub></strong></div>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Pin Zn–Cu:</strong> E°<sub>pin</sub> = 0,34 – (–0,76) = <strong>1,10 V</strong>.</li>
+                  <li><strong>Pin Fe–Cu:</strong> E°<sub>pin</sub> = 0,34 – (–0,44) = <strong>0,78 V</strong>.</li>
+                  <li><strong>Pin Cu–Ag:</strong> E°<sub>pin</sub> = 0,80 – 0,34 = <strong>0,46 V</strong>.</li>
+                  <li>Đo trực tiếp bằng <strong>Vôn kế</strong> mắc vào hai cực của pin.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Pin)</option>
+                      <option value="30">30 câu (+ôn nhánh Pin)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="pin-sdd">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 -->
+          <div class="node-item" data-node="pin-ud">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Các loại pin &amp; Ứng dụng</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Pin điện • Một số nguồn điện thực tế</span>
+                  <button class="zoom-btn" data-zoom="pin-ud">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Ắc quy chì (pin sạc):</strong> Cực Pb, PbO<sub>2</sub>, dd H<sub>2</sub>SO<sub>4</sub> — dòng khởi động mạnh, giá rẻ (ô tô, xe máy); nhược điểm: nặng, chứa chì độc hại.</li>
+                  <li><strong>Pin Lithium-ion (pin sạc):</strong> Nhẹ, mật độ năng lượng cao, sạc nhiều lần (điện thoại, laptop, xe điện).</li>
+                  <li><strong>Pin nhiên liệu (H<sub>2</sub>–O<sub>2</sub>):</strong> Chuyển hóa năng nhiên liệu thành điện năng liên tục, chỉ thải ra <strong>H<sub>2</sub>O</strong> sạch.</li>
+                  <li><strong>Pin Mặt Trời:</strong> Quang năng → điện năng (không dùng phản ứng Ox–Kh), sạch nhưng phụ thuộc thời tiết.</li>
+                </ul>
+                <div class="tip"><strong>Bảo vệ môi trường:</strong> Pin thải chứa kim loại nặng độc hại (Pb, Hg, Cd, Li) — cần thu gom riêng, không vứt lẫn rác sinh hoạt!</div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh Pin)</option>
+                      <option value="30">30 câu (+ôn nhánh Pin)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="pin-ud">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: ĐIỆN PHÂN -->
+      <section class="branch-col" data-branch="dp">
+        <div class="branch-pill" data-branch-toggle="dp" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Điện phân">
+          <div class="b-title">3. Điện phân</div>
+          <div class="b-sub">Điện năng → Hóa năng</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 3.1 -->
+          <div class="node-item" data-node="dp-nc">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Nguyên tắc &amp; ĐP nóng chảy</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Điện phân • Nguyên tắc &amp; Nóng chảy</span>
+                  <button class="zoom-btn" data-zoom="dp-nc">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Nguyên tắc (dòng điện 1 chiều):</strong>
+                    <br>• <strong>Cathode (cực âm –):</strong> Cation tiến về → xảy ra <strong>quá trình khử</strong>.
+                    <br>• <strong>Anode (cực dương +):</strong> Anion tiến về → xảy ra <strong>quá trình oxi hóa</strong>.
+                  </li>
+                  <li><strong>Điện phân nóng chảy:</strong> Điều chế kim loại mạnh (IA, IIA, Al):
+                    <br>• 2NaCl(nc) → 2Na (cathode) + Cl<sub>2</sub>↑ (anode).
+                    <br>• 2Al<sub>2</sub>O<sub>3</sub>(nc) → 4Al (cathode) + 3O<sub>2</sub>↑ (anode) — thêm <strong>cryolite (Na<sub>3</sub>AlF<sub>6</sub>)</strong> để hạ t° nóng chảy (~900 °C), tăng độ dẫn điện, bảo vệ Al lỏng.
+                  </li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh ĐP)</option>
+                      <option value="30">30 câu (+ôn nhánh ĐP)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="dp-nc">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.2 -->
+          <div class="node-item" data-node="dp-dd">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Điện phân dung dịch</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Điện phân • Dung dịch (điện cực trơ)</span>
+                  <button class="zoom-btn" data-zoom="dp-dd">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Tại Cathode (–):</strong> Cation có E° lớn hơn bị khử trước (Ag<sup>+</sup> &gt; Cu<sup>2+</sup> &gt; H<sup>+</sup> &gt; H<sub>2</sub>O). Các ion K<sup>+</sup>, Na<sup>+</sup>, Ca<sup>2+</sup>, Mg<sup>2+</sup>, Al<sup>3+</sup> không bị khử → <strong>2H<sub>2</sub>O + 2e → H<sub>2</sub>↑ + 2OH<sup>–</sup></strong>.</li>
+                  <li><strong>Tại Anode (+):</strong> Anion không oxi (Cl<sup>–</sup>, Br<sup>–</sup>...) bị oxi hóa trước. Anion có oxi (SO<sub>4</sub><sup>2–</sup>, NO<sub>3</sub><sup>–</sup>...) không bị oxi hóa → <strong>2H<sub>2</sub>O → O<sub>2</sub>↑ + 4H<sup>+</sup> + 4e</strong>.</li>
+                </ul>
+                <div class="eq">
+                  <div class="eq-note">Điện phân dd CuSO<sub>4</sub> (pH giảm):</div>
+                  <div class="eq-formula">2CuSO<sub>4</sub> + 2H<sub>2</sub>O → 2Cu (–) + O<sub>2</sub>↑ (+) + 2H<sub>2</sub>SO<sub>4</sub></div>
+                </div>
+                <div class="eq">
+                  <div class="eq-note">Điện phân dd NaCl có màng ngăn (không màng ngăn → nước Javel):</div>
+                  <div class="eq-formula">2NaCl + 2H<sub>2</sub>O → 2NaOH + H<sub>2</sub>↑ (–) + Cl<sub>2</sub>↑ (+)</div>
+                </div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh ĐP)</option>
+                      <option value="30">30 câu (+ôn nhánh ĐP)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="dp-dd">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3 -->
+          <div class="node-item" data-node="dp-ud">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Ứng dụng của điện phân</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Điện phân • Ứng dụng thực tiễn</span>
+                  <button class="zoom-btn" data-zoom="dp-ud">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>1. Sản xuất kim loại &amp; hóa chất:</strong> Sản xuất Al (từ Al<sub>2</sub>O<sub>3</sub> nc), Na, Mg, Cu; sản xuất NaOH, Cl<sub>2</sub>, H<sub>2</sub>, nước Javel.</li>
+                  <li><strong>2. Tinh luyện kim loại (vd đồng):</strong> <strong>Anode (+)</strong> là đồng thô (tan dần); <strong>Cathode (–)</strong> là đồng tinh khiết (dày lên); dd CuSO<sub>4</sub>. Tạp chất quý (Ag, Au, Pt) rơi xuống tạo <em>bùn anode</em>.</li>
+                  <li><strong>3. Mạ điện:</strong> <strong>Cathode (–)</strong> là <strong>vật cần mạ</strong>; <strong>Anode (+)</strong> là kim loại dùng để mạ; dung dịch chứa muối của kim loại mạ → giúp chống ăn mòn và tăng tính thẩm mĩ.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh ĐP)</option>
+                      <option value="30">30 câu (+ôn nhánh ĐP)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="dp-ud">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <p class="footer-hint">💡 Nhấp vào từng ô trên sơ đồ để xem kiến thức &amp; chọn số câu luyện tập (10–30 câu, mức độ Biết &amp; Hiểu) ngay bên dưới mỗi mục.</p>
+  </main>
+
+  <!-- Zoom Modal (for presenting theory fullscreen) -->
+  <div class="modal-backdrop" id="zoomModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="zoomTitle">Chi tiết</div>
+        </div>
+        <button class="modal-close" id="zoomClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="zoomBody"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal (fullscreen + in-modal confirm) -->
+  <div class="modal-backdrop" id="quizModal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="position: relative;">
+      <div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true">
+        <div class="confirm-card">
+          <h3>Xác nhận nộp bài</h3>
+          <p id="confirmText"></p>
+          <div class="confirm-actions">
+            <button class="btn-secondary" id="confirmCancel">Làm tiếp</button>
+            <button class="btn-primary" id="confirmOk">Vẫn nộp bài</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="quizTitle">Luyện tập</div>
+          <div class="modal-subtitle" id="quizSubtitle">Mức độ: Nhận biết &amp; Thông hiểu</div>
+        </div>
+        <button class="modal-close" id="quizClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+      <div class="modal-footer" id="quizFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_BANKS = {"tdc-kn": {"title": "1.1. Cặp oxi hóa – khử & Thế điện cực chuẩn", "questions": [{"q": "Dạng oxi hóa và dạng khử của cùng một nguyên tố hóa học tạo nên", "opts": ["Cặp oxi hóa – khử", "Phản ứng trung hòa", "Phản ứng ester hóa", "Đồng phân cấu tạo"], "ans": 0, "exp": "Dạng oxi hóa (Ox) và dạng khử (Kh) của cùng một nguyên tố hóa học (ví dụ Cu²⁺ và Cu) tạo thành một cặp oxi hóa – khử, kí hiệu Ox/Kh."}, {"q": "Cách kí hiệu đúng của cặp oxi hóa – khử gồm ion Cu²⁺ và kim loại Cu là", "opts": ["Cu²⁺/Cu", "Cu/Cu²⁺", "Cu²⁺–Cu", "Cu(II)/Cu(0)"], "ans": 0, "exp": "Theo quy ước quốc tế, luôn viết dạng oxi hóa ở bên trái và dạng khử ở bên phải, ngăn cách bằng dấu gạch chéo: Cu²⁺/Cu."}, {"q": "Trong bán phản ứng: Fe³⁺ + 1e ⇌ Fe²⁺, cặp oxi hóa – khử tương ứng là", "opts": ["Fe³⁺/Fe²⁺", "Fe²⁺/Fe", "Fe³⁺/Fe", "Fe²⁺/Fe³⁺"], "ans": 0, "exp": "Fe³⁺ nhận 1e (dạng oxi hóa) chuyển thành Fe²⁺ (dạng khử) → cặp oxi hóa – khử là Fe³⁺/Fe²⁺."}, {"q": "Trong cặp oxi hóa – khử Zn²⁺/Zn, chất nào là dạng oxi hóa và chất nào là dạng khử?", "opts": ["Zn²⁺ là dạng oxi hóa, Zn là dạng khử", "Zn là dạng oxi hóa, Zn²⁺ là dạng khử", "Cả hai đều là dạng khử", "Cả hai đều là dạng oxi hóa"], "ans": 0, "exp": "Ion Zn²⁺ có số oxi hóa cao hơn (+2), có khả năng nhận electron nên là dạng oxi hóa; Zn (0) nhường electron nên là dạng khử."}, {"q": "Điều kiện chuẩn để xác định thế điện cực chuẩn (E°) của một cặp oxi hóa – khử ở 25 °C (298 K) là", "opts": ["Nồng độ ion trong dung dịch bằng 1 M, áp suất khí (nếu có) bằng 1 bar", "Nồng độ ion bằng 0,1 M, áp suất khí bằng 2 bar", "Nồng độ ion bằng 2 M, nhiệt độ 100 °C", "Nồng độ ion bằng 1 M, nhiệt độ 0 °C"], "ans": 0, "exp": "Điều kiện chuẩn của điện cực: nồng độ ion tan là 1 M, áp suất khí là 1 bar, nhiệt độ thường chọn là 25 °C (298 K)."}, {"q": "Điện cực nào được quy ước chọn làm điện cực so sánh chuẩn có thế điện cực chuẩn bằng 0,00 V?", "opts": ["Điện cực hydrogen chuẩn (2H⁺/H₂)", "Điện cực đồng chuẩn (Cu²⁺/Cu)", "Điện cực kẽm chuẩn (Zn²⁺/Zn)", "Điện cực bạc chuẩn (Ag⁺/Ag)"], "ans": 0, "exp": "Theo quy ước IUPAC, thế điện cực chuẩn của điện cực hydrogen chuẩn (SHE) bằng 0 V ở mọi nhiệt độ: E°(2H⁺/H₂) = 0,00 V."}, {"q": "Đơn vị đo thường dùng của thế điện cực chuẩn (E°) là", "opts": ["Vôn (V)", "Ampe (A)", "Jun (J)", "Ôm (Ω)"], "ans": 0, "exp": "Thế điện cực chuẩn đặc trưng cho hiệu điện thế giữa điện cực đó và điện cực hydrogen chuẩn, đơn vị là Vôn (V)."}, {"q": "Kí hiệu thế điện cực chuẩn của cặp oxi hóa – khử Mⁿ⁺/M là", "opts": ["E°(Mⁿ⁺/M)", "E(M/Mⁿ⁺)", "ΔH°(Mⁿ⁺/M)", "K°(Mⁿ⁺/M)"], "ans": 0, "exp": "Thế điện cực chuẩn được kí hiệu là E° (có dấu ° chỉ điều kiện chuẩn) kèm cặp oxi hóa – khử: E°(Mⁿ⁺/M)."}, {"q": "Khi nhúng thanh kim loại kẽm (Zn) vào dung dịch muối ZnSO₄ 1 M ở 25 °C thì ta thu được", "opts": ["Điện cực kim loại chuẩn Zn²⁺/Zn", "Một pin điện hoàn chỉnh", "Bình điện phân nóng chảy", "Cầu muối"], "ans": 0, "exp": "Một thanh kim loại nhúng trong dung dịch chứa ion của chính kim loại đó (nồng độ 1 M ở 25 °C) tạo thành một điện cực (nửa pin) chuẩn."}, {"q": "Cặp chất nào sau đây KHÔNG tạo thành một cặp oxi hóa – khử?", "opts": ["Cu²⁺ và Zn", "Ag⁺ và Ag", "Fe³⁺ và Fe²⁺", "2H⁺ và H₂"], "ans": 0, "exp": "Cặp oxi hóa – khử phải gồm dạng oxi hóa và dạng khử của CÙNG một nguyên tố hóa học; Cu²⁺ và Zn là hai nguyên tố khác nhau."}, {"q": "Trong dung dịch, quá trình Mⁿ⁺ + ne ⇌ M diễn ra tại ranh giới giữa thanh kim loại M và dung dịch muối Mⁿ⁺. Chiều thuận của quá trình này là", "opts": ["Quá trình khử (sự khử)", "Quá trình oxi hóa (sự oxi hóa)", "Quá trình trung hòa", "Quá trình thủy phân"], "ans": 0, "exp": "Chiều thuận Mⁿ⁺ + ne → M là quá trình nhận electron (giảm số oxi hóa) nên là quá trình khử."}, {"q": "Thế điện cực chuẩn của cặp oxi hóa – khử Zn²⁺/Zn có giá trị âm (E° = –0,76 V), còn của cặp Cu²⁺/Cu có giá trị dương (E° = +0,34 V). Dấu âm/dương này được xác định dựa trên việc so sánh với", "opts": ["Điện cực hydrogen chuẩn (E° = 0 V)", "Điện cực sắt chuẩn", "Điện cực vàng chuẩn", "Nước cất nguyên chất"], "ans": 0, "exp": "Mọi giá trị E° đều được đo so với điện cực hydrogen chuẩn (0 V). Kim loại đứng trước H có E° < 0, đứng sau H có E° > 0."}, {"q": "Bán phản ứng biểu diễn đúng cặp oxi hóa – khử Al³⁺/Al là", "opts": ["Al³⁺ + 3e ⇌ Al", "Al + 3e ⇌ Al³⁺", "Al³⁺ + 2e ⇌ Al", "Al³⁺ – 3e ⇌ Al"], "ans": 0, "exp": "Ion Al³⁺ nhận 3 electron tạo thành nguyên tử Al: Al³⁺ + 3e ⇌ Al."}, {"q": "Trong điện cực hydrogen chuẩn (2H⁺/H₂), người ta sử dụng bản kim loại nào làm điện cực trơ dẫn điện?", "opts": ["Platinum (Pt)", "Kẽm (Zn)", "Sắt (Fe)", "Nhôm (Al)"], "ans": 0, "exp": "Điện cực hydrogen chuẩn dùng bản Pt phủ muội Pt nhúng trong dung dịch acid có [H⁺] = 1 M, sục khí H₂ ở áp suất 1 bar."}, {"q": "Phát biểu nào sau đây ĐÚNG về cặp oxi hóa – khử?", "opts": ["Mỗi nguyên tố có nhiều số oxi hóa có thể tạo ra nhiều cặp oxi hóa – khử khác nhau (ví dụ Fe²⁺/Fe và Fe³⁺/Fe²⁺)", "Mỗi nguyên tố chỉ tạo được duy nhất 1 cặp oxi hóa – khử", "Trong kí hiệu Ox/Kh, chất khử luôn viết bên trái", "Thế điện cực chuẩn luôn có giá trị dương"], "ans": 0, "exp": "Sắt có các trạng thái oxi hóa 0, +2, +3 nên tạo được các cặp Fe²⁺/Fe, Fe³⁺/Fe²⁺, Fe³⁺/Fe."}]}, "tdc-yn": {"title": "1.2. Ý nghĩa của Thế điện cực chuẩn", "questions": [{"q": "Thế điện cực chuẩn E°(Mⁿ⁺/M) càng NHỎ thì tính chất của cặp oxi hóa – khử đó như thế nào?", "opts": ["Tính khử của kim loại M càng MẠNH, tính oxi hóa của ion Mⁿ⁺ càng YẾU", "Tính khử của kim loại M càng yếu, tính oxi hóa của ion Mⁿ⁺ càng mạnh", "Cả tính khử và tính oxi hóa đều càng mạnh", "Cả tính khử và tính oxi hóa đều càng yếu"], "ans": 0, "exp": "E° càng nhỏ (càng âm) → kim loại M càng dễ nhường electron (tính khử càng mạnh) và ion Mⁿ⁺ càng khó nhận electron (tính oxi hóa càng yếu)."}, {"q": "Thế điện cực chuẩn E°(Mⁿ⁺/M) càng LỚN thì tính chất của cặp oxi hóa – khử đó như thế nào?", "opts": ["Tính oxi hóa của ion Mⁿ⁺ càng MẠNH, tính khử của kim loại M càng YẾU", "Tính khử của kim loại M càng mạnh, tính oxi hóa của ion Mⁿ⁺ càng yếu", "Kim loại M càng dễ tác dụng với nước", "Ion Mⁿ⁺ càng khó bị khử"], "ans": 0, "exp": "E° càng lớn (càng dương) → ion Mⁿ⁺ càng dễ nhận electron (tính oxi hóa mạnh) và kim loại M càng khó nhường electron (tính khử yếu)."}, {"q": "Cho thế điện cực chuẩn: E°(Mg²⁺/Mg) = –2,36 V; E°(Zn²⁺/Zn) = –0,76 V; E°(Cu²⁺/Cu) = +0,34 V; E°(Ag⁺/Ag) = +0,80 V. Kim loại có tính khử MẠNH nhất là", "opts": ["Mg", "Zn", "Cu", "Ag"], "ans": 0, "exp": "Cặp Mg²⁺/Mg có E° nhỏ nhất (–2,36 V) nên kim loại Mg có tính khử mạnh nhất."}, {"q": "Cho thế điện cực chuẩn: E°(Fe²⁺/Fe) = –0,44 V; E°(Cu²⁺/Cu) = +0,34 V; E°(Fe³⁺/Fe²⁺) = +0,77 V; E°(Ag⁺/Ag) = +0,80 V. Ion có tính oxi hóa MẠNH nhất là", "opts": ["Ag⁺", "Fe³⁺", "Cu²⁺", "Fe²⁺"], "ans": 0, "exp": "Cặp Ag⁺/Ag có E° lớn nhất (+0,80 V) nên ion Ag⁺ có tính oxi hóa mạnh nhất."}, {"q": "Cho thế điện cực chuẩn: E°(Al³⁺/Al) = –1,68 V; E°(Zn²⁺/Zn) = –0,76 V; E°(Fe²⁺/Fe) = –0,44 V. Thứ tự tăng dần tính khử của các kim loại là", "opts": ["Fe < Zn < Al", "Al < Zn < Fe", "Zn < Fe < Al", "Fe < Al < Zn"], "ans": 0, "exp": "E° giảm dần từ Fe (–0,44 V) → Zn (–0,76 V) → Al (–1,68 V) nên tính khử tăng dần: Fe < Zn < Al."}, {"q": "Cho thế điện cực chuẩn: E°(Zn²⁺/Zn) = –0,76 V; E°(Ni²⁺/Ni) = –0,26 V; E°(Cu²⁺/Cu) = +0,34 V. Thứ tự tăng dần tính oxi hóa của các ion kim loại là", "opts": ["Zn²⁺ < Ni²⁺ < Cu²⁺", "Cu²⁺ < Ni²⁺ < Zn²⁺", "Ni²⁺ < Zn²⁺ < Cu²⁺", "Zn²⁺ < Cu²⁺ < Ni²⁺"], "ans": 0, "exp": "E° tăng dần từ Zn²⁺/Zn (–0,76 V) → Ni²⁺/Ni (–0,26 V) → Cu²⁺/Cu (+0,34 V) nên tính oxi hóa tăng dần: Zn²⁺ < Ni²⁺ < Cu²⁺."}, {"q": "Trong dãy điện hóa các kim loại (sắp xếp theo chiều E° tăng dần), những kim loại có thế điện cực chuẩn E°(Mⁿ⁺/M) < 0 có đặc điểm chung nào?", "opts": ["Có thể đẩy được khí H₂ ra khỏi dung dịch acid loãng (HCl, H₂SO₄ loãng) ở điều kiện chuẩn", "Không bao giờ tác dụng với dung dịch HCl", "Có tính khử yếu hơn khí H₂", "Chỉ gồm Cu, Ag, Au, Pt"], "ans": 0, "exp": "E°(Mⁿ⁺/M) < E°(2H⁺/H₂) = 0 V nghĩa là kim loại M có tính khử mạnh hơn H₂ nên khử được H⁺ trong dung dịch acid loãng tạo khí H₂."}, {"q": "Những kim loại có thế điện cực chuẩn E°(Mⁿ⁺/M) > 0 (như Cu, Ag, Au) có đặc điểm chung là", "opts": ["Không tác dụng với dung dịch HCl hoặc H₂SO₄ loãng để giải phóng khí H₂", "Tác dụng mãnh liệt với nước ở nhiệt độ thường", "Có tính khử mạnh hơn kẽm và sắt", "Ion của chúng có tính oxi hóa rất yếu"], "ans": 0, "exp": "Vì E°(Mⁿ⁺/M) > 0 = E°(2H⁺/H₂) nên các kim loại đứng sau H không khử được ion H⁺."}, {"q": "Dựa vào dãy thế điện cực chuẩn, ion kim loại nào sau đây có tính oxi hóa YẾU nhất?", "opts": ["Na⁺ (E° = –2,71 V)", "Fe²⁺ (E° = –0,44 V)", "Cu²⁺ (E° = +0,34 V)", "Ag⁺ (E° = +0,80 V)"], "ans": 0, "exp": "Na⁺/Na có E° rất âm (–2,71 V) nên Na có tính khử rất mạnh, còn ion Na⁺ có tính oxi hóa rất yếu."}, {"q": "Cho hai cặp oxi hóa – khử: Fe³⁺/Fe²⁺ (E° = +0,77 V) và Cu²⁺/Cu (E° = +0,34 V). Nhận xét nào sau đây ĐÚNG?", "opts": ["Ion Fe³⁺ có tính oxi hóa mạnh hơn ion Cu²⁺", "Ion Cu²⁺ có tính oxi hóa mạnh hơn ion Fe³⁺", "Ion Fe²⁺ có tính khử mạnh hơn kim loại Cu", "Kim loại Cu không phản ứng được với dung dịch muối Fe³⁺"], "ans": 0, "exp": "Vì E°(Fe³⁺/Fe²⁺) = +0,77 V > E°(Cu²⁺/Cu) = +0,34 V nên tính oxi hóa: Fe³⁺ > Cu²⁺ và tính khử: Cu > Fe²⁺."}, {"q": "Kim loại nào sau đây có thế điện cực chuẩn E°(Mⁿ⁺/M) NHỎ hơn 0?", "opts": ["Sắt (Fe)", "Đồng (Cu)", "Bạc (Ag)", "Vàng (Au)"], "ans": 0, "exp": "Fe đứng trước H trong dãy điện hóa (E°(Fe²⁺/Fe) = –0,44 V < 0); còn Cu, Ag, Au đều đứng sau H (E° > 0)."}, {"q": "Trong bảng thế điện cực chuẩn, cặp oxi hóa – khử nào sau đây có giá trị E° LỚN hơn +0,34 V?", "opts": ["Ag⁺/Ag (+0,80 V)", "Zn²⁺/Zn (–0,76 V)", "Fe²⁺/Fe (–0,44 V)", "2H⁺/H₂ (0,00 V)"], "ans": 0, "exp": "Ag đứng sau Cu trong dãy điện hóa nên E°(Ag⁺/Ag) = +0,80 V > E°(Cu²⁺/Cu) = +0,34 V."}, {"q": "Hai ý nghĩa quan trọng nhất của bảng thế điện cực chuẩn là", "opts": ["So sánh tính khử/tính oxi hóa giữa các cặp và dự đoán chiều phản ứng oxi hóa – khử", "Tính khối lượng riêng và nhiệt độ nóng chảy của kim loại", "Xác định màu sắc và độ dẫn nhiệt của muối", "Phân biệt chất rắn với chất lỏng"], "ans": 0, "exp": "Thế điện cực chuẩn dùng để so sánh độ mạnh yếu của chất oxi hóa/chất khử, dự đoán chiều phản ứng tự diễn biến và tính sức điện động chuẩn của pin điện."}, {"q": "Trong dãy kim loại: Na, Mg, Fe, Cu, Ag; kim loại có tính khử YẾU nhất là", "opts": ["Ag", "Cu", "Fe", "Na"], "ans": 0, "exp": "Ag đứng cuối cùng trong dãy trên (E° lớn nhất = +0,80 V) nên có tính khử yếu nhất."}, {"q": "Phát biểu nào sau đây là SAI?", "opts": ["Cặp oxi hóa – khử có E° càng lớn thì kim loại ở dạng khử càng dễ bị oxi hóa", "E° càng nhỏ thì dạng khử có tính khử càng mạnh", "E° càng lớn thì dạng oxi hóa có tính oxi hóa càng mạnh", "Ở điều kiện chuẩn, E°(2H⁺/H₂) = 0 V"], "ans": 0, "exp": "E° càng lớn thì dạng khử (kim loại) có tính khử càng YẾU → càng KHÓ bị oxi hóa (như Ag, Au)."}]}, "tdc-pu": {"title": "1.3. Dự đoán chiều phản ứng oxi hóa – khử", "questions": [{"q": "Theo quy tắc dự đoán chiều phản ứng oxi hóa – khử ở điều kiện chuẩn (quy tắc alpha), phản ứng tự diễn biến theo chiều nào?", "opts": ["Chất oxi hóa mạnh hơn tác dụng với chất khử mạnh hơn tạo ra chất oxi hóa yếu hơn và chất khử yếu hơn", "Chất oxi hóa yếu hơn tác dụng với chất khử yếu hơn tạo ra chất mạnh hơn", "Hai chất khử tự tác dụng với nhau", "Hai chất oxi hóa tự tác dụng với nhau"], "ans": 0, "exp": "Phản ứng oxi hóa – khử tự xảy ra theo chiều: Ox(mạnh) + Kh(mạnh) → Ox(yếu) + Kh(yếu)."}, {"q": "Cho hai cặp oxi hóa – khử Xⁿ⁺/X và Yᵐ⁺/Y với E°(Xⁿ⁺/X) < E°(Yᵐ⁺/Y). Phản ứng hóa học nào sau đây tự xảy ra ở điều kiện chuẩn?", "opts": ["X + Yᵐ⁺ → Xⁿ⁺ + Y (chưa cân bằng)", "Y + Xⁿ⁺ → Yᵐ⁺ + X", "X + Y → Xⁿ⁺ + Yᵐ⁺", "Xⁿ⁺ + Yᵐ⁺ → X + Y"], "ans": 0, "exp": "Vì E°(Xⁿ⁺/X) < E°(Yᵐ⁺/Y) nên X là chất khử mạnh hơn và Yᵐ⁺ là chất oxi hóa mạnh hơn → X khử được Yᵐ⁺."}, {"q": "Cho E°(Zn²⁺/Zn) = –0,76 V và E°(Cu²⁺/Cu) = +0,34 V. Phản ứng nào sau đây tự xảy ra ở điều kiện chuẩn?", "opts": ["Zn + Cu²⁺ → Zn²⁺ + Cu", "Cu + Zn²⁺ → Cu²⁺ + Zn", "Zn²⁺ + Cu²⁺ → Zn + Cu", "Không có phản ứng nào xảy ra"], "ans": 0, "exp": "E°(Zn²⁺/Zn) < E°(Cu²⁺/Cu) → Zn (chất khử mạnh hơn) đẩy Cu ra khỏi dung dịch Cu²⁺."}, {"q": "Cho E°(Fe²⁺/Fe) = –0,44 V; E°(Cu²⁺/Cu) = +0,34 V; E°(Fe³⁺/Fe²⁺) = +0,77 V. Khi cho kim loại Cu vào dung dịch FeCl₃ dư, phản ứng xảy ra là", "opts": ["Cu + 2Fe³⁺ → Cu²⁺ + 2Fe²⁺", "Cu + Fe³⁺ → Cu²⁺ + Fe", "Không xảy ra phản ứng", "2Fe²⁺ + Cu²⁺ → 2Fe³⁺ + Cu"], "ans": 0, "exp": "Vì E°(Cu²⁺/Cu) = +0,34 V < E°(Fe³⁺/Fe²⁺) = +0,77 V nên Cu khử được Fe³⁺ về Fe²⁺: Cu + 2Fe³⁺ → Cu²⁺ + 2Fe²⁺."}, {"q": "Cho E°(Fe³⁺/Fe²⁺) = +0,77 V và E°(Ag⁺/Ag) = +0,80 V. Phản ứng nào sau đây tự xảy ra ở điều kiện chuẩn?", "opts": ["Fe²⁺ + Ag⁺ → Fe³⁺ + Ag", "Fe³⁺ + Ag → Fe²⁺ + Ag⁺", "Fe³⁺ + Ag⁺ → Fe²⁺ + Ag", "Không có phản ứng nào"], "ans": 0, "exp": "E°(Fe³⁺/Fe²⁺) < E°(Ag⁺/Ag) → Ag⁺ (oxi hóa mạnh hơn) oxi hóa Fe²⁺ (khử mạnh hơn) tạo Fe³⁺ và Ag."}, {"q": "Kim loại nào sau đây đẩy được kim loại Cu ra khỏi dung dịch CuSO₄?", "opts": ["Fe (E° = –0,44 V)", "Ag (E° = +0,80 V)", "Au (E° = +1,50 V)", "Pt (E° = +1,18 V)"], "ans": 0, "exp": "Chỉ kim loại có E° nhỏ hơn E°(Cu²⁺/Cu) = +0,34 V (như Fe, Zn, Mg...) mới đẩy được Cu ra khỏi dung dịch muối đồng."}, {"q": "Kim loại nào sau đây KHÔNG phản ứng với dung dịch CuSO₄ ở điều kiện thường?", "opts": ["Ag", "Zn", "Fe", "Mg"], "ans": 0, "exp": "Ag có E°(Ag⁺/Ag) = +0,80 V > E°(Cu²⁺/Cu) = +0,34 V nên tính khử yếu hơn Cu, không đẩy được Cu."}, {"q": "Khi nhúng thanh sắt (Fe) vào dung dịch CuSO₄ màu xanh lam, hiện tượng quan sát được là", "opts": ["Có lớp kim loại đồng màu đỏ bám ngoài thanh sắt, màu xanh của dung dịch nhạt dần", "Không có hiện tượng gì xảy ra", "Có khí không màu thoát ra rất mạnh", "Dung dịch chuyển sang màu tím"], "ans": 0, "exp": "Fe + CuSO₄ → FeSO₄ + Cu↓ (đỏ). Nồng độ Cu²⁺ giảm nên màu xanh lam của dung dịch nhạt dần."}, {"q": "Dung dịch muối nào sau đây phản ứng được với kim loại Cu ở điều kiện thường?", "opts": ["AgNO₃ và Fe(NO₃)₃", "ZnSO₄ và MgCl₂", "FeSO₄ và AlCl₃", "NaCl và K₂SO₄"], "ans": 0, "exp": "E°(Cu²⁺/Cu) = +0,34 V nhỏ hơn E°(Fe³⁺/Fe²⁺) = +0,77 V và E°(Ag⁺/Ag) = +0,80 V nên Cu phản ứng được với dung dịch chứa Fe³⁺ và Ag⁺."}, {"q": "Khi cho dây đồng (Cu) vào dung dịch AgNO₃, hiện tượng quan sát được là", "opts": ["Có lớp bạc trắng xám bám lên dây đồng và dung dịch chuyển dần sang màu xanh lam", "Không có hiện tượng gì", "Xuất hiện kết tủa màu nâu đỏ", "Có khí H₂ thoát ra"], "ans": 0, "exp": "Cu + 2Ag⁺ → Cu²⁺ (xanh lam) + 2Ag↓ (trắng xám)."}, {"q": "Cho E°(Fe²⁺/Fe) = –0,44 V và E°(Fe³⁺/Fe²⁺) = +0,77 V. Khi cho bột Fe vào dung dịch FeCl₃, phản ứng xảy ra là", "opts": ["Fe + 2Fe³⁺ → 3Fe²⁺", "Không có phản ứng xảy ra", "2Fe²⁺ → Fe + Fe³⁺", "Fe + FeCl₃ → FeCl₂ + Cl₂"], "ans": 0, "exp": "E°(Fe²⁺/Fe) < E°(Fe³⁺/Fe²⁺) → Fe khử Fe³⁺ thành Fe²⁺: Fe + 2Fe³⁺ → 3Fe²⁺."}, {"q": "Để làm sạch dung dịch FeSO₄ có lẫn tạp chất CuSO₄, có thể cho lượng dư kim loại nào vào dung dịch rồi lọc bỏ chất rắn?", "opts": ["Bột sắt (Fe)", "Bột đồng (Cu)", "Bột bạc (Ag)", "Bột kẽm (Zn)"], "ans": 0, "exp": "Fe đẩy Cu ra khỏi CuSO₄ tạo FeSO₄ (không đưa ion lạ vào dung dịch); nếu dùng Zn sẽ sinh thêm tạp chất ZnSO₄."}, {"q": "Cặp chất nào sau đây KHÔNG xảy ra phản ứng hóa học với nhau trong dung dịch ở điều kiện chuẩn?", "opts": ["Cu và dung dịch HCl loãng", "Fe và dung dịch CuSO₄", "Zn và dung dịch H₂SO₄ loãng", "Cu và dung dịch AgNO₃"], "ans": 0, "exp": "E°(Cu²⁺/Cu) = +0,34 V > E°(2H⁺/H₂) = 0 V nên Cu không phản ứng với dung dịch HCl loãng."}, {"q": "Cho các kim loại: Fe, Cu, Ag, Zn. Số kim loại phản ứng được với dung dịch HCl loãng tạo khí H₂ là", "opts": ["2 (Fe và Zn)", "1", "3", "4"], "ans": 0, "exp": "Chỉ Fe (–0,44 V) và Zn (–0,76 V) có E° < 0 nên phản ứng được với dung dịch HCl loãng."}, {"q": "Biết phản ứng A + B²⁺ → A²⁺ + B tự xảy ra ở điều kiện chuẩn. Kết luận nào sau đây ĐÚNG?", "opts": ["E°(A²⁺/A) < E°(B²⁺/B)", "E°(A²⁺/A) > E°(B²⁺/B)", "Kim loại B có tính khử mạnh hơn kim loại A", "Ion A²⁺ có tính oxi hóa mạnh hơn ion B²⁺"], "ans": 0, "exp": "A khử được B²⁺ chứng tỏ A có tính khử mạnh hơn B → E°(A²⁺/A) < E°(B²⁺/B)."}]}, "pin-ct": {"title": "2.1. Cấu tạo & Hoạt động Pin Galvani", "questions": [{"q": "Pin điện hóa (pin Galvani) là thiết bị chuyển hóa trực tiếp dạng năng lượng nào thành điện năng?", "opts": ["Hóa năng (từ phản ứng oxi hóa – khử tự diễn biến)", "Quang năng", "Cơ năng", "Nhiệt năng"], "ans": 0, "exp": "Pin điện hóa (pin Galvani) chuyển hóa hóa năng của phản ứng oxi hóa – khử tự diễn biến thành điện năng."}, {"q": "Trong pin Galvani (ví dụ pin Zn–Cu), điện cực nào là cực âm (anode) và xảy ra quá trình gì?", "opts": ["Cực âm (anode) là điện cực có E° nhỏ hơn (Zn), xảy ra quá trình OXI HÓA", "Cực âm (anode) là điện cực có E° lớn hơn (Cu), xảy ra quá trình khử", "Cực âm là cathode, xảy ra quá trình khử", "Cực âm không xảy ra phản ứng hóa học"], "ans": 0, "exp": "Trong pin Galvani: Anode là cực âm (–), gồm kim loại mạnh hơn (E° nhỏ hơn), tại đây luôn xảy ra quá trình oxi hóa (nhường electron)."}, {"q": "Trong pin Galvani (ví dụ pin Zn–Cu), điện cực nào là cực dương (cathode) và xảy ra quá trình gì?", "opts": ["Cực dương (cathode) là điện cực có E° lớn hơn (Cu), xảy ra quá trình KHỬ", "Cực dương (cathode) là điện cực có E° nhỏ hơn (Zn), xảy ra quá trình oxi hóa", "Cực dương là anode, xảy ra quá trình oxi hóa", "Cực dương bị hòa tan hoàn toàn"], "ans": 0, "exp": "Trong pin Galvani: Cathode là cực dương (+), tại đây luôn xảy ra quá trình khử (ion kim loại nhận electron)."}, {"q": "Trong pin Galvani Zn–Cu, ở mạch ngoài, dòng electron di chuyển theo chiều nào?", "opts": ["Từ cực âm (anode Zn) sang cực dương (cathode Cu)", "Từ cực dương (cathode Cu) sang cực âm (anode Zn)", "Chạy qua cầu muối từ dung dịch này sang dung dịch kia", "Đứng yên không di chuyển"], "ans": 0, "exp": "Tại anode Zn nhường electron (Zn → Zn²⁺ + 2e), electron theo dây dẫn mạch ngoài chạy sang cathode Cu (nơi Cu²⁺ nhận 2e)."}, {"q": "Vai trò chính của cầu muối (chứa dung dịch muối KCl hoặc KNO₃ bão hòa) trong pin Galvani là gì?", "opts": ["Khép kín mạch điện và trung hòa điện tích của hai dung dịch điện phân", "Cung cấp thêm kim loại Zn cho anode", "Ngăn không cho dòng điện chạy qua mạch ngoài", "Làm tăng nhiệt độ của pin"], "ans": 0, "exp": "Cầu muối cho phép các ion di chuyển giữa hai nửa pin để trung hòa điện tích dư thừa và khép kín mạch điện."}, {"q": "Khi pin Galvani Zn–Cu hoạt động, khối lượng của hai thanh điện cực Zn và Cu thay đổi như thế nào?", "opts": ["Khối lượng thanh Zn giảm dần, khối lượng thanh Cu tăng dần", "Khối lượng thanh Zn tăng dần, khối lượng thanh Cu giảm dần", "Khối lượng cả hai thanh đều tăng", "Khối lượng cả hai thanh đều không đổi"], "ans": 0, "exp": "Ở anode: Zn → Zn²⁺ + 2e nên thanh Zn tan bớt (khối lượng giảm). Ở cathode: Cu²⁺ + 2e → Cu bám lên thanh Cu (khối lượng tăng)."}, {"q": "Quá trình xảy ra tại cực âm (anode) của pin Galvani Zn–Cu là", "opts": ["Zn → Zn²⁺ + 2e", "Cu²⁺ + 2e → Cu", "Zn²⁺ + 2e → Zn", "Cu → Cu²⁺ + 2e"], "ans": 0, "exp": "Tại anode (cực âm) luôn xảy ra quá trình oxi hóa: Zn → Zn²⁺ + 2e."}, {"q": "Quá trình xảy ra tại cực dương (cathode) của pin Galvani Zn–Cu là", "opts": ["Cu²⁺ + 2e → Cu", "Zn → Zn²⁺ + 2e", "Cu → Cu²⁺ + 2e", "Zn²⁺ + 2e → Zn"], "ans": 0, "exp": "Tại cathode (cực dương) luôn xảy ra quá trình khử: Cu²⁺ + 2e → Cu."}, {"q": "Khi pin Galvani Zn–Cu hoạt động, nồng độ ion Zn²⁺ và Cu²⁺ trong hai dung dịch thay đổi như thế nào?", "opts": ["Nồng độ Zn²⁺ tăng dần, nồng độ Cu²⁺ giảm dần", "Nồng độ Zn²⁺ giảm dần, nồng độ Cu²⁺ tăng dần", "Nồng độ cả hai ion đều không đổi", "Nồng độ cả hai ion đều tăng mạnh"], "ans": 0, "exp": "Zn tan tạo thêm Zn²⁺ (nồng độ tăng); Cu²⁺ bị khử thành Cu bám lên điện cực (nồng độ giảm)."}, {"q": "Xét pin Galvani tạo bởi hai cặp Fe²⁺/Fe (E° = –0,44 V) và Cu²⁺/Cu (E° = +0,34 V). Cực âm (anode) và cực dương (cathode) lần lượt là", "opts": ["Anode là Fe, cathode là Cu", "Anode là Cu, cathode là Fe", "Cả hai đều là anode", "Không xác định được"], "ans": 0, "exp": "E°(Fe²⁺/Fe) < E°(Cu²⁺/Cu) nên Fe đóng vai trò cực âm (anode), Cu đóng vai trò cực dương (cathode)."}, {"q": "Xét pin Galvani tạo bởi hai cặp Cu²⁺/Cu (E° = +0,34 V) và Ag⁺/Ag (E° = +0,80 V). Phản ứng hóa học xảy ra trong pin là", "opts": ["Cu + 2Ag⁺ → Cu²⁺ + 2Ag", "2Ag + Cu²⁺ → 2Ag⁺ + Cu", "Cu + Ag → Cu²⁺ + Ag⁺", "Cu²⁺ + 2Ag⁺ → Cu + 2Ag"], "ans": 0, "exp": "Anode (–): Cu → Cu²⁺ + 2e; Cathode (+): 2Ag⁺ + 2e → 2Ag. Tổng phản ứng: Cu + 2Ag⁺ → Cu²⁺ + 2Ag."}, {"q": "Trong pin Galvani Zn–Cu, nếu rút cầu muối ra khỏi hai cốc dung dịch thì chuyện gì sẽ xảy ra?", "opts": ["Dòng điện ngừng chạy ngay lập tức (kim vôn kế chỉ về 0)", "Dòng điện tăng mạnh gấp đôi", "Pin vẫn hoạt động bình thường", "Thanh đồng tan nhanh hơn"], "ans": 0, "exp": "Không có cầu muối thì mạch điện bị hở và hai dung dịch không được trung hòa điện tích → pin ngừng hoạt động."}, {"q": "Trong pin Galvani Zn–Cu, các ion âm (anion, ví dụ Cl⁻ hoặc NO₃⁻) từ cầu muối sẽ di chuyển về phía nào để trung hòa điện tích?", "opts": ["Về phía dung dịch chứa anode (nửa pin Zn²⁺/Zn)", "Về phía dung dịch chứa cathode (nửa pin Cu²⁺/Cu)", "Chạy lên dây dẫn kim loại", "Không di chuyển"], "ans": 0, "exp": "Nửa pin anode sinh thêm ion dương Zn²⁺ nên các anion (Cl⁻/NO₃⁻) từ cầu muối di chuyển sang để trung hòa điện tích dương dư."}, {"q": "Nhớ nhanh quy tắc về quá trình xảy ra ở điện cực của pin Galvani:", "opts": ["Anode (cực âm) – Oxi hóa; Cathode (cực dương) – Khử", "Anode (cực dương) – Khử; Cathode (cực âm) – Oxi hóa", "Anode (cực âm) – Khử; Cathode (cực dương) – Oxi hóa", "Cả hai cực đều xảy ra quá trình khử"], "ans": 0, "exp": "Mẹo nhớ 'An-Ox, Ca-Khử': Tại Anode luôn xảy ra sự Oxi hóa, tại Cathode luôn xảy ra sự Khử. Với pin điện: Anode là cực âm (–), Cathode là cực dương (+)."}, {"q": "Sơ đồ pin Galvani chuẩn Zn–Cu được viết đúng theo quy ước (anode bên trái, cathode bên phải) là", "opts": ["(–) Zn | Zn²⁺(1 M) || Cu²⁺(1 M) | Cu (+)", "(–) Cu | Cu²⁺(1 M) || Zn²⁺(1 M) | Zn (+)", "(+) Zn | Zn²⁺(1 M) || Cu²⁺(1 M) | Cu (–)", "Zn²⁺ | Zn || Cu | Cu²⁺"], "ans": 0, "exp": "Quy ước: Anode (–) viết bên trái, Cathode (+) viết bên phải, hai gạch dọc (||) biểu thị cầu muối."}]}, "pin-sdd": {"title": "2.2. Sức điện động chuẩn của Pin điện hóa", "questions": [{"q": "Công thức tính sức điện động chuẩn của pin điện hóa (E°pin) là", "opts": ["E°pin = E°cathode – E°anode (tức E°(+) – E°(–))", "E°pin = E°anode – E°cathode", "E°pin = E°cathode + E°anode", "E°pin = E°cathode × E°anode"], "ans": 0, "exp": "Sức điện động chuẩn của pin luôn là số dương: E°pin = E°cathode – E°anode = E°(cực dương) – E°(cực âm)."}, {"q": "Cho E°(Zn²⁺/Zn) = –0,76 V và E°(Cu²⁺/Cu) = +0,34 V. Sức điện động chuẩn của pin Galvani Zn–Cu là", "opts": ["1,10 V", "0,42 V", "–1,10 V", "0,76 V"], "ans": 0, "exp": "E°pin = E°(Cu²⁺/Cu) – E°(Zn²⁺/Zn) = 0,34 – (–0,76) = 1,10 V."}, {"q": "Cho E°(Fe²⁺/Fe) = –0,44 V và E°(Cu²⁺/Cu) = +0,34 V. Sức điện động chuẩn của pin Galvani Fe–Cu là", "opts": ["0,78 V", "0,10 V", "–0,78 V", "0,44 V"], "ans": 0, "exp": "E°pin = E°(Cu²⁺/Cu) – E°(Fe²⁺/Fe) = 0,34 – (–0,44) = 0,78 V."}, {"q": "Cho E°(Cu²⁺/Cu) = +0,34 V và E°(Ag⁺/Ag) = +0,80 V. Sức điện động chuẩn của pin Galvani Cu–Ag là", "opts": ["0,46 V", "1,14 V", "–0,46 V", "0,80 V"], "ans": 0, "exp": "E°pin = E°(Ag⁺/Ag) – E°(Cu²⁺/Cu) = 0,80 – 0,34 = 0,46 V."}, {"q": "Cho E°(Mg²⁺/Mg) = –2,36 V và E°(Zn²⁺/Zn) = –0,76 V. Sức điện động chuẩn của pin Galvani Mg–Zn là", "opts": ["1,60 V", "3,12 V", "–1,60 V", "0,76 V"], "ans": 0, "exp": "Cực dương là Zn (–0,76 V > –2,36 V), cực âm là Mg → E°pin = –0,76 – (–2,36) = 1,60 V."}, {"q": "Cho E°(Al³⁺/Al) = –1,68 V và E°(Cu²⁺/Cu) = +0,34 V. Sức điện động chuẩn của pin Galvani Al–Cu là", "opts": ["2,02 V", "1,34 V", "–2,02 V", "1,68 V"], "ans": 0, "exp": "E°pin = E°(Cu²⁺/Cu) – E°(Al³⁺/Al) = 0,34 – (–1,68) = 2,02 V."}, {"q": "Cho E°(Ni²⁺/Ni) = –0,26 V và E°(Ag⁺/Ag) = +0,80 V. Sức điện động chuẩn của pin Ni–Ag là", "opts": ["1,06 V", "0,54 V", "–1,06 V", "0,26 V"], "ans": 0, "exp": "E°pin = 0,80 – (–0,26) = 1,06 V."}, {"q": "Sức điện động chuẩn của pin Galvani Zn–X bằng 0,50 V (biết Zn là cực âm, E°(Zn²⁺/Zn) = –0,76 V). Thế điện cực chuẩn của cặp X²⁺/X là", "opts": ["–0,26 V", "+0,26 V", "–1,26 V", "+1,26 V"], "ans": 0, "exp": "E°pin = E°(X²⁺/X) – E°(Zn²⁺/Zn) ⇒ 0,50 = E°(X²⁺/X) – (–0,76) ⇒ E°(X²⁺/X) = 0,50 – 0,76 = –0,26 V."}, {"q": "Sức điện động chuẩn của pin điện hóa M–Cu bằng 0,78 V (biết M là cực âm, E°(Cu²⁺/Cu) = +0,34 V). Thế điện cực chuẩn của cặp M²⁺/M là", "opts": ["–0,44 V", "+0,44 V", "+1,12 V", "–1,12 V"], "ans": 0, "exp": "0,78 = 0,34 – E°(M²⁺/M) ⇒ E°(M²⁺/M) = 0,34 – 0,78 = –0,44 V (chính là cặp Fe²⁺/Fe)."}, {"q": "Cho 3 cặp oxi hóa – khử: Mg²⁺/Mg (–2,36 V), Fe²⁺/Fe (–0,44 V), Ag⁺/Ag (+0,80 V). Pin điện hóa tạo từ 2 trong 3 cặp trên có sức điện động chuẩn LỚN nhất là", "opts": ["Pin Mg–Ag (3,16 V)", "Pin Mg–Fe (1,92 V)", "Pin Fe–Ag (1,24 V)", "Ba pin có sức điện động bằng nhau"], "ans": 0, "exp": "Sức điện động lớn nhất khi chọn cặp có E° lớn nhất (Ag⁺/Ag) ghép với cặp có E° nhỏ nhất (Mg²⁺/Mg): 0,80 – (–2,36) = 3,16 V."}, {"q": "Cho E°(Fe²⁺/Fe) = –0,44 V và E°(Ag⁺/Ag) = +0,80 V. Sức điện động chuẩn của pin Fe–Ag là", "opts": ["1,24 V", "0,36 V", "–1,24 V", "0,80 V"], "ans": 0, "exp": "E°pin = 0,80 – (–0,44) = 1,24 V."}, {"q": "Giá trị sức điện động chuẩn E°pin của một pin Galvani hoạt động được luôn thỏa mãn điều kiện nào?", "opts": ["E°pin > 0", "E°pin < 0", "E°pin = 0", "E°pin luôn bằng 1 V"], "ans": 0, "exp": "Sức điện động chuẩn của pin Galvani luôn là một số dương (E°cathode > E°anode)."}, {"q": "Cho E°(Zn²⁺/Zn) = –0,76 V và E°(Fe²⁺/Fe) = –0,44 V. Trong pin Galvani Zn–Fe, sức điện động chuẩn là", "opts": ["0,32 V", "1,20 V", "–0,32 V", "0,44 V"], "ans": 0, "exp": "E°pin = –0,44 – (–0,76) = 0,32 V."}, {"q": "Thiết bị đo hiệu điện thế (sức điện động) giữa hai cực của pin điện hóa trong phòng thí nghiệm là", "opts": ["Vôn kế (Voltmeter)", "Nhiệt kế", "Cân phân tích", "Ống đong"], "ans": 0, "exp": "Vôn kế có điện trở rất lớn được mắc vào hai cực của pin để đo sức điện động của pin."}, {"q": "Cho E°(Pb²⁺/Pb) = –0,13 V và E°(Cu²⁺/Cu) = +0,34 V. Sức điện động chuẩn của pin Pb–Cu là", "opts": ["0,47 V", "0,21 V", "–0,47 V", "0,13 V"], "ans": 0, "exp": "E°pin = 0,34 – (–0,13) = 0,47 V."}]}, "pin-ud": {"title": "2.3. Các loại pin phổ biến & Ứng dụng", "questions": [{"q": "Loại pin nào sau đây có thể sạc điện lại nhiều lần để tái sử dụng (pin thứ cấp)?", "opts": ["Ắc quy chì và pin lithium-ion", "Pin khô kẽm – carbon dùng 1 lần", "Pin kiềm dùng 1 lần", "Pin Galvani đơn giản không sạc"], "ans": 0, "exp": "Ắc quy chì (xe máy, ô tô) và pin lithium-ion (điện thoại, laptop, xe điện) là pin thứ cấp, có thể nạp điện lại nhiều lần."}, {"q": "Ưu điểm nổi bật khiến pin lithium-ion được dùng rộng rãi trong điện thoại thông minh, máy tính xách tay và ô tô điện là", "opts": ["Nhẹ, kích thước gọn, mật độ năng lượng cao và sạc lại được nhiều lần", "Rất nặng và không sạc lại được", "Chứa lượng lớn dung dịch H₂SO₄ đặc dễ tràn", "Chỉ dùng được 1 lần rồi bỏ"], "ans": 0, "exp": "Pin Li-ion có khối lượng nhẹ, dung lượng lưu trữ lớn, tuổi thọ sạc cao, rất lý tưởng cho thiết bị di động và xe điện."}, {"q": "Trong ắc quy chì (dùng khởi động động cơ xe máy, ô tô), dung dịch chất điện li được sử dụng là", "opts": ["Dung dịch H₂SO₄ loãng", "Dung dịch NaCl", "Dung dịch NaOH đặc", "Nước cất nguyên chất"], "ans": 0, "exp": "Ắc quy chì gồm cực âm bằng chì (Pb), cực dương bằng PbO₂ nhúng trong dung dịch chất điện li H₂SO₄."}, {"q": "Nhược điểm lớn về mặt môi trường của ắc quy chì nếu không được thu gom và xử lí đúng cách là", "opts": ["Chứa kim loại nặng chì (Pb) rất độc và dung dịch acid H₂SO₄ gây ô nhiễm đất, nước", "Quá nhẹ nên dễ bay theo gió", "Tự tan hoàn toàn trong nước mưa", "Không có bất kỳ nhược điểm nào"], "ans": 0, "exp": "Chì là kim loại nặng rất độc hại với thần kinh và môi trường, còn H₂SO₄ gây ăn mòn và acid hóa đất nước nên ắc quy cũ phải được thu gom tái chế."}, {"q": "Pin nhiên liệu (fuel cell, ví dụ pin nhiên liệu hydrogen – oxygen) hoạt động dựa trên nguyên tắc nào?", "opts": ["Chuyển hóa trực tiếp hóa năng của phản ứng oxi hóa nhiên liệu (như H₂ bởi O₂) thành điện năng", "Chuyển hóa ánh sáng mặt trời trực tiếp thành điện năng", "Lưu trữ điện từ ổ cắm rồi xả ra như ắc quy", "Đốt cháy xăng để quay máy phát điện"], "ans": 0, "exp": "Pin nhiên liệu cung cấp điện liên tục chừng nào còn cấp nhiên liệu (H₂) và chất oxi hóa (O₂) vào pin."}, {"q": "Sản phẩm duy nhất thải ra của pin nhiên liệu hydrogen – oxygen (2H₂ + O₂ → 2H₂O) là gì?", "opts": ["Nước (H₂O) — rất sạch và thân thiện với môi trường", "Khí CO₂ gây hiệu ứng nhà kính", "Khí SO₂ gây mưa acid", "Khói bụi mịn"], "ans": 0, "exp": "Pin nhiên liệu hydrogen chỉ thải ra hơi nước sạch, hiệu suất chuyển hóa năng lượng cao và không gây tiếng ồn."}, {"q": "Pin Mặt Trời (solar cell) chuyển hóa trực tiếp dạng năng lượng nào thành điện năng?", "opts": ["Quang năng (năng lượng ánh sáng mặt trời)", "Hóa năng của phản ứng oxi hóa – khử", "Nhiệt năng từ than đá", "Cơ năng của gió"], "ans": 0, "exp": "Pin Mặt Trời (vật liệu bán dẫn silicon) chuyển trực tiếp quang năng thành điện năng (năng lượng tái tạo, sạch)."}, {"q": "Nhược điểm chính của pin Mặt Trời trong thực tế sử dụng là gì?", "opts": ["Phụ thuộc vào điều kiện thời tiết, ánh sáng (không phát điện vào ban đêm) và chi phí lắp đặt/xử lí tấm pin cũ", "Thải ra rất nhiều khí CO₂ khi hoạt động", "Cần đổ xăng liên tục mới chạy được", "Gây tiếng ồn rất lớn"], "ans": 0, "exp": "Điện mặt trời phụ thuộc cường độ nắng/thời tiết nên cần hệ thống lưu trữ (pin/ắc quy) để dùng vào ban đêm."}, {"q": "Một điểm khác biệt quan trọng giữa pin nhiên liệu và ắc quy (pin sạc) là", "opts": ["Pin nhiên liệu không cần sạc điện mà hoạt động liên tục khi được nạp thêm nhiên liệu (như H₂)", "Pin nhiên liệu chỉ dùng được 1 lần duy nhất", "Ắc quy không cần sạc lại", "Pin nhiên liệu hoạt động bằng ánh sáng mặt trời"], "ans": 0, "exp": "Pin nhiên liệu giống 'máy phát điện hóa học': chỉ cần tiếp tục cấp nhiên liệu (H₂) và O₂ là phát điện liên tục."}, {"q": "Pin khô thông thường (pin con thỏ, pin tiểu AA dùng cho điều khiển TV, đồng hồ) thường có vỏ làm bằng kim loại nào đóng vai trò cực âm?", "opts": ["Kẽm (Zn)", "Đồng (Cu)", "Bạc (Ag)", "Vàng (Au)"], "ans": 0, "exp": "Pin kẽm – carbon và pin kiềm phổ thông dùng kẽm (Zn) làm cực âm (anode) và thanh than chì/MnO₂ làm cực dương (cathode)."}, {"q": "Vì sao KHÔNG nên vứt pin đã qua sử dụng (pin tiểu, pin điện thoại, pin cúc áo) lẫn vào rác sinh hoạt thông thường?", "opts": ["Vì pin chứa các kim loại nặng độc hại (Pb, Hg, Cd, Li...) và hóa chất dễ rò rỉ gây ô nhiễm nguồn nước, đất", "Vì pin sẽ tự nổ tung ngay khi chạm nước", "Vì pin phân hủy quá nhanh gây mùi thơm", "Vì pin làm tăng độ phì nhiêu của đất"], "ans": 0, "exp": "Pin thải là rác thải nguy hại, cần thu gom riêng đến điểm xử lí chuyên dụng để tránh kim loại nặng ngấm vào đất và nước ngầm."}, {"q": "Loại nguồn điện nào sau đây được dùng phổ biến để cung cấp điện cho vệ tinh nhân tạo và trạm vũ trụ ngoài không gian?", "opts": ["Pin Mặt Trời (kết hợp pin sạc/pin nhiên liệu)", "Ắc quy chì nước", "Pin con thỏ", "Máy phát điện chạy dầu diesel"], "ans": 0, "exp": "Các tấm pin Mặt Trời đón ánh sáng trực tiếp ngoài không gian, kết hợp pin Li-ion/pin nhiên liệu cung cấp năng lượng bền bỉ cho vệ tinh."}, {"q": "Ưu điểm của ắc quy chì khiến nó vẫn rất phổ biến trên ô tô, xe máy xăng là", "opts": ["Cung cấp dòng điện khởi động mạnh, giá thành rẻ và dễ sản xuất", "Siêu nhẹ hơn cả pin điện thoại", "Không chứa hóa chất độc hại", "Không bao giờ hết điện"], "ans": 0, "exp": "Ắc quy chì cho dòng phóng điện lớn trong thời gian ngắn (rất tốt để đề nổ động cơ) và chi phí thấp."}, {"q": "Khi sử dụng thiết bị có pin lithium-ion (điện thoại, sạc dự phòng), lưu ý an toàn nào sau đây là ĐÚNG?", "opts": ["Tránh làm va đập mạnh, không để nơi nhiệt độ quá cao và không dùng bộ sạc kém chất lượng để tránh cháy nổ", "Nên phơi điện thoại ngoài nắng gắt để pin sạc nhanh hơn", "Có thể đâm thủng pin khi pin bị phồng", "Nên vứt pin phồng vào bếp lửa"], "ans": 0, "exp": "Pin Li-ion chứa dung môi hữu cơ dễ cháy và năng lượng cao nên cần tránh nhiệt độ cao, va đập hoặc chập mạch."}, {"q": "Nguồn điện hóa học nào sau đây KHÔNG dựa trên phản ứng oxi hóa – khử?", "opts": ["Pin Mặt Trời", "Pin Galvani Zn–Cu", "Ắc quy chì", "Pin nhiên liệu hydrogen"], "ans": 0, "exp": "Pin Mặt Trời hoạt động dựa trên hiệu ứng quang điện trong chất bán dẫn, không phải phản ứng oxi hóa – khử hóa học."}]}, "dp-nc": {"title": "3.1. Nguyên tắc điện phân & Điện phân nóng chảy", "questions": [{"q": "Điện phân là quá trình oxi hóa – khử xảy ra trên bề mặt các điện cực dưới tác dụng của", "opts": ["Dòng điện một chiều đi qua chất điện li nóng chảy hoặc dung dịch chất điện li", "Ánh sáng mặt trời", "Nhiệt độ cao mà không cần dòng điện", "Dòng điện xoay chiều tần số cao"], "ans": 0, "exp": "Điện phân dùng dòng điện MỘT CHIỀU để ép các phản ứng oxi hóa – khử không tự diễn biến xảy ra tại hai điện cực."}, {"q": "Trong bình điện phân, cực nối với cực ÂM của nguồn điện một chiều gọi là gì và xảy ra quá trình nào?", "opts": ["Cathode (cực âm), xảy ra quá trình KHỬ", "Anode (cực âm), xảy ra quá trình oxi hóa", "Cathode (cực dương), xảy ra quá trình khử", "Anode (cực dương), xảy ra quá trình oxi hóa"], "ans": 0, "exp": "Trong điện phân: Cathode là cực ÂM (nơi cation tiến về nhận electron → quá trình khử); Anode là cực DƯƠNG (nơi anion tiến về nhường electron → quá trình oxi hóa)."}, {"q": "Trong bình điện phân, cực nối với cực DƯƠNG của nguồn điện một chiều gọi là gì và xảy ra quá trình nào?", "opts": ["Anode (cực dương), xảy ra quá trình OXI HÓA", "Cathode (cực dương), xảy ra quá trình khử", "Anode (cực âm), xảy ra quá trình oxi hóa", "Cathode (cực âm), xảy ra quá trình oxi hóa"], "ans": 0, "exp": "Anode trong điện phân mang điện dương (+) và luôn xảy ra quá trình oxi hóa."}, {"q": "So sánh giữa Pin điện hóa và Bình điện phân, điểm GIỐNG NHAU hoàn toàn giữa chúng là", "opts": ["Tại anode luôn xảy ra quá trình oxi hóa, tại cathode luôn xảy ra quá trình khử", "Anode luôn là cực âm, cathode luôn là cực dương", "Đều tự phát sinh ra dòng điện", "Đều cần nguồn điện một chiều bên ngoài"], "ans": 0, "exp": "Dù ở pin điện hay điện phân, quy tắc 'Anode – Oxi hóa, Cathode – Khử' luôn đúng; chỉ khác dấu điện cực."}, {"q": "Phương pháp điện phân nóng chảy được dùng chủ yếu để điều chế nhóm kim loại nào sau đây?", "opts": ["Các kim loại hoạt động hóa học mạnh (nhóm IA, IIA và nhôm Al)", "Các kim loại yếu như Cu, Ag, Au", "Chỉ dùng cho sắt (Fe) và kẽm (Zn)", "Chỉ dùng cho phi kim"], "ans": 0, "exp": "Các ion K⁺, Na⁺, Ca²⁺, Mg²⁺, Al³⁺ không bị khử trong dung dịch nước nên phải điện phân nóng chảy muối halide hoặc oxide của chúng."}, {"q": "Khi điện phân nóng chảy sodium chloride (NaCl), sản phẩm thu được ở cathode (cực âm) và anode (cực dương) lần lượt là", "opts": ["Kim loại Na (cathode) và khí Cl₂ (anode)", "Khí Cl₂ (cathode) và kim loại Na (anode)", "Khí H₂ (cathode) và khí Cl₂ (anode)", "NaOH (cathode) và O₂ (anode)"], "ans": 0, "exp": "Cathode (–): Na⁺ + 1e → Na. Anode (+): 2Cl⁻ → Cl₂↑ + 2e. Tổng: 2NaCl(nc) → 2Na + Cl₂↑."}, {"q": "Khi điện phân nóng chảy magnesium chloride (MgCl₂), sản phẩm thu được gồm", "opts": ["Mg (ở cathode) và Cl₂ (ở anode)", "Mg (ở anode) và Cl₂ (ở cathode)", "Mg(OH)₂ và H₂", "MgO và HCl"], "ans": 0, "exp": "MgCl₂(nc) → Mg (cathode) + Cl₂↑ (anode)."}, {"q": "Trong công nghiệp, nhôm (Al) được sản xuất bằng phương pháp điện phân nóng chảy chất nào sau đây?", "opts": ["Aluminium oxide (Al₂O₃)", "Aluminium chloride (AlCl₃)", "Aluminium sulfate (Al₂(SO₄)₃)", "Aluminium hydroxide (Al(OH)₃)"], "ans": 0, "exp": "Al được sản xuất bằng điện phân nóng chảy Al₂O₃ (quặng bauxite đã tinh chế) với chất phụ gia cryolite Na₃AlF₆."}, {"q": "Trong quá trình điện phân nóng chảy Al₂O₃ để sản xuất nhôm, người ta trộn thêm cryolite (Na₃AlF₆) nhằm mục đích chính nào sau đây?", "opts": ["Hạ nhiệt độ nóng chảy của hỗn hợp (từ ~2050 °C xuống ~900 °C), tăng độ dẫn điện và tạo lớp phủ bảo vệ Al lỏng", "Làm tăng nhiệt độ nóng chảy của Al₂O₃ lên 3000 °C", "Tạo ra thêm khí Cl₂ ở cực dương", "Làm nhôm lỏng nổi lên trên mặt bể"], "ans": 0, "exp": "Cryolite giúp tiết kiệm năng lượng lớn nhờ hạ nhiệt độ nóng chảy, tăng độ dẫn điện và nổi lên trên ngăn Al lỏng tiếp xúc với O₂ không khí."}, {"q": "Khi điện phân nóng chảy Al₂O₃ với điện cực than chì (graphite), sản phẩm thu được ở cathode (cực âm) và anode (cực dương) lần lượt là", "opts": ["Al nóng chảy (cathode) và khí O₂ (anode, phản ứng một phần với than chì tạo CO, CO₂)", "Khí O₂ (cathode) và Al (anode)", "Khí H₂ (cathode) và khí O₂ (anode)", "Al (cathode) và khí Cl₂ (anode)"], "ans": 0, "exp": "Cathode (–): Al³⁺ + 3e → Al. Anode (+): 2O²⁻ → O₂ + 4e (ở nhiệt độ cao O₂ đốt cháy dần cực dương than chì thành CO₂/CO nên phải định kỳ thay cực dương)."}, {"q": "Trong điện phân nóng chảy NaCl, quá trình xảy ra tại anode (cực dương) là", "opts": ["2Cl⁻ → Cl₂ + 2e", "Na⁺ + 1e → Na", "Cl₂ + 2e → 2Cl⁻", "2H₂O → O₂ + 4H⁺ + 4e"], "ans": 0, "exp": "Tại anode (+) xảy ra sự oxi hóa ion Cl⁻: 2Cl⁻ → Cl₂↑ + 2e."}, {"q": "Trong bình điện phân nóng chảy, các ion dương (cation) luôn di chuyển về cực nào?", "opts": ["Về cực âm (cathode)", "Về cực dương (anode)", "Đứng yên tại chỗ", "Bay ra ngoài không khí"], "ans": 0, "exp": "Theo lực hút tĩnh điện trái dấu, cation (+) di chuyển về cực âm (cathode) để nhận electron."}, {"q": "Trong bình điện phân nóng chảy, các ion âm (anion) luôn di chuyển về cực nào?", "opts": ["Về cực dương (anode)", "Về cực âm (cathode)", "Không di chuyển", "Chìm xuống đáy bình"], "ans": 0, "exp": "Anion (–) bị hút về cực dương (anode) và nhường electron (bị oxi hóa)."}, {"q": "Vì sao trong công nghiệp sản xuất nhôm từ Al₂O₃ nóng chảy, các điện cực dương (anode) bằng than chì bị tiêu hao dần và phải thay thế định kỳ?", "opts": ["Vì khí O₂ sinh ra ở anode tại nhiệt độ cao (~900 °C) đốt cháy than chì tạo thành khí CO₂ và CO", "Vì than chì bị tan trong nhôm lỏng", "Vì cryolite ăn mòn hết than chì", "Vì than chì bốc hơi ở 100 °C"], "ans": 0, "exp": "C (graphite) + O₂ → CO₂ (và một phần CO) ở ~900 °C làm mòn dần cực dương."}, {"q": "Kim loại nào sau đây CHỈ có thể điều chế bằng phương pháp điện phân nóng chảy (không thể điều chế bằng điện phân dung dịch)?", "opts": ["Na, K, Ca, Mg, Al", "Cu, Ag, Au", "Fe, Zn, Ni", "Sn, Pb, Cu"], "ans": 0, "exp": "Các kim loại mạnh (từ Al trở về trước trong dãy điện hóa) chỉ điều chế được bằng điện phân nóng chảy."}]}, "dp-dd": {"title": "3.2. Điện phân dung dịch (điện cực trơ)", "questions": [{"q": "Trong điện phân dung dịch với điện cực trơ, khi có nhiều cation cùng tiến về cathode (–), thứ tự bị khử tuân theo quy tắc nào?", "opts": ["Cation có tính oxi hóa mạnh hơn (E° lớn hơn) bị khử trước", "Cation có E° nhỏ hơn bị khử trước", "Cation kim loại kiềm (Na⁺, K⁺) luôn bị khử trước tiên", "Các cation bị khử hoàn toàn ngẫu nhiên"], "ans": 0, "exp": "Ở cathode, chất có tính oxi hóa mạnh hơn (E° lớn hơn) dễ nhận electron hơn nên bị khử trước."}, {"q": "Khi điện phân dung dịch muối của các kim loại mạnh (như NaCl, K₂SO₄, MgCl₂, Al₂(SO₄)₃), tại cathode (–) chất nào bị khử?", "opts": ["Nước (2H₂O + 2e → H₂↑ + 2OH⁻)", "Ion kim loại mạnh (Na⁺, K⁺, Mg²⁺...)", "Ion gốc acid (Cl⁻, SO₄²⁻)", "Không có chất nào bị khử"], "ans": 0, "exp": "Các ion K⁺, Na⁺, Ca²⁺, Mg²⁺, Al³⁺ không bị khử trong dung dịch nước; thay vào đó H₂O bị khử sinh khí H₂ và ion OH⁻."}, {"q": "Khi điện phân dung dịch muối chứa gốc acid có oxygen (như SO₄²⁻, NO₃⁻, PO₄³⁻) với điện cực trơ, tại anode (+) chất nào bị oxi hóa?", "opts": ["Nước (2H₂O → O₂↑ + 4H⁺ + 4e)", "Ion SO₄²⁻ hoặc NO₃⁻", "Cation kim loại", "Khí H₂"], "ans": 0, "exp": "Các anion gốc acid có oxi (SO₄²⁻, NO₃⁻...) rất bền, không bị oxi hóa trong dung dịch nước; thay vào đó H₂O bị oxi hóa tạo khí O₂ và H⁺."}, {"q": "Khi điện phân dung dịch CuSO₄ với điện cực trơ (graphite), sản phẩm thu được ở cathode (–) và anode (+) lần lượt là", "opts": ["Kim loại Cu (cathode) và khí O₂ (anode)", "Khí H₂ (cathode) và khí O₂ (anode)", "Kim loại Cu (cathode) và khí SO₂ (anode)", "Khí O₂ (cathode) và kim loại Cu (anode)"], "ans": 0, "exp": "Cathode (–): Cu²⁺ + 2e → Cu↓. Anode (+): 2H₂O → O₂↑ + 4H⁺ + 4e. Phương trình: 2CuSO₄ + 2H₂O → 2Cu + O₂↑ + 2H₂SO₄."}, {"q": "Khi điện phân dung dịch CuSO₄ với điện cực trơ, độ pH của dung dịch thay đổi như thế nào trong quá trình điện phân?", "opts": ["Giảm dần (dung dịch trở nên có tính acid vì sinh ra H₂SO₄)", "Tăng dần", "Không thay đổi", "Tăng lên 14"], "ans": 0, "exp": "Quá trình oxi hóa H₂O ở anode sinh ra ion H⁺ (tạo H₂SO₄ trong dung dịch) nên pH giảm dần."}, {"q": "Khi điện phân dung dịch NaCl bão hòa có màng ngăn xốp (điện cực trơ), sản phẩm thu được gồm những chất nào?", "opts": ["Khí H₂ và dung dịch NaOH (ở cathode), khí Cl₂ (ở anode)", "Kim loại Na (ở cathode) và khí Cl₂ (ở anode)", "Khí H₂ (ở cathode) và khí O₂ (ở anode)", "Nước Javel duy nhất"], "ans": 0, "exp": "2NaCl + 2H₂O → 2NaOH + H₂↑ + Cl₂↑ (có màng ngăn để Cl₂ không phản ứng với NaOH)."}, {"q": "Trong điện phân dung dịch NaCl (điện cực trơ), nếu KHÔNG có màng ngăn giữa hai điện cực thì sản phẩm chính thu được trong dung dịch là gì?", "opts": ["Nước Javel (hỗn hợp NaCl và NaClO)", "Dung dịch NaOH tinh khiết", "Kim loại Na nguyên chất", "Dung dịch HCl đặc"], "ans": 0, "exp": "Không có màng ngăn, khí Cl₂ sinh ra ở anode khuếch tán sang phản ứng ngay với NaOH tạo nước Javel: Cl₂ + 2NaOH → NaCl + NaClO + H₂O."}, {"q": "Khi điện phân dung dịch CuCl₂ với điện cực trơ, sản phẩm thu được ở cathode (–) và anode (+) lần lượt là", "opts": ["Kim loại Cu và khí Cl₂", "Khí H₂ và khí Cl₂", "Kim loại Cu và khí O₂", "Khí H₂ và khí O₂"], "ans": 0, "exp": "Cathode (–): Cu²⁺ + 2e → Cu. Anode (+): 2Cl⁻ → Cl₂↑ + 2e. Tổng: CuCl₂ → Cu + Cl₂↑."}, {"q": "Khi điện phân dung dịch AgNO₃ với điện cực trơ, tại cathode (–) và anode (+) thu được sản phẩm lần lượt là", "opts": ["Kim loại Ag và khí O₂", "Khí H₂ và khí O₂", "Kim loại Ag và khí NO₂", "Khí O₂ và kim loại Ag"], "ans": 0, "exp": "Cathode (–): Ag⁺ + 1e → Ag. Anode (+): 2H₂O → O₂↑ + 4H⁺ + 4e. Dung dịch sau điện phân chứa HNO₃."}, {"q": "Khi điện phân dung dịch Na₂SO₄ loãng (hoặc H₂SO₄ loãng, NaOH loãng) với điện cực trơ, thực chất là điện phân chất nào?", "opts": ["Điện phân nước (thu được khí H₂ ở cathode và khí O₂ ở anode)", "Điện phân tạo kim loại Na", "Điện phân tạo khí SO₂", "Không xảy ra sự điện phân"], "ans": 0, "exp": "Cả Na⁺ (ở cathode) và SO₄²⁻ (ở anode) đều không bị điện phân; chỉ có H₂O bị điện phân: 2H₂O → 2H₂↑ + O₂↑."}, {"q": "Quá trình khử nước ở cathode (–) khi điện phân dung dịch muối kim loại mạnh được viết đúng là", "opts": ["2H₂O + 2e → H₂↑ + 2OH⁻", "2H₂O → O₂↑ + 4H⁺ + 4e", "2H₂O + 4e → O₂↑ + 4OH⁻", "H₂O + 1e → H⁺ + OH⁻"], "ans": 0, "exp": "Ở cathode xảy ra sự khử (nhận electron): 2H₂O + 2e → H₂↑ + 2OH⁻ (làm môi trường quanh cathode có tính kiềm)."}, {"q": "Quá trình oxi hóa nước ở anode (+) khi điện phân dung dịch muối gốc SO₄²⁻, NO₃⁻ được viết đúng là", "opts": ["2H₂O → O₂↑ + 4H⁺ + 4e", "2H₂O + 2e → H₂↑ + 2OH⁻", "2H₂O → 2H₂↑ + O₂↑", "H₂O → H⁺ + OH⁻"], "ans": 0, "exp": "Ở anode xảy ra sự oxi hóa (nhường electron): 2H₂O → O₂↑ + 4H⁺ + 4e (làm môi trường quanh anode có tính acid)."}, {"q": "Điện phân dung dịch hỗn hợp chứa các ion Ag⁺, Cu²⁺, Fe²⁺ cùng nồng độ. Thứ tự các ion bị khử lần lượt tại cathode (–) là", "opts": ["Ag⁺ → Cu²⁺ → Fe²⁺", "Fe²⁺ → Cu²⁺ → Ag⁺", "Cu²⁺ → Ag⁺ → Fe²⁺", "Cả ba bị khử cùng lúc"], "ans": 0, "exp": "Theo chiều giảm dần E°: Ag⁺ (+0,80 V) > Cu²⁺ (+0,34 V) > Fe²⁺ (–0,44 V) → Ag⁺ bị khử trước, sau đó đến Cu²⁺ rồi mới đến Fe²⁺."}, {"q": "Trong công nghiệp hóa chất, phương pháp điện phân dung dịch NaCl có màng ngăn được dùng để sản xuất bộ ba hóa chất cơ bản nào?", "opts": ["NaOH, Cl₂ và H₂", "Na, Cl₂ và O₂", "NaClO, HCl và H₂", "Na₂CO₃, Cl₂ và H₂"], "ans": 0, "exp": "Công nghiệp chlor-alkali điện phân dung dịch NaCl có màng ngăn sản xuất đồng thời NaOH (xút), khí Cl₂ và khí H₂."}, {"q": "Khi điện phân dung dịch CuSO₄ bằng điện cực trơ, nếu cho vài giọt quỳ tím vào dung dịch sau một thời gian điện phân, quỳ tím sẽ chuyển sang màu gì?", "opts": ["Màu đỏ (vì tạo thành H₂SO₄)", "Màu xanh", "Mất màu hoàn toàn", "Không đổi màu"], "ans": 0, "exp": "Điện phân dung dịch CuSO₄ sinh ra H₂SO₄ nên dung dịch có tính acid làm quỳ tím hóa đỏ."}]}, "dp-ud": {"title": "3.3. Ứng dụng của điện phân (Sản xuất, Tinh luyện, Mạ điện)", "questions": [{"q": "Ba ứng dụng quan trọng nhất của phương pháp điện phân trong công nghiệp là", "opts": ["Sản xuất kim loại (và hóa chất), tinh luyện kim loại và mạ điện", "Sản xuất đường, sản xuất tinh bột và làm bánh kẹo", "Sản xuất giấy, dệt vải và làm gốm sứ", "Chưng cất dầu mỏ, lên men rượu và nấu xà phòng"], "ans": 0, "exp": "Điện phân có 3 ứng dụng trụ cột: sản xuất kim loại/hóa chất (Al, Na, Cl₂, NaOH...), tinh luyện kim loại (Cu, Zn, Pb...) và mạ điện."}, {"q": "Trong công nghiệp tinh luyện đồng (làm sạch đồng thô chứa tạp chất thành đồng tinh khiết 99,99% dùng làm dây dẫn điện), thanh đồng THÔ được nối vào cực nào của nguồn điện?", "opts": ["Anode (cực dương)", "Cathode (cực âm)", "Cầu muối", "Không nối vào nguồn điện"], "ans": 0, "exp": "Trong tinh luyện đồng: Anode (+) là tấm đồng thô (bị oxi hóa tan ra: Cu → Cu²⁺ + 2e); Cathode (–) là tấm đồng tinh khiết (Cu²⁺ + 2e → Cu bám vào)."}, {"q": "Trong quá trình tinh luyện đồng bằng phương pháp điện phân, dung dịch chất điện li thường dùng là", "opts": ["Dung dịch CuSO₄ (có thêm H₂SO₄ loãng)", "Dung dịch NaCl bão hòa", "Dung dịch AgNO₃", "Nước cất"], "ans": 0, "exp": "Dung dịch CuSO₄ chứa ion Cu²⁺ giúp vận chuyển đồng từ anode (đồng thô) sang bám vào cathode (đồng tinh khiết)."}, {"q": "Trong quá trình tinh luyện đồng bằng điện phân, hiện tượng gì xảy ra ở anode (tấm đồng thô) và cathode (tấm đồng tinh khiết)?", "opts": ["Anode đồng thô tan dần, cathode đồng tinh khiết dày lên", "Anode dày lên, cathode tan dần", "Cả hai cực đều tan hết", "Cả hai cực đều không thay đổi khối lượng"], "ans": 0, "exp": "Hiện tượng dương cực tan: Cu ở anode tan thành Cu²⁺, còn Cu²⁺ bị khử thành Cu tinh khiết bám đều lên cathode."}, {"q": "Trong kỹ thuật MẠ ĐIỆN (ví dụ mạ bạc lên thìa sắt hoặc mạ đồng lên huy chương), VẬT CẦN MẠ luôn được nối vào cực nào của nguồn điện một chiều?", "opts": ["Cathode (cực âm)", "Anode (cực dương)", "Nối vào cả hai cực", "Đặt ở ngoài dung dịch"], "ans": 0, "exp": "Vật cần mạ phải nối vào cathode (cực âm) để ion kim loại mạ (Mⁿ⁺) tiến về nhận electron và phủ thành lớp kim loại mỏng bám chặt lên bề mặt vật."}, {"q": "Trong kỹ thuật mạ bạc lên một chiếc thìa bằng đồng, thanh kim loại dùng làm ANODE (cực dương) thường là", "opts": ["Thanh bạc (Ag) tinh khiết", "Thanh đồng (Cu)", "Thanh sắt (Fe)", "Thanh kẽm (Zn)"], "ans": 0, "exp": "Trong mạ điện: Anode (+) là kim loại dùng để mạ (Ag tan ra bổ sung ion Ag⁺ cho dung dịch), Cathode (–) là vật cần mạ (thìa đồng), dung dịch là muối bạc."}, {"q": "Mục đích chính của việc mạ điện (mạ kẽm, mạ chromium, mạ nickel, mạ vàng, mạ bạc) lên bề mặt đồ vật kim loại là gì?", "opts": ["Chống ăn mòn (gỉ sét), tăng độ cứng bề mặt và tăng tính thẩm mĩ cho sản phẩm", "Làm vật nhẹ hơn không khí", "Làm vật dễ bị gỉ sét hơn", "Làm vật mất hoàn toàn khả năng dẫn điện"], "ans": 0, "exp": "Lớp mạ mỏng bảo vệ kim loại nền khỏi ăn mòn môi trường, tăng độ bóng đẹp (trang sức, phụ tùng xe) và chống mài mòn."}, {"q": "Để mạ đồng (Cu) lên một chiếc chìa khóa bằng sắt, cách lắp đặt bình điện phân nào sau đây là ĐÚNG?", "opts": ["Cathode (–): chìa khóa sắt; Anode (+): thanh đồng; Dung dịch điện phân: CuSO₄", "Cathode (–): thanh đồng; Anode (+): chìa khóa sắt; Dung dịch điện phân: CuSO₄", "Cathode (–): chìa khóa sắt; Anode (+): thanh sắt; Dung dịch điện phân: FeSO₄", "Cathode (–): chìa khóa sắt; Anode (+): thanh đồng; Dung dịch điện phân: NaCl"], "ans": 0, "exp": "Quy tắc mạ điện: Vật cần mạ ở cathode (–), kim loại mạ ở anode (+), dung dịch chứa muối của kim loại mạ."}, {"q": "Trong tinh luyện đồng bằng phương pháp điện phân (anode là đồng thô, dung dịch CuSO₄), các tạp chất kim loại quý yếu hơn đồng (như Ag, Au, Pt) sẽ đi đâu?", "opts": ["Không bị oxi hóa mà rơi xuống đáy bể tạo thành 'bùn anode' (được thu hồi để lấy lại kim loại quý)", "Tan hết vào dung dịch thành ion", "Bay hơi lên không khí", "Bám lẫn vào tấm đồng tinh khiết ở cathode"], "ans": 0, "exp": "Vì Ag, Au, Pt có E° lớn hơn Cu nên không bị oxi hóa ở anode; khi Cu tan đi, chúng rơi xuống đáy tạo bùn anode rất có giá trị kinh tế."}, {"q": "Trong quá trình mạ điện với anode tan (ví dụ mạ đồng bằng dung dịch CuSO₄ và anode Cu), nồng độ ion Cu²⁺ trong dung dịch thay đổi như thế nào?", "opts": ["Hầu như không đổi (lượng Cu²⁺ sinh ra ở anode bằng lượng Cu²⁺ bị khử ở cathode)", "Giảm nhanh về 0", "Tăng gấp 10 lần", "Chuyển hoàn toàn thành khí O₂"], "ans": 0, "exp": "Anode: Cu → Cu²⁺ + 2e; Cathode: Cu²⁺ + 2e → Cu. Hai quá trình bù trừ nhau nên nồng độ Cu²⁺ trong dung dịch hầu như không đổi."}, {"q": "Kim loại nào sau đây được sản xuất quy mô lớn nhất thế giới bằng phương pháp điện phân nóng chảy oxide của nó?", "opts": ["Nhôm (Al)", "Sắt (Fe)", "Đồng (Cu)", "Bạc (Ag)"], "ans": 0, "exp": "Nhôm là kim loại nhẹ được sản xuất chủ yếu bằng điện phân nóng chảy Al₂O₃ (quy trình Hall–Héroult)."}, {"q": "Vì sao dây dẫn điện cao thế và lõi dây điện gia dụng cần dùng đồng đã qua TINH LUYỆN bằng điện phân (độ tinh khiết > 99,9%)?", "opts": ["Vì đồng càng tinh khiết thì độ dẫn điện càng cao, giảm tổn hao điện năng trên đường dây", "Vì đồng tinh khiết không dẫn điện", "Vì đồng tinh khiết nhẹ hơn nhựa", "Vì đồng thô không thể kéo thành sợi"], "ans": 0, "exp": "Chỉ một lượng nhỏ tạp chất cũng làm tăng điện trở của đồng đáng kể; tinh luyện điện phân cho đồng siêu sạch dẫn điện tối ưu."}, {"q": "Để lớp mạ điện bám chắc, sáng bóng và mịn đẹp trên bề mặt vật cần mạ, cần chú ý điều gì trước và trong khi mạ?", "opts": ["Làm sạch kỹ dầu mỡ/gỉ sét trên vật cần mạ và kiểm soát cường độ dòng điện phù hợp", "Để nguyên lớp gỉ sét dày trên vật cần mạ", "Dùng dòng điện xoay chiều mạnh nhất có thể", "Đun sôi dung dịch mạ thật mạnh"], "ans": 0, "exp": "Bề mặt vật phải thật sạch (tẩy dầu, tẩy gỉ) và mật độ dòng điện thích hợp thì lớp kim loại mạ mới bám chắc và mịn đều."}, {"q": "Trong công nghiệp, ngoài kim loại, điện phân dung dịch NaCl còn là nguồn sản xuất chính của loại hóa chất tẩy rửa, sát trùng quen thuộc nào (khi không có màng ngăn)?", "opts": ["Nước Javel (NaCl + NaClO)", "Giấm ăn (CH₃COOH)", "Cồn y tế (C₂H₅OH)", "Xà phòng bánh"], "ans": 0, "exp": "Điện phân dung dịch NaCl không màng ngăn tạo nước Javel chứa NaClO có tính oxi hóa mạnh dùng tẩy trắng và khử trùng."}, {"q": "Phát biểu nào sau đây SAI về ứng dụng của điện phân?", "opts": ["Trong mạ điện, vật cần mạ được gắn vào cực dương (anode)", "Trong tinh luyện đồng, đồng thô được gắn vào cực dương (anode)", "Điện phân nóng chảy Al₂O₃ dùng để sản xuất nhôm công nghiệp", "Điện phân dung dịch NaCl có màng ngăn dùng sản xuất NaOH, Cl₂ và H₂"], "ans": 0, "exp": "Trong mạ điện, vật cần mạ PHẢI gắn vào cực âm (cathode) để ion kim loại mạ đến nhận electron và bám lên bề mặt."}]}};
+
+    const BRANCH_TOPICS = {
+      tdc: ['tdc-kn', 'tdc-yn', 'tdc-pu'],
+      pin: ['pin-ct', 'pin-sdd', 'pin-ud'],
+      dp:  ['dp-nc', 'dp-dd', 'dp-ud']
+    };
+
+    const rootPill = document.getElementById('rootPill');
+    const rootDrawer = document.getElementById('rootDrawer');
+    const nodeItems = document.querySelectorAll('.node-item');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const branchCols = document.querySelectorAll('.branch-col');
+    const columnsGrid = document.getElementById('columnsGrid');
+    const treeConnectors = document.getElementById('treeConnectors');
+
+    /* ================= MIND MAP INTERACTION ================= */
+    function toggleRoot() {
+      const isOpen = rootDrawer.classList.toggle('open');
+      rootPill.setAttribute('aria-expanded', isOpen);
+    }
+    rootPill.addEventListener('click', toggleRoot);
+    rootPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRoot(); }
+    });
+
+    nodeItems.forEach(item => {
+      const btn = item.querySelector('.sub-pill');
+      btn.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        nodeItems.forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            other.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (!wasOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          item.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-branch-toggle]').forEach(header => {
+      header.addEventListener('click', () => {
+        const col = header.closest('.branch-col');
+        const items = col.querySelectorAll('.node-item');
+        const anyOpen = Array.from(items).some(i => i.classList.contains('open'));
+        items.forEach(i => {
+          i.classList.toggle('open', !anyOpen);
+          i.querySelector('.sub-pill').setAttribute('aria-expanded', String(!anyOpen));
+        });
+      });
+    });
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+        if (filter === 'all') {
+          branchCols.forEach(col => col.classList.remove('hidden'));
+          columnsGrid.classList.remove('single-col');
+          treeConnectors.style.display = '';
+        } else {
+          branchCols.forEach(col => {
+            col.classList.toggle('hidden', col.dataset.branch !== filter);
+          });
+          columnsGrid.classList.add('single-col');
+          treeConnectors.style.display = 'none';
+        }
+      });
+    });
+
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      nodeItems.forEach(item => {
+        if (!item.closest('.branch-col').classList.contains('hidden')) {
+          item.classList.add('open');
+          item.querySelector('.sub-pill').setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      rootDrawer.classList.remove('open');
+      rootPill.setAttribute('aria-expanded', 'false');
+      nodeItems.forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    /* ================= ZOOM MODAL (FULLSCREEN) ================= */
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomTitle = document.getElementById('zoomTitle');
+    const zoomBody = document.getElementById('zoomBody');
+
+    function closeZoomModal() {
+      zoomModal.classList.remove('show');
+      if (document.fullscreenElement === zoomModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.querySelectorAll('.zoom-btn').forEach(zbtn => {
+      zbtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = zbtn.closest('.node-item');
+        const label = item.querySelector('.pill-label').textContent.trim();
+        const branchName = item.closest('.branch-col').querySelector('.b-title').textContent.trim();
+        const innerClone = item.querySelector('.drawer-inner').cloneNode(true);
+        const topBar = innerClone.querySelector('.drawer-top');
+        const pBar = innerClone.querySelector('.practice-bar');
+        if (topBar) topBar.remove();
+        if (pBar) pBar.remove();
+
+        zoomTitle.textContent = `${branchName} — ${label}`;
+        zoomBody.innerHTML = '';
+        innerClone.className = 'zoom-content-wrap';
+        innerClone.removeAttribute('style');
+        zoomBody.appendChild(innerClone);
+        zoomModal.classList.add('show');
+
+        if (zoomModal.requestFullscreen) {
+          zoomModal.requestFullscreen().catch(() => {});
+        } else if (zoomModal.webkitRequestFullscreen) {
+          zoomModal.webkitRequestFullscreen();
+        }
+      });
+    });
+
+    document.getElementById('zoomClose').addEventListener('click', closeZoomModal);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        if (zoomModal.classList.contains('show')) {
+          zoomModal.classList.remove('show');
+        }
+      }
+    });
+
+    /* ================= QUIZ ENGINE ================= */
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSubtitle = document.getElementById('quizSubtitle');
+    const quizBody = document.getElementById('quizBody');
+    const quizFooter = document.getElementById('quizFooter');
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    const confirmText = document.getElementById('confirmText');
+
+    let activeQuiz = {
+      topic: null,
+      count: 10,
+      questions: [],
+      userAnswers: {},
+      submitted: false
+    };
+
+    function shuffleArray(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getBranchOfTopic(topicId) {
+      for (const [b, list] of Object.entries(BRANCH_TOPICS)) {
+        if (list.includes(topicId)) return b;
+      }
+      return null;
+    }
+
+    function buildQuestionSet(topicId, desiredCount) {
+      let pool = [];
+      let label = '';
+
+      if (topicId === 'all') {
+        label = 'Tổng hợp Chương 5: Pin điện và điện phân';
+        Object.values(QUIZ_BANKS).forEach(bank => {
+          bank.questions.forEach(q => pool.push({ ...q, source: bank.title }));
+        });
+        pool = shuffleArray(pool).slice(0, desiredCount);
+      } else {
+        const primaryBank = QUIZ_BANKS[topicId];
+        label = primaryBank.title;
+        const primaryQs = shuffleArray(primaryBank.questions.map(q => ({ ...q, source: primaryBank.title })));
+
+        if (desiredCount <= primaryQs.length) {
+          pool = primaryQs.slice(0, desiredCount);
+        } else {
+          pool = primaryQs.slice();
+          const branch = getBranchOfTopic(topicId);
+          const siblings = (BRANCH_TOPICS[branch] || []).filter(id => id !== topicId);
+          let extra = [];
+          siblings.forEach(sibId => {
+            QUIZ_BANKS[sibId].questions.forEach(q => extra.push({ ...q, source: QUIZ_BANKS[sibId].title }));
+          });
+          extra = shuffleArray(extra);
+          const needed = desiredCount - pool.length;
+          pool = pool.concat(extra.slice(0, needed));
+        }
+      }
+
+      const prepared = pool.map((q, idx) => {
+        const indexedOpts = q.opts.map((text, i) => ({ text, isCorrect: i === q.ans }));
+        const shuffledOpts = shuffleArray(indexedOpts);
+        const newAns = shuffledOpts.findIndex(o => o.isCorrect);
+        return {
+          idx,
+          q: q.q,
+          opts: shuffledOpts.map(o => o.text),
+          ans: newAns,
+          exp: q.exp,
+          source: q.source
+        };
+      });
+
+      return { label, questions: prepared };
+    }
+
+    function openQuiz(topicId, count) {
+      const { label, questions } = buildQuestionSet(topicId, count);
+      activeQuiz = {
+        topic: topicId,
+        count: questions.length,
+        questions,
+        userAnswers: {},
+        submitted: false
+      };
+
+      confirmOverlay.classList.remove('show');
+      quizTitle.textContent = `Luyện tập: ${label}`;
+      quizSubtitle.textContent = `${questions.length} câu trắc nghiệm • Mức độ Biết & Hiểu (có giải thích chi tiết sau khi nộp)`;
+      renderQuizTaking();
+      quizModal.classList.add('show');
+      quizBody.scrollTop = 0;
+
+      if (!document.fullscreenElement) {
+        if (quizModal.requestFullscreen) {
+          quizModal.requestFullscreen().catch(() => {});
+        } else if (quizModal.webkitRequestFullscreen) {
+          quizModal.webkitRequestFullscreen();
+        }
+      }
+    }
+
+    const LETTERS = ['A', 'B', 'C', 'D'];
+
+    function renderQuizTaking() {
+      const countOptions = [10, 15, 20, 30];
+      const setupBar = `
+        <div class="quiz-setup-bar">
+          <span>Chọn nhanh số câu muốn luyện tập:</span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${countOptions.map(n => `
+              <button class="rf-btn ${activeQuiz.count === n ? 'active' : ''}" data-change-count="${n}">${n} câu</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => `
+        <div class="quiz-card" data-qidx="${i}">
+          <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+          <div class="opt-list">
+            ${item.opts.map((optText, oIdx) => `
+              <label class="opt-label" data-q="${i}" data-o="${oIdx}">
+                <input type="radio" name="q_${i}" value="${oIdx}" />
+                <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${setupBar}${cardsHtml}</div>`;
+
+      quizBody.querySelectorAll('[data-change-count]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openQuiz(activeQuiz.topic, parseInt(btn.dataset.changeCount, 10));
+        });
+      });
+
+      quizBody.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const qIdx = parseInt(radio.name.split('_')[1], 10);
+          const oIdx = parseInt(radio.value, 10);
+          activeQuiz.userAnswers[qIdx] = oIdx;
+
+          const card = quizBody.querySelector(`.quiz-card[data-qidx="${qIdx}"]`);
+          card.querySelectorAll('.opt-label').forEach(lbl => {
+            lbl.classList.toggle('is-selected', parseInt(lbl.dataset.o, 10) === oIdx);
+          });
+          updateProgressFooter();
+        });
+      });
+
+      updateProgressFooter();
+    }
+
+    function updateProgressFooter() {
+      const answeredCount = Object.keys(activeQuiz.userAnswers).length;
+      const total = activeQuiz.questions.length;
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đã chọn: <strong>${answeredCount} / ${total}</strong> câu</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCancelQuiz">Đóng</button>
+          <button class="btn-primary" id="btnSubmitQuiz">Nộp bài &amp; Xem giải thích</button>
+        </div>
+      `;
+      document.getElementById('btnCancelQuiz').addEventListener('click', closeQuizModal);
+      document.getElementById('btnSubmitQuiz').addEventListener('click', submitQuiz);
+    }
+
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+    });
+    document.getElementById('confirmOk').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+      finalizeSubmitQuiz();
+    });
+
+    function submitQuiz() {
+      const total = activeQuiz.questions.length;
+      const answered = Object.keys(activeQuiz.userAnswers).length;
+      if (answered < total) {
+        confirmText.textContent = `Bạn mới làm ${answered}/${total} câu. Các câu chưa chọn sẽ bị tính là sai. Bạn vẫn muốn nộp bài chứ?`;
+        confirmOverlay.classList.add('show');
+        return;
+      }
+      finalizeSubmitQuiz();
+    }
+
+    function finalizeSubmitQuiz() {
+      const total = activeQuiz.questions.length;
+      activeQuiz.submitted = true;
+      let correctCount = 0;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => {
+        const userAns = activeQuiz.userAnswers.hasOwnProperty(i) ? activeQuiz.userAnswers[i] : -1;
+        const isCorrect = userAns === item.ans;
+        if (isCorrect) correctCount++;
+
+        const optsHtml = item.opts.map((optText, oIdx) => {
+          let cls = 'opt-label';
+          let badge = '';
+          if (oIdx === item.ans) {
+            cls += ' is-correct';
+            badge = '<span class="opt-badge">✓ Đáp án đúng</span>';
+          } else if (oIdx === userAns && !isCorrect) {
+            cls += ' is-wrong';
+            badge = '<span class="opt-badge">✕ Bạn chọn</span>';
+          }
+          return `
+            <div class="${cls}" style="cursor:default;">
+              <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              ${badge}
+            </div>
+          `;
+        }).join('');
+
+        let expHtml = '';
+        if (isCorrect) {
+          expHtml = `
+            <div class="exp-box exp-ok">
+              <strong>✓ Chính xác!</strong> ${item.exp}
+            </div>
+          `;
+        } else {
+          const chosenReason = userAns === -1
+            ? 'Bạn chưa chọn đáp án cho câu này.'
+            : `Bạn đã chọn <strong>${LETTERS[userAns]}</strong> (chưa đúng). Đáp án đúng là <strong>${LETTERS[item.ans]}</strong>.`;
+          expHtml = `
+            <div class="exp-box exp-err">
+              <strong>✕ Vì sao sai?</strong> ${chosenReason}<br/>
+              <strong>Giải thích:</strong> ${item.exp}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="quiz-card ${isCorrect ? 'correct-card' : 'wrong-card'}" data-is-correct="${isCorrect}">
+            <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+            <div class="opt-list">${optsHtml}</div>
+            ${expHtml}
+          </div>
+        `;
+      }).join('');
+
+      const pct = Math.round((correctCount / total) * 100);
+      const wrongCount = total - correctCount;
+      let msg = 'Cần ôn lại kỹ lý thuyết ở sơ đồ rồi làm lại nhé!';
+      if (pct >= 90) msg = 'Xuất sắc! Bạn nắm rất chắc kiến thức phần này.';
+      else if (pct >= 70) msg = 'Khá tốt! Hãy xem kỹ giải thích ở các câu làm sai để đạt điểm tối đa.';
+      else if (pct >= 50) msg = 'Đạt mức trung bình. Xem lại các câu sai bên dưới để củng cố kiến thức.';
+
+      const bannerHtml = `
+        <div class="result-banner">
+          <div>
+            <div class="score-big">Kết quả: ${correctCount} / ${total} câu đúng (${pct}%)</div>
+            <div class="score-msg">${msg}</div>
+          </div>
+          <div class="review-filters">
+            <button class="rf-btn active" data-review-filter="all">Tất cả (${total})</button>
+            <button class="rf-btn" data-review-filter="wrong">Chỉ xem câu sai (${wrongCount})</button>
+          </div>
+        </div>
+      `;
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${bannerHtml}${cardsHtml}</div>`;
+      quizBody.scrollTop = 0;
+
+      quizBody.querySelectorAll('[data-review-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.reviewFilter;
+          quizBody.querySelectorAll('[data-review-filter]').forEach(b => b.classList.toggle('active', b === btn));
+          quizBody.querySelectorAll('.quiz-card').forEach(card => {
+            if (mode === 'wrong' && card.dataset.isCorrect === 'true') {
+              card.classList.add('hidden-review');
+            } else {
+              card.classList.remove('hidden-review');
+            }
+          });
+        });
+      });
+
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đúng: <strong>${correctCount}</strong> • Sai: <strong>${wrongCount}</strong></span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCloseAfter">Quay lại sơ đồ</button>
+          <button class="btn-primary" id="btnRetryQuiz">🔄 Làm lại (đảo câu hỏi)</button>
+        </div>
+      `;
+      document.getElementById('btnCloseAfter').addEventListener('click', closeQuizModal);
+      document.getElementById('btnRetryQuiz').addEventListener('click', () => openQuiz(activeQuiz.topic, activeQuiz.count));
+    }
+
+    function closeQuizModal() {
+      confirmOverlay.classList.remove('show');
+      quizModal.classList.remove('show');
+      if (document.fullscreenElement === quizModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.getElementById('quizClose').addEventListener('click', closeQuizModal);
+    quizModal.addEventListener('click', e => { if (e.target === quizModal) closeQuizModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (confirmOverlay.classList.contains('show')) {
+          confirmOverlay.classList.remove('show');
+        } else {
+          closeZoomModal();
+          closeQuizModal();
+        }
+      }
+    });
+
+    document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.dataset.quizTopic;
+        const bar = btn.closest('.practice-bar');
+        const select = bar.querySelector('.q-count-select');
+        const count = select ? parseInt(select.value, 10) : 10;
+        openQuiz(topicId, count);
+      });
+    });
+
+    document.getElementById('btnChapterQuiz').addEventListener('click', () => {
+      openQuiz('all', 20);
+    });
+  </script>
+</body>
+</html>
