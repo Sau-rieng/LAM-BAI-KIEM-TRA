@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sơ đồ tư duy & Luyện tập Chương 4: Polymer (Hóa 12 – KNTT)</title>
+  <style>
+    :root {
+      --page-bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --pill-bg: #f1f3f5;
+      --pill-hover: #e5e7eb;
+      --line-color: #64748b;
+
+      /* Blue - Root & Monosaccharide */
+      --blue-fill: #dceeff;
+      --blue-border: #3b82f6;
+      --blue-text: #1e3a8a;
+      --blue-soft: #f0f7ff;
+
+      /* Green - Disaccharide */
+      --green-fill: #dcfce7;
+      --green-border: #22a055;
+      --green-text: #14532d;
+      --green-soft: #f0fdf4;
+
+      /* Purple - Polysaccharide */
+      --purple-fill: #ede9fe;
+      --purple-border: #8b5cf6;
+      --purple-text: #4c1d95;
+      --purple-soft: #f5f3ff;
+
+      /* Feedback colors */
+      --ok-bg: #ecfdf5;
+      --ok-border: #10b981;
+      --ok-text: #065f46;
+      --err-bg: #fef2f2;
+      --err-border: #ef4444;
+      --err-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px 16px 40px;
+      line-height: 1.55;
+    }
+
+    /* Top subtle toolbar */
+    .toolbar {
+      max-width: 1120px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tab-btn:hover {
+      background: #f9fafb;
+      color: var(--text);
+    }
+
+    .tab-btn.active[data-filter="all"] { background: #1f2937; color: #fff; border-color: #1f2937; }
+    .tab-btn.active[data-filter="dc"] { background: var(--blue-border); color: #fff; border-color: var(--blue-border); }
+    .tab-btn.active[data-filter="cd"] { background: var(--green-border); color: #fff; border-color: var(--green-border); }
+    .tab-btn.active[data-filter="vl"] { background: var(--purple-border); color: #fff; border-color: var(--purple-border); }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .action-btn:hover {
+      background: #f3f4f6;
+      color: var(--text);
+    }
+
+    .action-btn.primary-quiz {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .action-btn.primary-quiz:hover {
+      background: #1d4ed8;
+    }
+
+    /* Main White Mindmap Canvas */
+    .canvas-card {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 28px 28px 34px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Root Pill */
+    .root-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .root-pill {
+      background: var(--blue-fill);
+      border: 2px solid var(--blue-border);
+      border-radius: 999px;
+      padding: 12px 38px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      min-width: 290px;
+    }
+
+    .root-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.18);
+    }
+
+    .root-pill .title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .root-pill .sub {
+      font-size: 0.86rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Root inline accordion */
+    .root-drawer {
+      max-width: 720px;
+      width: 100%;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .root-drawer.open {
+      max-height: 540px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+
+    /* SVG Connector between root and 3 columns */
+    .tree-connectors {
+      width: 100%;
+      height: 52px;
+      display: block;
+      margin: 2px 0;
+    }
+
+    /* 3 Columns Grid */
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .columns.single-col {
+      grid-template-columns: minmax(0, 560px);
+      justify-content: center;
+    }
+
+    .branch-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .branch-col.hidden {
+      display: none;
+    }
+
+    /* Branch Header Pill */
+    .branch-pill {
+      border-radius: 999px;
+      padding: 11px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+
+    .branch-pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .branch-pill .b-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .branch-pill .b-sub {
+      font-size: 0.84rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .branch-col[data-branch="dc"] .branch-pill { background: var(--blue-fill); border-color: var(--blue-border); }
+    .branch-col[data-branch="dc"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(59, 130, 246, 0.16); }
+
+    .branch-col[data-branch="cd"] .branch-pill { background: var(--green-fill); border-color: var(--green-border); }
+    .branch-col[data-branch="cd"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(34, 160, 85, 0.16); }
+
+    .branch-col[data-branch="vl"] .branch-pill { background: var(--purple-fill); border-color: var(--purple-border); }
+    .branch-col[data-branch="vl"] .branch-pill:hover { box-shadow: 0 5px 14px rgba(139, 92, 246, 0.16); }
+
+    /* Dotted Vertical Tree List under each Branch */
+    .sub-tree {
+      position: relative;
+      margin-top: 14px;
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sub-tree::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -14px;
+      bottom: 24px;
+      border-left: 2px dotted var(--line-color);
+    }
+
+    .node-item {
+      position: relative;
+    }
+
+    .node-item::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 23px;
+      width: 14px;
+      border-top: 2px dotted var(--line-color);
+    }
+
+    /* Sub-node Pill Button */
+    .sub-pill {
+      width: 100%;
+      background: var(--pill-bg);
+      border: 1.5px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+
+    .sub-pill:hover {
+      background: var(--pill-hover);
+      border-color: #cbd5e1;
+    }
+
+    .sub-pill .pill-label {
+      flex: 1;
+      text-align: center;
+      padding-left: 14px;
+    }
+
+    .sub-pill .chev {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      transition: transform 0.22s ease;
+      flex-shrink: 0;
+    }
+
+    .node-item.open .sub-pill .chev {
+      transform: rotate(180deg);
+    }
+
+    .branch-col[data-branch="dc"] .node-item.open .sub-pill {
+      background: var(--blue-fill);
+      border-color: var(--blue-border);
+      color: var(--blue-text);
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.14);
+    }
+
+    .branch-col[data-branch="cd"] .node-item.open .sub-pill {
+      background: var(--green-fill);
+      border-color: var(--green-border);
+      color: var(--green-text);
+      box-shadow: 0 3px 10px rgba(34, 160, 85, 0.14);
+    }
+
+    .branch-col[data-branch="vl"] .node-item.open .sub-pill {
+      background: var(--purple-fill);
+      border-color: var(--purple-border);
+      color: var(--purple-text);
+      box-shadow: 0 3px 10px rgba(139, 92, 246, 0.14);
+    }
+
+    /* Accordion Expandable Content */
+    .drawer {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.34s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .node-item.open .drawer {
+      max-height: 1600px;
+      opacity: 1;
+      margin-top: 8px;
+    }
+
+    .drawer-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left-width: 4px;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 0.87rem;
+      color: #1f2937;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .branch-col[data-branch="dc"] .drawer-inner,
+    .root-drawer .drawer-inner {
+      border-left-color: var(--blue-border);
+      background: var(--blue-soft);
+    }
+
+    .branch-col[data-branch="cd"] .drawer-inner {
+      border-left-color: var(--green-border);
+      background: var(--green-soft);
+    }
+
+    .branch-col[data-branch="vl"] .drawer-inner {
+      border-left-color: var(--purple-border);
+      background: var(--purple-soft);
+    }
+
+    .drawer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .drawer-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .zoom-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .zoom-btn:hover { background: #f1f5f9; }
+
+    .d-list {
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .d-list li strong { color: #0f172a; }
+
+    /* Chemical Equation Box */
+    .eq {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin: 7px 0;
+      overflow-x: auto;
+    }
+
+    .eq-note {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .eq-formula {
+      font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+      font-size: 0.96rem;
+      color: #0f172a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .arr {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.05;
+      margin: 0 3px;
+    }
+
+    .arr .cond {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.68rem;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .arr .sym {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.8rem;
+    }
+
+    .mini-table th, .mini-table td {
+      border: 1px solid #e2e8f0;
+      padding: 5px 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .tip {
+      margin-top: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 0.8rem;
+      color: #78350f;
+    }
+
+    /* Practice Launcher Bar inside each Drawer */
+    .practice-bar {
+      margin-top: 11px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .practice-bar .p-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .practice-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .q-count-select {
+      padding: 4px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .start-quiz-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.12s ease;
+    }
+
+    .start-quiz-btn:hover {
+      filter: brightness(0.93);
+      transform: translateY(-1px);
+    }
+
+    .branch-col[data-branch="dc"] .start-quiz-btn { background: var(--blue-border); }
+    .branch-col[data-branch="cd"] .start-quiz-btn { background: var(--green-border); }
+    .branch-col[data-branch="vl"] .start-quiz-btn { background: var(--purple-border); }
+    .root-drawer .start-quiz-btn { background: #1f2937; }
+
+    .footer-hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 22px;
+    }
+
+    /* Modal Backdrop (used for Zoom & Quiz) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 22px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-close {
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover { background: #cbd5e1; }
+
+    .modal-body {
+      padding: 20px 22px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid #e5e7eb;
+      background: #f8fafc;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Quiz Styling inside Modal */
+    .quiz-setup-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+
+    .quiz-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+
+    .quiz-card.correct-card {
+      border-color: var(--ok-border);
+      background: #fafefd;
+    }
+
+    .quiz-card.wrong-card {
+      border-color: var(--err-border);
+      background: #fffafa;
+    }
+
+    .quiz-card.hidden-review {
+      display: none;
+    }
+
+    .q-text {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .q-num {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+
+    .opt-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .opt-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: #ffffff;
+      transition: all 0.15s ease;
+    }
+
+    .opt-label:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .opt-label input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .opt-label.is-selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .opt-label.is-correct {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok-text);
+      font-weight: 600;
+    }
+
+    .opt-label.is-wrong {
+      background: var(--err-bg);
+      border-color: var(--err-border);
+      color: var(--err-text);
+      font-weight: 600;
+    }
+
+    .opt-badge {
+      margin-left: auto;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .exp-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .exp-box.exp-ok {
+      background: var(--ok-bg);
+      border: 1px solid #a7f3d0;
+      color: var(--ok-text);
+    }
+
+    .exp-box.exp-err {
+      background: var(--err-bg);
+      border: 1px solid #fecaca;
+      color: var(--err-text);
+    }
+
+    /* Result Summary Banner */
+    .result-banner {
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1.5px solid #bfdbfe;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .score-big {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .score-msg {
+      font-size: 0.88rem;
+      color: #334155;
+      margin-top: 2px;
+    }
+
+    .review-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .rf-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rf-btn.active {
+      background: #1f2937;
+      color: #ffffff;
+      border-color: #1f2937;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    .progress-text {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Full-screen Zoom Modal for Classroom Presentation */
+    #zoomModal {
+      padding: 0;
+      background: #ffffff;
+    }
+
+    #zoomModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #zoomModal .modal-header {
+      padding: 20px 36px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #zoomModal .modal-title {
+      font-size: 1.65rem;
+      color: #0f172a;
+    }
+
+    #zoomModal .modal-close {
+      width: 44px;
+      height: 44px;
+      font-size: 1.35rem;
+    }
+
+    #zoomModal .modal-body {
+      padding: 32px 48px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #ffffff;
+    }
+
+    #zoomModal .zoom-content-wrap {
+      width: 100%;
+      max-width: 1080px;
+      font-size: 1.38rem;
+      line-height: 1.75;
+    }
+
+    #zoomModal .d-list {
+      gap: 14px;
+      padding-left: 26px;
+    }
+
+    #zoomModal .eq {
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 12px;
+      background: #f8fafc;
+      border-left: 5px solid #3b82f6;
+    }
+
+    #zoomModal .eq-note {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    #zoomModal .eq-formula {
+      font-size: 1.55rem;
+      gap: 8px;
+    }
+
+    #zoomModal .arr .cond {
+      font-size: 0.95rem;
+    }
+
+    #zoomModal .arr .sym {
+      font-size: 1.6rem;
+    }
+
+    #zoomModal .mini-table {
+      font-size: 1.22rem;
+      margin: 18px 0;
+    }
+
+    #zoomModal .mini-table th,
+    #zoomModal .mini-table td {
+      padding: 12px 16px;
+    }
+
+    #zoomModal .tip {
+      font-size: 1.18rem;
+      padding: 14px 18px;
+      margin-top: 18px;
+      border-radius: 12px;
+    }
+
+    /* Full-screen Quiz Modal for Comfortable Reading & Practice */
+    #quizModal {
+      padding: 0;
+      background: #f8fafc;
+    }
+
+    #quizModal .modal-box {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #quizModal .modal-header {
+      padding: 18px 36px;
+      background: #ffffff;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    #quizModal .modal-title {
+      font-size: 1.45rem;
+      color: #0f172a;
+    }
+
+    #quizModal .modal-subtitle {
+      font-size: 0.92rem;
+    }
+
+    #quizModal .modal-close {
+      width: 42px;
+      height: 42px;
+      font-size: 1.3rem;
+    }
+
+    #quizModal .modal-body {
+      padding: 24px 36px 36px;
+      background: #f8fafc;
+    }
+
+    #quizModal .quiz-inner-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    #quizModal .quiz-setup-bar {
+      font-size: 0.96rem;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    #quizModal .quiz-card {
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    #quizModal .q-text {
+      font-size: 1.12rem;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    #quizModal .q-num {
+      font-size: 0.86rem;
+      padding: 3px 10px;
+    }
+
+    #quizModal .opt-label {
+      font-size: 1.04rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .exp-box {
+      font-size: 0.96rem;
+      padding: 12px 15px;
+    }
+
+    #quizModal .score-big {
+      font-size: 1.6rem;
+    }
+
+    #quizModal .score-msg {
+      font-size: 1rem;
+    }
+
+    #quizModal .modal-footer {
+      padding: 16px 36px;
+      background: #ffffff;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    #quizModal .progress-text {
+      font-size: 0.98rem;
+    }
+
+    #quizModal .btn-primary,
+    #quizModal .btn-secondary {
+      font-size: 0.96rem;
+      padding: 10px 20px;
+    }
+
+    /* Custom In-Modal Confirm Box (never exits fullscreen) */
+    .confirm-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+      backdrop-filter: blur(2px);
+    }
+
+    .confirm-overlay.show {
+      display: flex;
+    }
+
+    .confirm-card {
+      background: #ffffff;
+      border-radius: 16px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      border: 1px solid #e2e8f0;
+    }
+
+    .confirm-card h3 {
+      font-size: 1.15rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .confirm-card p {
+      font-size: 0.96rem;
+      color: #334155;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    @media (max-width: 700px) {
+      #quizModal .modal-header,
+      #quizModal .modal-body,
+      #quizModal .modal-footer,
+      #zoomModal .modal-header,
+      #zoomModal .modal-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      #quizModal .q-text { font-size: 1rem; }
+      #quizModal .opt-label { font-size: 0.95rem; }
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .canvas-card { padding: 20px 14px 24px; }
+      .tree-connectors { display: none; }
+      .columns { grid-template-columns: 1fr; gap: 20px; margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="tab-btn active" data-filter="all">Tất cả</button>
+      <button class="tab-btn" data-filter="dc">1. Đại cương Polymer</button>
+      <button class="tab-btn" data-filter="cd">2. Chất dẻo &amp; Composite</button>
+      <button class="tab-btn" data-filter="vl">3. Tơ, Cao su &amp; Keo dán</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="action-btn primary-quiz" id="btnChapterQuiz">📝 Luyện tập tổng hợp (10–30 câu)</button>
+      <button class="action-btn" id="btnExpandAll">Mở tất cả</button>
+      <button class="action-btn" id="btnCollapseAll">Thu gọn hết</button>
+    </div>
+  </div>
+
+  <main class="canvas-card">
+    <!-- ROOT NODE -->
+    <div class="root-wrap">
+      <div class="root-pill" id="rootPill" role="button" tabindex="0" aria-expanded="false">
+        <div class="title">Chương 4: Polymer</div>
+        <div class="sub">Hóa học 12 · KNTT</div>
+      </div>
+
+      <div class="root-drawer" id="rootDrawer">
+        <div class="drawer-inner">
+          <div class="drawer-top">
+            <span class="drawer-tag">Tổng quan Chương 4</span>
+          </div>
+          <ul class="d-list">
+            <li><strong>Bài 12 – Đại cương về polymer:</strong> Khái niệm (mắt xích, monomer, hệ số n), danh pháp, phân loại, tính chất vật lí, 3 loại phản ứng hóa học (cắt mạch, giữ nguyên mạch, tăng mạch) và 2 phương pháp tổng hợp (trùng hợp, trùng ngưng).</li>
+            <li><strong>Bài 13 – Vật liệu polymer:</strong> Chất dẻo &amp; vấn đề rác thải nhựa, vật liệu composite (nền + cốt), tơ (tự nhiên, bán tổng hợp, tổng hợp), cao su (thiên nhiên &amp; tổng hợp, lưu hóa) và keo dán tổng hợp.</li>
+          </ul>
+          <div class="practice-bar">
+            <span class="p-label">📝 Luyện tập cả Chương 4 (135 câu Biết &amp; Hiểu):</span>
+            <div class="practice-controls">
+              <select class="q-count-select" id="rootQuizCount">
+                <option value="10">10 câu</option>
+                <option value="15">15 câu</option>
+                <option value="20" selected>20 câu</option>
+                <option value="30">30 câu</option>
+              </select>
+              <button class="start-quiz-btn" data-quiz-topic="all">Làm bài ngay</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOTTED SVG CONNECTORS -->
+    <svg class="tree-connectors" id="treeConnectors" viewBox="0 0 900 56" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 450 2 L 450 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 165 20 Q 145 20 145 38 L 145 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 450 20 L 735 20 Q 755 20 755 38 L 755 48" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="2.5 4.5" stroke-linecap="round"/>
+      <path d="M 139 43 L 145 50 L 151 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 444 43 L 450 50 L 456 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 749 43 L 755 50 L 761 43" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- 3 BRANCH COLUMNS -->
+    <div class="columns" id="columnsGrid">
+
+      <!-- COLUMN 1: ĐẠI CƯƠNG POLYMER -->
+      <section class="branch-col" data-branch="dc">
+        <div class="branch-pill" data-branch-toggle="dc" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Đại cương Polymer">
+          <div class="b-title">1. Đại cương Polymer</div>
+          <div class="b-sub">Mắt xích · Hệ số n</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 1.1 -->
+          <div class="node-item" data-node="poly-kn">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Khái niệm, Danh pháp &amp; Vật lí</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Đại cương • Khái niệm &amp; Vật lí</span>
+                  <button class="zoom-btn" data-zoom="poly-kn">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Khái niệm:</strong> Hợp chất phân tử khối rất lớn do nhiều <strong>mắt xích</strong> liên kết tạo nên (n: hệ số polymer hóa; chất đầu gọi là <strong>monomer</strong>).</li>
+                  <li><strong>Danh pháp:</strong> <strong>Poly + tên monomer</strong> (đặt trong ngoặc đơn nếu tên monomer ≥ 2 từ, vd: <em>polyethylene</em>, <em>poly(vinyl chloride)</em>).</li>
+                  <li><strong>Phân loại nguồn gốc:</strong> Thiên nhiên (tinh bột, cellulose, tơ tằm), bán tổng hợp (tơ visco, tơ cellulose acetate), tổng hợp (PE, PVC, nylon-6,6...).</li>
+                  <li><strong>Cấu trúc mạch:</strong> Không phân nhánh (PE, PVC, cellulose), phân nhánh (amylopectin, glycogen), mạng không gian (cao su lưu hóa, nhựa bakelite).</li>
+                  <li><strong>Tính chất vật lí:</strong> Chất rắn, không bay hơi, nóng chảy trong một khoảng nhiệt độ (nhựa <em>nhiệt dẻo</em> chảy lỏng khi đun; nhựa <em>nhiệt rắn</em> bị phân hủy), đa số không tan trong nước.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh ĐC)</option>
+                      <option value="30">30 câu (+ôn nhánh ĐC)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="poly-kn">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.2 -->
+          <div class="node-item" data-node="poly-hh">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tính chất hóa học</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Đại cương • Tính chất hóa học</span>
+                  <button class="zoom-btn" data-zoom="poly-hh">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>1. Phản ứng cắt mạch:</strong>
+                    <br>• Thủy phân (tinh bột, cellulose, protein, tơ polyamide –CO–NH–).
+                    <br>• Giải trùng hợp / nhiệt phân (PS → styrene; PMMA → methyl methacrylate).
+                  </li>
+                  <li><strong>2. Phản ứng giữ nguyên mạch:</strong> Phản ứng ở nhóm chức nhánh hoặc cộng nối đôi C=C mà không đứt mạch chính (vd: poly(vinyl acetate) + NaOH → poly(vinyl alcohol); cellulose + HNO<sub>3</sub>; cao su + HCl/Cl<sub>2</sub>).</li>
+                  <li><strong>3. Phản ứng tăng mạch (khâu mạch):</strong> Lưu hóa cao su (tạo cầu nối –S–S–), đóng rắn nhựa bakelite thành mạng không gian bền chắc.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh ĐC)</option>
+                      <option value="30">30 câu (+ôn nhánh ĐC)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="poly-hh">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.3 -->
+          <div class="node-item" data-node="poly-dc">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Trùng hợp &amp; Trùng ngưng</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">1. Đại cương • Phương pháp tổng hợp</span>
+                  <button class="zoom-btn" data-zoom="poly-dc">Phóng to ⤢</button>
+                </div>
+                <table class="mini-table">
+                  <thead><tr><th>Tiêu chí</th><th>Trùng hợp</th><th>Trùng ngưng</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>Điều kiện monomer</strong></td><td>Có liên kết bội (C=C) hoặc vòng kém bền</td><td>Có ít nhất 2 nhóm chức phản ứng được với nhau</td></tr>
+                    <tr><td><strong>Sản phẩm phụ</strong></td><td><strong>Không có</strong></td><td><strong>Có</strong> phân tử nhỏ (thường là H<sub>2</sub>O)</td></tr>
+                    <tr><td><strong>Ví dụ</strong></td><td>PE, PP, PVC, PS, PMMA, cao su buna, tơ nitron</td><td>Nylon-6,6, PPF, PET</td></tr>
+                  </tbody>
+                </table>
+                <div class="tip"><strong>Lưu ý:</strong> Tơ capron (nylon-6) có thể điều chế bằng cả <strong>trùng hợp</strong> (mở vòng caprolactam) lẫn <strong>trùng ngưng</strong> (ε-aminocaproic acid).</div>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh ĐC)</option>
+                      <option value="30">30 câu (+ôn nhánh ĐC)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="poly-dc">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: CHẤT DẺO & COMPOSITE -->
+      <section class="branch-col" data-branch="cd">
+        <div class="branch-pill" data-branch-toggle="cd" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Chất dẻo & Composite">
+          <div class="b-title">2. Chất dẻo &amp; Composite</div>
+          <div class="b-sub">PE · PP · PVC · PS · PMMA · PPF</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 2.1 -->
+          <div class="node-item" data-node="mat-cd">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Chất dẻo &amp; Nhựa phổ biến</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Chất dẻo • Các loại nhựa thông dụng</span>
+                  <button class="zoom-btn" data-zoom="mat-cd">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Chất dẻo:</strong> Vật liệu polymer có tính dẻo (gồm polymer chính + phụ gia: chất hóa dẻo, chất độn, chất màu...).</li>
+                </ul>
+                <table class="mini-table">
+                  <thead><tr><th>Nhựa</th><th>Monomer</th><th>Ứng dụng nổi bật</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>PE</strong></td><td>CH<sub>2</sub>=CH<sub>2</sub></td><td>Túi nilon, màng bọc thực phẩm</td></tr>
+                    <tr><td><strong>PP</strong></td><td>CH<sub>2</sub>=CH–CH<sub>3</sub></td><td>Hộp thực phẩm (chịu nhiệt), bao bì</td></tr>
+                    <tr><td><strong>PVC</strong></td><td>CH<sub>2</sub>=CHCl</td><td>Ống nước, vỏ dây điện, giả da</td></tr>
+                    <tr><td><strong>PS</strong></td><td>C<sub>6</sub>H<sub>5</sub>CH=CH<sub>2</sub></td><td>Hộp xốp, khay cách nhiệt</td></tr>
+                    <tr><td><strong>PMMA</strong></td><td>Methyl methacrylate</td><td>Thủy tinh hữu cơ (trong suốt)</td></tr>
+                    <tr><td><strong>PPF</strong></td><td>Phenol + HCHO</td><td>Nhựa nhiệt rắn: ổ cắm, tay cầm nồi</td></tr>
+                  </tbody>
+                </table>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh CD)</option>
+                      <option value="30">30 câu (+ôn nhánh CD)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="mat-cd">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.2 -->
+          <div class="node-item" data-node="mat-comp">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Vật liệu Composite</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Vật liệu Composite</span>
+                  <button class="zoom-btn" data-zoom="mat-comp">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Khái niệm:</strong> Tổ hợp từ ít nhất hai vật liệu khác nhau tạo vật liệu mới có tính năng vượt trội hơn từng thành phần.</li>
+                  <li><strong>Cấu tạo 2 phần:</strong>
+                    <br>• <strong>Vật liệu nền:</strong> Polymer nhiệt rắn (epoxy, polyester...) hoặc nhiệt dẻo — gắn kết và bảo vệ vật liệu cốt.
+                    <br>• <strong>Vật liệu cốt:</strong> Dạng <strong>sợi</strong> (sợi carbon, sợi thủy tinh) hoặc dạng <strong>hạt</strong> (bột gỗ, bột đá) — tăng độ bền cơ học, chịu lực.
+                  </li>
+                  <li><strong>Ứng dụng:</strong> Thân máy bay/tàu vũ trụ (cốt sợi carbon), bồn nước/thân tàu thuyền (cốt sợi thủy tinh), gỗ nhựa ngoài trời (cốt bột gỗ).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh CD)</option>
+                      <option value="30">30 câu (+ôn nhánh CD)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="mat-comp">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 -->
+          <div class="node-item" data-node="mat-mt">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Rác thải nhựa &amp; Môi trường</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">2. Ô nhiễm rác thải nhựa &amp; Giải pháp</span>
+                  <button class="zoom-btn" data-zoom="mat-mt">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Tác hại:</strong> Nhựa tổng hợp mất hàng trăm năm mới phân hủy; chôn lấp làm suy thoái đất; đốt tự phát sinh khí độc (HCl, CO, dioxin); vỡ vụn thành <strong>vi nhựa</strong> xâm nhập chuỗi thức ăn.</li>
+                  <li><strong>Giải pháp 3R:</strong> Tiết giảm (Reduce – hạn chế nhựa dùng 1 lần), Tái sử dụng (Reuse – túi vải, bình nước cá nhân), Tái chế (Recycle – phân loại rác tại nguồn theo mã nhựa 1–7).</li>
+                  <li><strong>Xu hướng xanh:</strong> Dùng nhựa <strong>phân hủy sinh học</strong> (PLA, nhựa gốc tinh bột) và vật liệu tự nhiên (tre, giấy, cỏ bàng).</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh CD)</option>
+                      <option value="30">30 câu (+ôn nhánh CD)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="mat-mt">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: TƠ, CAO SU & KEO DÁN -->
+      <section class="branch-col" data-branch="vl">
+        <div class="branch-pill" data-branch-toggle="vl" role="button" tabindex="0" title="Nhấp để thu gọn/mở rộng nhánh Tơ, Cao su & Keo dán">
+          <div class="b-title">3. Tơ, Cao su &amp; Keo dán</div>
+          <div class="b-sub">Polyamide · Polyisoprene · Epoxy</div>
+        </div>
+
+        <div class="sub-tree">
+          <!-- 3.1 -->
+          <div class="node-item" data-node="mat-to">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Tơ</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Vật liệu Tơ</span>
+                  <button class="zoom-btn" data-zoom="mat-to">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Đặc điểm:</strong> Polymer mạch không phân nhánh, xếp song song, hình sợi dài và mảnh.</li>
+                  <li><strong>1. Tơ tự nhiên:</strong> Bông (cellulose), len lông cừu &amp; tơ tằm (protein) — thấm hút tốt, thoáng mát.</li>
+                  <li><strong>2. Tơ bán tổng hợp (nhân tạo):</strong> <strong>Tơ visco</strong> và <strong>tơ cellulose acetate</strong> (chế biến từ cellulose).</li>
+                  <li><strong>3. Tơ tổng hợp:</strong>
+                    <br>• <em>Tơ polyamide</em> (nhóm –CO–NH–): <strong>Tơ capron (nylon-6)</strong>, <strong>tơ nylon-6,6</strong> (kém bền trong acid/kiềm mạnh).
+                    <br>• <em>Tơ nitron (olon)</em>: Trùng hợp CH<sub>2</sub>=CH–CN — giữ nhiệt tốt, may áo ấm.
+                  </li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 3)</option>
+                      <option value="30">30 câu (+ôn nhánh 3)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="mat-to">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.2 -->
+          <div class="node-item" data-node="mat-cs">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Cao su</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Vật liệu Cao su</span>
+                  <button class="zoom-btn" data-zoom="mat-cs">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Cao su thiên nhiên:</strong> Polymer của <strong>isoprene</strong> (cấu hình <em>cis</em>), không tan trong nước, tan trong xăng/benzene, còn nối đôi C=C nên cộng được H<sub>2</sub>, Br<sub>2</sub>, HCl.</li>
+                  <li><strong>Lưu hóa cao su:</strong> Đun với lưu huỳnh (S) tạo cầu nối <strong>–S–S–</strong> thành mạng không gian → tăng độ đàn hồi, bền cơ học, chịu nhiệt, lâu mài mòn.</li>
+                  <li><strong>Cao su tổng hợp:</strong>
+                    <br>• <strong>Buna:</strong> Trùng hợp buta-1,3-diene.
+                    <br>• <strong>Buna-S:</strong> Đồng trùng hợp buta-1,3-diene + <strong>styrene</strong> (làm lốp xe).
+                    <br>• <strong>Buna-N:</strong> Đồng trùng hợp buta-1,3-diene + <strong>acrylonitrile</strong> (chống dầu tốt).
+                    <br>• <strong>Isoprene &amp; Chloroprene:</strong> Chống dầu, chịu nhiệt.
+                  </li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 3)</option>
+                      <option value="30">30 câu (+ôn nhánh 3)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="mat-cs">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3 -->
+          <div class="node-item" data-node="mat-keo">
+            <button class="sub-pill" aria-expanded="false">
+              <span class="pill-label">Keo dán tổng hợp</span>
+              <span class="chev">▼</span>
+            </button>
+            <div class="drawer">
+              <div class="drawer-inner">
+                <div class="drawer-top">
+                  <span class="drawer-tag">3. Keo dán tổng hợp</span>
+                  <button class="zoom-btn" data-zoom="mat-keo">Phóng to ⤢</button>
+                </div>
+                <ul class="d-list">
+                  <li><strong>Khái niệm:</strong> Kết dính bề mặt hai vật liệu rắn mà không làm biến đổi bản chất của chúng.</li>
+                  <li><strong>1. Nhựa vá săm:</strong> Dung dịch keo của cao su trong dung môi hữu cơ (toluene, xăng...). Dung môi bay hơi để lại lớp cao su dính chặt.</li>
+                  <li><strong>2. Keo dán epoxy (keo 2 thành phần AB):</strong> Gồm nhựa chứa nhóm epoxy + chất đóng rắn (amine) → đóng rắn tạo mạng không gian siêu bền (dán kim loại, gỗ, kính, composite).</li>
+                  <li><strong>3. Keo poly(urea-formaldehyde):</strong> Trùng ngưng urea + formaldehyde (thêm chất đóng rắn) — dùng phổ biến trong dán gỗ ván ép, gỗ công nghiệp.</li>
+                </ul>
+                <div class="practice-bar">
+                  <span class="p-label">📝 Luyện tập mục này:</span>
+                  <div class="practice-controls">
+                    <select class="q-count-select">
+                      <option value="10" selected>10 câu</option>
+                      <option value="15">15 câu</option>
+                      <option value="20">20 câu (+ôn nhánh 3)</option>
+                      <option value="30">30 câu (+ôn nhánh 3)</option>
+                    </select>
+                    <button class="start-quiz-btn" data-quiz-topic="mat-keo">Làm bài</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <p class="footer-hint">💡 Nhấp vào từng ô trên sơ đồ để xem kiến thức &amp; chọn số câu luyện tập (10–30 câu, mức độ Biết &amp; Hiểu) ngay bên dưới mỗi mục.</p>
+  </main>
+
+  <!-- Zoom Modal (for presenting theory fullscreen) -->
+  <div class="modal-backdrop" id="zoomModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="zoomTitle">Chi tiết</div>
+        </div>
+        <button class="modal-close" id="zoomClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="zoomBody"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal (fullscreen + in-modal confirm) -->
+  <div class="modal-backdrop" id="quizModal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="position: relative;">
+      <div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true">
+        <div class="confirm-card">
+          <h3>Xác nhận nộp bài</h3>
+          <p id="confirmText"></p>
+          <div class="confirm-actions">
+            <button class="btn-secondary" id="confirmCancel">Làm tiếp</button>
+            <button class="btn-primary" id="confirmOk">Vẫn nộp bài</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="quizTitle">Luyện tập</div>
+          <div class="modal-subtitle" id="quizSubtitle">Mức độ: Nhận biết &amp; Thông hiểu</div>
+        </div>
+        <button class="modal-close" id="quizClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+      <div class="modal-footer" id="quizFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_BANKS = {"poly-kn": {"title": "1.1. Khái niệm, Danh pháp & Vật lí Polymer", "questions": [{"q": "Polymer là những hợp chất có phân tử khối rất lớn do nhiều đơn vị nhỏ liên kết với nhau tạo nên. Các đơn vị nhỏ lặp đi lặp lại trong mạch polymer gọi là", "opts": ["Mắt xích", "Monomer", "Isomer", "Micelle"], "ans": 0, "exp": "Các đơn vị nhỏ lặp đi lặp lại trong phân tử polymer gọi là mắt xích; còn các phân tử nhỏ ban đầu tham gia phản ứng tạo polymer gọi là monomer."}, {"q": "Trong công thức của polyethylene (–CH₂–CH₂–)ₙ, giá trị n được gọi là", "opts": ["Hệ số polymer hóa (độ polymer hóa)", "Số lượng nguyên tử carbon", "Bậc của polymer", "Hóa trị của monomer"], "ans": 0, "exp": "Giá trị n là số lượng mắt xích trong một phân tử polymer, gọi là hệ số polymer hóa (hay độ polymer hóa)."}, {"q": "Công thức một mắt xích của polyethylene (PE) là", "opts": ["–CH₂–CH₂–", "–CH₂–CHCl–", "–CH₂–CH(CH₃)–", "–CF₂–CF₂–"], "ans": 0, "exp": "Polyethylene được trùng hợp từ ethylene (CH₂=CH₂) nên mắt xích là –CH₂–CH₂–."}, {"q": "Tên gọi của polymer có công thức (–CH₂–CHCl–)ₙ là", "opts": ["Poly(vinyl chloride) (PVC)", "Polyethylene (PE)", "Polypropylene (PP)", "Polystyrene (PS)"], "ans": 0, "exp": "Monomer là vinyl chloride (CH₂=CHCl) → thêm tiền tố 'poly' (có dấu ngoặc đơn vì tên monomer gồm 2 từ) → poly(vinyl chloride)."}, {"q": "Polymer nào sau đây có tên gọi KHÔNG cần dùng dấu ngoặc đơn quanh tên monomer theo quy tắc danh pháp?", "opts": ["Polyethylene", "Poly(vinyl chloride)", "Poly(methyl methacrylate)", "Poly(vinyl acetate)"], "ans": 0, "exp": "Khi tên monomer chỉ gồm 1 từ (ethylene, propylene, styrene...) thì viết liền không cần ngoặc đơn; từ 2 từ trở lên đặt trong dấu ngoặc đơn."}, {"q": "Polymer nào sau đây thuộc loại polymer THIÊN NHIÊN?", "opts": ["Tinh bột, cellulose, tơ tằm, cao su thiên nhiên", "Polyethylene (PE), PVC", "Tơ visco, tơ cellulose acetate", "Tơ nylon-6,6, cao su buna"], "ans": 0, "exp": "Tinh bột, cellulose, tơ tằm, len, cao su thiên nhiên có sẵn trong tự nhiên nên là polymer thiên nhiên."}, {"q": "Polymer nào sau đây thuộc loại polymer BÁN TỔNG HỢP (nhân tạo)?", "opts": ["Tơ visco và tơ cellulose acetate", "Polyethylene và polypropylene", "Tinh bột và tơ tằm", "Cao su buna và tơ nitron"], "ans": 0, "exp": "Polymer bán tổng hợp được chế biến hóa học từ polymer thiên nhiên (như cellulose → tơ visco, tơ cellulose acetate)."}, {"q": "Polymer nào sau đây có cấu trúc mạch PHÂN NHÁNH?", "opts": ["Amylopectin và glycogen", "Polyethylene (PE) và PVC", "Nhựa bakelite và cao su lưu hóa", "Cellulose và amylose"], "ans": 0, "exp": "Amylopectin và glycogen có mạch phân nhánh; PE, PVC, cellulose, amylose mạch không phân nhánh; bakelite và cao su lưu hóa có mạch mạng không gian."}, {"q": "Polymer nào sau đây có cấu trúc mạng KHÔNG GIAN?", "opts": ["Cao su lưu hóa và nhựa bakelite", "Amylopectin và glycogen", "Polyethylene và polystyrene", "Amylose và cellulose"], "ans": 0, "exp": "Cao su lưu hóa (có cầu nối –S–S–) và nhựa bakelite (nhựa rezit) có các mạch polymer nối ngang tạo cấu trúc mạng không gian rất bền."}, {"q": "Ở điều kiện thường, đặc điểm chung về trạng thái và nhiệt độ nóng chảy của đa số polymer là", "opts": ["Chất rắn, không bay hơi, không có nhiệt độ nóng chảy xác định (nóng chảy trong một khoảng nhiệt độ)", "Chất lỏng dễ bay hơi, sôi ở nhiệt độ xác định", "Chất khí không màu, tan vô hạn trong nước", "Chất rắn nóng chảy ở một nhiệt độ duy nhất cực kỳ chính xác"], "ans": 0, "exp": "Vì polymer là hỗn hợp của nhiều phân tử có hệ số n khác nhau nên chúng là chất rắn, không bay hơi và nóng chảy trong một khoảng nhiệt độ rộng."}, {"q": "Polymer nhiệt dẻo (như PE, PP, PVC) có đặc điểm nào sau đây khi đun nóng?", "opts": ["Nóng chảy tạo chất lỏng nhớt, để nguội lại rắn nên có thể tái chế nhiều lần", "Không nóng chảy mà bị phân hủy ngay thành than", "Bay hơi hoàn toàn thành khí", "Tan hoàn toàn vào nước lạnh"], "ans": 0, "exp": "Polymer nhiệt dẻo mềm ra và chảy lỏng khi đun nóng, đóng rắn lại khi nguội nên có thể đúc lại và tái chế."}, {"q": "Polymer nhiệt rắn (như nhựa bakelite) có đặc điểm nào khi đun nóng?", "opts": ["Không nóng chảy mà bị phân hủy bởi nhiệt (rất khó tái chế)", "Dễ dàng nóng chảy ở 50 °C", "Tan tốt trong nước nóng", "Có tính đàn hồi như cao su"], "ans": 0, "exp": "Polymer nhiệt rắn có cấu trúc mạng không gian bền vững nên không nóng chảy khi đun nóng mà bị phân hủy ở nhiệt độ cao."}, {"q": "Tính tan của đa số các polymer trong nước và các dung môi thông thường là", "opts": ["Hầu hết không tan trong nước và các dung môi thông thường", "Tan vô hạn trong nước lạnh", "Tan rất tốt trong nước nóng", "Chỉ tan trong dung dịch NaCl"], "ans": 0, "exp": "Do phân tử khối rất lớn, đa số polymer không tan trong nước và dung môi thông thường; một số ít chỉ tan trong dung môi hữu cơ thích hợp."}, {"q": "Chất nào sau đây KHÔNG phải là polymer?", "opts": ["Saccharose (C₁₂H₂₂O₁₁)", "Tinh bột ((C₆H₁₀O₅)ₙ)", "Polyethylene (PE)", "Cellulose"], "ans": 0, "exp": "Saccharose là disaccharide (M = 342), phân tử khối nhỏ, không phải hợp chất cao phân tử (polymer)."}, {"q": "Phát biểu nào sau đây SAI về đại cương polymer?", "opts": ["Mọi polymer đều có nhiệt độ nóng chảy xác định rõ ràng", "Hầu hết polymer là chất rắn, không bay hơi", "Nhiều polymer có tính cách điện, cách nhiệt tốt", "Monomer là phân tử nhỏ ban đầu dùng để tổng hợp polymer"], "ans": 0, "exp": "Polymer là hỗn hợp gồm các mạch có chiều dài n khác nhau nên không có nhiệt độ nóng chảy xác định mà nóng chảy trong một khoảng nhiệt độ."}]}, "poly-hh": {"title": "1.2. Tính chất hóa học của Polymer", "questions": [{"q": "Tính chất hóa học của polymer được chia thành 3 loại phản ứng chính nào sau đây?", "opts": ["Phản ứng cắt mạch, phản ứng giữ nguyên mạch và phản ứng tăng mạch", "Phản ứng tráng bạc, phản ứng este hóa và phản ứng cộng", "Phản ứng trung hòa, phản ứng trao đổi và phản ứng cháy", "Phản ứng điện phân, phản ứng nhiệt phân và phản ứng oxi hóa"], "ans": 0, "exp": "Các phản ứng hóa học của polymer gồm 3 nhóm: cắt mạch (giảm n), giữ nguyên mạch (không đổi n) và tăng mạch (tăng n/nối ngang)."}, {"q": "Phản ứng thủy phân tinh bột, cellulose thành glucose hoặc thủy phân protein thành α-amino acid thuộc loại phản ứng nào của polymer?", "opts": ["Phản ứng cắt mạch polymer", "Phản ứng giữ nguyên mạch polymer", "Phản ứng tăng mạch polymer", "Phản ứng trùng hợp"], "ans": 0, "exp": "Phản ứng thủy phân cắt đứt các liên kết trong mạch chính làm giảm chiều dài mạch polymer → phản ứng cắt mạch."}, {"q": "Phản ứng nhiệt phân polystyrene (PS) ở nhiệt độ thích hợp thu lại monomer styrene (CH₂=CH–C₆H₅) gọi là phản ứng gì?", "opts": ["Phản ứng cắt mạch (giải trùng hợp / depolymer hóa)", "Phản ứng tăng mạch", "Phản ứng giữ nguyên mạch", "Phản ứng lưu hóa"], "ans": 0, "exp": "Đun nóng một số polymer (như PS, PMMA) cắt đứt mạch chính thành các phân tử monomer ban đầu gọi là phản ứng giải trùng hợp (thuộc nhóm cắt mạch)."}, {"q": "Quá trình lưu hóa cao su (đun nóng cao su với lưu huỳnh tạo cầu nối –S–S– giữa các mạch polymer) thuộc loại phản ứng nào?", "opts": ["Phản ứng tăng mạch polymer (khâu mạch)", "Phản ứng cắt mạch polymer", "Phản ứng giữ nguyên mạch polymer", "Phản ứng thủy phân"], "ans": 0, "exp": "Lưu hóa tạo các cầu nối disulfide (–S–S–) nối các mạch cao su lại thành mạng không gian → phản ứng tăng mạch (khâu mạch)."}, {"q": "Phản ứng thủy phân nhóm ester trong poly(vinyl acetate) bằng dung dịch NaOH tạo poly(vinyl alcohol) thuộc loại phản ứng nào?", "opts": ["Phản ứng giữ nguyên mạch polymer", "Phản ứng cắt mạch polymer", "Phản ứng tăng mạch polymer", "Phản ứng giải trùng hợp"], "ans": 0, "exp": "Phản ứng chỉ xảy ra ở nhóm thế nhánh (–OCOCH₃ → –OH), mạch chính carbon (–CH₂–CH–)ₙ không bị cắt đứt → phản ứng giữ nguyên mạch."}, {"q": "Phản ứng cộng HCl hoặc Cl₂ vào liên kết đôi C=C trong mạch cao su thiên nhiên (polyisoprene) thuộc loại phản ứng nào?", "opts": ["Phản ứng giữ nguyên mạch polymer", "Phản ứng cắt mạch polymer", "Phản ứng tăng mạch polymer", "Phản ứng trùng ngưng"], "ans": 0, "exp": "Cộng vào nối đôi C=C làm mất liên kết π nhưng không cắt đứt khung mạch chính carbon nên là phản ứng giữ nguyên mạch."}, {"q": "Phản ứng của cellulose với HNO₃ đặc (xúc tác H₂SO₄ đặc) tạo cellulose trinitrate thuộc loại phản ứng nào của polymer?", "opts": ["Phản ứng giữ nguyên mạch polymer", "Phản ứng cắt mạch polymer", "Phản ứng tăng mạch polymer", "Phản ứng cộng hợp"], "ans": 0, "exp": "Chỉ các nhóm –OH nhánh phản ứng thành –ONO₂, mạch chính gồm n mắt xích vẫn giữ nguyên."}, {"q": "Polymer nào sau đây dễ bị CẮT MẠCH bởi phản ứng thủy phân trong môi trường acid hoặc kiềm?", "opts": ["Tinh bột, cellulose, protein, tơ nylon-6,6", "Polyethylene (PE)", "Polypropylene (PP)", "Polystyrene (PS)"], "ans": 0, "exp": "Các polymer có nhóm chức dị nguyên tố trên mạch chính (như liên kết glycoside, liên kết amide –CO–NH–, liên kết ester) dễ bị thủy phân cắt mạch."}, {"q": "Vì sao polyethylene (PE) và polypropylene (PP) rất bền hóa học, KHÔNG bị thủy phân trong nước hay môi trường acid/kiềm thông thường?", "opts": ["Vì mạch chính chỉ gồm các liên kết đơn C–C rất bền, không có nhóm chức dễ bị thủy phân", "Vì PE tan hoàn toàn trong nước", "Vì PE có chứa nhiều liên kết peptide", "Vì PE có phân tử khối rất nhỏ"], "ans": 0, "exp": "Mạch chính của PE, PP chỉ có liên kết C–C bền vững (tương tự alkane) nên không bị thủy phân — đây cũng là lý do rác thải nhựa PE rất khó phân hủy."}, {"q": "Khi đun nóng nhựa novolac với chất đóng rắn tạo nhựa bakelite (cấu trúc mạng không gian), quá trình này thuộc loại phản ứng nào?", "opts": ["Phản ứng tăng mạch polymer", "Phản ứng cắt mạch polymer", "Phản ứng giữ nguyên mạch polymer", "Phản ứng thủy phân"], "ans": 0, "exp": "Các mạch thẳng novolac nối ngang với nhau tạo mạng không gian bakelite → phản ứng tăng mạch."}, {"q": "Thủy phân hoàn toàn tơ capron (polycaproamide) trong dung dịch HCl đun nóng sẽ xảy ra hiện tượng gì?", "opts": ["Mạch polymer bị cắt đứt tạo muối của ε-aminocaproic acid", "Mạch polymer được giữ nguyên", "Mạch polymer nối dài thêm", "Không có phản ứng xảy ra"], "ans": 0, "exp": "Tơ capron có các liên kết amide (–CO–NH–) trên mạch chính nên bị thủy phân cắt mạch trong môi trường acid mạnh hoặc kiềm mạnh."}, {"q": "Mục đích chính của phản ứng tăng mạch (lưu hóa) đối với cao su là gì?", "opts": ["Tăng độ đàn hồi, độ bền cơ học, chịu nhiệt và lâu mài mòn hơn", "Làm cao su mềm nhão và dễ tan trong xăng hơn", "Chuyển cao su thành chất lỏng", "Giảm phân tử khối của cao su"], "ans": 0, "exp": "Cầu nối –S–S– tạo mạng không gian giúp cao su lưu hóa đàn hồi tốt hơn, chịu nhiệt, bền cơ học và khó bị hòa tan trong dung môi hơn."}, {"q": "Phản ứng chlorine hóa PVC (tác dụng với khí Cl₂) để tạo tơ clorin là loại phản ứng nào?", "opts": ["Phản ứng giữ nguyên mạch polymer", "Phản ứng cắt mạch polymer", "Phản ứng tăng mạch polymer", "Phản ứng trùng ngưng"], "ans": 0, "exp": "Phản ứng thế nguyên tử H bằng nguyên tử Cl trên mạch carbon mà không làm đứt mạch chính → giữ nguyên mạch."}, {"q": "Cho dãy các polymer: tinh bột, polyethylene, nylon-6,6, cellulose. Số polymer có thể tham gia phản ứng thủy phân cắt mạch là", "opts": ["3 (tinh bột, nylon-6,6, cellulose)", "1", "2", "4"], "ans": 0, "exp": "Tinh bột, cellulose (liên kết glycoside) và nylon-6,6 (liên kết amide) bị thủy phân cắt mạch; PE thì không."}, {"q": "Phản ứng cắt mạch polymer có ứng dụng thực tiễn quan trọng nào trong bảo vệ môi trường?", "opts": ["Tái chế hóa học rác thải nhựa (nhiệt phân/thủy phân thu lại monomer hoặc nhiên liệu)", "Làm tăng lượng rác thải nhựa khó phân hủy", "Biến nhựa thành kim loại nặng", "Không có ứng dụng thực tiễn nào"], "ans": 0, "exp": "Phản ứng cắt mạch (như nhiệt phân, giải trùng hợp) giúp tái chế rác thải nhựa thành monomer ban đầu để tổng hợp nhựa mới."}]}, "poly-dc": {"title": "1.3. Phản ứng Trùng hợp & Trùng ngưng", "questions": [{"q": "Phản ứng trùng hợp là quá trình kết hợp nhiều phân tử nhỏ (monomer) giống nhau hay tương tự nhau thành phân tử lớn (polymer) và", "opts": ["Không giải phóng phân tử nhỏ nào (tổng khối lượng monomer = khối lượng polymer)", "Luôn giải phóng phân tử nhỏ như H₂O", "Luôn giải phóng khí CO₂", "Chỉ xảy ra với amino acid"], "ans": 0, "exp": "Trùng hợp là phản ứng cộng liên tiếp các monomer nên không tạo sản phẩm phụ (khác với trùng ngưng có tách phân tử nhỏ như H₂O)."}, {"q": "Điều kiện cần về cấu tạo của monomer để tham gia phản ứng TRÙNG HỢP là phân tử phải có", "opts": ["Liên kết bội (C=C, C≡C) hoặc vòng kém bền có thể mở ra", "Ít nhất hai nhóm chức có khả năng phản ứng (như –NH₂, –COOH, –OH)", "Chỉ có liên kết đơn C–C mạch hở", "Phải chứa vòng benzene"], "ans": 0, "exp": "Monomer trùng hợp cần có liên kết bội (như CH₂=CH₂, CH₂=CHCl...) hoặc vòng kém bền (như caprolactam)."}, {"q": "Phản ứng trùng ngưng là quá trình kết hợp nhiều phân tử nhỏ (monomer) thành polymer đồng thời", "opts": ["Giải phóng các phân tử nhỏ khác (thường là H₂O)", "Không giải phóng bất kỳ phân tử nhỏ nào", "Chỉ xảy ra ở nhiệt độ dưới 0 °C", "Luôn cần liên kết đôi C=C"], "ans": 0, "exp": "Trùng ngưng luôn kèm theo việc tách ra các phân tử nhỏ (phổ biến nhất là H₂O)."}, {"q": "Điều kiện cần về cấu tạo của monomer để tham gia phản ứng TRÙNG NGƯNG là phân tử phải có", "opts": ["Ít nhất hai nhóm chức có khả năng phản ứng tạo liên kết với nhau", "Liên kết đôi C=C", "Chỉ 1 nhóm –OH duy nhất", "Không có nhóm chức nào"], "ans": 0, "exp": "Monomer trùng ngưng phải có ít nhất 2 nhóm chức phản ứng được với nhau (ví dụ: diacid + diamine, diacid + diol, hoặc amino acid)."}, {"q": "Polymer nào sau đây được tổng hợp bằng phản ứng TRÙNG HỢP?", "opts": ["Polyethylene (PE), PVC, polypropylene (PP), polystyrene (PS)", "Nylon-6,6", "Poly(ethylene terephthalate) (PET)", "Nhựa phenol-formaldehyde (PPF)"], "ans": 0, "exp": "PE, PP, PVC, PS, PMMA, cao su buna đều điều chế bằng phản ứng trùng hợp các monomer có nối đôi C=C."}, {"q": "Polymer nào sau đây được tổng hợp bằng phản ứng TRÙNG NGƯNG?", "opts": ["Nylon-6,6 (từ hexamethylenediamine và adipic acid)", "Polyethylene (PE)", "Poly(vinyl chloride) (PVC)", "Polystyrene (PS)"], "ans": 0, "exp": "Nylon-6,6 điều chế bằng phản ứng đồng trùng ngưng giữa H₂N[CH₂]₆NH₂ và HOOC[CH₂]₄COOH, giải phóng H₂O."}, {"q": "Monomer dùng để trùng hợp tạo ra poly(vinyl chloride) (PVC) là", "opts": ["CH₂=CHCl (vinyl chloride)", "CH₂=CH₂ (ethylene)", "CH₂=CH–CH₃ (propylene)", "CH₂=CH–C₆H₅ (styrene)"], "ans": 0, "exp": "nCH₂=CHCl → (–CH₂–CHCl–)ₙ (PVC)."}, {"q": "Monomer dùng để trùng hợp tạo ra polypropylene (PP) là", "opts": ["CH₂=CH–CH₃ (propylene / propene)", "CH₂=CH₂ (ethylene)", "CH₂=CHCl", "CH₂=CH–CN"], "ans": 0, "exp": "Trùng hợp propene (CH₂=CH–CH₃) tạo polypropylene (–CH₂–CH(CH₃)–)ₙ."}, {"q": "Monomer dùng để trùng hợp tạo ra polystyrene (PS) là", "opts": ["C₆H₅–CH=CH₂ (styrene)", "CH₂=CH₂ (ethylene)", "CH₂=CH–CN (acrylonitrile)", "CH₂=CH–CH=CH₂ (buta-1,3-diene)"], "ans": 0, "exp": "Trùng hợp styrene (C₆H₅–CH=CH₂) thu được polystyrene (–CH₂–CH(C₆H₅)–)ₙ."}, {"q": "Monomer nào sau đây tham gia phản ứng trùng hợp tạo ra tơ nitron (hay tơ olon)?", "opts": ["CH₂=CH–CN (acrylonitrile)", "CH₂=CHCl (vinyl chloride)", "CH₂=CH₂ (ethylene)", "H₂N–[CH₂]₅–COOH"], "ans": 0, "exp": "Trùng hợp acrylonitrile (CH₂=CH–CN) tạo polyacrylonitrile (–CH₂–CH(CN)–)ₙ dùng kéo tơ nitron (olon)."}, {"q": "Poly(methyl methacrylate) (PMMA – thủy tinh hữu cơ) được điều chế bằng phản ứng nào?", "opts": ["Trùng hợp methyl methacrylate", "Trùng ngưng methyl methacrylate", "Xà phòng hóa", "Thủy phân tinh bột"], "ans": 0, "exp": "Methyl methacrylate CH₂=C(CH₃)COOCH₃ có nối đôi C=C nên tham gia phản ứng trùng hợp tạo PMMA."}, {"q": "Polymer nào sau đây có thể được tổng hợp bằng CẢ phản ứng trùng hợp (mở vòng caprolactam) LẪN phản ứng trùng ngưng (ε-aminocaproic acid)?", "opts": ["Nylon-6 (tơ capron / polycaproamide)", "Polyethylene (PE)", "Nylon-6,6", "Polystyrene (PS)"], "ans": 0, "exp": "Nylon-6 (–NH–[CH₂]₅–CO–)ₙ có thể điều chế bằng trùng hợp mở vòng caprolactam hoặc trùng ngưng H₂N–[CH₂]₅–COOH."}, {"q": "Cặp monomer nào sau đây tham gia phản ứng trùng ngưng tạo tơ nylon-6,6?", "opts": ["Hexamethylenediamine (H₂N[CH₂]₆NH₂) và adipic acid (HOOC[CH₂]₄COOH)", "Ethylene glycol và terephthalic acid", "Buta-1,3-diene và styrene", "Phenol và formaldehyde"], "ans": 0, "exp": "Cả hai monomer đều có 6 nguyên tử carbon (hexamethylenediamine 6 C và adipic acid 6 C) → trùng ngưng tạo nylon-6,6."}, {"q": "Cặp monomer nào sau đây tham gia phản ứng trùng ngưng tạo nhựa poly(phenol-formaldehyde) (PPF)?", "opts": ["Phenol và formaldehyde", "Ethylene và vinyl chloride", "Adipic acid và hexamethylenediamine", "Styrene và buta-1,3-diene"], "ans": 0, "exp": "Phenol (C₆H₅OH) trùng ngưng với formaldehyde (HCHO) tạo nhựa poly(phenol-formaldehyde) (PPF)."}, {"q": "Dãy nào sau đây chỉ gồm các polymer được điều chế bằng phản ứng TRÙNG HỢP?", "opts": ["PE, PP, PVC, PS, PMMA", "PE, PVC, nylon-6,6", "Nylon-6,6, PPF, tinh bột", "PVC, cellulose, cao su thiên nhiên"], "ans": 0, "exp": "PE, PP, PVC, PS, PMMA đều được tổng hợp bằng phản ứng trùng hợp các monomer có nối đôi C=C."}]}, "mat-cd": {"title": "2.1. Chất dẻo & Các loại nhựa phổ biến", "questions": [{"q": "Chất dẻo là những vật liệu polymer có tính chất nổi bật nào sau đây?", "opts": ["Tính dẻo (bị biến dạng khi chịu tác dụng của nhiệt, áp lực và vẫn giữ nguyên biến dạng đó khi thôi tác dụng)", "Tính đàn hồi rất cao như dây chun", "Tính dẫn điện rất tốt như đồng", "Dễ tan trong nước lạnh"], "ans": 0, "exp": "Tính dẻo là khả năng bị biến dạng dưới tác dụng của nhiệt/áp lực và giữ nguyên hình dạng mới sau khi bỏ lực tác dụng."}, {"q": "Thành phần cơ bản (chính) của vật liệu chất dẻo là gì?", "opts": ["Polymer (ngoài ra còn có thể thêm chất hóa dẻo, chất độn, chất màu, chất ổn định)", "Kim loại nguyên chất", "Đường saccharose", "Muối ăn NaCl"], "ans": 0, "exp": "Chất dẻo gồm thành phần chính là polymer kết hợp với các chất phụ gia (hóa dẻo, độn, tạo màu, chống oxi hóa...)."}, {"q": "Loại nhựa nào sau đây mềm, dẻo, hơi trong, được dùng rất phổ biến để làm túi nilon, màng bọc thực phẩm, chai lọ?", "opts": ["Polyethylene (PE)", "Poly(methyl methacrylate) (PMMA)", "Poly(phenol-formaldehyde) (PPF)", "Cao su lưu hóa"], "ans": 0, "exp": "PE là nhựa nhiệt dẻo mềm, bền, không độc, dùng làm túi đựng, màng bọc thực phẩm, bình chứa."}, {"q": "Loại nhựa nào sau đây thường được dùng để sản xuất ống dẫn nước, vỏ bọc dây điện, vật liệu giả da?", "opts": ["Poly(vinyl chloride) (PVC)", "Polystyrene (PS)", "PMMA", "Tinh bột"], "ans": 0, "exp": "PVC cách điện tốt, bền với hóa chất nên rất phổ biến làm ống dẫn nước, vỏ dây cáp điện, vật liệu lợp mái, giả da."}, {"q": "Loại nhựa nào sau đây có đặc tính trong suốt, cho ánh sáng truyền qua tốt (khoảng 90%), khó vỡ nên được gọi là thủy tinh hữu cơ (dùng làm kính máy bay, kính bảo hộ, biển quảng cáo)?", "opts": ["Poly(methyl methacrylate) (PMMA)", "Polyethylene (PE)", "Poly(vinyl chloride) (PVC)", "Polypropylene (PP)"], "ans": 0, "exp": "PMMA (plexiglass) trong suốt, nhẹ và khó vỡ hơn thủy tinh vô cơ nên được gọi là thủy tinh hữu cơ."}, {"q": "Loại nhựa nào sau đây cứng, chịu nhiệt tốt hơn PE, thường được dùng làm hộp đựng thực phẩm có thể dùng trong lò vi sóng, bao bì dệt, ống nhựa chịu nhiệt?", "opts": ["Polypropylene (PP)", "Polystyrene (PS)", "PVC", "PPF"], "ans": 0, "exp": "PP bền cơ học và chịu nhiệt cao hơn PE (nóng chảy ~165 °C) nên an toàn để làm hộp đựng thực phẩm, ống hút, bao tải dứa."}, {"q": "Hộp xốp đựng cơm, khay xốp cách nhiệt, vật liệu đóng gói chống sốc thường được làm từ loại nhựa nào?", "opts": ["Polystyrene (PS)", "Poly(vinyl chloride) (PVC)", "Poly(phenol-formaldehyde) (PPF)", "Tơ nylon-6,6"], "ans": 0, "exp": "Polystyrene (PS) khi tạo bọt xốp (EPS) rất nhẹ, cách nhiệt tốt nên dùng làm hộp xốp, vật liệu chống sốc (lưu ý không nên đựng thức ăn quá nóng)."}, {"q": "Nhựa poly(phenol-formaldehyde) (PPF – nhựa bakelite) là nhựa nhiệt rắn, cách điện và chịu nhiệt tốt nên thường được dùng làm gì?", "opts": ["Vỏ thiết bị điện, ổ cắm, công tắc điện, tay cầm xoong nồi", "Túi nilon siêu thị", "Màng bọc thực phẩm", "Ống hút nước uống"], "ans": 0, "exp": "PPF là nhựa nhiệt rắn, cứng, chịu nhiệt và cách điện rất tốt nên dùng làm ổ cắm điện, tay cầm nồi chảo, bảng mạch."}, {"q": "Trên đáy các chai nhựa nước uống đóng chai (nước khoáng, nước ngọt) thường có kí hiệu tái chế số 1 là loại nhựa nào?", "opts": ["PET (Poly(ethylene terephthalate))", "PVC", "PS", "PPF"], "ans": 0, "exp": "Kí hiệu số 1 là PET (PETE) — dùng làm chai nước giải khát dùng một lần."}, {"q": "Chất phụ gia thêm vào chất dẻo nhằm làm tăng tính dẻo, dễ gia công tạo hình sản phẩm được gọi là", "opts": ["Chất hóa dẻo", "Chất tẩy trắng", "Chất xúc tác sinh học", "Chất tạo bọt"], "ans": 0, "exp": "Chất hóa dẻo giúp giảm lực tương tác giữa các mạch polymer, làm tăng độ mềm dẻo và dễ đúc khuôn."}, {"q": "Loại nhựa nào sau đây khi đốt cháy sinh ra khí HCl rất độc và gây ăn mòn?", "opts": ["Poly(vinyl chloride) (PVC)", "Polyethylene (PE)", "Polypropylene (PP)", "Polystyrene (PS)"], "ans": 0, "exp": "PVC có chứa nguyên tử chlorine (–CH₂–CHCl–)ₙ nên khi cháy sinh ra khí HCl độc hại (và dioxin nếu cháy không hoàn toàn)."}, {"q": "Trong số các loại nhựa sau, loại nào là nhựa NHIỆT RẮN?", "opts": ["Poly(phenol-formaldehyde) (PPF)", "Polyethylene (PE)", "Polypropylene (PP)", "Poly(vinyl chloride) (PVC)"], "ans": 0, "exp": "PPF (nhựa bakelite) là nhựa nhiệt rắn; PE, PP, PVC, PS, PMMA đều là nhựa nhiệt dẻo."}, {"q": "Vì sao không nên dùng hộp xốp polystyrene (PS) để đựng thức ăn đang quá nóng (trên 70–80 °C) hoặc nhiều dầu mỡ sôi?", "opts": ["Nhiệt độ cao làm hộp xốp biến dạng và có thể giải phóng monomer styrene độc hại lẫn vào thức ăn", "Hộp xốp sẽ đông cứng thành kim loại", "Hộp xốp sẽ chuyển hóa thành tinh bột", "Hộp xốp làm thức ăn bị đóng băng"], "ans": 0, "exp": "PS chịu nhiệt kém; ở nhiệt độ cao hoặc gặp dầu nóng, nhựa PS mềm chảy và có thể thôi nhiễm styrene không tốt cho sức khỏe."}, {"q": "Chất nào sau đây KHÔNG được xếp vào nhóm chất dẻo thông dụng?", "opts": ["Tơ tằm", "PE", "PVC", "PP"], "ans": 0, "exp": "Tơ tằm là vật liệu tơ tự nhiên (protein), không phải chất dẻo."}, {"q": "Ưu điểm chung khiến chất dẻo được sử dụng rộng rãi thay thế gỗ, thủy tinh, kim loại trong nhiều lĩnh vực là", "opts": ["Nhẹ, bền, không bị gỉ sét, cách điện tốt, dễ tạo hình và giá thành rẻ", "Nặng hơn thép và dẫn điện rất tốt", "Chịu được nhiệt độ trên 1000 °C", "Tự phân hủy hoàn toàn sau 1 ngày"], "ans": 0, "exp": "Chất dẻo nhẹ, bền hóa học, không gỉ, cách điện/cách nhiệt tốt và dễ gia công thành nhiều hình dạng."}]}, "mat-comp": {"title": "2.2. Vật liệu Composite", "questions": [{"q": "Vật liệu composite là loại vật liệu được tổ hợp từ ít nhất hai loại vật liệu khác nhau nhằm mục đích gì?", "opts": ["Tạo ra vật liệu mới có tính năng vượt trội hơn hẳn so với các vật liệu thành phần ban đầu", "Làm giảm độ bền của vật liệu để dễ phá hủy", "Làm tăng khối lượng vật liệu nặng hơn kim loại", "Biến polymer thành chất lỏng"], "ans": 0, "exp": "Vật liệu composite kết hợp ưu điểm của các thành phần để tạo ra vật liệu mới nhẹ hơn, bền hơn, chịu nhiệt/chịu lực tốt hơn."}, {"q": "Thành phần cấu tạo cơ bản của một vật liệu composite gồm hai phần chính là", "opts": ["Vật liệu nền và vật liệu cốt", "Chất dẻo và nước", "Kim loại và acid", "Monomer và khí oxygen"], "ans": 0, "exp": "Vật liệu composite luôn gồm 2 thành phần chính: vật liệu nền (thường là polymer) và vật liệu cốt (dạng sợi hoặc dạng hạt)."}, {"q": "Trong vật liệu composite có nền polymer, vai trò chính của VẬT LIỆU CỐT (như sợi carbon, sợi thủy tinh, bột gỗ...) là gì?", "opts": ["Đảm bảo cho composite có các đặc tính cơ học cần thiết (tăng độ bền, độ cứng, khả năng chịu lực)", "Chỉ dùng để tạo mùi thơm cho sản phẩm", "Làm chất xúc tác hòa tan vật liệu nền", "Làm mềm vật liệu để dễ kéo dãn như cao su"], "ans": 0, "exp": "Vật liệu cốt (sợi carbon, sợi thủy tinh, hạt...) đóng vai trò chịu lực chính, tăng độ cứng và độ bền cơ học cho composite."}, {"q": "Trong vật liệu composite, vai trò chính của VẬT LIỆU NỀN (nhựa nhiệt dẻo hoặc nhựa nhiệt rắn) là gì?", "opts": ["Liên kết các vật liệu cốt lại với nhau, tạo tính thống nhất và bảo vệ cốt khỏi tác động môi trường", "Phá hủy liên kết của vật liệu cốt", "Làm tăng độ dẫn điện của sợi thủy tinh", "Tách rời các sợi cốt ra xa nhau"], "ans": 0, "exp": "Vật liệu nền bao bọc và gắn kết các thành phần cốt thành một khối thống nhất, truyền ứng suất và bảo vệ cốt."}, {"q": "Vật liệu cốt trong composite thường tồn tại ở hai dạng phổ biến nào?", "opts": ["Dạng sợi (sợi thủy tinh, sợi carbon, sợi cellulose...) và dạng hạt (bột gỗ, bột đá, hạt kim loại...)", "Dạng khí và dạng lỏng", "Chỉ có dạng chất lỏng", "Chỉ có dạng muối tan"], "ans": 0, "exp": "Vật liệu cốt được chia làm 2 dạng chính: cốt sợi (composite cốt sợi) và cốt hạt (composite cốt hạt)."}, {"q": "Loại vật liệu composite nào rất nhẹ, siêu bền, thường được dùng để chế tạo thân vỏ máy bay, tàu vũ trụ, khung xe đua, vợt tennis cao cấp?", "opts": ["Composite cốt sợi carbon", "Nhựa PE thông thường", "Hộp xốp PS", "Hồ tinh bột"], "ans": 0, "exp": "Composite nền polymer cốt sợi carbon có tỉ lệ độ bền trên khối lượng cực cao, rất nhẹ và cứng nên dùng trong hàng không vũ trụ và thể thao."}, {"q": "Bồn chứa nước, thân vỏ tàu thuyền, ca nô, ống dẫn hóa chất thường được chế tạo từ loại composite phổ biến nào sau đây?", "opts": ["Composite nền polymer cốt sợi thủy tinh", "Nhựa bakelite nguyên chất", "Giấy ép thông thường", "Cao su thiên nhiên chưa lưu hóa"], "ans": 0, "exp": "Composite cốt sợi thủy tinh (nhựa gia cường sợi thủy tinh) nhẹ, bền, không bị ăn mòn bởi nước biển và hóa chất, giá thành hợp lí."}, {"q": "Ván gỗ nhựa (sàn gỗ ngoài trời, tấm ốp tường chống ẩm mốc, mối mọt) là một ví dụ về loại composite nào?", "opts": ["Composite cốt hạt (nhựa nền kết hợp bột gỗ/mạt cưa)", "Composite kim loại nguyên chất", "Tơ nhân tạo", "Chất giặt rửa tổng hợp"], "ans": 0, "exp": "Gỗ nhựa (WPC) là composite cốt hạt gồm nhựa nhiệt dẻo (PE, PP, PVC) kết hợp bột gỗ, vừa có vẻ đẹp gỗ vừa chống nước, chống mối mọt."}, {"q": "Vật liệu nền trong các composite polymer phổ biến thường là", "opts": ["Nhựa nhiệt rắn (như epoxy, polyester không no) hoặc nhựa nhiệt dẻo (như PE, PP, PVC)", "Nước cất", "Đường glucose", "Khí nitrogen"], "ans": 0, "exp": "Polymer nhiệt rắn (epoxy, nhựa phenolic...) và polymer nhiệt dẻo đều được dùng làm vật liệu nền cho composite."}, {"q": "So với thép có cùng kích thước, composite cốt sợi carbon có ưu điểm vượt trội nào?", "opts": ["Nhẹ hơn rất nhiều, không bị gỉ sét và có độ bền kéo rất cao", "Nặng hơn thép và dễ bị gỉ trong nước mưa", "Dễ nóng chảy ở nhiệt độ phòng", "Rẻ hơn đất sét"], "ans": 0, "exp": "Sợi carbon composite nhẹ hơn thép nhiều lần, không bị ăn mòn hóa học nhưng lại cực kỳ bền chắc."}, {"q": "Loại composite nào sau đây được ứng dụng để làm mặt bàn bếp nhân tạo, bồn rửa, gạch ốp lát chống thấm và chịu lực tốt?", "opts": ["Composite cốt hạt (nền nhựa kết hợp bột đá thạch anh/bột khoáng)", "Túi nilon PE", "Sợi bông cotton", "Màng bọc thực phẩm"], "ans": 0, "exp": "Đá nhân tạo (composite nền nhựa cốt bột đá/thạch anh) cứng, đẹp, chống thấm và dễ tạo hình."}, {"q": "Khi kết hợp nhựa polymer với sợi thủy tinh thành vật liệu composite, tính chất nào sau đây KHÔNG phải là ưu điểm của nó?", "opts": ["Tự phân hủy sinh học nhanh chóng trong vài ngày", "Khối lượng riêng nhẹ", "Chống ăn mòn tốt trong môi trường nước, hóa chất", "Độ bền cơ học cao"], "ans": 0, "exp": "Composite polymer rất bền vững trước môi trường nên rất khó phân hủy sinh học và khó tái chế hơn nhựa đơn chất."}, {"q": "Trong xây dựng và giao thông, mũ bảo hiểm chất lượng cao, cản xe ô tô, cánh quạt tua-bin gió thường dùng vật liệu nào?", "opts": ["Vật liệu composite cốt sợi (sợi thủy tinh, sợi carbon, sợi aramid)", "Nhựa PS xốp nguyên chất", "Giấy bìa cứng", "Sáp ong"], "ans": 0, "exp": "Composite cốt sợi chịu va đập tốt, nhẹ và bền nên được dùng làm cánh quạt điện gió, mũ bảo hiểm, vỏ xe."}, {"q": "Trong vật liệu composite, giữa vật liệu nền và vật liệu cốt có xảy ra phản ứng hòa tan hoàn toàn vào nhau thành một chất duy nhất không?", "opts": ["Không, chúng không hòa tan vào nhau mà liên kết vật lí/bề mặt để hỗ trợ tính chất cho nhau", "Có, hòa tan thành dung dịch lỏng", "Có, phản ứng cháy thành khí", "Vật liệu cốt biến mất hoàn toàn"], "ans": 0, "exp": "Các pha thành phần trong composite vẫn giữ ranh giới riêng biệt (không hòa tan vào nhau), kết hợp lại để phát huy thế mạnh của từng pha."}, {"q": "Phát biểu nào sau đây ĐÚNG về vật liệu composite?", "opts": ["Composite gồm vật liệu nền và vật liệu cốt, có tính chất cơ lí vượt trội hơn từng vật liệu thành phần", "Composite chỉ gồm một loại polymer duy nhất", "Composite luôn nặng hơn kim loại sắt", "Composite không thể dùng trong ngành hàng không"], "ans": 0, "exp": "Composite là sự kết hợp của ít nhất hai vật liệu (nền + cốt) tạo tính năng vượt trội so với từng thành phần riêng lẻ."}]}, "mat-mt": {"title": "2.3. Rác thải nhựa & Bảo vệ môi trường", "questions": [{"q": "Nguyên nhân chính khiến rác thải nhựa (như túi nilon PE, chai nhựa PET, hộp xốp PS) gây ô nhiễm môi trường nghiêm trọng là", "opts": ["Rất bền vững, mất hàng trăm năm mới phân hủy trong tự nhiên", "Tan quá nhanh trong nước mưa", "Dễ bị vi sinh vật ăn hết sau 1 tuần", "Có mùi thơm thu hút côn trùng"], "ans": 0, "exp": "Các polymer tổng hợp có mạch C–C bền nên vi sinh vật không phân hủy được, tồn tại hàng trăm năm trong đất và đại dương."}, {"q": "Tác hại nghiêm trọng của việc ĐỐT rác thải nhựa (đặc biệt là nhựa PVC) ngoài trời một cách tự phát là gì?", "opts": ["Sinh ra nhiều khí độc hại (như HCl, CO, dioxin, furan) gây ô nhiễm không khí và ảnh hưởng sức khỏe", "Tạo ra nhiều khí oxygen làm sạch không khí", "Làm tăng độ màu mỡ của đất", "Không gây ra bất kỳ khói bụi nào"], "ans": 0, "exp": "Đốt nhựa không kiểm soát sinh khí độc (HCl từ PVC, CO, bụi mịn, hợp chất hữu cơ độc hại như dioxin) gây nguy hiểm cho hô hấp và môi trường."}, {"q": "Hạt vi nhựa (microplastics) hình thành khi rác thải nhựa bị vỡ vụn dưới tác động của nắng, gió, sóng biển gây tác hại gì?", "opts": ["Xâm nhập vào nguồn nước, chuỗi thức ăn của sinh vật biển và cuối cùng đi vào cơ thể con người", "Làm nước biển ngọt hơn", "Là nguồn vitamin thiết yếu cho cá", "Tự biến thành cát sạch vô hại"], "ans": 0, "exp": "Vi nhựa tích tụ trong sinh vật thủy sinh và đi theo chuỗi thức ăn vào cơ thể người, tiềm ẩn nhiều nguy cơ sức khỏe."}, {"q": "Nguyên tắc 3R (hoặc 4R) phổ biến trong quản lí và giảm thiểu rác thải nhựa gồm những hành động nào?", "opts": ["Tiết giảm (Reduce) – Tái sử dụng (Reuse) – Tái chế (Recycle)", "Đốt bỏ – Chôn lấp – Thải ra biển", "Mua nhiều – Dùng một lần – Vứt ngay", "Nghiền nhỏ – Rải ra đồng – Ngâm nước"], "ans": 0, "exp": "Giảm thiểu sử dụng nhựa dùng một lần (Reduce), tái sử dụng nhiều lần (Reuse) và phân loại để tái chế (Recycle) là giải pháp cốt lõi."}, {"q": "Hành động nào sau đây giúp GIẢM THIỂU rác thải nhựa hiệu quả nhất trong đời sống hằng ngày?", "opts": ["Mang theo túi vải, bình nước cá nhân và hạn chế đồ nhựa dùng một lần", "Đốt tất cả túi nilon trong vườn nhà", "Dùng nhiều ống hút nhựa và ly nhựa dùng một lần hơn", "Chôn lấp nhựa cùng với rác thực phẩm"], "ans": 0, "exp": "Thay thế nhựa dùng một lần bằng đồ dùng bền vững (túi vải, bình inox/thủy tinh) giúp cắt giảm rác thải nhựa ngay từ nguồn."}, {"q": "Loại nhựa nào sau đây là nhựa PHÂN HỦY SINH HỌC, thân thiện với môi trường hơn nhựa truyền thống?", "opts": ["Nhựa PLA (polylactic acid) hoặc nhựa làm từ tinh bột biến tính", "Nhựa PVC", "Nhựa PS", "Nhựa bakelite (PPF)"], "ans": 0, "exp": "PLA (tổng hợp từ lactic acid lên men từ tinh bột ngô/sắn) và nhựa gốc tinh bột có khả năng bị vi sinh vật phân hủy sinh học trong điều kiện thích hợp."}, {"q": "Vì sao cần phân loại rác thải nhựa riêng với rác hữu cơ (thức ăn thừa) tại nguồn?", "opts": ["Giúp nhựa sạch, dễ thu gom và nâng cao hiệu quả tái chế thành sản phẩm mới", "Để nhựa nhanh thối rữa hơn", "Để làm tăng khối lượng rác đem đi chôn lấp", "Để đốt chung cho dễ cháy"], "ans": 0, "exp": "Nhựa dính rác hữu cơ rất khó làm sạch và tốn kém khi tái chế; phân loại tại nguồn giúp quy trình tái chế hiệu quả và tiết kiệm."}, {"q": "Loại nhựa nào sau đây thường DỄ tái chế cơ học (rửa sạch, nghiền nhỏ, nấu chảy tạo hạt nhựa mới)?", "opts": ["Nhựa nhiệt dẻo (như PET, HDPE, PP)", "Nhựa nhiệt rắn (như bakelite)", "Cao su đã lưu hóa hoàn toàn", "Composite cốt sợi thủy tinh"], "ans": 0, "exp": "Nhựa nhiệt dẻo có thể nóng chảy và đúc lại nhiều lần nên dễ tái chế cơ học; nhựa nhiệt rắn không nóng chảy nên rất khó tái chế."}, {"q": "Chôn lấp túi nilon PE trực tiếp xuống đất nông nghiệp gây ra hậu quả trực tiếp nào?", "opts": ["Cản trở sự thoát nước, ngăn cản rễ cây phát triển và làm suy thoái đất", "Cung cấp phân đạm cho cây trồng", "Giúp đất tơi xốp hơn", "Tạo ra giun đất có lợi"], "ans": 0, "exp": "Túi nilon không thấm nước và không phân hủy làm bí đất, ngăn trao đổi khí và cản trở rễ cây hấp thụ dinh dưỡng."}, {"q": "Trên các sản phẩm nhựa thường in biểu tượng hình tam giác gồm 3 mũi tên với con số bên trong (từ 1 đến 7). Biểu tượng này dùng để làm gì?", "opts": ["Phân loại mã nhận diện loại nhựa giúp thu gom và tái chế đúng cách", "Cho biết số lần được phép đun sôi nhựa", "Cho biết giá tiền của sản phẩm", "Cho biết khối lượng của chai nhựa"], "ans": 0, "exp": "Mã nhận diện nhựa (1: PET, 2: HDPE, 3: PVC, 4: LDPE, 5: PP, 6: PS, 7: Khác) giúp phân loại chính xác từng loại nhựa khi tái chế."}, {"q": "Trong các mã nhựa tái chế, nhựa số 5 (PP) được đánh giá là khá an toàn để đựng thực phẩm vì", "opts": ["Chịu nhiệt tốt, bền cơ học và ít thôi nhiễm chất độc", "Có thể ăn được như tinh bột", "Tan hoàn toàn trong nước nóng", "Không thể tái chế được"], "ans": 0, "exp": "Nhựa PP (số 5) chịu nhiệt tốt, không chứa BPA, thường được dùng làm hộp đựng thực phẩm và đồ dùng nhà bếp an toàn."}, {"q": "Tái chế hóa học rác thải nhựa là phương pháp sử dụng các phản ứng hóa học (như nhiệt phân, thủy phân) để", "opts": ["Cắt mạch polymer thu hồi lại monomer hoặc tạo nhiên liệu lỏng/khí", "Rửa sạch rồi đem chôn xuống đất", "Nghiền nhựa thành bụi mịn rải ra môi trường", "Sơn màu mới lên chai nhựa cũ"], "ans": 0, "exp": "Tái chế hóa học phá vỡ mạch polymer thành monomer ban đầu hoặc dầu/khí nhiên liệu để tái sử dụng."}, {"q": "Việc sử dụng ống hút làm từ tre, cỏ bàng, gạo hoặc inox thay cho ống hút nhựa nhằm mục đích chính là", "opts": ["Giảm thiểu rác thải nhựa dùng một lần khó phân hủy", "Làm tăng lượng nhựa thải ra biển", "Tăng chi phí xử lí rác thải", "Làm nước uống ngọt hơn"], "ans": 0, "exp": "Các vật liệu tự nhiên dễ phân hủy sinh học hoặc vật liệu tái sử dụng nhiều lần giúp giảm mạnh rác thải nhựa."}, {"q": "Khi sử dụng chai nhựa PET (số 1 – chai nước suối đóng chai), khuyến cáo an toàn cho sức khỏe là", "opts": ["Chỉ nên dùng một lần, không đựng nước nóng và không tái sử dụng lâu ngày làm bình đựng nước uống", "Nên dùng để đun sôi nước trực tiếp trên bếp", "Dùng càng lâu năm càng tốt", "Dùng để đựng dầu ăn nóng"], "ans": 0, "exp": "Chai PET được thiết kế dùng một lần; tái sử dụng lâu ngày hoặc đựng nước nóng dễ làm trầy xước, tích tụ vi khuẩn và thôi nhiễm chất không tốt."}, {"q": "Biện pháp nào sau đây KHÔNG phù hợp để giải quyết vấn đề ô nhiễm rác thải nhựa?", "opts": ["Khuyến khích đốt rác thải nhựa trực tiếp ở khu dân cư", "Phát triển và sử dụng vật liệu polymer phân hủy sinh học", "Phân loại rác tại nguồn và đẩy mạnh tái chế", "Hạn chế tối đa đồ nhựa dùng một lần"], "ans": 0, "exp": "Đốt nhựa tự phát ở khu dân cư thải ra khí độc hại rất nguy hiểm cho sức khỏe cộng đồng."}]}, "mat-to": {"title": "3.1. Tơ (Tự nhiên, Bán tổng hợp, Tổng hợp)", "questions": [{"q": "Tơ là những vật liệu polymer có đặc điểm cấu tạo nào sau đây?", "opts": ["Mạch không phân nhánh, xếp song song nhau, hình sợi dài và mảnh với độ bền nhất định", "Mạch mạng không gian cứng giòn", "Mạch phân nhánh rối rắm", "Phân tử khối nhỏ, dễ tan trong nước"], "ans": 0, "exp": "Polymer dùng làm tơ phải có mạch không phân nhánh, xếp song song, tương đối bền với nhiệt và dung môi thông thường."}, {"q": "Dựa vào nguồn gốc và quy trình chế tạo, tơ được chia thành 3 nhóm chính nào?", "opts": ["Tơ tự nhiên, tơ tổng hợp và tơ bán tổng hợp (tơ nhân tạo)", "Tơ nhiệt dẻo, tơ nhiệt rắn và tơ đàn hồi", "Tơ mạch nhánh, tơ mạch vòng và tơ mạng không gian", "Tơ thực vật, tơ kim loại và tơ thủy tinh"], "ans": 0, "exp": "3 loại tơ theo nguồn gốc: tơ tự nhiên (bông, len, tơ tằm), tơ bán tổng hợp (visco, cellulose acetate) và tơ tổng hợp (nylon, nitron...)."}, {"q": "Dãy nào sau đây chỉ gồm các loại TƠ TỰ NHIÊN?", "opts": ["Bông, len lông cừu, tơ tằm", "Tơ visco, tơ tằm, bông", "Tơ nylon-6,6, tơ capron, len", "Tơ cellulose acetate, tơ nitron"], "ans": 0, "exp": "Bông (cellulose), len và tơ tằm (protein) có sẵn trong thiên nhiên nên là tơ tự nhiên."}, {"q": "Hai loại tơ tiêu biểu thuộc nhóm TƠ BÁN TỔNG HỢP (tơ nhân tạo) được chế biến từ cellulose là", "opts": ["Tơ visco và tơ cellulose acetate", "Tơ nylon-6,6 và tơ capron", "Tơ tằm và sợi bông", "Tơ nitron và tơ lapsan"], "ans": 0, "exp": "Tơ visco và tơ cellulose acetate xuất phát từ polymer thiên nhiên (cellulose) được chế biến thêm bằng phương pháp hóa học."}, {"q": "Tơ nào sau đây thuộc loại TƠ TỔNG HỢP?", "opts": ["Tơ capron (nylon-6), tơ nylon-6,6, tơ nitron (olon)", "Tơ tằm và sợi bông", "Tơ visco và len lông cừu", "Tơ cellulose acetate"], "ans": 0, "exp": "Tơ capron, tơ nylon-6,6, tơ nitron được tổng hợp hoàn toàn từ các monomer hóa học nên là tơ tổng hợp."}, {"q": "Tơ nylon-6,6 thuộc nhóm tơ polyamide vì trong mạch phân tử có chứa nhiều nhóm chức nào?", "opts": ["Nhóm amide (–CO–NH–)", "Nhóm ester (–COO–)", "Nhóm nitrile (–CN)", "Nhóm hydroxyl (–OH)"], "ans": 0, "exp": "Tơ polyamide (nylon-6, nylon-6,6) có nhiều nhóm –CO–NH– trong mạch chính."}, {"q": "Tơ nitron (còn gọi là tơ olon) dai, bền với nhiệt và giữ nhiệt tốt nên thường được dùng để dệt vải may quần áo ấm hoặc bện thành sợi len đan áo rét. Monomer tạo tơ nitron là", "opts": ["Acrylonitrile (CH₂=CH–CN)", "Vinyl chloride (CH₂=CHCl)", "Caprolactam", "Styrene"], "ans": 0, "exp": "Trùng hợp acrylonitrile (CH₂=CH–CN) tạo polyacrylonitrile dùng kéo tơ nitron (olon)."}, {"q": "Vì sao quần áo làm từ tơ polyamide (như tơ nylon-6,6, tơ capron) hoặc tơ tằm KHÔNG nên giặt bằng xà phòng có độ kiềm quá cao hoặc ngâm trong nước acid mạnh?", "opts": ["Vì nhóm –CO–NH– (amide/peptide) dễ bị thủy phân cắt mạch làm mục sợi vải", "Vì tơ sẽ trở nên quá cứng như sắt", "Vì tơ sẽ tan ngay trong nước lạnh", "Vì tơ chuyển thành cao su"], "ans": 0, "exp": "Các tơ polyamide và tơ tằm (protein) đều chứa liên kết –CO–NH– kém bền trong môi trường acid mạnh và kiềm mạnh."}, {"q": "Tơ nào sau đây được điều chế bằng phản ứng TRÙNG NGƯNG giữa hexamethylenediamine và adipic acid?", "opts": ["Tơ nylon-6,6", "Tơ nitron", "Tơ visco", "Tơ tằm"], "ans": 0, "exp": "Hexamethylenediamine (6 C) + adipic acid (6 C) → tơ nylon-6,6 + H₂O."}, {"q": "Tơ capron còn có tên gọi khác là", "opts": ["Tơ nylon-6", "Tơ nylon-6,6", "Tơ olon", "Tơ visco"], "ans": 0, "exp": "Tơ capron (polycaproamide) được tạo từ monomer 6 carbon (caprolactam hoặc ε-aminocaproic acid) nên còn gọi là tơ nylon-6."}, {"q": "Bản chất hóa học của sợi bông và tơ tằm lần lượt là", "opts": ["Cellulose và protein", "Protein và cellulose", "Tinh bột và protein", "Polyamide và polyester"], "ans": 0, "exp": "Sợi bông có bản chất cellulose (nguồn gốc thực vật); tơ tằm và len lông cừu có bản chất protein (nguồn gốc động vật)."}, {"q": "Tơ nào sau đây thuộc loại tơ tổng hợp được điều chế bằng phản ứng TRÙNG HỢP?", "opts": ["Tơ nitron (olon)", "Tơ nylon-6,6", "Tơ visco", "Tơ tằm"], "ans": 0, "exp": "Tơ nitron điều chế bằng trùng hợp acrylonitrile (CH₂=CH–CN); còn nylon-6,6 điều chế bằng trùng ngưng."}, {"q": "Tơ nào sau đây vừa thuộc nhóm tơ hóa học, vừa thuộc nhóm tơ bán tổng hợp?", "opts": ["Tơ visco", "Tơ tằm", "Tơ nylon-6,6", "Tơ nitron"], "ans": 0, "exp": "Tơ hóa học gồm 2 nhánh: tơ bán tổng hợp (visco, cellulose acetate) và tơ tổng hợp (nylon, nitron...)."}, {"q": "Ưu điểm nổi bật của vải sợi bông (cotton) và tơ tằm so với vải tơ tổng hợp (như nylon) là", "opts": ["Thấm hút mồ hôi tốt, thoáng khí, mặc mát và dễ chịu", "Không bao giờ bị nhăn", "Hoàn toàn không thấm nước", "Bền hơn thép"], "ans": 0, "exp": "Bông và tơ tằm có nhiều nhóm phân cực (–OH, –CO–NH–) hút ẩm tốt nên rất thoáng mát khi mặc."}, {"q": "Phát biểu nào sau đây SAI về tơ?", "opts": ["Tơ visco thuộc loại tơ tổng hợp hoàn toàn từ dầu mỏ", "Tơ tằm và len lông cừu là tơ tự nhiên có bản chất protein", "Tơ nylon-6,6 và tơ capron đều thuộc loại tơ polyamide", "Tơ nitron được dùng dệt vải may quần áo ấm"], "ans": 0, "exp": "Tơ visco là tơ bán tổng hợp (nhân tạo) được chế biến từ cellulose tự nhiên, không phải tơ tổng hợp hoàn toàn từ dầu mỏ."}]}, "mat-cs": {"title": "3.2. Cao su (Thiên nhiên & Tổng hợp)", "questions": [{"q": "Tính chất đặc trưng nhất của vật liệu cao su là", "opts": ["Tính đàn hồi (bị biến dạng khi chịu lực bên ngoài và trở lại hình dạng ban đầu khi thôi tác dụng lực)", "Tính dẻo không phục hồi", "Tính dẫn điện cao", "Tính tan tốt trong nước"], "ans": 0, "exp": "Cao su là vật liệu polymer có tính đàn hồi cao."}, {"q": "Cao su thiên nhiên được lấy từ mủ cây cao su có bản chất hóa học là polymer của monomer nào sau đây?", "opts": ["Isoprene (2-methylbuta-1,3-diene)", "Buta-1,3-diene", "Chloroprene", "Ethylene"], "ans": 0, "exp": "Cao su thiên nhiên là polyisoprene (–CH₂–C(CH₃)=CH–CH₂–)ₙ, các mắt xích đều ở cấu hình cis."}, {"q": "Trong phân tử cao su thiên nhiên (polyisoprene), các liên kết đôi C=C có cấu hình không gian nào?", "opts": ["Cấu hình cis", "Cấu hình trans", "Không có liên kết đôi", "Liên kết ba C≡C"], "ans": 0, "exp": "Cao su thiên nhiên có cấu hình cis (cis-polyisoprene), giúp mạch polymer cuộn xoắn lại tạo nên tính đàn hồi tuyệt vời."}, {"q": "Khi trùng hợp buta-1,3-diene (CH₂=CH–CH=CH₂) có mặt xúc tác Na (hoặc xúc tác thích hợp) thu được loại cao su tổng hợp nào?", "opts": ["Cao su buna", "Cao su isoprene", "Cao su chloroprene", "Cao su thiên nhiên"], "ans": 0, "exp": "nCH₂=CH–CH=CH₂ → (–CH₂–CH=CH–CH₂–)ₙ (polybutadiene hay cao su buna)."}, {"q": "Cao su buna-S (có tính đàn hồi cao, chống mài mòn tốt, dùng làm lốp xe) được điều chế bằng phản ứng đồng trùng hợp giữa buta-1,3-diene và chất nào?", "opts": ["Styrene (C₆H₅–CH=CH₂)", "Lưu huỳnh (S)", "Acrylonitrile (CH₂=CH–CN)", "Vinyl chloride"], "ans": 0, "exp": "Chữ 'S' trong buna-S là viết tắt của Styrene (đồng trùng hợp buta-1,3-diene với styrene), KHÔNG phải lưu huỳnh!"}, {"q": "Cao su buna-N (có tính chống dầu mỡ rất tốt, dùng làm ống dẫn dầu, gioăng cao su) được điều chế bằng phản ứng đồng trùng hợp giữa buta-1,3-diene và chất nào?", "opts": ["Acrylonitrile (CH₂=CH–CN)", "Styrene", "Khí nitrogen (N₂)", "Isoprene"], "ans": 0, "exp": "Chữ 'N' trong buna-N chỉ gốc nitrile từ acrylonitrile (CH₂=CH–CN)."}, {"q": "Cao su chloroprene (chịu dầu, chịu nhiệt, khó cháy) được điều chế bằng cách trùng hợp monomer nào?", "opts": ["Chloroprene (CH₂=CCl–CH=CH₂)", "Vinyl chloride (CH₂=CHCl)", "Isoprene", "Buta-1,3-diene"], "ans": 0, "exp": "Trùng hợp chloroprene (2-chlorobuta-1,3-diene) thu được cao su chloroprene (neoprene)."}, {"q": "Bản chất của quá trình LƯU HÓA cao su là", "opts": ["Đun nóng cao su với một lượng nhỏ lưu huỳnh (S) để tạo các cầu nối disulfide (–S–S–) nối các mạch cao su thành mạng không gian", "Thủy phân cao su bằng dung dịch H₂SO₄ loãng", "Hòa tan cao su vào xăng", "Đốt cháy cao su trong không khí"], "ans": 0, "exp": "Lưu hóa tạo cầu nối –S–S– giữa các mạch polymer giúp cao su chuyển sang cấu trúc mạng không gian."}, {"q": "So với cao su thiên nhiên chưa lưu hóa, cao su đã lưu hóa có ưu điểm gì?", "opts": ["Độ đàn hồi cao hơn, chịu nhiệt tốt hơn, bền cơ học, lâu mài mòn và khó tan trong dung môi hữu cơ hơn", "Mềm hơn và dễ chảy dính khi trời nắng", "Tan dễ dàng trong xăng và benzene", "Không còn tính đàn hồi"], "ans": 0, "exp": "Cao su lưu hóa khắc phục nhược điểm mềm dính khi nóng, giòn khi lạnh của cao su sống; dùng làm lốp xe, băng tải, đệm giảm xóc."}, {"q": "Vì sao cao su thiên nhiên và cao su buna đều có khả năng tham gia phản ứng cộng với H₂, Br₂, HCl?", "opts": ["Vì trong mạch phân tử cao su vẫn còn các liên kết đôi C=C", "Vì cao su có nhóm –COOH", "Vì cao su có nhóm –NH₂", "Vì cao su là hợp chất no hoàn toàn"], "ans": 0, "exp": "Trùng hợp kiểu 1,4 của alkadiene để lại 1 liên kết đôi C=C trong mỗi mắt xích nên cao su vẫn tham gia phản ứng cộng."}, {"q": "Tính tan của cao su thiên nhiên (chưa lưu hóa) trong nước và trong xăng/benzene là", "opts": ["Không tan trong nước, nhưng tan được trong xăng và benzene", "Tan tốt trong nước lạnh", "Không tan trong cả nước và xăng", "Tan vô hạn trong nước nóng"], "ans": 0, "exp": "Cao su thiên nhiên là hydrocarbon không phân cực nên không tan trong nước, nhưng tan trong dung môi không phân cực như xăng, benzene."}, {"q": "Loại cao su tổng hợp nào có cấu tạo hóa học gần giống nhất với cao su thiên nhiên?", "opts": ["Cao su isoprene", "Cao su buna-N", "Cao su chloroprene", "Cao su buna-S"], "ans": 0, "exp": "Cao su isoprene tổng hợp bằng cách trùng hợp isoprene tạo cis-polyisoprene có cấu trúc tương tự cao su thiên nhiên."}, {"q": "Loại cao su nào sau đây có khả năng CHỐNG DẦU MỠ tốt nhất, thường dùng làm ống dẫn xăng dầu, găng tay chịu dầu?", "opts": ["Cao su buna-N và cao su chloroprene", "Cao su thiên nhiên chưa lưu hóa", "Cao su buna thường", "Nhựa PE"], "ans": 0, "exp": "Nhờ có nhóm phân cực (–CN ở buna-N, –Cl ở chloroprene), hai loại cao su này không bị trương phồng trong dầu mỡ/xăng."}, {"q": "Cấu trúc mạch của cao su thiên nhiên (chưa lưu hóa) và cao su lưu hóa lần lượt là", "opts": ["Mạch không phân nhánh và mạch mạng không gian", "Mạch phân nhánh và mạch thẳng", "Đều là mạch mạng không gian", "Đều là mạch phân nhánh"], "ans": 0, "exp": "Cao su sống có mạch không phân nhánh; sau khi lưu hóa với lưu huỳnh tạo cầu nối –S–S– trở thành mạch mạng không gian."}, {"q": "Phát biểu nào sau đây SAI về cao su?", "opts": ["Cao su buna-S có chứa nguyên tố lưu huỳnh (S) do đồng trùng hợp buta-1,3-diene với lưu huỳnh", "Cao su thiên nhiên là polymer của isoprene", "Cao su lưu hóa có độ bền cơ học và độ đàn hồi tốt hơn cao su chưa lưu hóa", "Cao su không tan trong nước"], "ans": 0, "exp": "Chữ 'S' trong buna-S là Styrene (C₆H₅CH=CH₂), hoàn toàn không chứa lưu huỳnh."}]}, "mat-keo": {"title": "3.3. Keo dán tổng hợp", "questions": [{"q": "Keo dán là loại vật liệu có khả năng kết dính bề mặt của hai vật liệu rắn với nhau mà", "opts": ["Không làm biến đổi bản chất của các vật liệu được kết dính", "Làm nóng chảy hoàn toàn hai vật liệu thành chất lỏng", "Phản ứng hóa học phá hủy bề mặt hai vật liệu", "Chỉ dùng được cho vật liệu giấy"], "ans": 0, "exp": "Keo dán tạo lớp màng mỏng bám chắc vào hai bề mặt rắn mà vẫn giữ nguyên bản chất hóa học của các vật liệu được dán."}, {"q": "Nhựa vá săm (dùng để vá chỗ thủng của săm/ruột xe đạp, xe máy) có bản chất là gì?", "opts": ["Dung dịch keo của cao su thiên nhiên (hoặc cao su tổng hợp) hòa tan trong dung môi hữu cơ như toluene, xăng...", "Dung dịch đường saccharose đặc", "Hồ tinh bột pha nước nóng", "Dung dịch muối ăn bão hòa"], "ans": 0, "exp": "Nhựa vá săm là dung dịch keo của cao su trong dung môi hữu cơ dễ bay hơi; khi bôi lên vết thủng, dung môi bay hơi để lại lớp cao su kết dính chặt miếng vá."}, {"q": "Keo dán epoxy (thường gọi là keo hai thành phần / keo AB) gồm hai thành phần chính nào được trộn với nhau ngay trước khi sử dụng?", "opts": ["Thành phần chính (chất chứa nhóm epoxy) và chất đóng rắn (thường là các amine)", "Tinh bột và nước lạnh", "Đường glucose và giấm ăn", "Cao su và nước cất"], "ans": 0, "exp": "Keo epoxy gồm 2 tuýp: phần nhựa chứa nhóm epoxy và phần chất đóng rắn (amine). Khi trộn lại, chúng phản ứng tạo mạng không gian siêu bền."}, {"q": "Ưu điểm nổi bật của keo dán epoxy là gì?", "opts": ["Độ kết dính rất cao, chịu lực, chịu nhiệt và dán được nhiều vật liệu khác nhau (kim loại, gỗ, thủy tinh, nhựa, bê tông...)", "Chỉ dán được giấy mỏng và tan ngay trong nước", "Có thể ăn được trong thực phẩm", "Rất mềm và dễ bong khi gặp nước"], "ans": 0, "exp": "Sau khi đóng rắn tạo mạng không gian, keo epoxy cực kỳ chắc chắn, chống thấm và dán được hầu hết các loại vật liệu cứng."}, {"q": "Keo dán poly(urea-formaldehyde) được điều chế bằng phản ứng trùng ngưng giữa hai chất nào?", "opts": ["Urea ((NH₂)₂CO) và formaldehyde (HCHO)", "Phenol và ethanol", "Ethylene và styrene", "Glucose và acetic acid"], "ans": 0, "exp": "Trùng ngưng urea với formaldehyde tạo polymer poly(urea-formaldehyde) dùng làm keo dán gỗ rất phổ biến."}, {"q": "Keo dán poly(urea-formaldehyde) được sử dụng phổ biến nhất trong ngành công nghiệp nào sau đây?", "opts": ["Chế biến gỗ (dán gỗ ván ép, gỗ công nghiệp MDF, đồ nội thất)", "Sản xuất lốp xe ô tô", "Chế tạo dịch truyền y tế", "Sản xuất nước giải khát"], "ans": 0, "exp": "Keo poly(urea-formaldehyde) có độ bám dính tốt với gỗ, giá thành rẻ nên dùng chủ yếu để sản xuất ván ép và gỗ công nghiệp."}, {"q": "Trong quá trình sử dụng keo dán poly(urea-formaldehyde), người ta thường cho thêm chất đóng rắn (như NH₄Cl, oxalic acid...) nhằm mục đích gì?", "opts": ["Tạo polymer có cấu trúc mạng không gian giúp mối dán cứng chắc và bền hơn", "Làm keo loãng ra như nước", "Làm keo mất khả năng kết dính", "Tạo mùi thơm cho gỗ"], "ans": 0, "exp": "Chất đóng rắn thúc đẩy phản ứng khâu mạch tạo mạng không gian bền chắc cho mối dán."}, {"q": "Keo dán nào sau đây có cơ chế kết dính chủ yếu dựa trên sự BAY HƠI của dung môi hữu cơ (không cần trộn chất đóng rắn 2 thành phần)?", "opts": ["Nhựa vá săm", "Keo dán epoxy (keo AB)", "Keo poly(urea-formaldehyde) đóng rắn nhiệt", "Xi măng đông cứng"], "ans": 0, "exp": "Khi bôi nhựa vá săm, dung môi hữu cơ (xăng, toluene...) bay hơi nhanh để lại màng cao su dính chặt miếng vá với săm xe."}, {"q": "Vì sao khi sử dụng nhựa vá săm hoặc các loại keo dán chứa dung môi hữu cơ cần làm ở nơi thoáng khí và tránh xa nguồn lửa?", "opts": ["Vì dung môi hữu cơ dễ bay hơi, dễ cháy nổ và hít nhiều có hại cho sức khỏe", "Vì keo sẽ bị đóng băng nếu ở trong phòng", "Vì dung môi phản ứng nổ với khí nitrogen", "Vì ánh sáng mặt trời làm keo biến thành nước"], "ans": 0, "exp": "Các dung môi như toluene, xăng rất dễ bay hơi, dễ bắt lửa và có độc tính nếu hít phải trong không gian kín."}, {"q": "Vì sao keo dán epoxy phải được đựng riêng trong 2 tuýp (tuýp A và tuýp B), chỉ trộn khi cần dán?", "opts": ["Vì nếu trộn sẵn từ trước, hai thành phần sẽ phản ứng đóng rắn ngay trong tuýp khiến keo đông cứng không dùng được nữa", "Vì tuýp A là nước còn tuýp B là dầu ăn", "Để bán được nhiều tuýp hơn", "Vì hai thành phần không phản ứng với nhau"], "ans": 0, "exp": "Nhựa epoxy và chất đóng rắn phản ứng hóa học tạo mạng không gian đông cứng chỉ sau một thời gian ngắn kể từ khi trộn."}, {"q": "Chất nào sau đây KHÔNG phải là keo dán tổng hợp?", "opts": ["Hồ tinh bột", "Keo dán epoxy", "Keo dán poly(urea-formaldehyde)", "Nhựa vá săm (gốc cao su tổng hợp)"], "ans": 0, "exp": "Hồ tinh bột là keo dán có nguồn gốc tự nhiên (từ tinh bột), không phải keo dán tổng hợp."}, {"q": "Trước khi bôi keo dán lên hai bề mặt vật liệu (như dán săm xe, dán gỗ, dán kim loại), việc làm sạch bụi bẩn, dầu mỡ và đánh nhám nhẹ bề mặt nhằm mục đích gì?", "opts": ["Tăng diện tích tiếp xúc và độ bám dính chắc chắn của lớp keo lên bề mặt vật liệu", "Làm giảm độ bền của mối dán", "Để keo không tiếp xúc được với vật liệu", "Để làm thay đổi bản chất hóa học của vật liệu"], "ans": 0, "exp": "Bề mặt sạch dầu mỡ và hơi nhám giúp keo thấm ướt tốt và bám chặt vào các vi khe, tạo mối dán bền tối đa."}, {"q": "Trong ngành hàng không, đóng tàu và xây dựng, loại keo nào thường được ưu tiên dùng để dán kết cấu kim loại hoặc vật liệu composite chịu lực cao?", "opts": ["Keo dán epoxy", "Hồ tinh bột", "Nhựa vá săm xe đạp", "Nước đường đặc"], "ans": 0, "exp": "Keo epoxy có độ bền cơ học và khả năng chịu lực, chịu nhiệt vượt trội nên được dùng trong kết cấu kỹ thuật cao."}, {"q": "Nhược điểm cần lưu ý đối với sức khỏe khi sử dụng ván gỗ công nghiệp dùng keo poly(urea-formaldehyde) kém chất lượng là", "opts": ["Có thể phát thải khí formaldehyde dư gây kích ứng mắt, mũi và ảnh hưởng hô hấp", "Gỗ tự tan trong nước mưa", "Gỗ phát ra tia phóng xạ", "Gỗ dẫn điện mạnh như đồng"], "ans": 0, "exp": "Formaldehyde dư trong keo chất lượng thấp có thể bay hơi gây hại cho đường hô hấp, nên sản phẩm gỗ công nghiệp phải đạt tiêu chuẩn kiểm soát phát thải formaldehyde."}, {"q": "Phát biểu nào sau đây ĐÚNG về keo dán tổng hợp?", "opts": ["Keo dán epoxy gồm hai thành phần (nhựa epoxy và chất đóng rắn), có độ kết dính rất cao", "Nhựa vá săm là dung dịch của cao su trong nước cất", "Keo poly(urea-formaldehyde) được điều chế bằng phản ứng trùng hợp", "Keo dán làm biến đổi hoàn toàn bản chất hóa học của hai vật được dán"], "ans": 0, "exp": "Keo epoxy là keo 2 thành phần có độ bám dính cực cao; nhựa vá săm tan trong dung môi hữu cơ (không phải nước); keo urea-formaldehyde điều chế bằng trùng ngưng."}]}};
+
+    const BRANCH_TOPICS = {
+      dc: ['poly-kn', 'poly-hh', 'poly-dc'],
+      cd: ['mat-cd', 'mat-comp', 'mat-mt'],
+      vl: ['mat-to', 'mat-cs', 'mat-keo']
+    };
+
+    const rootPill = document.getElementById('rootPill');
+    const rootDrawer = document.getElementById('rootDrawer');
+    const nodeItems = document.querySelectorAll('.node-item');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const branchCols = document.querySelectorAll('.branch-col');
+    const columnsGrid = document.getElementById('columnsGrid');
+    const treeConnectors = document.getElementById('treeConnectors');
+
+    /* ================= MIND MAP INTERACTION ================= */
+    function toggleRoot() {
+      const isOpen = rootDrawer.classList.toggle('open');
+      rootPill.setAttribute('aria-expanded', isOpen);
+    }
+    rootPill.addEventListener('click', toggleRoot);
+    rootPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRoot(); }
+    });
+
+    nodeItems.forEach(item => {
+      const btn = item.querySelector('.sub-pill');
+      btn.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        nodeItems.forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            other.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (!wasOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          item.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-branch-toggle]').forEach(header => {
+      header.addEventListener('click', () => {
+        const col = header.closest('.branch-col');
+        const items = col.querySelectorAll('.node-item');
+        const anyOpen = Array.from(items).some(i => i.classList.contains('open'));
+        items.forEach(i => {
+          i.classList.toggle('open', !anyOpen);
+          i.querySelector('.sub-pill').setAttribute('aria-expanded', String(!anyOpen));
+        });
+      });
+    });
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+        if (filter === 'all') {
+          branchCols.forEach(col => col.classList.remove('hidden'));
+          columnsGrid.classList.remove('single-col');
+          treeConnectors.style.display = '';
+        } else {
+          branchCols.forEach(col => {
+            col.classList.toggle('hidden', col.dataset.branch !== filter);
+          });
+          columnsGrid.classList.add('single-col');
+          treeConnectors.style.display = 'none';
+        }
+      });
+    });
+
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      nodeItems.forEach(item => {
+        if (!item.closest('.branch-col').classList.contains('hidden')) {
+          item.classList.add('open');
+          item.querySelector('.sub-pill').setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      rootDrawer.classList.remove('open');
+      rootPill.setAttribute('aria-expanded', 'false');
+      nodeItems.forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    /* ================= ZOOM MODAL (FULLSCREEN) ================= */
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomTitle = document.getElementById('zoomTitle');
+    const zoomBody = document.getElementById('zoomBody');
+
+    function closeZoomModal() {
+      zoomModal.classList.remove('show');
+      if (document.fullscreenElement === zoomModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.querySelectorAll('.zoom-btn').forEach(zbtn => {
+      zbtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = zbtn.closest('.node-item');
+        const label = item.querySelector('.pill-label').textContent.trim();
+        const branchName = item.closest('.branch-col').querySelector('.b-title').textContent.trim();
+        const innerClone = item.querySelector('.drawer-inner').cloneNode(true);
+        const topBar = innerClone.querySelector('.drawer-top');
+        const pBar = innerClone.querySelector('.practice-bar');
+        if (topBar) topBar.remove();
+        if (pBar) pBar.remove();
+
+        zoomTitle.textContent = `${branchName} — ${label}`;
+        zoomBody.innerHTML = '';
+        innerClone.className = 'zoom-content-wrap';
+        innerClone.removeAttribute('style');
+        zoomBody.appendChild(innerClone);
+        zoomModal.classList.add('show');
+
+        if (zoomModal.requestFullscreen) {
+          zoomModal.requestFullscreen().catch(() => {});
+        } else if (zoomModal.webkitRequestFullscreen) {
+          zoomModal.webkitRequestFullscreen();
+        }
+      });
+    });
+
+    document.getElementById('zoomClose').addEventListener('click', closeZoomModal);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        if (zoomModal.classList.contains('show')) {
+          zoomModal.classList.remove('show');
+        }
+      }
+    });
+
+    /* ================= QUIZ ENGINE ================= */
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSubtitle = document.getElementById('quizSubtitle');
+    const quizBody = document.getElementById('quizBody');
+    const quizFooter = document.getElementById('quizFooter');
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    const confirmText = document.getElementById('confirmText');
+
+    let activeQuiz = {
+      topic: null,
+      count: 10,
+      questions: [],
+      userAnswers: {},
+      submitted: false
+    };
+
+    function shuffleArray(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getBranchOfTopic(topicId) {
+      for (const [b, list] of Object.entries(BRANCH_TOPICS)) {
+        if (list.includes(topicId)) return b;
+      }
+      return null;
+    }
+
+    function buildQuestionSet(topicId, desiredCount) {
+      let pool = [];
+      let label = '';
+
+      if (topicId === 'all') {
+        label = 'Tổng hợp Chương 4: Polymer';
+        Object.values(QUIZ_BANKS).forEach(bank => {
+          bank.questions.forEach(q => pool.push({ ...q, source: bank.title }));
+        });
+        pool = shuffleArray(pool).slice(0, desiredCount);
+      } else {
+        const primaryBank = QUIZ_BANKS[topicId];
+        label = primaryBank.title;
+        const primaryQs = shuffleArray(primaryBank.questions.map(q => ({ ...q, source: primaryBank.title })));
+
+        if (desiredCount <= primaryQs.length) {
+          pool = primaryQs.slice(0, desiredCount);
+        } else {
+          pool = primaryQs.slice();
+          const branch = getBranchOfTopic(topicId);
+          const siblings = (BRANCH_TOPICS[branch] || []).filter(id => id !== topicId);
+          let extra = [];
+          siblings.forEach(sibId => {
+            QUIZ_BANKS[sibId].questions.forEach(q => extra.push({ ...q, source: QUIZ_BANKS[sibId].title }));
+          });
+          extra = shuffleArray(extra);
+          const needed = desiredCount - pool.length;
+          pool = pool.concat(extra.slice(0, needed));
+        }
+      }
+
+      const prepared = pool.map((q, idx) => {
+        const indexedOpts = q.opts.map((text, i) => ({ text, isCorrect: i === q.ans }));
+        const shuffledOpts = shuffleArray(indexedOpts);
+        const newAns = shuffledOpts.findIndex(o => o.isCorrect);
+        return {
+          idx,
+          q: q.q,
+          opts: shuffledOpts.map(o => o.text),
+          ans: newAns,
+          exp: q.exp,
+          source: q.source
+        };
+      });
+
+      return { label, questions: prepared };
+    }
+
+    function openQuiz(topicId, count) {
+      const { label, questions } = buildQuestionSet(topicId, count);
+      activeQuiz = {
+        topic: topicId,
+        count: questions.length,
+        questions,
+        userAnswers: {},
+        submitted: false
+      };
+
+      confirmOverlay.classList.remove('show');
+      quizTitle.textContent = `Luyện tập: ${label}`;
+      quizSubtitle.textContent = `${questions.length} câu trắc nghiệm • Mức độ Biết & Hiểu (có giải thích chi tiết sau khi nộp)`;
+      renderQuizTaking();
+      quizModal.classList.add('show');
+      quizBody.scrollTop = 0;
+
+      if (!document.fullscreenElement) {
+        if (quizModal.requestFullscreen) {
+          quizModal.requestFullscreen().catch(() => {});
+        } else if (quizModal.webkitRequestFullscreen) {
+          quizModal.webkitRequestFullscreen();
+        }
+      }
+    }
+
+    const LETTERS = ['A', 'B', 'C', 'D'];
+
+    function renderQuizTaking() {
+      const countOptions = [10, 15, 20, 30];
+      const setupBar = `
+        <div class="quiz-setup-bar">
+          <span>Chọn nhanh số câu muốn luyện tập:</span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${countOptions.map(n => `
+              <button class="rf-btn ${activeQuiz.count === n ? 'active' : ''}" data-change-count="${n}">${n} câu</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => `
+        <div class="quiz-card" data-qidx="${i}">
+          <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+          <div class="opt-list">
+            ${item.opts.map((optText, oIdx) => `
+              <label class="opt-label" data-q="${i}" data-o="${oIdx}">
+                <input type="radio" name="q_${i}" value="${oIdx}" />
+                <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${setupBar}${cardsHtml}</div>`;
+
+      quizBody.querySelectorAll('[data-change-count]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openQuiz(activeQuiz.topic, parseInt(btn.dataset.changeCount, 10));
+        });
+      });
+
+      quizBody.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const qIdx = parseInt(radio.name.split('_')[1], 10);
+          const oIdx = parseInt(radio.value, 10);
+          activeQuiz.userAnswers[qIdx] = oIdx;
+
+          const card = quizBody.querySelector(`.quiz-card[data-qidx="${qIdx}"]`);
+          card.querySelectorAll('.opt-label').forEach(lbl => {
+            lbl.classList.toggle('is-selected', parseInt(lbl.dataset.o, 10) === oIdx);
+          });
+          updateProgressFooter();
+        });
+      });
+
+      updateProgressFooter();
+    }
+
+    function updateProgressFooter() {
+      const answeredCount = Object.keys(activeQuiz.userAnswers).length;
+      const total = activeQuiz.questions.length;
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đã chọn: <strong>${answeredCount} / ${total}</strong> câu</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCancelQuiz">Đóng</button>
+          <button class="btn-primary" id="btnSubmitQuiz">Nộp bài &amp; Xem giải thích</button>
+        </div>
+      `;
+      document.getElementById('btnCancelQuiz').addEventListener('click', closeQuizModal);
+      document.getElementById('btnSubmitQuiz').addEventListener('click', submitQuiz);
+    }
+
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+    });
+    document.getElementById('confirmOk').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+      finalizeSubmitQuiz();
+    });
+
+    function submitQuiz() {
+      const total = activeQuiz.questions.length;
+      const answered = Object.keys(activeQuiz.userAnswers).length;
+      if (answered < total) {
+        confirmText.textContent = `Bạn mới làm ${answered}/${total} câu. Các câu chưa chọn sẽ bị tính là sai. Bạn vẫn muốn nộp bài chứ?`;
+        confirmOverlay.classList.add('show');
+        return;
+      }
+      finalizeSubmitQuiz();
+    }
+
+    function finalizeSubmitQuiz() {
+      const total = activeQuiz.questions.length;
+      activeQuiz.submitted = true;
+      let correctCount = 0;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => {
+        const userAns = activeQuiz.userAnswers.hasOwnProperty(i) ? activeQuiz.userAnswers[i] : -1;
+        const isCorrect = userAns === item.ans;
+        if (isCorrect) correctCount++;
+
+        const optsHtml = item.opts.map((optText, oIdx) => {
+          let cls = 'opt-label';
+          let badge = '';
+          if (oIdx === item.ans) {
+            cls += ' is-correct';
+            badge = '<span class="opt-badge">✓ Đáp án đúng</span>';
+          } else if (oIdx === userAns && !isCorrect) {
+            cls += ' is-wrong';
+            badge = '<span class="opt-badge">✕ Bạn chọn</span>';
+          }
+          return `
+            <div class="${cls}" style="cursor:default;">
+              <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              ${badge}
+            </div>
+          `;
+        }).join('');
+
+        let expHtml = '';
+        if (isCorrect) {
+          expHtml = `
+            <div class="exp-box exp-ok">
+              <strong>✓ Chính xác!</strong> ${item.exp}
+            </div>
+          `;
+        } else {
+          const chosenReason = userAns === -1
+            ? 'Bạn chưa chọn đáp án cho câu này.'
+            : `Bạn đã chọn <strong>${LETTERS[userAns]}</strong> (chưa đúng). Đáp án đúng là <strong>${LETTERS[item.ans]}</strong>.`;
+          expHtml = `
+            <div class="exp-box exp-err">
+              <strong>✕ Vì sao sai?</strong> ${chosenReason}<br/>
+              <strong>Giải thích:</strong> ${item.exp}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="quiz-card ${isCorrect ? 'correct-card' : 'wrong-card'}" data-is-correct="${isCorrect}">
+            <div class="q-text"><span class="q-num">Câu ${i + 1}</span>${item.q}</div>
+            <div class="opt-list">${optsHtml}</div>
+            ${expHtml}
+          </div>
+        `;
+      }).join('');
+
+      const pct = Math.round((correctCount / total) * 100);
+      const wrongCount = total - correctCount;
+      let msg = 'Cần ôn lại kỹ lý thuyết ở sơ đồ rồi làm lại nhé!';
+      if (pct >= 90) msg = 'Xuất sắc! Bạn nắm rất chắc kiến thức phần này.';
+      else if (pct >= 70) msg = 'Khá tốt! Hãy xem kỹ giải thích ở các câu làm sai để đạt điểm tối đa.';
+      else if (pct >= 50) msg = 'Đạt mức trung bình. Xem lại các câu sai bên dưới để củng cố kiến thức.';
+
+      const bannerHtml = `
+        <div class="result-banner">
+          <div>
+            <div class="score-big">Kết quả: ${correctCount} / ${total} câu đúng (${pct}%)</div>
+            <div class="score-msg">${msg}</div>
+          </div>
+          <div class="review-filters">
+            <button class="rf-btn active" data-review-filter="all">Tất cả (${total})</button>
+            <button class="rf-btn" data-review-filter="wrong">Chỉ xem câu sai (${wrongCount})</button>
+          </div>
+        </div>
+      `;
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${bannerHtml}${cardsHtml}</div>`;
+      quizBody.scrollTop = 0;
+
+      quizBody.querySelectorAll('[data-review-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.reviewFilter;
+          quizBody.querySelectorAll('[data-review-filter]').forEach(b => b.classList.toggle('active', b === btn));
+          quizBody.querySelectorAll('.quiz-card').forEach(card => {
+            if (mode === 'wrong' && card.dataset.isCorrect === 'true') {
+              card.classList.add('hidden-review');
+            } else {
+              card.classList.remove('hidden-review');
+            }
+          });
+        });
+      });
+
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đúng: <strong>${correctCount}</strong> • Sai: <strong>${wrongCount}</strong></span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCloseAfter">Quay lại sơ đồ</button>
+          <button class="btn-primary" id="btnRetryQuiz">🔄 Làm lại (đảo câu hỏi)</button>
+        </div>
+      `;
+      document.getElementById('btnCloseAfter').addEventListener('click', closeQuizModal);
+      document.getElementById('btnRetryQuiz').addEventListener('click', () => openQuiz(activeQuiz.topic, activeQuiz.count));
+    }
+
+    function closeQuizModal() {
+      confirmOverlay.classList.remove('show');
+      quizModal.classList.remove('show');
+      if (document.fullscreenElement === quizModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.getElementById('quizClose').addEventListener('click', closeQuizModal);
+    quizModal.addEventListener('click', e => { if (e.target === quizModal) closeQuizModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (confirmOverlay.classList.contains('show')) {
+          confirmOverlay.classList.remove('show');
+        } else {
+          closeZoomModal();
+          closeQuizModal();
+        }
+      }
+    });
+
+    document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.dataset.quizTopic;
+        const bar = btn.closest('.practice-bar');
+        const select = bar.querySelector('.q-count-select');
+        const count = select ? parseInt(select.value, 10) : 10;
+        openQuiz(topicId, count);
+      });
+    });
+
+    document.getElementById('btnChapterQuiz').addEventListener('click', () => {
+      openQuiz('all', 20);
+    });
+  </script>
+</body>
+</html>
