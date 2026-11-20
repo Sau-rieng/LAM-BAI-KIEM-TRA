@@ -242,6 +242,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261120-190615",
+  "file": "tai-len/tl-261120-190615.html",
+  "anh": "",
+  "ten": "Sơ đồ tư duy & Luyện tập Chương 5: Pin điện và điện phân (Hóa 12 – KNTT)",
+  "khoi": "12",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
