@@ -6758,10 +6758,18 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (de.some(function (x) { return x.madot === md; })) return;
       var cu = DOT.filter(function (z) { return z.madot === md; })[0];
       var gocMd = Object.keys(NAP.doiMa || {}).filter(function (k) { return NAP.doiMa[k] === md; })[0] || md;
+      var ghiDoi = '', k0 = md;
+      if (!cu) {   // mã đợt trong file viết khác kho (VD H12-HK1-202-0201 ↔ H12-HK1-D202-201): dò theo môn-kì + số mã đề
+        var m3 = (/(\d{3})$/.exec(md) || [])[1], dau = md.split('-').slice(0, 2).join('-').toUpperCase(), so = (md.match(/\d{3,}/g) || []).map(function (x) { return String(Number(x)); });
+        var ung = m3 ? DOT.filter(function (z) { return z.giay && (/(\d{3})$/.exec(z.madot) || [])[1] === m3 && z.madot.toUpperCase().indexOf(dau) === 0 && !kq.some(function (k) { return k.madot === z.madot; }); }) : [];
+        if (ung.length > 1) ung = ung.filter(function (z) { var zs = ((z.ca || '') + ' ' + z.madot).match(/\d{3,}/g) || []; return so.every(function (x) { return zs.some(function (y) { return String(Number(y)) === x; }); }); });
+        if (ung.length === 1) { cu = ung[0]; ghiDoi = md; md = cu.madot; gocMd = md; }
+      }
       var d = { madot: md, goc: gocMd, chiGT: true, ten: cu ? cu.ten : md, loi: [], canh: [], cau: [], kt: [], hinh: [], md: {}, dem: {}, tong: 0,
-        gt: Object.keys(gt[md] || {}).map(function (c) { return [c, gt[md][c]]; }), tl: tl[md] || [], rb: rb[md] || [], chon: !!cu };
+        gt: Object.keys(gt[k0] || {}).map(function (c) { return [c, gt[k0][c]]; }), tl: tl[k0] || [], rb: rb[k0] || [], chon: !!cu };
       if (!cu) d.loi.push('Kho chưa có đề ' + md + ' nên chưa thêm lời giải được. Nạp đề trước (hoặc gửi file có cả tab đề).');
-      if (gocMd !== md) d.ten += ' (trong file: ' + gocMd + ')';
+      if (ghiDoi) d.ten += ' (trong file ghi ' + ghiDoi + ')';
+      else if (gocMd !== md) d.ten += ' (trong file: ' + gocMd + ')';
       kq.push(d);
     });
     return kq;
