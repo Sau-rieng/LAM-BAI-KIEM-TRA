@@ -3150,7 +3150,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (!j.ok) throw j; CT.cau = j.cau; CT.rb = j.rubric; CT.nhap = null; veRB(); taiDs();
       }).catch(function (e) { $('ctRB').innerHTML = '<p class="loi">' + esc(loiSo(e)) + '</p>'; });
     }
-    function rbDu() { return CT.cau.length && CT.cau.every(function (q) { return CT.rb[q.cau] && CT.rb[q.cau].buoc.length; }); }
+    function rbDu() { return !!(CT.rb && CT.cau.length && CT.cau.every(function (q) { return CT.rb[q.cau] && CT.rb[q.cau].buoc.length; })); }
     function veRB() {
       var box = $('ctRB');
       if (!CT.cau.length) { box.innerHTML = '<p class="sub">Đề này không có câu tự luận (tab TU LUAN của kho).</p>'; return; }
@@ -3191,16 +3191,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       goi(CT.lop.url, { action: 'gv_tl_ds', ma: MA, ca: ca }).then(function (j) { if (!j.ok) throw j; CT.ds = j; veDs(); }).catch(function (e) { $('ctDs').innerHTML = '<p class="loi">' + esc(loiSo(e)) + '</p>'; });
     }
     function veDs() {
-      var j = CT.ds; if (!j || !CT.rb) return;
+      var j = CT.ds; if (!j) return;
       var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), xong = co.filter(function (h) { return j.tl[h.mahs] && j.tl[h.mahs].duyet; }).length;
       var choAI = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.anh && !t.duyet && !t.nhap; }), nhap = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.nhap && !t.duyet; }).length;
       var h = '<h2>Lớp ' + esc(CT.lop.ten) + ' · đã duyệt tự luận ' + xong + '/' + co.length + ' em' + (nhap ? ' · ' + nhap + ' bài AI chấm nháp chờ duyệt' : '') + '</h2>';
-      if (!rbDu()) h += '<p class="ptCanh">Soạn và lưu hướng dẫn chấm cho đủ các câu trước khi chấm.</p>';
+      if (!rbDu()) h += '<p class="ptCanh">Chưa có hướng dẫn chấm: bấm một em để <b>xem ảnh bài tự luận</b>. Muốn chấm thì soạn và lưu hướng dẫn chấm (✨ AI soạn từ lời giải) ở trên.</p>';
       else h += '<p class="sub">Ảnh mặt sau: chụp ngay khi quét phiếu (nút 📷 Chụp mặt sau) hoặc chụp trong từng em. AI đọc ảnh, chấm nháp theo bước; thầy/cô xem, sửa rồi bấm <b>✓ Duyệt</b> mới cộng điểm và học sinh mới thấy.</p>' +
         (choAI.length ? '<div class="ptNut"><button class="btn2" id="ctAITat">🤖 AI chấm nháp ' + choAI.length + ' em đã có ảnh</button><span class="sub" id="ctAITT"></span></div>' : '');
       h += '<div class="kqDs">' + co.map(function (x) {
         var t = j.tl[x.mahs], dTN = Number(j.da[x.mahs].diem) || 0;
-        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"' + (rbDu() ? '' : ' disabled') + '><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t && t.duyet ? '✓ TL ' + soMT(t.tong) : t && t.nhap ? '🤖 nháp ' + soMT(t.nhap.tong) + ' · chờ duyệt' : t && t.anh ? '📷 có ảnh' : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
+        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t && t.duyet ? '✓ TL ' + soMT(t.tong) : t && t.nhap ? '🤖 nháp ' + soMT(t.nhap.tong) + ' · chờ duyệt' : t && t.anh ? '📷 có ảnh' : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
       }).join('') + '</div>';
       if (!co.length) h += '<p class="sub">Lớp này chưa có phiếu trắc nghiệm nào được chấm. Quét phiếu trước rồi chấm tự luận.</p>';
       $('ctDs').innerHTML = h;
@@ -3218,6 +3218,20 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }
     function veCham() {
       var j = CT.ds, ma = CT.em, t = j.tl[ma], box = $('ctCham'); if (!box) return;
+      if (!rbDu()) {   // chưa có rubric: chỉ xem / chụp ảnh bài tự luận
+        box.innerHTML = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 ' + (t && t.anh ? 'Chụp lại' : 'Chụp') + ' bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' +
+          '<span class="sub">' + (t && t.anh ? 'Đang tải ảnh…' : 'Chưa có ảnh mặt sau.') + '</span></div><img class="ctAnh" alt="Ảnh bài tự luận" hidden><p class="sub">Soạn hướng dẫn chấm ở trên để chấm và cộng điểm.</p></div>';
+        var im1 = box.querySelector('.ctAnh'), tt1 = box.querySelector('.ptNut .sub');
+        im1.onclick = function () { im1.classList.toggle('to'); };
+        if (t && t.anh) goi(CT.lop.url, { action: 'gv_tl_layanh', ma: MA, ca: ca, mahs: ma }).then(function (r) { if (CT.em !== ma) return; if (r.ok) { im1.src = r.anh; im1.hidden = false; tt1.textContent = 'Chạm ảnh để phóng to.'; } else tt1.textContent = 'Chưa tải được ảnh: ' + loiSo(r); }).catch(function (e) { tt1.textContent = 'Chưa tải được ảnh: ' + loiSo(e); });
+        box.querySelector('.ctChup input').onchange = function () {
+          var f = this.files[0]; if (!f) return;
+          txNen(f).then(function (u) { im1.src = u; im1.hidden = false; tt1.textContent = 'Đang lưu ảnh…';
+            return goi(CT.lop.url, { action: 'gv_tl_anh', ma: MA, ca: ca, mahs: ma, anh: u }).then(function (r) { if (!r.ok) throw r; j.tl[ma] = Object.assign(j.tl[ma] || { cau: {}, tong: 0 }, { anh: r.anh }); tt1.textContent = 'Đã lưu ảnh.'; });
+          }).catch(function (e) { tt1.textContent = 'Chưa lưu được ảnh: ' + loiSo(e); });
+        };
+        return;
+      }
       var nguon = t && t.duyet ? t.cau : t && t.nhap ? t.nhap.cau : {}, laNhap = !!(t && t.nhap && !t.duyet), aiCau = t && t.nhap ? t.nhap.cau : {};
       var h = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 ' + (t && t.anh ? 'Chụp lại' : 'Chụp') + ' bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' +
         (t && t.anh ? (t.duyet ? '<span class="sub">✓ Đã duyệt · sửa tích rồi bấm Duyệt để lưu lại</span>' : '<button class="btn2" id="ctAIEm">🤖 ' + (t.nhap ? 'AI chấm lại' : 'AI chấm nháp') + '</button>') : '<span class="sub">Chưa có ảnh mặt sau.</span>') + '</div>' +
