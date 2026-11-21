@@ -6763,11 +6763,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var m3 = (/(\d{3})$/.exec(md) || [])[1], dau = md.split('-').slice(0, 2).join('-').toUpperCase(), so = (md.match(/\d{3,}/g) || []).map(function (x) { return String(Number(x)); });
         var ung = m3 ? DOT.filter(function (z) { return z.giay && (/(\d{3})$/.exec(z.madot) || [])[1] === m3 && z.madot.toUpperCase().indexOf(dau) === 0 && !kq.some(function (k) { return k.madot === z.madot; }); }) : [];
         if (ung.length > 1) ung = ung.filter(function (z) { var zs = ((z.ca || '') + ' ' + z.madot).match(/\d{3,}/g) || []; return so.every(function (x) { return zs.some(function (y) { return String(Number(y)) === x; }); }); });
+        // còn nhiều đề: ưu tiên đề có mã đề là đoạn cuối riêng (…-202), rồi đề cùng ca với các mã khác trong file đã dò được
+        if (ung.length > 1) { var u2 = ung.filter(function (z) { return new RegExp('-0?' + m3 + '$').test(z.madot); }); if (u2.length) ung = u2; }
+        if (ung.length > 1) { var caDa = kq.filter(function (k) { return k.ghiDoi; }).map(function (k) { var z = DOT.filter(function (x) { return x.madot === k.madot; })[0]; return z && (z.ca || z.madot); });
+          var u3 = ung.filter(function (z) { return caDa.indexOf(z.ca || z.madot) >= 0; }); if (u3.length) ung = u3; }
         if (ung.length === 1) { cu = ung[0]; ghiDoi = md; md = cu.madot; gocMd = md; }
+        else if (ung.length > 1) var nhieu = ung.map(function (z) { return z.madot; }).join(', ');
       }
       var d = { madot: md, goc: gocMd, chiGT: true, ten: cu ? cu.ten : md, loi: [], canh: [], cau: [], kt: [], hinh: [], md: {}, dem: {}, tong: 0,
         gt: Object.keys(gt[k0] || {}).map(function (c) { return [c, gt[k0][c]]; }), tl: tl[k0] || [], rb: rb[k0] || [], chon: !!cu };
-      if (!cu) d.loi.push('Kho chưa có đề ' + md + ' nên chưa thêm lời giải được. Nạp đề trước (hoặc gửi file có cả tab đề).');
+      if (!cu) d.loi.push(nhieu ? 'Mã ' + md + ' khớp nhiều đề trong kho (' + nhieu + '). Sửa MaDot trong file cho đúng tên đề rồi nạp lại.' : 'Kho chưa có đề ' + md + ' nên chưa thêm lời giải được. Nạp đề trước (hoặc gửi file có cả tab đề).');
+      d.ghiDoi = ghiDoi;
       if (ghiDoi) d.ten += ' (trong file ghi ' + ghiDoi + ')';
       else if (gocMd !== md) d.ten += ' (trong file: ' + gocMd + ')';
       kq.push(d);
