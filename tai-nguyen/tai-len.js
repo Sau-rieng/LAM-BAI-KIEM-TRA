@@ -286,6 +286,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261121-152113",
+  "file": "tai-len/tl-261121-152113.html",
+  "anh": "",
+  "ten": "Sơ đồ tư duy & Luyện tập KHTN 9 – Bài 18 & 19 (KNTT) – v6",
+  "khoi": "9",
+  "bai": "",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
