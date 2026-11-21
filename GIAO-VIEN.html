@@ -6767,6 +6767,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (ung.length > 1) { var u2 = ung.filter(function (z) { return new RegExp('-0?' + m3 + '$').test(z.madot); }); if (u2.length) ung = u2; }
         if (ung.length > 1) { var caDa = kq.filter(function (k) { return k.ghiDoi; }).map(function (k) { var z = DOT.filter(function (x) { return x.madot === k.madot; })[0]; return z && (z.ca || z.madot); });
           var u3 = ung.filter(function (z) { return caDa.indexOf(z.ca || z.madot) >= 0; }); if (u3.length) ung = u3; }
+        if (!ung.length && m3) {   // dự phòng: tìm trong cùng bài với các mã khác đã dò được (kể cả đề gốc)
+          var caB = kq.filter(function (k) { return k.ghiDoi; }).map(function (k) { var z = DOT.filter(function (x) { return x.madot === k.madot; })[0]; return z && (z.ca || z.madot); }).filter(Boolean);
+          ung = DOT.filter(function (z) { return (caB.indexOf(z.ca) >= 0 || caB.indexOf(z.madot) >= 0) && (/(\d{3})$/.exec(z.madot) || [])[1] === m3 && !kq.some(function (k) { return k.madot === z.madot; }); });
+          if (ung.length > 1) { var u4 = ung.filter(function (z) { return new RegExp('-0?' + m3 + '$').test(z.madot); }); if (u4.length) ung = u4; }
+        }
         if (ung.length === 1) { cu = ung[0]; ghiDoi = md; md = cu.madot; gocMd = md; }
         else if (ung.length > 1) var nhieu = ung.map(function (z) { return z.madot; }).join(', ');
       }
