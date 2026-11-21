@@ -182,7 +182,8 @@ function doPost(e) {
       case 'gv_tc_themkhung':
       case 'gv_tc_xoakhung':
         if (!kiemGV(d)) return json({ok: false, loi: 'ma', khoa: !!BM_MSG, msg: BM_MSG || 'Ma quan ly chua dung'});
-        if (/^\d{6}$/.test(String(d.tt || ''))) { const P0 = PropertiesService.getScriptProperties(); if (P0.getProperty('tiento_gv') !== d.tt) { P0.setProperty('tiento_gv', d.tt); CacheService.getScriptCache().remove('tiento'); } }
+        if (/^\d{6}$/.test(String(d.tt || ''))) { const P0 = PropertiesService.getScriptProperties(); if (P0.getProperty('tiento_gv') !== d.tt) { P0.setProperty('tiento_gv', d.tt); CacheService.getScriptCache().remove('tiento'); }
+          if (/^\d{6}(,\d{6})*$/.test(String(d.tts || '')) && P0.getProperty('tiento_ds') !== d.tts) P0.setProperty('tiento_ds', d.tts); }
         AN_GV = true;   // trang GV: an bai/diem cua tai khoan GV (SBD ...00) khoi moi thong ke
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -3662,11 +3663,13 @@ function tkMap() {
 }
 function dongBoTK(ep) {
   const P = PropertiesService.getScriptProperties();
-  if (P.getProperty('tk_ver') !== '2') { P.setProperty('tk_ver', '2'); ep = true; }   // ban moi (them HoTen): dong bo ngay
+  if (P.getProperty('tk_ver') !== '3') { P.setProperty('tk_ver', '3'); ep = true; }   // ban moi (them HoTen): dong bo ngay
   if (!ep && Date.now() - Number(P.getProperty(P.getProperty('tk_thieu') ? 'tk_luc_thieu' : 'tk_luc') || 0) < (P.getProperty('tk_thieu') ? 3 : 30) * 60000) return 0;
   P.setProperty('tk_luc', String(Date.now())); P.setProperty('tk_luc_thieu', String(Date.now()));
   const ss = SpreadsheetApp.getActive(), ds = ss.getSheetByName(TAB_DS); if (!ds || ds.getLastRow() < 2) return 0;
   const lop = lopNay(), tt = tienToLop(), sh = tabKho(TAB_TK, HEAD_TK);
+  // các tiền tố SBD của những lớp có sổ (trang GV gửi); em có tiền tố ngoài danh sách này (VD lớp khác trường/khối) thì lớp này là lớp chính → tự cấp mật khẩu
+  const ttDS = String(P.getProperty('tiento_ds') || '').split(',').filter(String);
   if (sh.getRange(1, 6).getValue() !== 'HoTen') sh.getRange(1, 6).setValue('HoTen').setFontWeight('bold');
   const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 6).getValues() : [], vt = {};
   v.forEach(function (r, i) { vt[String(r[0]).trim()] = i; });
@@ -3674,7 +3677,9 @@ function dongBoTK(ep) {
   let doiDS = false, doiTen = false, doiKho = false, thieu = 0;
   dsV.forEach(function (r) {
     const ma = String(r[0]).trim(); if (!/^\d{8}$/.test(ma) || laGV(ma)) return;
-    const mx = String(r[3]).trim(), ten = String(r[1]).trim(), chinh = !!tt && ma.slice(0, 6) === tt;
+    const ten = String(r[1]).trim(), chinh = (!!tt && ma.slice(0, 6) === tt) || (ttDS.length > 0 && ttDS.indexOf(ma.slice(0, 6)) < 0);
+    if (chinh && !String(r[3]).trim() && !(vt[ma] >= 0 && String(v[vt[ma]][1]).trim())) { r[3] = String(Math.floor(1000 + Math.random() * 9000)); doiDS = true; }   // em mới chưa có mật khẩu: cấp mã 4 số
+    const mx = String(r[3]).trim();
     let i = vt[ma];
     if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date(), chinh ? ten : '']); vt[ma] = -1; if (!chinh && (!ten || !mx)) thieu++; return; }
     if (i < 0) return;

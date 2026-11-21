@@ -1048,7 +1048,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var UA = (function () { var u = navigator.userAgent || '', m = /iPhone|iPad|Android[^;)]*|Windows NT [\d.]+|Mac OS X [\d_]+|CrOS/.exec(u), b = /Edg\/|Chrome\/|Firefox\/|Safari\//.exec(u); return (m ? m[0] : 'máy lạ') + (b ? ' · ' + b[0].replace('/', '') : ''); })();
   function goi(url, du) {
     if (du && du.ma !== undefined && !du.tb) { du.tb = TB; du.ua = UA; }
-    if (du && du.ma !== undefined && !du.tt) { var lx = DS.filter(function (l) { return l.url === url; })[0]; if (lx && lx.tiento) du.tt = lx.tiento; }   // sổ biết tiền tố SBD của lớp mình
+    if (du && du.ma !== undefined && !du.tt) { var lx = DS.filter(function (l) { return l.url === url; })[0]; if (lx && lx.tiento) du.tt = lx.tiento; du.tts = DS.map(function (l) { return l.tiento; }).filter(function (t) { return /^\d{6}$/.test(t); }).join(','); }   // sổ biết tiền tố SBD của lớp mình
     var hetGio = new Promise(function (_, loi) { setTimeout(function () { loi(new Error('quá 30 giây không trả lời')); }, 30000); });
     return Promise.race([fetch(url, { method: 'POST', body: JSON.stringify(du) }).then(function (r) { return r.json(); }), hetGio]);
   }

@@ -46,7 +46,7 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 
 ## 5c. Tài khoản chung nhiều lớp (20/11)
 - Em học nhiều lớp (12G01 + 12CLB + 12AFTER) dùng 1 SBD: GV ghi SBD lớp chính (tiền tố trùng lớp chính) vào DANHSACH lớp phụ. Mật khẩu (mã xem bài) lấy theo lớp chính, kho tab **TAI KHOAN** (MaHS, MaXem, LopChinh, CacLop) đồng bộ khi GV mở trang (≤30 phút/lần, `dongBoTK`), lớp phụ tự chép mật khẩu. Đổi mật khẩu ở sổ lớp chính.
-- Từ 21/11: TAI KHOAN thêm cột HoTen (lớp chính gửi tên); lớp phụ chỉ cần cột MAHS, tự điền HO TEN + MAXEM (còn thiếu thì thử lại sau 3 phút, Script Property `tk_thieu`). Tiền tố lớp lấy từ trang GV gửi kèm `tt` (Script Property `tiento_gv`), không đoán theo số đông nữa.
+- Từ 21/11: TAI KHOAN thêm cột HoTen (lớp chính gửi tên); lớp phụ chỉ cần cột MAHS, tự điền HO TEN + MAXEM (còn thiếu thì thử lại sau 3 phút, Script Property `tk_thieu`). Tiền tố lớp lấy từ trang GV gửi kèm `tt` (Script Property `tiento_gv`), không đoán theo số đông nữa. Trang GV gửi thêm `tts` (tiền tố mọi lớp có sổ, Script Property `tiento_ds`): em có tiền tố ngoài danh sách (VD 261203, 261206 ở 12AFTER) thì lớp đang giữ là lớp chính, tự cấp mã 4 số nếu trống.
 - Ô SBD ở XEM-LAI, LAM-BAI, các trò chơi nhận 2 số cuối hoặc đủ 8 số. Tài khoản HS gộp bài/bảng điểm/TX/khảo sát các lớp (nhãn lớp); Kiến thức cần ôn có nút chọn lớp. Quét nộp vở: sổ lớp đang quét tự kiểm tra em có trong danh sách.
 
 ## 5d. Tài khoản GV đóng vai HS (20/11)
