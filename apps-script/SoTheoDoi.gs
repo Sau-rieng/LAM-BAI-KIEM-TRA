@@ -181,6 +181,7 @@ function doPost(e) {
       case 'gv_tc_themkhung':
       case 'gv_tc_xoakhung':
         if (!kiemGV(d)) return json({ok: false, loi: 'ma', khoa: !!BM_MSG, msg: BM_MSG || 'Ma quan ly chua dung'});
+        if (/^\d{6}$/.test(String(d.tt || ''))) { const P0 = PropertiesService.getScriptProperties(); if (P0.getProperty('tiento_gv') !== d.tt) { P0.setProperty('tiento_gv', d.tt); CacheService.getScriptCache().remove('tiento'); } }
         AN_GV = true;   // trang GV: an bai/diem cua tai khoan GV (SBD ...00) khoi moi thong ke
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
@@ -3589,9 +3590,9 @@ function timHS(ma) {
   const rows = sh.getRange(2, 1, n, 4).getValues();
   for (let i = 0; i < rows.length; i++) {
     if (String(rows[i][0]).trim() === ma) {
-      let mx = String(rows[i][3]).trim();
-      if (ma.slice(0, 6) !== tienToLop()) { const t = tkMap()[ma]; if (t && t.mx) mx = t.mx; }   // em hoc lop phu: mat khau theo lop chinh
-      return {ten: String(rows[i][1]).trim(), maxem: mx};
+      let mx = String(rows[i][3]).trim(), ten = String(rows[i][1]).trim();
+      if (ma.slice(0, 6) !== tienToLop()) { const t = tkMap()[ma]; if (t && t.mx) mx = t.mx; if (t && !ten && t.ten) ten = t.ten; }   // em hoc lop phu: mat khau (+ ten) theo lop chinh
+      return {ten: ten, maxem: mx};
     }
   }
   if (laGV(ma) && ma.slice(0, 6) === tienToLop()) return {ten: 'GV', maxem: mxGV(), gv: true};   // tai khoan GV dong vai HS (khong nam trong DANHSACH)
@@ -3610,9 +3611,12 @@ function boGV(v, c) { return AN_GV ? v.filter(function (r) { return !laGV(r[c]);
 // Lop chinh = lop co tien to SBD trung voi SBD cua em; cac lop phu ghi cung SBD do trong DANHSACH.
 // Kho tab TAI KHOAN: MaHS | MaXem (cua lop chinh) | LopChinh | CacLop | CapNhat — moi so dong bo khi GV mo trang (toi da 30 phut/lan).
 // ---------------------------------------------------------------------
-const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat'];
+const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat', 'HoTen'];
 function tienToLop() {
   const c = CacheService.getScriptCache(); let t = c.get('tiento'); if (t !== null) return t;
+  // Trang GV gui kem tien to cua lop (cau-hinh-lop.js) → chinh xac ca khi lop phu toan HS lop khac (VD 12AFTER)
+  t = PropertiesService.getScriptProperties().getProperty('tiento_gv') || '';
+  if (t) { c.put('tiento', t, 21600); return t; }
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), dem = {};
   if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { const m = String(r[0]).trim(); if (/^\d{8}$/.test(m)) dem[m.slice(0, 6)] = (dem[m.slice(0, 6)] || 0) + 1; });
   t = Object.keys(dem).sort(function (a, b) { return dem[b] - dem[a]; })[0] || '';
@@ -3624,35 +3628,46 @@ function tkMap() {
   const c = CacheService.getScriptCache(), s = c.get('tk_map');
   if (s) { try { return TK_NHO = JSON.parse(s); } catch (e) {} }
   const m = {}, sh = kho().getSheetByName(TAB_TK);
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String)}; });
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String), ten: String(r[5] || '').trim()}; });
   try { c.put('tk_map', JSON.stringify(m), 300); } catch (e) {}
   return TK_NHO = m;
 }
 function dongBoTK(ep) {
   const P = PropertiesService.getScriptProperties();
-  if (!ep && Date.now() - Number(P.getProperty('tk_luc') || 0) < 30 * 60000) return 0;
-  P.setProperty('tk_luc', String(Date.now()));
+  if (P.getProperty('tk_ver') !== '2') { P.setProperty('tk_ver', '2'); ep = true; }   // ban moi (them HoTen): dong bo ngay
+  if (!ep && Date.now() - Number(P.getProperty(P.getProperty('tk_thieu') ? 'tk_luc_thieu' : 'tk_luc') || 0) < (P.getProperty('tk_thieu') ? 3 : 30) * 60000) return 0;
+  P.setProperty('tk_luc', String(Date.now())); P.setProperty('tk_luc_thieu', String(Date.now()));
   const ss = SpreadsheetApp.getActive(), ds = ss.getSheetByName(TAB_DS); if (!ds || ds.getLastRow() < 2) return 0;
   const lop = lopNay(), tt = tienToLop(), sh = tabKho(TAB_TK, HEAD_TK);
-  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 4).getValues() : [], vt = {};
+  if (sh.getRange(1, 6).getValue() !== 'HoTen') sh.getRange(1, 6).setValue('HoTen').setFontWeight('bold');
+  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 6).getValues() : [], vt = {};
   v.forEach(function (r, i) { vt[String(r[0]).trim()] = i; });
   const dsR = ds.getRange(2, 1, ds.getLastRow() - 1, 4), dsV = dsR.getValues(), them = [];
-  let doiDS = false, doiKho = false;
+  let doiDS = false, doiTen = false, doiKho = false, thieu = 0;
   dsV.forEach(function (r) {
-    const ma = String(r[0]).trim(); if (!/^\d{8}$/.test(ma)) return;
-    const mx = String(r[3]).trim(), chinh = ma.slice(0, 6) === tt;
+    const ma = String(r[0]).trim(); if (!/^\d{8}$/.test(ma) || laGV(ma)) return;
+    const mx = String(r[3]).trim(), ten = String(r[1]).trim(), chinh = !!tt && ma.slice(0, 6) === tt;
     let i = vt[ma];
-    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date()]); vt[ma] = -1; return; }
+    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date(), chinh ? ten : '']); vt[ma] = -1; if (!chinh && (!ten || !mx)) thieu++; return; }
     if (i < 0) return;
     const x = v[i], cl = String(x[3]).split(',').map(function (z) { return z.trim(); }).filter(String);
     if (cl.indexOf(lop) < 0) { cl.push(lop); x[3] = cl.join(','); doiKho = true; }
-    if (chinh) { if (String(x[1]).trim() !== mx || String(x[2]).trim() !== lop) { x[1] = mx; x[2] = lop; doiKho = true; } }
-    else if (String(x[1]).trim() && String(x[1]).trim() !== mx) { r[3] = String(x[1]).trim(); doiDS = true; }   // lop phu: chep mat khau lop chinh sang
-    else if (!String(x[1]).trim() && mx) { x[1] = mx; doiKho = true; }
+    if (chinh) {
+      if ((mx && String(x[1]).trim() !== mx) || String(x[2]).trim() !== lop || (ten && String(x[5] || '').trim() !== ten)) { if (mx) x[1] = mx; x[2] = lop; if (ten) x[5] = ten; doiKho = true; }
+      if (!mx && String(x[1]).trim()) { r[3] = String(x[1]).trim(); doiDS = true; }
+    } else {
+      // lop phu: chep mat khau + ho ten cua lop chinh sang DANHSACH
+      if (String(x[1]).trim() && String(x[1]).trim() !== mx) { r[3] = String(x[1]).trim(); doiDS = true; }
+      else if (!String(x[1]).trim() && mx && !String(x[2]).trim()) { x[1] = mx; doiKho = true; }
+      if (!ten && String(x[5] || '').trim()) { r[1] = String(x[5]).trim(); doiTen = true; }
+      if (!String(r[1]).trim() || !String(r[3]).trim()) thieu++;
+    }
   });
-  if (doiKho) sh.getRange(2, 1, v.length, 4).setNumberFormat('@').setValues(v);
-  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 4).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 5).setValues(them); }
+  if (doiKho) sh.getRange(2, 1, v.length, 6).setNumberFormat('@').setValues(v);
+  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 6).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 6).setValues(them); }
   if (doiDS) ds.getRange(2, 4, dsV.length, 1).setNumberFormat('@').setValues(dsV.map(function (r) { return [r[3]]; }));
+  if (doiTen) ds.getRange(2, 2, dsV.length, 1).setValues(dsV.map(function (r) { return [r[1]]; }));
+  if (thieu) P.setProperty('tk_thieu', '1'); else P.deleteProperty('tk_thieu');   // con em chua co ten/mat khau: thu lai sau 3 phut
   CacheService.getScriptCache().remove('tk_map'); TK_NHO = null;
   return them.length + (doiKho ? 1 : 0);
 }
