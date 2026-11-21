@@ -33,6 +33,7 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 
 ## 5a. Quét nhanh lưu trong máy (21/11)
 - Chấm phiếu giấy → chọn bài, lớp → **⚡ Quét nhanh · lưu trong máy**: không chờ tải danh sách, chỉ đọc SBD + mã đề để gắn nhãn ⚠ (tô sai, mã đề không có, SBD lạ, quét lại), ảnh phiếu lưu IndexedDB `kphh_quet` (store `to`: id, ca, lop, luc, sbd, made, anh, canh, gui, anhId).
+- Đề ≥45 phút: sau mỗi tờ có nút 📷 Chụp mặt sau, lưu cùng tờ (trường `sau`, `guiSau`); ☁ Gửi tải luôn mặt sau qua `gv_tl_anh`.
 - Mục **📦 Bài quét trong máy**: ☁ Gửi lên Drive (`gv_giay_anh`, ảnh CHO) → 🗂 Chấm tất cả bài đã gửi (chế độ `cham`, tờ lỗi dừng cho GV sửa) → 🗑 Xóa tờ đã gửi khỏi máy. Trang chọn bài nhắc nếu còn tờ chưa gửi.
 - Bỏ vuốt ngang để thoát màn quét (chỉ nút ✕ Thoát); chạm ô báo trên camera để tắt.
 
