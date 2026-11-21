@@ -98,8 +98,13 @@
     for (y = y0; y <= y1; y++) for (x = x0; x <= x1; x++) { if (x < 0 || y < 0 || x >= a.w || y >= a.h) continue; if (a.g[y * a.w + x] < T) { sx += x; sy += y; n++; } }
     return n ? [sx / n, sy / n, n] : null;
   }
-  function doc(a) {
-    var I = tichPhan(a), ds = timKhoiDen(a, I), g4 = do4Goc(ds);
+  // sau = true: đọc MẶT SAU (phiếu tự luận) – chỉ lấy SBD; mốc nhận dạng P.mocSau + vạch P.vachSau
+  function doc(a, sau) {
+    var MOC_ = sau ? P.mocSau : MOC, PHU = sau ? [P.vachSau] : P.neoPhu;
+    if (sau && !MOC_) return { ok: false, loi: 'Mẫu phiếu chưa có mặt sau' };
+    // dùng lại kết quả tìm góc khi đọc cả mặt sau lẫn mặt trước trên cùng 1 ảnh
+    if (!a._I) { a._I = tichPhan(a); a._g4 = do4Goc(timKhoiDen(a, a._I)); }
+    var I = a._I, g4 = a._g4;
     if (!g4) return { ok: false, loi: 'Không thấy đủ 4 ô vuông đen ở góc phiếu. Chụp lại cho thấy trọn tờ phiếu.' };
     var q = g4.q, tot = null;
     // Thử 4 cách xoay: điểm = độ đậm tại các ô vuông nhỏ đã biết
@@ -109,18 +114,22 @@
       var src = [P.neo[0], P.neo[1], P.neo[3], P.neo[2]], H = homo(src, dst); if (!H) continue;
       var s0 = Math.hypot(ap(H, [10, 10])[0] - ap(H, [11, 10])[0], ap(H, [10, 10])[1] - ap(H, [11, 10])[1]);
       var diem = 0;
-      MOC.concat(P.neoPhu).forEach(function (m) { diem += doDam(a, I, ap(H, m), Math.max(1, s0 * 0.8)); });
-      // ô trống (giữa các ô tròn Phần I) phải sáng
-      P.o.p1.slice(0, 10).forEach(function (row) { diem -= doDam(a, I, ap(H, [row[0][0] + 3.65, row[0][1]]), Math.max(1, s0 * 0.6)); });
+      MOC_.concat(PHU).forEach(function (m) { diem += doDam(a, I, ap(H, m), Math.max(1, s0 * 0.8)); });
+      // ô trống phải sáng: giữa các ô tròn Phần I (mặt trước) / đối xứng của vạch mặt sau
+      if (sau) diem -= 3 * doDam(a, I, ap(H, [P.vachSau[0], 297 - P.vachSau[1]]), Math.max(1, s0 * 0.8));
+      else P.o.p1.slice(0, 10).forEach(function (row) { diem -= doDam(a, I, ap(H, [row[0][0] + 3.65, row[0][1]]), Math.max(1, s0 * 0.6)); });
       if (!tot || diem > tot.diem) tot = { H: H, diem: diem, s0: s0, k: k };
     }
     // Kiểm tra lại: phần lớn ô vuông nhỏ phải nằm đúng chỗ dự đoán (tránh nhầm khi phiếu ra ngoài khung hình)
-    var thay = MOC.filter(function (m) { return chinhMoc(a, ap(tot.H, m), tot.s0 * 3.2); }).length;
-    if (thay < MOC.length * 0.6) return { ok: false, loi: 'Chưa thấy trọn tờ phiếu. Đưa máy ra xa một chút cho đủ 4 ô vuông ở 4 góc.' };
+    var thay = MOC_.filter(function (m) { return chinhMoc(a, ap(tot.H, m), tot.s0 * 3.2); }).length;
+    if (sau && !chinhMoc(a, ap(tot.H, P.vachSau), tot.s0 * 4)) thay = 0;
+    // đọc mặt trước mà thấy dấu hiệu mặt sau (vạch + ô nhỏ mép trên/dưới) → không phải mặt trước
+    if (!sau && P.mocSau && chinhMoc(a, ap(tot.H, P.vachSau), tot.s0 * 4) && P.mocSau.slice(0, 8).filter(function (m) { return chinhMoc(a, ap(tot.H, m), tot.s0 * 3.2); }).length >= 6) return { ok: false, laSau: true, loi: 'Đây là mặt sau (phiếu tự luận).' };
+    if (thay < MOC_.length * (sau ? 0.8 : 0.6)) return { ok: false, loi: 'Chưa thấy trọn tờ phiếu. Đưa máy ra xa một chút cho đủ 4 ô vuông ở 4 góc.' };
     var H = tot.H, s0 = tot.s0, src2 = [P.neo[0], P.neo[1], P.neo[3], P.neo[2]], dst2 = [0, 1, 2, 3].map(function (i) { var p = q[(i + tot.k) % 4]; return [p.x, p.y]; });
     // Chỉnh lại: thêm 2 ô giữa cạnh + các ô vuông nhỏ tìm thấy
-    P.neoPhu.concat(MOC).forEach(function (m, i) {
-      var c = chinhMoc(a, ap(H, m), s0 * (i < 2 ? 6 : 3.2));
+    PHU.concat(MOC_).forEach(function (m, i) {
+      var c = chinhMoc(a, ap(H, m), s0 * (i < PHU.length ? (sau ? 4 : 6) : 3.2));
       if (c) { src2.push(m); dst2.push([c[0], c[1]]); }
     });
     var H2 = homo(src2, dst2) || H;
@@ -144,6 +153,7 @@
       return { p: p, m: m, v: Math.max(0, Math.min(1, (giay - loi) / Math.max(40, giay))) };
     }
     o.sbd = P.o.sbd.map(function (c) { return c.map(do1); });
+    if (sau) return Object.assign({ ok: true, sau: true, H: H2, lech: lech, soMoc: src2.length, o: o }, giaiSBD(o));
     o.made = P.o.made.map(function (c) { return c.map(do1); });
     o.p1 = P.o.p1.map(function (c) { return c.map(do1); });
     o.p2 = P.o.p2.map(function (c) { return c.map(function (y) { return [do1(y[0]), do1(y[1])]; }); });
@@ -159,6 +169,14 @@
     });
     ds.forEach(function (x, i) { x.v0 = x.v; x.v = Math.max(0, x.v - nen[i]); });
     return Object.assign({ ok: true, H: H2, lech: lech, soMoc: src2.length, o: o }, giaiMa(o));
+  }
+  // Mặt sau: trừ nền cục bộ trong khung SBD rồi giải mã như mặt trước
+  function giaiSBD(o) {
+    var ds = []; o.sbd.forEach(function (c) { c.forEach(function (x) { ds.push(x); }); });
+    var nen = ds.map(function (x) { var g = []; ds.forEach(function (y) { if (y !== x && Math.abs(y.m[0] - x.m[0]) < 12 && Math.abs(y.m[1] - x.m[1]) < 12) g.push(y.v); }); g.sort(function (a, b) { return a - b; }); return g.length ? g[Math.floor(g.length * 0.2)] : 0; });
+    ds.forEach(function (x, i) { x.v0 = x.v; x.v = Math.max(0, x.v - nen[i]); });
+    var oo = { sbd: o.sbd, made: [], p1: [], p2: [], p3: [] }, g = giaiMa(oo);
+    return { sbd: g.sbd, canh: g.canh };
   }
   // Ô được tô: xét theo từng nhóm ô (1 cột SBD, 1 câu Phần I, 1 câu Đ/S, 1 cột Phần III):
   // tô = đậm hơn cả 3 mức: 0.12 tuyệt đối · nửa ô đậm nhất nhóm · 2.5 lần nền nhóm (+0.04). Gần ngưỡng = nghi ngờ (thầy xem lại).
@@ -220,5 +238,5 @@
     if (tl < 1.2 || tl > 1.8) return null;
     return { q: q.map(function (p) { return [p.x, p.y]; }), tile: S / (a.w * a.h) };
   }
-  window.OMR = { doc: doc, tuCanvas: tuCanvas, timGoc: timGoc, ap: ap, homo: homo };
+  window.OMR = { doc: function (a) { return doc(a, false); }, docSau: function (a) { return doc(a, true); }, tuCanvas: tuCanvas, timGoc: timGoc, ap: ap, homo: homo };
 })();

@@ -37,6 +37,8 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 - Mục **📦 Bài quét trong máy**: ☁ Gửi lên Drive (`gv_giay_anh`, ảnh CHO) → 🗂 Chấm tất cả bài đã gửi (chế độ `cham`, tờ lỗi dừng cho GV sửa) → 🗑 Xóa tờ đã gửi khỏi máy. Trang chọn bài nhắc nếu còn tờ chưa gửi.
 - Bỏ vuốt ngang để thoát màn quét (chỉ nút ✕ Thoát); chạm ô báo trên camera để tắt.
 
+- **Phiếu 2 mặt (21/11)**: `PHIEU.veSau()` mặt sau tự luận có 4 ô góc + khung tô SBD cùng vị trí mặt trước, nhận dạng bằng vạch giữa mép trên `P.vachSau` + 8 ô nhỏ mép trên/dưới `P.mocSau`. `OMR.docSau(a)` đọc SBD; khi quét (mọi chế độ trừ chấm ảnh Drive) máy thử mặt sau trước → `xuLySau` → `ghepSau` ghép đúng em (quét nhanh: lưu cùng tờ, chưa có mặt trước thì giữ chờ ghép). In ở thẻ đề giấy: "📝 In phiếu 2 mặt". Ảnh ghép nhầm: ✍ Chấm tự luận → "↔ Chuyển ảnh" (`gv_tl_chuyen`, đổi chỗ nếu em kia có ảnh, xóa bản AI nháp).
+
 ## 5b. Bảo mật (19/11)
 - Mã xem bài sai 5 lần/15 phút → khóa SBD 15 phút; sai mã quản lý 8 lần/10 phút → chặn thao tác GV 30 phút trừ máy đã đăng nhập đúng (thiết bị `tb` lưu localStorage `gv_tb`, danh sách Script Properties `may_tin`); dò mã mở khóa → báo.
 - Sự việc ghi tab **BAO MAT** (kho); Nhật ký điểm tab **NHAT KY DIEM** (mỗi sổ) + hoàn tác; kiểm tra điểm sửa ngoài trang GV (ảnh chụp tab KIEM TRA DIEM, mỗi 3 giờ). Xem ở Cài đặt → 🛡 Bảo mật; trang chủ hiện băng ⚠ khi có sự việc mới.

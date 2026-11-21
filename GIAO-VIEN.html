@@ -135,7 +135,7 @@ button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16p
 .ctRBhop{border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin:10px 0}.ctRBhop summary{cursor:pointer}
 .ctCau{border-top:1px solid var(--line);padding:8px 0}.ctCauDau{margin-bottom:4px}.ctBuoc{margin:4px 0 4px 18px;padding:0}
 .ctBuocSua{display:flex;gap:6px;margin:4px 0}.ctBuocSua .nd{flex:1;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px}.ctBuocSua .dm{width:72px;font:inherit;padding:6px;border:1px solid var(--line);border-radius:8px}
-.ctChamHop{border:2px solid var(--pri);border-radius:12px;padding:8px 12px;margin:-4px 0 10px;background:#fbfcff}.ctAnh{max-width:100%;max-height:420px;display:block;margin:6px auto;border-radius:8px;cursor:zoom-in}.ctAnh.to{max-height:none;cursor:zoom-out}.ctLy{display:block;color:#5b6175;font-size:12.5px;margin-top:2px}.ctNX{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:700;margin:6px 0}.ctNX input{font:inherit;font-weight:400;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+.ctChuyen{margin:4px 0 8px}.ctChuyen select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;max-width:100%}.ctChamHop{border:2px solid var(--pri);border-radius:12px;padding:8px 12px;margin:-4px 0 10px;background:#fbfcff}.ctAnh{max-width:100%;max-height:420px;display:block;margin:6px auto;border-radius:8px;cursor:zoom-in}.ctAnh.to{max-height:none;cursor:zoom-out}.ctLy{display:block;color:#5b6175;font-size:12.5px;margin-top:2px}.ctNX{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:700;margin:6px 0}.ctNX input{font:inherit;font-weight:400;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
 .ctTich{display:flex;gap:8px;align-items:flex-start;padding:6px 4px;border-radius:8px;cursor:pointer}.ctTich:hover{background:var(--bg)}.ctTich input{width:20px;height:20px;margin-top:2px}.ctTich span{flex:1}
 .ctTong{font-size:17px;margin:10px 0}.ctChup{display:inline-flex;align-items:center;cursor:pointer}.kqDong.on{border-color:var(--pri)}
 .ptNen{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;overflow:auto;padding:16px}.ptNen[hidden]{display:none}
@@ -1695,7 +1695,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var ca = {}, thu = [];
     ds.forEach(function (d) { var k = d.ca || d.madot; if (!ca[k]) { ca[k] = []; thu.push(k); } ca[k].push(d); });
     var nP = document.createElement('button'); nP.className = 'suaDe'; nP.textContent = '🧾 In phiếu trả lời trắc nghiệm (phiếu trống, dùng chung mọi bài)';
-    nP.onclick = inPhieu; box.appendChild(nP);
+    nP.onclick = function () { inPhieu('truoc'); }; box.appendChild(nP);
+    var nS = document.createElement('button'); nS.className = 'suaDe'; nS.textContent = '📝 In phiếu 2 mặt: trắc nghiệm + mặt sau tự luận có ô tô SBD (đề 45 phút)';
+    nS.onclick = function () { inPhieu('hai'); }; box.appendChild(nS);
     var tt = {}; thu.forEach(function (k) { var a = ktGiay(k, ca[k]); tt[k] = { ds: a, xong: a.length && a.every(function (x) { return x.da; }) }; });
     var nXong = thu.filter(function (k) { return tt[k].xong; }).length;
     var loc = document.createElement('div'); loc.className = 'ksLoc locGiay';
@@ -1822,13 +1824,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       };
     }).catch(function (e) { o.innerHTML = '<div class="xdBox xau">' + esc(e.message) + '</div>'; });
   }
-  function inPhieu() {
+  function inPhieu(kieu) {
     if (!window.PHIEU) { alert('Chưa tải được mẫu phiếu (phieu-omr.js). Tải lại trang rồi thử lại.'); return; }
     var w = window.open('', '_blank'); if (!w) { alert('Trình duyệt chặn cửa sổ mới. Cho phép cửa sổ bật lên (pop-up) rồi bấm lại.'); return; }
     var css = CSS_IN.replace('@page{size:A4;margin:12mm 12mm 14mm}', '@page{size:A4;margin:0}') + '@media screen{.trang{padding:0;width:210mm}}.trang svg{display:block}';
     w.document.open(); w.document.write('<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>PHIEU-TRA-LOI</title><style>' + css + '</style></head><body>' +
-      thanhIn('Phiếu trả lời trắc nghiệm · A4') + '<div class="thanh" style="background:#fff7d6;color:#000;font-weight:400;position:static">Khi in: khổ A4, tỉ lệ 100% (không chọn “Vừa trang”), lề 0 hoặc mặc định, bỏ “Đầu trang và chân trang”. In thử 1 tờ, đặt lên tờ mẫu xem 4 ô vuông đen ở 4 góc còn đủ.</div>' +
-      '<div class="trang">' + PHIEU.ve() + '</div></body></html>');
+      thanhIn(kieu === 'hai' ? 'Phiếu 2 mặt: trắc nghiệm + tự luận · A4' : 'Phiếu trả lời trắc nghiệm · A4') + '<div class="thanh" style="background:#fff7d6;color:#000;font-weight:400;position:static">Khi in: khổ A4, tỉ lệ 100% (không chọn “Vừa trang”), lề 0 hoặc mặc định, bỏ “Đầu trang và chân trang”.' +
+      (kieu === 'hai' ? ' Chọn <b>in 2 mặt (lật theo cạnh dài)</b>: trang 1 mặt trước, trang 2 mặt sau. Học sinh tô SBD ở <b>cả 2 mặt</b> – máy quét mặt sau tự ghép bài tự luận vào đúng em.' : '') +
+      ' In thử 1 tờ, đặt lên tờ mẫu xem 4 ô vuông đen ở 4 góc còn đủ.</div>' +
+      '<div class="trang">' + PHIEU.ve() + '</div>' + (kieu === 'hai' && PHIEU.veSau ? '<div class="trang" style="page-break-before:always">' + PHIEU.veSau() + '</div>' : '') + '</body></html>');
     w.document.close();
   }
   // =====================================================================
@@ -1990,12 +1994,33 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var v = $('qVideo'), m = Q && Q.matSau; if (!m || !v.videoWidth) return;
     var k = Math.min(1, 1800 / Math.max(v.videoWidth, v.videoHeight)), c = document.createElement('canvas');
     c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
-    var anh = c.toDataURL('image/jpeg', 0.85), b = this; b.disabled = true; b.textContent = 'Đang lưu mặt sau…'; bip(true);
+    ghepSau(m, c.toDataURL('image/jpeg', 0.85), c.toDataURL('image/jpeg', 0.8), this);
+  };
+  function xuLySau(rs, A) {
+    var sbd = rs.sbd.s, hien = sbd.replace(/_/g, '□').replace(/\*/g, '✱');
+    Q.trangThai = 'doiTo';
+    if (Q.cuoi && Q.cuoi.sau === sbd) { $('qTT').textContent = 'Mặt sau này vừa ghép xong. Lật sang tờ khác.'; return; }
+    Q.cuoi = { sau: sbd };
+    if (!Q.coTL) { bip(false); hienKQ('loi', 'Đây là mặt sau (tự luận)', 'Bài này không có phần tự luận · quét mặt trước'); return; }
+    if (rs.sbd.loi) { bip(false); hienKQ('loi', '⚠ Mặt sau: SBD tô chưa rõ (' + esc(hien) + ')', Q.matSau ? 'Bấm 📷 bên dưới để ghép vào ' + esc(Q.matSau.ten) : 'Chụp mặt sau cho em ở ✍ Chấm tự luận'); return; }
+    if (Object.keys(Q.ten).length && !Q.ten[sbd]) { bip(false); hienKQ('loi', '⚠ Mặt sau: SBD ' + esc(sbd) + ' không có trong lớp ' + esc(Q.lop.ten), 'Kiểm tra lại SBD em tô ở mặt sau'); return; }
+    var m = { sbd: sbd, ten: Q.ten[sbd] || ('SBD ' + sbd) };
+    if (Q.matSau && Q.matSau.sbd === sbd && Q.matSau.id) m.id = Q.matSau.id;
+    var b = $('qMatSau'); b.hidden = false;
+    var anhMS = anhPhieu({ canvas: A.canvas, r: rs }, 1600, 0.82);
+    ghepSau(m, anhMS, anhMS, b);
+  }
+  // Ghép ảnh mặt sau vào bài tự luận của em m.sbd (nút 📷 hoặc máy tự nhận ra mặt sau có SBD)
+  function ghepSau(m, anh, anhMay, b) {
+    b.disabled = true; b.textContent = 'Đang lưu mặt sau…'; bip(true);
     Q.matSau = null;
     if (Q.cheDo === 'may') {   // quét nhanh: mặt sau lưu cùng tờ trong máy, gửi Drive khi bấm ☁ Gửi
-      var o = Q.may.filter(function (z) { return z.id === m.id; })[0], q = Q;
-      if (!o) { b.hidden = true; return; }
-      o.sau = c.toDataURL('image/jpeg', 0.8); o.guiSau = 0;
+      var q = Q, o = Q.may.filter(function (z) { return m.id ? z.id === m.id : z.sbd === m.sbd; }).sort(function (x, y) { return y.luc - x.luc; })[0];
+      if (!o) {   // chưa quét mặt trước của em này: giữ mặt sau, quét mặt trước sau sẽ tự ghép
+        o = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), ca: Q.ca, lop: Q.lop.ten, luc: Date.now(), sbd: m.sbd, made: '', anh: null, canh: ['Chưa quét mặt trước'], gui: 1 };
+        Q.may.push(o);
+      }
+      o.sau = anhMay; o.guiSau = 0;
       KM.luu(o).then(function () { if (Q !== q) return; b.hidden = true; hienKQ('xanh', '📷 Đã lưu mặt sau · ' + esc(m.ten), 'trong máy · quét tờ tiếp theo'); veDaCham(); veTienDo(); })
         .catch(function (e) { delete o.sau; b.disabled = false; Q.matSau = m; b.textContent = '📷 Chụp lại mặt sau · ' + m.ten; hienKQ('loi', '✗ Máy không lưu được mặt sau', esc(e.message)); bip(false); });
       return;
@@ -2008,7 +2033,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         q.aiTL--; if (Q === q) { veTienDo(); if (r.ok) { Q.moi = { html: '🤖 <b>' + esc(m.sbd.slice(-2)) + '</b> ' + esc(m.ten) + ' · tự luận AI chấm nháp <b>' + diem(r.tl && r.tl.nhap ? r.tl.nhap.tong : 0) + '</b> <small>chờ duyệt</small>' }; veDaCham(); } }
       }).catch(function () { q.aiTL--; if (Q === q) veTienDo(); });
     }).catch(function (e) { b.disabled = false; Q.matSau = m; b.textContent = '📷 Chụp lại mặt sau · ' + m.ten; hienKQ('loi', '✗ Chưa lưu được mặt sau', esc(e.message)); bip(false); });
-  };
+    }
   function goiLau(url, du, ms) {
     var hetGio = new Promise(function (_, loi) { setTimeout(function () { loi(new Error('quá ' + Math.round(ms / 1000) + ' giây không trả lời')); }, ms); });
     return Promise.race([fetch(url, { method: 'POST', body: JSON.stringify(du) }).then(function (r) { return r.json(); }), hetGio]);
@@ -2040,7 +2065,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     try { if (navigator.vibrate) navigator.vibrate(tot ? 80 : [200, 100, 200]); } catch (e) {}
   }
   function xuLyAnh(canvas, tuFile) {
-    var t0 = Date.now(), a = OMR.tuCanvas(canvas, 1800), r = OMR.doc(a);
+    var t0 = Date.now(), a = OMR.tuCanvas(canvas, 1800);
+    // Mặt sau (phiếu tự luận có ô tô SBD): đọc SBD → ghép vào bài tự luận đúng em
+    if (OMR.docSau && Q.cheDo !== 'cham') { var rs = OMR.docSau(a); if (rs.ok) { xuLySau(rs, a); return; } }
+    var r = OMR.doc(a);
     if (!r.ok) { Q.trangThai = 'tim'; $('qTT').textContent = r.loi; bip(false); if (tuFile) $('qXet').innerHTML = '<div class="card loi">Ảnh không đọc được: ' + esc(r.loi) + '</div>'; return; }
     if (!tuFile) ghiVanTay(canvas, r, a.s);
     if (Q.cheDo === 'may') { luuMay(r, a); return; }
@@ -2412,9 +2440,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function luuMay(r, A) {
     var sbd = r.sbd.s;
     if (Q.cuoi && sbd === Q.cuoi.sbd) { Q.trangThai = 'doiTo'; $('qTT').textContent = 'Tờ này vừa quét xong. Lật sang tờ khác.'; return; }
-    var nh = nhanMay(r), cu = r.sbd.loi ? null : Q.may.filter(function (o) { return o.sbd === sbd && !o.gui; })[0];
-    if (cu) nh.c.push('Quét lại SBD này – thay tờ quét lúc ' + gio(new Date(cu.luc).toISOString()));
+    var nh = nhanMay(r), cu = r.sbd.loi ? null : Q.may.filter(function (o) { return o.sbd === sbd && (!o.gui || !o.anh); })[0];
+    if (cu && cu.anh) nh.c.push('Quét lại SBD này – thay tờ quét lúc ' + gio(new Date(cu.luc).toISOString()));
     var o = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), ca: Q.ca, lop: Q.lop.ten, luc: Date.now(), sbd: sbd, made: r.made.s, anh: anhPhieu({ canvas: A.canvas, r: r }, 1400, 0.75), canh: nh.c, gui: 0 };
+    if (cu && cu.sau) { o.sau = cu.sau; o.guiSau = cu.guiSau || 0; }   // mặt sau đã quét trước → ghép luôn
     Q.trangThai = 'doiTo'; Q.cuoi = { sbd: sbd }; var q = Q; $('qMatSau').hidden = true; Q.matSau = null;
     KM.luu(o).then(function () { return cu ? KM.xoa(cu.id) : null; }).then(function () {
       if (Q !== q) return;
@@ -2424,7 +2453,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var sau = Q.coTL ? ' · lật mặt sau, bấm 📷' : ' · lật sang tờ tiếp theo';
       if (nh.c.length) { bip(false); hienKQ('loi', '⚠ Đã quét · ' + ai + 'SBD ' + esc(sbd.replace(/_/g, '□').replace(/\*/g, '✱')), nh.c.map(esc).join('<br>') + '<br>Đã gắn nhãn' + (Q.coTL ? sau : ' · quét tờ tiếp theo')); }
       else { bip(true); hienKQ('ok', '✓ Đã quét · ' + ai + 'SBD ' + esc(sbd), 'mã ' + esc(nh.m3) + ' · ' + n + ' tờ trong máy' + sau); }
-      if (Q.coTL) { Q.matSau = { id: o.id, sbd: sbd, ten: Q.ten[sbd] || ('SBD ' + sbd) }; var bm = $('qMatSau'); bm.hidden = false; bm.disabled = false; bm.textContent = '📷 Chụp mặt sau · ' + Q.matSau.ten; }
+      if (o.sau) hienKQ('ok', '✓ Đã quét · ' + ai + 'SBD ' + esc(sbd), 'đã ghép với mặt sau quét trước · lật sang tờ tiếp theo');
+      else if (Q.coTL) { Q.matSau = { id: o.id, sbd: sbd, ten: Q.ten[sbd] || ('SBD ' + sbd) }; var bm = $('qMatSau'); bm.hidden = false; bm.disabled = false; bm.textContent = '📷 Chụp mặt sau · ' + Q.matSau.ten; }
       veDaCham(); veTienDo();
     }).catch(function (e) { if (Q === q) { Q.cuoi = null; bip(false); hienKQ('loi', '✗ Máy không lưu được tờ này', esc(e.message) + ' · quét lại'); } });
   }
@@ -3234,11 +3264,28 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       };
       if (CT.em && $('ctCham')) veCham();
     }
+    // Ảnh mặt sau ghép nhầm em: chuyển sang em đúng (em kia đã có ảnh thì đổi chỗ 2 ảnh)
+    function ganChuyen(box, ma) {
+      var j = CT.ds, t = j.tl[ma], im = box.querySelector('.ctAnh'); if (!t || !t.anh || !im) return;
+      var d = document.createElement('div'); d.className = 'ptNut ctChuyen';
+      d.innerHTML = '<span class="sub">Ảnh này của em khác?</span><select><option value="">— chọn em đúng —</option>' + j.hs.filter(function (x) { return x.mahs !== ma; }).map(function (x) { var c = j.tl[x.mahs]; return '<option value="' + esc(x.mahs) + '">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + (c && c.anh ? ' (đã có ảnh → đổi chỗ)' : '') + '</option>'; }).join('') + '</select><button class="btn2" type="button">↔ Chuyển ảnh</button><span class="sub ctChTT"></span>';
+      im.parentNode.insertBefore(d, im.nextSibling);
+      d.querySelector('button').onclick = function () {
+        var den = d.querySelector('select').value, tt = d.querySelector('.ctChTT'), bt = this; if (!den) { tt.textContent = 'Chọn em đúng trước.'; return; }
+        var tenDen = (j.hs.filter(function (x) { return x.mahs === den; })[0] || {}).hoten || den;
+        if (!confirm('Chuyển ảnh mặt sau này sang ' + tenDen + '?' + (j.tl[den] && j.tl[den].anh ? ' Ảnh của ' + tenDen + ' sẽ chuyển ngược lại cho em đang xem.' : '') + ' Bài AI chấm nháp của 2 em sẽ xóa để chấm lại.')) return;
+        bt.disabled = true; tt.textContent = 'Đang chuyển…';
+        goi(CT.lop.url, { action: 'gv_tl_chuyen', ma: MA, ca: ca, tu: ma, den: den }).then(function (r) {
+          if (!r.ok) throw r; CT.em = j.da[den] ? den : null; CT.anhCo = null; CT.anhMa = null; taiDs();
+        }).catch(function (e) { bt.disabled = false; tt.textContent = 'Chưa chuyển được: ' + loiSo(e); });
+      };
+    }
     function veCham() {
       var j = CT.ds, ma = CT.em, t = j.tl[ma], box = $('ctCham'); if (!box) return;
       if (!rbDu()) {   // chưa có rubric: chỉ xem / chụp ảnh bài tự luận
         box.innerHTML = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 ' + (t && t.anh ? 'Chụp lại' : 'Chụp') + ' bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' +
           '<span class="sub">' + (t && t.anh ? 'Đang tải ảnh…' : 'Chưa có ảnh mặt sau.') + '</span></div><img class="ctAnh" alt="Ảnh bài tự luận" hidden><p class="sub">Soạn hướng dẫn chấm ở trên để chấm và cộng điểm.</p></div>';
+        ganChuyen(box, ma);
         var im1 = box.querySelector('.ctAnh'), tt1 = box.querySelector('.ptNut .sub');
         im1.onclick = function () { im1.classList.toggle('to'); };
         if (t && t.anh) goi(CT.lop.url, { action: 'gv_tl_layanh', ma: MA, ca: ca, mahs: ma }).then(function (r) { if (CT.em !== ma) return; if (r.ok) { im1.src = r.anh; im1.hidden = false; tt1.textContent = 'Chạm ảnh để phóng to.'; } else tt1.textContent = 'Chưa tải được ảnh: ' + loiSo(r); }).catch(function (e) { tt1.textContent = 'Chưa tải được ảnh: ' + loiSo(e); });
@@ -3279,7 +3326,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           return goi(CT.lop.url, { action: 'gv_tl_anh', ma: MA, ca: ca, mahs: ma, anh: u }).then(function (r) { if (!r.ok) throw r; CT.anhCo = u; t = j.tl[ma] = Object.assign(j.tl[ma] || { cau: {}, tong: 0 }, { anh: r.anh }); veDs(); $('ctTT').textContent = 'Đã lưu ảnh. Bấm 🤖 AI chấm nháp hoặc tự tích.'; });
         }).catch(function (e) { $('ctTT').textContent = 'Chưa lưu được ảnh: ' + loiSo(e); });
       };
-      var im0 = box.querySelector('.ctAnh');
+      var im0 = box.querySelector('.ctAnh'); ganChuyen(box, ma);
       if (t && t.anh) {
         if (CT.anhCo && CT.anhMa === ma) { im0.src = CT.anhCo; im0.hidden = false; }
         else goi(CT.lop.url, { action: 'gv_tl_layanh', ma: MA, ca: ca, mahs: ma }).then(function (r) { if (r.ok && CT.em === ma) { CT.anhCo = r.anh; CT.anhMa = ma; im0.src = r.anh; im0.hidden = false; } }).catch(function () {});

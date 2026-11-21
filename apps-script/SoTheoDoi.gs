@@ -131,6 +131,7 @@ function doPost(e) {
       case 'gv_tl_luu':
       case 'gv_tl_anh':
       case 'gv_tl_layanh':
+      case 'gv_tl_chuyen':
       case 'gv_tl_ai':
       case 'gv_ainx':
       case 'gv_nhanxet_nhieu':
@@ -221,6 +222,7 @@ function doPost(e) {
         if (d.action === 'gv_tl_luu') return json(gvTLLuu(d));
         if (d.action === 'gv_tl_ai') return json(gvTLAI(d));
         if (d.action === 'gv_tl_layanh') return json(gvTLLayAnh(d));
+        if (d.action === 'gv_tl_chuyen') return json(gvTLChuyen(d));
         if (d.action === 'gv_tl_anh') return json(gvTLAnh(d));
         if (d.action === 'gv_ainx') return json(gvAINX(d));
         if (d.action === 'gv_nhanxet_nhieu') return json(gvNhanXetNhieu(d));
@@ -1310,6 +1312,32 @@ function tlXoaDong(ca, ma, loc) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD); if (!sh || sh.getLastRow() < 2) return;
   const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TLD.length).getValues();
   for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === ca && String(v[i][1]).trim() === ma && loc(v[i])) sh.deleteRow(i + 2);
+}
+// Anh mat sau ghep nham em: chuyen anh tu em 'tu' sang em 'den' (neu 'den' da co anh thi doi cho 2 anh).
+// Ban AI cham nhap cua 2 em bi xoa (cham lai theo anh moi); ban da duyet giu diem, tro sang anh moi.
+function gvTLChuyen(d) {
+  const ca = String(d.ca || '').trim(), tu = String(d.tu || '').trim(), den = String(d.den || '').trim();
+  if (!tu || !den || tu === den) return {ok: false, msg: 'Chon em can chuyen'};
+  const hsTu = timHS(tu), hsDen = timHS(den); if (!hsTu || !hsDen) return {ok: false, msg: 'Khong co SBD ' + (hsTu ? den : tu)};
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD); if (!sh || sh.getLastRow() < 2) return {ok: false, msg: 'Chua co anh tu luan'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  let idTu = '', idDen = '';
+  try {
+    const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TLD.length).getValues();
+    // ảnh của mỗi em: dòng _ANH, không có thì AnhId của dòng đã chấm
+    v.forEach(function (r) { if (String(r[0]).trim() !== ca || !String(r[5]).trim()) return; const m = String(r[1]).trim(), uu = String(r[2]).trim() === '_ANH';
+      if (m === tu && (uu || !idTu)) idTu = String(r[5]).trim(); if (m === den && (uu || !idDen)) idDen = String(r[5]).trim(); });
+    if (!idTu) return {ok: false, msg: 'Em ' + tu + ' chua co anh mat sau'};
+    for (let i = v.length - 1; i >= 0; i--) {
+      const r = v[i], m = String(r[1]).trim(); if (String(r[0]).trim() !== ca || (m !== tu && m !== den)) continue;
+      if (String(r[2]).trim() === '_ANH' || String(r[7]).trim() === 'NHAP') { sh.deleteRow(i + 2); continue; }
+      sh.getRange(i + 2, 6).setValue(m === tu ? idDen : idTu);
+    }
+    const moi = [[ca, den, '_ANH', '[]', 0, idTu, new Date(), 'ANH', '']]; if (idDen) moi.push([ca, tu, '_ANH', '[]', 0, idDen, new Date(), 'ANH', '']);
+    const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, moi.length, 4).setNumberFormat('@'); sh.getRange(r0, 1, moi.length, HEAD_TLD.length).setValues(moi);
+  } finally { lock.releaseLock(); }
+  try { DriveApp.getFileById(idTu).setName('TU LUAN - ' + den + ' - ' + hsDen.ten + '.jpg'); if (idDen) DriveApp.getFileById(idDen).setName('TU LUAN - ' + tu + ' - ' + hsTu.ten + '.jpg'); } catch (e) {}
+  return {ok: true, doi: !!idDen};
 }
 // Quet phieu xong chup mat sau (tu luan): luu anh, gan vao bai em (chua cham)
 function gvTLAnh(d) {

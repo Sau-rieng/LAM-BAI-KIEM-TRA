@@ -101,6 +101,7 @@ Ngoài file Excel nạp kho, gửi kèm để in:
 ## Chấm tự luận theo rubric (từ 11/2026)
 - Lời giải câu tự luận (cột LoiGiai của `TU LUAN THEM`) viết **theo bước, có điểm từng bước**, ví dụ "Viết đúng PTHH … (0.25) – Tính n(CO2) = 0.15 mol (0.25) – Kết luận … (0.5)". Tổng điểm các bước phải bằng cột Diem của câu.
 - File nạp có tab `RUBRIC THEM` thì hướng dẫn chấm có sẵn ngay sau khi nạp. Không có thì trên trang GV, ở thẻ đề giấy bấm **✍ Chấm tự luận** → **✨ AI soạn từ lời giải**. AI tách lời giải thành hướng dẫn chấm theo bước. Giáo viên sửa rồi lưu (lưu vào tab `RUBRIC` của kho).
+- Đề 45 phút in **phiếu 2 mặt** (trang GV → thẻ đề giấy → 📝 In phiếu 2 mặt): mặt sau là phiếu tự luận có khung tô SBD; học sinh tô SBD ở cả 2 mặt, máy quét mặt sau tự ghép bài tự luận đúng em.
 - Khi chấm, giáo viên chụp bài tự luận của từng em và tích các bước đạt. Máy cộng điểm vào điểm đề giấy. Học sinh xem lại thấy bước nào ✓, bước nào ✗ mất điểm, cùng lời giải.
 
 
