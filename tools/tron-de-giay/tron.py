@@ -52,6 +52,7 @@ def docKho(duong):
     kt = {x.get('CAU'): (x.get('KIENTHUC', ''), x.get('MUCDO', '')) for x in bang('KIEN THUC THEM') if x.get('MADOT', ma) == ma}
     gt = {x.get('CAU'): x.get('GIAITHICH', '') for x in bang('GIAI THICH THEM') if x.get('MADOT', ma) == ma}
     ch['_TL'] = [[x.get('CAU', ''), x.get('NOIDUNG', ''), x.get('HINH', ''), x.get('DIEM', ''), x.get('LOIGIAI', '')] for x in bang('TU LUAN THEM') if x.get('MADOT', ma) in (ma, '')]
+    ch['_RB'] = [[x.get('CAU', ''), x.get('BUOC', ''), x.get('NOIDUNG', ''), x.get('DIEM', '')] for x in (bang('RUBRIC THEM') or bang('RUBRIC')) if x.get('MADOT', ma) in (ma, '')]
     for c in cau:
         c['kt'], c['md'] = kt.get(c['cau'], ('', '')); c['gt'] = gt.get(c['cau'], '')
         if c['loai'] == 'DS': c['da'] = boDau(c['da']).replace('Đ', 'D')
@@ -339,9 +340,13 @@ def taoKho(tien, MA, ch, a, thang, ra):
     tl = ch.get('_TL') or []
     t = wb.create_sheet('TU LUAN THEM') if tl else None
     if t: t.append(['MaDot', 'Cau', 'NoiDung', 'Hinh', 'Diem', 'LoiGiai'])
+    rb = ch.get('_RB') or []
+    u = wb.create_sheet('RUBRIC THEM') if rb else None
+    if u: u.append(['MaDot', 'Cau', 'Buoc', 'NoiDung', 'Diem'])
     for ma, ds in MA.items():
         c.append([ma, ch.get('TENBAI') or a.ky, ch.get('THOIGIAN_PHUT') or '45', 'DONG', 'KHONG', a.lop or ch.get('LOP', ''), 'GIAY', thang])
         for r in tl: t.append([ma] + [duongHinh(r[2], a.maGoc) or r[2] if j == 2 else r[j] for j in range(5)])
+        for r in rb: u.append([ma] + r)
         for x in ds:
             k.append([ma, x['cau'], x['kt'], x['md']])
             if x['gt']: g.append([ma, x['cau'], x['gt']])
@@ -377,6 +382,12 @@ def main():
     tl = phanTuLuan(a.word)
     if a.word and not tl: canh.add('Đề Word không có phần "PHẦN IV" (tự luận) – đề in chỉ có Phần I–III')
     if tl and not ch.get('_TL'): canh.add('Đề có PHẦN IV tự luận nhưng file kho thiếu tab TU LUAN THEM – học sinh sẽ không xem được lời giải tự luận khi xem lại')
+    if ch.get('_TL') and not ch.get('_RB'): canh.add('Có tự luận nhưng file kho thiếu tab RUBRIC THEM (hướng dẫn chấm theo bước) – nạp xong phải bấm AI soạn rồi mới chấm được')
+    for r in ch.get('_TL') or []:
+        bs = [x for x in ch.get('_RB') or [] if x[0] == r[0]]
+        try: tg = round(sum(float(str(x[3]).replace(',', '.')) for x in bs), 3); dc = float(str(r[3]).replace(',', '.'))
+        except ValueError: continue
+        if bs and abs(tg - dc) > 1e-6: canh.add('RUBRIC THEM câu %s: tổng điểm các bước %s ≠ điểm câu %s' % (r[0], tg, dc))
     class CS: pass
     cs = CS(); cs.maGoc = maGoc; cs.canh = canh
     cs.thuMuc = ([a.hinh] if a.hinh else []) + [os.path.dirname(os.path.abspath(a.kho))] + ([layHinhWord(a.word, a.ra)] if a.word else [])

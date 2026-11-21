@@ -1212,15 +1212,17 @@ function gvRubricLuu(d) {
   const ss = kho(); let sh = ss.getSheetByName(TAB_RB);
   if (!sh) { sh = ss.insertSheet(TAB_RB); sh.getRange(1, 1, 1, HEAD_RB.length).setValues([HEAD_RB]).setFontWeight('bold'); sh.setFrozenRows(1); }
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
-  try {
-    const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_RB.length).getValues() : [];
-    const giu = v.filter(function (r) { return !(String(r[0]).trim() === ca && (String(r[1]).trim() in rb)); });
-    const ngay = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
-    Object.keys(rb).forEach(function (c) { (rb[c] || []).forEach(function (b, i) { if (String(b.nd || '').trim()) giu.push([ca, c, i + 1, String(b.nd).trim(), Number(String(b.diem).replace(',', '.')) || 0, d.cho ? 'CHO' : 'DUYET', String(d.nguon || 'GV'), ngay]); }); });
-    if (v.length) sh.getRange(2, 1, v.length, HEAD_RB.length).clearContent();
-    if (giu.length) sh.getRange(2, 1, giu.length, HEAD_RB.length).setValues(giu.map(function (r) { return r.map(function (x, j) { return j === 4 ? x : String(x); }); }));
-  } finally { lock.releaseLock(); }
+  try { rbGhi(sh, ca, rb, d.cho ? 'CHO' : 'DUYET', String(d.nguon || 'GV')); } finally { lock.releaseLock(); }
   return gvRubric({ca: ca});
+}
+// Ghi rubric 1 ca (thay cac cau co trong rb); goi trong lock
+function rbGhi(sh, ca, rb, tt, nguon) {
+  const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_RB.length).getValues() : [];
+  const giu = v.filter(function (r) { return !(String(r[0]).trim() === ca && (String(r[1]).trim() in rb)); });
+  const ngay = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  Object.keys(rb).forEach(function (c) { (rb[c] || []).forEach(function (b, i) { if (String(b.nd || '').trim()) giu.push([ca, c, i + 1, String(b.nd).trim(), Number(String(b.diem).replace(',', '.')) || 0, tt, nguon, ngay]); }); });
+  if (v.length) sh.getRange(2, 1, v.length, HEAD_RB.length).clearContent();
+  if (giu.length) sh.getRange(2, 1, giu.length, HEAD_RB.length).setValues(giu.map(function (r) { return r.map(function (x, j) { return j === 4 ? x : String(x); }); }));
 }
 // AI soan rubric tu loi giai + diem cau (chua luu; GV xem, sua roi bam Luu)
 function gvRubricAI(d) {
@@ -1698,11 +1700,14 @@ function gvNapDe(d) {
         .map(function (r) { return [madot, String(r[0]).trim(), String(r[1]).trim()]; });
       const tl = (Array.isArray(x.tl) ? x.tl : []).filter(function (r) { return Array.isArray(r) && String(r[0] || '').trim() !== ''; })
         .map(function (r) { return [madot].concat([0, 1, 2, 3, 4].map(function (j) { return String(r[j] == null ? '' : r[j]).trim(); })); });
+      // RUBRIC (huong dan cham tu luan theo buoc): [Cau, Buoc, NoiDung, Diem]
+      const rb = (Array.isArray(x.rb) ? x.rb : []).filter(function (r) { return Array.isArray(r) && String(r[0] || '').trim() !== '' && String(r[2] || '').trim() !== ''; })
+        .map(function (r) { return {cau: String(r[0]).trim(), buoc: Number(r[1]) || 0, nd: String(r[2]).trim(), diem: Number(String(r[3] == null ? '' : r[3]).replace(',', '.')) || 0}; });
       if (x.chiGT) {
         // Chi them/thay loi giai cho de da co trong kho (ke ca de da thi)
         if (!ss.getSheetByName(madot)) return {ok: false, msg: 'Kho chua co de ' + madot + ' de them loi giai'};
-        if (!gt.length && !tl.length) return {ok: false, msg: 'De ' + madot + ' khong co dong loi giai nao'};
-        viec.push({madot: madot, chiGT: true, gt: gt, tl: tl, cau: [], kt: []});
+        if (!gt.length && !tl.length && !rb.length) return {ok: false, msg: 'De ' + madot + ' khong co dong loi giai nao'};
+        viec.push({madot: madot, chiGT: true, gt: gt, tl: tl, rb: rb, cau: [], kt: []});
         continue;
       }
       const cau = (Array.isArray(x.cau) ? x.cau : []).filter(function (r) { return Array.isArray(r) && String(r[1] || '').trim() !== ''; });
@@ -1723,7 +1728,7 @@ function gvNapDe(d) {
         cau: cau.map(function (r) { const o = []; for (let j = 0; j < 11; j++) o.push(r[j] === undefined || r[j] === null ? '' : String(r[j])); return o; }),
         kt: (Array.isArray(x.kt) ? x.kt : []).filter(function (r) { return Array.isArray(r) && String(r[0] || '').trim() !== ''; })
           .map(function (r) { return [madot, String(r[0]).trim(), String(r[1] || '').trim(), String(r[2] || '').trim(), String(r[3] || '').trim(), String(r[4] || '').trim()]; }),
-        gt: gt, tl: tl, tab: tab, dong: dong});
+        gt: gt, tl: tl, rb: rb, tab: tab, dong: dong});
     }
     // 2) Ghi
     let kt = ss.getSheetByName('KIEN THUC');
@@ -1777,10 +1782,27 @@ function gvNapDe(d) {
       if (tlV.length) tlSh.getRange(2, 1, tlV.length, 6).clearContent();
       if (tlMoi.length) tlSh.getRange(2, 1, tlMoi.length, 6).setNumberFormat('@').setValues(tlMoi);
     }
+    // RUBRIC: gom theo ca (cac ma de cung ca dung chung 1 huong dan cham), nap xong dung ngay (DUYET)
+    if (viec.some(function (v) { return v.rb && v.rb.length; })) {
+      SpreadsheetApp.flush();
+      const caMa = {}; docCauHinhGoc().forEach(function (c) { caMa[c.madot] = c.giay ? (c.ca || c.madot) : c.madot; });
+      const theoCa = {};
+      viec.forEach(function (v) {
+        if (!v.rb || !v.rb.length) return;
+        const ca = v.ca || caMa[v.madot] || v.madot, o = theoCa[ca] = theoCa[ca] || {}, moi = {};
+        v.rb.forEach(function (b) { if (o[b.cau] && !moi[b.cau]) return; moi[b.cau] = 1; (o[b.cau] = o[b.cau] || []).push(b); });
+      });
+      let rbSh = ss.getSheetByName(TAB_RB);
+      if (!rbSh) { rbSh = ss.insertSheet(TAB_RB); rbSh.getRange(1, 1, 1, HEAD_RB.length).setValues([HEAD_RB]).setFontWeight('bold'); rbSh.setFrozenRows(1); }
+      Object.keys(theoCa).forEach(function (ca) {
+        const o = theoCa[ca]; Object.keys(o).forEach(function (c) { o[c].sort(function (a, b) { return a.buoc - b.buoc; }); });
+        rbGhi(rbSh, ca, o, 'DUYET', 'NAP');
+      });
+    }
     ds.forEach(function (x) { const goc = String((x && x.goc) || '').trim(), moi = String((x && x.madot) || '').trim(); if (goc && goc !== moi && /^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(goc)) ghiDoiMa(goc, moi); });
     SpreadsheetApp.flush();
     const r = gvDot();
-    r.nap = viec.map(function (v) { return {madot: v.madot, hinh: ketHinh[v.madot] || null, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, sotl: (v.tl || []).length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
+    r.nap = viec.map(function (v) { return {madot: v.madot, hinh: ketHinh[v.madot] || null, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, sotl: (v.tl || []).length, sorb: (v.rb || []).length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
     return r;
   } finally {
     lock.releaseLock();

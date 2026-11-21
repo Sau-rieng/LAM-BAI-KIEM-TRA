@@ -67,6 +67,8 @@ Tab `CAU HINH THEM`:
 
 Tab `TU LUAN THEM` (`MaDot | Cau | NoiDung | Hinh | Diem | LoiGiai`, xem `K1-Ra-de.md`): tự luận giống nhau ở mọi mã, **mỗi mã một bộ dòng** (công cụ trộn tự chép). Thiếu tab này thì học sinh không xem được lời giải tự luận; công cụ báo cảnh báo.
 
+Tab `RUBRIC THEM` (`MaDot | Cau | Buoc | NoiDung | Diem`, xem `K1-Ra-de.md`): hướng dẫn chấm tự luận theo bước, **mỗi bước 0.25**, tổng bước = điểm câu. Nạp xong là chấm được ngay, không cần bấm AI soạn.
+
 Tab `KIEN THUC THEM` (`MaDot | Cau | KienThuc | MucDo | ChuDe | NoiDung`) và `GIAI THICH THEM` (`MaDot | Cau | GiaiThich`): **mỗi mã đề đủ mọi câu**, `Cau` theo số câu của mã đó. Lời giải Phần I viết theo **chữ cái của mã đó** (đã đổi sau khi trộn).
 
 ## 5. Trang nạp tự kiểm (lỗi thì không cho nạp)
@@ -93,12 +95,12 @@ Ngoài file Excel nạp kho, gửi kèm để in:
 - [ ] Điểm từng câu đúng yêu cầu giáo viên; `ThangDS` đúng khối giáo viên yêu cầu.
 - [ ] Mỗi mã đủ kiến thức, mức độ, lời giải cho mọi câu.
 - [ ] Đủ file Word + PDF cho từng mã và file đáp án; mở file PDF xem lại hình, bảng, số trang.
-- [ ] Đề có tự luận thì file nạp có tab `TU LUAN THEM` đủ các mã.
+- [ ] Đề có tự luận thì file nạp có tab `TU LUAN THEM` và `RUBRIC THEM` (mỗi bước 0.25, tổng = điểm câu).
 - [ ] Công cụ không còn cảnh báo (hoặc đã sửa tay phần cảnh báo).
 
 ## Chấm tự luận theo rubric (từ 11/2026)
 - Lời giải câu tự luận (cột LoiGiai của `TU LUAN THEM`) viết **theo bước, có điểm từng bước**, ví dụ "Viết đúng PTHH … (0.25) – Tính n(CO2) = 0.15 mol (0.25) – Kết luận … (0.5)". Tổng điểm các bước phải bằng cột Diem của câu.
-- Trên trang GV, ở thẻ đề giấy bấm **✍ Chấm tự luận** → **✨ AI soạn từ lời giải**. AI tách lời giải thành hướng dẫn chấm theo bước. Giáo viên sửa rồi lưu (lưu vào tab `RUBRIC` của kho).
+- File nạp có tab `RUBRIC THEM` thì hướng dẫn chấm có sẵn ngay sau khi nạp. Không có thì trên trang GV, ở thẻ đề giấy bấm **✍ Chấm tự luận** → **✨ AI soạn từ lời giải**. AI tách lời giải thành hướng dẫn chấm theo bước. Giáo viên sửa rồi lưu (lưu vào tab `RUBRIC` của kho).
 - Khi chấm, giáo viên chụp bài tự luận của từng em và tích các bước đạt. Máy cộng điểm vào điểm đề giấy. Học sinh xem lại thấy bước nào ✓, bước nào ✗ mất điểm, cùng lời giải.
 
 

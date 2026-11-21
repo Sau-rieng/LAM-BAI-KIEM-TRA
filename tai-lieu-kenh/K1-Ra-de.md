@@ -96,6 +96,17 @@ Tab `TU LUAN THEM`, dòng 1 đúng thứ tự:
 - `Diem`: điểm câu, dấu chấm (vd `1`, `1.5`).
 - `LoiGiai`: lời giải chi tiết **viết cho học sinh tự đọc** theo hướng dẫn chấm: từng ý a), b)…, phương trình, các bước tính, kết quả; ghi điểm từng bước ở cuối dòng (vd `– 0.25 điểm`).
 
+### Hướng dẫn chấm tự luận – tab `RUBRIC THEM` (bắt buộc khi có tự luận, từ 21/11/2026)
+
+Nạp xong là chấm được ngay (máy quét mặt sau → AI chấm nháp theo bước → giáo viên duyệt). Dòng 1 đúng thứ tự:
+
+`MaDot | Cau | Buoc | NoiDung | Diem`
+
+- `MaDot`: mã đề gốc (`…-201`); kênh trộn đề chép sang các mã còn lại (các mã cùng đợt dùng chung 1 hướng dẫn chấm).
+- `Cau`: trùng `Cau` của `TU LUAN THEM` (`IV.1`, `IV.2`…). `Buoc`: 1, 2, 3… theo thứ tự chấm.
+- `NoiDung`: một ý chấm cụ thể, kiểm tra được trên bài làm (vd "Viết đúng PTHH 2Na + 2H₂O → 2NaOH + H₂", "Tính đúng n(H₂) = 0.1 mol", "Kết luận %m Na = 46%"). Ý a), b) ghi rõ ở đầu (vd "a) …").
+- `Diem`: **mỗi bước 0.25** (dấu chấm). Tổng các bước của một câu = `Diem` của câu đó trong `TU LUAN THEM`.
+
 Có `TU LUAN THEM` thì vẫn giữ trang hướng dẫn chấm trong file Word cho giáo viên. Đề đã nạp rồi mà thiếu tự luận: gửi file chỉ có tab `TU LUAN THEM` (đủ 4 mã); trang nạp hiện "chỉ thêm tự luận", bài đã chấm giữ nguyên.
 
 ## Đề mẫu đã làm
