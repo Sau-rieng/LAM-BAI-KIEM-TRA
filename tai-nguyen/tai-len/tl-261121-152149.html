@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ôn tập tổng quan Chương VI: Kim loại (KHTN 9 – KNTT)</title>
+  <style>
+    :root {
+      --page-bg: #f3f5f9;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --pill-bg: #f1f3f5;
+      --pill-hover: #e5e7eb;
+      --line-color: #64748b;
+
+      /* B18 - Blue */
+      --b18-fill: #dceeff; --b18-border: #3b82f6; --b18-text: #1e3a8a; --b18-soft: #f0f7ff;
+      /* B19 - Green */
+      --b19-fill: #dcfce7; --b19-border: #16a34a; --b19-text: #14532d; --b19-soft: #f0fdf4;
+      /* B20 - Amber */
+      --b20-fill: #fef3c7; --b20-border: #d97706; --b20-text: #78350f; --b20-soft: #fffbeb;
+      /* B21 - Purple */
+      --b21-fill: #ede9fe; --b21-border: #8b5cf6; --b21-text: #4c1d95; --b21-soft: #f5f3ff;
+
+      /* Feedback colors */
+      --ok-bg: #ecfdf5; --ok-border: #10b981; --ok-text: #065f46;
+      --err-bg: #fef2f2; --err-border: #ef4444; --err-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px 16px 40px;
+      line-height: 1.55;
+    }
+
+    /* Top toolbar */
+    .toolbar {
+      max-width: 1160px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .toolbar-left { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .tab-btn {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tab-btn:hover { background: #f9fafb; color: var(--text); }
+    .tab-btn.active[data-filter="all"] { background: #1f2937; color: #fff; border-color: #1f2937; }
+    .tab-btn.active[data-filter="b18"] { background: var(--b18-border); color: #fff; border-color: var(--b18-border); }
+    .tab-btn.active[data-filter="b19"] { background: var(--b19-border); color: #fff; border-color: var(--b19-border); }
+    .tab-btn.active[data-filter="b20"] { background: var(--b20-border); color: #fff; border-color: var(--b20-border); }
+    .tab-btn.active[data-filter="b21"] { background: var(--b21-border); color: #fff; border-color: var(--b21-border); }
+
+    .toolbar-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    .action-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .action-btn:hover { background: #f3f4f6; color: var(--text); }
+    .action-btn.primary-quiz { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .action-btn.primary-quiz:hover { background: #1d4ed8; }
+
+    /* Main White Mindmap Canvas */
+    .canvas-card {
+      max-width: 1160px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 28px 28px 34px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Root Pill */
+    .root-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .root-pill {
+      background: linear-gradient(135deg, #dceeff, #e0e7ff);
+      border: 2px solid #2563eb;
+      border-radius: 999px;
+      padding: 13px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      min-width: 320px;
+    }
+
+    .root-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    .root-pill .title { font-size: 1.12rem; font-weight: 800; color: #0f172a; }
+    .root-pill .sub { font-size: 0.86rem; font-style: italic; color: var(--text-muted); margin-top: 2px; }
+
+    .root-drawer {
+      max-width: 780px;
+      width: 100%;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .root-drawer.open { max-height: 600px; opacity: 1; margin-top: 14px; }
+
+    /* 4 Lessons Balanced 2x2 Grid */
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 26px 28px;
+      align-items: start;
+    }
+
+    .columns.single-col {
+      grid-template-columns: minmax(0, 680px);
+      justify-content: center;
+    }
+
+    .branch-col { display: flex; flex-direction: column; }
+    .branch-col.hidden { display: none; }
+
+    /* Branch Header Pill */
+    .branch-pill {
+      border-radius: 999px;
+      padding: 12px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+
+    .branch-pill:hover { transform: translateY(-1px); }
+    .branch-pill .b-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .branch-pill .b-sub { font-size: 0.82rem; font-style: italic; color: var(--text-muted); margin-top: 1px; }
+
+    .branch-col[data-branch="b18"] .branch-pill { background: var(--b18-fill); border-color: var(--b18-border); }
+    .branch-col[data-branch="b19"] .branch-pill { background: var(--b19-fill); border-color: var(--b19-border); }
+    .branch-col[data-branch="b20"] .branch-pill { background: var(--b20-fill); border-color: var(--b20-border); }
+    .branch-col[data-branch="b21"] .branch-pill { background: var(--b21-fill); border-color: var(--b21-border); }
+
+    /* Dotted Vertical Tree List */
+    .sub-tree {
+      position: relative;
+      margin-top: 14px;
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sub-tree::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -14px;
+      bottom: 24px;
+      border-left: 2px dotted var(--line-color);
+    }
+
+    .node-item { position: relative; }
+    .node-item::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 23px;
+      width: 14px;
+      border-top: 2px dotted var(--line-color);
+    }
+
+    /* Sub-node Pill Button */
+    .sub-pill {
+      width: 100%;
+      background: var(--pill-bg);
+      border: 1.5px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+
+    .sub-pill:hover { background: var(--pill-hover); border-color: #cbd5e1; }
+    .sub-pill .pill-label { flex: 1; text-align: center; padding-left: 14px; }
+    .sub-pill .chev { font-size: 0.72rem; color: var(--text-muted); transition: transform 0.22s ease; flex-shrink: 0; }
+    .node-item.open .sub-pill .chev { transform: rotate(180deg); }
+
+    .branch-col[data-branch="b18"] .node-item.open .sub-pill { background: var(--b18-fill); border-color: var(--b18-border); color: var(--b18-text); }
+    .branch-col[data-branch="b19"] .node-item.open .sub-pill { background: var(--b19-fill); border-color: var(--b19-border); color: var(--b19-text); }
+    .branch-col[data-branch="b20"] .node-item.open .sub-pill { background: var(--b20-fill); border-color: var(--b20-border); color: var(--b20-text); }
+    .branch-col[data-branch="b21"] .node-item.open .sub-pill { background: var(--b21-fill); border-color: var(--b21-border); color: var(--b21-text); }
+
+    /* Accordion Expandable Content */
+    .drawer {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.34s ease, opacity 0.25s ease, margin-top 0.25s ease;
+    }
+
+    .node-item.open .drawer { max-height: 1800px; opacity: 1; margin-top: 8px; }
+
+    .drawer-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left-width: 4px;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      color: #1f2937;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .root-drawer .drawer-inner,
+    .branch-col[data-branch="b18"] .drawer-inner { border-left-color: var(--b18-border); background: var(--b18-soft); }
+    .branch-col[data-branch="b19"] .drawer-inner { border-left-color: var(--b19-border); background: var(--b19-soft); }
+    .branch-col[data-branch="b20"] .drawer-inner { border-left-color: var(--b20-border); background: var(--b20-soft); }
+    .branch-col[data-branch="b21"] .drawer-inner { border-left-color: var(--b21-border); background: var(--b21-soft); }
+
+    .drawer-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .drawer-tag { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+
+    .zoom-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .zoom-btn:hover { background: #f1f5f9; }
+
+    .d-list { padding-left: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .d-list li strong { color: #0f172a; }
+
+    .eq {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin: 7px 0;
+      overflow-x: auto;
+    }
+    .eq-note { font-size: 0.76rem; font-weight: 600; color: #64748b; margin-bottom: 3px; }
+    .eq-formula { font-family: 'Cambria Math', 'Times New Roman', Georgia, serif; font-size: 0.96rem; color: #0f172a; }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.81rem;
+    }
+    .mini-table th, .mini-table td { border: 1px solid #e2e8f0; padding: 5px 8px; text-align: left; vertical-align: top; }
+    .mini-table th { background: #f8fafc; font-weight: 700; }
+
+    .tip {
+      margin-top: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 0.8rem;
+      color: #78350f;
+    }
+
+    /* Practice Launcher Bar */
+    .practice-bar {
+      margin-top: 11px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .practice-bar .p-label { font-size: 0.8rem; font-weight: 700; color: #1e293b; }
+    .practice-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .q-count-select {
+      padding: 4px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .start-quiz-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.12s ease;
+    }
+    .start-quiz-btn:hover { filter: brightness(0.93); transform: translateY(-1px); }
+
+    .branch-col[data-branch="b18"] .start-quiz-btn { background: var(--b18-border); }
+    .branch-col[data-branch="b19"] .start-quiz-btn { background: var(--b19-border); }
+    .branch-col[data-branch="b20"] .start-quiz-btn { background: var(--b20-border); }
+    .branch-col[data-branch="b21"] .start-quiz-btn { background: var(--b21-border); }
+    .root-drawer .start-quiz-btn { background: #1f2937; }
+
+    .chapter-quiz-row {
+      margin-top: 9px;
+      padding-left: 24px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .chapter-quiz-btn {
+      background: transparent;
+      border: 1px dashed #94a3b8;
+      color: #334155;
+      font-size: 0.79rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chapter-quiz-btn:hover { background: #f1f5f9; color: #0f172a; border-color: #475569; }
+
+    .footer-hint { text-align: center; font-size: 0.82rem; color: var(--text-muted); margin-top: 24px; }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+    .modal-backdrop.show { display: flex; }
+
+    .modal-box {
+      background: #ffffff;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 36px;
+      border-bottom: 2px solid #e2e8f0;
+      background: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .modal-title { font-size: 1.48rem; font-weight: 700; color: #0f172a; }
+    .modal-subtitle { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
+
+    .modal-close {
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .modal-close:hover { background: #cbd5e1; }
+
+    .modal-body { padding: 26px 36px 40px; overflow-y: auto; flex: 1; background: #f8fafc; }
+    .modal-footer {
+      padding: 16px 36px;
+      border-top: 2px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Fullscreen Zoom Content */
+    #zoomModal .modal-body { display: flex; justify-content: center; align-items: flex-start; background: #ffffff; }
+    #zoomModal .zoom-content-wrap { width: 100%; max-width: 1080px; font-size: 1.36rem; line-height: 1.75; }
+    #zoomModal .d-list { gap: 14px; padding-left: 26px; }
+    #zoomModal .eq { padding: 16px 20px; margin: 16px 0; border-radius: 12px; background: #f8fafc; border-left: 5px solid #3b82f6; }
+    #zoomModal .eq-note { font-size: 1.05rem; margin-bottom: 6px; }
+    #zoomModal .eq-formula { font-size: 1.5rem; }
+    #zoomModal .mini-table { font-size: 1.2rem; margin: 18px 0; }
+    #zoomModal .mini-table th, #zoomModal .mini-table td { padding: 12px 16px; }
+    #zoomModal .tip { font-size: 1.15rem; padding: 14px 18px; margin-top: 18px; border-radius: 12px; }
+
+    /* Quiz Styling */
+    .quiz-inner-container { max-width: 960px; margin: 0 auto; }
+    .quiz-setup-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 12px 18px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .quiz-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .quiz-card.correct-card { border-color: var(--ok-border); background: #fafefd; }
+    .quiz-card.wrong-card { border-color: var(--err-border); background: #fffafa; }
+    .quiz-card.hidden-review { display: none; }
+
+    .q-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .q-num {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-size: 0.84rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .q-src {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+    .q-text { font-weight: 700; font-size: 1.1rem; color: #0f172a; margin-bottom: 12px; line-height: 1.55; }
+
+    .opt-list { display: grid; grid-template-columns: 1fr; gap: 9px; }
+    .opt-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 15px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.03rem;
+      background: #ffffff;
+      transition: all 0.15s ease;
+    }
+    .opt-label:hover { background: #f8fafc; border-color: #94a3b8; }
+    .opt-label input[type="radio"] { margin-top: 4px; accent-color: #2563eb; flex-shrink: 0; }
+    .opt-label.is-selected { background: #eff6ff; border-color: #3b82f6; }
+    .opt-label.is-correct { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-text); font-weight: 600; }
+    .opt-label.is-wrong { background: var(--err-bg); border-color: var(--err-border); color: var(--err-text); font-weight: 600; }
+    .opt-badge { margin-left: auto; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+
+    .exp-box { margin-top: 12px; padding: 12px 15px; border-radius: 10px; font-size: 0.95rem; line-height: 1.55; }
+    .exp-box.exp-ok { background: var(--ok-bg); border: 1px solid #a7f3d0; color: var(--ok-text); }
+    .exp-box.exp-err { background: var(--err-bg); border: 1px solid #fecaca; color: var(--err-text); }
+
+    .result-banner {
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1.5px solid #bfdbfe;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .score-big { font-size: 1.55rem; font-weight: 800; color: #1e3a8a; }
+    .score-msg { font-size: 0.98rem; color: #334155; margin-top: 2px; }
+    .review-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .rf-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .rf-btn.active { background: #1f2937; color: #ffffff; border-color: #1f2937; }
+
+    .btn-primary {
+      background: #2563eb; color: #fff; border: none;
+      padding: 10px 20px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary {
+      background: #e2e8f0; color: #1e293b; border: none;
+      padding: 10px 18px; border-radius: 10px; font-size: 0.94rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .progress-text { font-size: 0.96rem; font-weight: 600; color: var(--text-muted); }
+
+    /* In-Modal Confirm Box */
+    .confirm-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+      backdrop-filter: blur(2px);
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-card {
+      background: #ffffff;
+      border-radius: 16px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      border: 1px solid #e2e8f0;
+    }
+    .confirm-card h3 { font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; }
+    .confirm-card p { font-size: 0.96rem; color: #334155; margin-bottom: 18px; line-height: 1.5; }
+    .confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    @media (max-width: 820px) {
+      .canvas-card { padding: 18px 14px 24px; }
+      .columns { grid-template-columns: 1fr; gap: 18px; }
+      .modal-header, .modal-body, .modal-footer { padding-left: 16px; padding-right: 16px; }
+      .q-text { font-size: 1rem; }
+      .opt-label { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="tab-btn active" data-filter="all">Tất cả (Bài 18–21)</button>
+      <button class="tab-btn" data-filter="b18">Bài 18: Tính chất KL</button>
+      <button class="tab-btn" data-filter="b19">Bài 19: Dãy hoạt động HH</button>
+      <button class="tab-btn" data-filter="b20">Bài 20: Tách KL &amp; Hợp kim</button>
+      <button class="tab-btn" data-filter="b21">Bài 21: Phi kim &amp; KL</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="action-btn primary-quiz" id="btnAllQuiz">📝 Đề ôn tổng hợp Chương VI (10–40 câu)</button>
+      <button class="action-btn" id="btnExpandAll">Mở tất cả</button>
+      <button class="action-btn" id="btnCollapseAll">Thu gọn hết</button>
+    </div>
+  </div>
+
+  <main class="canvas-card">
+    <!-- ROOT NODE -->
+    <div class="root-wrap">
+      <div class="root-pill" id="rootPill" role="button" tabindex="0" aria-expanded="false">
+        <div class="title">ÔN TẬP CHƯƠNG VI: KIM LOẠI – PHI KIM (KHTN 9)</div>
+        <div class="sub">Kết nối tri thức với cuộc sống · Bài 18, 19, 20, 21 (SGK tr. 87–102)</div>
+      </div>
+
+      <div class="root-drawer" id="rootDrawer">
+        <div class="drawer-inner">
+          <div class="drawer-top">
+            <span class="drawer-tag">Tổng quan 4 bài Chương VI (KHTN 9 KNTT)</span>
+          </div>
+          <ul class="d-list">
+            <li><strong>Bài 18 – Tính chất chung của kim loại:</strong> tính dẻo; tính dẫn điện, dẫn nhiệt; ánh kim; tác dụng với phi kim (oxygen, chlorine, lưu huỳnh), nước hoặc hơi nước, dung dịch hydrochloric acid, dung dịch muối.</li>
+            <li><strong>Bài 19 – Dãy hoạt động hóa học:</strong> Xây dựng từ thí nghiệm, trật tự <strong>K, Na, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Ag, Au</strong> và ý nghĩa của dãy.</li>
+            <li><strong>Bài 20 – Tách kim loại &amp; Hợp kim:</strong> quặng bauxite, hematite, sphalerite; điện phân nóng chảy, nhiệt luyện, thủy luyện; sản xuất gang, thép; hợp kim (gang, thép, inox, đuy-ra).</li>
+            <li><strong>Bài 21 – Sự khác nhau cơ bản giữa phi kim và kim loại:</strong> ứng dụng của carbon, lưu huỳnh, chlorine; khác nhau về tính dẫn điện, nhiệt độ nóng chảy, nhiệt độ sôi, khối lượng riêng; tạo ion dương, ion âm; tạo oxide base, oxide acid.</li>
+          </ul>
+          <div class="practice-bar">
+            <span class="p-label">📝 Thi thử tổng hợp Chương VI (Ngân hàng 225 câu Biết &amp; Hiểu):</span>
+            <div class="practice-controls">
+              <select class="q-count-select" id="rootQuizCount">
+                <option value="10">10 câu</option>
+                <option value="15">15 câu</option>
+                <option value="20" selected>20 câu</option>
+                <option value="30">30 câu</option>
+                <option value="40">40 câu</option>
+              </select>
+              <button class="start-quiz-btn" data-quiz-topic="all">Bắt đầu làm đề</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 LESSONS GRID (2x2) -->
+    <div class="columns" id="columnsGrid">
+
+      <!-- BÀI 18 -->
+      <section class="branch-col" data-branch="b18">
+        <div class="branch-pill" data-branch-toggle="b18" role="button" tabindex="0" title="Nhấp để mở/thu gọn Bài 18">
+          <div class="b-title">Bài 18: Tính chất chung của kim loại</div>
+          <div class="b-sub">Tính chất vật lí &amp; Tính chất hóa học</div>
+        </div>
+        <div class="sub-tree">
+          <div class="node-item" data-node="b18-vl">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">1. Tính chất vật lí &amp; Ứng dụng</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 18 • Tính chất vật lí</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <ul class="d-list">
+                <li><strong>Tính chất vật lí chung:</strong> tính dẻo; tính dẫn điện, dẫn nhiệt; ánh kim. <em>(tr. 87)</em></li>
+                <li><strong>Ứng dụng (Hình 18.1):</strong> vàng làm đồ trang sức; đồng làm lõi dây điện; nhôm làm xoong, nồi, chảo; thép dùng trong xây dựng, cầu đường. <em>(tr. 88)</em></li>
+                <li><strong>Kim loại tiêu biểu:</strong> dẻo nhất là <strong>vàng</strong>; dẫn điện, dẫn nhiệt tốt nhất là <strong>bạc</strong>; nhiệt độ nóng chảy cao nhất là <strong>tungsten</strong>, thấp nhất là <strong>thủy ngân</strong>. <em>(tr. 88)</em></li>
+                <li><strong>Khác biệt Al, Fe, Au:</strong> Al, Fe phản ứng với oxygen và dung dịch HCl; Au thì không. Nhôm, kẽm, chromium tạo lớp oxide mỏng, bền vững bảo vệ kim loại. <em>(tr. 88–91)</em></li>
+              </ul>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu</option><option value="30">30 câu</option></select><button class="start-quiz-btn" data-quiz-topic="b18-vl">Làm bài</button></div></div>
+            </div></div>
+          </div>
+
+          <div class="node-item" data-node="b18-hh">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">2. Tính chất hóa học của kim loại</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 18 • Tính chất hóa học</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <ul class="d-list">
+                <li><strong>Với oxygen:</strong> hầu hết kim loại (Ca, Mg, Al, Zn, Fe, Cu,...) tạo oxide; một số như <strong>Au</strong> không phản ứng. 3Fe + 2O<sub>2</sub> → Fe<sub>3</sub>O<sub>4</sub> (khói nâu đỏ); 4Al + 3O<sub>2</sub> → 2Al<sub>2</sub>O<sub>3</sub> (chất rắn trắng). <em>(tr. 88)</em></li>
+                <li><strong>Với phi kim khác → muối:</strong> 2Na + Cl<sub>2</sub> → 2NaCl (muối ăn trắng); sắt + chlorine → iron(III) chloride nâu đỏ; Cu + Cl<sub>2</sub> → CuCl<sub>2</sub>; 2Al + 3S → Al<sub>2</sub>S<sub>3</sub>. <em>(tr. 89–90)</em></li>
+                <li><strong>Với nước:</strong> K, Na, Ca,... ở nhiệt độ thường → hydroxide + hydrogen, tỏa nhiều nhiệt (2Na + 2H<sub>2</sub>O → 2NaOH + H<sub>2</sub>); Zn, Fe,... với hơi nước ở nhiệt độ cao → oxide + hydrogen (Zn + H<sub>2</sub>O → ZnO + H<sub>2</sub>); Cu, Ag, Au không tác dụng. <em>(tr. 90)</em></li>
+                <li><strong>Với dung dịch HCl:</strong> một số kim loại → muối + hydrogen: Fe + 2HCl → FeCl<sub>2</sub> + H<sub>2</sub>; 2Al + 6HCl → 2AlCl<sub>3</sub> + 3H<sub>2</sub>. Cu, Ag, Au không tác dụng. <em>(tr. 90)</em></li>
+                <li><strong>Với dung dịch muối:</strong> Fe + CuSO<sub>4</sub> → FeSO<sub>4</sub> + Cu (sắt mạnh hơn đồng); Mg, Al, Zn,... tác dụng với CuSO<sub>4</sub>, AgNO<sub>3</sub> tạo muối mới + kim loại mới (trừ K, Na, Ca,...). <em>(tr. 91)</em></li>
+              </ul>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (45 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu</option><option value="30">30 câu</option></select><button class="start-quiz-btn" data-quiz-topic="b18-hh">Làm bài</button></div></div>
+            </div></div>
+          </div>
+        </div>
+        <div class="chapter-quiz-row"><button class="chapter-quiz-btn" data-lesson-quiz="b18">📝 Ôn tập riêng Bài 18 (20 câu)</button></div>
+      </section>
+
+      <!-- BÀI 19 -->
+      <section class="branch-col" data-branch="b19">
+        <div class="branch-pill" data-branch-toggle="b19" role="button" tabindex="0" title="Nhấp để mở/thu gọn Bài 19">
+          <div class="b-title">Bài 19: Dãy hoạt động hóa học</div>
+          <div class="b-sub">K, Na, Ca … H … Cu, Ag, Au</div>
+        </div>
+        <div class="sub-tree">
+          <div class="node-item" data-node="b19-tt">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">1. Thí nghiệm &amp; Trật tự dãy</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 19 • Xây dựng &amp; Trật tự dãy</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <div class="eq">
+                <div class="eq-note">Dãy hoạt động hóa học – giảm dần từ trái sang phải (tr. 93–94):</div>
+                <div class="eq-formula"><strong>K, Na, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Ag, Au</strong></div>
+              </div>
+              <ul class="d-list">
+                <li><strong>Thí nghiệm:</strong> Na phản ứng với nước, Fe và Cu không; đinh sắt phản ứng với dung dịch HCl, dây đồng không (Fe &gt; H &gt; Cu); dây đồng đẩy bạc khỏi dung dịch AgNO<sub>3</sub> (Cu &gt; Ag) ⇒ <strong>Na, Fe, H, Cu, Ag</strong>. <em>(tr. 92–93)</em></li>
+              </ul>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu</option><option value="30">30 câu</option></select><button class="start-quiz-btn" data-quiz-topic="b19-tt">Làm bài</button></div></div>
+            </div></div>
+          </div>
+
+          <div class="node-item" data-node="b19-yn">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">2. Ý nghĩa &amp; Vận dụng</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 19 • Ý nghĩa của dãy (tr. 94)</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <ul class="d-list">
+                <li><strong>1.</strong> Từ trái sang phải, mức độ hoạt động hóa học <strong>giảm dần</strong>.</li>
+                <li><strong>2.</strong> Kim loại hoạt động hóa học mạnh như <strong>K, Na, Ca,...</strong> tác dụng được với nước ở điều kiện thường, giải phóng khí hydrogen.</li>
+                <li><strong>3.</strong> Kim loại đứng <strong>trước H</strong> có thể tác dụng với dung dịch acid, giải phóng khí hydrogen.</li>
+                <li><strong>4.</strong> Kim loại đứng <strong>trước</strong> (trừ K, Na, Ca,...) có thể đẩy kim loại đứng <strong>sau</strong> ra khỏi dung dịch muối. <em>(tr. 94)</em></li>
+              </ul>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (15–30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu (+Bài 19)</option><option value="30">30 câu (+Bài 19)</option></select><button class="start-quiz-btn" data-quiz-topic="b19-yn">Làm bài</button></div></div>
+            </div></div>
+          </div>
+        </div>
+        <div class="chapter-quiz-row"><button class="chapter-quiz-btn" data-lesson-quiz="b19">📝 Ôn tập riêng Bài 19 (20 câu)</button></div>
+      </section>
+
+      <!-- BÀI 20 -->
+      <section class="branch-col" data-branch="b20">
+        <div class="branch-pill" data-branch-toggle="b20" role="button" tabindex="0" title="Nhấp để mở/thu gọn Bài 20">
+          <div class="b-title">Bài 20: Tách kim loại &amp; Hợp kim</div>
+          <div class="b-sub">Quặng · Lò cao · Gang · Thép · Inox · Đuy-ra</div>
+        </div>
+        <div class="sub-tree">
+          <div class="node-item" data-node="b20-tk">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">1. Tách kim loại &amp; Gang, Thép</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 20 • Tách kim loại &amp; Sản xuất gang thép</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <ul class="d-list">
+                <li><strong>Kim loại trong tự nhiên:</strong> chủ yếu ở dạng hợp chất trong quặng: aluminium oxide (bauxite), iron(III) oxide (hematite), zinc sulfide (sphalerite); vàng có thể ở dạng đơn chất. Quy trình: quặng → làm giàu quặng → hợp chất → phương pháp hóa học → kim loại. <em>(tr. 95, 99)</em></li>
+                <li><strong>Phương pháp tách:</strong> điện phân nóng chảy (Na, Ca, Mg, Al,...): 2Al<sub>2</sub>O<sub>3</sub> → 4Al + 3O<sub>2</sub> (cryolite hạ nhiệt độ nóng chảy); nhiệt luyện (Fe, Zn,...; dùng C, CO, H<sub>2</sub>, Al,...): Fe<sub>2</sub>O<sub>3</sub> + 3CO → 2Fe + 3CO<sub>2</sub>; 2ZnS + 3O<sub>2</sub> → 2ZnO + 2SO<sub>2</sub>, ZnO + C → Zn + CO; thủy luyện (Ag, Au,...). <em>(tr. 95–96)</em></li>
+                <li><strong>Sản xuất gang:</strong> quặng sắt (hematite), than cốc, chất tạo xỉ (CaCO<sub>3</sub>, SiO<sub>2</sub>,...). Tạo CO: C + O<sub>2</sub> → CO<sub>2</sub>; C + CO<sub>2</sub> → 2CO. Tạo gang: 3CO + Fe<sub>2</sub>O<sub>3</sub> → 2Fe + 3CO<sub>2</sub>. Tạo xỉ: CaO + SiO<sub>2</sub> → CaSiO<sub>3</sub> (xỉ nhẹ nổi trên gang lỏng). <em>(tr. 98–99)</em></li>
+                <li><strong>Sản xuất thép:</strong> gang (hoặc thép phế liệu) + khí oxygen; đốt cháy tạp chất C, Si, Mn,... thành oxide: oxide khí (CO<sub>2</sub>, SO<sub>2</sub>) theo khí thải, oxide rắn (SiO<sub>2</sub>, MnO<sub>2</sub>) tạo xỉ. <em>(tr. 98–99)</em></li>
+              </ul>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu</option><option value="30">30 câu</option></select><button class="start-quiz-btn" data-quiz-topic="b20-tk">Làm bài</button></div></div>
+            </div></div>
+          </div>
+
+          <div class="node-item" data-node="b20-hk">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">2. Hợp kim &amp; Các hợp kim phổ biến</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 20 • Hợp kim</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <ul class="d-list">
+                <li><strong>Hợp kim:</strong> vật liệu kim loại có chứa <strong>ít nhất một kim loại cơ bản</strong> và một số kim loại hoặc phi kim khác; vượt trội về <strong>độ cứng, độ bền, khả năng chống ăn mòn và gỉ sét</strong>. <em>(tr. 97)</em></li>
+              </ul>
+              <table class="mini-table">
+                <thead><tr><th>Hợp kim</th><th>Thành phần</th><th>Đặc điểm &amp; Ứng dụng</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Gang</strong></td><td>Fe, C (2%–5%),...</td><td>Cứng và giòn hơn thép → đúc chi tiết máy, ống dẫn nước, nắp cống</td></tr>
+                  <tr><td><strong>Thép</strong></td><td>Fe, C (dưới 2%),...</td><td>Hơn sắt về độ cứng, độ đàn hồi, chịu lực → xây dựng, giao thông</td></tr>
+                  <tr><td><strong>Inox</strong></td><td>Fe, C, chromium, nickel</td><td>Cứng, khó bị gỉ → đồ gia dụng, thiết bị y tế</td></tr>
+                  <tr><td><strong>Đuy-ra (duralumin)</strong></td><td>Al, đồng, manganese, magnesium,...</td><td>Nhẹ tương đương nhôm nhưng bền, cứng hơn nhiều → máy bay, ô tô</td></tr>
+                </tbody>
+              </table>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu</option><option value="30">30 câu</option></select><button class="start-quiz-btn" data-quiz-topic="b20-hk">Làm bài</button></div></div>
+            </div></div>
+          </div>
+        </div>
+        <div class="chapter-quiz-row"><button class="chapter-quiz-btn" data-lesson-quiz="b20">📝 Ôn tập riêng Bài 20 (20 câu)</button></div>
+      </section>
+
+      <!-- BÀI 21 -->
+      <section class="branch-col" data-branch="b21">
+        <div class="branch-pill" data-branch-toggle="b21" role="button" tabindex="0" title="Nhấp để mở/thu gọn Bài 21">
+          <div class="b-title">Bài 21: Phi kim và Kim loại</div>
+          <div class="b-sub">Carbon, lưu huỳnh, chlorine · So sánh VL &amp; HH</div>
+        </div>
+        <div class="sub-tree">
+          <div class="node-item" data-node="b21-ud">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">1. Ứng dụng của carbon, lưu huỳnh, chlorine</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 21 • Một số phi kim quan trọng</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <ul class="d-list">
+                <li><strong>Carbon:</strong> dạng chính là kim cương, than chì (graphite), carbon vô định hình (than gỗ, than xương, mồ hóng). <strong>Tính hấp phụ</strong>: giữ trên bề mặt phân tử chất khí, chất tan (Hình 21.1) → than hoạt tính làm mặt nạ phòng độc, khử màu, khử mùi. Than cốc: nhiên liệu, nguyên liệu luyện kim; than chì: điện cực, chất bôi trơn, ruột bút chì; kim cương: trang sức, mũi khoan, dao cắt kính. <em>(tr. 100)</em></li>
+                <li><strong>Lưu huỳnh:</strong> lưu hóa cao su, dược phẩm, sulfuric acid, thuốc diệt nấm, pháo hoa, diêm. <em>(tr. 101)</em></li>
+                <li><strong>Chlorine:</strong> khử trùng nước sinh hoạt; nước Javel, chất tẩy rửa; tẩy trắng vải, sợi, bột giấy; chất dẻo; hydrochloric acid. <em>(tr. 101–102)</em></li>
+              </ul>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (15–30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu (+Bài 21)</option><option value="30">30 câu (+Bài 21)</option></select><button class="start-quiz-btn" data-quiz-topic="b21-ud">Làm bài</button></div></div>
+            </div></div>
+          </div>
+
+          <div class="node-item" data-node="b21-ss">
+            <button class="sub-pill" aria-expanded="false"><span class="pill-label">2. So sánh Phi kim &amp; Kim loại</span><span class="chev">▼</span></button>
+            <div class="drawer"><div class="drawer-inner">
+              <div class="drawer-top"><span class="drawer-tag">Bài 21 • Khác nhau về Vật lí &amp; Hóa học</span><button class="zoom-btn">Phóng to ⤢</button></div>
+              <table class="mini-table">
+                <thead><tr><th>Tiêu chí</th><th>Kim loại</th><th>Phi kim</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Dẫn điện</strong></td><td>Tốt</td><td>Thường không dẫn; silicon tinh khiết bán dẫn; than chì dẫn điện yếu hơn kim loại</td></tr>
+                  <tr><td><strong>Nhiệt độ nóng chảy, sôi</strong></td><td>Cao hơn</td><td>Phần lớn thấp hơn</td></tr>
+                  <tr><td><strong>Thể (nhiệt độ thường)</strong></td><td>Hầu hết rắn (thủy ngân lỏng)</td><td>Khí (hydrogen, nitrogen, oxygen, fluorine, chlorine), lỏng (bromine), rắn (carbon, silicon, phosphorus, lưu huỳnh)</td></tr>
+                  <tr><td><strong>Khối lượng riêng</strong></td><td>Lớn hơn</td><td>Phần lớn nhỏ hơn</td></tr>
+                  <tr><td><strong>Electron</strong></td><td>Dễ nhường → ion dương: Na → Na<sup>+</sup> + 1e</td><td>Dễ nhận → ion âm: Cl + 1e → Cl<sup>–</sup></td></tr>
+                  <tr><td><strong>Với oxygen</strong></td><td>Thường oxide base: 2Mg + O<sub>2</sub> → 2MgO</td><td>Thường oxide acid: S + O<sub>2</sub> → SO<sub>2</sub></td></tr>
+                </tbody>
+              </table>
+              <p style="margin-top:6px"><em>(tr. 101–102)</em></p>
+            <div class="practice-bar"><span class="p-label">📝 Luyện tập (30 câu):</span><div class="practice-controls"><select class="q-count-select"><option value="10" selected>10 câu</option><option value="15">15 câu</option><option value="20">20 câu</option><option value="30">30 câu</option></select><button class="start-quiz-btn" data-quiz-topic="b21-ss">Làm bài</button></div></div>
+            </div></div>
+          </div>
+        </div>
+        <div class="chapter-quiz-row"><button class="chapter-quiz-btn" data-lesson-quiz="b21">📝 Ôn tập riêng Bài 21 (20 câu)</button></div>
+      </section>
+
+    </div>
+
+    <p class="footer-hint">💡 Nhấp vào từng ô để xem kiến thức SGK KHTN 9 (Bài 18–21), phóng to toàn màn hình trình chiếu hoặc luyện tập (225 câu Biết &amp; Hiểu).</p>
+  </main>
+
+  <!-- Zoom Modal (Fullscreen) -->
+  <div class="modal-backdrop" id="zoomModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div><div class="modal-title" id="zoomTitle">Chi tiết</div></div>
+        <button class="modal-close" id="zoomClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="zoomBody"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal (Fullscreen + In-modal confirm) -->
+  <div class="modal-backdrop" id="quizModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true">
+        <div class="confirm-card">
+          <h3>Xác nhận nộp bài</h3>
+          <p id="confirmText"></p>
+          <div class="confirm-actions">
+            <button class="btn-secondary" id="confirmCancel">Làm tiếp</button>
+            <button class="btn-primary" id="confirmOk">Vẫn nộp bài</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="quizTitle">Luyện tập</div>
+          <div class="modal-subtitle" id="quizSubtitle">Mức độ: Nhận biết &amp; Thông hiểu (Bám sát SGK)</div>
+        </div>
+        <button class="modal-close" id="quizClose" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+      <div class="modal-footer" id="quizFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_BANKS = {"b18-vl": {"title": "Bài 18 • Tính chất vật lí của kim loại", "questions": [{"q": "Kim loại có các tính chất vật lí chung là", "opts": ["tính dẻo; tính dẫn điện, dẫn nhiệt; ánh kim", "tính giòn; tính cách điện; ánh kim", "tính dẻo; tính tan trong nước; có mùi", "tính giòn; tính dẫn điện; không có ánh kim"], "ans": 0, "exp": "Kim loại có các tính chất vật lí chung: tính dẻo; tính dẫn điện, dẫn nhiệt; ánh kim.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Khi uốn các thanh thủy tinh, gỗ, nhôm, thép, những thanh có thể bị uốn cong mà không gãy là", "opts": ["thanh nhôm và thanh thép", "thanh thủy tinh và thanh gỗ", "chỉ thanh thủy tinh", "cả bốn thanh"], "ans": 0, "exp": "Nhôm và thép (thành phần chính là sắt) là kim loại, có tính dẻo nên bị uốn cong mà không gãy.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Khi dùng búa đập vào các vật thể, vật thể nào bị dát mỏng mà không vỡ vụn?", "opts": ["Vật bằng đồng", "Vật bằng sứ", "Vật bằng thủy tinh", "Viên gạch"], "ans": 0, "exp": "Đồng là kim loại có tính dẻo nên bị dát mỏng; sứ, thủy tinh, gạch bị vỡ vụn.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Nhúng thìa nhôm vào cốc nước sôi, tay cầm cán thìa thấy nóng. Hiện tượng này chứng tỏ nhôm có", "opts": ["tính dẫn nhiệt", "tính dẫn điện", "ánh kim", "tính dẻo"], "ans": 0, "exp": "Nhiệt truyền từ nước sôi qua thìa nhôm lên cán thìa: nhôm có tính dẫn nhiệt.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Quan sát bề mặt viên gạch, mảnh nhôm, mảnh đồng. Bề mặt có vẻ sáng lấp lánh (ánh kim) là", "opts": ["mảnh nhôm và mảnh đồng", "chỉ viên gạch", "viên gạch và mảnh nhôm", "không có bề mặt nào"], "ans": 0, "exp": "Nhôm, đồng là kim loại nên có ánh kim; viên gạch không phải kim loại.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Vàng được dùng làm đồ trang sức (Hình 18.1a) chủ yếu dựa trên tính chất vật lí nào?", "opts": ["Ánh kim", "Tính dẫn điện", "Tính dẫn nhiệt", "Nhiệt độ nóng chảy thấp"], "ans": 0, "exp": "Vàng có ánh kim (vẻ sáng lấp lánh) nên được dùng làm đồ trang sức.<br><small>📖 SGK tr. 87–88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Đồng được dùng làm lõi dây điện (Hình 18.1b) dựa trên tính chất vật lí nào?", "opts": ["Tính dẫn điện", "Ánh kim", "Tính dẫn nhiệt", "Không tác dụng với nước"], "ans": 0, "exp": "Đồng dẫn điện tốt nên được dùng làm lõi dây điện.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Nhôm được dùng làm xoong, nồi, chảo (Hình 18.1c) dựa trên tính chất vật lí nào?", "opts": ["Tính dẫn nhiệt", "Ánh kim", "Tính dẫn điện", "Có màu trắng bạc"], "ans": 0, "exp": "Nhôm dẫn nhiệt nên được dùng làm dụng cụ nấu ăn.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Theo Hình 18.1, thép được dùng trong", "opts": ["xây dựng, cầu đường", "làm đồ trang sức", "làm lõi dây điện", "làm nhiệt kế"], "ans": 0, "exp": "Hình 18.1d: Thép được dùng trong xây dựng, cầu đường,...<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Thép được dùng làm khung chịu lực của các công trình xây dựng có thành phần chính là", "opts": ["sắt (iron)", "đồng (copper)", "vàng (gold)", "nhôm (aluminium)"], "ans": 0, "exp": "Thép, thành phần chính là sắt (iron), được dùng làm khung chịu lực của các công trình xây dựng.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Kim loại dẻo thể hiện ở đặc điểm", "opts": ["dễ dát mỏng, dễ kéo sợi", "dễ vỡ vụn khi đập", "dễ tan trong nước", "không dẫn nhiệt"], "ans": 0, "exp": "Kim loại dẻo nhất là kim loại dễ dát mỏng, dễ kéo sợi (vàng).<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Vật nào sau đây KHÔNG có ánh kim?", "opts": ["Viên gạch", "Mảnh nhôm", "Mảnh đồng", "Nhẫn vàng"], "ans": 0, "exp": "Nhôm, đồng, vàng là kim loại nên có ánh kim; viên gạch thì không.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Phát biểu nào sau đây SAI?", "opts": ["Kim loại không dẫn nhiệt", "Kim loại có tính dẻo", "Kim loại dẫn điện", "Kim loại có ánh kim"], "ans": 0, "exp": "Kim loại có tính dẻo; tính dẫn điện, dẫn nhiệt; ánh kim.<br><small>📖 SGK tr. 87 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Kim loại được dùng làm lõi dây điện trong Hình 18.1 là", "opts": ["đồng", "vàng", "sắt", "thủy ngân"], "ans": 0, "exp": "Hình 18.1b: Đồng được dùng làm lõi dây điện.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Dựa vào tính chất của kim loại, lựa chọn nào sau đây phù hợp với mục đích sử dụng?", "opts": ["Dùng nhôm làm nồi nấu ăn vì nhôm dẫn nhiệt", "Dùng gỗ làm lõi dây điện vì gỗ dẫn điện", "Dùng thủy tinh làm dây điện vì thủy tinh dẻo", "Dùng gạch làm đồ trang sức vì gạch có ánh kim"], "ans": 0, "exp": "Em có thể: dựa vào tính chất của kim loại để giải thích việc lựa chọn kim loại cho dây dẫn điện, đồ dùng nấu ăn, đồ trang sức,...<br><small>📖 SGK tr. 88, 91 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Kim loại dẫn điện tốt nhất là", "opts": ["bạc (silver)", "đồng", "vàng", "nhôm"], "ans": 0, "exp": "Kim loại dẫn điện tốt nhất: bạc (silver).<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Kim loại dẫn nhiệt tốt nhất là", "opts": ["bạc", "đồng", "sắt", "nhôm"], "ans": 0, "exp": "Kim loại dẫn nhiệt tốt nhất: bạc.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Kim loại dẻo nhất (dễ dát mỏng, dễ kéo sợi) là", "opts": ["vàng", "sắt", "đồng", "thủy ngân"], "ans": 0, "exp": "Kim loại dẻo nhất (dễ dát mỏng, dễ kéo sợi): vàng.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Kim loại có nhiệt độ nóng chảy cao nhất là", "opts": ["tungsten", "thủy ngân", "bạc", "vàng"], "ans": 0, "exp": "Kim loại có nhiệt độ nóng chảy cao nhất: tungsten.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Kim loại có nhiệt độ nóng chảy thấp nhất là", "opts": ["thủy ngân (mercury)", "tungsten", "sắt", "nhôm"], "ans": 0, "exp": "Kim loại có nhiệt độ nóng chảy thấp nhất: thủy ngân (mercury).<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Biết</small>"}, {"q": "Cặp ghép nào sau đây ĐÚNG?", "opts": ["Bạc – dẫn điện tốt nhất", "Thủy ngân – nhiệt độ nóng chảy cao nhất", "Tungsten – dẻo nhất", "Vàng – nhiệt độ nóng chảy thấp nhất"], "ans": 0, "exp": "Bạc dẫn điện, dẫn nhiệt tốt nhất; vàng dẻo nhất; tungsten có nhiệt độ nóng chảy cao nhất; thủy ngân thấp nhất.<br><small>📖 SGK tr. 88 · Kiến thức: Trình bày tính chất vật lí chung của kim loại và ứng dụng · Mức độ: Hiểu</small>"}, {"q": "Kim loại nào sau đây KHÔNG phản ứng với khí oxygen?", "opts": ["Vàng (Au)", "Sắt (Fe)", "Nhôm (Al)", "Kẽm (Zn)"], "ans": 0, "exp": "Một số kim loại như Au,... không phản ứng với khí oxygen.<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Vì sao đồ trang sức bằng vàng để lâu trong không khí vẫn sáng, đẹp?", "opts": ["Vì vàng không phản ứng với oxygen", "Vì vàng phản ứng với oxygen tạo lớp oxide sáng", "Vì vàng dẫn điện tốt", "Vì vàng có nhiệt độ nóng chảy thấp"], "ans": 0, "exp": "Một số kim loại như Au không phản ứng với khí oxygen nên giữ được ánh kim.<br><small>📖 SGK tr. 88–89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Những kim loại phản ứng được với oxygen ngay ở điều kiện thường, tạo lớp oxide mỏng, bền vững là", "opts": ["nhôm, kẽm, chromium,...", "vàng, bạc", "natri, kali", "thủy ngân, tungsten"], "ans": 0, "exp": "Một số kim loại như nhôm, kẽm, chromium,... phản ứng được với khí oxygen ngay ở điều kiện thường, tạo thành lớp oxide mỏng, bền vững.<br><small>📖 SGK tr. 89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Lớp oxide mỏng, bền vững trên bề mặt nhôm có tác dụng", "opts": ["bảo vệ, ngăn không cho kim loại bên trong phản ứng tiếp với oxygen", "làm nhôm dẫn điện tốt hơn", "làm nhôm tan trong nước", "làm nhôm có nhiệt độ nóng chảy thấp"], "ans": 0, "exp": "Lớp oxide này có tác dụng bảo vệ, ngăn không cho kim loại bên trong phản ứng tiếp với oxygen.<br><small>📖 SGK tr. 89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Cho ba kim loại Al, Fe, Au lần lượt vào dung dịch hydrochloric acid. Kim loại KHÔNG phản ứng là", "opts": ["Au", "Al", "Fe", "Cả Al và Fe"], "ans": 0, "exp": "Fe, Al tác dụng với dung dịch HCl; các kim loại Cu, Ag, Au,... không tác dụng với dung dịch HCl.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Hiểu</small>"}, {"q": "So sánh Al, Fe, Au khi tác dụng với oxygen, nhận xét nào ĐÚNG?", "opts": ["Al và Fe phản ứng tạo oxide; Au không phản ứng", "Cả ba đều phản ứng", "Chỉ Au phản ứng", "Cả ba đều không phản ứng"], "ans": 0, "exp": "3Fe + 2O₂ → Fe₃O₄; 4Al + 3O₂ → 2Al₂O₃; Au không phản ứng với oxygen.<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Đồ vật bằng sắt, nhôm, kẽm, đồng để lâu trong không khí bị mất ánh kim vì", "opts": ["các kim loại này phản ứng với oxygen trong không khí tạo oxide", "các kim loại này bay hơi", "các kim loại này tan trong không khí", "các kim loại này mất tính dẫn điện"], "ans": 0, "exp": "Hầu hết kim loại như Al, Zn, Fe, Cu,... phản ứng với khí oxygen tạo thành oxide kim loại.<br><small>📖 SGK tr. 88–89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Kim loại nào sau đây là kim loại hoạt động hóa học yếu, không tác dụng với nước?", "opts": ["Vàng", "Natri", "Kali", "Calcium"], "ans": 0, "exp": "Một số kim loại như Cu, Ag, Au,... không tác dụng với nước, đó là các kim loại hoạt động hóa học yếu.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Fe₃O₄ (tạo thành khi sắt cháy trong oxygen) có thể viết dưới dạng", "opts": ["FeO·Fe₂O₃", "FeO·FeO", "Fe₂O₃·Fe₂O₃", "Fe·O₄"], "ans": 0, "exp": "Fe₃O₄ (sắt có hóa trị II và III) có thể viết dưới dạng FeO·Fe₂O₃.<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}]}, "b18-hh": {"title": "Bài 18 • Tính chất hóa học của kim loại", "questions": [{"q": "Hầu hết các kim loại như Ca, Mg, Al, Zn, Fe, Cu,... phản ứng với khí oxygen tạo thành", "opts": ["oxide kim loại", "muối chloride", "hydroxide", "muối sulfide"], "ans": 0, "exp": "Hầu hết các kim loại như Ca, Mg, Al, Zn, Fe, Cu,... phản ứng với khí oxygen tạo thành oxide kim loại.<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng sắt cháy trong oxygen là", "opts": ["3Fe + 2O₂ → Fe₃O₄ (t°)", "2Fe + O₂ → 2FeO (t°)", "4Fe + 3O₂ → 2Fe₂O₃ (t°)", "Fe + O₂ → FeO₂ (t°)"], "ans": 0, "exp": "Ví dụ SGK: 3Fe + 2O₂ → Fe₃O₄ (t°).<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Đốt nóng dây sắt rồi đưa vào bình đựng khí oxygen, hiện tượng quan sát được là", "opts": ["dây sắt cháy sáng tạo thành khói màu nâu đỏ", "dây sắt không cháy", "dây sắt tan thành dung dịch xanh", "dây sắt cháy tạo chất rắn màu trắng"], "ans": 0, "exp": "Dây sắt cháy sáng tạo thành khói màu nâu đỏ (Hình 18.2).<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng nhôm cháy trong oxygen là", "opts": ["4Al + 3O₂ → 2Al₂O₃ (t°)", "2Al + O₂ → 2AlO (t°)", "Al + O₂ → AlO₂ (t°)", "2Al + 3O₂ → Al₂O₃ (t°)"], "ans": 0, "exp": "Ví dụ SGK: 4Al + 3O₂ → 2Al₂O₃ (t°).<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Rắc bột nhôm trên ngọn lửa đèn cồn, hiện tượng quan sát được là", "opts": ["nhôm cháy sáng tạo thành chất rắn màu trắng", "nhôm cháy tạo khói màu nâu đỏ", "nhôm không cháy", "nhôm tan thành chất lỏng màu xanh"], "ans": 0, "exp": "Rắc bột nhôm trên ngọn lửa đèn cồn, nhôm cháy sáng tạo thành chất rắn màu trắng.<br><small>📖 SGK tr. 88 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa kẽm và oxygen là", "opts": ["2Zn + O₂ → 2ZnO (t°)", "Zn + O₂ → ZnO₂ (t°)", "Zn + O → ZnO (t°)", "2Zn + 3O₂ → 2ZnO₃ (t°)"], "ans": 0, "exp": "Kẽm phản ứng với oxygen tạo oxide kim loại ZnO (câu hỏi SGK tr. 89).<br><small>📖 SGK tr. 88–89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học của phản ứng giữa đồng và oxygen là", "opts": ["2Cu + O₂ → 2CuO (t°)", "Cu + O₂ → CuO₂ (t°)", "4Cu + O₂ → 2Cu₂O₃ (t°)", "Cu + O → CuO (t°)"], "ans": 0, "exp": "Đồng phản ứng với oxygen tạo oxide kim loại CuO (câu hỏi SGK tr. 89).<br><small>📖 SGK tr. 88–89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Kim loại tác dụng với chlorine tạo thành", "opts": ["muối chloride", "muối sulfide", "oxide kim loại", "hydroxide"], "ans": 0, "exp": "Kim loại tác dụng với chlorine tạo thành muối chloride.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Kim loại tác dụng với lưu huỳnh (sulfur) tạo thành", "opts": ["muối sulfide", "muối chloride", "oxide kim loại", "hydroxide"], "ans": 0, "exp": "Kim loại tác dụng với lưu huỳnh (sulfur) tạo thành muối sulfide.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Đun nóng chảy mẩu natri rồi đưa nhanh vào bình khí chlorine, sản phẩm tạo thành là", "opts": ["tinh thể muối ăn (sodium chloride) màu trắng", "khói màu nâu đỏ iron(III) chloride", "chất rắn màu đen", "khí hydrogen"], "ans": 0, "exp": "Natri cháy trong khí chlorine tạo thành tinh thể muối ăn có màu trắng (Hình 18.3).<br><small>📖 SGK tr. 89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa natri và chlorine là", "opts": ["2Na + Cl₂ → 2NaCl", "Na + Cl₂ → NaCl₂", "Na + Cl → NaCl₂", "2Na + Cl₂ → Na₂Cl₂"], "ans": 0, "exp": "Natri cháy trong khí chlorine tạo thành sodium chloride: 2Na + Cl₂ → 2NaCl.<br><small>📖 SGK tr. 89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Sắt cháy trong khí chlorine tạo thành", "opts": ["muối iron(III) chloride màu nâu đỏ", "muối iron(II) chloride màu trắng", "oxide Fe₃O₄", "tinh thể muối ăn màu trắng"], "ans": 0, "exp": "Sắt cháy trong khí chlorine tạo thành muối iron(III) chloride màu nâu đỏ (Hình 18.4).<br><small>📖 SGK tr. 89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa sắt và chlorine là", "opts": ["2Fe + 3Cl₂ → 2FeCl₃ (t°)", "Fe + Cl₂ → FeCl₂ (t°)", "Fe + 3Cl₂ → FeCl₆ (t°)", "3Fe + 2Cl₂ → Fe₃Cl₄ (t°)"], "ans": 0, "exp": "Sản phẩm là iron(III) chloride (FeCl₃): 2Fe + 3Cl₂ → 2FeCl₃ (t°).<br><small>📖 SGK tr. 89 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học nào sau đây là ví dụ SGK về kim loại tác dụng với chlorine?", "opts": ["Cu + Cl₂ → CuCl₂ (t°)", "2Al + 3S → Al₂S₃ (t°)", "3Fe + 2O₂ → Fe₃O₄ (t°)", "Fe + CuSO₄ → FeSO₄ + Cu"], "ans": 0, "exp": "Ví dụ SGK: Cu + Cl₂ → CuCl₂ (t°).<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa nhôm và lưu huỳnh là", "opts": ["2Al + 3S → Al₂S₃ (t°)", "Al + S → AlS (t°)", "2Al + S → Al₂S (t°)", "Al + 3S → AlS₃ (t°)"], "ans": 0, "exp": "Ví dụ SGK: 2Al + 3S → Al₂S₃ (t°).<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với phi kim (oxygen, chlorine, sulfur) · Mức độ: Biết</small>"}, {"q": "Một số kim loại như K, Na, Ca,... tác dụng với nước ở nhiệt độ thường tạo thành", "opts": ["hydroxide và khí hydrogen", "oxide và khí hydrogen", "muối và khí oxygen", "muối chloride"], "ans": 0, "exp": "Một số kim loại như K, Na, Ca,... tác dụng với nước ở nhiệt độ thường tạo thành hydroxide và khí hydrogen, phản ứng tỏa ra nhiều nhiệt.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa natri và nước là", "opts": ["2Na + 2H₂O → 2NaOH + H₂", "Na + H₂O → NaOH + H₂", "2Na + H₂O → Na₂O + H₂", "Na + 2H₂O → Na(OH)₂ + H₂"], "ans": 0, "exp": "Ví dụ SGK: 2Na + 2H₂O → 2NaOH + H₂.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Phản ứng của K, Na, Ca với nước ở nhiệt độ thường", "opts": ["tỏa ra nhiều nhiệt", "cần đun nóng mạnh", "không xảy ra", "tạo ra kết tủa màu nâu đỏ"], "ans": 0, "exp": "Phản ứng tỏa ra nhiều nhiệt.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Những kim loại như K, Na, Ca tác dụng với nước ở nhiệt độ thường là", "opts": ["kim loại hoạt động hóa học mạnh", "kim loại hoạt động hóa học yếu", "phi kim", "kim loại không phản ứng với oxygen"], "ans": 0, "exp": "Những kim loại này là kim loại hoạt động hóa học mạnh.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Những kim loại như Zn, Fe,... tác dụng với hơi nước ở nhiệt độ cao tạo thành", "opts": ["oxide và khí hydrogen", "hydroxide và khí hydrogen", "muối và khí hydrogen", "không tạo sản phẩm nào"], "ans": 0, "exp": "Những kim loại như Zn, Fe,... tác dụng với hơi nước ở nhiệt độ cao tạo thành oxide và khí hydrogen.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa kẽm và hơi nước ở nhiệt độ cao là", "opts": ["Zn + H₂O → ZnO + H₂ (t°)", "Zn + 2H₂O → Zn(OH)₂ + H₂", "Zn + H₂O → ZnH₂ + O", "2Zn + H₂O → Zn₂O + H₂"], "ans": 0, "exp": "Ví dụ SGK: Zn + H₂O → ZnO + H₂ (t°).<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Ở nhiệt độ cao, hơi nước tác dụng với sắt tạo thành Fe₃O₄. Phương trình hóa học đúng là", "opts": ["3Fe + 4H₂O → Fe₃O₄ + 4H₂ (t°)", "Fe + H₂O → FeO + H₂ (t°)", "3Fe + 2H₂O → Fe₃O₄ + 2H₂ (t°)", "2Fe + 3H₂O → Fe₂O₃ + 3H₂ (t°)"], "ans": 0, "exp": "Câu hỏi SGK tr. 90: sắt + hơi nước → Fe₃O₄ + H₂, cân bằng: 3Fe + 4H₂O → Fe₃O₄ + 4H₂.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Hiểu</small>"}, {"q": "Một số kim loại như Cu, Ag, Au,... không tác dụng với nước, đó là", "opts": ["các kim loại hoạt động hóa học yếu", "các kim loại hoạt động hóa học mạnh", "các phi kim", "các kim loại tác dụng với hơi nước"], "ans": 0, "exp": "Một số kim loại như Cu, Ag, Au,... không tác dụng với nước, đó là các kim loại hoạt động hóa học yếu.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Một số kim loại phản ứng với dung dịch hydrochloric acid tạo thành", "opts": ["muối và giải phóng khí hydrogen", "oxide và khí oxygen", "hydroxide và khí hydrogen", "muối và khí chlorine"], "ans": 0, "exp": "Một số kim loại phản ứng với dung dịch hydrochloric acid tạo thành muối và giải phóng khí hydrogen.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa sắt và dung dịch HCl là", "opts": ["Fe + 2HCl → FeCl₂ + H₂", "2Fe + 6HCl → 2FeCl₃ + 3H₂", "Fe + HCl → FeCl + H₂", "Fe + 2HCl → FeCl₂ + H₂O"], "ans": 0, "exp": "Ví dụ SGK: Fe + 2HCl → FeCl₂ + H₂ (FeCl₂: iron(II) chloride).<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa nhôm và dung dịch HCl là", "opts": ["2Al + 6HCl → 2AlCl₃ + 3H₂", "Al + 3HCl → AlCl₃ + H₂", "Al + 2HCl → AlCl₂ + H₂", "2Al + 3HCl → 2AlCl₃ + H₂"], "ans": 0, "exp": "Ví dụ SGK: 2Al + 6HCl → 2AlCl₃ + 3H₂ (AlCl₃: aluminium chloride).<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Các kim loại nào sau đây KHÔNG tác dụng với dung dịch HCl?", "opts": ["Cu, Ag, Au", "Fe, Al, Zn", "Mg, Fe, Al", "Zn, Mg, Fe"], "ans": 0, "exp": "Các kim loại Cu, Ag, Au,... không tác dụng với dung dịch HCl.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học khi cho magnesium vào dung dịch hydrochloric acid là", "opts": ["Mg + 2HCl → MgCl₂ + H₂", "Mg + HCl → MgCl + H₂", "2Mg + 2HCl → 2MgCl + H₂", "Mg + 2HCl → MgCl₂ + H₂O"], "ans": 0, "exp": "Câu hỏi SGK tr. 90: kim loại + HCl → muối + H₂.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Hiểu</small>"}, {"q": "Trong phòng thí nghiệm, phản ứng của kẽm với dung dịch hydrochloric acid được dùng để", "opts": ["điều chế khí hydrogen", "điều chế khí oxygen", "điều chế khí chlorine", "điều chế kim loại đồng"], "ans": 0, "exp": "Phản ứng của kim loại kẽm với dung dịch hydrochloric acid được dùng để điều chế khí hydrogen trong phòng thí nghiệm.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Iron(II) chloride là tên gọi của chất nào?", "opts": ["FeCl₂", "FeCl₃", "Fe₃O₄", "FeSO₄"], "ans": 0, "exp": "Fe + 2HCl → FeCl₂ (iron(II) chloride) + H₂.<br><small>📖 SGK tr. 90 · Kiến thức: Kim loại tác dụng với nước và dung dịch acid · Mức độ: Biết</small>"}, {"q": "Khi cho đinh sắt vào cốc đựng dung dịch copper(II) sulfate, phản ứng xảy ra là", "opts": ["Fe + CuSO₄ → FeSO₄ + Cu", "Cu + FeSO₄ → CuSO₄ + Fe", "Fe + CuSO₄ → Fe₂(SO₄)₃ + Cu", "Không xảy ra phản ứng"], "ans": 0, "exp": "Ví dụ SGK: Fe + CuSO₄ → FeSO₄ + Cu.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Biết</small>"}, {"q": "Trong phản ứng Fe + CuSO₄ → FeSO₄ + Cu, sắt đã", "opts": ["đẩy đồng ra khỏi muối", "bị đồng đẩy ra khỏi muối", "tác dụng với nước", "không thay đổi"], "ans": 0, "exp": "Sắt đã đẩy đồng ra khỏi muối.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Biết</small>"}, {"q": "Từ phản ứng Fe + CuSO₄ → FeSO₄ + Cu, rút ra kết luận", "opts": ["sắt là kim loại hoạt động hóa học mạnh hơn đồng", "đồng hoạt động hóa học mạnh hơn sắt", "sắt và đồng hoạt động như nhau", "sắt là phi kim"], "ans": 0, "exp": "Sắt đã đẩy đồng ra khỏi muối, sắt là kim loại hoạt động hóa học mạnh hơn đồng.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Hiểu</small>"}, {"q": "Nhiều kim loại như Mg, Al, Zn,... tác dụng với dung dịch CuSO₄, AgNO₃,... tạo thành", "opts": ["muối mới và kim loại mới", "oxide và khí hydrogen", "hydroxide và khí hydrogen", "muối và khí oxygen"], "ans": 0, "exp": "Nhiều kim loại khác như Mg, Al, Zn,... cũng tác dụng được với dung dịch CuSO₄, AgNO₃,... tạo thành muối mới và kim loại mới.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Biết</small>"}, {"q": "Theo SGK, những kim loại nào được trừ ra khi nói kim loại tác dụng với dung dịch muối tạo muối mới và kim loại mới?", "opts": ["Kim loại phản ứng được với nước như K, Na, Ca,...", "Kim loại không tác dụng với nước như Cu, Ag", "Kim loại tác dụng với hơi nước như Zn, Fe", "Không có trường hợp nào"], "ans": 0, "exp": "Khi xảy ra phản ứng hóa học giữa dung dịch muối và kim loại (trừ kim loại phản ứng được với nước như K, Na, Ca,...), thường sản phẩm tạo thành là muối mới và kim loại mới.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Biết</small>"}, {"q": "Copper(II) sulfate là tên gọi của chất nào?", "opts": ["CuSO₄", "FeSO₄", "CuCl₂", "AgNO₃"], "ans": 0, "exp": "Dung dịch copper(II) sulfate (CuSO₄) trong ví dụ Fe + CuSO₄ → FeSO₄ + Cu.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học khi cho kẽm vào dung dịch CuSO₄ là", "opts": ["Zn + CuSO₄ → ZnSO₄ + Cu", "Cu + ZnSO₄ → CuSO₄ + Zn", "Zn + CuSO₄ → ZnO + CuS", "Không xảy ra phản ứng"], "ans": 0, "exp": "Zn cũng tác dụng được với dung dịch CuSO₄ tạo thành muối mới và kim loại mới.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học khi cho magnesium vào dung dịch CuSO₄ là", "opts": ["Mg + CuSO₄ → MgSO₄ + Cu", "Cu + MgSO₄ → CuSO₄ + Mg", "Mg + CuSO₄ → MgO + CuS", "Không xảy ra phản ứng"], "ans": 0, "exp": "Mg tác dụng được với dung dịch CuSO₄ tạo thành muối mới và kim loại mới.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học khi cho nhôm vào dung dịch CuSO₄ là", "opts": ["2Al + 3CuSO₄ → Al₂(SO₄)₃ + 3Cu", "Al + CuSO₄ → AlSO₄ + Cu", "3Cu + Al₂(SO₄)₃ → 3CuSO₄ + 2Al", "Không xảy ra phản ứng"], "ans": 0, "exp": "Al tác dụng được với dung dịch CuSO₄ tạo thành muối mới và kim loại mới.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học khi cho dây đồng vào dung dịch AgNO₃ (Hình 19.2) là", "opts": ["Cu + 2AgNO₃ → Cu(NO₃)₂ + 2Ag", "2Ag + Cu(NO₃)₂ → 2AgNO₃ + Cu", "Cu + AgNO₃ → CuNO₃ + Ag", "Không xảy ra phản ứng"], "ans": 0, "exp": "Đồng đẩy bạc ra khỏi dung dịch AgNO₃ (thí nghiệm 3, Bài 19).<br><small>📖 SGK tr. 93 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Hiểu</small>"}, {"q": "Cặp chất nào sau đây KHÔNG xảy ra phản ứng?", "opts": ["Cu và dung dịch FeSO₄", "Fe và dung dịch CuSO₄", "Zn và dung dịch CuSO₄", "Cu và dung dịch AgNO₃"], "ans": 0, "exp": "Cu đứng sau Fe trong dãy hoạt động hóa học nên không đẩy được Fe ra khỏi dung dịch muối.<br><small>📖 SGK tr. 91, 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Cho bạc vào dung dịch CuSO₄, hiện tượng xảy ra là", "opts": ["không có phản ứng vì Ag đứng sau Cu", "bạc tan, đồng bám vào", "có khí hydrogen thoát ra", "tạo kết tủa màu trắng"], "ans": 0, "exp": "Kim loại đứng trước mới đẩy được kim loại đứng sau ra khỏi dung dịch muối; Ag đứng sau Cu.<br><small>📖 SGK tr. 93–94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Cho đinh sắt vào dung dịch muối nào sau đây thì KHÔNG xảy ra phản ứng?", "opts": ["Dung dịch ZnSO₄", "Dung dịch CuSO₄", "Dung dịch AgNO₃", "Dung dịch CuCl₂"], "ans": 0, "exp": "Zn đứng trước Fe nên Fe không đẩy được Zn ra khỏi dung dịch muối.<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Kim loại nào sau đây đẩy được bạc ra khỏi dung dịch AgNO₃ nhưng KHÔNG tác dụng với dung dịch HCl?", "opts": ["Cu", "Fe", "Zn", "Au"], "ans": 0, "exp": "Cu đứng sau H (không tác dụng với HCl) nhưng đứng trước Ag (đẩy được Ag khỏi muối).<br><small>📖 SGK tr. 93–94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Theo Em đã học, khi xảy ra phản ứng giữa kim loại (trừ K, Na, Ca,...) và dung dịch muối thì sản phẩm thường là", "opts": ["muối mới và kim loại mới", "oxide và khí hydrogen", "hydroxide và khí hydrogen", "acid và base"], "ans": 0, "exp": "Thường sản phẩm tạo thành là muối mới và kim loại mới.<br><small>📖 SGK tr. 91 · Kiến thức: Kim loại tác dụng với dung dịch muối · Mức độ: Biết</small>"}]}, "b19-tt": {"title": "Bài 19 • Thí nghiệm & Trật tự dãy hoạt động HH", "questions": [{"q": "Dãy hoạt động hóa học là", "opts": ["dãy sắp xếp các kim loại theo thứ tự khả năng phản ứng giảm dần", "dãy sắp xếp các kim loại theo khối lượng tăng dần", "dãy sắp xếp các phi kim theo tính dẫn điện", "dãy sắp xếp các kim loại theo nhiệt độ nóng chảy"], "ans": 0, "exp": "Khi quan sát phản ứng của kim loại với các chất khác nhau, có thể sắp xếp các kim loại thành dãy theo thứ tự khả năng phản ứng giảm dần. Dãy này được gọi là dãy hoạt động hóa học.<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Trong hoạt động thí nghiệm Bài 19, cần sắp xếp mức độ hoạt động hóa học của", "opts": ["Na, Fe, H, Cu, Ag", "K, Ca, Mg, Al", "Au, Ag, Pb, Zn", "Na, Ca, Mg, Al"], "ans": 0, "exp": "Sắp xếp mức độ hoạt động hóa học của: Na, Fe, H, Cu, Ag.<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Thí nghiệm 1 (khảo sát phản ứng của Na, Fe, Cu với nước) dùng mẩu natri có kích thước", "opts": ["bằng hạt đậu xanh", "bằng quả trứng", "bằng bàn tay", "nghiền thành bột mịn"], "ans": 0, "exp": "Chuẩn bị: 1 mẩu kim loại natri bằng hạt đậu xanh, đinh sắt và dây đồng.<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Trong thí nghiệm 1, kim loại phản ứng với nước ở nhiệt độ thường là", "opts": ["Na", "Fe", "Cu", "Cả Fe và Cu"], "ans": 0, "exp": "Na phản ứng với nước (Hình 18.5); Fe, Cu không phản ứng với nước ở nhiệt độ thường.<br><small>📖 SGK tr. 90, 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Từ thí nghiệm 1, có thể kết luận", "opts": ["Na hoạt động hóa học mạnh hơn Fe và Cu", "Cu hoạt động hóa học mạnh hơn Na", "Fe hoạt động hóa học mạnh hơn Na", "Na, Fe, Cu hoạt động như nhau"], "ans": 0, "exp": "Dựa vào khả năng phản ứng với nước: Na phản ứng, Fe và Cu không nên Na hoạt động hóa học mạnh hơn.<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Thí nghiệm 2: cho đinh sắt, dây đồng vào hai ống nghiệm đựng dung dịch HCl. Kim loại phản ứng được là", "opts": ["sắt (có bọt khí thoát ra, Hình 19.1)", "đồng", "cả sắt và đồng", "không kim loại nào"], "ans": 0, "exp": "Hình 19.1: phản ứng của đinh sắt với dung dịch HCl; Cu không tác dụng với dung dịch HCl.<br><small>📖 SGK tr. 90, 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Trong thí nghiệm 2, khí thoát ra khi sắt phản ứng với dung dịch HCl là", "opts": ["khí hydrogen", "khí oxygen", "khí chlorine", "khí carbon dioxide"], "ans": 0, "exp": "Sắt đẩy được hydrogen ra khỏi acid: Fe + 2HCl → FeCl₂ + H₂.<br><small>📖 SGK tr. 90, 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Từ thí nghiệm 2, so sánh mức độ hoạt động hóa học của sắt, đồng với hydrogen", "opts": ["Fe mạnh hơn H; Cu yếu hơn H", "Fe yếu hơn H; Cu mạnh hơn H", "Cả Fe và Cu đều yếu hơn H", "Cả Fe và Cu đều mạnh hơn H"], "ans": 0, "exp": "Fe đẩy được hydrogen ra khỏi acid nên Fe đứng trước H; Cu không phản ứng nên Cu đứng sau H.<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Từ thí nghiệm 2, so sánh mức độ hoạt động hóa học của sắt với đồng", "opts": ["Fe mạnh hơn Cu", "Cu mạnh hơn Fe", "Fe và Cu như nhau", "Không so sánh được"], "ans": 0, "exp": "Fe phản ứng với dung dịch HCl còn Cu không nên Fe hoạt động hóa học mạnh hơn Cu.<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Thí nghiệm 3 (so sánh Ag và Cu) cần chuẩn bị", "opts": ["dây đồng, dung dịch AgNO₃ 2%, ống nghiệm, panh", "dây bạc, dung dịch CuSO₄, đèn cồn", "mẩu natri, chậu nước", "đinh sắt, dung dịch HCl"], "ans": 0, "exp": "Chuẩn bị: dây đồng, dung dịch AgNO₃ 2%; ống nghiệm, panh.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Từ thí nghiệm 3 (Cu đẩy được Ag ra khỏi dung dịch AgNO₃), kết luận", "opts": ["Cu hoạt động hóa học mạnh hơn Ag", "Ag hoạt động hóa học mạnh hơn Cu", "Cu và Ag như nhau", "Cu là phi kim"], "ans": 0, "exp": "Kim loại hoạt động mạnh hơn đẩy được kim loại yếu hơn ra khỏi dung dịch muối.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Trong thí nghiệm 3, sau một thời gian quan sát thấy (Hình 19.2)", "opts": ["có chất rắn bám trên dây đồng", "dây đồng không thay đổi", "có khí thoát ra mạnh", "dây đồng bốc cháy"], "ans": 0, "exp": "Cu + 2AgNO₃ → Cu(NO₃)₂ + 2Ag: bạc tạo thành bám trên dây đồng (Hình 19.2).<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Qua ba thí nghiệm, sắp xếp Na, Fe, Cu, Ag và H theo chiều giảm dần mức độ hoạt động hóa học", "opts": ["Na, Fe, H, Cu, Ag", "Ag, Cu, H, Fe, Na", "Na, H, Fe, Cu, Ag", "Fe, Na, H, Ag, Cu"], "ans": 0, "exp": "TN1: Na > Fe, Cu; TN2: Fe > H > Cu; TN3: Cu > Ag ⇒ Na, Fe, H, Cu, Ag.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Dãy hoạt động hóa học được xây dựng từ", "opts": ["thực nghiệm (nhiều thí nghiệm khác nhau)", "khối lượng nguyên tử", "màu sắc kim loại", "nhiệt độ nóng chảy"], "ans": 0, "exp": "Bằng nhiều thí nghiệm khác nhau, người ta sắp xếp các kim loại và hydrogen thành dãy theo chiều giảm dần mức độ hoạt động hóa học.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Trong thí nghiệm 1, mẩu natri được cho vào", "opts": ["chậu thủy tinh đựng nước", "ống nghiệm (1) đựng nước", "dung dịch HCl", "dung dịch AgNO₃"], "ans": 0, "exp": "Tiến hành: cho mẩu natri vào chậu thủy tinh đựng nước, đinh sắt vào ống nghiệm (1), dây đồng vào ống nghiệm (2).<br><small>📖 SGK tr. 92 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Dãy hoạt động hóa học theo SGK là", "opts": ["K, Na, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Ag, Au", "K, Na, Mg, Ca, Al, Fe, Zn, Pb, H, Cu, Ag, Au", "Na, K, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Au, Ag", "K, Na, Ca, Mg, Al, Zn, Fe, H, Pb, Cu, Ag, Au"], "ans": 0, "exp": "Dãy hoạt động hóa học: K, Na, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Ag, Au.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Trong dãy hoạt động hóa học, từ trái sang phải", "opts": ["mức độ hoạt động hóa học giảm dần", "mức độ hoạt động hóa học tăng dần", "khối lượng riêng giảm dần", "mức độ hoạt động không đổi"], "ans": 0, "exp": "Ý nghĩa: từ trái sang phải, mức độ hoạt động hóa học giảm dần.<br><small>📖 SGK tr. 94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Nguyên tố KHÔNG phải kim loại có trong dãy hoạt động hóa học là", "opts": ["hydrogen (H)", "oxygen (O)", "chlorine (Cl)", "lưu huỳnh (S)"], "ans": 0, "exp": "Người ta sắp xếp các kim loại và hydrogen thành dãy theo chiều giảm dần mức độ hoạt động hóa học.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Các kim loại đứng sau H trong dãy hoạt động hóa học là", "opts": ["Cu, Ag, Au", "Pb, Fe, Zn", "K, Na, Ca", "Mg, Al, Zn"], "ans": 0, "exp": "Dãy: K, Na, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Ag, Au.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Kim loại đứng liền trước H trong dãy hoạt động hóa học là", "opts": ["Pb", "Fe", "Cu", "Zn"], "ans": 0, "exp": "Dãy: ... Fe, Pb, H, Cu ...<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Kim loại đứng đầu dãy hoạt động hóa học (hoạt động mạnh nhất trong dãy) là", "opts": ["K", "Na", "Au", "Ca"], "ans": 0, "exp": "Dãy bắt đầu bằng K.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Kim loại đứng cuối dãy hoạt động hóa học (hoạt động yếu nhất trong dãy) là", "opts": ["Au", "Ag", "Cu", "K"], "ans": 0, "exp": "Dãy kết thúc bằng Au.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Trong dãy hoạt động hóa học, Zn đứng giữa hai kim loại", "opts": ["Al và Fe", "Mg và Al", "Fe và Pb", "Cu và Ag"], "ans": 0, "exp": "Dãy: ... Mg, Al, Zn, Fe, Pb ...<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Dãy kim loại nào sau đây được sắp xếp theo chiều mức độ hoạt động hóa học GIẢM dần?", "opts": ["K, Mg, Al, Fe, Cu", "Cu, Fe, Al, Mg, K", "Mg, K, Fe, Al, Cu", "Al, K, Cu, Mg, Fe"], "ans": 0, "exp": "Theo dãy hoạt động hóa học, K đứng trước Mg, Mg trước Al, Al trước Fe, Fe trước Cu.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Dãy kim loại nào sau đây được sắp xếp theo chiều mức độ hoạt động hóa học TĂNG dần?", "opts": ["Ag, Cu, Fe, Zn, Mg", "Mg, Zn, Fe, Cu, Ag", "Cu, Ag, Zn, Fe, Mg", "Fe, Ag, Mg, Cu, Zn"], "ans": 0, "exp": "Đọc dãy hoạt động hóa học từ phải sang trái: Ag, Cu, Fe, Zn, Mg.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Trong các kim loại Al, Fe, Cu, Ag, kim loại hoạt động hóa học mạnh nhất là", "opts": ["Al", "Fe", "Cu", "Ag"], "ans": 0, "exp": "Al đứng trước Fe, Cu, Ag trong dãy hoạt động hóa học.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Trong các kim loại Na, Mg, Zn, Pb, Au, kim loại hoạt động hóa học yếu nhất là", "opts": ["Au", "Pb", "Zn", "Na"], "ans": 0, "exp": "Au đứng cuối dãy hoạt động hóa học.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Các kim loại hoạt động hóa học mạnh như K, Na, Ca nằm ở vị trí nào trong dãy?", "opts": ["Đầu dãy (bên trái)", "Cuối dãy (bên phải)", "Sau H", "Giữa Cu và Ag"], "ans": 0, "exp": "Dãy bắt đầu bằng K, Na, Ca; mức độ hoạt động giảm dần từ trái sang phải.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Các kim loại hoạt động hóa học yếu như Cu, Ag, Au nằm ở vị trí nào trong dãy?", "opts": ["Cuối dãy, sau H", "Đầu dãy, trước Mg", "Giữa Al và Fe", "Trước K"], "ans": 0, "exp": "Cu, Ag, Au đứng sau H, ở cuối dãy.<br><small>📖 SGK tr. 93–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Dãy nào sau đây chỉ gồm các kim loại đứng TRƯỚC H trong dãy hoạt động hóa học?", "opts": ["Mg, Al, Zn, Fe, Pb", "Mg, Al, Cu, Ag", "Zn, Fe, Cu, Au", "Pb, Cu, Ag, Au"], "ans": 0, "exp": "Cu, Ag, Au đứng sau H.<br><small>📖 SGK tr. 93 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}]}, "b19-yn": {"title": "Bài 19 • Ý nghĩa & Vận dụng dãy hoạt động HH", "questions": [{"q": "Theo ý nghĩa của dãy hoạt động hóa học, các kim loại hoạt động hóa học mạnh như K, Na, Ca,...", "opts": ["tác dụng được với nước ở điều kiện thường, giải phóng khí hydrogen", "không tác dụng với nước", "chỉ tác dụng với hơi nước ở nhiệt độ cao", "đẩy được kim loại đứng sau ra khỏi dung dịch muối"], "ans": 0, "exp": "Các kim loại hoạt động hóa học mạnh như K, Na, Ca,... tác dụng được với nước ở điều kiện thường, giải phóng khí hydrogen.<br><small>📖 SGK tr. 94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Theo ý nghĩa của dãy hoạt động hóa học, kim loại đứng trước H", "opts": ["có thể tác dụng với dung dịch acid, giải phóng khí hydrogen", "không tác dụng với dung dịch acid", "tác dụng với acid giải phóng khí oxygen", "luôn tác dụng với nước ở điều kiện thường"], "ans": 0, "exp": "Kim loại đứng trước H có thể tác dụng với dung dịch acid, giải phóng khí hydrogen.<br><small>📖 SGK tr. 94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Theo ý nghĩa của dãy hoạt động hóa học, kim loại đứng trước (trừ K, Na, Ca,...)", "opts": ["có thể đẩy kim loại đứng sau ra khỏi dung dịch muối", "bị kim loại đứng sau đẩy ra khỏi dung dịch muối", "không tác dụng với dung dịch muối", "chỉ tác dụng với phi kim"], "ans": 0, "exp": "Kim loại đứng trước (trừ K, Na, Ca,...) có thể đẩy kim loại đứng sau ra khỏi dung dịch muối.<br><small>📖 SGK tr. 94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Biết</small>"}, {"q": "Dựa vào dãy hoạt động hóa học, phản ứng nào sau đây XẢY RA?", "opts": ["Fe + CuCl₂ → FeCl₂ + Cu", "Cu + FeCl₂ → CuCl₂ + Fe", "Ag + CuSO₄ → Ag₂SO₄ + Cu", "Cu + ZnSO₄ → CuSO₄ + Zn"], "ans": 0, "exp": "Fe đứng trước Cu nên đẩy được Cu ra khỏi dung dịch muối.<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Dựa vào dãy hoạt động hóa học, phản ứng nào sau đây KHÔNG xảy ra?", "opts": ["Cu + 2HCl → CuCl₂ + H₂", "Fe + 2HCl → FeCl₂ + H₂", "2Al + 6HCl → 2AlCl₃ + 3H₂", "Mg + 2HCl → MgCl₂ + H₂"], "ans": 0, "exp": "Cu đứng sau H nên không tác dụng với dung dịch HCl.<br><small>📖 SGK tr. 90, 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại với nước, acid · Mức độ: Hiểu</small>"}, {"q": "Cho lần lượt Mg, Ag, Zn vào ba ống nghiệm đựng dung dịch H₂SO₄ loãng. Kim loại phản ứng là", "opts": ["Mg và Zn", "chỉ Ag", "cả Mg, Ag, Zn", "chỉ Zn"], "ans": 0, "exp": "Mg, Zn đứng trước H nên tác dụng với dung dịch acid giải phóng hydrogen; Ag đứng sau H nên không phản ứng (câu hỏi SGK tr. 94).<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại với nước, acid · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học khi cho kẽm vào dung dịch H₂SO₄ loãng là", "opts": ["Zn + H₂SO₄ → ZnSO₄ + H₂", "Zn + H₂SO₄ → ZnO + SO₂ + H₂O", "2Zn + H₂SO₄ → Zn₂SO₄ + H₂", "Không xảy ra phản ứng"], "ans": 0, "exp": "Zn đứng trước H, tác dụng với dung dịch acid tạo muối và giải phóng khí hydrogen.<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại với nước, acid · Mức độ: Hiểu</small>"}, {"q": "Cho lần lượt Cu, Fe, Ca vào ba cốc nước cất. Kim loại phản ứng với nước ở điều kiện thường là", "opts": ["Ca", "Cu", "Fe", "cả Cu và Fe"], "ans": 0, "exp": "Các kim loại hoạt động hóa học mạnh như K, Na, Ca,... tác dụng được với nước ở điều kiện thường (câu hỏi SGK tr. 94).<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại với nước, acid · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học khi cho calcium vào nước là", "opts": ["Ca + 2H₂O → Ca(OH)₂ + H₂", "Ca + H₂O → CaO + H₂", "Ca + H₂O → CaOH + H", "2Ca + 2H₂O → 2CaOH + H₂"], "ans": 0, "exp": "Ca tác dụng với nước ở nhiệt độ thường tạo thành hydroxide và khí hydrogen.<br><small>📖 SGK tr. 90, 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại với nước, acid · Mức độ: Hiểu</small>"}, {"q": "Cho viên kẽm vào ống nghiệm chứa dung dịch AgNO₃, phương trình hóa học xảy ra là", "opts": ["Zn + 2AgNO₃ → Zn(NO₃)₂ + 2Ag", "2Ag + Zn(NO₃)₂ → 2AgNO₃ + Zn", "Zn + AgNO₃ → ZnNO₃ + Ag", "Không xảy ra phản ứng"], "ans": 0, "exp": "Zn đứng trước Ag nên đẩy được Ag ra khỏi dung dịch muối (câu hỏi SGK tr. 94).<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Cho các kim loại Mg, Fe, Cu, Ag. Số kim loại tác dụng được với dung dịch HCl là", "opts": ["2", "1", "3", "4"], "ans": 0, "exp": "Mg, Fe đứng trước H nên tác dụng với dung dịch HCl; Cu, Ag đứng sau H.<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại với nước, acid · Mức độ: Hiểu</small>"}, {"q": "Cho các kim loại Mg, Fe, Ag, Au. Số kim loại đẩy được đồng ra khỏi dung dịch CuSO₄ là", "opts": ["2", "1", "3", "4"], "ans": 0, "exp": "Mg, Fe đứng trước Cu nên đẩy được Cu; Ag, Au đứng sau Cu.<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Cho lá kẽm lần lượt vào các dung dịch: (1) MgCl₂, (2) FeSO₄, (3) CuSO₄, (4) AgNO₃. Số trường hợp xảy ra phản ứng là", "opts": ["3", "1", "2", "4"], "ans": 0, "exp": "Zn đứng trước Fe, Cu, Ag nên phản ứng với (2), (3), (4); Zn đứng sau Mg nên không phản ứng với (1).<br><small>📖 SGK tr. 94 · Kiến thức: Vận dụng dãy hoạt động hóa học: kim loại đẩy kim loại khỏi muối · Mức độ: Hiểu</small>"}, {"q": "Quan sát đồ vật làm từ sắt, đồng, vàng, bạc. Đồ vật dễ bị gỉ nhất là đồ vật làm từ", "opts": ["sắt", "vàng", "bạc", "đồng"], "ans": 0, "exp": "Fe đứng trước Cu, Ag, Au trong dãy hoạt động hóa học nên dễ tham gia phản ứng hóa học hơn (câu hỏi mở đầu Bài 19).<br><small>📖 SGK tr. 92–94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}, {"q": "Theo SGK, kết quả nào sau đây dự đoán được nhờ dãy hoạt động hóa học?", "opts": ["Phản ứng của kim loại với nước, dung dịch acid, dung dịch muối", "Màu sắc của kim loại", "Khối lượng riêng của kim loại", "Nhiệt độ nóng chảy của kim loại"], "ans": 0, "exp": "Em có thể: dự đoán được phản ứng hóa học của các kim loại với nước, dung dịch acid, dung dịch muối,...<br><small>📖 SGK tr. 94 · Kiến thức: Nêu thứ tự và ý nghĩa dãy hoạt động hóa học của kim loại · Mức độ: Hiểu</small>"}]}, "b20-tk": {"title": "Bài 20 • Tách kim loại & Sản xuất gang, thép", "questions": [{"q": "Trong tự nhiên, kim loại chủ yếu tồn tại ở dạng nào?", "opts": ["Dạng hợp chất (oxide, muối,...) trong quặng", "Dạng đơn chất tinh khiết", "Dạng khí trong không khí", "Dạng hợp kim có sẵn"], "ans": 0, "exp": "Trong tự nhiên, kim loại chủ yếu tồn tại ở trong quặng dưới dạng hợp chất như oxide, muối,...<br><small>📖 SGK tr. 95 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Biết</small>"}, {"q": "Kim loại quý nào sau đây có thể tồn tại dưới dạng đơn chất trong các hạt nhỏ li ti, nằm lẫn trong đất, cát?", "opts": ["Vàng", "Nhôm", "Sắt", "Kẽm"], "ans": 0, "exp": "Một số kim loại quý như vàng có thể tồn tại dưới dạng đơn chất trong các hạt nhỏ li ti, nằm lẫn trong đất, cát.<br><small>📖 SGK tr. 95 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Biết</small>"}, {"q": "Thành phần chủ yếu của quặng bauxite là", "opts": ["aluminium oxide (Al₂O₃)", "iron(III) oxide (Fe₂O₃)", "zinc sulfide (ZnS)", "calcium carbonate (CaCO₃)"], "ans": 0, "exp": "Aluminium oxide là thành phần chủ yếu trong quặng bauxite.<br><small>📖 SGK tr. 95 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Biết</small>"}, {"q": "Thành phần chủ yếu của quặng hematite là", "opts": ["iron(III) oxide (Fe₂O₃)", "aluminium oxide (Al₂O₃)", "zinc sulfide (ZnS)", "zinc oxide (ZnO)"], "ans": 0, "exp": "Iron(III) oxide là thành phần chủ yếu trong quặng hematite.<br><small>📖 SGK tr. 95 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Biết</small>"}, {"q": "Thành phần chủ yếu của quặng sphalerite là", "opts": ["zinc sulfide (ZnS)", "zinc oxide (ZnO)", "iron(III) oxide (Fe₂O₃)", "aluminium oxide (Al₂O₃)"], "ans": 0, "exp": "Zinc sulfide là thành phần chủ yếu trong quặng sphalerite.<br><small>📖 SGK tr. 95 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Biết</small>"}, {"q": "Các bước cơ bản trong quy trình tách kim loại từ quặng theo đúng thứ tự là", "opts": ["Quặng → làm giàu quặng → hợp chất chứa kim loại → phương pháp hóa học → kim loại", "Quặng → phương pháp hóa học → làm giàu quặng → kim loại", "Quặng → hợp kim → làm giàu quặng → kim loại", "Kim loại → làm giàu quặng → hợp chất chứa kim loại → quặng"], "ans": 0, "exp": "Quặng được làm giàu (loại bỏ tạp chất như đất, cát, đá,...) để thu hợp chất chứa kim loại; sau đó dùng phương pháp hóa học phù hợp để tách kim loại.<br><small>📖 SGK tr. 95, 99 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Hiểu</small>"}, {"q": "Phương pháp điện phân nóng chảy được áp dụng để tách các kim loại nào?", "opts": ["Kim loại hoạt động hóa học mạnh như Na, Ca, Mg, Al,...", "Kim loại hoạt động hóa học trung bình như Fe, Zn,...", "Kim loại hoạt động hóa học yếu như Ag, Au,...", "Chỉ dùng để tách sắt"], "ans": 0, "exp": "Phương pháp điện phân nóng chảy được áp dụng để tách các kim loại hoạt động hóa học mạnh như Na, Ca, Mg, Al,...<br><small>📖 SGK tr. 95 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Biết</small>"}, {"q": "Phương pháp nhiệt luyện thường được dùng để tách các kim loại nào?", "opts": ["Kim loại hoạt động hóa học trung bình như Fe, Zn,...", "Kim loại hoạt động hóa học mạnh như Na, Ca, Mg, Al,...", "Kim loại hoạt động hóa học yếu như Ag, Au,...", "Tất cả các kim loại"], "ans": 0, "exp": "Phương pháp nhiệt luyện thường được dùng để tách các kim loại hoạt động hóa học trung bình như Fe, Zn,...<br><small>📖 SGK tr. 95 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Biết</small>"}, {"q": "Phương pháp thủy luyện được dùng để tách các kim loại nào?", "opts": ["Kim loại hoạt động hóa học yếu như Ag, Au,...", "Kim loại hoạt động hóa học mạnh như Na, Mg,...", "Kim loại hoạt động hóa học trung bình như Fe, Zn,...", "Chỉ dùng để tách nhôm"], "ans": 0, "exp": "Ngoài điện phân nóng chảy và nhiệt luyện, người ta còn dùng phương pháp thủy luyện để tách các kim loại hoạt động hóa học yếu như Ag, Au,...<br><small>📖 SGK tr. 95 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Biết</small>"}, {"q": "Trong phương pháp nhiệt luyện, những chất nào có thể dùng để tác dụng với oxide kim loại ở nhiệt độ cao, thu được kim loại?", "opts": ["C, CO, H₂, Al,...", "O₂, CO₂, H₂O", "NaCl, CaCO₃", "SO₂, Cl₂"], "ans": 0, "exp": "Trong phương pháp nhiệt luyện có thể dùng các chất như C, CO, H₂, Al,... tác dụng với oxide kim loại ở nhiệt độ cao.<br><small>📖 SGK tr. 95 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Biết</small>"}, {"q": "Kim loại sodium (natri, Na) được tách bằng phương pháp nào?", "opts": ["Điện phân nóng chảy, vì Na là kim loại hoạt động hóa học mạnh", "Nhiệt luyện bằng carbon như tách kẽm", "Thủy luyện như tách bạc", "Dùng khí CO khử oxide ở nhiệt độ cao"], "ans": 0, "exp": "Na thuộc nhóm kim loại hoạt động hóa học mạnh (Na, Ca, Mg, Al,...) nên được tách bằng điện phân nóng chảy, không tách bằng nhiệt luyện như kẽm.<br><small>📖 SGK tr. 95–96 · Kiến thức: Nêu phương pháp tách kim loại theo mức độ hoạt động hóa học · Mức độ: Hiểu</small>"}, {"q": "Phương trình hóa học của quá trình sản xuất nhôm từ aluminium oxide là", "opts": ["2Al₂O₃ → 4Al + 3O₂ (điện phân nóng chảy, cryolite)", "Al₂O₃ + 3CO → 2Al + 3CO₂ (t°)", "2Al₂O₃ → 2Al + 3O₂ (điện phân nóng chảy)", "Al₂O₃ + 3C → 2Al + 3CO (t°)"], "ans": 0, "exp": "Trong công nghiệp, nhôm được sản xuất bằng điện phân aluminium oxide nóng chảy: 2Al₂O₃ → 4Al + 3O₂ (điện phân nóng chảy, cryolite).<br><small>📖 SGK tr. 96 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Biết</small>"}, {"q": "Trong quá trình điện phân nóng chảy aluminium oxide, cryolite được dùng để", "opts": ["hạ nhiệt độ nóng chảy của Al₂O₃ nhằm tiết kiệm năng lượng", "khử Al₂O₃ thành Al", "làm cực dương của bể điện phân", "tạo xỉ với tạp chất"], "ans": 0, "exp": "Cryolite dùng để hạ nhiệt độ nóng chảy của Al₂O₃ nhằm tiết kiệm năng lượng (chú thích Hình 20.1).<br><small>📖 SGK tr. 96 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Biết</small>"}, {"q": "Ở nhiệt độ cao, sắt được tách ra khỏi iron(III) oxide bởi carbon monoxide theo phương trình", "opts": ["Fe₂O₃ + 3CO → 2Fe + 3CO₂ (t°)", "Fe₂O₃ + CO → 2Fe + CO₂ (t°)", "Fe₂O₃ + 3CO₂ → 2Fe + 3CO (t°)", "2Fe₂O₃ → 4Fe + 3O₂ (điện phân nóng chảy)"], "ans": 0, "exp": "Fe₂O₃ + 3CO → 2Fe + 3CO₂ (t°).<br><small>📖 SGK tr. 96 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Biết</small>"}, {"q": "Để tách kẽm từ quặng chứa zinc sulfide, người ta thực hiện", "opts": ["đốt ZnS trong không khí thành ZnO, sau đó dùng carbon tách kẽm ra khỏi ZnO", "điện phân nóng chảy ZnS", "hòa tan ZnS vào nước rồi lọc lấy kẽm", "dùng khí oxygen tách trực tiếp kẽm khỏi ZnS"], "ans": 0, "exp": "2ZnS + 3O₂ → 2ZnO + 2SO₂ (t°); ZnO + C → Zn + CO (t°).<br><small>📖 SGK tr. 96 · Kiến thức: Tách một số kim loại (Fe, Al, Zn); bài toán tách kim loại · Mức độ: Hiểu</small>"}, {"q": "Nguyên liệu để sản xuất gang gồm", "opts": ["quặng sắt (thường là hematite), than cốc và chất tạo xỉ như CaCO₃, SiO₂,...", "quặng bauxite, cryolite và than chì", "gang, thép phế liệu và khí oxygen", "quặng sphalerite và than cốc"], "ans": 0, "exp": "Nguyên liệu: quặng sắt (thường là quặng hematite với thành phần chính là Fe₂O₃), than cốc và chất tạo xỉ như CaCO₃, SiO₂,...<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Trong lò cao, quặng sắt, than cốc, đá vôi và không khí nóng được đưa vào như thế nào?", "opts": ["Nguyên liệu đưa vào qua miệng lò, chuyển dần từ trên xuống; không khí nóng được thổi từ dưới lên", "Nguyên liệu và không khí nóng đều được đưa vào từ đáy lò", "Nguyên liệu đưa vào từ đáy lò; không khí nóng thổi từ trên xuống", "Không khí nóng được thổi vào cửa tháo gang"], "ans": 0, "exp": "Quặng sắt, than cốc, đá vôi được đưa vào lò cao qua miệng lò, chuyển dần từ trên xuống. Không khí nóng được thổi từ dưới lên (Hình 20.2).<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Các phản ứng tạo thành khí CO trong lò cao là", "opts": ["C + O₂ → CO₂ và C + CO₂ → 2CO (t°)", "CaO + SiO₂ → CaSiO₃ (t°)", "3CO + Fe₂O₃ → 2Fe + 3CO₂ (t°)", "2ZnS + 3O₂ → 2ZnO + 2SO₂ (t°)"], "ans": 0, "exp": "Giai đoạn tạo CO: C + O₂ → CO₂; C + CO₂ → 2CO (t°).<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Trong lò cao, chất phản ứng với các oxide của sắt trong quặng để tạo thành sắt là", "opts": ["khí CO", "khí CO₂", "CaO", "SiO₂"], "ans": 0, "exp": "Khí CO phản ứng với các oxide của sắt trong quặng: 3CO + Fe₂O₃ → 2Fe + 3CO₂ (t°).<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Gang lỏng trong lò cao được tạo thành do", "opts": ["sắt nóng chảy hòa tan một lượng nhỏ carbon cùng một số nguyên tố khác", "sắt kết hợp với CaSiO₃", "CO₂ hòa tan vào sắt nóng chảy", "đá vôi bị nóng chảy"], "ans": 0, "exp": "Sắt nóng chảy hòa tan một lượng nhỏ carbon cùng một số nguyên tố khác tạo thành gang lỏng.<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Trong lò cao, đá vôi bị phân hủy thành chất nào để tạo xỉ?", "opts": ["CaO", "CO", "CaSiO₃", "Fe₂O₃"], "ans": 0, "exp": "Đá vôi bị phân hủy thành CaO. CaO kết hợp với các oxide như SiO₂ trong quặng tạo thành xỉ.<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Phản ứng tạo xỉ trong lò cao là", "opts": ["CaO + SiO₂ → CaSiO₃ (t°)", "C + CO₂ → 2CO (t°)", "3CO + Fe₂O₃ → 2Fe + 3CO₂ (t°)", "C + O₂ → CO₂ (t°)"], "ans": 0, "exp": "CaO kết hợp với SiO₂ trong quặng tạo thành xỉ: CaO + SiO₂ → CaSiO₃ (t°).<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Xỉ được tách ra khỏi gang như thế nào?", "opts": ["Xỉ nhẹ, nổi lên trên gang lỏng và được đưa ra ngoài qua cửa tháo xỉ", "Xỉ nặng, chìm xuống dưới gang lỏng", "Xỉ bay ra ngoài theo khí lò cao", "Xỉ tan vào gang lỏng"], "ans": 0, "exp": "Xỉ nhẹ nổi lên trên gang lỏng, được đưa ra ngoài qua cửa tháo xỉ.<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Hiểu</small>"}, {"q": "Thứ tự các giai đoạn chính của quá trình sản xuất gang là", "opts": ["Tạo CO → tạo gang từ quặng → tạo xỉ, tách xỉ thu được gang", "Tạo xỉ → tạo CO → tạo gang từ quặng", "Tạo gang từ quặng → tạo CO → tạo xỉ", "Thổi oxygen vào gang → tạo CO → tạo xỉ"], "ans": 0, "exp": "Em đã học: tạo CO; tạo gang từ quặng (3CO + Fe₂O₃ → 2Fe + 3CO₂); tạo xỉ, tách xỉ thu được gang (CaO + SiO₂ → CaSiO₃).<br><small>📖 SGK tr. 99 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Hiểu</small>"}, {"q": "Phương pháp tách kim loại nào đã được vận dụng trong quá trình sản xuất gang?", "opts": ["Nhiệt luyện, vì dùng CO tác dụng với oxide sắt ở nhiệt độ cao", "Điện phân nóng chảy", "Thủy luyện", "Làm giàu quặng"], "ans": 0, "exp": "Trong lò cao, CO tác dụng với Fe₂O₃ ở nhiệt độ cao thu được Fe, đây là phương pháp nhiệt luyện (dùng C, CO, H₂,... tác dụng với oxide kim loại ở nhiệt độ cao).<br><small>📖 SGK tr. 95, 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Hiểu</small>"}, {"q": "Nguyên liệu chính để sản xuất thép là", "opts": ["gang (hoặc thép phế liệu) và khí oxygen", "quặng hematite và than cốc", "quặng bauxite và cryolite", "đá vôi và SiO₂"], "ans": 0, "exp": "Nguyên liệu chính để sản xuất thép là gang (hoặc thép phế liệu) và khí oxygen.<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Trong quá trình sản xuất thép, khí oxygen được thổi vào lò đựng gang nóng chảy ở nhiệt độ cao để", "opts": ["đốt cháy các tạp chất trong gang", "tạo khí CO khử oxide sắt", "hạ nhiệt độ nóng chảy của gang", "tăng hàm lượng carbon trong gang"], "ans": 0, "exp": "Khí oxygen được thổi vào lò đựng gang nóng chảy ở nhiệt độ cao, đốt cháy các tạp chất trong gang (Hình 20.3 – lò thổi).<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Biết</small>"}, {"q": "Trong sản xuất thép, các oxide tạo thành được loại bỏ như thế nào?", "opts": ["Oxide dạng khí (CO₂, SO₂,...) thoát ra theo khí thải; oxide dạng rắn (SiO₂, MnO₂,...) tạo xỉ nổi lên trên thép lỏng", "Tất cả oxide đều tan vào thép lỏng", "Oxide dạng khí tạo xỉ; oxide dạng rắn thoát ra theo khí thải", "Tất cả oxide đều thoát ra theo khí thải"], "ans": 0, "exp": "Các oxide tạo thành ở dạng khí (CO₂, SO₂,...) sẽ thoát ra theo khí thải, còn các oxide dạng rắn (SiO₂, MnO₂,...) sẽ tạo xỉ nhẹ, nổi lên trên thép lỏng và được tách ra.<br><small>📖 SGK tr. 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Hiểu</small>"}, {"q": "Bản chất của quá trình sản xuất thép từ gang là", "opts": ["làm giảm các tạp chất C, Si, Mn,... trong gang bằng cách chuyển chúng thành các oxide và loại bỏ", "tăng hàm lượng carbon trong gang", "dùng CO khử oxide sắt trong quặng", "điện phân nóng chảy gang"], "ans": 0, "exp": "Quá trình sản xuất thép: làm giảm các tạp chất C, Si, Mn,... trong gang bằng cách chuyển chúng thành các oxide và loại bỏ chúng để thu được thép.<br><small>📖 SGK tr. 99 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Hiểu</small>"}, {"q": "Phản ứng nào sau đây KHÔNG xảy ra trong lò cao sản xuất gang?", "opts": ["2Al₂O₃ → 4Al + 3O₂", "C + O₂ → CO₂", "3CO + Fe₂O₃ → 2Fe + 3CO₂", "CaO + SiO₂ → CaSiO₃"], "ans": 0, "exp": "2Al₂O₃ → 4Al + 3O₂ là phản ứng điện phân nóng chảy để sản xuất nhôm (tr. 96), không xảy ra trong lò cao.<br><small>📖 SGK tr. 96, 98 · Kiến thức: Sản xuất gang, thép; bài toán sản xuất gang, thép · Mức độ: Hiểu</small>"}]}, "b20-hk": {"title": "Bài 20 • Hợp kim & Các hợp kim phổ biến", "questions": [{"q": "Hợp kim là", "opts": ["vật liệu kim loại có chứa ít nhất một kim loại cơ bản và một số kim loại hoặc phi kim khác", "vật liệu chỉ gồm các phi kim", "một kim loại nguyên chất", "hỗn hợp muối và oxide kim loại"], "ans": 0, "exp": "Hợp kim là vật liệu kim loại có chứa ít nhất một kim loại cơ bản và một số kim loại hoặc phi kim khác.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Kim loại cơ bản trong hợp kim là", "opts": ["kim loại chiếm thành phần chính trong hợp kim", "kim loại có nhiệt độ nóng chảy thấp nhất", "kim loại có giá thành rẻ nhất", "kim loại chiếm phần nhỏ nhất"], "ans": 0, "exp": "Kim loại cơ bản là kim loại chiếm thành phần chính trong hợp kim.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Kim loại cơ bản của thép là", "opts": ["sắt", "nhôm", "đồng", "carbon"], "ans": 0, "exp": "Ví dụ: thép có kim loại cơ bản là sắt.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Kim loại cơ bản của đuy-ra (duralumin) là", "opts": ["nhôm", "sắt", "đồng", "magnesium"], "ans": 0, "exp": "Đuy-ra (duralumin) có kim loại cơ bản là nhôm.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "So với kim loại nguyên chất, hợp kim thường có ưu điểm vượt trội về", "opts": ["độ cứng, độ bền, khả năng chống ăn mòn và gỉ sét", "khả năng tan trong nước", "khả năng dẫn điện tốt hơn mọi kim loại", "khối lượng riêng lớn hơn"], "ans": 0, "exp": "Hợp kim thường có nhiều ưu điểm vượt trội so với kim loại nguyên chất về độ cứng, độ bền, khả năng chống ăn mòn và gỉ sét.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Vì sao trong thực tiễn kim loại thường được sử dụng dưới dạng hợp kim?", "opts": ["Vì hợp kim thường cứng hơn, bền hơn, chống ăn mòn và gỉ sét tốt hơn, phù hợp với nhiều ứng dụng", "Vì kim loại nguyên chất không tồn tại", "Vì hợp kim luôn rẻ hơn kim loại nguyên chất", "Vì hợp kim không chứa kim loại"], "ans": 0, "exp": "Hợp kim có nhiều ưu điểm vượt trội về độ cứng, độ bền, khả năng chống ăn mòn và gỉ sét, phù hợp với nhiều ứng dụng nên được sử dụng phổ biến.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Phát biểu nào sau đây SAI?", "opts": ["Hợp kim chỉ được tạo thành từ các kim loại, không chứa phi kim", "Hợp kim là vật liệu kim loại", "Gang và thép là hợp kim của sắt với carbon và một số nguyên tố khác", "Hợp kim được sử dụng phổ biến trong đời sống và công nghiệp"], "ans": 0, "exp": "Hợp kim có chứa kim loại cơ bản và một số kim loại HOẶC PHI KIM khác (ví dụ carbon trong gang, thép).<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Phi kim có trong thành phần của gang và thép là", "opts": ["carbon", "chlorine", "lưu huỳnh", "oxygen"], "ans": 0, "exp": "Gang và thép là hai hợp kim quan trọng của sắt với carbon và một số nguyên tố khác.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Vật liệu nào sau đây là hợp kim?", "opts": ["Thép", "Kim cương", "Than chì", "Lưu huỳnh"], "ans": 0, "exp": "Thép là hợp kim của sắt với carbon; kim cương, than chì, lưu huỳnh là đơn chất phi kim.<br><small>📖 SGK tr. 97, 100 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Trong cuộc sống, sắt tinh khiết và hợp kim của sắt được sử dụng như thế nào?", "opts": ["Sắt tinh khiết hầu như không được sử dụng; gang và thép được sử dụng phổ biến", "Sắt tinh khiết được dùng nhiều hơn gang, thép", "Gang và thép hầu như không được sử dụng", "Chỉ dùng sắt tinh khiết trong xây dựng"], "ans": 0, "exp": "Sắt tinh khiết hầu như không được sử dụng trong cuộc sống, nhưng các hợp kim của sắt là gang và thép lại được sử dụng phổ biến.<br><small>📖 SGK tr. 98 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Hợp kim Wood (gồm bismuth, chì, thiếc, cadmium) có nhiệt độ nóng chảy khoảng", "opts": ["55.5 °C", "271 °C", "327 °C", "1 000 °C"], "ans": 0, "exp": "Hợp kim của bismuth (50%), chì (25%), thiếc (12.5%) và cadmium (12.5%) có nhiệt độ nóng chảy 55.5 °C.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Hợp kim Wood có nhiệt độ nóng chảy thấp nên được dùng làm", "opts": ["van nước cứu hỏa của hệ thống dập lửa tự động", "vỏ máy bay", "nắp cống", "dụng cụ y tế"], "ans": 0, "exp": "Van nước cứu hỏa của hệ thống dập lửa tự động có thể được làm từ hợp kim có nhiệt độ nóng chảy thấp như hợp kim Wood.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "So với nhiệt độ nóng chảy của các đơn chất Bi, Pb, Sn, Cd, nhiệt độ nóng chảy của hợp kim Wood", "opts": ["thấp hơn nhiều", "cao hơn nhiều", "bằng nhau", "bằng trung bình cộng của chúng"], "ans": 0, "exp": "Hợp kim Wood nóng chảy ở 55.5 °C, trong khi Bi, Pb, Sn, Cd nóng chảy ở 271 °C, 327 °C, 232 °C và 321 °C.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Theo SGK, điểm nóng chảy của hợp kim có thể được thay đổi bằng cách", "opts": ["thay đổi thành phần của hợp kim", "thay đổi màu sắc", "thay đổi hình dạng vật", "thay đổi khối lượng vật"], "ans": 0, "exp": "Điểm nóng chảy có thể được thay đổi bằng cách thay đổi thành phần hợp kim.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Vì sao thép được sử dụng rộng rãi hơn sắt trong các công trình xây dựng, giao thông?", "opts": ["Vì thép có nhiều ưu điểm hơn sắt về độ cứng, độ đàn hồi, khả năng chịu lực", "Vì thép mềm hơn sắt", "Vì thép không chứa sắt", "Vì thép nhẹ hơn nhôm"], "ans": 0, "exp": "Thép có nhiều ưu điểm hơn sắt về độ cứng, độ đàn hồi, khả năng chịu lực nên được sử dụng rộng rãi trong các công trình xây dựng, giao thông.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Hàm lượng carbon trong gang là", "opts": ["từ 2% đến 5%", "dưới 2%", "từ 5% đến 10%", "trên 20%"], "ans": 0, "exp": "Carbon chiếm hàm lượng từ 2% đến 5% trong gang.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Hàm lượng carbon trong thép là", "opts": ["dưới 2%", "từ 2% đến 5%", "từ 5% đến 10%", "trên 20%"], "ans": 0, "exp": "Carbon chiếm hàm lượng dưới 2% trong thép.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Gang và thép là hợp kim của", "opts": ["sắt với carbon và một số nguyên tố khác", "nhôm với đồng", "đồng với carbon", "nhôm với carbon"], "ans": 0, "exp": "Gang và thép là hai hợp kim quan trọng của sắt với carbon và một số nguyên tố khác.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Theo SGK, hiện nay gang và thép là", "opts": ["những vật liệu kim loại phổ biến nhất trên thế giới", "những kim loại nguyên chất", "những vật liệu ít được sử dụng", "những đơn chất phi kim"], "ans": 0, "exp": "Hiện nay, gang và thép là những vật liệu kim loại phổ biến nhất trên thế giới.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "So sánh gang với thép, nhận xét nào ĐÚNG?", "opts": ["Gang cứng và giòn hơn thép", "Gang mềm và dẻo hơn thép", "Gang không chứa carbon", "Thép chứa nhiều carbon hơn gang"], "ans": 0, "exp": "Gang cứng và giòn hơn thép.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Gang thường được dùng để", "opts": ["đúc các chi tiết máy, ống dẫn nước, nắp cống,...", "chế tạo máy bay", "làm thiết bị y tế", "làm ruột bút chì"], "ans": 0, "exp": "Gang cứng và giòn hơn thép, thường được dùng để đúc các chi tiết máy, ống dẫn nước, nắp cống,...<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Thép được sử dụng rộng rãi trong", "opts": ["các công trình xây dựng, giao thông", "sản xuất sulfuric acid", "khử trùng nước sinh hoạt", "làm mặt nạ phòng độc"], "ans": 0, "exp": "Thép được sử dụng rộng rãi trong các công trình xây dựng, giao thông.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Inox là", "opts": ["một loại thép đặc biệt, ngoài sắt và carbon còn có các nguyên tố khác như chromium, nickel", "một loại hợp kim của nhôm với đồng", "sắt nguyên chất", "một loại gang chứa trên 5% carbon"], "ans": 0, "exp": "Inox là một loại thép đặc biệt, ngoài sắt và carbon còn có các nguyên tố khác như chromium, nickel.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Tính chất của inox là", "opts": ["cứng và khó bị gỉ", "mềm và dễ bị gỉ", "nhẹ tương đương nhôm", "có nhiệt độ nóng chảy 55.5 °C"], "ans": 0, "exp": "Inox cứng và khó bị gỉ.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Inox được sử dụng làm", "opts": ["đồ gia dụng, thiết bị y tế,...", "vật liệu chế tạo máy bay", "nắp cống", "van nước cứu hỏa"], "ans": 0, "exp": "Inox cứng và khó bị gỉ, được sử dụng làm đồ gia dụng, thiết bị y tế,...<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Đuy-ra (duralumin) là hợp kim của nhôm với", "opts": ["đồng, manganese, magnesium,...", "sắt và carbon", "chromium và nickel", "bismuth và chì"], "ans": 0, "exp": "Đuy-ra (duralumin) là hợp kim của nhôm với đồng, manganese, magnesium,...<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Đặc điểm của đuy-ra là", "opts": ["nhẹ tương đương nhôm nhưng bền và cứng hơn nhiều", "nặng và giòn hơn gang", "mềm hơn nhôm", "dễ bị gỉ như sắt"], "ans": 0, "exp": "Đuy-ra nhẹ tương đương nhôm nhưng bền và cứng hơn nhiều.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Biết</small>"}, {"q": "Vì sao đuy-ra được dùng làm vật liệu chế tạo máy bay, ô tô?", "opts": ["Vì đuy-ra nhẹ tương đương nhôm nhưng bền và cứng hơn nhiều", "Vì đuy-ra là kim loại nguyên chất", "Vì đuy-ra có hàm lượng carbon từ 2% đến 5%", "Vì đuy-ra có nhiệt độ nóng chảy rất thấp"], "ans": 0, "exp": "Đuy-ra nhẹ tương đương nhôm nhưng bền và cứng hơn nhiều, được dùng làm vật liệu chế tạo máy bay, ô tô,...<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Một mẫu hợp kim của sắt với carbon chứa 3.5% carbon về khối lượng. Mẫu hợp kim này là", "opts": ["gang", "thép", "inox", "đuy-ra"], "ans": 0, "exp": "Hàm lượng carbon 3.5% nằm trong khoảng 2% đến 5% nên đó là gang.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}, {"q": "Một mẫu hợp kim của sắt với carbon chứa 0.8% carbon về khối lượng. Mẫu hợp kim này là", "opts": ["thép", "gang", "đuy-ra", "sắt nguyên chất"], "ans": 0, "exp": "Hàm lượng carbon 0.8% nhỏ hơn 2% nên đó là thép.<br><small>📖 SGK tr. 97 · Kiến thức: Hợp kim: khái niệm, ưu điểm, một số hợp kim phổ biến · Mức độ: Hiểu</small>"}]}, "b21-ud": {"title": "Bài 21 • Ứng dụng của carbon, lưu huỳnh, chlorine", "questions": [{"q": "Ba phi kim quan trọng được tìm hiểu ứng dụng trong Bài 21 là", "opts": ["carbon, lưu huỳnh, chlorine", "oxygen, nitrogen, hydrogen", "phosphorus, silicon, bromine", "fluorine, bromine, iodine"], "ans": 0, "exp": "Mục I – Ứng dụng của một số phi kim quan trọng: 1. Carbon; 2. Lưu huỳnh; 3. Chlorine.<br><small>📖 SGK tr. 100–101 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Trong tự nhiên, đơn chất carbon tồn tại ở các dạng chính nào?", "opts": ["Kim cương, than chì (graphite), carbon vô định hình", "Kim cương, lưu huỳnh, than chì", "Than chì, silicon, phosphorus", "Chỉ ở dạng kim cương"], "ans": 0, "exp": "Trong tự nhiên, đơn chất carbon tồn tại ở các dạng chính như: kim cương, than chì (graphite), carbon vô định hình (than gỗ, than xương, mồ hóng,...).<br><small>📖 SGK tr. 100 · Kiến thức: Các dạng thù hình của carbon, tính hấp phụ của than · Mức độ: Biết</small>"}, {"q": "Than gỗ, than xương, mồ hóng thuộc dạng nào của carbon?", "opts": ["Carbon vô định hình", "Kim cương", "Than chì (graphite)", "Than hoạt tính"], "ans": 0, "exp": "Carbon vô định hình gồm than gỗ, than xương, mồ hóng,...<br><small>📖 SGK tr. 100 · Kiến thức: Các dạng thù hình của carbon, tính hấp phụ của than · Mức độ: Biết</small>"}, {"q": "Tính hấp phụ của than là", "opts": ["khả năng giữ trên bề mặt của nó các phân tử chất khí, chất tan trong dung dịch", "khả năng dẫn điện tốt", "khả năng cháy tỏa nhiều nhiệt", "khả năng tan trong nước"], "ans": 0, "exp": "Các loại than như than gỗ, than xương,... có khả năng giữ trên bề mặt của nó các phân tử chất khí, chất tan trong dung dịch. Tính chất này được gọi là tính hấp phụ.<br><small>📖 SGK tr. 100 · Kiến thức: Các dạng thù hình của carbon, tính hấp phụ của than · Mức độ: Biết</small>"}, {"q": "Trong thí nghiệm ở Hình 21.1, rót nước màu qua lớp bột than gỗ, dung dịch thu được trong cốc bị mất màu vì", "opts": ["than gỗ đã giữ lại các phân tử chất màu trên bề mặt", "than gỗ phản ứng với nước", "bông đã hòa tan chất màu", "chất màu bay hơi hết"], "ans": 0, "exp": "Dung dịch thu được bị mất màu là do than gỗ đã giữ lại các phân tử chất màu trên bề mặt (tính hấp phụ).<br><small>📖 SGK tr. 100 · Kiến thức: Các dạng thù hình của carbon, tính hấp phụ của than · Mức độ: Hiểu</small>"}, {"q": "Dựa vào tính chất nào mà carbon ở dạng than hoạt tính được dùng trong mặt nạ phòng độc, chất khử màu, khử mùi?", "opts": ["Tính hấp phụ", "Tính dẫn điện", "Độ cứng", "Khả năng cháy"], "ans": 0, "exp": "Dựa vào tính hấp phụ, carbon ở dạng than hoạt tính được dùng trong mặt nạ phòng độc, chất khử màu, khử mùi (và trong máy lọc nước, khẩu trang than hoạt tính – mục Em có thể).<br><small>📖 SGK tr. 100, 102 · Kiến thức: Các dạng thù hình của carbon, tính hấp phụ của than · Mức độ: Hiểu</small>"}, {"q": "Than cốc được dùng làm", "opts": ["nhiên liệu, nguyên liệu trong công nghiệp luyện kim", "điện cực, ruột bút chì", "đồ trang sức", "chất khử trùng nước"], "ans": 0, "exp": "Than cốc dùng làm nhiên liệu, nguyên liệu trong công nghiệp luyện kim,...<br><small>📖 SGK tr. 100 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Than chì được dùng làm", "opts": ["điện cực, chất bôi trơn, ruột bút chì", "mũi khoan, dao cắt kính", "mặt nạ phòng độc", "nước Javel"], "ans": 0, "exp": "Than chì làm điện cực, chất bôi trơn, ruột bút chì,...<br><small>📖 SGK tr. 100 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Kim cương được dùng làm", "opts": ["đồ trang sức, mũi khoan, dao cắt kính", "điện cực, ruột bút chì", "nhiên liệu luyện kim", "chất khử màu, khử mùi"], "ans": 0, "exp": "Kim cương làm đồ trang sức, mũi khoan, dao cắt kính,...<br><small>📖 SGK tr. 100 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Lưu huỳnh là nguyên liệu để sản xuất acid nào?", "opts": ["Sulfuric acid", "Hydrochloric acid", "Nitric acid", "Acetic acid"], "ans": 0, "exp": "Lưu huỳnh là nguyên liệu sản xuất sulfuric acid (Hình 21.2).<br><small>📖 SGK tr. 101–102 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Ứng dụng nào sau đây KHÔNG phải của lưu huỳnh (theo Hình 21.2)?", "opts": ["Khử trùng nước sinh hoạt", "Lưu hóa cao su", "Sản xuất dược phẩm", "Sản xuất pháo hoa, diêm"], "ans": 0, "exp": "Hình 21.2: lưu huỳnh dùng để lưu hóa cao su, sản xuất dược phẩm, sulfuric acid, thuốc diệt nấm, pháo hoa, diêm. Khử trùng nước sinh hoạt là ứng dụng của chlorine.<br><small>📖 SGK tr. 101 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Hiểu</small>"}, {"q": "Bản chất của quá trình lưu hóa cao su là", "opts": ["tạo các cầu nối lưu huỳnh giữa các mạch cao su để hình thành mạng lưới chắc chắn, đàn hồi hơn", "đốt cháy cao su bằng lưu huỳnh", "hòa tan cao su vào lưu huỳnh lỏng", "tẩy trắng cao su"], "ans": 0, "exp": "Bản chất của quá trình lưu hóa cao su là tạo các cầu nối lưu huỳnh giữa các mạch cao su để hình thành một mạng lưới có kết cấu chắc chắn, đàn hồi hơn.<br><small>📖 SGK tr. 101 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Hiểu</small>"}, {"q": "Ứng dụng của chlorine trong đời sống là", "opts": ["khử trùng nước sinh hoạt", "làm ruột bút chì", "lưu hóa cao su", "làm mặt nạ phòng độc"], "ans": 0, "exp": "Chlorine có nhiều ứng dụng như khử trùng nước sinh hoạt; sản xuất nước Javel, chất tẩy rửa,...; tẩy trắng vải, sợi, bột giấy,...; sản xuất chất dẻo,...<br><small>📖 SGK tr. 101 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Chất nào sau đây được sản xuất từ chlorine?", "opts": ["Nước Javel", "Sulfuric acid", "Diêm", "Than cốc"], "ans": 0, "exp": "Chlorine dùng sản xuất nước Javel, chất tẩy rửa,..., chất dẻo, hydrochloric acid,...<br><small>📖 SGK tr. 101–102 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Biết</small>"}, {"q": "Cặp phi kim – ứng dụng nào sau đây ghép SAI?", "opts": ["Lưu huỳnh – làm mặt nạ phòng độc", "Than hoạt tính – làm mặt nạ phòng độc", "Chlorine – tẩy trắng vải, sợi, bột giấy", "Kim cương – làm dao cắt kính"], "ans": 0, "exp": "Mặt nạ phòng độc dùng than hoạt tính (tính hấp phụ), không dùng lưu huỳnh.<br><small>📖 SGK tr. 100–101 · Kiến thức: Nêu ứng dụng của một số phi kim (C, S, Cl₂) · Mức độ: Hiểu</small>"}]}, "b21-ss": {"title": "Bài 21 • So sánh Phi kim và Kim loại", "questions": [{"q": "Về tính dẫn điện, nhận xét nào ĐÚNG?", "opts": ["Kim loại dẫn điện tốt, phi kim thường không dẫn điện", "Phi kim dẫn điện tốt hơn kim loại", "Kim loại và phi kim đều không dẫn điện", "Mọi phi kim đều dẫn điện tốt"], "ans": 0, "exp": "Trong khi các kim loại dẫn điện tốt thì phi kim thường không dẫn điện.<br><small>📖 SGK tr. 101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Silicon tinh khiết là", "opts": ["chất bán dẫn", "chất dẫn điện tốt như kim loại", "chất lỏng ở nhiệt độ thường", "một kim loại"], "ans": 0, "exp": "Silicon tinh khiết là chất bán dẫn.<br><small>📖 SGK tr. 101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Nhận xét nào ĐÚNG về tính dẫn điện của than chì?", "opts": ["Than chì có tính dẫn điện nhưng yếu hơn kim loại", "Than chì hoàn toàn không dẫn điện", "Than chì dẫn điện tốt hơn mọi kim loại", "Than chì là chất bán dẫn như silicon"], "ans": 0, "exp": "Than chì có tính dẫn điện nhưng yếu hơn kim loại.<br><small>📖 SGK tr. 101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "So với kim loại, nhiệt độ nóng chảy và nhiệt độ sôi của phần lớn phi kim", "opts": ["thấp hơn", "cao hơn", "bằng nhau", "luôn trên 1 000 °C"], "ans": 0, "exp": "Phần lớn các phi kim có nhiệt độ nóng chảy, nhiệt độ sôi thấp hơn kim loại.<br><small>📖 SGK tr. 101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "So với kim loại, khối lượng riêng của phần lớn phi kim", "opts": ["nhỏ hơn", "lớn hơn", "bằng nhau", "luôn bằng 1 g/cm³"], "ans": 0, "exp": "Phần lớn phi kim có khối lượng riêng nhỏ hơn kim loại.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Ở nhiệt độ thường, hầu hết các kim loại ở thể nào?", "opts": ["Thể rắn (riêng thủy ngân ở thể lỏng)", "Thể khí", "Thể lỏng", "Cả ba thể rắn, lỏng, khí"], "ans": 0, "exp": "Ở nhiệt độ thường, hầu hết các kim loại ở thể rắn (riêng thủy ngân ở thể lỏng).<br><small>📖 SGK tr. 101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Kim loại nào ở thể lỏng ở nhiệt độ thường?", "opts": ["Thủy ngân", "Sắt", "Nhôm", "Đồng"], "ans": 0, "exp": "Riêng thủy ngân ở thể lỏng.<br><small>📖 SGK tr. 101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Phi kim nào ở thể lỏng ở nhiệt độ thường?", "opts": ["Bromine", "Chlorine", "Lưu huỳnh", "Carbon"], "ans": 0, "exp": "Phi kim có thể tồn tại ở thể lỏng (bromine).<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Dãy nào sau đây gồm các phi kim ở thể khí ở nhiệt độ thường?", "opts": ["Hydrogen, nitrogen, oxygen, chlorine", "Carbon, silicon, phosphorus", "Bromine, lưu huỳnh, carbon", "Oxygen, lưu huỳnh, silicon"], "ans": 0, "exp": "Phi kim ở thể khí: hydrogen, nitrogen, oxygen, fluorine, chlorine,...<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Dãy nào sau đây gồm các phi kim ở thể rắn ở nhiệt độ thường?", "opts": ["Carbon, silicon, phosphorus, lưu huỳnh", "Hydrogen, nitrogen, oxygen", "Bromine, chlorine, fluorine", "Oxygen, carbon, bromine"], "ans": 0, "exp": "Phi kim ở thể rắn: carbon, silicon, phosphorus, lưu huỳnh,...<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Phát biểu nào sau đây SAI?", "opts": ["Ở nhiệt độ thường, tất cả phi kim đều ở thể khí", "Ở nhiệt độ thường, hầu hết kim loại ở thể rắn", "Phi kim có thể tồn tại ở thể khí, thể lỏng hay thể rắn", "Phần lớn phi kim có khối lượng riêng nhỏ hơn kim loại"], "ans": 0, "exp": "Phi kim có thể tồn tại ở thể khí (hydrogen, oxygen,...), thể lỏng (bromine) hay thể rắn (carbon, lưu huỳnh,...).<br><small>📖 SGK tr. 101–102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Hiểu</small>"}, {"q": "Một đơn chất X ở nhiệt độ thường là chất rắn, không dẫn điện. X có thể là", "opts": ["lưu huỳnh", "sắt", "nhôm", "thủy ngân"], "ans": 0, "exp": "Kim loại dẫn điện tốt; phi kim thường không dẫn điện. Lưu huỳnh là phi kim ở thể rắn.<br><small>📖 SGK tr. 101–102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Hiểu</small>"}, {"q": "Trong bể điện phân aluminium oxide nóng chảy (Hình 20.1), các điện cực được làm bằng than chì vì", "opts": ["than chì có tính dẫn điện", "than chì có tính hấp phụ", "than chì là kim loại", "than chì có khối lượng riêng lớn"], "ans": 0, "exp": "Than chì có tính dẫn điện (dù yếu hơn kim loại) nên được dùng làm điện cực.<br><small>📖 SGK tr. 96, 100–101 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Hiểu</small>"}, {"q": "Nhận xét nào sau đây ĐÚNG khi so sánh phi kim với kim loại?", "opts": ["Hầu hết phi kim không dẫn điện; phần lớn phi kim có nhiệt độ nóng chảy, nhiệt độ sôi và khối lượng riêng nhỏ hơn kim loại", "Phi kim dẫn điện tốt hơn kim loại", "Phi kim có khối lượng riêng lớn hơn kim loại", "Phi kim có nhiệt độ nóng chảy cao hơn kim loại"], "ans": 0, "exp": "Em đã học: khác với kim loại, hầu hết các nguyên tố phi kim không dẫn điện; phần lớn phi kim có nhiệt độ nóng chảy, nhiệt độ sôi và khối lượng riêng nhỏ hơn so với kim loại.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Hiểu</small>"}, {"q": "Ở nhiệt độ thường, phi kim có thể tồn tại ở", "opts": ["cả ba thể: khí, lỏng, rắn", "chỉ thể khí", "chỉ thể rắn", "chỉ thể lỏng"], "ans": 0, "exp": "Phi kim có thể tồn tại ở thể khí (hydrogen, nitrogen, oxygen,...), thể lỏng (bromine) hay thể rắn (carbon, silicon,...).<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất vật lí của kim loại và phi kim · Mức độ: Biết</small>"}, {"q": "Trong phản ứng hóa học, các kim loại có xu hướng", "opts": ["dễ nhường electron để tạo ra ion dương", "dễ nhận electron để tạo ra ion âm", "không nhường, không nhận electron", "dễ nhường electron để tạo ra ion âm"], "ans": 0, "exp": "Trong phản ứng hóa học, các kim loại dễ nhường electron để tạo ra ion dương.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Trong phản ứng với kim loại, các phi kim có xu hướng", "opts": ["dễ nhận electron tạo ion âm", "dễ nhường electron tạo ion dương", "dễ nhận electron tạo ion dương", "không tạo ion"], "ans": 0, "exp": "Các phi kim dễ nhận electron tạo ion âm.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Quá trình tạo ion của nguyên tử sodium (Na) được biểu diễn đúng là", "opts": ["Na → Na⁺ + 1e", "Na + 1e → Na⁻", "Na → Na⁻ + 1e", "Na + 1e → Na⁺"], "ans": 0, "exp": "Ví dụ SGK: Na → Na⁺ + 1e.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Quá trình tạo ion của nguyên tử chlorine (Cl) được biểu diễn đúng là", "opts": ["Cl + 1e → Cl⁻", "Cl → Cl⁺ + 1e", "Cl → Cl⁻ + 1e", "Cl + 1e → Cl⁺"], "ans": 0, "exp": "Ví dụ SGK: Cl + 1e → Cl⁻.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa sodium và chlorine là", "opts": ["2Na + Cl₂ → 2NaCl", "Na + Cl₂ → NaCl₂", "2Na + Cl → 2NaCl", "Na + Cl₂ → 2NaCl"], "ans": 0, "exp": "Ví dụ SGK: 2Na + Cl₂ → 2NaCl.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Trong phản ứng 2Na + Cl₂ → 2NaCl, chất nhường electron là", "opts": ["Na (kim loại)", "Cl₂ (phi kim)", "NaCl", "Cả Na và Cl₂"], "ans": 0, "exp": "Trong phản ứng giữa kim loại và phi kim, kim loại là chất nhường electron, phi kim là chất nhận electron.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Hiểu</small>"}, {"q": "Trong NaCl tạo thành từ phản ứng giữa Na và Cl₂, các ion là", "opts": ["Na⁺ và Cl⁻", "Na⁻ và Cl⁺", "Na²⁺ và Cl²⁻", "Không có ion"], "ans": 0, "exp": "Na nhường 1e tạo ion dương Na⁺; Cl nhận 1e tạo ion âm Cl⁻.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Hiểu</small>"}, {"q": "Kim loại tác dụng với oxygen thường tạo thành", "opts": ["oxide base", "oxide acid", "acid", "muối"], "ans": 0, "exp": "Kim loại tác dụng với oxygen thường tạo thành oxide base.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Phi kim tác dụng với oxygen thường tạo thành", "opts": ["oxide acid", "oxide base", "base", "muối"], "ans": 0, "exp": "Phi kim tác dụng với oxygen thường tạo thành oxide acid.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa magnesium và oxygen là", "opts": ["2Mg + O₂ → 2MgO (t°)", "Mg + O₂ → MgO₂ (t°)", "2Mg + O₂ → Mg₂O (t°)", "Mg + O → MgO (t°)"], "ans": 0, "exp": "Ví dụ SGK: 2Mg + O₂ → 2MgO (t°).<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "Phương trình hóa học của phản ứng giữa lưu huỳnh và oxygen là", "opts": ["S + O₂ → SO₂ (t°)", "2S + O₂ → 2SO (t°)", "S + O → SO (t°)", "S + 2O₂ → SO₄ (t°)"], "ans": 0, "exp": "Ví dụ SGK: S + O₂ → SO₂ (t°).<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Biết</small>"}, {"q": "MgO (tạo thành khi đốt magnesium trong oxygen) thuộc loại", "opts": ["oxide base", "oxide acid", "acid", "phi kim"], "ans": 0, "exp": "Mg là kim loại; kim loại tác dụng với oxygen thường tạo oxide base.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Hiểu</small>"}, {"q": "SO₂ (tạo thành khi đốt lưu huỳnh trong oxygen) thuộc loại", "opts": ["oxide acid", "oxide base", "base", "kim loại"], "ans": 0, "exp": "S là phi kim; phi kim tác dụng với oxygen thường tạo oxide acid.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Hiểu</small>"}, {"q": "Khi đốt magnesium và lưu huỳnh trong oxygen, nhận xét nào ĐÚNG?", "opts": ["Magnesium tạo oxide base MgO; lưu huỳnh tạo oxide acid SO₂", "Cả hai đều tạo oxide base", "Cả hai đều tạo oxide acid", "Magnesium tạo oxide acid; lưu huỳnh tạo oxide base"], "ans": 0, "exp": "2Mg + O₂ → 2MgO (oxide base); S + O₂ → SO₂ (oxide acid).<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Hiểu</small>"}, {"q": "Phát biểu nào sau đây SAI?", "opts": ["Trong phản ứng với kim loại, phi kim dễ nhường electron tạo ion dương", "Kim loại dễ nhường electron tạo ion dương", "Nhiều kim loại tác dụng với oxygen tạo thành oxide base", "Phi kim tác dụng với oxygen thường tạo thành oxide acid"], "ans": 0, "exp": "Trong phản ứng giữa kim loại và phi kim, kim loại là chất nhường electron, phi kim là chất nhận electron tạo ion âm.<br><small>📖 SGK tr. 102 · Kiến thức: So sánh tính chất hóa học của kim loại và phi kim (ion, oxide) · Mức độ: Hiểu</small>"}]}};
+
+    const LESSON_TOPICS = {
+      b18: { name: 'Bài 18: Tính chất chung của kim loại', topics: ['b18-vl', 'b18-hh'] },
+      b19: { name: 'Bài 19: Dãy hoạt động hóa học', topics: ['b19-tt', 'b19-yn'] },
+      b20: { name: 'Bài 20: Tách kim loại & Hợp kim', topics: ['b20-tk', 'b20-hk'] },
+      b21: { name: 'Bài 21: Phi kim và Kim loại', topics: ['b21-ud', 'b21-ss'] }
+    };
+
+    const rootPill = document.getElementById('rootPill');
+    const rootDrawer = document.getElementById('rootDrawer');
+    const nodeItems = document.querySelectorAll('.node-item');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const branchCols = document.querySelectorAll('.branch-col');
+    const columnsGrid = document.getElementById('columnsGrid');
+
+    /* ================= MIND MAP INTERACTION ================= */
+    function toggleRoot() {
+      const isOpen = rootDrawer.classList.toggle('open');
+      rootPill.setAttribute('aria-expanded', isOpen);
+    }
+    rootPill.addEventListener('click', toggleRoot);
+    rootPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRoot(); }
+    });
+
+    nodeItems.forEach(item => {
+      const btn = item.querySelector('.sub-pill');
+      btn.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        nodeItems.forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            other.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (!wasOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          item.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-branch-toggle]').forEach(header => {
+      header.addEventListener('click', () => {
+        const col = header.closest('.branch-col');
+        const items = col.querySelectorAll('.node-item');
+        const anyOpen = Array.from(items).some(i => i.classList.contains('open'));
+        items.forEach(i => {
+          i.classList.toggle('open', !anyOpen);
+          i.querySelector('.sub-pill').setAttribute('aria-expanded', String(!anyOpen));
+        });
+      });
+    });
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+        if (filter === 'all') {
+          branchCols.forEach(col => col.classList.remove('hidden'));
+          columnsGrid.classList.remove('single-col');
+        } else {
+          branchCols.forEach(col => col.classList.toggle('hidden', col.dataset.branch !== filter));
+          columnsGrid.classList.add('single-col');
+        }
+      });
+    });
+
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      nodeItems.forEach(item => {
+        if (!item.closest('.branch-col').classList.contains('hidden')) {
+          item.classList.add('open');
+          item.querySelector('.sub-pill').setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      rootDrawer.classList.remove('open');
+      rootPill.setAttribute('aria-expanded', 'false');
+      nodeItems.forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.sub-pill').setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    /* ================= ZOOM MODAL (FULLSCREEN) ================= */
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomTitle = document.getElementById('zoomTitle');
+    const zoomBody = document.getElementById('zoomBody');
+
+    function closeZoomModal() {
+      zoomModal.classList.remove('show');
+      if (document.fullscreenElement === zoomModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.querySelectorAll('.zoom-btn').forEach(zbtn => {
+      zbtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = zbtn.closest('.node-item');
+        const label = item.querySelector('.pill-label').textContent.trim();
+        const branchName = item.closest('.branch-col').querySelector('.b-title').textContent.trim();
+        const innerClone = item.querySelector('.drawer-inner').cloneNode(true);
+        const topBar = innerClone.querySelector('.drawer-top');
+        const pBar = innerClone.querySelector('.practice-bar');
+        if (topBar) topBar.remove();
+        if (pBar) pBar.remove();
+
+        zoomTitle.textContent = `${branchName} — ${label}`;
+        zoomBody.innerHTML = '';
+        innerClone.className = 'zoom-content-wrap';
+        innerClone.removeAttribute('style');
+        zoomBody.appendChild(innerClone);
+        zoomModal.classList.add('show');
+
+        if (zoomModal.requestFullscreen) {
+          zoomModal.requestFullscreen().catch(() => {});
+        } else if (zoomModal.webkitRequestFullscreen) {
+          zoomModal.webkitRequestFullscreen();
+        }
+      });
+    });
+
+    document.getElementById('zoomClose').addEventListener('click', closeZoomModal);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && zoomModal.classList.contains('show')) {
+        zoomModal.classList.remove('show');
+      }
+    });
+
+    /* ================= QUIZ ENGINE ================= */
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSubtitle = document.getElementById('quizSubtitle');
+    const quizBody = document.getElementById('quizBody');
+    const quizFooter = document.getElementById('quizFooter');
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    const confirmText = document.getElementById('confirmText');
+
+    let activeQuiz = {
+      topic: null,
+      count: 20,
+      questions: [],
+      userAnswers: {},
+      submitted: false
+    };
+
+    function shuffleArray(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getLessonOfTopic(topicId) {
+      for (const [lk, obj] of Object.entries(LESSON_TOPICS)) {
+        if (obj.topics.includes(topicId)) return lk;
+      }
+      return null;
+    }
+
+    function buildQuestionSet(topicId, desiredCount) {
+      let pool = [];
+      let label = '';
+
+      if (topicId === 'all') {
+        label = 'Tổng hợp Chương VI: Kim loại – Phi kim (Bài 18–21)';
+        const lessonKeys = Object.keys(LESSON_TOPICS);
+        const perLesson = Math.floor(desiredCount / lessonKeys.length);
+        let remainder = desiredCount - perLesson * lessonKeys.length;
+        lessonKeys.forEach(lk => {
+          let lPool = [];
+          LESSON_TOPICS[lk].topics.forEach(tid => {
+            QUIZ_BANKS[tid].questions.forEach(q => lPool.push({ ...q, source: QUIZ_BANKS[tid].title }));
+          });
+          lPool = shuffleArray(lPool);
+          const take = perLesson + (remainder > 0 ? 1 : 0);
+          if (remainder > 0) remainder--;
+          pool = pool.concat(lPool.slice(0, take));
+        });
+        pool = shuffleArray(pool);
+      } else if (LESSON_TOPICS[topicId]) {
+        label = LESSON_TOPICS[topicId].name;
+        LESSON_TOPICS[topicId].topics.forEach(tid => {
+          QUIZ_BANKS[tid].questions.forEach(q => pool.push({ ...q, source: QUIZ_BANKS[tid].title }));
+        });
+        pool = shuffleArray(pool).slice(0, desiredCount);
+      } else {
+        const primaryBank = QUIZ_BANKS[topicId];
+        label = primaryBank.title;
+        const primaryQs = shuffleArray(primaryBank.questions.map(q => ({ ...q, source: primaryBank.title })));
+        if (desiredCount <= primaryQs.length) {
+          pool = primaryQs.slice(0, desiredCount);
+        } else {
+          pool = primaryQs.slice();
+          const lk = getLessonOfTopic(topicId);
+          const siblings = (LESSON_TOPICS[lk]?.topics || []).filter(id => id !== topicId);
+          let extra = [];
+          siblings.forEach(sibId => {
+            QUIZ_BANKS[sibId].questions.forEach(q => extra.push({ ...q, source: QUIZ_BANKS[sibId].title }));
+          });
+          extra = shuffleArray(extra);
+          pool = pool.concat(extra.slice(0, desiredCount - pool.length));
+        }
+      }
+
+      const prepared = pool.map((q, idx) => {
+        const indexedOpts = q.opts.map((text, i) => ({ text, isCorrect: i === q.ans }));
+        const shuffledOpts = shuffleArray(indexedOpts);
+        const newAns = shuffledOpts.findIndex(o => o.isCorrect);
+        return {
+          idx,
+          q: q.q,
+          opts: shuffledOpts.map(o => o.text),
+          ans: newAns,
+          exp: q.exp,
+          source: q.source
+        };
+      });
+
+      return { label, questions: prepared };
+    }
+
+    function openQuiz(topicId, count) {
+      const { label, questions } = buildQuestionSet(topicId, count);
+      activeQuiz = {
+        topic: topicId,
+        count: questions.length,
+        questions,
+        userAnswers: {},
+        submitted: false
+      };
+
+      confirmOverlay.classList.remove('show');
+      quizTitle.textContent = `Luyện tập: ${label}`;
+      quizSubtitle.textContent = `${questions.length} câu trắc nghiệm • Mức độ Biết & Hiểu (bám sát SGK KHTN 9 KNTT)`;
+      renderQuizTaking();
+      quizModal.classList.add('show');
+      quizBody.scrollTop = 0;
+
+      if (!document.fullscreenElement) {
+        if (quizModal.requestFullscreen) {
+          quizModal.requestFullscreen().catch(() => {});
+        } else if (quizModal.webkitRequestFullscreen) {
+          quizModal.webkitRequestFullscreen();
+        }
+      }
+    }
+
+    const LETTERS = ['A', 'B', 'C', 'D'];
+
+    function renderQuizTaking() {
+      const countOptions = activeQuiz.topic === 'all' ? [10, 15, 20, 30, 40] : [10, 15, 20, 30];
+      const setupBar = `
+        <div class="quiz-setup-bar">
+          <span>Chọn nhanh số câu muốn luyện tập:</span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${countOptions.map(n => `
+              <button class="rf-btn ${activeQuiz.count === n ? 'active' : ''}" data-change-count="${n}">${n} câu</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => `
+        <div class="quiz-card" data-qidx="${i}">
+          <div class="q-meta">
+            <span class="q-num">Câu ${i + 1}</span>
+            <span class="q-src">${item.source}</span>
+          </div>
+          <div class="q-text">${item.q}</div>
+          <div class="opt-list">
+            ${item.opts.map((optText, oIdx) => `
+              <label class="opt-label" data-q="${i}" data-o="${oIdx}">
+                <input type="radio" name="q_${i}" value="${oIdx}" />
+                <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${setupBar}${cardsHtml}</div>`;
+
+      quizBody.querySelectorAll('[data-change-count]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openQuiz(activeQuiz.topic, parseInt(btn.dataset.changeCount, 10));
+        });
+      });
+
+      quizBody.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const qIdx = parseInt(radio.name.split('_')[1], 10);
+          const oIdx = parseInt(radio.value, 10);
+          activeQuiz.userAnswers[qIdx] = oIdx;
+
+          const card = quizBody.querySelector(`.quiz-card[data-qidx="${qIdx}"]`);
+          card.querySelectorAll('.opt-label').forEach(lbl => {
+            lbl.classList.toggle('is-selected', parseInt(lbl.dataset.o, 10) === oIdx);
+          });
+          updateProgressFooter();
+        });
+      });
+
+      updateProgressFooter();
+    }
+
+    function updateProgressFooter() {
+      const answeredCount = Object.keys(activeQuiz.userAnswers).length;
+      const total = activeQuiz.questions.length;
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đã chọn: <strong>${answeredCount} / ${total}</strong> câu</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCancelQuiz">Đóng</button>
+          <button class="btn-primary" id="btnSubmitQuiz">Nộp bài &amp; Xem giải thích</button>
+        </div>
+      `;
+      document.getElementById('btnCancelQuiz').addEventListener('click', closeQuizModal);
+      document.getElementById('btnSubmitQuiz').addEventListener('click', submitQuiz);
+    }
+
+    document.getElementById('confirmCancel').addEventListener('click', () => confirmOverlay.classList.remove('show'));
+    document.getElementById('confirmOk').addEventListener('click', () => {
+      confirmOverlay.classList.remove('show');
+      finalizeSubmitQuiz();
+    });
+
+    function submitQuiz() {
+      const total = activeQuiz.questions.length;
+      const answered = Object.keys(activeQuiz.userAnswers).length;
+      if (answered < total) {
+        confirmText.textContent = `Bạn mới làm ${answered}/${total} câu. Các câu chưa chọn sẽ bị tính là sai. Bạn vẫn muốn nộp bài chứ?`;
+        confirmOverlay.classList.add('show');
+        return;
+      }
+      finalizeSubmitQuiz();
+    }
+
+    function finalizeSubmitQuiz() {
+      const total = activeQuiz.questions.length;
+      activeQuiz.submitted = true;
+      let correctCount = 0;
+
+      const cardsHtml = activeQuiz.questions.map((item, i) => {
+        const userAns = activeQuiz.userAnswers.hasOwnProperty(i) ? activeQuiz.userAnswers[i] : -1;
+        const isCorrect = userAns === item.ans;
+        if (isCorrect) correctCount++;
+
+        const optsHtml = item.opts.map((optText, oIdx) => {
+          let cls = 'opt-label';
+          let badge = '';
+          if (oIdx === item.ans) {
+            cls += ' is-correct';
+            badge = '<span class="opt-badge">✓ Đáp án đúng</span>';
+          } else if (oIdx === userAns && !isCorrect) {
+            cls += ' is-wrong';
+            badge = '<span class="opt-badge">✕ Bạn chọn</span>';
+          }
+          return `
+            <div class="${cls}" style="cursor:default;">
+              <span><strong>${LETTERS[oIdx]}.</strong> ${optText}</span>
+              ${badge}
+            </div>
+          `;
+        }).join('');
+
+        let expHtml = isCorrect
+          ? `<div class="exp-box exp-ok"><strong>✓ Chính xác!</strong> ${item.exp}</div>`
+          : `<div class="exp-box exp-err"><strong>✕ Vì sao sai?</strong> ${
+              userAns === -1
+                ? 'Bạn chưa chọn đáp án cho câu này.'
+                : `Bạn đã chọn <strong>${LETTERS[userAns]}</strong> (chưa đúng). Đáp án đúng là <strong>${LETTERS[item.ans]}</strong>.`
+            }<br/><strong>Giải thích:</strong> ${item.exp}</div>`;
+
+        return `
+          <div class="quiz-card ${isCorrect ? 'correct-card' : 'wrong-card'}" data-is-correct="${isCorrect}">
+            <div class="q-meta">
+              <span class="q-num">Câu ${i + 1}</span>
+              <span class="q-src">${item.source}</span>
+            </div>
+            <div class="q-text">${item.q}</div>
+            <div class="opt-list">${optsHtml}</div>
+            ${expHtml}
+          </div>
+        `;
+      }).join('');
+
+      const pct = Math.round((correctCount / total) * 100);
+      const wrongCount = total - correctCount;
+      let msg = 'Cần ôn lại kỹ lý thuyết ở sơ đồ rồi làm lại nhé!';
+      if (pct >= 90) msg = 'Xuất sắc! Bạn nắm rất chắc kiến thức Chương VI.';
+      else if (pct >= 70) msg = 'Khá tốt! Xem lại các câu sai bên dưới để đạt điểm tối đa.';
+      else if (pct >= 50) msg = 'Đạt mức trung bình. Tập trung ôn lại các bài có nhiều câu sai nhé.';
+
+      const bannerHtml = `
+        <div class="result-banner">
+          <div>
+            <div class="score-big">Kết quả: ${correctCount} / ${total} câu đúng (${pct}%)</div>
+            <div class="score-msg">${msg}</div>
+          </div>
+          <div class="review-filters">
+            <button class="rf-btn active" data-review-filter="all">Tất cả (${total})</button>
+            <button class="rf-btn" data-review-filter="wrong">Chỉ xem câu sai (${wrongCount})</button>
+          </div>
+        </div>
+      `;
+
+      quizBody.innerHTML = `<div class="quiz-inner-container">${bannerHtml}${cardsHtml}</div>`;
+      quizBody.scrollTop = 0;
+
+      quizBody.querySelectorAll('[data-review-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.reviewFilter;
+          quizBody.querySelectorAll('[data-review-filter]').forEach(b => b.classList.toggle('active', b === btn));
+          quizBody.querySelectorAll('.quiz-card').forEach(card => {
+            card.classList.toggle('hidden-review', mode === 'wrong' && card.dataset.isCorrect === 'true');
+          });
+        });
+      });
+
+      quizFooter.innerHTML = `
+        <span class="progress-text">Đúng: <strong>${correctCount}</strong> • Sai: <strong>${wrongCount}</strong></span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" id="btnCloseAfter">Quay lại sơ đồ</button>
+          <button class="btn-primary" id="btnRetryQuiz">🔄 Làm lại (đảo đề mới)</button>
+        </div>
+      `;
+      document.getElementById('btnCloseAfter').addEventListener('click', closeQuizModal);
+      document.getElementById('btnRetryQuiz').addEventListener('click', () => openQuiz(activeQuiz.topic, activeQuiz.count));
+    }
+
+    function closeQuizModal() {
+      confirmOverlay.classList.remove('show');
+      quizModal.classList.remove('show');
+      if (document.fullscreenElement === quizModal) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.getElementById('quizClose').addEventListener('click', closeQuizModal);
+    quizModal.addEventListener('click', e => { if (e.target === quizModal) closeQuizModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (confirmOverlay.classList.contains('show')) confirmOverlay.classList.remove('show');
+        else { closeZoomModal(); closeQuizModal(); }
+      }
+    });
+
+    document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.dataset.quizTopic;
+        const bar = btn.closest('.practice-bar');
+        const select = bar.querySelector('.q-count-select');
+        const count = select ? parseInt(select.value, 10) : 10;
+        openQuiz(topicId, count);
+      });
+    });
+
+    document.querySelectorAll('.chapter-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openQuiz(btn.dataset.lessonQuiz, 20);
+      });
+    });
+
+    document.getElementById('btnAllQuiz').addEventListener('click', () => {
+      openQuiz('all', 20);
+    });
+  </script>
+</body>
+</html>
