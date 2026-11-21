@@ -1830,7 +1830,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var css = CSS_IN.replace('@page{size:A4;margin:12mm 12mm 14mm}', '@page{size:A4;margin:0}') + '@media screen{.trang{padding:0;width:210mm}}.trang svg{display:block}';
     w.document.open(); w.document.write('<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>PHIEU-TRA-LOI</title><style>' + css + '</style></head><body>' +
       thanhIn(kieu === 'hai' ? 'Phiếu 2 mặt: trắc nghiệm + tự luận · A4' : 'Phiếu trả lời trắc nghiệm · A4') + '<div class="thanh" style="background:#fff7d6;color:#000;font-weight:400;position:static">Khi in: khổ A4, tỉ lệ 100% (không chọn “Vừa trang”), lề 0 hoặc mặc định, bỏ “Đầu trang và chân trang”.' +
-      (kieu === 'hai' ? ' Chọn <b>in 2 mặt (lật theo cạnh dài)</b>: trang 1 mặt trước, trang 2 mặt sau. Học sinh tô SBD ở <b>cả 2 mặt</b> – máy quét mặt sau tự ghép bài tự luận vào đúng em.' : '') +
+      (kieu === 'hai' ? ' Chọn <b>in 2 mặt (lật theo cạnh dài)</b>: trang 1 mặt trước, trang 2 mặt sau. Mặt sau học sinh ghi họ tên, lớp và <b>tô 2 số cuối SBD</b> – máy quét mặt sau tự ghép bài tự luận vào đúng em.' : '') +
       ' In thử 1 tờ, đặt lên tờ mẫu xem 4 ô vuông đen ở 4 góc còn đủ.</div>' +
       '<div class="trang">' + PHIEU.ve() + '</div>' + (kieu === 'hai' && PHIEU.veSau ? '<div class="trang" style="page-break-before:always">' + PHIEU.veSau() + '</div>' : '') + '</body></html>');
     w.document.close();
@@ -1996,15 +1996,28 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
     ghepSau(m, c.toDataURL('image/jpeg', 0.85), c.toDataURL('image/jpeg', 0.8), this);
   };
+  // Mặt sau chỉ tô 2 số cuối SBD → tìm em trong lớp đang quét (danh sách lớp + các tờ đã quét)
+  function timEm2(so2) {
+    var tap = {}; Object.keys(Q.ten || {}).forEach(function (m) { tap[m] = 1; }); (Q.hs || []).forEach(function (x) { tap[x.mahs] = 1; }); (Q.may || []).forEach(function (o) { if (/^\d{8}$/.test(o.sbd)) tap[o.sbd] = 1; });
+    var c = Object.keys(tap).filter(function (m) { return /^\d{8}$/.test(m) && m.slice(-2) === so2; });
+    if (c.length > 1 && Q.matSau && c.indexOf(Q.matSau.sbd) >= 0) return { sbd: Q.matSau.sbd };   // trùng 2 số cuối (lớp ghép nhiều lớp): ưu tiên em vừa quét mặt trước
+    if (c.length > 1) return { trung: c };
+    if (c.length === 1) return { sbd: c[0] };
+    if (!Object.keys(Q.ten || {}).length && Q.lop && Q.lop.tiento) return { sbd: Q.lop.tiento + so2 };   // chưa có danh sách lớp: tạm theo tiền tố lớp
+    return {};
+  }
   function xuLySau(rs, A) {
-    var sbd = rs.sbd.s, hien = sbd.replace(/_/g, '□').replace(/\*/g, '✱');
+    var so2 = rs.sbd.s, hien = so2.replace(/_/g, '□').replace(/\*/g, '✱');
     Q.trangThai = 'doiTo';
-    if (Q.cuoi && Q.cuoi.sau === sbd) { $('qTT').textContent = 'Mặt sau này vừa ghép xong. Lật sang tờ khác.'; return; }
-    Q.cuoi = { sau: sbd };
+    if (Q.cuoi && Q.cuoi.sau === so2) { $('qTT').textContent = 'Mặt sau này vừa ghép xong. Lật sang tờ khác.'; return; }
+    Q.cuoi = { sau: so2 };
     if (!Q.coTL) { bip(false); hienKQ('loi', 'Đây là mặt sau (tự luận)', 'Bài này không có phần tự luận · quét mặt trước'); return; }
-    if (rs.sbd.loi) { bip(false); hienKQ('loi', '⚠ Mặt sau: SBD tô chưa rõ (' + esc(hien) + ')', Q.matSau ? 'Bấm 📷 bên dưới để ghép vào ' + esc(Q.matSau.ten) : 'Chụp mặt sau cho em ở ✍ Chấm tự luận'); return; }
-    if (Object.keys(Q.ten).length && !Q.ten[sbd]) { bip(false); hienKQ('loi', '⚠ Mặt sau: SBD ' + esc(sbd) + ' không có trong lớp ' + esc(Q.lop.ten), 'Kiểm tra lại SBD em tô ở mặt sau'); return; }
-    var m = { sbd: sbd, ten: Q.ten[sbd] || ('SBD ' + sbd) };
+    var nut = Q.matSau ? 'Bấm 📷 bên dưới để ghép vào ' + esc(Q.matSau.ten) : 'Chụp mặt sau cho em ở ✍ Chấm tự luận';
+    if (rs.sbd.loi) { bip(false); hienKQ('loi', '⚠ Mặt sau: 2 số cuối SBD tô chưa rõ (' + esc(hien) + ')', nut); return; }
+    var e = timEm2(so2);
+    if (e.trung) { bip(false); hienKQ('loi', '⚠ Mặt sau: 2 số cuối ' + esc(so2) + ' trùng ' + e.trung.length + ' em', e.trung.map(function (m) { return esc(m + ' ' + (Q.ten[m] || '')); }).join(' · ') + '<br>Quét mặt trước của em rồi quét mặt sau ngay sau đó, hoặc ' + nut); return; }
+    if (!e.sbd) { bip(false); hienKQ('loi', '⚠ Mặt sau: không có em nào SBD đuôi ' + esc(so2) + ' trong lớp ' + esc(Q.lop.ten), 'Kiểm tra 2 số em tô ở mặt sau · ' + nut); return; }
+    var sbd = e.sbd, m = { sbd: sbd, ten: Q.ten[sbd] || ('SBD ' + sbd) };
     if (Q.matSau && Q.matSau.sbd === sbd && Q.matSau.id) m.id = Q.matSau.id;
     var b = $('qMatSau'); b.hidden = false;
     var anhMS = anhPhieu({ canvas: A.canvas, r: rs }, 1600, 0.82);

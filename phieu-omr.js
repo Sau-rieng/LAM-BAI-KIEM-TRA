@@ -98,40 +98,35 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297" width="210mm" height="297mm" font-family="Times New Roman, Times, serif">' + s.join('') + '</svg>';
   };
   // =====================================================================
-  // MẶT SAU – PHIẾU TỰ LUẬN: cùng 4 ô vuông góc + khung tô SBD đúng vị trí mặt trước (P.o.sbd).
-  // Phân biệt với mặt trước: vạch ngang ở giữa mép trên (P.vachSau) + 8 ô vuông nhỏ ở mép trên/dưới (P.mocSau) – chỗ mặt trước để trống.
-  // Máy quét thấy mặt sau thì đọc SBD và ghép ảnh vào bài tự luận của đúng em.
+  // MẶT SAU – PHIẾU TỰ LUẬN: 4 ô vuông góc + 1 hàng đầu (họ tên, lớp, tô 2 SỐ CUỐI SBD) + khung viết 2 cột.
+  // Nhận dạng mặt sau: vạch ngang giữa mép trên (P.vachSau) + 8 ô vuông nhỏ ở mép trên/dưới (P.mocSau) – chỗ mặt trước để trống.
+  // 2 số cuối SBD: hàng trên = chữ số hàng chục, hàng dưới = hàng đơn vị (P.o.sbd2: 2 nhóm × 10 ô, đọc như 2 cột SBD).
   P.vachSau = [105, 11];
-  P.mocSau = [[57, 11], [81, 11], [129, 11], [153, 11], [57, 286], [81, 286], [129, 286], [153, 286], [176.6, 58], [176.6, 84]];
+  P.mocSau = [[57, 11], [81, 11], [129, 11], [153, 11], [57, 286], [81, 286], [129, 286], [153, 286]];
+  P.sbd2 = { x0: 143, dx: 5.2, y: [20, 26] };
+  P.o.sbd2 = P.sbd2.y.map(function (y) { var a = []; for (var d = 0; d < 10; d++) a.push([P.sbd2.x0 + d * P.sbd2.dx, y]); return a; });
   P.veSau = function (opt) {
     opt = opt || {};
-    var s = [], r = P.r, so = P.o.sbd;
-    function T(x, y, t, a) { a = a || {}; s.push('<text x="' + x + '" y="' + y + '" font-size="' + (a.c || 3) + '"' + (a.b ? ' font-weight="700"' : '') + (a.i ? ' font-style="italic"' : '') + ' text-anchor="' + (a.n || 'start') + '">' + t + '</text>'); }
-    function R(x, y, w, h, a) { a = a || {}; s.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + (a.f || 'none') + '" stroke="#000" stroke-width="' + (a.sw === undefined ? 0.3 : a.sw) + '"/>'); }
+    var s = [], r = P.r, a = P.sbd2;
+    function T(x, y, t, b) { b = b || {}; s.push('<text x="' + x + '" y="' + y + '" font-size="' + (b.c || 3) + '"' + (b.b ? ' font-weight="700"' : '') + (b.i ? ' font-style="italic"' : '') + ' text-anchor="' + (b.n || 'start') + '">' + t + '</text>'); }
     function V(p, c2) { c2 = c2 || P.canhNeo; s.push('<rect x="' + (p[0] - c2 / 2) + '" y="' + (p[1] - c2 / 2) + '" width="' + c2 + '" height="' + c2 + '" fill="#000"/>'); }
     function L(x1, y1, x2, y2, w, dash) { s.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#000" stroke-width="' + (w || 0.3) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>'); }
     P.neo.forEach(function (p) { V(p); });
     s.push('<rect x="' + (P.vachSau[0] - 4) + '" y="' + (P.vachSau[1] - 1.5) + '" width="8" height="3" fill="#000"/>');
     P.mocSau.forEach(function (p) { V(p, 2.6); });
-    T(72, 22, 'PHIẾU TRẢ LỜI TỰ LUẬN', { c: 5.2, b: 1, n: 'middle' });
-    T(72, 28.5, '(Mặt sau phiếu trả lời – PHẦN IV)', { c: 3.2, i: 1, n: 'middle' });
-    T(17, 38, 'Bài thi: ' + (opt.bai || '..................................................................'), { c: 3.4 });
-    T(17, 46, 'Họ và tên: ........................................................... Lớp: ..............', { c: 3.4 });
-    R(17, 52, 110, 34);
-    T(20, 58, 'Lưu ý:', { c: 3.2, b: 1 });
-    ['• Tô SBD ở khung bên phải giống hệt mặt trước.', '• Viết trong khung kẻ bên dưới, không viết ra ngoài', '   4 ô vuông đen và khung SBD.', '• Ghi rõ số câu (Câu 1, Câu 2 …) trước mỗi bài giải.'].forEach(function (t, i) { T(20, 64.5 + i * 5.6, t, { c: 3.1 }); });
-    // khung SBD – cùng vị trí với mặt trước
-    var a = P.sbd, x1 = a.x0 - a.dx / 2, w = a.cot * a.dx, Y0 = so[0][0][1], DY = so[0][1][1] - Y0;
-    T(a.x0 + 3.5 * a.dx, 18, 'Số báo danh', { c: 3.3, n: 'middle' });
-    for (var c = 0; c < a.cot; c++) R(x1 + c * a.dx, 20.5, a.dx, 6, { sw: 0.25 });
-    R(x1 - 0.8, Y0 - 3.4, w + 1.6, 9 * DY + 6.8, { sw: 0.3 });
-    so.forEach(function (col) { col.forEach(function (p) { s.push('<circle cx="' + p[0].toFixed(2) + '" cy="' + p[1].toFixed(2) + '" r="' + r + '" fill="#fff" stroke="#000" stroke-width="0.25"/>'); }); });
-    for (var d = 0; d < 10; d++) T(a.x0 - a.dx / 2 - 3.2, Y0 + d * DY + 1.1, String(d), { c: 3.1, b: 1, n: 'middle' });
-    // khung viết
-    T(17, 97.5, 'PHẦN IV. TỰ LUẬN', { c: 3.6, b: 1 });
-    R(15, 100, 180, 178);
-    for (var y = 108; y < 277; y += 8) L(17, y, 193, y, 0.15, '0.6 1.2');
-    T(105, 293, 'Phiếu tự luận (mặt sau) · Khám phá Hóa học · mẫu ' + P.phienBan + ' · in mặt sau của phiếu trả lời trắc nghiệm', { c: 2.4, i: 1, n: 'middle' });
+    // hàng đầu: họ tên, lớp + tô 2 số cuối SBD
+    T(16, 22, 'Họ và tên: ' + '.'.repeat(52), { c: 3.4 });
+    T(16, 28.5, 'Lớp: ' + '.'.repeat(18) + '   PHẦN IV – TỰ LUẬN', { c: 3.4 });
+    T(a.x0 - 5, 16, 'Tô 2 số cuối SBD', { c: 2.8, b: 1, n: 'end' });
+    T(a.x0 - 4.6, a.y[0] + 1, 'chục', { c: 2.7, n: 'end' }); T(a.x0 - 4.6, a.y[1] + 1, 'đơn vị', { c: 2.7, n: 'end' });
+    for (var d = 0; d < 10; d++) T(a.x0 + d * a.dx, 16, String(d), { c: 2.8, b: 1, n: 'middle' });
+    s.push('<rect x="' + (a.x0 - 3.4) + '" y="' + (a.y[0] - 3.2) + '" width="' + (9 * a.dx + 6.8) + '" height="' + (a.y[1] - a.y[0] + 6.4) + '" fill="none" stroke="#000" stroke-width="0.3"/>');
+    P.o.sbd2.forEach(function (row) { row.forEach(function (p) { s.push('<circle cx="' + p[0].toFixed(2) + '" cy="' + p[1].toFixed(2) + '" r="' + r + '" fill="#fff" stroke="#000" stroke-width="0.25"/>'); }); });
+    // khung viết 2 cột
+    s.push('<rect x="15" y="33" width="180" height="246" fill="none" stroke="#000" stroke-width="0.3"/>');
+    L(105, 33, 105, 279, 0.4);
+    for (var y = 41; y < 279; y += 8) { L(17, y, 103, y, 0.15, '0.6 1.2'); L(107, y, 193, y, 0.15, '0.6 1.2'); }
+    T(105, 293, 'Mặt sau – tự luận · Khám phá Hóa học · tô 2 số cuối SBD giống mặt trước · không viết đè lên ô vuông đen', { c: 2.4, i: 1, n: 'middle' });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297" width="210mm" height="297mm" font-family="Times New Roman, Times, serif">' + s.join('') + '</svg>';
   };
   window.PHIEU = P;

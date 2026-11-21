@@ -152,7 +152,7 @@
       [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (v) { var pp = chieu([m[0] + v[0] * r * 1.45, m[1] + v[1] * r * 1.45]); giay = Math.max(giay, tbVung(a, I, Math.round(pp[0] - 1), Math.round(pp[1] - 1), Math.round(pp[0] + 2), Math.round(pp[1] + 2))); });
       return { p: p, m: m, v: Math.max(0, Math.min(1, (giay - loi) / Math.max(40, giay))) };
     }
-    o.sbd = P.o.sbd.map(function (c) { return c.map(do1); });
+    o.sbd = (sau ? P.o.sbd2 : P.o.sbd).map(function (c) { return c.map(do1); });
     if (sau) return Object.assign({ ok: true, sau: true, H: H2, lech: lech, soMoc: src2.length, o: o }, giaiSBD(o));
     o.made = P.o.made.map(function (c) { return c.map(do1); });
     o.p1 = P.o.p1.map(function (c) { return c.map(do1); });
