@@ -2841,7 +2841,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     Object.keys(TLNEN).forEach(function (lop) { (TLNEN[lop] || []).forEach(function (v) {
       var d = DOT.filter(function (x) { return x.giay && (x.ca || x.madot) === v.ca; })[0], ten = esc(v.ten || (d ? d.ten : v.ca));
       if (v.con) h.push('<div class="tlBanD">⏳ Máy đang chấm ngầm tự luận <b>' + ten + '</b>: xong ' + v.xong + '/' + v.tong + ' em</div>');
-      else h.push('<div class="tlBanD">✅ Đã chấm xong tự luận <b>' + ten + '</b>: ' + (v.xong - (v.trong || 0) > 0 ? 'AI đã chấm nháp ' + (v.xong - (v.trong || 0)) + ' bài, mở để duyệt' : 'không còn bài chờ duyệt') + (v.trong ? ' · ' + v.trong + ' bài để trắng đã tự chấm 0' : '') + (v.loi ? ' · ' + v.loi + ' bài AI không đọc được' : '') +
+      else h.push('<div class="tlBanD">✅ Đã chấm xong tự luận <b>' + ten + '</b>: ' + (v.xong - (v.trong || 0) > 0 ? 'AI đã chấm nháp ' + (v.xong - (v.trong || 0)) + ' bài, mở để duyệt' : 'không còn bài chờ duyệt') + (v.trong ? ' · 🔵 ' + v.trong + ' bài 0 điểm máy đã tự chấm (chưa xem)' : '') + (v.loi ? ' · ' + v.loi + ' bài AI không đọc được' : '') +
         ' <button class="btn2" data-mo="' + esc(v.ca) + '" data-lop="' + esc(lop) + '">Mở duyệt ▸</button> <button class="lienKet" data-an="' + esc(v.ca) + '" data-lop="' + esc(lop) + '">Ẩn</button></div>');
     }); });
     b.hidden = !h.length; b.innerHTML = h.join('');
@@ -3303,14 +3303,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var j = CT.ds; if (!j) return;
       var co = j.hs.filter(function (h) { return j.da[h.mahs]; }), xong = co.filter(function (h) { return j.tl[h.mahs] && j.tl[h.mahs].duyet; }).length;
       var choAI = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.anh && !t.duyet && !t.nhap; }), nhap = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.nhap && !t.duyet; }).length;
-      var h = '<h2>Lớp ' + esc(CT.lop.ten) + ' · đã duyệt tự luận ' + xong + '/' + co.length + ' em' + (nhap ? ' · ' + nhap + ' bài AI chấm nháp chờ duyệt' : '') + '</h2>';
+      var h = '<h2>Lớp ' + esc(CT.lop.ten) + ' · đã duyệt tự luận ' + xong + '/' + co.length + ' em' + (nhap ? ' · ' + nhap + ' bài AI chấm nháp chờ duyệt' : '') + '</h2>' +
+        (function () { var n0 = co.filter(function (h) { var t = j.tl[h.mahs]; return t && t.duyet && t.tu; }).length; return n0 ? '<p class="sub">🔵 ' + n0 + ' bài máy tự chấm 0 điểm (không làm / sai hết), thầy/cô chưa xem. Mở em đó ra xem là dấu 🔵 mất.</p>' : ''; })();
       if (!rbDu()) h += '<p class="ptCanh">Chưa có hướng dẫn chấm: bấm một em để <b>xem ảnh bài tự luận</b>. Muốn chấm thì soạn và lưu hướng dẫn chấm (✨ AI soạn từ lời giải) ở trên.</p>';
       else h += '<p class="sub">Ảnh mặt sau: chụp ngay khi quét phiếu (nút 📷 Chụp mặt sau) hoặc chụp trong từng em. AI đọc ảnh, chấm nháp theo bước; thầy/cô xem, sửa rồi bấm <b>✓ Duyệt</b> mới cộng điểm và học sinh mới thấy.</p>' +
         (choAI.length ? '<div class="ptNut"><button class="btn2" id="ctNen">🌙 Chấm ngầm cả lớp (' + choAI.length + ' em) – đóng app vẫn chạy</button><button class="btn2" id="ctAITat">🤖 Chấm ngay khi đang mở</button><span class="sub" id="ctAITT"></span></div>' : '') +
         (nhap ? '<div class="ptNut"><button class="btn2" id="ctDuyetTat">✓ Duyệt tất cả ' + nhap + ' bài AI chấm nháp</button><span class="sub" id="ctDTT">Nên mở xem nhanh vài em trước khi duyệt.</span></div>' : '');
       h += '<div class="kqDs">' + co.map(function (x) {
         var t = j.tl[x.mahs], dTN = Number(j.da[x.mahs].diem) || 0;
-        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t && t.duyet ? '✓ TL ' + soMT(t.tong) : t && t.nhap ? '🤖 nháp ' + soMT(t.nhap.tong) + ' · chờ duyệt' : t && t.anh ? '📷 có ảnh' : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
+        return '<button class="kqDong ctEm' + (CT.em === x.mahs ? ' on' : '') + '" data-ma="' + esc(x.mahs) + '"><span class="kqTen">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + '</span><span class="kqSbd">' + (t && t.duyet && t.tu ? '🔵 TL 0 · máy tự chấm, chưa xem' : t && t.duyet ? '✓ TL ' + soMT(t.tong) : t && t.nhap ? '🤖 nháp ' + soMT(t.nhap.tong) + ' · chờ duyệt' : t && t.anh ? '📷 có ảnh' : 'chưa chấm TL') + '</span><span class="kqD">' + diem(dTN) + '</span></button>' + (CT.em === x.mahs ? '<div id="ctCham"></div>' : '');
       }).join('') + '</div>';
       if (!co.length) h += '<p class="sub">Lớp này chưa có phiếu trắc nghiệm nào được chấm. Quét phiếu trước rồi chấm tự luận.</p>';
       $('ctDs').innerHTML = h;
@@ -3319,7 +3320,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var bt = this; bt.disabled = true; $('ctAITT').textContent = 'Đang giao cho máy chủ…';
         goi(CT.lop.url, { action: 'gv_tl_nen', ma: MA, ca: ca, ten: d.ten + ' · ' + CT.lop.ten }).then(function (r) {
           if (!r.ok) throw r;
-          bt.textContent = '🌙 Máy chủ đang chấm ngầm ' + r.tong + ' em';
+          bt.textContent = r.tong ? '🌙 Máy chủ đang chấm ngầm ' + r.tong + ' em' : '✓ Không còn em nào cần chấm';
+          if (r.doi0) { delete HS_CACHE[CT.lop.ten]; setTimeout(taiDs, 300); }
           $('ctAITT').innerHTML = 'Thầy/cô có thể đóng app. Khoảng 1 em/phút; xong sẽ có băng báo ở Trang chủ. Kết quả để <b>nháp</b> chờ duyệt.';
         }).catch(function (e) { bt.disabled = false; $('ctAITT').textContent = 'Chưa giao được: ' + loiSo(e); });
       };
@@ -3365,6 +3367,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     }
     function veCham() {
       var j = CT.ds, ma = CT.em, t = j.tl[ma], box = $('ctCham'); if (!box) return;
+      if (t && t.duyet && t.tu) {   // GV đã mở xem bài máy tự chấm 0 → bỏ dấu 🔵
+        t.tu = false; goi(CT.lop.url, { action: 'gv_tl_daxem', ma: MA, ca: ca, mahs: ma }).catch(function () {});
+        var nb = document.querySelector('.ctEm[data-ma="' + ma + '"] .kqSbd'); if (nb) nb.textContent = '✓ TL ' + soMT(t.tong);
+      }
       if (!rbDu()) {   // chưa có rubric: chỉ xem / chụp ảnh bài tự luận
         box.innerHTML = '<div class="ctChamHop"><div class="ptNut" style="margin-top:4px"><label class="btn2 ctChup">📷 ' + (t && t.anh ? 'Chụp lại' : 'Chụp') + ' bài tự luận<input type="file" accept="image/*" capture="environment" hidden></label>' +
           '<span class="sub">' + (t && t.anh ? 'Đang tải ảnh…' : 'Chưa có ảnh mặt sau.') + '</span></div><img class="ctAnh" alt="Ảnh bài tự luận" hidden><p class="sub">Soạn hướng dẫn chấm ở trên để chấm và cộng điểm.</p></div>';
@@ -3433,7 +3439,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var b = this; b.disabled = true; b.textContent = '🤖 AI đang đọc bài… (20–60 giây)';
         goiLau(CT.lop.url, { action: 'gv_tl_ai', ma: MA, ca: ca, mahs: ma, lai: 1 }, 120000).then(function (r) {
           if (!r.ok) throw r; j.tl[ma] = r.tl; veDs();
-          if (r.boTrong) $('ctTT').textContent = 'Mặt sau để trắng → máy tự chấm 0 điểm (đã duyệt).';
+          if (r.tu0) $('ctTT').textContent = 'Bài không làm / sai hết → máy tự chấm 0 điểm (đã duyệt, 🔵 chưa xem).';
           if (!r.docDuoc) $('ctTT').textContent = '⚠ AI báo ảnh khó đọc – thầy/cô xem kỹ hoặc chụp lại.';
         }).catch(function (e) { b.disabled = false; b.textContent = '🤖 AI chấm nháp'; $('ctTT').textContent = 'AI chưa chấm được: ' + loiSo(e); });
       };
