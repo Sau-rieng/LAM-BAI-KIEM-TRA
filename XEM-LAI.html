@@ -217,6 +217,18 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <label for="maxem">Mật khẩu (mã xem bài)</label>
   <input id="maxem" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
   <button class="btn" id="btnXem">Đăng nhập</button>
+  <p style="text-align:center;margin:10px 0 0"><button class="btn2" id="quenMK" type="button">🔑 Quên mật khẩu?</button></p>
+  <div id="qmBox" hidden style="margin-top:10px;border:2px dashed var(--line);border-radius:14px;padding:12px">
+    <p class="sub" style="margin-top:0">Chọn lớp và gõ SBD ở trên, rồi bấm Gửi mã. Mã 6 số sẽ gửi về <b>email trường</b> của em (hạn 10 phút).</p>
+    <button class="btn2" id="qmGui" type="button">📧 Gửi mã về email</button>
+    <div id="qmNhap" hidden>
+      <label for="qmOtp">Mã xác nhận (6 số trong email)</label><input id="qmOtp" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      <label for="qmMoi">Mật khẩu mới (6–20 ký tự, có chữ và số)</label><input id="qmMoi" type="password" maxlength="20" autocapitalize="off" autocomplete="new-password">
+      <label for="qmMoi2">Nhập lại mật khẩu mới</label><input id="qmMoi2" type="password" maxlength="20" autocapitalize="off" autocomplete="new-password">
+      <button class="btn" id="qmDat" type="button">Đặt mật khẩu mới và đăng nhập</button>
+    </div>
+    <div class="loi" id="qmMsg"></div>
+  </div>
   <div class="msg" id="msg"></div>
 </section>
 
@@ -743,6 +755,29 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     return url;
   }
   $('moNhan').onclick = function () { man('scrNhan'); veNhan(); };
+  // Quên mật khẩu: mã 6 số gửi về email → đặt mật khẩu mới
+  function qmMa() { var s2 = $('sbd').value.trim(); if (!lopChon) return { loi: 'Em chọn lớp trước.' }; if (!/^\d{2}$/.test(s2) && !/^\d{8}$/.test(s2)) return { loi: 'Gõ 2 số cuối SBD (hoặc đủ 8 số) ở ô Số báo danh.' }; return { ma: s2.length === 8 ? s2 : lopChon.tiento + s2 }; }
+  $('quenMK').onclick = function () { $('qmBox').hidden = !$('qmBox').hidden; $('qmMsg').textContent = ''; };
+  $('qmGui').onclick = function () {
+    var x = qmMa(), m = $('qmMsg'), b = this; m.style.color = ''; if (x.loi) { m.textContent = x.loi; return; }
+    b.disabled = true; m.textContent = 'Đang gửi mã…';
+    fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_quenmk', mahs: x.ma }) }).then(function (r) { return r.json(); }).then(function (j) {
+      b.disabled = false;
+      if (!j.ok) { m.textContent = /khong hop le|khong ro/i.test(j.msg || '') ? 'Hệ thống chưa cập nhật, nhờ thầy/cô cấp lại mật khẩu.' : (j.msg || 'Chưa gửi được'); return; }
+      b.textContent = '📧 Gửi lại mã'; $('qmNhap').hidden = false; m.style.color = '#1f7a3a'; m.textContent = 'Đã gửi mã tới ' + j.mail + '. Mở email (cả mục Thư rác) để lấy mã.';
+    }).catch(function () { b.disabled = false; m.textContent = 'Mất mạng, thử lại.'; });
+  };
+  $('qmDat').onclick = function () {
+    var x = qmMa(), m = $('qmMsg'), b = this, moi = $('qmMoi').value.trim(); m.style.color = ''; if (x.loi) { m.textContent = x.loi; return; }
+    if (!/^\d{6}$/.test($('qmOtp').value.trim())) { m.textContent = 'Nhập đủ 6 số của mã xác nhận.'; return; }
+    if (moi !== $('qmMoi2').value.trim()) { m.textContent = 'Hai lần nhập mật khẩu mới chưa giống nhau.'; return; }
+    if (moi.length < 6 || !/[A-Za-z]/.test(moi) || !/\d/.test(moi) || /\s/.test(moi)) { m.textContent = 'Mật khẩu mới cần 6–20 ký tự, có cả chữ và số, không dấu cách.'; return; }
+    b.disabled = true; m.textContent = 'Đang đặt mật khẩu…';
+    fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_datmk', mahs: x.ma, otp: $('qmOtp').value.trim(), moi: moi }) }).then(function (r) { return r.json(); }).then(function (j) {
+      b.disabled = false; if (!j.ok) { m.textContent = j.msg || 'Chưa đặt được'; return; }
+      $('qmBox').hidden = true; $('maxem').value = moi; ['qmOtp', 'qmMoi', 'qmMoi2'].forEach(function (k) { $(k).value = ''; }); $('btnXem').click();
+    }).catch(function () { b.disabled = false; m.textContent = 'Mất mạng, thử lại.'; });
+  };
   $('moMK').onclick = function () { ['mkCu', 'mkMoi', 'mkMoi2'].forEach(function (k) { $(k).value = ''; }); $('mkMsg').textContent = ''; $('mkMsg').style.color = ''; man('scrMK'); };
   $('mkLai').onclick = function () { man('scrHome'); };
   $('mkHien').onchange = function () { var t = this.checked ? 'text' : 'password'; ['mkCu', 'mkMoi', 'mkMoi2'].forEach(function (k) { $(k).type = t; }); };

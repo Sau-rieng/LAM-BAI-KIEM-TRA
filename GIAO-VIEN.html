@@ -915,7 +915,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <h1>Hồ sơ học sinh</h1>
     <p class="sub">Bảng điểm từng lớp. Bấm vào tên để xem tiến bộ của em đó, bấm vào điểm để mở bài làm (PDF).</p>
     <div class="loc" id="locLop" style="margin-top:12px"></div>
-    <div class="loc" id="cheDo"><button data-c="hs" class="on">👤 Học sinh</button><button data-c="nhom">👥 Nhóm (trò chơi nhóm)</button><button data-c="kt">🧭 Kiến thức</button><button data-c="luyen">🔁 Luyện tập</button><button data-c="ks">📋 Khảo sát</button><button data-c="sodo">🪑 Sơ đồ lớp</button></div>
+    <div class="loc" id="cheDo"><button data-c="hs" class="on">👤 Học sinh</button><button data-c="nhom">👥 Nhóm (trò chơi nhóm)</button><button data-c="kt">🧭 Kiến thức</button><button data-c="luyen">🔁 Luyện tập</button><button data-c="ks">📋 Khảo sát</button><button data-c="sodo">🪑 Sơ đồ lớp</button><button data-c="mail">📧 Email HS</button></div>
   </div>
   <div id="hoSo"></div>
 </section>
@@ -4358,7 +4358,37 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (b.getAttribute('data-c') === 'sodo') { moSoDo(HS_LOP ? HS_LOP.ten : null, null, 'hoso'); return; }
       HS_CHE = b.getAttribute('data-c'); [].forEach.call($('cheDo').children, function (x) { x.classList.toggle('on', x === b); }); if (HS_DL) veHoSo(); };
   });
-  function veHoSo() { if (HS_CHE === 'nhom') veNhom(); else if (HS_CHE === 'kt') veKTLop(); else if (HS_CHE === 'luyen') veLuyenLop(); else if (HS_CHE === 'ks') veKS(); else veBangDiem(); }
+  function veHoSo() { if (HS_CHE === 'nhom') veNhom(); else if (HS_CHE === 'kt') veKTLop(); else if (HS_CHE === 'luyen') veLuyenLop(); else if (HS_CHE === 'ks') veKS(); else if (HS_CHE === 'mail') veEmail(); else veBangDiem(); }
+  // ---------- Email HS: nạp file Excel (Họ và tên | Email), ghép theo họ tên vào cột EMAIL của DANHSACH – để em tự lấy lại mật khẩu ----------
+  function veEmail() {
+    var l = HS_LOP; if (!l) return;
+    $('hoSo').innerHTML = '<div class="card"><h2>📧 Email học sinh · lớp ' + esc(l.ten) + '</h2><p class="sub">Có email, em bấm <b>🔑 Quên mật khẩu?</b> ở trang đăng nhập Tài khoản HS → nhận mã 6 số qua email → tự đặt mật khẩu mới. Email lưu ở cột <b>EMAIL</b> (cột E) tab DANHSACH của sổ lớp, chỉ dùng để gửi mã.</p>' +
+      '<label class="napChon" style="margin-top:10px"><input type="file" id="emFile" accept=".xlsx"><span id="emChu">📂 Chọn file Excel danh sách email (cột Họ và tên + cột Email; có cột SBD/MAHS càng tốt)</span></label><div id="emKQ" class="sub" style="margin-top:10px"></div></div>';
+    $('emFile').onchange = function () {
+      var f = this.files && this.files[0]; if (!f) return; var kq = $('emKQ'); kq.textContent = 'Đang đọc ' + f.name + '…';
+      f.arrayBuffer().then(docExcelTatCa).then(function (tabs) {
+        var ds = [];
+        tabs.forEach(function (t) {
+          for (var r = 0; r < Math.min(12, t.o.length); r++) {
+            var d = hang(t.o, r).map(boDau), ie = d.findIndex(function (x) { return x.indexOf('EMAIL') >= 0 || x === 'MAIL'; }); if (ie < 0) continue;
+            var it = d.findIndex(function (x) { return x === 'HOVATEN' || x === 'HOTEN' || x === 'HOTENHS' || x === 'TEN'; }), im = d.findIndex(function (x) { return x === 'MAHS' || x === 'SBD' || x === 'SOBAODANH'; });
+            for (var k = r + 1; k < t.o.length; k++) { var h = hang(t.o, k), em = chuO(h[ie]).trim(); if (em.indexOf('@') > 0) ds.push({ email: em, hoten: it >= 0 ? chuO(h[it]).trim() : '', mahs: im >= 0 ? chuO(h[im]).trim() : '' }); }
+            break;
+          }
+        });
+        if (!ds.length) throw new Error('Không thấy cột Email trong file.');
+        kq.textContent = 'Đang ghép ' + ds.length + ' email vào lớp ' + l.ten + '…';
+        return goi(l.url, { action: 'gv_email_nap', ma: MA, ds: ds });
+      }).then(function (r) {
+        if (!r.ok) throw r;
+        var h = '<b style="color:var(--ok)">✓ Đã ghép ' + r.khop + ' email vào sổ ' + esc(l.ten) + '.</b>';
+        if (r.khong.length) h += '<br>⚠ Không tìm thấy trong lớp (' + r.khong.length + '): ' + r.khong.map(esc).join(', ') + ' – kiểm tra cách viết họ tên hoặc dán tay vào cột EMAIL.';
+        if (r.trung.length) h += '<br>⚠ Trùng họ tên, chưa ghép (' + r.trung.length + '): ' + r.trung.map(esc).join(', ') + ' – thêm cột SBD vào file hoặc dán tay.';
+        if (r.thieu.length) h += '<br>Em còn thiếu email (' + r.thieu.length + '): ' + r.thieu.map(esc).join(', ');
+        kq.innerHTML = h;
+      }).catch(function (e) { kq.textContent = 'Chưa nạp được: ' + (e.message || loiSo(e)); });
+    };
+  }
   // ---------- Luyen lai phan yeu (M3): tien bo tung em + cau luyen bo sung AI soan, GV duyet ----------
   var LYD = {};
   function pc(x) { return x == null ? '–' : Math.round(x * 100) + '%'; }

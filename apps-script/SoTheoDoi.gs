@@ -83,6 +83,8 @@ function doPost(e) {
       case 'hs_luyen_nop': return json(hsLuyenNop(d));
       case 'hs_ks_nop': return json(hsKSNop(d));
       case 'hs_doima': return json(hsDoiMa(d));
+      case 'hs_quenmk': return json(hsQuenMK(d));
+      case 'hs_datmk': return json(hsDatMK(d));
       case 'daxem':  return json(ghiDaXem(d));
       case 'xemtn':  return json(ghiXemTN(d));
       case 'tn_gui': return json(hsGuiTin(d));
@@ -136,6 +138,7 @@ function doPost(e) {
       case 'gv_tl_nen':
       case 'gv_tl_nen_ok':
       case 'gv_capmk':
+      case 'gv_email_nap':
       case 'gv_tl_ai':
       case 'gv_ainx':
       case 'gv_nhanxet_nhieu':
@@ -231,6 +234,7 @@ function doPost(e) {
         if (d.action === 'gv_tl_nen') return json(gvTLNen(d));
         if (d.action === 'gv_tl_nen_ok') return json(gvTLNenOK(d));
         if (d.action === 'gv_capmk') return json(gvCapMK(d));
+        if (d.action === 'gv_email_nap') return json(gvEmailNap(d));
         if (d.action === 'gv_tl_anh') return json(gvTLAnh(d));
         if (d.action === 'gv_ainx') return json(gvAINX(d));
         if (d.action === 'gv_nhanxet_nhieu') return json(gvNhanXetNhieu(d));
@@ -3735,7 +3739,7 @@ function boGV(v, c) { return AN_GV ? v.filter(function (r) { return !laGV(r[c]);
 // Lop chinh = lop co tien to SBD trung voi SBD cua em; cac lop phu ghi cung SBD do trong DANHSACH.
 // Kho tab TAI KHOAN: MaHS | MaXem (cua lop chinh) | LopChinh | CacLop | CapNhat — moi so dong bo khi GV mo trang (toi da 30 phut/lan).
 // ---------------------------------------------------------------------
-const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat', 'HoTen', 'HSDoi'];
+const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat', 'HoTen', 'HSDoi', 'Email'];
 function tienToLop() {
   const c = CacheService.getScriptCache(); let t = c.get('tiento'); if (t !== null) return t;
   // Trang GV gui kem tien to cua lop (cau-hinh-lop.js) → chinh xac ca khi lop phu toan HS lop khac (VD 12AFTER)
@@ -3784,12 +3788,66 @@ function gvCapMK(d) {
   ghiMatKhau(ma, moi);
   return {ok: true, mk: moi};
 }
+// ---------------------------------------------------------------------
+// EMAIL HS + QUÊN MẬT KHẨU: cột E 'EMAIL' của DANHSACH (GV nạp từ file Excel, ghép theo họ tên). Kho TAI KHOAN cột 8 giữ email để lớp phụ dùng.
+// Quên mật khẩu: gửi mã 6 số (10 phút, ≤3 lần/giờ/em, sai 5 lần thì hủy mã) → em tự đặt mật khẩu mới.
+// ---------------------------------------------------------------------
+function tenSo(x) { return khongDau(String(x || '')).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+function gvEmailNap(d) {
+  const ds = SpreadsheetApp.getActive().getSheetByName(TAB_DS); if (!ds || ds.getLastRow() < 2) return {ok: false, msg: 'Lop chua co danh sach'};
+  const n = ds.getLastRow() - 1, v = ds.getRange(2, 1, n, 2).getValues(), em = ds.getRange(2, 5, n, 1).getValues();
+  if (String(ds.getRange(1, 5).getValue()).trim().toUpperCase() !== 'EMAIL') ds.getRange(1, 5).setValue('EMAIL').setFontWeight('bold');
+  const theoTen = {}; v.forEach(function (r, i) { const t = tenSo(r[1]); if (t) (theoTen[t] = theoTen[t] || []).push(i); });
+  const theoMa = {}; v.forEach(function (r, i) { theoMa[String(r[0]).replace(/^'/, '').trim()] = i; });
+  const khong = [], trung = [], daDung = {}; let khop = 0;
+  (Array.isArray(d.ds) ? d.ds : []).slice(0, 300).forEach(function (x) {
+    const mail = String(x.email || '').trim().toLowerCase(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return;
+    let i = x.mahs && theoMa[String(x.mahs).trim()] !== undefined ? theoMa[String(x.mahs).trim()] : -1;
+    if (i < 0) { const g = theoTen[tenSo(x.hoten)] || []; if (g.length > 1) { trung.push(String(x.hoten)); return; } if (g.length === 1) i = g[0]; }
+    if (i < 0) { khong.push(String(x.hoten || x.mahs || mail)); return; }
+    if (daDung[i]) { trung.push(String(x.hoten)); return; }
+    daDung[i] = 1; em[i][0] = mail; khop++;
+  });
+  ds.getRange(2, 5, n, 1).setValues(em);
+  const thieu = v.filter(function (r, i) { return String(r[0]).trim() && !String(em[i][0]).trim(); }).map(function (r) { return String(r[1]).trim(); });
+  try { dongBoTK(true); } catch (e) {}
+  return {ok: true, khop: khop, khong: khong, trung: trung, thieu: thieu};
+}
+function emailHS(ma) {
+  const ds = SpreadsheetApp.getActive().getSheetByName(TAB_DS);
+  if (ds && ds.getLastRow() > 1 && ds.getLastColumn() >= 5) { const v = ds.getRange(2, 1, ds.getLastRow() - 1, 5).getValues(); for (let i = 0; i < v.length; i++) if (String(v[i][0]).replace(/^'/, '').trim() === ma && String(v[i][4]).trim()) return String(v[i][4]).trim(); }
+  const t = tkMap()[ma]; return t && t.em ? t.em : '';
+}
+function anMail(m) { const p = m.split('@'); return p[0].slice(0, 2) + '•••' + (p[0].length > 4 ? p[0].slice(-1) : '') + '@' + p[1]; }
+function hsQuenMK(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs || hs.gv) return {ok: false, msg: 'Không có số báo danh này trong lớp ' + lopNay()};
+  const mail = emailHS(ma); if (!mail) return {ok: false, msg: 'Lớp chưa có email của em. Nhờ thầy/cô cấp lại mật khẩu.'};
+  if (bmDem('qmk_' + ma, 60) > 3) return {ok: false, msg: 'Em đã xin mã 3 lần trong 1 giờ. Thử lại sau hoặc nhờ thầy/cô.'};
+  const otp = String(Math.floor(100000 + Math.random() * 900000)), c = CacheService.getScriptCache();
+  c.put('otpk_' + ma, otp, 600); c.remove('otps_' + ma);
+  MailApp.sendEmail(mail, 'Mã đặt lại mật khẩu – Khám phá Hóa học',
+    'Chào ' + hs.ten + ',\n\nMã xác nhận để đặt lại mật khẩu Tài khoản HS (lớp ' + lopNay() + ') của em là: ' + otp + '\n\nMã dùng được trong 10 phút. Nếu em không yêu cầu, hãy bỏ qua thư này và báo thầy/cô.\n\n– Khám phá Hóa học');
+  return {ok: true, mail: anMail(mail)};
+}
+function hsDatMK(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma), c = CacheService.getScriptCache(), otp = c.get('otpk_' + ma);
+  if (!hs || hs.gv) return {ok: false, msg: 'Không có số báo danh này'};
+  if (!otp) return {ok: false, msg: 'Mã đã hết hạn. Bấm gửi lại mã.'};
+  if (String(d.otp || '').trim() !== otp) { if (bmDem('otps_' + ma, 10) >= 5) { c.remove('otpk_' + ma); return {ok: false, msg: 'Nhập sai mã 5 lần, mã đã bị hủy. Bấm gửi lại mã.'}; } return {ok: false, msg: 'Mã xác nhận chưa đúng'}; }
+  const moi = String(d.moi || '').trim();
+  if (moi.length < 6 || moi.length > 20 || !/[A-Za-z]/.test(moi) || !/\d/.test(moi) || /\s/.test(moi)) return {ok: false, msg: 'Mật khẩu mới cần 6–20 ký tự, có cả chữ và số, không dấu cách'};
+  if (moi.indexOf(ma) >= 0) return {ok: false, msg: 'Đừng dùng số báo danh làm mật khẩu'};
+  c.remove('otpk_' + ma); c.remove('kx_' + ma); c.remove('sx_' + ma);
+  ghiMatKhau(ma, moi);
+  return {ok: true};
+}
 function tkMap() {
   if (TK_NHO) return TK_NHO;
   const c = CacheService.getScriptCache(), s = c.get('tk_map');
   if (s) { try { return TK_NHO = JSON.parse(s); } catch (e) {} }
   const m = {}, sh = kho().getSheetByName(TAB_TK);
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 7).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), hd: !!String(r[6] || '').trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String), ten: String(r[5] || '').trim()}; });
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 8).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), hd: !!String(r[6] || '').trim(), em: String(r[7] || '').trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String), ten: String(r[5] || '').trim()}; });
   try { c.put('tk_map', JSON.stringify(m), 300); } catch (e) {}
   return TK_NHO = m;
 }
@@ -3804,11 +3862,13 @@ function dongBoTK(ep) {
   const ttDS = String(P.getProperty('tiento_ds') || '').split(',').filter(String);
   if (sh.getRange(1, 6).getValue() !== 'HoTen') sh.getRange(1, 6).setValue('HoTen').setFontWeight('bold');
   if (sh.getRange(1, 7).getValue() !== 'HSDoi') sh.getRange(1, 7).setValue('HSDoi').setFontWeight('bold');
-  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 7).getValues() : [], vt = {};
+  if (sh.getRange(1, 8).getValue() !== 'Email') sh.getRange(1, 8).setValue('Email').setFontWeight('bold');
+  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 8).getValues() : [], vt = {};
   v.forEach(function (r, i) { vt[String(r[0]).trim()] = i; });
   const dsR = ds.getRange(2, 1, ds.getLastRow() - 1, 4), dsV = dsR.getValues(), them = [];
+  const dsEm = ds.getLastColumn() >= 5 ? ds.getRange(2, 5, ds.getLastRow() - 1, 1).getValues().map(function (r) { return String(r[0] || '').trim(); }) : [];
   let doiDS = false, doiTen = false, doiKho = false, thieu = 0;
-  dsV.forEach(function (r) {
+  dsV.forEach(function (r, iDS) {
     const ma = String(r[0]).trim(); if (!/^\d{8}$/.test(ma) || laGV(ma)) return;
     const ten = String(r[1]).trim(), chinh = (!!tt && ma.slice(0, 6) === tt) || (ttDS.length > 0 && ttDS.indexOf(ma.slice(0, 6)) < 0);
     if (chinh && !String(r[3]).trim() && !(vt[ma] >= 0 && String(v[vt[ma]][1]).trim())) { r[3] = String(Math.floor(1000 + Math.random() * 9000)); doiDS = true; }   // em mới chưa có mật khẩu: cấp mã 4 số
@@ -3816,10 +3876,11 @@ function dongBoTK(ep) {
     if (vt[ma] >= 0 && String(v[vt[ma]][6] || '').trim() && String(v[vt[ma]][1]).trim()) { if (String(r[3]).trim() !== String(v[vt[ma]][1]).trim()) { r[3] = String(v[vt[ma]][1]).trim(); doiDS = true; } if (chinh) { v[vt[ma]][6] = ''; doiKho = true; } }
     const mx = String(r[3]).trim();
     let i = vt[ma];
-    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date(), chinh ? ten : '', '']); vt[ma] = -1; if (!chinh && (!ten || !mx)) thieu++; return; }
+    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date(), chinh ? ten : '', '', chinh ? (dsEm[iDS] || '') : '']); vt[ma] = -1; if (!chinh && (!ten || !mx)) thieu++; return; }
     if (i < 0) return;
     const x = v[i], cl = String(x[3]).split(',').map(function (z) { return z.trim(); }).filter(String);
     if (cl.indexOf(lop) < 0) { cl.push(lop); x[3] = cl.join(','); doiKho = true; }
+    if (chinh && dsEm[iDS] && String(x[7] || '').trim() !== dsEm[iDS]) { x[7] = dsEm[iDS]; doiKho = true; }
     if (chinh) {
       if ((mx && String(x[1]).trim() !== mx) || String(x[2]).trim() !== lop || (ten && String(x[5] || '').trim() !== ten)) { if (mx) x[1] = mx; x[2] = lop; if (ten) x[5] = ten; doiKho = true; }
       if (!mx && String(x[1]).trim()) { r[3] = String(x[1]).trim(); doiDS = true; }
@@ -3831,8 +3892,8 @@ function dongBoTK(ep) {
       if (!String(r[1]).trim() || !String(r[3]).trim()) thieu++;
     }
   });
-  if (doiKho) sh.getRange(2, 1, v.length, 7).setNumberFormat('@').setValues(v);
-  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 7).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 7).setValues(them); }
+  if (doiKho) sh.getRange(2, 1, v.length, 8).setNumberFormat('@').setValues(v);
+  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 8).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 8).setValues(them); }
   if (doiDS) ds.getRange(2, 4, dsV.length, 1).setNumberFormat('@').setValues(dsV.map(function (r) { return [r[3]]; }));
   if (doiTen) ds.getRange(2, 2, dsV.length, 1).setValues(dsV.map(function (r) { return [r[1]]; }));
   if (thieu) P.setProperty('tk_thieu', '1'); else P.deleteProperty('tk_thieu');   // con em chua co ten/mat khau: thu lai sau 3 phut
