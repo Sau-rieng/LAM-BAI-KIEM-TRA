@@ -326,7 +326,7 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "anh": "",
   "ten": "Mô Phỏng Thí Nghiệm: Phản Ứng Thuỷ Phân Ester (Hóa 12 - KNTT)",
   "khoi": "12",
-  "bai": "",
+  "bai": "Bài 1: ESTER",
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
