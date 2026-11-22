@@ -1838,19 +1838,22 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // =====================================================================
   // CHẤM PHIẾU GIẤY: chọn khối → bài (đợt đề giấy) → lớp → camera tự chụp khi thấy đủ 4 góc → đọc phiếu → lưu vào sổ lớp
   // =====================================================================
-  var QC = { cho: 2, trang: true, anh: true };   // cài đặt trên máy này
+  var QC = { cho: 2, trang: false, mo: false, anh: true };   // cài đặt trên máy này
   try { Object.assign(QC, JSON.parse(localStorage.getItem('gv_quet') || '{}')); } catch (e) {}
   if (!QC.v2) { if (QC.cho === 5) QC.cho = 2; QC.v2 = 1; }
+  if (!QC.v3) { QC.trang = false; QC.mo = false; QC.v3 = 1; }   // 22/11: chỉ dừng khi tô sai SBD, mã đề, tô 2 đáp án
   function luuQC() { try { localStorage.setItem('gv_quet', JSON.stringify(QC)); } catch (e) {} }
   function veQuetCaiDat() {
     var b = $('quetCaiDat');
     b.innerHTML = '<div class="nhom">Chấm phiếu giấy (cài trên máy này)</div><div class="card">' +
       '<label class="qcD">Chờ lấy nét rồi tự chụp sau <input type="number" id="qcCho" min="1" max="15" step="1" value="' + QC.cho + '"> giây (khi camera thấy đủ 4 ô vuông góc phiếu)</label>' +
       '<label class="qcD"><input type="checkbox" id="qcTrang"' + (QC.trang ? ' checked' : '') + '> Dừng lại khi phiếu có câu để trắng</label>' +
+      '<label class="qcD"><input type="checkbox" id="qcMo"' + (QC.mo ? ' checked' : '') + '> Dừng lại khi có ô tô mờ (không chọn: máy tự quyết theo độ đậm)</label>' +
       '<label class="qcD"><input type="checkbox" id="qcAnh"' + (QC.anh ? ' checked' : '') + '> Lưu ảnh phiếu (nén, khoảng 150 KB/tờ) vào Drive để đối chiếu khi học sinh thắc mắc</label>' +
-      '<p class="chuthich">Phiếu tô 2 ô, ô mờ, SBD hoặc mã đề sai, em đã chấm rồi: máy luôn dừng cho thầy/cô xem. Phần III tô sai quy cách (lệch cột, 2 dấu phẩy…) tính sai, không hỏi.</p></div>';
+      '<p class="chuthich">Phiếu tô 2 đáp án, SBD hoặc mã đề sai, em đã chấm rồi (khác lần trước): máy luôn dừng cho thầy/cô xem. Câu để trắng, ô mờ: máy tự chấm, không hỏi (trừ khi bật ở trên). Phần III tô sai quy cách (lệch cột, 2 dấu phẩy…) tính sai, không hỏi.</p></div>';
     $('qcCho').onchange = function () { QC.cho = Math.max(1, Math.min(15, Math.round(Number(this.value) || 2))); this.value = QC.cho; luuQC(); };
     $('qcTrang').onchange = function () { QC.trang = this.checked; luuQC(); };
+    $('qcMo').onchange = function () { QC.mo = this.checked; luuQC(); };
     $('qcAnh').onchange = function () { QC.anh = this.checked; luuQC(); };
   }
   var Q = null;   // phiên quét đang chạy
@@ -2202,7 +2205,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var c = r.p1[i]; x.chon[q.cau] = c.chon;
       if (c.chon.length > 1) { x.canh.push({ k: 'cau', cau: q.cau, t: 'Phần I câu ' + (i + 1) + ': tô ' + c.chon.length + ' ô (' + c.chon.split('').join(', ') + ')' }); x.cauLoi[q.cau] = 1; }
       else if (!c.chon && QC.trang) { x.canh.push({ k: 'trang', cau: q.cau, t: 'Phần I câu ' + (i + 1) + ': để trắng' }); x.cauLoi[q.cau] = 1; }
-      if (c.mo) { x.canh.push({ k: 'mo', cau: q.cau, t: 'Phần I câu ' + (i + 1) + ': có ô tô mờ, xem lại' }); x.cauLoi[q.cau] = 1; }
+      if (c.mo && QC.mo) { x.canh.push({ k: 'mo', cau: q.cau, t: 'Phần I câu ' + (i + 1) + ': có ô tô mờ, xem lại' }); x.cauLoi[q.cau] = 1; }
     });
     p.DS.forEach(function (q, i) {
       var c = r.p2[i], s = c.map(function (y) { return y.chon === 'D' || y.chon === 'S' ? y.chon : '-'; }).join('');
@@ -2211,7 +2214,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var ten = 'Phần II câu ' + (i + 1) + ' ý ' + 'abcd'[j];
         if (y.chon === '*') { x.canh.push({ k: 'cau', cau: q.cau, t: ten + ': tô cả Đúng và Sai' }); x.cauLoi[q.cau] = 1; }
         else if (!y.chon && QC.trang) { x.canh.push({ k: 'trang', cau: q.cau, t: ten + ': để trắng' }); x.cauLoi[q.cau] = 1; }
-        if (y.mo) { x.canh.push({ k: 'mo', cau: q.cau, t: ten + ': có ô tô mờ, xem lại' }); x.cauLoi[q.cau] = 1; }
+        if (y.mo && QC.mo) { x.canh.push({ k: 'mo', cau: q.cau, t: ten + ': có ô tô mờ, xem lại' }); x.cauLoi[q.cau] = 1; }
       });
     });
     p.TLN.forEach(function (q, i) {
@@ -2219,7 +2222,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       x.chon[q.cau] = c.loi ? 'sai cách tô: ' + c.chon : c.chon;
       if (c.loi) x.ghi.push('Phần III câu ' + (i + 1) + ': ' + c.loi + ' → tính sai');
       else if (!c.chon && QC.trang) { x.canh.push({ k: 'trang', cau: q.cau, t: 'Phần III câu ' + (i + 1) + ': để trắng' }); x.cauLoi[q.cau] = 1; }
-      if (c.mo) { x.canh.push({ k: 'mo', cau: q.cau, t: 'Phần III câu ' + (i + 1) + ': có ô tô mờ, xem lại' }); x.cauLoi[q.cau] = 1; }
+      if (c.mo && QC.mo) { x.canh.push({ k: 'mo', cau: q.cau, t: 'Phần III câu ' + (i + 1) + ': có ô tô mờ, xem lại' }); x.cauLoi[q.cau] = 1; }
     });
     // tô ở câu ngoài số câu của đề
     var thua = r.p1.slice(p.TN.length).filter(function (c) { return c.chon; }).length + r.p2.slice(p.DS.length).filter(function (c) { return c.some(function (y) { return y.chon; }); }).length + r.p3.slice(p.TLN.length).filter(function (c) { return c.chon; }).length;
