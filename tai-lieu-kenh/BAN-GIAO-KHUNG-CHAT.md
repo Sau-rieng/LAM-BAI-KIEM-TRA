@@ -39,6 +39,7 @@ Dán file này vào đầu khung chat mới (hoặc đính kèm) để Claude n�
 
 - **Phiếu 2 mặt (21/11)**: `PHIEU.veSau()` mặt sau tự luận: 4 ô góc + 1 hàng (họ tên, lớp, tô 2 SỐ CUỐI SBD `P.o.sbd2`) + khung viết 2 cột; nhận dạng bằng vạch giữa mép trên `P.vachSau` + 8 ô nhỏ mép trên/dưới `P.mocSau`. `OMR.docSau(a)` đọc 2 số cuối, `timEm2` tìm em trong lớp đang quét (trùng đuôi → ưu tiên em vừa quét mặt trước, không thì báo ⚠); khi quét (mọi chế độ trừ chấm ảnh Drive) máy thử mặt sau trước → `xuLySau` → `ghepSau` ghép đúng em (quét nhanh: lưu cùng tờ, chưa có mặt trước thì giữ chờ ghép). In ở thẻ đề giấy: "📝 In phiếu 2 mặt". Ảnh ghép nhầm: ✍ Chấm tự luận → "↔ Chuyển ảnh" (`gv_tl_chuyen`, đổi chỗ nếu em kia có ảnh, xóa bản AI nháp).
 
+- **Điểm lẻ từng bước (22/11)**: TU LUAN DIEM cột LyDo JSON thêm `d` (điểm từng bước khi có bước cho một phần); `tlDiemBuoc(buoc, dat, dB)`; gv_tl_luu nhận `diemB`; AI trả `mot_phan` {bước: điểm}; HS thấy ◐ 0.15/0.25 + lý do (GV sửa được ô lý do).
 - **Chấm tự luận ngầm (22/11)**: ✍ Chấm tự luận → 🌙 Chấm ngầm cả lớp (`gv_tl_nen`): hàng đợi Script Property `tl_nen`, trình kích hoạt `tlNenChay` mỗi phút (≤4.5 phút/lượt, gọi `gvTLAI`, lỗi thử lại 3 lần, xong tự xóa trình kích hoạt). Kết quả NHÁP; nút ✓ Duyệt tất cả. Trang chủ có băng `#tlBan` (từ `gv_dathi.tlNen`), Ẩn → `gv_tl_nen_ok`. Mỗi sổ phải chạy hàm `capQuyen` 1 lần để cấp quyền chạy ngầm.
 
 ## 5b. Bảo mật (19/11)

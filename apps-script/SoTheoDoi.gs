@@ -392,7 +392,7 @@ function xemLai(d) {
     ketqua.push({
       madot: c.madot, ten: c.ten + (bai.lan > 1 && !c.giay ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
       giay: !!c.giay, coAnh: !!(c.giay && idTuUrl(bai.file)), nx: ((nxMap[ma + '|' + (c.ca || c.madot)] || nxMap[ma + '|' + c.madot]) || {}).nx || '',
-      tlcham: c.giay ? (function () { const ca = c.ca || c.madot, x = docTLDiem(ca)[ma]; if (!x) return null; const rb = docRubric(ca); if (!x.duyet) return null; return {tong: x.tong, coAnh: !!x.anh, cau: Object.keys(x.cau).map(function (k) { return {cau: k, diem: x.cau[k].diem, nx: x.cau[k].nx || '', buoc: ((rb[k] || {}).buoc || []).map(function (b, i) { return {nd: b.nd, diem: b.diem, dat: x.cau[k].dat.indexOf(i) >= 0, lydo: x.cau[k].lydo[i] || ''}; })}; })}; })() : null,
+      tlcham: c.giay ? (function () { const ca = c.ca || c.madot, x = docTLDiem(ca)[ma]; if (!x) return null; const rb = docRubric(ca); if (!x.duyet) return null; return {tong: x.tong, coAnh: !!x.anh, cau: Object.keys(x.cau).map(function (k) { return {cau: k, diem: x.cau[k].diem, nx: x.cau[k].nx || '', buoc: (function () { const bb = (rb[k] || {}).buoc || [], db = tlDiemBuoc(bb, x.cau[k].dat, x.cau[k].dB); return bb.map(function (b, i) { return {nd: b.nd, diem: b.diem, duoc: db[i], dat: db[i] > 0, lydo: x.cau[k].lydo[i] || ''}; }); })()}; })}; })() : null,
       tuluan: c.giay ? ((tlMap = tlMap || docTuLuan())[c.madot] || []).map(function (t) { return {cau: t.cau, hoi: t.hoi, hinh: t.hinh && t.hinh !== '-' ? anhDataUri(/^hinh\//.test(t.hinh) ? 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/' + t.hinh : t.hinh) : '', diem: t.diem, gt: t.gt}; }) : [], tongDiem: c.giay ? de.reduce(function (a, q) { return a + (Number(q.w) || 0); }, 0) : null,
       goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
       cau: kq.ct.map(function (q) {
@@ -1304,6 +1304,14 @@ function gvRubricAI(d) {
   return {ok: true, de: ra};
 }
 // Diem tu luan theo em: chi bai GV da duyet (cau, tong); coNhap: kem ban AI cham nhap (o.nhap = {cau, tong}) va em chi moi co anh
+// Điểm từng bước: mặc định bước đạt = đủ điểm bước; GV/AI có thể cho một phần (dB[i] = số, 0 < dB[i] < điểm bước)
+function tlDiemBuoc(buoc, dat, dB) {
+  return buoc.map(function (b, i) {
+    const p = Array.isArray(dB) && dB[i] !== null && dB[i] !== undefined && dB[i] !== '' ? Number(String(dB[i]).replace(',', '.')) : NaN;
+    if (!isNaN(p)) return Math.max(0, Math.min(b.diem, Math.round(p * 100) / 100));
+    return dat.indexOf(i) >= 0 ? b.diem : 0;
+  });
+}
 function docTLDiem(ca, coNhap) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD), m = {};
   if (!sh || sh.getLastRow() < 2) return m;
@@ -1314,7 +1322,7 @@ function docTLDiem(ca, coNhap) {
     if (c === '_ANH' || (tt === 'NHAP' && !coNhap)) return;
     const o = m[ma] = m[ma] || {cau: {}, anh: '', tong: 0, duyet: false};
     let dat = [], ly = {}; try { dat = JSON.parse(r[3] || '[]'); } catch (e) {} try { ly = JSON.parse(r[8] || '{}'); } catch (e) {}
-    const x = {dat: dat, diem: Number(r[4]) || 0, lydo: Array.isArray(ly.b) ? ly.b : [], nx: String(ly.nx || '')};
+    const x = {dat: dat, diem: Number(r[4]) || 0, lydo: Array.isArray(ly.b) ? ly.b : [], nx: String(ly.nx || ''), dB: Array.isArray(ly.d) ? ly.d : null};
     if (tt === 'NHAP') { const n = o.nhap = o.nhap || {cau: {}, tong: 0}; n.cau[c] = x; n.tong = Math.round((n.tong + x.diem) * 100) / 100; }
     else { o.cau[c] = x; o.tong = Math.round((o.tong + x.diem) * 100) / 100; o.duyet = true; }
   });
@@ -1342,10 +1350,15 @@ function gvTLLuu(d) {
   }
   let tong = 0;
   Object.keys(rb).forEach(function (c) {
-    const dat = (Array.isArray(cham[c]) ? cham[c] : (cu.cau[c] || {}).dat || []).map(Number).filter(function (i) { return i >= 0 && i < rb[c].buoc.length; });
-    const dm = Math.round(dat.reduce(function (s, i) { return s + rb[c].buoc[i].diem; }, 0) * 100) / 100;
+    let dat = (Array.isArray(cham[c]) ? cham[c] : (cu.cau[c] || {}).dat || []).map(Number).filter(function (i) { return i >= 0 && i < rb[c].buoc.length; });
+    const dB0 = d.diemB && Array.isArray(d.diemB[c]) ? d.diemB[c] : (Array.isArray(cham[c]) ? null : (cu.cau[c] || {}).dB);
+    const db = tlDiemBuoc(rb[c].buoc, dat, dB0);
+    dat = db.map(function (x, i) { return x > 0 ? i : -1; }).filter(function (i) { return i >= 0; });
+    const le = db.some(function (x, i) { return x > 0 && x < rb[c].buoc[i].diem; });
+    const dm = Math.round(db.reduce(function (s, x) { return s + x; }, 0) * 100) / 100;
     const ly = Array.isArray(lydo[c]) ? lydo[c].slice(0, rb[c].buoc.length).map(function (x) { return String(x || '').slice(0, 200); }) : ((cu.cau[c] || {}).lydo || []);
-    tong += dm; dong.push([ca, ma, c, JSON.stringify(dat), dm, anhId || '', new Date(), 'DUYET', JSON.stringify({b: ly, nx: String(nxs[c] !== undefined ? nxs[c] : (cu.cau[c] || {}).nx || '').slice(0, 300)})]);
+    const jl = {b: ly, nx: String(nxs[c] !== undefined ? nxs[c] : (cu.cau[c] || {}).nx || '').slice(0, 300)}; if (le) jl.d = db;
+    tong += dm; dong.push([ca, ma, c, JSON.stringify(dat), dm, anhId || '', new Date(), 'DUYET', JSON.stringify(jl)]);
   });
   tong = Math.round(tong * 100) / 100;
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -1437,17 +1450,25 @@ function gvTLAI(d) {
   const b64 = Utilities.base64Encode(DriveApp.getFileById(x.anh).getBlob().getBytes());
   const yc = 'Ảnh là bài làm TỰ LUẬN viết tay môn Hóa học của một học sinh (mặt sau phiếu trả lời). Hãy đọc kỹ bài làm và chấm theo HƯỚNG DẪN CHẤM từng bước dưới đây.\n' +
     'Quy tắc: một bước chỉ ĐẠT khi trên bài có nội dung đúng tương ứng (chấp nhận cách làm khác nếu đúng bản chất, kết quả đúng). Không đọc được, bỏ trống hoặc sai → KHÔNG đạt. Không đoán thay học sinh.\n' +
+    'Sai nhỏ ở một bước (VD viết đúng chất nhưng chưa cân bằng, thiếu đơn vị/điều kiện, làm tròn sai) thì cho MỘT PHẦN điểm bước đó: ghi vào "mot_phan" dạng {"chỉ số bước": điểm} (bội số 0.05, nhỏ hơn điểm bước) và KHÔNG đưa bước đó vào "dat"; lý do ghi rõ lỗi bị trừ.\n' +
     'Với mỗi bước ghi lý do rất ngắn (≤ 15 từ, tiếng Việt, nói học sinh đã viết gì / thiếu gì). Mỗi câu thêm 1 nhận xét ngắn giúp học sinh sửa (≤ 30 từ). Số thập phân dùng dấu chấm.\n' +
     'Đề và hướng dẫn chấm: ' + JSON.stringify(cau.map(function (q) { return {cau: q.cau, diem: q.diem, de: String(q.hoi).replace(/<[^>]*>/g, ' ').slice(0, 1200), buoc: rb[q.cau].buoc.map(function (b, i) { return {so: i, nd: b.nd, diem: b.diem}; })}; })) +
-    '\nTrả về JSON: {"doc_duoc":true,"cau":[{"cau":"1","dat":[0,2],"lydo":["lý do bước 0","lý do bước 1",...],"nhanxet":"..."}]}';
+    '\nTrả về JSON: {"doc_duoc":true,"cau":[{"cau":"1","dat":[0,2],"mot_phan":{"1":0.15},"lydo":["lý do bước 0","lý do bước 1",...],"nhanxet":"..."}]}';
   const kq = goiAI(yc, {b64: b64, mime: 'image/jpeg'}, 0.1, {thuLai: true, he: 'Bạn là giáo viên Hóa học chấm bài cẩn thận, công bằng. Chỉ trả về JSON hợp lệ.'});
   if (!kq || !Array.isArray(kq.cau)) return {ok: false, msg: 'AI chua cham duoc, thu lai'};
   const dong = [];
   cau.forEach(function (q) {
     const a = kq.cau.filter(function (z) { return String(z.cau).replace(/^IV\./, '') === String(q.cau).replace(/^IV\./, ''); })[0] || {};
-    const n = rb[q.cau].buoc.length, dat = (Array.isArray(a.dat) ? a.dat : []).map(Number).filter(function (i, k, s) { return i >= 0 && i < n && s.indexOf(i) === k; });
-    const dm = Math.round(dat.reduce(function (t, i) { return t + rb[q.cau].buoc[i].diem; }, 0) * 100) / 100;
-    dong.push([ca, ma, q.cau, JSON.stringify(dat), dm, x.anh, new Date(), 'NHAP', JSON.stringify({b: (Array.isArray(a.lydo) ? a.lydo : []).slice(0, n).map(function (t) { return String(t || '').slice(0, 200); }), nx: String(a.nhanxet || '').slice(0, 300)})]);
+    const bb = rb[q.cau].buoc, n = bb.length; let dat = (Array.isArray(a.dat) ? a.dat : []).map(Number).filter(function (i, k, s) { return i >= 0 && i < n && s.indexOf(i) === k; });
+    const mp = a.mot_phan && typeof a.mot_phan === 'object' ? a.mot_phan : {}, dB = bb.map(function (b, i) {
+      if (dat.indexOf(i) >= 0) return b.diem;
+      const v = Number(String(mp[i] === undefined ? mp[String(i)] : mp[i]).replace(',', '.'));
+      return v > 0 && v < b.diem ? Math.round(Math.round(v / 0.05) * 0.05 * 100) / 100 : 0;
+    });
+    dat = dB.map(function (v, i) { return v > 0 ? i : -1; }).filter(function (i) { return i >= 0; });
+    const le = dB.some(function (v, i) { return v > 0 && v < bb[i].diem; }), dm = Math.round(dB.reduce(function (t, v) { return t + v; }, 0) * 100) / 100;
+    const jl = {b: (Array.isArray(a.lydo) ? a.lydo : []).slice(0, n).map(function (t) { return String(t || '').slice(0, 200); }), nx: String(a.nhanxet || '').slice(0, 300)}; if (le) jl.d = dB;
+    dong.push([ca, ma, q.cau, JSON.stringify(dat), dm, x.anh, new Date(), 'NHAP', JSON.stringify(jl)]);
   });
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
