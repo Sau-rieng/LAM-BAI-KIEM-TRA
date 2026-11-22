@@ -4808,6 +4808,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<div><b>' + (tinh.length ? diem(lam2(tong / tinh.length)) : '–') + '</b><span>Điểm TB</span></div>' +
       '<div><b>' + (cao === null ? '–' : diem(cao)) + '</b><span>Cao nhất</span></div>' +
       '<div><b>' + (thap === null ? '–' : diem(thap)) + '</b><span>Thấp nhất</span></div></div>' +
+      '<p class="sub" style="margin-top:8px">🔑 Em quên mật khẩu (mã xem bài)? <button class="btn2" id="capMK" type="button">Cấp lại mật khẩu</button> <b id="capMKkq"></b></p>' +
       '</div>';
     var chuaDot = j.dot.filter(function (d) { return !d.tro && !m[ma + '|' + d.madot]; });
     if (chuaDot.length) {
@@ -4904,6 +4905,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     });
     veKTMotHS($('ktEm'), ma);
     taiLyEm(HS_LOP, ma);
+    if ($('capMK')) $('capMK').onclick = function () {
+      var b = this; if (!confirm('Cấp mật khẩu mới cho ' + x.hoten + '? Mật khẩu cũ sẽ không dùng được nữa.')) return;
+      b.disabled = true; $('capMKkq').textContent = 'Đang cấp…';
+      goi(HS_LOP.url, { action: 'gv_capmk', ma: MA, mahs: ma }).then(function (r) {
+        if (!r.ok) throw r; $('capMKkq').innerHTML = 'Mật khẩu mới: <span style="font-size:1.3em;letter-spacing:1px">' + esc(r.mk) + '</span> – đưa em, em đăng nhập rồi tự đổi.'; b.hidden = true;
+      }).catch(function (e) { b.disabled = false; $('capMKkq').textContent = 'Chưa cấp được: ' + loiSo(e); });
+    };
     man('scrMotHS');
   }
 

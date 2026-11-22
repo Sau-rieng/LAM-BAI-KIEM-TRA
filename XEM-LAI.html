@@ -215,7 +215,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <label for="sbd">Số báo danh (2 số cuối, hoặc đủ 8 số nếu em học nhiều lớp)</label>
   <div class="sbd"><span class="pre" id="pre">------</span><input id="sbd" inputmode="numeric" maxlength="8" autocomplete="off"></div>
   <label for="maxem">Mật khẩu (mã xem bài)</label>
-  <input id="maxem" type="password" inputmode="numeric" autocomplete="off">
+  <input id="maxem" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
   <button class="btn" id="btnXem">Đăng nhập</button>
   <div class="msg" id="msg"></div>
 </section>
@@ -235,6 +235,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       <button id="moTX" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Điểm TX</b><span id="soTX">Điểm thầy/cô cho trên lớp</span></button>
       <button id="moKT" class="ktBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>Kiến thức cần ôn</b><span id="soKT">Em yếu phần nào, câu nào sai</span></button>
       <button id="moLuyen" class="luyenBtn"><span class="ic" aria-hidden="true" data-bt="ong"></span><b>Luyện lại phần yếu</b><span>10 câu đúng phần em còn sai, có lời giải ngay</span></button>
+      <button id="moMK" class="txBtn"><span class="ic" aria-hidden="true" data-bt="kq"></span><b>🔑 Đổi mật khẩu</b><span>Tự đặt mật khẩu (mã xem bài) của riêng em</span></button>
       <button id="moTin" class="tinBtn"><span class="ic" aria-hidden="true" data-bt="tin"></span><i class="dem" id="demTin" hidden></i><b>Hỏi thầy/cô</b><span id="soTin">Nhắn thắc mắc, xem trả lời</span></button>
     </div>
     <button class="btn btn2" id="btnRa0">Thoát</button>
@@ -279,6 +280,20 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <div id="ksNoi"></div>
   </div>
 </section>
+<section id="scrMK" class="hidden">
+  <div class="card" style="max-width:460px;margin:0 auto">
+    <div class="dau"><button class="btn2" id="mkLai">◀ Tài khoản</button></div>
+    <h1>🔑 Đổi mật khẩu</h1>
+    <p class="sub">Mật khẩu mới dùng để đăng nhập Tài khoản HS ở mọi lớp em học. Cần <b>6–20 ký tự, có cả chữ và số</b> (VD: hoa12a). Đừng đưa mật khẩu cho bạn. Quên mật khẩu thì nhờ thầy/cô cấp lại.</p>
+    <label for="mkCu">Mật khẩu hiện tại</label><input id="mkCu" type="password" autocomplete="current-password" autocapitalize="off">
+    <label for="mkMoi">Mật khẩu mới</label><input id="mkMoi" type="password" autocomplete="new-password" maxlength="20" autocapitalize="off">
+    <label for="mkMoi2">Nhập lại mật khẩu mới</label><input id="mkMoi2" type="password" autocomplete="new-password" maxlength="20" autocapitalize="off">
+    <label style="display:flex;gap:6px;align-items:center;margin:6px 0"><input type="checkbox" id="mkHien" style="width:auto"> Hiện mật khẩu</label>
+    <button class="btn" id="mkLuu">Đổi mật khẩu</button>
+    <div class="loi" id="mkMsg"></div>
+  </div>
+</section>
+
 <section id="scrNhan" class="hidden">
   <div class="card">
     <button class="btn2 nho" id="nhanVe">◀ Quay lại</button>
@@ -369,7 +384,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   var lopChon = null, duLieu = null, baiDangXem = null, LOP_CHINH = null, TAT = [];   // TAT: [{l, j}] các lớp em học (tài khoản chung)
   function $(id) { return document.getElementById(id); }
   function loi(t) { $('msg').className = 'msg err'; $('msg').textContent = t; }
-  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX', 'scrLuyen', 'scrBD', 'scrNhan', 'scrKS'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
+  function man(id) { ['scrLogin', 'scrHome', 'scrTN', 'scrDS', 'scrBai', 'scrTin', 'scrKT', 'scrTX', 'scrLuyen', 'scrBD', 'scrNhan', 'scrKS', 'scrMK'].forEach(function (k) { $(k).classList.toggle('hidden', k !== id); }); window.scrollTo(0, 0); }
 
   DS.forEach(function (l, i) { var o = document.createElement('option'); o.value = i; o.textContent = l.ten; $('lop').appendChild(o); });
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
@@ -728,6 +743,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     return url;
   }
   $('moNhan').onclick = function () { man('scrNhan'); veNhan(); };
+  $('moMK').onclick = function () { ['mkCu', 'mkMoi', 'mkMoi2'].forEach(function (k) { $(k).value = ''; }); $('mkMsg').textContent = ''; $('mkMsg').style.color = ''; man('scrMK'); };
+  $('mkLai').onclick = function () { man('scrHome'); };
+  $('mkHien').onchange = function () { var t = this.checked ? 'text' : 'password'; ['mkCu', 'mkMoi', 'mkMoi2'].forEach(function (k) { $(k).type = t; }); };
+  $('mkLuu').onclick = function () {
+    var cu = $('mkCu').value.trim(), moi = $('mkMoi').value.trim(), m = $('mkMsg'), b = this; m.style.color = '';
+    if (moi !== $('mkMoi2').value.trim()) { m.textContent = 'Hai lần nhập mật khẩu mới chưa giống nhau.'; return; }
+    if (moi.length < 6 || !/[A-Za-z]/.test(moi) || !/\d/.test(moi) || /\s/.test(moi)) { m.textContent = 'Mật khẩu mới cần 6–20 ký tự, có cả chữ và số, không dấu cách.'; return; }
+    b.disabled = true; m.textContent = 'Đang đổi…';
+    fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_doima', mahs: duLieu.mahs, maxem: cu, moi: moi }) }).then(function (r) { return r.json(); }).then(function (j) {
+      b.disabled = false;
+      if (!j.ok) { m.textContent = /khong hop le|khong ro/i.test(j.msg || '') ? 'Hệ thống chưa cập nhật, nhờ thầy/cô cập nhật sổ.' : (j.msg || 'Chưa đổi được'); return; }
+      duLieu.maxem = moi; m.style.color = '#1f7a3a'; m.textContent = '✓ Đã đổi mật khẩu. Lần sau đăng nhập bằng mật khẩu mới.';
+      ['mkCu', 'mkMoi', 'mkMoi2'].forEach(function (k) { $(k).value = ''; });
+    }).catch(function () { b.disabled = false; m.textContent = 'Mất mạng, thử lại.'; });
+  };
   // ---------- Khảo sát (GV mở đợt, có giờ mở/đóng; phiếu ẩn danh) ----------
   var KS = null;
   function ngGio(iso) { var d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }

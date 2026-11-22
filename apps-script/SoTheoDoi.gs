@@ -82,6 +82,7 @@ function doPost(e) {
       case 'hs_luyen': return json(hsLuyen(d));
       case 'hs_luyen_nop': return json(hsLuyenNop(d));
       case 'hs_ks_nop': return json(hsKSNop(d));
+      case 'hs_doima': return json(hsDoiMa(d));
       case 'daxem':  return json(ghiDaXem(d));
       case 'xemtn':  return json(ghiXemTN(d));
       case 'tn_gui': return json(hsGuiTin(d));
@@ -134,6 +135,7 @@ function doPost(e) {
       case 'gv_tl_chuyen':
       case 'gv_tl_nen':
       case 'gv_tl_nen_ok':
+      case 'gv_capmk':
       case 'gv_tl_ai':
       case 'gv_ainx':
       case 'gv_nhanxet_nhieu':
@@ -228,6 +230,7 @@ function doPost(e) {
         if (d.action === 'gv_tl_chuyen') return json(gvTLChuyen(d));
         if (d.action === 'gv_tl_nen') return json(gvTLNen(d));
         if (d.action === 'gv_tl_nen_ok') return json(gvTLNenOK(d));
+        if (d.action === 'gv_capmk') return json(gvCapMK(d));
         if (d.action === 'gv_tl_anh') return json(gvTLAnh(d));
         if (d.action === 'gv_ainx') return json(gvAINX(d));
         if (d.action === 'gv_nhanxet_nhieu') return json(gvNhanXetNhieu(d));
@@ -3710,7 +3713,9 @@ function timHS(ma) {
   for (let i = 0; i < rows.length; i++) {
     if (String(rows[i][0]).trim() === ma) {
       let mx = String(rows[i][3]).trim(), ten = String(rows[i][1]).trim();
-      if (ma.slice(0, 6) !== tienToLop()) { const t = tkMap()[ma]; if (t && t.mx) mx = t.mx; if (t && !ten && t.ten) ten = t.ten; }   // em hoc lop phu: mat khau (+ ten) theo lop chinh
+      const t = tkMap()[ma];
+      if (t && t.mx && (t.hd || ma.slice(0, 6) !== tienToLop())) mx = t.mx;   // lop phu theo lop chinh; mat khau HS vua tu doi (chua dong bo) thi theo kho
+      if (t && !ten && t.ten && ma.slice(0, 6) !== tienToLop()) ten = t.ten;   // em hoc lop phu: mat khau (+ ten) theo lop chinh
       return {ten: ten, maxem: mx};
     }
   }
@@ -3730,7 +3735,7 @@ function boGV(v, c) { return AN_GV ? v.filter(function (r) { return !laGV(r[c]);
 // Lop chinh = lop co tien to SBD trung voi SBD cua em; cac lop phu ghi cung SBD do trong DANHSACH.
 // Kho tab TAI KHOAN: MaHS | MaXem (cua lop chinh) | LopChinh | CacLop | CapNhat — moi so dong bo khi GV mo trang (toi da 30 phut/lan).
 // ---------------------------------------------------------------------
-const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat', 'HoTen'];
+const TAB_TK = 'TAI KHOAN', HEAD_TK = ['MaHS', 'MaXem', 'LopChinh', 'CacLop', 'CapNhat', 'HoTen', 'HSDoi'];
 function tienToLop() {
   const c = CacheService.getScriptCache(); let t = c.get('tiento'); if (t !== null) return t;
   // Trang GV gui kem tien to cua lop (cau-hinh-lop.js) → chinh xac ca khi lop phu toan HS lop khac (VD 12AFTER)
@@ -3742,12 +3747,49 @@ function tienToLop() {
   c.put('tiento', t, 21600); return t;
 }
 var TK_NHO = null;
+// ---------------------------------------------------------------------
+// ĐỔI MẬT KHẨU (mã xem bài): HS tự đổi trong Tài khoản HS; GV cấp lại khi em quên.
+// Ghi vào DANHSACH sổ này (nếu có em) + kho TAI KHOAN (cột HSDoi đánh dấu) → các sổ khác của em chép theo khi đồng bộ.
+// ---------------------------------------------------------------------
+function ghiMatKhau(ma, moi) {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const ds = SpreadsheetApp.getActive().getSheetByName(TAB_DS);
+    if (ds && ds.getLastRow() > 1) { const v = ds.getRange(2, 1, ds.getLastRow() - 1, 1).getValues(); for (let i = 0; i < v.length; i++) if (String(v[i][0]).replace(/^'/, '').trim() === ma) { ds.getRange(i + 2, 4).setNumberFormat('@').setValue(moi); break; } }
+    const sh = tabKho(TAB_TK, HEAD_TK);
+    if (sh.getRange(1, 7).getValue() !== 'HSDoi') sh.getRange(1, 7).setValue('HSDoi').setFontWeight('bold');
+    const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 1).getValues() : []; let dong = -1;
+    for (let i = 0; i < v.length; i++) if (String(v[i][0]).trim() === ma) { dong = i + 2; break; }
+    const luc = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+    if (dong > 0) { sh.getRange(dong, 2).setNumberFormat('@').setValue(moi); sh.getRange(dong, 5).setValue(new Date()); sh.getRange(dong, 7).setNumberFormat('@').setValue(luc); }
+    else { const r0 = n + 1; sh.getRange(r0, 1, 1, 7).setNumberFormat('@').setValues([[ma, moi, ma.slice(0, 6) === tienToLop() ? lopNay() : '', lopNay(), new Date(), '', luc]]); }
+  } finally { lock.releaseLock(); }
+  CacheService.getScriptCache().remove('tk_map'); TK_NHO = null;
+}
+function hsDoiMa(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma);
+  if (!hs || hs.gv) return {ok: false, msg: 'Tài khoản này không đổi mật khẩu được'};
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'Mật khẩu cũ chưa đúng'};
+  const moi = String(d.moi || '').trim();
+  if (moi.length < 6 || moi.length > 20 || !/[A-Za-z]/.test(moi) || !/\d/.test(moi) || /\s/.test(moi)) return {ok: false, msg: 'Mật khẩu mới cần 6–20 ký tự, có cả chữ và số, không dấu cách'};
+  if (moi === hs.maxem) return {ok: false, msg: 'Mật khẩu mới phải khác mật khẩu cũ'};
+  if (moi.indexOf(ma) >= 0) return {ok: false, msg: 'Đừng dùng số báo danh làm mật khẩu'};
+  ghiMatKhau(ma, moi);
+  return {ok: true};
+}
+// GV cấp lại mật khẩu khi em quên: 2 chữ + 4 số (VD hd4821); em đăng nhập rồi tự đổi
+function gvCapMK(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma); if (!hs || hs.gv) return {ok: false, msg: 'Khong co SBD ' + ma};
+  const ch = 'abcdefghkmnpqrstuvwxyz', moi = ch[Math.floor(Math.random() * ch.length)] + ch[Math.floor(Math.random() * ch.length)] + String(Math.floor(1000 + Math.random() * 9000));
+  ghiMatKhau(ma, moi);
+  return {ok: true, mk: moi};
+}
 function tkMap() {
   if (TK_NHO) return TK_NHO;
   const c = CacheService.getScriptCache(), s = c.get('tk_map');
   if (s) { try { return TK_NHO = JSON.parse(s); } catch (e) {} }
   const m = {}, sh = kho().getSheetByName(TAB_TK);
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String), ten: String(r[5] || '').trim()}; });
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 7).getValues().forEach(function (r) { const ma = String(r[0]).trim(); if (ma) m[ma] = {mx: String(r[1]).trim(), hd: !!String(r[6] || '').trim(), lc: String(r[2]).trim(), cl: String(r[3]).split(',').map(function (x) { return x.trim(); }).filter(String), ten: String(r[5] || '').trim()}; });
   try { c.put('tk_map', JSON.stringify(m), 300); } catch (e) {}
   return TK_NHO = m;
 }
@@ -3761,7 +3803,8 @@ function dongBoTK(ep) {
   // các tiền tố SBD của những lớp có sổ (trang GV gửi); em có tiền tố ngoài danh sách này (VD lớp khác trường/khối) thì lớp này là lớp chính → tự cấp mật khẩu
   const ttDS = String(P.getProperty('tiento_ds') || '').split(',').filter(String);
   if (sh.getRange(1, 6).getValue() !== 'HoTen') sh.getRange(1, 6).setValue('HoTen').setFontWeight('bold');
-  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 6).getValues() : [], vt = {};
+  if (sh.getRange(1, 7).getValue() !== 'HSDoi') sh.getRange(1, 7).setValue('HSDoi').setFontWeight('bold');
+  const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 7).getValues() : [], vt = {};
   v.forEach(function (r, i) { vt[String(r[0]).trim()] = i; });
   const dsR = ds.getRange(2, 1, ds.getLastRow() - 1, 4), dsV = dsR.getValues(), them = [];
   let doiDS = false, doiTen = false, doiKho = false, thieu = 0;
@@ -3769,9 +3812,11 @@ function dongBoTK(ep) {
     const ma = String(r[0]).trim(); if (!/^\d{8}$/.test(ma) || laGV(ma)) return;
     const ten = String(r[1]).trim(), chinh = (!!tt && ma.slice(0, 6) === tt) || (ttDS.length > 0 && ttDS.indexOf(ma.slice(0, 6)) < 0);
     if (chinh && !String(r[3]).trim() && !(vt[ma] >= 0 && String(v[vt[ma]][1]).trim())) { r[3] = String(Math.floor(1000 + Math.random() * 9000)); doiDS = true; }   // em mới chưa có mật khẩu: cấp mã 4 số
+    // HS tự đổi mật khẩu (hoặc GV cấp lại) ở sổ khác: kho giữ mật khẩu mới (cột HSDoi) → chép về DANHSACH; lớp chính chép xong thì xóa dấu
+    if (vt[ma] >= 0 && String(v[vt[ma]][6] || '').trim() && String(v[vt[ma]][1]).trim()) { if (String(r[3]).trim() !== String(v[vt[ma]][1]).trim()) { r[3] = String(v[vt[ma]][1]).trim(); doiDS = true; } if (chinh) { v[vt[ma]][6] = ''; doiKho = true; } }
     const mx = String(r[3]).trim();
     let i = vt[ma];
-    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date(), chinh ? ten : '']); vt[ma] = -1; if (!chinh && (!ten || !mx)) thieu++; return; }
+    if (i === undefined) { them.push([ma, mx, chinh ? lop : '', lop, new Date(), chinh ? ten : '', '']); vt[ma] = -1; if (!chinh && (!ten || !mx)) thieu++; return; }
     if (i < 0) return;
     const x = v[i], cl = String(x[3]).split(',').map(function (z) { return z.trim(); }).filter(String);
     if (cl.indexOf(lop) < 0) { cl.push(lop); x[3] = cl.join(','); doiKho = true; }
@@ -3786,8 +3831,8 @@ function dongBoTK(ep) {
       if (!String(r[1]).trim() || !String(r[3]).trim()) thieu++;
     }
   });
-  if (doiKho) sh.getRange(2, 1, v.length, 6).setNumberFormat('@').setValues(v);
-  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 6).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 6).setValues(them); }
+  if (doiKho) sh.getRange(2, 1, v.length, 7).setNumberFormat('@').setValues(v);
+  if (them.length) { const r0 = sh.getLastRow() + 1; sh.getRange(r0, 1, them.length, 7).setNumberFormat('@'); sh.getRange(r0, 1, them.length, 7).setValues(them); }
   if (doiDS) ds.getRange(2, 4, dsV.length, 1).setNumberFormat('@').setValues(dsV.map(function (r) { return [r[3]]; }));
   if (doiTen) ds.getRange(2, 2, dsV.length, 1).setValues(dsV.map(function (r) { return [r[1]]; }));
   if (thieu) P.setProperty('tk_thieu', '1'); else P.deleteProperty('tk_thieu');   // con em chua co ten/mat khau: thu lai sau 3 phut
