@@ -132,6 +132,8 @@ function doPost(e) {
       case 'gv_tl_anh':
       case 'gv_tl_layanh':
       case 'gv_tl_chuyen':
+      case 'gv_tl_nen':
+      case 'gv_tl_nen_ok':
       case 'gv_tl_ai':
       case 'gv_ainx':
       case 'gv_nhanxet_nhieu':
@@ -224,6 +226,8 @@ function doPost(e) {
         if (d.action === 'gv_tl_ai') return json(gvTLAI(d));
         if (d.action === 'gv_tl_layanh') return json(gvTLLayAnh(d));
         if (d.action === 'gv_tl_chuyen') return json(gvTLChuyen(d));
+        if (d.action === 'gv_tl_nen') return json(gvTLNen(d));
+        if (d.action === 'gv_tl_nen_ok') return json(gvTLNenOK(d));
         if (d.action === 'gv_tl_anh') return json(gvTLAnh(d));
         if (d.action === 'gv_ainx') return json(gvAINX(d));
         if (d.action === 'gv_nhanxet_nhieu') return json(gvNhanXetNhieu(d));
@@ -1045,6 +1049,62 @@ function gvDoiMaOTP(d) {
   return {ok: true};
 }
 // Chay 1 lan trong trinh soan Apps Script de cap quyen gui mail (cho chuc nang Quen ma)
+// ---------------------------------------------------------------------
+// CHẤM TỰ LUẬN NGẦM: GV bấm 1 lần, máy chủ Google tự AI chấm nháp cả lớp (trình kích hoạt mỗi phút, mỗi lượt ≤ 4.5 phút)
+// Hàng đợi ở Script Property 'tl_nen': {viec: [{ca, ten, cho: [MaHS], tong, xong, loi, thu: {ma: số lần}, bd, kt, xem}]}
+// Kết quả để NHÁP – GV duyệt. Trang GV (gv_dathi) đọc tlNenTT() để hiện băng báo.
+// ---------------------------------------------------------------------
+function tlNenDoc() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('tl_nen') || '{"viec":[]}'); } catch (e) { return {viec: []}; } }
+function tlNenGhi(q) { PropertiesService.getScriptProperties().setProperty('tl_nen', JSON.stringify(q)); }
+function tlNenTT() {
+  const q = tlNenDoc();
+  return q.viec.filter(function (v) { return !v.xem; }).map(function (v) { return {ca: v.ca, ten: v.ten, tong: v.tong, xong: v.xong, loi: v.loi, con: v.cho.length, kt: v.kt || 0, bd: v.bd}; });
+}
+function tlNenTrigger(bat) {
+  const cu = ScriptApp.getProjectTriggers().filter(function (t) { return t.getHandlerFunction() === 'tlNenChay'; });
+  if (bat && !cu.length) ScriptApp.newTrigger('tlNenChay').timeBased().everyMinutes(1).create();
+  if (!bat) cu.forEach(function (t) { ScriptApp.deleteTrigger(t); });
+}
+function gvTLNen(d) {
+  const ca = String(d.ca || '').trim(), r = gvRubric({ca: ca}); if (!r.ok) return r;
+  const rb = r.rubric; if (!r.cau.length || r.cau.some(function (q) { return !rb[q.cau] || !rb[q.cau].buoc.length; })) return {ok: false, msg: 'Chua du huong dan cham (rubric) cho cac cau'};
+  const tl = docTLDiem(ca, true), cho = Object.keys(tl).filter(function (m) { return tl[m].anh && !tl[m].duyet && (!tl[m].nhap || d.lai); });
+  if (!cho.length) return {ok: true, tong: 0, tt: tlNenTT()};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const q = tlNenDoc(); q.viec = q.viec.filter(function (v) { return v.ca !== ca; });
+    q.viec.push({ca: ca, ten: String(d.ten || '').slice(0, 80), cho: cho, tong: cho.length, xong: 0, loi: 0, thu: {}, bd: Date.now(), kt: 0, xem: false});
+    tlNenGhi(q);
+  } finally { lock.releaseLock(); }
+  try { tlNenTrigger(true); } catch (e) { return {ok: false, quyen: true, msg: 'Can cap quyen chay ngam: mo Apps Script cua so ' + lopNay() + ', chon ham capQuyen, bam Chay (1 lan)'}; }
+  return {ok: true, tong: cho.length, tt: tlNenTT()};
+}
+function gvTLNenOK(d) {
+  const q = tlNenDoc(), ca = String(d.ca || '').trim();
+  q.viec.forEach(function (v) { if (!ca || v.ca === ca) { if (!v.cho.length) v.xem = true; } });
+  q.viec = q.viec.filter(function (v) { return !(v.xem && Date.now() - (v.kt || 0) > 7 * 864e5); });
+  tlNenGhi(q); return {ok: true, tt: tlNenTT()};
+}
+function tlNenChay(gioiHan) {
+  const c = CacheService.getScriptCache(); if (c.get('tl_nen_chay')) return; c.put('tl_nen_chay', '1', 330);
+  const t0 = Date.now(), han = typeof gioiHan === 'number' ? gioiHan : 270000;
+  try {
+    while (Date.now() - t0 < han) {
+      const q = tlNenDoc(), v = q.viec.filter(function (x) { return x.cho.length; })[0];
+      if (!v) { tlNenTrigger(false); return; }
+      const ma = v.cho[0]; let ok = false, boQua = false;
+      try { const r = gvTLAI({ca: v.ca, mahs: ma}); ok = r.ok; boQua = !r.ok && /da duyet|Chua co anh/i.test(r.msg || ''); } catch (e) {}
+      const q2 = tlNenDoc(), v2 = q2.viec.filter(function (x) { return x.ca === v.ca; })[0]; if (!v2) continue;
+      v2.cho = v2.cho.filter(function (m) { return m !== ma; });
+      if (ok || boQua) { if (ok) v2.xong++; }
+      else { v2.thu[ma] = (v2.thu[ma] || 0) + 1; if (v2.thu[ma] < 3) v2.cho.push(ma); else v2.loi++; }   // AI lỗi: thử lại tối đa 3 lần
+      if (!v2.cho.length) v2.kt = Date.now();
+      tlNenGhi(q2);
+    }
+  } finally { c.remove('tl_nen_chay'); }
+}
+// Chạy 1 lần trong trình soạn Apps Script của MỖI sổ để cấp quyền: gửi mail (Quên mã) + chạy ngầm (chấm tự luận)
+function capQuyen() { ScriptApp.getProjectTriggers(); DriveApp.getRootFolder(); capQuyenMail(); }
 function capQuyenMail() { MailApp.sendEmail(Session.getEffectiveUser().getEmail(), 'Khám phá Hóa học – đã cấp quyền gửi mail', 'Sổ ' + lopNay() + ' đã gửi được mail. Chức năng "Quên mã" trên trang giáo viên đã sẵn sàng.'); }
 function kiemMaQL(m) {
   const q = docMa().quanly;
@@ -2359,7 +2419,7 @@ function gvDaThi() {
   Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
   let siso = 0, dakt = {}; try { siso = dsLopTX().length; dakt = docDaKT(); } catch (e) {}
   try { dongBoTK(); } catch (e) {}
-  return {ok: true, lop: lopNay(), dathi: dathi, siso: siso, dakt: dakt};
+  return {ok: true, lop: lopNay(), dathi: dathi, siso: siso, dakt: dakt, tlNen: tlNenTT()};
 }
 // De giay "da kiem tra" theo lop: mac dinh tu tich khi co bai quet; GV tich/bo tich tay luu o kho (tab DA KIEM TRA)
 const TAB_DAKT = 'DA KIEM TRA', HEAD_DAKT = ['Ca', 'Lop', 'TrangThai', 'Luc'];
