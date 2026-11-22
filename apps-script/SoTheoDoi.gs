@@ -1058,7 +1058,7 @@ function tlNenDoc() { try { return JSON.parse(PropertiesService.getScriptPropert
 function tlNenGhi(q) { PropertiesService.getScriptProperties().setProperty('tl_nen', JSON.stringify(q)); }
 function tlNenTT() {
   const q = tlNenDoc();
-  return q.viec.filter(function (v) { return !v.xem; }).map(function (v) { return {ca: v.ca, ten: v.ten, tong: v.tong, xong: v.xong, loi: v.loi, con: v.cho.length, kt: v.kt || 0, bd: v.bd}; });
+  return q.viec.filter(function (v) { return !v.xem; }).map(function (v) { return {ca: v.ca, ten: v.ten, tong: v.tong, xong: v.xong, loi: v.loi, trong: v.trong || 0, con: v.cho.length, kt: v.kt || 0, bd: v.bd}; });
 }
 function tlNenTrigger(bat) {
   const cu = ScriptApp.getProjectTriggers().filter(function (t) { return t.getHandlerFunction() === 'tlNenChay'; });
@@ -1093,10 +1093,11 @@ function tlNenChay(gioiHan) {
       const q = tlNenDoc(), v = q.viec.filter(function (x) { return x.cho.length; })[0];
       if (!v) { tlNenTrigger(false); return; }
       const ma = v.cho[0]; let ok = false, boQua = false;
-      try { const r = gvTLAI({ca: v.ca, mahs: ma}); ok = r.ok; boQua = !r.ok && /da duyet|Chua co anh/i.test(r.msg || ''); } catch (e) {}
+      let trong = false;
+      try { const r = gvTLAI({ca: v.ca, mahs: ma}); ok = r.ok; trong = !!r.boTrong; boQua = !r.ok && /da duyet|Chua co anh/i.test(r.msg || ''); } catch (e) {}
       const q2 = tlNenDoc(), v2 = q2.viec.filter(function (x) { return x.ca === v.ca; })[0]; if (!v2) continue;
       v2.cho = v2.cho.filter(function (m) { return m !== ma; });
-      if (ok || boQua) { if (ok) v2.xong++; }
+      if (ok || boQua) { if (ok) v2.xong++; if (trong) v2.trong = (v2.trong || 0) + 1; }
       else { v2.thu[ma] = (v2.thu[ma] || 0) + 1; if (v2.thu[ma] < 3) v2.cho.push(ma); else v2.loi++; }   // AI lỗi: thử lại tối đa 3 lần
       if (!v2.cho.length) v2.kt = Date.now();
       tlNenGhi(q2);
@@ -1453,9 +1454,17 @@ function gvTLAI(d) {
     'Sai nhỏ ở một bước (VD viết đúng chất nhưng chưa cân bằng, thiếu đơn vị/điều kiện, làm tròn sai) thì cho MỘT PHẦN điểm bước đó: ghi vào "mot_phan" dạng {"chỉ số bước": điểm} (bội số 0.05, nhỏ hơn điểm bước) và KHÔNG đưa bước đó vào "dat"; lý do ghi rõ lỗi bị trừ.\n' +
     'Với mỗi bước ghi lý do rất ngắn (≤ 15 từ, tiếng Việt, nói học sinh đã viết gì / thiếu gì). Mỗi câu thêm 1 nhận xét ngắn giúp học sinh sửa (≤ 30 từ). Số thập phân dùng dấu chấm.\n' +
     'Đề và hướng dẫn chấm: ' + JSON.stringify(cau.map(function (q) { return {cau: q.cau, diem: q.diem, de: String(q.hoi).replace(/<[^>]*>/g, ' ').slice(0, 1200), buoc: rb[q.cau].buoc.map(function (b, i) { return {so: i, nd: b.nd, diem: b.diem}; })}; })) +
-    '\nTrả về JSON: {"doc_duoc":true,"cau":[{"cau":"1","dat":[0,2],"mot_phan":{"1":0.15},"lydo":["lý do bước 0","lý do bước 1",...],"nhanxet":"..."}]}';
+    'Nếu phần tự luận để GIẤY TRẮNG hoàn toàn (không có chữ, số, công thức hay phương trình nào của học sinh) thì trả "bo_trong": true; có viết bất cứ gì thì "bo_trong": false.\n' +
+    '\nTrả về JSON: {"doc_duoc":true,"bo_trong":false,"cau":[{"cau":"1","dat":[0,2],"mot_phan":{"1":0.15},"lydo":["lý do bước 0","lý do bước 1",...],"nhanxet":"..."}]}';
   const kq = goiAI(yc, {b64: b64, mime: 'image/jpeg'}, 0.1, {thuLai: true, he: 'Bạn là giáo viên Hóa học chấm bài cẩn thận, công bằng. Chỉ trả về JSON hợp lệ.'});
   if (!kq || !Array.isArray(kq.cau)) return {ok: false, msg: 'AI chua cham duoc, thu lai'};
+  // Mặt sau để giấy trắng: tự duyệt 0 điểm (không cần GV duyệt); GV vẫn mở ra sửa được
+  if (kq.bo_trong === true && kq.doc_duoc !== false && kq.cau.every(function (a) { return !(Array.isArray(a.dat) && a.dat.length) && !(a.mot_phan && Object.keys(a.mot_phan).some(function (k) { return Number(a.mot_phan[k]) > 0; })); })) {
+    const cham = {}, lydo = {}, nx = {};
+    cau.forEach(function (q) { cham[q.cau] = []; lydo[q.cau] = rb[q.cau].buoc.map(function () { return 'Để trống'; }); nx[q.cau] = 'Em để trống phần tự luận.'; });
+    const l = gvTLLuu({ca: ca, mahs: ma, cham: cham, lydo: lydo, nx: nx});
+    if (l.ok) return {ok: true, mahs: ma, docDuoc: true, boTrong: true, tl: l.tl};
+  }
   const dong = [];
   cau.forEach(function (q) {
     const a = kq.cau.filter(function (z) { return String(z.cau).replace(/^IV\./, '') === String(q.cau).replace(/^IV\./, ''); })[0] || {};

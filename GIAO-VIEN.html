@@ -2841,7 +2841,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     Object.keys(TLNEN).forEach(function (lop) { (TLNEN[lop] || []).forEach(function (v) {
       var d = DOT.filter(function (x) { return x.giay && (x.ca || x.madot) === v.ca; })[0], ten = esc(v.ten || (d ? d.ten : v.ca));
       if (v.con) h.push('<div class="tlBanD">⏳ Máy đang chấm ngầm tự luận <b>' + ten + '</b>: xong ' + v.xong + '/' + v.tong + ' em</div>');
-      else h.push('<div class="tlBanD">✅ Đã chấm xong tự luận <b>' + ten + '</b>: AI đã chấm nháp ' + v.xong + ' bài, mở để duyệt' + (v.loi ? ' · ' + v.loi + ' bài AI không đọc được' : '') +
+      else h.push('<div class="tlBanD">✅ Đã chấm xong tự luận <b>' + ten + '</b>: ' + (v.xong - (v.trong || 0) > 0 ? 'AI đã chấm nháp ' + (v.xong - (v.trong || 0)) + ' bài, mở để duyệt' : 'không còn bài chờ duyệt') + (v.trong ? ' · ' + v.trong + ' bài để trắng đã tự chấm 0' : '') + (v.loi ? ' · ' + v.loi + ' bài AI không đọc được' : '') +
         ' <button class="btn2" data-mo="' + esc(v.ca) + '" data-lop="' + esc(lop) + '">Mở duyệt ▸</button> <button class="lienKet" data-an="' + esc(v.ca) + '" data-lop="' + esc(lop) + '">Ẩn</button></div>');
     }); });
     b.hidden = !h.length; b.innerHTML = h.join('');
@@ -3433,6 +3433,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         var b = this; b.disabled = true; b.textContent = '🤖 AI đang đọc bài… (20–60 giây)';
         goiLau(CT.lop.url, { action: 'gv_tl_ai', ma: MA, ca: ca, mahs: ma, lai: 1 }, 120000).then(function (r) {
           if (!r.ok) throw r; j.tl[ma] = r.tl; veDs();
+          if (r.boTrong) $('ctTT').textContent = 'Mặt sau để trắng → máy tự chấm 0 điểm (đã duyệt).';
           if (!r.docDuoc) $('ctTT').textContent = '⚠ AI báo ảnh khó đọc – thầy/cô xem kỹ hoặc chụp lại.';
         }).catch(function (e) { b.disabled = false; b.textContent = '🤖 AI chấm nháp'; $('ctTT').textContent = 'AI chưa chấm được: ' + loiSo(e); });
       };
