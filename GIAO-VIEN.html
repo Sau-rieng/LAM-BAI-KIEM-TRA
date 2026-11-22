@@ -2465,14 +2465,27 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     else if (!m3 || Q.maDe.indexOf(m3) < 0) c.push('Mã đề ' + made + ' không có trong bài này (có ' + Q.maDe.map(function (m) { return '0' + m; }).join(', ') + ')');
     return { c: c, m3: m3 };
   }
+  // 2 lần đọc cùng 1 tờ có thể lệch vài ô (tô mờ) → coi là cùng tờ khi ≥ 90% câu giống nhau
+  function giongVT(a, b) {
+    if (!a || !b) return true; if (a === b) return true;
+    try { var x = JSON.parse(a), y = JSON.parse(b); if (x[0] !== y[0]) return false;
+      var p = [].concat(x[1], x[2], x[3]), q = [].concat(y[1], y[2], y[3]), n = 0, g = 0;
+      p.forEach(function (v, i) { if (v || q[i]) { n++; if (v === q[i]) g++; } }); return !n || g / n >= 0.9; } catch (e) { return false; }
+  }
   function luuMay(r, A) {
     var sbd = r.sbd.s;
-    if (Q.cuoi && sbd === Q.cuoi.sbd) { Q.trangThai = 'doiTo'; $('qTT').textContent = 'Tờ này vừa quét xong. Lật sang tờ khác.'; return; }
-    var nh = nhanMay(r), cu = r.sbd.loi ? null : Q.may.filter(function (o) { return o.sbd === sbd && (!o.gui || !o.anh); })[0];
-    if (cu && cu.anh) nh.c.push('Quét lại SBD này – thay tờ quét lúc ' + gio(new Date(cu.luc).toISOString()));
-    var o = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), ca: Q.ca, lop: Q.lop.ten, luc: Date.now(), sbd: sbd, made: r.made.s, anh: anhPhieu({ canvas: A.canvas, r: r }, 1400, 0.75), canh: nh.c, gui: 0 };
+    // vân tay đáp án: cùng SBD + cùng đáp án = quét lại đúng tờ đó (thay); cùng SBD mà đáp án khác = 2 tờ khác nhau (giữ cả 2, gắn nhãn)
+    var vt = JSON.stringify([r.made.s, r.p1.map(function (x) { return x.chon; }), r.p2.map(function (c) { return c.map(function (y) { return y.chon; }).join(''); }), r.p3.map(function (x) { return x.chon; })]);
+    if (Q.cuoi && sbd === Q.cuoi.sbd && giongVT(Q.cuoi.vt, vt)) { Q.trangThai = 'doiTo'; $('qTT').textContent = 'Tờ này vừa quét xong. Lật sang tờ khác.'; return; }
+    var nh = nhanMay(r), cung = r.sbd.loi ? [] : Q.may.filter(function (o) { return o.sbd === sbd; });
+    var cu = cung.filter(function (o) { return !o.anh || (!o.gui && giongVT(o.vt, vt)); })[0];
+    var khac = cung.filter(function (o) { return o.anh && o !== cu && o.vt && !giongVT(o.vt, vt); });
+    if (cu && cu.anh) nh.c.push('Quét lại tờ này – thay lần quét lúc ' + gio(new Date(cu.luc).toISOString()));
+    if (khac.length) nh.c.push('Trùng SBD với tờ khác (quét lúc ' + khac.map(function (o) { return gio(new Date(o.luc).toISOString()); }).join(', ') + ') – có em tô nhầm SBD của bạn; khi chấm chọn lại đúng em');
+    var o = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), ca: Q.ca, lop: Q.lop.ten, luc: Date.now(), sbd: sbd, made: r.made.s, anh: anhPhieu({ canvas: A.canvas, r: r }, 1400, 0.75), canh: nh.c, gui: 0, vt: vt };
     if (cu && cu.sau) { o.sau = cu.sau; o.guiSau = cu.guiSau || 0; }   // mặt sau đã quét trước → ghép luôn
-    Q.trangThai = 'doiTo'; Q.cuoi = { sbd: sbd }; var q = Q; $('qMatSau').hidden = true; Q.matSau = null;
+    Q.trangThai = 'doiTo'; Q.cuoi = { sbd: sbd, vt: vt }; var q = Q; $('qMatSau').hidden = true; Q.matSau = null;
+    khac.forEach(function (z) { var t = 'Trùng SBD với tờ quét sau (' + gio(new Date(o.luc).toISOString()) + ') – có em tô nhầm SBD'; if ((z.canh || []).indexOf(t) < 0) { (z.canh = z.canh || []).push(t); KM.luu(z).catch(function () {}); } });
     KM.luu(o).then(function () { return cu ? KM.xoa(cu.id) : null; }).then(function () {
       if (Q !== q) return;
       if (cu) Q.may = Q.may.filter(function (z) { return z !== cu; });
