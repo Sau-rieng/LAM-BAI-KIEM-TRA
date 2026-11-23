@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khái niệm &amp; Danh pháp Ester đơn chức (Hóa học 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – NỀN SÁNG)
+       ========================================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      /* Hệ màu chuẩn SGK Kết nối tri thức */
+      --sgk-blue: #2b78c5;
+      --sgk-blue-dark: #1d5fa3;
+      --sgk-blue-soft: #eff6ff;
+      --sgk-blue-border: #bfdbfe;
+
+      --sgk-peach: #f4a285;
+      --sgk-peach-soft: #fde8df;
+      --sgk-peach-border: #e88a68;
+      --sgk-acid-red: #8c1d18;
+
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --emerald-200: #a7f3d0;
+
+      --rose-600: #dc2626;
+      --rose-50: #fef2f2;
+      --rose-200: #fecaca;
+
+      --amber-700: #b45309;
+      --amber-50: #fffbeb;
+      --amber-200: #fde68a;
+
+      --violet-700: #6d28d9;
+      --violet-50: #f5f3ff;
+      --violet-200: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.07);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. HIỂN THỊ CÔNG THỨC HÓA HỌC LIỀN MẠCH (KHẮC PHỤC TRIỆT ĐỂ LỖI <sub>)
+       ========================================================================= */
+    .chem-formula {
+      display: inline;
+      white-space: nowrap;
+      letter-spacing: 0;
+    }
+
+    .chem-formula sub,
+    sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH CHUYỂN TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Ô vuông 44x44px chứa SVG phân tử nhỏ gọn vừa khít, không bao giờ tràn */
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--sgk-blue), #164e87);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tabs-bar {
+      display: inline-flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (AN TOÀN TUYỆT ĐỐI TRÊN IPAD/SAFARI)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--sgk-blue);
+      border-color: var(--sgk-blue-dark);
+      color: #ffffff;
+    }
+
+    /* Chỉ áp dụng :hover thông thường trên thiết bị có chuột (tránh dính hover trên iPad) */
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--sgk-blue);
+        background-color: rgba(43, 120, 197, 0.08);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--sgk-blue-dark);
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .chip-btn:not(.active):hover {
+        border-color: var(--sgk-blue);
+        background-color: #f8fbff;
+      }
+      .preset-ester-btn:not(.active):hover {
+        border-color: var(--sgk-blue);
+        background-color: var(--sgk-blue-soft);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--sgk-blue);
+        background-color: #f8fbff;
+      }
+    }
+
+    /* =========================================================================
+       5. BỐ CỤC CHUNG & CARD
+       ========================================================================= */
+    .main-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 40px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--sgk-blue-soft);
+      color: var(--sgk-blue);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-info {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--sgk-blue-soft);
+      color: var(--sgk-blue);
+    }
+
+    /* =========================================================================
+       6. TAB 1: KHÁI NIỆM ESTER
+       ========================================================================= */
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      max-height: 265px;
+      display: block;
+      margin: 0 auto;
+      user-select: none;
+    }
+
+    .svg-anim-group {
+      transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.52s ease;
+      will-change: transform, opacity;
+    }
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    /* Khung lưu ý khoa học màu vàng/cam nhạt nổi bật */
+    .science-note-box {
+      background-color: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      border-left: 5px solid #d97706;
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      font-size: 0.95rem;
+      color: #78350f;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+
+    .rule-callout {
+      background-color: var(--sgk-blue-soft);
+      border-left: 4px solid var(--sgk-blue);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 13px 16px;
+      font-size: 0.96rem;
+      color: var(--text-main);
+    }
+
+    /* Trình kiểm tra điều kiện RCOOR' */
+    .checker-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .checker-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .selector-box {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 15px 16px;
+    }
+
+    .selector-label {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-body);
+      margin-bottom: 10px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .chip-btn.active,
+    .chip-btn.active:hover,
+    .chip-btn.active:focus {
+      border-color: var(--sgk-blue-dark);
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+    }
+
+    .chip-btn.trap {
+      border-style: dashed;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+
+    .chip-btn.trap.active,
+    .chip-btn.trap.active:hover,
+    .chip-btn.trap.active:focus {
+      border-style: solid;
+      border-color: #b91c1c;
+      background-color: var(--rose-600);
+      color: #ffffff;
+    }
+
+    .formula-result-card {
+      margin-top: 16px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--emerald-200);
+      background-color: var(--emerald-50);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .formula-result-card.invalid {
+      border-color: var(--rose-200);
+      background-color: var(--rose-50);
+    }
+
+    .formula-big-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    /* Khối công thức: 2 dòng rõ ràng (dòng trên là .chem-formula inline, dòng dưới là .part-caption) */
+    .formula-part {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 12px;
+      min-width: 96px;
+    }
+
+    .formula-part .chem-formula {
+      font-size: 1.42rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .formula-part .part-caption {
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-top: 4px;
+      opacity: 0.92;
+    }
+
+    .part-r {
+      background-color: var(--sgk-peach-soft);
+      color: var(--sgk-acid-red);
+      border: 1.8px solid var(--sgk-peach-border);
+    }
+
+    .part-coo {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border: 1.8px solid var(--border-strong);
+    }
+
+    .part-rp {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      border: 1.8px solid var(--sgk-blue-dark);
+    }
+
+    .part-rp.trap-part {
+      background-color: var(--rose-600);
+      border-color: #b91c1c;
+    }
+
+    .checker-status {
+      text-align: center;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #065f46;
+    }
+
+    .formula-result-card.invalid .checker-status {
+      color: #991b1b;
+    }
+
+    .preset-row {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border-strong);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preset-label {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    /* =========================================================================
+       7. TAB 2: DANH PHÁP ESTER ĐƠN CHỨC
+       ========================================================================= */
+    .naming-rule-banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 15px 16px;
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .rule-prefix {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .sgk-box-rp {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 1.04rem;
+      font-weight: 800;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sgk-box-acid {
+      background-color: var(--sgk-peach);
+      color: var(--sgk-acid-red);
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 1.04rem;
+      font-weight: 800;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .plus-sign {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    /* Hộp quy tắc đổi tên gốc acid (-ic acid -> -ate) */
+    .acid-rename-box {
+      background-color: #fff7f4;
+      border: 1.5px solid var(--sgk-peach-border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .acid-rename-title {
+      font-size: 0.94rem;
+      font-weight: 800;
+      color: var(--sgk-acid-red);
+      margin: 0 0 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .suffix-pill {
+      display: inline-block;
+      background-color: var(--sgk-acid-red);
+      color: #ffffff;
+      padding: 2px 9px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .acid-rename-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 720px) {
+      .acid-rename-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .rename-item {
+      background-color: #ffffff;
+      border: 1px solid #f7c7b5;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      color: var(--text-body);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rename-arrow {
+      color: var(--sgk-acid-red);
+      font-weight: 800;
+    }
+
+    .rename-target {
+      color: var(--sgk-acid-red);
+      font-weight: 800;
+    }
+
+    .workshop-selectors {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .workshop-selectors {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .acid-choice.active,
+    .acid-choice.active:hover,
+    .acid-choice.active:focus {
+      background-color: var(--sgk-peach);
+      border-color: var(--sgk-acid-red);
+      color: var(--sgk-acid-red);
+    }
+
+    /* Sân khấu phân tích cấu tạo 2 khối màu */
+    .breakdown-stage {
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px;
+      margin-bottom: 16px;
+    }
+
+    .structure-flex {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .struct-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .struct-box-acid {
+      background-color: var(--sgk-peach-soft);
+      border: 2.5px solid var(--sgk-peach);
+      border-radius: 14px;
+      padding: 8px 14px;
+      min-height: 112px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Khối R': chỉ chứa 1 span .chem-formula bên trong nên không bao giờ vỡ chỉ số dưới */
+    .struct-box-rp {
+      background-color: var(--sgk-blue);
+      border: 2.5px solid var(--sgk-blue-dark);
+      border-radius: 14px;
+      padding: 12px 24px;
+      min-height: 112px;
+      min-width: 136px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 800;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .bond-connector {
+      align-self: flex-start;
+      margin-top: 38px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+      user-select: none;
+    }
+
+    .down-arrow {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+
+    .part-name-pill {
+      padding: 8px 16px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 800;
+      min-width: 158px;
+    }
+
+    .part-name-pill.acid {
+      background-color: #fff5f2;
+      border: 1.5px solid var(--sgk-peach-border);
+      color: var(--sgk-acid-red);
+    }
+
+    .part-name-pill.rp {
+      background-color: var(--sgk-blue-soft);
+      border: 1.5px solid #93c5fd;
+      color: var(--sgk-blue-dark);
+    }
+
+    .part-sub-note {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Hộp ghép tên đảo chiều */
+    .assembled-name-panel {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background-color: #ffffff;
+      border: 2px solid var(--border);
+      text-align: center;
+    }
+
+    .reverse-step-hint {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--sgk-blue-dark);
+      margin-bottom: 12px;
+      min-height: 24px;
+    }
+
+    .assembled-tokens {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .token-rp, .token-acid {
+      padding: 10px 20px;
+      border-radius: 11px;
+      font-size: 1.28rem;
+      font-weight: 800;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+      will-change: transform, opacity;
+    }
+
+    .token-rp {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+    }
+
+    .token-acid {
+      background-color: var(--sgk-peach);
+      color: var(--sgk-acid-red);
+    }
+
+    .common-name-line {
+      font-size: 1.04rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-top: 6px;
+    }
+
+    .common-name-line .c-rp {
+      color: var(--sgk-blue-dark);
+      font-weight: 800;
+    }
+
+    .common-name-line .c-acid {
+      color: var(--sgk-acid-red);
+      font-weight: 800;
+    }
+
+    .sgk-presets-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .preset-ester-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-strong);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .preset-ester-btn.active,
+    .preset-ester-btn.active:hover,
+    .preset-ester-btn.active:focus {
+      border-color: var(--sgk-blue-dark);
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       8. TAB 3: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ 3 MỨC ĐỘ + FISHER-YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--sgk-blue), var(--emerald-600));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .q-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .q-dot.current {
+      border-color: var(--sgk-blue);
+      background-color: var(--sgk-blue-soft);
+      color: var(--sgk-blue);
+    }
+
+    .q-dot.correct {
+      border-color: var(--emerald-600);
+      background-color: var(--emerald-50);
+      color: var(--emerald-600);
+    }
+
+    .q-dot.wrong {
+      border-color: var(--rose-600);
+      background-color: var(--rose-50);
+      color: var(--rose-600);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--sgk-blue-soft);
+      border: 1px solid var(--sgk-blue-border);
+      color: var(--sgk-blue-dark);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+
+    /* 2 nhãn: Mức độ nhận thức & Yêu cầu cần đạt */
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+
+    .level-badge.nb {
+      background-color: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    .level-badge.th {
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .level-badge.vd {
+      background-color: #f5f3ff;
+      color: #6d28d9;
+      border-color: #ddd6fe;
+    }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.14rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .opt-text {
+      display: block;
+      line-height: 1.45;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald-600);
+      background-color: var(--emerald-50);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald-600);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose-600);
+      background-color: var(--rose-50);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose-600);
+      color: #ffffff;
+    }
+
+    /* Hộp lời giải chi tiết cho TỪNG phương án A, B, C, D */
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .feedback-head.ok {
+      background-color: var(--emerald-50);
+      color: #065f46;
+      border-bottom: 1px solid var(--emerald-200);
+    }
+
+    .feedback-head.err {
+      background-color: var(--rose-50);
+      color: #991b1b;
+      border-bottom: 1px solid var(--rose-200);
+    }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+
+    .reason-tag {
+      display: inline-block;
+      font-weight: 800;
+      margin-right: 6px;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #eff6ff, #ecfdf5);
+      border: 1.5px solid var(--sgk-blue-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    /* Toast thông báo nhẹ */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <!-- SVG phân tử nhóm chức ester nhỏ gọn vừa khít ô vuông 44x44px -->
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="8" y1="21" x2="17" y2="16" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+            <line x1="17" y1="16" x2="26" y2="21" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+            <line x1="15.3" y1="15" x2="15.3" y2="8.5" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18.7" y1="15" x2="18.7" y2="8.5" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="8" cy="21" r="3.4" fill="#f4a285" stroke="#ffffff" stroke-width="1.4"/>
+            <circle cx="17" cy="16" r="3.8" fill="#ffffff"/>
+            <circle cx="17" cy="7.2" r="3" fill="#fde047"/>
+            <circle cx="26" cy="21" r="3.4" fill="#93c5fd" stroke="#ffffff" stroke-width="1.4"/>
+            <circle cx="26" cy="29" r="2.6" fill="#60a5fa"/>
+            <line x1="26" y1="24.5" x2="26" y2="27" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Khái niệm &amp; Danh pháp Ester đơn chức</h1>
+          <p class="brand-sub">Hóa học 12 • Kết nối tri thức với cuộc sống • Chương 1: Ester – Lipid</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="tabs-bar" role="tablist" aria-label="Các phần bài học">
+          <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+            1. Khái niệm Ester
+          </button>
+          <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+            2. Danh pháp Ester
+          </button>
+          <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+            3. Luyện tập nhanh (10 câu)
+          </button>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: KHÁI NIỆM ESTER
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+
+      <!-- 1A: MÔ PHỎNG SVG THAY THẾ NHÓM –OH BẰNG –OR' -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Mô phỏng thay thế nhóm –OH bằng nhóm –OR'</h2>
+          </div>
+          <span id="subStatusPill" class="pill-info">Trạng thái: Carboxylic acid ban đầu</span>
+        </div>
+
+        <div class="svg-stage">
+          <svg viewBox="0 0 700 236" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng thay thế nhóm OH trong carboxylic acid bằng nhóm OR' để tạo ester">
+            <!-- Khung phân tử chính -->
+            <rect x="32" y="22" width="390" height="190" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.8" />
+
+            <!-- Phần khung cố định: R–C(=O)– -->
+            <g>
+              <text x="118" y="112" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">R</text>
+              <line x1="136" y1="102" x2="174" y2="102" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" />
+              <text x="194" y="112" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">C</text>
+              <!-- Nối đôi C=O -->
+              <line x1="189" y1="122" x2="189" y2="150" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+              <line x1="199" y1="122" x2="199" y2="150" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+              <text x="194" y="178" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">O</text>
+              <!-- Nối đơn từ C sang O -->
+              <line x1="214" y1="102" x2="252" y2="102" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" />
+            </g>
+
+            <!-- Nhóm –O–H trượt lên khi thay thế -->
+            <g id="svgGroupOH" class="svg-anim-group" style="transform: translate(0px, 0px); opacity: 1;">
+              <rect x="254" y="70" width="128" height="64" rx="12" fill="#bfdbfe" stroke="#60a5fa" stroke-width="2" />
+              <text x="286" y="112" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">O</text>
+              <line x1="304" y1="102" x2="332" y2="102" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+              <text x="352" y="112" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">H</text>
+            </g>
+
+            <!-- Nhóm –O–R' trượt vào thay thế -->
+            <g id="svgGroupOR" class="svg-anim-group" style="transform: translate(0px, 82px); opacity: 0;">
+              <rect x="254" y="70" width="136" height="64" rx="12" fill="#93c5fd" stroke="#2563eb" stroke-width="2.4" />
+              <text x="286" y="112" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">O</text>
+              <line x1="304" y1="102" x2="332" y2="102" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+              <text x="356" y="112" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a">R'</text>
+            </g>
+
+            <!-- Tên chất bên dưới -->
+            <text id="svgMainLabel" x="227" y="202" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">carboxylic acid</text>
+
+            <!-- Khu vực nhóm tham gia bên phải -->
+            <rect x="446" y="22" width="222" height="190" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="5 4" />
+            <text x="557" y="52" text-anchor="middle" font-size="13.5" font-weight="800" fill="#334155">NHÓM THAM GIA THAY THẾ</text>
+
+            <g id="svgTrayIncoming" class="svg-anim-group" style="transform: translate(0px, 0px); opacity: 1;">
+              <rect x="490" y="72" width="134" height="58" rx="12" fill="#dbeafe" stroke="#2b78c5" stroke-width="2" />
+              <text x="557" y="109" text-anchor="middle" font-size="23" font-weight="800" fill="#1d4ed8">–O–R'</text>
+              <text x="557" y="154" text-anchor="middle" font-size="12.5" font-weight="700" fill="#475569">Nhóm –OR' sẵn sàng</text>
+              <text x="557" y="172" text-anchor="middle" font-size="12.5" font-weight="700" fill="#475569">thay thế nhóm –OH</text>
+            </g>
+
+            <g id="svgTrayOutgoing" class="svg-anim-group" style="transform: translate(0px, 24px); opacity: 0;">
+              <rect x="494" y="72" width="126" height="58" rx="12" fill="#fee2e2" stroke="#ef4444" stroke-width="2" />
+              <text x="557" y="109" text-anchor="middle" font-size="23" font-weight="800" fill="#b91c1c">–O–H</text>
+              <text x="557" y="154" text-anchor="middle" font-size="12.5" font-weight="800" fill="#059669">✔ Đã thay thế thành công!</text>
+              <text x="557" y="172" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">Thu được phân tử ester</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="action-bar">
+          <button type="button" class="btn btn-primary" onclick="runSubstitution()">
+            ▶ Thực hiện thay thế
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="resetSubstitution()">
+            ↻ Đặt lại
+          </button>
+        </div>
+
+        <!-- Khung Lưu ý khoa học màu vàng/cam nhạt -->
+        <div class="science-note-box">
+          ⚠️ <b>Lưu ý khoa học:</b> Sơ đồ thay thế nhóm <b>–OH</b> bằng <b>–OR'</b> chỉ là <b>quy ước hình thức</b> để định nghĩa cấu tạo ester. Trong thực tế, ester thường được điều chế bằng <b>phản ứng ester hoá</b> giữa carboxylic acid và alcohol (xúc tác <span class="chem-formula">H<sub>2</sub>SO<sub>4</sub></span> đặc, đun nóng).
+        </div>
+
+        <div class="rule-callout">
+          <b>Khái niệm (SGK):</b> Khi thay thế nhóm <b>–OH</b> ở nhóm carboxyl (<b>–COOH</b>) của carboxylic acid bằng nhóm <b>–OR'</b> thì được <b>ester</b> (trong đó <b>R'</b> là gốc hydrocarbon).
+          Ester đơn chức có công thức chung là <b>RCOOR'</b>, với <b>R</b> là gốc hydrocarbon hoặc nguyên tử <b>H</b>, còn <b>R'</b> bắt buộc là gốc hydrocarbon.
+        </div>
+      </div>
+
+      <!-- 1B: TRÌNH KIỂM TRA CẤU TẠO ESTER ĐƠN CHỨC RCOOR' -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="num-badge">2</span>
+            <h2 class="card-title">Trình kiểm tra cấu tạo ester đơn chức RCOOR'</h2>
+          </div>
+          <span class="pill-info">Thử chọn R và R' (có lựa chọn bẫy R' = –H)</span>
+        </div>
+
+        <div class="checker-grid">
+          <div class="selector-box">
+            <div class="selector-label">Chọn gốc R (gốc hydrocarbon hoặc H):</div>
+            <div id="rButtonsRow" class="chip-row"></div>
+          </div>
+
+          <div class="selector-box">
+            <div class="selector-label">Chọn gốc R' (bắt buộc là gốc hydrocarbon):</div>
+            <div id="rpButtonsRow" class="chip-row"></div>
+          </div>
+        </div>
+
+        <!-- Kết quả ghép theo 3 khối màu rõ nét -->
+        <div id="checkerResultCard" class="formula-result-card">
+          <div id="checkerFormulaRow" class="formula-big-row"></div>
+          <div id="checkerStatusText" class="checker-status"></div>
+        </div>
+
+        <!-- 3 nút nạp nhanh ví dụ SGK (bọc trong .chem-formula, không khoảng trắng thừa) -->
+        <div class="preset-row">
+          <span class="preset-label">Nạp nhanh ví dụ SGK:</span>
+          <button type="button" class="btn btn-secondary" onclick="loadCheckerPreset('CH3', 'C2H5')"><span class="chem-formula">CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></span></button>
+          <button type="button" class="btn btn-secondary" onclick="loadCheckerPreset('CH2=CH', 'CH3')"><span class="chem-formula">CH<sub>2</sub>=CHCOOCH<sub>3</sub></span></button>
+          <button type="button" class="btn btn-secondary" onclick="loadCheckerPreset('C6H5', 'CH3')"><span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COOCH<sub>3</sub></span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: DANH PHÁP ESTER ĐƠN CHỨC
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="num-badge">2</span>
+            <h2 class="card-title">Danh pháp Ester đơn chức – Xưởng lắp ghép &amp; Đảo chiều gọi tên</h2>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="animateReverseNaming()">
+            ✨ Xem cách ghép tên (Đảo thứ tự)
+          </button>
+        </div>
+
+        <!-- Quy tắc màu sắc SGK -->
+        <div class="naming-rule-banner">
+          <span class="rule-prefix">Tên gọi của ester đơn chức:</span>
+          <span class="sgk-box-rp">Tên gốc R'</span>
+          <span class="plus-sign">+</span>
+          <span class="sgk-box-acid">Tên gốc carboxylic acid</span>
+        </div>
+
+        <!-- HỘP QUY TẮC ĐỔI TÊN GỐC ACID (-ic acid -> -ate) -->
+        <div class="acid-rename-box">
+          <div class="acid-rename-title">
+            <span>📌 Quy tắc gọi tên gốc carboxylic acid:</span>
+            <span class="suffix-pill">Đổi đuôi "-ic acid" → "-ate"</span>
+          </div>
+          <div class="acid-rename-grid">
+            <div class="rename-item">
+              <span>methano<b>ic acid</b> (form<b>ic acid</b>)</span>
+              <span class="rename-arrow">→</span>
+              <span class="rename-target">methanoate (formate)</span>
+            </div>
+            <div class="rename-item">
+              <span>ethano<b>ic acid</b> (acet<b>ic acid</b>)</span>
+              <span class="rename-arrow">→</span>
+              <span class="rename-target">ethanoate (acetate)</span>
+            </div>
+            <div class="rename-item">
+              <span>propeno<b>ic acid</b> (acryl<b>ic acid</b>)</span>
+              <span class="rename-arrow">→</span>
+              <span class="rename-target">propenoate (acrylate)</span>
+            </div>
+            <div class="rename-item">
+              <span>benzo<b>ic acid</b></span>
+              <span class="rename-arrow">→</span>
+              <span class="rename-target">benzoate</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 bộ chọn gốc acid và gốc hydrocarbon R' -->
+        <div class="workshop-selectors">
+          <div class="selector-box">
+            <div class="selector-label">1. Chọn gốc carboxylic acid (<span class="chem-formula">RCOO–</span>):</div>
+            <div id="acidSelectorRow" class="chip-row"></div>
+          </div>
+
+          <div class="selector-box">
+            <div class="selector-label">2. Chọn gốc hydrocarbon (<span class="chem-formula">–R'</span>):</div>
+            <div id="alkylSelectorRow" class="chip-row"></div>
+          </div>
+        </div>
+
+        <!-- Sân khấu phân tích cấu tạo 2 khối màu -->
+        <div class="breakdown-stage">
+          <div class="structure-flex">
+            <!-- Khối trái: Gốc carboxylic acid (Cam đào) -->
+            <div id="colAcidBlock" class="struct-column">
+              <div id="acidSvgHost" class="struct-box-acid"></div>
+              <div class="down-arrow" aria-hidden="true">↓</div>
+              <div id="acidPartLabel" class="part-name-pill acid"></div>
+            </div>
+
+            <!-- Liên kết đơn giữa O và R' -->
+            <div class="bond-connector" aria-hidden="true">—</div>
+
+            <!-- Khối phải: Gốc hydrocarbon R' (Xanh dương) -->
+            <div id="colRpBlock" class="struct-column">
+              <div id="rpFormulaBox" class="struct-box-rp"></div>
+              <div class="down-arrow" aria-hidden="true">↓</div>
+              <div id="rpPartLabel" class="part-name-pill rp"></div>
+            </div>
+          </div>
+
+          <!-- Bảng ghép tên đảo thứ tự -->
+          <div class="assembled-name-panel">
+            <div id="reverseStepHint" class="reverse-step-hint">
+              Quy tắc đảo thứ tự: Đọc <b>Tên gốc R' (khối xanh bên phải) TRƯỚC</b> → đọc <b>Tên gốc carboxylic acid (khối cam bên trái) SAU</b>.
+            </div>
+            <div class="assembled-tokens">
+              <span id="tokenRp" class="token-rp">methyl</span>
+              <span id="tokenAcid" class="token-acid">ethanoate</span>
+            </div>
+            <div id="commonNameDisplay" class="common-name-line"></div>
+          </div>
+        </div>
+
+        <!-- 5 nút ví dụ chuẩn SGK -->
+        <div>
+          <span class="preset-label">5 ví dụ chuẩn SGK (bấm để nạp nhanh):</span>
+          <div id="sgkPresetsRow" class="sgk-presets-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ 3 MỨC ĐỘ + FISHER-YATES)
+         ======================================================================= -->
+    <section id="tabPanel-3" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: Khái niệm &amp; Danh pháp Ester (10 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              4 Nhận biết • 3 Thông hiểu • 3 Vận dụng • Tự động xáo trộn đáp án A, B, C, D
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 10</span>
+          </div>
+        </div>
+
+        <!-- Thanh tiến độ -->
+        <div class="progress-track" aria-label="Tiến độ hoàn thành bài tập">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <button type="button" class="btn btn-secondary" onclick="resetQuiz()">↻ Làm lại từ đầu</button>
+        </div>
+
+        <!-- Nhãn Mức độ nhận thức & Yêu cầu cần đạt -->
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <!-- Nội dung câu hỏi & 4 phương án -->
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)">← Câu trước</button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 10</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)">Câu tiếp theo →</button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--sgk-blue-dark);">Hoàn thành!</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.94rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()">Làm lại &amp; Xáo trộn đáp án</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast thông báo nhẹ (không dùng alert) -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. DỮ LIỆU CHUYÊN MÔN CHUẨN SGK HÓA HỌC 12 (KNTT)
+    // =========================================================================
+    const CHECKER_R = [
+      { id: 'H', html: 'H', labelHtml: '<span class="chem-formula">H–</span>' },
+      { id: 'CH3', html: 'CH<sub>3</sub>', labelHtml: '<span class="chem-formula">CH<sub>3</sub>–</span>' },
+      { id: 'C2H5', html: 'C<sub>2</sub>H<sub>5</sub>', labelHtml: '<span class="chem-formula">C<sub>2</sub>H<sub>5</sub>–</span>' },
+      { id: 'CH2=CH', html: 'CH<sub>2</sub>=CH', labelHtml: '<span class="chem-formula">CH<sub>2</sub>=CH–</span>' },
+      { id: 'C6H5', html: 'C<sub>6</sub>H<sub>5</sub>', labelHtml: '<span class="chem-formula">C<sub>6</sub>H<sub>5</sub>–</span>' }
+    ];
+
+    const CHECKER_RP = [
+      { id: 'CH3', html: 'CH<sub>3</sub>', labelHtml: '<span class="chem-formula">–CH<sub>3</sub></span>', isTrap: false },
+      { id: 'C2H5', html: 'C<sub>2</sub>H<sub>5</sub>', labelHtml: '<span class="chem-formula">–C<sub>2</sub>H<sub>5</sub></span>', isTrap: false },
+      { id: 'C3H7', html: 'C<sub>3</sub>H<sub>7</sub>', labelHtml: '<span class="chem-formula">–C<sub>3</sub>H<sub>7</sub></span>', isTrap: false },
+      { id: 'H', html: 'H', labelHtml: '<span class="chem-formula">–H</span> (Bẫy)', isTrap: true }
+    ];
+
+    const ACIDS = [
+      {
+        id: 'HCOO',
+        btnHtml: '<span class="chem-formula">HCOO–</span>',
+        iupac: 'methanoate',
+        common: 'formate'
+      },
+      {
+        id: 'CH3COO',
+        btnHtml: '<span class="chem-formula">CH<sub>3</sub>COO–</span>',
+        iupac: 'ethanoate',
+        common: 'acetate'
+      },
+      {
+        id: 'CH2=CHCOO',
+        btnHtml: '<span class="chem-formula">CH<sub>2</sub>=CHCOO–</span>',
+        iupac: 'propenoate',
+        common: 'acrylate'
+      },
+      {
+        id: 'C6H5COO',
+        btnHtml: '<span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COO–</span>',
+        iupac: 'benzoate',
+        common: null
+      }
+    ];
+
+    const ALKYLS = [
+      {
+        id: 'CH3',
+        btnHtml: '<span class="chem-formula">–CH<sub>3</sub></span> (methyl)',
+        formulaHtml: 'CH<sub>3</sub>',
+        compactHtml: 'CH<sub>3</sub>',
+        name: 'methyl'
+      },
+      {
+        id: 'C2H5',
+        btnHtml: '<span class="chem-formula">–CH<sub>2</sub>CH<sub>3</sub></span> (ethyl)',
+        formulaHtml: 'CH<sub>2</sub>CH<sub>3</sub>',
+        compactHtml: 'C<sub>2</sub>H<sub>5</sub>',
+        name: 'ethyl'
+      },
+      {
+        id: 'C3H7',
+        btnHtml: '<span class="chem-formula">–CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span> (propyl)',
+        formulaHtml: 'CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub>',
+        compactHtml: 'CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub>',
+        name: 'propyl'
+      },
+      {
+        id: 'CH=CH2',
+        btnHtml: '<span class="chem-formula">–CH=CH<sub>2</sub></span> (vinyl)',
+        formulaHtml: 'CH=CH<sub>2</sub>',
+        compactHtml: 'CH=CH<sub>2</sub>',
+        name: 'vinyl'
+      }
+    ];
+
+    const SGK_PRESETS = [
+      { labelHtml: 'VD mẫu: <span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span>', acid: 'CH3COO', alkyl: 'CH3', useCompact: false },
+      { labelHtml: 'VD 1: <span class="chem-formula">CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></span>', acid: 'CH3COO', alkyl: 'C2H5', useCompact: true },
+      { labelHtml: 'VD 2: <span class="chem-formula">HCOOCH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span>', acid: 'HCOO', alkyl: 'C3H7', useCompact: false },
+      { labelHtml: 'VD 3: <span class="chem-formula">CH<sub>2</sub>=CHCOOCH<sub>3</sub></span>', acid: 'CH2=CHCOO', alkyl: 'CH3', useCompact: false },
+      { labelHtml: 'VD 4: <span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COOC<sub>2</sub>H<sub>5</sub></span>', acid: 'C6H5COO', alkyl: 'C2H5', useCompact: true }
+    ];
+
+    // =========================================================================
+    // 2. NGÂN HÀNG 10 CÂU HỎI PHÂN HOÁ 3 MỨC ĐỘ (4 NB – 3 TH – 3 VD)
+    //    Mỗi phương án gắn kèm lý do đúng/sai riêng để hiển thị chuẩn sau khi xáo trộn
+    // =========================================================================
+    const RAW_QUIZ_BANK = [
+      // --- 4 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được khái niệm về ester',
+        question: 'Khi thay thế nhóm –OH ở nhóm carboxyl (–COOH) của carboxylic acid bằng nhóm nào sau đây thì thu được ester?',
+        options: [
+          {
+            text: 'Nhóm –OR\' (với R\' là gốc hydrocarbon).',
+            isCorrect: true,
+            reason: 'Đúng theo định nghĩa SGK: thay thế nhóm –OH ở nhóm carboxyl (–COOH) của carboxylic acid bằng nhóm –OR\' (R\' là gốc hydrocarbon) ta được ester.'
+          },
+          {
+            text: 'Nhóm –NH<sub>2</sub>.',
+            isCorrect: false,
+            reason: 'Sai: thay nhóm –OH bằng –NH<sub>2</sub> tạo thành amide (RCONH<sub>2</sub>), không phải ester.'
+          },
+          {
+            text: 'Nguyên tử halogen (–Cl hoặc –Br).',
+            isCorrect: false,
+            reason: 'Sai: thay nhóm –OH bằng nguyên tử halogen tạo thành dẫn xuất acyl halide (RCOX), không phải ester.'
+          },
+          {
+            text: 'Gốc hydrocarbon –R\' gắn trực tiếp vào nguyên tử C của nhóm C=O.',
+            isCorrect: false,
+            reason: 'Sai: gắn trực tiếp R\' vào C=O tạo thành ketone (RCOR\'), thiếu nguyên tử O của nhóm chức ester –COO–.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Viết được công thức chung của ester đơn chức RCOOR\'',
+        question: 'Ester đơn chức có công thức chung là RCOOR\'. Điều kiện đúng của R và R\' là gì?',
+        options: [
+          {
+            text: 'R là gốc hydrocarbon hoặc nguyên tử H; R\' bắt buộc là gốc hydrocarbon.',
+            isCorrect: true,
+            reason: 'Đúng: R có thể là H (như <span class="chem-formula">HCOOCH<sub>3</sub></span>) hoặc gốc hydrocarbon; R\' bắt buộc là gốc hydrocarbon.'
+          },
+          {
+            text: 'R và R\' đều bắt buộc phải là gốc hydrocarbon.',
+            isCorrect: false,
+            reason: 'Sai: loại trừ mất trường hợp R = H (các ester của formic acid như <span class="chem-formula">HCOOCH<sub>3</sub></span>).'
+          },
+          {
+            text: 'R là gốc hydrocarbon; R\' là gốc hydrocarbon hoặc nguyên tử H.',
+            isCorrect: false,
+            reason: 'Sai: nếu R\' = H thì chất có nhóm –COOH, đó là carboxylic acid chứ không phải ester.'
+          },
+          {
+            text: 'R và R\' đều có thể là nguyên tử H.',
+            isCorrect: false,
+            reason: 'Sai: khi R\' = H thì hợp chất là carboxylic acid (ví dụ HCOOH là formic acid).'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Gọi được tên theo danh pháp thay thế của ester đơn giản',
+        question: 'Tên thay thế (IUPAC) của ester có công thức cấu tạo <span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span> là gì?',
+        options: [
+          {
+            text: 'methyl ethanoate.',
+            isCorrect: true,
+            reason: 'Đúng: gốc R\' là <span class="chem-formula">–CH<sub>3</sub></span> (methyl) đọc trước; gốc acid <span class="chem-formula">CH<sub>3</sub>COO–</span> (từ ethanoic acid) đổi đuôi thành ethanoate.'
+          },
+          {
+            text: 'ethyl methanoate.',
+            isCorrect: false,
+            reason: 'Sai: ethyl methanoate là tên của đồng phân <span class="chem-formula">HCOOC<sub>2</sub>H<sub>5</sub></span>.'
+          },
+          {
+            text: 'ethanoate methyl.',
+            isCorrect: false,
+            reason: 'Sai: bị ngược trật tự gọi tên. Quy tắc gọi tên ester là [Tên gốc R\'] + [Tên gốc carboxylic acid].'
+          },
+          {
+            text: 'methyl methanoate.',
+            isCorrect: false,
+            reason: 'Sai: methyl methanoate là tên của <span class="chem-formula">HCOOCH<sub>3</sub></span> (gốc acid chỉ có 1 nguyên tử C).'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Gọi được tên thay thế và tên thông thường của ester cơ bản',
+        question: 'Ester <span class="chem-formula">CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></span> có tên thay thế và tên thông thường lần lượt là gì?',
+        options: [
+          {
+            text: 'ethyl ethanoate và ethyl acetate.',
+            isCorrect: true,
+            reason: 'Đúng: gốc <span class="chem-formula">–C<sub>2</sub>H<sub>5</sub></span> là ethyl; gốc <span class="chem-formula">CH<sub>3</sub>COO–</span> có tên thay thế là ethanoate và tên thông thường là acetate.'
+          },
+          {
+            text: 'methyl ethanoate và methyl acetate.',
+            isCorrect: false,
+            reason: 'Sai: gốc R\' trong công thức là <span class="chem-formula">–C<sub>2</sub>H<sub>5</sub></span> (ethyl), không phải <span class="chem-formula">–CH<sub>3</sub></span> (methyl).'
+          },
+          {
+            text: 'ethyl methanoate và ethyl formate.',
+            isCorrect: false,
+            reason: 'Sai: gốc acid là <span class="chem-formula">CH<sub>3</sub>COO–</span> (2 C), không phải <span class="chem-formula">HCOO–</span> (1 C).'
+          },
+          {
+            text: 'propyl ethanoate và propyl acetate.',
+            isCorrect: false,
+            reason: 'Sai: gốc R\' có 2 nguyên tử C (ethyl), không phải 3 nguyên tử C (propyl).'
+          }
+        ]
+      },
+
+      // --- 3 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Phân biệt được ester với carboxylic acid qua nhóm chức',
+        question: 'Trong các hợp chất sau đây, chất nào KHÔNG phải là ester?',
+        options: [
+          {
+            text: '<span class="chem-formula">CH<sub>3</sub>COOH</span>.',
+            isCorrect: true,
+            reason: 'Đúng: <span class="chem-formula">CH<sub>3</sub>COOH</span> có nguyên tử H gắn vào –COO– (tức nhóm –COOH), đây là carboxylic acid (acetic acid), không phải ester.'
+          },
+          {
+            text: '<span class="chem-formula">HCOOCH<sub>3</sub></span>.',
+            isCorrect: false,
+            reason: 'Sai: đây là ester đơn chức (R = H, R\' = <span class="chem-formula">CH<sub>3</sub></span> – methyl methanoate).'
+          },
+          {
+            text: '<span class="chem-formula">CH<sub>2</sub>=CHCOOCH<sub>3</sub></span>.',
+            isCorrect: false,
+            reason: 'Sai: đây là ester đơn chức không no (R = <span class="chem-formula">CH<sub>2</sub>=CH</span>, R\' = <span class="chem-formula">CH<sub>3</sub></span> – methyl acrylate).'
+          },
+          {
+            text: '<span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COOCH<sub>3</sub></span>.',
+            isCorrect: false,
+            reason: 'Sai: đây là ester thơm đơn chức (R = <span class="chem-formula">C<sub>6</sub>H<sub>5</sub></span>, R\' = <span class="chem-formula">CH<sub>3</sub></span> – methyl benzoate).'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Vận dụng quy tắc đổi đuôi acid để gọi tên ester',
+        question: 'Ester có công thức cấu tạo <span class="chem-formula">HCOOCH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span> có tên gọi là gì?',
+        options: [
+          {
+            text: 'propyl methanoate (hay propyl formate).',
+            isCorrect: true,
+            reason: 'Đúng: gốc R\' mạch không nhánh 3 C (<span class="chem-formula">–CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span>) là propyl; gốc <span class="chem-formula">HCOO–</span> là methanoate (hay formate).'
+          },
+          {
+            text: 'methyl propanoate (hay methyl propionate).',
+            isCorrect: false,
+            reason: 'Sai: methyl propanoate ứng với <span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOCH<sub>3</sub></span> (nhầm lẫn giữa phần gốc acid và phần gốc R\').'
+          },
+          {
+            text: 'isopropyl methanoate (hay isopropyl formate).',
+            isCorrect: false,
+            reason: 'Sai: mạch 3 C ở đây là mạch thẳng (<span class="chem-formula">–CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span> – propyl), không phải mạch nhánh <span class="chem-formula">–CH(CH<sub>3</sub>)<sub>2</sub></span> (isopropyl).'
+          },
+          {
+            text: 'propyl ethanoate (hay propyl acetate).',
+            isCorrect: false,
+            reason: 'Sai: gốc acid là <span class="chem-formula">HCOO–</span> (1 C – methanoate), không phải <span class="chem-formula">CH<sub>3</sub>COO–</span> (2 C – ethanoate).'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Viết được công thức cấu tạo từ tên gọi của ester không no và ester thơm',
+        question: 'Công thức cấu tạo của methyl acrylate (methyl propenoate) và ethyl benzoate lần lượt là gì?',
+        options: [
+          {
+            text: '<span class="chem-formula">CH<sub>2</sub>=CHCOOCH<sub>3</sub></span> và <span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COOC<sub>2</sub>H<sub>5</sub></span>.',
+            isCorrect: true,
+            reason: 'Đúng: methyl acrylate gồm gốc <span class="chem-formula">CH<sub>2</sub>=CHCOO–</span> gắn <span class="chem-formula">–CH<sub>3</sub></span>; ethyl benzoate gồm gốc <span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COO–</span> gắn <span class="chem-formula">–C<sub>2</sub>H<sub>5</sub></span>.'
+          },
+          {
+            text: '<span class="chem-formula">CH<sub>3</sub>COOCH=CH<sub>2</sub></span> và <span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COOC<sub>2</sub>H<sub>5</sub></span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem-formula">CH<sub>3</sub>COOCH=CH<sub>2</sub></span> là vinyl acetate, không phải methyl acrylate.'
+          },
+          {
+            text: '<span class="chem-formula">CH<sub>2</sub>=CHCOOCH<sub>3</sub></span> và <span class="chem-formula">C<sub>2</sub>H<sub>5</sub>COOC<sub>6</sub>H<sub>5</sub></span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem-formula">C<sub>2</sub>H<sub>5</sub>COOC<sub>6</sub>H<sub>5</sub></span> là phenyl propanoate, bị đảo ngược gốc acid và gốc R\'.'
+          },
+          {
+            text: '<span class="chem-formula">CH<sub>2</sub>=CHCOOC<sub>2</sub>H<sub>5</sub></span> và <span class="chem-formula">C<sub>6</sub>H<sub>5</sub>COOCH<sub>3</sub></span>.',
+            isCorrect: false,
+            reason: 'Sai: hai công thức này lần lượt là ethyl acrylate và methyl benzoate.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU VẬN DỤNG ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Thiết lập được công thức phân tử chung của ester no, đơn chức, mạch hở',
+        question: 'Công thức phân tử tổng quát của ester no, đơn chức, mạch hở là gì?',
+        options: [
+          {
+            text: '<span class="chem-formula">C<sub>n</sub>H<sub>2n</sub>O<sub>2</sub></span> (n ≥ 2).',
+            isCorrect: true,
+            reason: 'Đúng: ester no, đơn chức, mạch hở có 1 liên kết đôi C=O trong nhóm –COO– nên độ bất bão hoà k = 1 → <span class="chem-formula">C<sub>n</sub>H<sub>2n</sub>O<sub>2</sub></span>. Vì R\' có ít nhất 1 C nên ester nhỏ nhất là <span class="chem-formula">HCOOCH<sub>3</sub></span> (n ≥ 2).'
+          },
+          {
+            text: '<span class="chem-formula">C<sub>n</sub>H<sub>2n</sub>O<sub>2</sub></span> (n ≥ 1).',
+            isCorrect: false,
+            reason: 'Sai điều kiện n: với n = 1 (<span class="chem-formula">CH<sub>2</sub>O<sub>2</sub></span>) chỉ có carboxylic acid (HCOOH), chưa tạo được ester vì R\' cần tối thiểu 1 nguyên tử C.'
+          },
+          {
+            text: '<span class="chem-formula">C<sub>n</sub>H<sub>2n+2</sub>O<sub>2</sub></span> (n ≥ 2).',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem-formula">C<sub>n</sub>H<sub>2n+2</sub>O<sub>2</sub></span> có k = 0 (alcohol hai chức no, mạch hở), trong khi nhóm –COO– luôn chứa 1 liên kết π (k = 1).'
+          },
+          {
+            text: '<span class="chem-formula">C<sub>n</sub>H<sub>2n–2</sub>O<sub>2</sub></span> (n ≥ 3).',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem-formula">C<sub>n</sub>H<sub>2n–2</sub>O<sub>2</sub></span> có k = 2, là công thức của ester đơn chức mạch hở chứa 1 nối đôi C=C ở gốc hydrocarbon (như methyl acrylate).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Viết và đếm được các đồng phân cấu tạo ester của C4H8O2',
+        question: 'Ứng với công thức phân tử <span class="chem-formula">C<sub>4</sub>H<sub>8</sub>O<sub>2</sub></span> có bao nhiêu đồng phân cấu tạo là ester?',
+        options: [
+          {
+            text: '4 đồng phân.',
+            isCorrect: true,
+            reason: 'Đúng: gồm 4 đồng phân cấu tạo ester là: (1) <span class="chem-formula">HCOOCH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span>, (2) <span class="chem-formula">HCOOCH(CH<sub>3</sub>)<sub>2</sub></span>, (3) <span class="chem-formula">CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></span>, (4) <span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOCH<sub>3</sub></span>.'
+          },
+          {
+            text: '2 đồng phân.',
+            isCorrect: false,
+            reason: 'Sai: 2 đồng phân là số đồng phân ester của <span class="chem-formula">C<sub>3</sub>H<sub>6</sub>O<sub>2</sub></span> (<span class="chem-formula">HCOOC<sub>2</sub>H<sub>5</sub></span> và <span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span>), còn thiếu với <span class="chem-formula">C<sub>4</sub>H<sub>8</sub>O<sub>2</sub></span>.'
+          },
+          {
+            text: '3 đồng phân.',
+            isCorrect: false,
+            reason: 'Sai: thường bỏ sót đồng phân mạch nhánh của gốc propyl là <span class="chem-formula">HCOOCH(CH<sub>3</sub>)<sub>2</sub></span> (isopropyl formate).'
+          },
+          {
+            text: '6 đồng phân.',
+            isCorrect: false,
+            reason: 'Sai: 6 là tổng số đồng phân gồm cả 4 ester và 2 carboxylic acid (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>COOH</span>, <span class="chem-formula">(CH<sub>3</sub>)<sub>2</sub>CHCOOH</span>). Đề chỉ hỏi số đồng phân ester.'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Gọi được tên đồng phân ester mạch nhánh của C4H8O2',
+        question: 'Một đồng phân ester mạch nhánh của <span class="chem-formula">C<sub>4</sub>H<sub>8</sub>O<sub>2</sub></span> có công thức cấu tạo <span class="chem-formula">HCOOCH(CH<sub>3</sub>)<sub>2</sub></span>. Tên gọi đúng của ester này là gì?',
+        options: [
+          {
+            text: 'isopropyl methanoate (hay isopropyl formate).',
+            isCorrect: true,
+            reason: 'Đúng: gốc hydrocarbon mạch nhánh <span class="chem-formula">–CH(CH<sub>3</sub>)<sub>2</sub></span> là isopropyl; gốc acid <span class="chem-formula">HCOO–</span> là methanoate (hay formate).'
+          },
+          {
+            text: 'propyl methanoate (hay propyl formate).',
+            isCorrect: false,
+            reason: 'Sai: propyl là gốc mạch thẳng <span class="chem-formula">–CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span>, ứng với đồng phân <span class="chem-formula">HCOOCH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub></span>.'
+          },
+          {
+            text: 'methyl propanoate (hay methyl propionate).',
+            isCorrect: false,
+            reason: 'Sai: methyl propanoate ứng với đồng phân <span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOCH<sub>3</sub></span>.'
+          },
+          {
+            text: 'ethyl ethanoate (hay ethyl acetate).',
+            isCorrect: false,
+            reason: 'Sai: ethyl ethanoate ứng với đồng phân <span class="chem-formula">CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></span>.'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let selectedCheckerR = 'CH3';
+    let selectedCheckerRp = 'C2H5';
+
+    let selectedAcidId = 'CH3COO';
+    let selectedAlkylId = 'CH3';
+    let useCompactAlkyl = false;
+    let activePresetIdx = 0;
+    let reverseAnimTimers = [];
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+
+    // =========================================================================
+    // 4. CHUYỂN TAB & TOÀN MÀN HÌNH AN TOÀN (KHÔNG LỖI TRÊN IPHONE/SAFARI)
+    // =========================================================================
+    function switchTab(tabNum) {
+      for (let i = 1; i <= 3; i++) {
+        const panel = document.getElementById(`tabPanel-${i}`);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        const active = i === tabNum;
+        panel.classList.toggle('hidden', !active);
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      }
+      if (tabNum === 3) {
+        renderQuizQuestion();
+      }
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 1: MÔ PHỎNG THAY THẾ & TRÌNH KIỂM TRA RCOOR'
+    // =========================================================================
+    function runSubstitution() {
+      document.getElementById('svgGroupOH').style.transform = 'translate(0px, -64px)';
+      document.getElementById('svgGroupOH').style.opacity = '0';
+
+      document.getElementById('svgGroupOR').style.transform = 'translate(0px, 0px)';
+      document.getElementById('svgGroupOR').style.opacity = '1';
+
+      document.getElementById('svgTrayIncoming').style.transform = 'translate(0px, -24px)';
+      document.getElementById('svgTrayIncoming').style.opacity = '0';
+
+      document.getElementById('svgTrayOutgoing').style.transform = 'translate(0px, 0px)';
+      document.getElementById('svgTrayOutgoing').style.opacity = '1';
+
+      document.getElementById('svgMainLabel').textContent = 'ester';
+      document.getElementById('subStatusPill').textContent = 'Trạng thái: Đã tạo thành Ester (RCOOR\')';
+    }
+
+    function resetSubstitution() {
+      document.getElementById('svgGroupOH').style.transform = 'translate(0px, 0px)';
+      document.getElementById('svgGroupOH').style.opacity = '1';
+
+      document.getElementById('svgGroupOR').style.transform = 'translate(0px, 82px)';
+      document.getElementById('svgGroupOR').style.opacity = '0';
+
+      document.getElementById('svgTrayIncoming').style.transform = 'translate(0px, 0px)';
+      document.getElementById('svgTrayIncoming').style.opacity = '1';
+
+      document.getElementById('svgTrayOutgoing').style.transform = 'translate(0px, 24px)';
+      document.getElementById('svgTrayOutgoing').style.opacity = '0';
+
+      document.getElementById('svgMainLabel').textContent = 'carboxylic acid';
+      document.getElementById('subStatusPill').textContent = 'Trạng thái: Carboxylic acid ban đầu';
+    }
+
+    function renderCheckerControls() {
+      document.getElementById('rButtonsRow').innerHTML = CHECKER_R.map(item =>
+        `<button type="button" class="chip-btn ${item.id === selectedCheckerR ? 'active' : ''}" onclick="selectCheckerR('${item.id}')">${item.labelHtml}</button>`
+      ).join('');
+
+      document.getElementById('rpButtonsRow').innerHTML = CHECKER_RP.map(item =>
+        `<button type="button" class="chip-btn ${item.isTrap ? 'trap' : ''} ${item.id === selectedCheckerRp ? 'active' : ''}" onclick="selectCheckerRp('${item.id}')">${item.labelHtml}</button>`
+      ).join('');
+
+      updateCheckerResult();
+    }
+
+    function selectCheckerR(id) {
+      selectedCheckerR = id;
+      renderCheckerControls();
+    }
+
+    function selectCheckerRp(id) {
+      selectedCheckerRp = id;
+      renderCheckerControls();
+    }
+
+    function loadCheckerPreset(rId, rpId) {
+      selectedCheckerR = rId;
+      selectedCheckerRp = rpId;
+      renderCheckerControls();
+    }
+
+    function updateCheckerResult() {
+      const rObj = CHECKER_R.find(x => x.id === selectedCheckerR);
+      const rpObj = CHECKER_RP.find(x => x.id === selectedCheckerRp);
+      const card = document.getElementById('checkerResultCard');
+      const row = document.getElementById('checkerFormulaRow');
+      const status = document.getElementById('checkerStatusText');
+
+      // Mỗi khối chứa 1 <span class="chem-formula"> liền mạch ở dòng trên và 1 <span class="part-caption"> ở dòng dưới
+      row.innerHTML = `
+        <div class="formula-part part-r">
+          <span class="chem-formula">${rObj.html}</span>
+          <span class="part-caption">Gốc R</span>
+        </div>
+        <div class="formula-part part-coo">
+          <span class="chem-formula">COO</span>
+          <span class="part-caption">Nhóm –COO–</span>
+        </div>
+        <div class="formula-part part-rp ${rpObj.isTrap ? 'trap-part' : ''}">
+          <span class="chem-formula">${rpObj.html}</span>
+          <span class="part-caption">Gốc R'</span>
+        </div>
+      `;
+
+      if (rpObj.isTrap) {
+        card.classList.add('invalid');
+        status.innerHTML = `⚠ <b>Đây là Carboxylic acid (<span class="chem-formula">${rObj.html}COOH</span>), KHÔNG phải ester!</b> Vì R' bắt buộc phải là gốc hydrocarbon.`;
+      } else {
+        card.classList.remove('invalid');
+        status.innerHTML = `✔ <b>Hợp lệ! Đây là ester đơn chức:</b> <span class="chem-formula">${rObj.html}COO${rpObj.html}</span> (R = <span class="chem-formula">${rObj.html}</span>, R' = <span class="chem-formula">${rpObj.html}</span> là gốc hydrocarbon).`;
+      }
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 2: XƯỞNG LẮP GHÉP & ĐẢO CHIỀU GỌI TÊN
+    // =========================================================================
+    function buildAcidSvg(acidId) {
+      if (acidId === 'HCOO') {
+        return `
+          <svg width="206" height="94" viewBox="0 0 206 94" xmlns="http://www.w3.org/2000/svg" aria-label="Gốc HCOO">
+            <text x="40" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">H</text>
+            <line x1="56" y1="30" x2="86" y2="30" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+            <text x="102" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">C</text>
+            <line x1="98" y1="45" x2="98" y2="66" stroke="#0f172a" stroke-width="2.4" />
+            <line x1="106" y1="45" x2="106" y2="66" stroke="#0f172a" stroke-width="2.4" />
+            <text x="102" y="88" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+            <line x1="118" y1="30" x2="148" y2="30" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+            <text x="166" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+          </svg>
+        `;
+      }
+      if (acidId === 'CH3COO') {
+        return `
+          <svg width="232" height="94" viewBox="0 0 232 94" xmlns="http://www.w3.org/2000/svg" aria-label="Gốc CH3COO">
+            <text x="44" y="38" text-anchor="middle" font-size="23" font-weight="800" fill="#0f172a">CH<tspan dy="6" font-size="16">3</tspan></text>
+            <line x1="76" y1="30" x2="106" y2="30" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+            <text x="122" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">C</text>
+            <line x1="118" y1="45" x2="118" y2="66" stroke="#0f172a" stroke-width="2.4" />
+            <line x1="126" y1="45" x2="126" y2="66" stroke="#0f172a" stroke-width="2.4" />
+            <text x="122" y="88" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+            <line x1="138" y1="30" x2="168" y2="30" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+            <text x="188" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+          </svg>
+        `;
+      }
+      if (acidId === 'CH2=CHCOO') {
+        return `
+          <svg width="282" height="94" viewBox="0 0 282 94" xmlns="http://www.w3.org/2000/svg" aria-label="Gốc CH2=CHCOO">
+            <text x="66" y="38" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">CH<tspan dy="6" font-size="15">2</tspan><tspan dy="-6">=CH</tspan></text>
+            <line x1="126" y1="30" x2="154" y2="30" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+            <text x="170" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">C</text>
+            <line x1="166" y1="45" x2="166" y2="66" stroke="#0f172a" stroke-width="2.4" />
+            <line x1="174" y1="45" x2="174" y2="66" stroke="#0f172a" stroke-width="2.4" />
+            <text x="170" y="88" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+            <line x1="186" y1="30" x2="216" y2="30" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+            <text x="236" y="38" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+          </svg>
+        `;
+      }
+      // C6H5COO: Vòng benzene lục giác đều + vòng tròn thơm bên trong
+      return `
+        <svg width="250" height="94" viewBox="0 0 250 94" xmlns="http://www.w3.org/2000/svg" aria-label="Gốc C6H5COO có vòng benzene">
+          <polygon points="60,10 84,24 84,52 60,66 36,52 36,24" fill="#ffffff" stroke="#0f172a" stroke-width="2.6" stroke-linejoin="round" />
+          <circle cx="60" cy="38" r="15" fill="none" stroke="#0f172a" stroke-width="2" />
+          <line x1="84" y1="38" x2="114" y2="38" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+          <text x="130" y="46" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">C</text>
+          <line x1="126" y1="53" x2="126" y2="70" stroke="#0f172a" stroke-width="2.4" />
+          <line x1="134" y1="53" x2="134" y2="70" stroke="#0f172a" stroke-width="2.4" />
+          <text x="130" y="90" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">O</text>
+          <line x1="146" y1="38" x2="176" y2="38" stroke="#0f172a" stroke-width="2.8" stroke-linecap="round" />
+          <text x="196" y="46" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">O</text>
+        </svg>
+      `;
+    }
+
+    function renderWorkshopSelectors() {
+      document.getElementById('acidSelectorRow').innerHTML = ACIDS.map(a =>
+        `<button type="button" class="chip-btn acid-choice ${a.id === selectedAcidId ? 'active' : ''}" onclick="selectAcid('${a.id}')">${a.btnHtml}</button>`
+      ).join('');
+
+      document.getElementById('alkylSelectorRow').innerHTML = ALKYLS.map(k =>
+        `<button type="button" class="chip-btn ${k.id === selectedAlkylId ? 'active' : ''}" onclick="selectAlkyl('${k.id}')">${k.btnHtml}</button>`
+      ).join('');
+
+      document.getElementById('sgkPresetsRow').innerHTML = SGK_PRESETS.map((p, idx) =>
+        `<button type="button" class="preset-ester-btn ${idx === activePresetIdx ? 'active' : ''}" onclick="loadSgkPreset(${idx})">${p.labelHtml}</button>`
+      ).join('');
+
+      updateWorkshopView();
+    }
+
+    function clearReverseTimers() {
+      reverseAnimTimers.forEach(t => clearTimeout(t));
+      reverseAnimTimers = [];
+      document.getElementById('colAcidBlock').style.transform = 'scale(1)';
+      document.getElementById('colRpBlock').style.transform = 'scale(1)';
+      document.getElementById('tokenRp').style.transform = 'translateX(0px)';
+      document.getElementById('tokenRp').style.opacity = '1';
+      document.getElementById('tokenAcid').style.transform = 'translateX(0px)';
+      document.getElementById('tokenAcid').style.opacity = '1';
+    }
+
+    function selectAcid(id) {
+      selectedAcidId = id;
+      useCompactAlkyl = false;
+      activePresetIdx = -1;
+      clearReverseTimers();
+      renderWorkshopSelectors();
+    }
+
+    function selectAlkyl(id) {
+      selectedAlkylId = id;
+      useCompactAlkyl = false;
+      activePresetIdx = -1;
+      clearReverseTimers();
+      renderWorkshopSelectors();
+    }
+
+    function loadSgkPreset(idx) {
+      const p = SGK_PRESETS[idx];
+      selectedAcidId = p.acid;
+      selectedAlkylId = p.alkyl;
+      useCompactAlkyl = p.useCompact;
+      activePresetIdx = idx;
+      clearReverseTimers();
+      renderWorkshopSelectors();
+    }
+
+    function updateWorkshopView() {
+      const acid = ACIDS.find(a => a.id === selectedAcidId);
+      const alkyl = ALKYLS.find(k => k.id === selectedAlkylId);
+
+      // Vẽ khối trái (acid) & khối phải (R' bọc trong .chem-formula chuẩn <sub>)
+      document.getElementById('acidSvgHost').innerHTML = buildAcidSvg(acid.id);
+      const rpHtml = useCompactAlkyl ? alkyl.compactHtml : alkyl.formulaHtml;
+      document.getElementById('rpFormulaBox').innerHTML = `<span class="chem-formula">${rpHtml}</span>`;
+
+      const acidLbl = document.getElementById('acidPartLabel');
+      acidLbl.innerHTML = acid.common
+        ? `${acid.iupac}<div class="part-sub-note">hay ${acid.common}</div>`
+        : `${acid.iupac}<div class="part-sub-note">Tên gốc acid</div>`;
+
+      document.getElementById('rpPartLabel').innerHTML = `${alkyl.name}<div class="part-sub-note">Tên gốc R'</div>`;
+
+      document.getElementById('tokenRp').textContent = alkyl.name;
+      document.getElementById('tokenAcid').textContent = acid.iupac;
+
+      const commonDiv = document.getElementById('commonNameDisplay');
+      if (acid.common) {
+        commonDiv.innerHTML = `
+          <b>Tên thay thế (IUPAC):</b> <span class="c-rp">${alkyl.name}</span> <span class="c-acid">${acid.iupac}</span>
+          &nbsp;•&nbsp;
+          <b>Tên thông thường:</b> <span class="c-rp">${alkyl.name}</span> <span class="c-acid">${acid.common}</span>
+        `;
+      } else {
+        commonDiv.innerHTML = `
+          <b>Tên gọi chuẩn (IUPAC &amp; thông thường):</b> <span class="c-rp">${alkyl.name}</span> <span class="c-acid">${acid.iupac}</span>
+        `;
+      }
+
+      document.getElementById('reverseStepHint').innerHTML =
+        'Quy tắc đảo thứ tự: Đọc <b>Tên gốc R\' (khối xanh bên phải) TRƯỚC</b> → đọc <b>Tên gốc carboxylic acid (khối cam bên trái) SAU</b>.';
+    }
+
+    function animateReverseNaming() {
+      clearReverseTimers();
+      const colRp = document.getElementById('colRpBlock');
+      const colAcid = document.getElementById('colAcidBlock');
+      const tokenRp = document.getElementById('tokenRp');
+      const tokenAcid = document.getElementById('tokenAcid');
+      const hint = document.getElementById('reverseStepHint');
+
+      tokenRp.style.opacity = '0';
+      tokenRp.style.transform = 'translateX(64px)';
+      tokenAcid.style.opacity = '0';
+      tokenAcid.style.transform = 'translateX(-64px)';
+
+      reverseAnimTimers.push(setTimeout(() => {
+        hint.innerHTML = '① Bước 1: Đọc <b>Tên gốc R\' (khối xanh bên phải) TRƯỚC</b>...';
+        colRp.style.transform = 'scale(1.06)';
+        tokenRp.style.opacity = '1';
+        tokenRp.style.transform = 'translateX(0px)';
+      }, 120));
+
+      reverseAnimTimers.push(setTimeout(() => {
+        colRp.style.transform = 'scale(1)';
+        hint.innerHTML = '② Bước 2: Đọc <b>Tên gốc carboxylic acid (khối cam bên trái) SAU</b>...';
+        colAcid.style.transform = 'scale(1.06)';
+        tokenAcid.style.opacity = '1';
+        tokenAcid.style.transform = 'translateX(0px)';
+      }, 900));
+
+      reverseAnimTimers.push(setTimeout(() => {
+        colAcid.style.transform = 'scale(1)';
+        hint.innerHTML = '✔ Hoàn tất ghép tên (đã đảo chiều: <b>Tên gốc R\'</b> + <b>Tên gốc carboxylic acid</b>)!';
+      }, 1680));
+    }
+
+    // =========================================================================
+    // 7. LOGIC TAB 3: LUYỆN TẬP NHANH (10 CÂU + XÁO TRỘN FISHER-YATES)
+    // =========================================================================
+    function shuffleArrayFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const shuffledOptions = shuffleArrayFisherYates(q.options);
+        const correctIdx = shuffledOptions.findIndex(opt => opt.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: shuffledOptions,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndProgress() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      const pct = Math.round((answered / shuffledQuiz.length) * 100);
+      document.getElementById('quizProgressFill').style.width = `${pct}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Hoàn thành 10/10 câu! Điểm số: ${score} / ${shuffledQuiz.length}`;
+        let msg = 'Hãy ôn lại Tab 1 và Tab 2 rồi làm lại để nắm chắc hơn nhé!';
+        if (score >= 9) msg = 'Xuất sắc! Bạn đã làm chủ toàn diện Khái niệm, Danh pháp và Đồng phân Ester đơn chức.';
+        else if (score >= 7) msg = 'Rất tốt! Bạn đã nắm vững phần lớn kiến thức từ Nhận biết đến Vận dụng.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const letters = ['A', 'B', 'C', 'D'];
+
+      // 2 badge: Mức độ nhận thức & Yêu cầu cần đạt
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">Yêu cầu cần đạt: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (chosen !== null) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = chosen !== null ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span class="opt-text">${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Lời giải chi tiết cho TỪNG phương án (A, B, C, D)
+      const fbPanel = document.getElementById('quizFeedbackPanel');
+      if (chosen !== null) {
+        const isOk = chosen === q.correctIdx;
+        const headHtml = `
+          <div class="feedback-head ${isOk ? 'ok' : 'err'}">
+            ${isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là phương án ${letters[q.correctIdx]}.`} — Giải thích chi tiết từng phương án:
+          </div>
+        `;
+        const listHtml = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <span class="reason-tag">${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</span>
+            <span>${opt.reason}</span>
+          </li>
+        `).join('');
+
+        fbPanel.innerHTML = `${headHtml}<ul class="option-reasons-list">${listHtml}</ul>`;
+        fbPanel.classList.remove('hidden');
+      } else {
+        fbPanel.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndProgress();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới bài tập và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 8. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      resetSubstitution();
+      renderCheckerControls();
+      loadSgkPreset(0);
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+  </script>
+</body>
+</html>
