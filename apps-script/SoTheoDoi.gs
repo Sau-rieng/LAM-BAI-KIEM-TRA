@@ -172,6 +172,7 @@ function doPost(e) {
       case 'gv_napde':
       case 'gv_xemde':
       case 'gv_degiay':
+      case 'gv_dechuan':
       case 'gv_giay_diem':
       case 'gv_hinh':
       case 'gv_hinhde':
@@ -274,6 +275,7 @@ function doPost(e) {
         if (d.action === 'gv_tc_xoakhung') return json(gvTcXoaKhung(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
         if (d.action === 'gv_degiay') return json(gvDeGiay(d));
+        if (d.action === 'gv_dechuan') return json(gvDeChuan(d));
         if (d.action === 'gv_giay_diem') return json(gvGiayDiem(d));
         if (d.action === 'gv_hinh') return json(gvHinh(d));
         if (d.action === 'gv_hinhde') return json(gvHinhDe(d));
@@ -1628,6 +1630,26 @@ function gvDeGiay(d) {
         return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, da: q.da, w: q.w, hinh: q.hinh, goc: q.goc, kt: k.kt || '', md: k.md || ''};
       })};
   })};
+}
+// De chuan (chung cho cac ma) de GV chieu sua bai: cau xep theo thu tu de goc (cot Goc), kem dap an + loi giai + tu luan/huong dan cham.
+// Uu tien ma giu nguyen thu tu goc (vd 201); neu ma nao cung da tron thi lay ma dau, chi xep lai thu tu cau (phuong an giu theo ma do de khop loi giai)
+function gvDeChuan(d) {
+  const ca = String(d.ca || '').trim();
+  const ds = docCauHinh().filter(function (c) { return c.giay && (c.ca || c.madot) === ca; }).sort(function (a, b) { return a.madot < b.madot ? -1 : 1; });
+  if (!ds.length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
+  const goc = function (q) { return String(q.goc || q.cau).split(':')[0].trim() || q.cau; };
+  let chon = null, chuan = false;
+  ds.forEach(function (c) { if (chon) return; const de = docDe(c.madot); if (de.every(function (q) { return goc(q) === q.cau && String(q.goc || '').indexOf(':') < 0; })) { chon = c; chuan = true; } });
+  if (!chon) chon = ds[0];
+  const gt = docGiaiThich(), kt = docKienThuc(), PH = {TN: 1, DS: 2, TLN: 3};
+  const so = function (s) { const m = String(s).match(/(\d+)\s*$/); return m ? Number(m[1]) : 0; };
+  const cau = docDe(chon.madot).map(function (q) {
+    const k = kt[chon.madot + '|' + q.cau] || {};
+    return {cau: goc(q), cauMa: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, da: q.da, w: q.w, hinh: q.hinh, gt: String(gt[chon.madot + '|' + q.cau] || ''), kt: k.kt || '', md: k.md || ''};
+  }).sort(function (a, b) { return (PH[a.loai] - PH[b.loai]) || (so(a.cau) - so(b.cau)); });
+  const g = tlGoc(ca), rb = docRubric(ca);
+  const tl = (g ? g.cau : []).map(function (t) { return {cau: t.cau, hoi: t.hoi, hinh: t.hinh, diem: Number(String(t.diem).replace(',', '.')) || 0, gt: t.gt, buoc: (rb[t.cau] || {}).buoc || []}; });
+  return {ok: true, ca: ca, ten: chon.ten, phut: chon.phut, thang: chon.thang || 'K12', madot: chon.madot, chuan: chuan, mas: ds.map(function (c) { return c.madot; }), cau: cau, tl: tl};
 }
 // GV dat diem tung phan cho ca 1 dot de giay: tn = diem/cau Phan I; ds = [dung 1 y, 2 y, 3 y, 4 y]; tln = diem/cau Phan III
 // Ghi cot Diem cua moi ma de (DS: diem 4 y) va cot ThangDS cua CAU HINH (ti le = diem k y / diem 4 y)

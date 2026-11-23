@@ -1722,7 +1722,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           var muc = !x.n ? 'chua' : x.siso && x.n >= x.siso ? 'du' : 'do';
           return '<span class="ktC ' + muc + (x.da ? ' da' : '') + '"><button class="ktTich" data-l="' + esc(x.lop) + '" aria-pressed="' + x.da + '" title="' + (x.da ? 'Bỏ tích đã kiểm tra' : 'Tích đã kiểm tra') + '">' + (x.da ? '☑' : '☐') + '</button><b>' + esc(x.lop) + '</b> ' + (DATHI ? '📷 ' + x.n + (x.siso ? '/' + x.siso : '') : '…') + (x.tay ? ' <small>(tay)</small>' : '') + '</span>';
         }).join('') + '</div>' +
-        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button>' + (Number(d.phut) >= 45 ? '<button class="btn2 tlG">✍ Chấm tự luận</button>' : '') + '<button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button></div>' +
+        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 dcG">📄 Đề chuẩn + đáp án</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button>' + (Number(d.phut) >= 45 ? '<button class="btn2 tlG">✍ Chấm tự luận</button>' : '') + '<button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button></div>' +
         '<div class="lopO"></div><div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
       var o = el.querySelector('.dauDeO'), kq = el.querySelector('.giayKQ');
       [].forEach.call(el.querySelectorAll('.ktTich'), function (b) {
@@ -1775,6 +1775,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       }
       el.querySelector('.diemG').onclick = function () { var o2 = el.querySelector('.diemO'); if (o2.innerHTML) { o2.innerHTML = ''; return; } diemGiay(k, o2); };
       el.querySelector('.quetG').onclick = function () { DOT_CUON = window.scrollY; moQuet(k, '', null, 'dot'); };
+      el.querySelector('.dcG').onclick = function () {
+        if (kq.querySelector('.dcBox')) { kq.innerHTML = ''; return; }
+        kq.innerHTML = '<div class="xdBox dcBox"><b>📄 Đề chuẩn chung cho các mã ' + esc(g.map(function (x) { return x.madot.slice(-3); }).join(', ')) + '</b>' +
+          '<div class="sub">Câu xếp theo thứ tự đề gốc – để chiếu lên màn hình sửa bài cho cả lớp (chỉ giáo viên). Mở ra rồi bấm 🖨 In / Lưu PDF để lưu file.</div>' +
+          '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 dcDe">📄 Đề chuẩn</button><button class="btn2 dcDa">✅ Đáp án + lời giải</button></div><div class="dcKQ"></div></div>';
+        kq.querySelector('.dcDe').onclick = function () { moDeChuan(k, 'de', kq.querySelector('.dcKQ')); };
+        kq.querySelector('.dcDa').onclick = function () { moDeChuan(k, 'da', kq.querySelector('.dcKQ')); };
+      };
       el.querySelector('.kqG').onclick = function () { DOT_CUON = window.scrollY; moQuet(k, 'ketqua', null, 'dot'); };
       if (el.querySelector('.tlG')) el.querySelector('.tlG').onclick = function () { moChamTL(k, d); };
       el.querySelector('.mtG').onclick = function () { var l = lopCuaDot(d)[0] || DS[0]; moMaTran({ ten: d.ten, madots: g.map(function (x) { return x.madot; }), url: l.url }); };
@@ -2691,14 +2699,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var trang = '';
     j.ma.forEach(function (m, i) {
       var so = m.madot.slice(-3), pn = 'p' + so;
-      css += '@page ' + pn + '{@bottom-center{content:"Mã đề ' + so + ' – Trang " counter(page);font:10pt "Times New Roman"}}.ma' + so + '{page:' + pn + '}';
+      var nhanMa = m.nhan || ('Mã đề ' + so);
+      css += '@page ' + pn + '{@bottom-center{content:"' + nhanMa + ' – Trang " counter(page);font:10pt "Times New Roman"}}.ma' + so + '{page:' + pn + '}';
       var phan = { TN: [], DS: [], TLN: [] }; m.cau.forEach(function (q) { phan[q.loai].push(q); });
       var h = '<section class="ma ma' + so + '"><table class="dau"><tr><td class="tr"><div>' + esc(dd.so || '') + '</div><div><b>' + esc(dd.truong || '') + '</b></div><div class="gach"></div></td>' +
         '<td><div><b>' + esc(ky) + '</b></div><div><b>Môn: ' + esc(monChu(m.madot)) + '</b></div><div><i>Thời gian làm bài: ' + m.phut + ' phút, không kể thời gian phát đề</i></div></td></tr></table>' +
-        '<div class="ts"><span>Họ, tên thí sinh: ..................................................... Số báo danh: ......................</span><span class="made">Mã đề ' + so + '</span></div><div class="than">';
+        '<div class="ts"><span>Họ, tên thí sinh: ..................................................... Số báo danh: ......................</span><span class="made">' + esc(nhanMa) + '</span></div><div class="than">';
       if (phan.TN.length) h += '<div class="ph">PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. <span>Thí sinh trả lời từ câu 1 đến câu ' + phan.TN.length + '. Mỗi câu hỏi thí sinh chỉ chọn một phương án.</span></div>' + phan.TN.map(function (q, i) { return htmlCau(q, i + 1); }).join('');
       if (phan.DS.length) h += '<div class="ph">PHẦN II. Câu trắc nghiệm đúng sai. <span>Thí sinh trả lời từ câu 1 đến câu ' + phan.DS.length + '. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn đúng hoặc sai.</span></div>' + phan.DS.map(function (q, i) { return htmlCau(q, i + 1); }).join('');
       if (phan.TLN.length) h += '<div class="ph">PHẦN III. Câu trắc nghiệm trả lời ngắn. <span>Thí sinh trả lời từ câu 1 đến câu ' + phan.TLN.length + '.</span></div>' + phan.TLN.map(function (q, i) { return htmlCau(q, i + 1); }).join('');
+      if (m.tl && m.tl.length) h += '<div class="ph">PHẦN IV. Tự luận.</div>' + m.tl.map(function (t, i) { return '<div class="cau"><b>Câu ' + (i + 1) + '</b> <i>(' + t.diem + ' điểm)</i>. ' + t.hoi + (t.hinh ? '<div class="hinh"><img src="' + esc(t.hinh) + '" alt=""></div>' : '') + '</div>'; }).join('');
       h += '<div class="het">------ HẾT ------</div></div></section>';
       trang += h;
     });
@@ -2727,6 +2737,50 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>DAP-AN-' + esc(j.ca) + '</title><style>' + css + '</style></head><body>' + thanhIn('Đáp án ' + m0.ten) + '<div class="trang">' + h + '</div></body></html>';
   }
 
+  // ---------- ĐỀ CHUẨN (chung các mã, thứ tự đề gốc) + ĐÁP ÁN, LỜI GIẢI để GV chiếu sửa bài ----------
+  function moDeChuan(k, loai, kq) {
+    var w = window.open('', '_blank');
+    if (w) w.document.write('<p style="font:16px sans-serif;padding:20px">Đang tạo ' + (loai === 'de' ? 'đề chuẩn' : 'đáp án') + '…</p>');
+    kq.innerHTML = '<div class="sub">Đang tải đề…</div>';
+    goiBatKy({ action: 'gv_dechuan', ma: MA, ca: k }).then(function (j) {
+      if (!j.ok) throw new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới (dán SoTheoDoi.gs mới rồi Triển khai → Phiên bản mới).' : j.msg);
+      var html = loai === 'de' ? htmlDeGiay({ ca: k, ma: [{ madot: j.madot, ten: j.ten, phut: j.phut, thang: j.thang, cau: j.cau, tl: j.tl, nhan: 'ĐỀ CHUẨN' }] }, DAU_DE) : htmlDapAnChuan(j);
+      if (!w || w.closed) w = window.open('', '_blank');
+      if (!w) { kq.innerHTML = '<div class="xdBox xau">Trình duyệt chặn cửa sổ mới. Cho phép cửa sổ bật lên (pop-up) rồi bấm lại.</div>'; return; }
+      w.document.open(); w.document.write(html); w.document.close();
+      kq.innerHTML = '<div class="sub">✓ Đã mở ở thẻ mới' + (j.chuan ? ' (theo đúng thứ tự đề gốc – mã ' + esc(j.madot.slice(-3)) + ').' : '. Lưu ý: các mã đều đã trộn nên câu xếp theo thứ tự gốc nhưng phương án A–D giữ theo mã ' + esc(j.madot.slice(-3)) + '.') + ' Bấm <b>🖨 In / Lưu PDF</b> để lưu file.</div>';
+    }).catch(function (e) { if (w) w.close(); kq.innerHTML = '<div class="xdBox xau">Chưa tải được: ' + esc(e.message) + '</div>'; });
+  }
+  function htmlDapAnChuan(j) {
+    var phanTen = { TN: 'PHẦN I. Trắc nghiệm nhiều phương án', DS: 'PHẦN II. Trắc nghiệm đúng sai', TLN: 'PHẦN III. Trả lời ngắn' };
+    var css = CSS_IN + 'body{font-size:12.5pt}h1{font-size:16pt;text-align:center;margin:0 0 2px}.sub{text-align:center;margin:0 0 10px}h2{font-size:13.5pt;margin:14px 0 6px;border-bottom:1pt solid #000}' +
+      'table.da{border-collapse:collapse;margin:0 0 8px}table.da td,table.da th{border:.6pt solid #000;padding:3px 6px;text-align:center}table.da th{background:#eee}' +
+      '.lg{break-inside:avoid;margin:0 0 9px}.lg .d{font-weight:700}.lg .g{margin:2px 0 0 14px}.bc{margin:2px 0 0 14px}.bc td{padding:1px 6px;vertical-align:top}.hinh{text-align:center}.hinh img{max-width:70%}';
+    var dem = { TN: [], DS: [], TLN: [] }; j.cau.forEach(function (q) { dem[q.loai].push(q); });
+    var daChu = function (q) { return q.loai === 'DS' ? String(q.da).split('').map(function (x, i) { return 'abcd'[i] + ') ' + (x === 'D' ? 'Đúng' : 'Sai'); }).join('; ') : String(q.da).split(';')[0]; };
+    var h = '<h1>ĐÁP ÁN VÀ LỜI GIẢI – ĐỀ CHUẨN</h1><p class="sub">' + esc(j.ten) + ' · ' + j.phut + ' phút · dùng chung các mã ' + esc((j.mas || []).map(function (m) { return m.slice(-3); }).join(', ')) + '</p>';
+    ['TN', 'DS', 'TLN'].forEach(function (L) {
+      var ds = dem[L]; if (!ds.length) return;
+      h += '<h2>' + phanTen[L] + '</h2>';
+      for (var a = 0; a < ds.length; a += 10) {
+        var p = ds.slice(a, a + 10);
+        h += '<table class="da"><tr><th>Câu</th>' + p.map(function (q, i) { return '<th>' + (a + i + 1) + '</th>'; }).join('') + '</tr><tr><th>Đáp án</th>' +
+          p.map(function (q) { return '<td>' + esc(L === 'DS' ? String(q.da).replace(/D/g, 'Đ') : String(q.da).split(';')[0]) + '</td>'; }).join('') + '</tr></table>';
+      }
+      ds.forEach(function (q, i) {
+        h += '<div class="lg"><span class="d">Câu ' + (i + 1) + '. Đáp án: ' + esc(daChu(q)) + '</span>' + (q.gt ? '<div class="g">' + String(q.gt).replace(/\n/g, '<br>') + '</div>' : '') + '</div>';
+      });
+    });
+    if (j.tl && j.tl.length) {
+      h += '<h2>PHẦN IV. Tự luận – đáp án và hướng dẫn chấm</h2>';
+      j.tl.forEach(function (t, i) {
+        h += '<div class="lg"><span class="d">Câu ' + (i + 1) + ' (' + t.diem + ' điểm).</span> ' + t.hoi + (t.hinh ? '<div class="hinh"><img src="' + esc(t.hinh) + '" alt=""></div>' : '') +
+          (t.gt ? '<div class="g"><b>Lời giải:</b> ' + String(t.gt).replace(/\n/g, '<br>') + '</div>' : '') +
+          (t.buoc.length ? '<table class="bc">' + t.buoc.map(function (b) { return '<tr><td>' + esc(b.nd) + '</td><td><b>' + b.diem + 'đ</b></td></tr>'; }).join('') + '</table>' : '') + '</div>';
+      });
+    }
+    return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>DAP-AN-DE-CHUAN-' + esc(j.ca) + '</title><style>' + css + '</style></head><body>' + thanhIn('Đáp án + lời giải đề chuẩn') + '<div class="trang">' + h + '</div></body></html>';
+  }
   // ---------- GV xem de (PDF) truoc khi thi + tai hinh cua de len GitHub ----------
   function xemDePDF(d, o) {
     o.innerHTML = '<div class="xdBox sub">Đang tạo file PDF đề ' + esc(d.madot) + ' và kiểm tra hình… (10–30 giây)</div>';
