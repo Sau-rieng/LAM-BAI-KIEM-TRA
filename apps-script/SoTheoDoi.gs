@@ -392,7 +392,7 @@ function xemLai(d) {
   const gtMap = docGiaiThich(), nxMap = docNhanXet();
   let tlMap = null;
   docCauHinh().forEach(function (c) {
-    if ((!c.xemlai && !hs.gv) || !hopLop(c)) return;   // tài khoản GV: thấy mọi đề của lớp (kể cả chưa mở xem lại)
+    if (!c.xemlai || !hopLop(c)) return;   // chỉ đề GV đang mở xem lại; tài khoản GV thấy cả đề mình chưa làm
     let bai = timBaiDaNop(c.madot, ma);
     if (!bai && hs.gv) bai = {diem: '', chitiet: '', lan: 1, luc: '', socaudung: 0, tongsocau: 0, file: '', xemDe: true};
     if (!bai) return;
@@ -433,7 +433,7 @@ function hsAnhPhieu(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma), madot = String(d.madot || '').trim();
   if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const c = timDot(madot);
-  if (!c || !c.giay || (!c.xemlai && !hs.gv)) return {ok: false, msg: 'Bai nay chua mo xem lai'};
+  if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
   const bai = timBaiDaNop(madot, ma), id = bai ? idTuUrl(bai.file) : '';
   if (!id) return {ok: false, msg: 'Khong co anh phieu'};
   const b = DriveApp.getFileById(id).getBlob();
@@ -1527,7 +1527,7 @@ function gvTLAI(d) {
 function hsAnhTL(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma), c = timDot(String(d.madot || '').trim());
   if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
-  if (!c || !c.giay || (!c.xemlai && !hs.gv)) return {ok: false, msg: 'Bai nay chua mo xem lai'};
+  if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
   const x = docTLDiem(c.ca || c.madot)[ma]; if (!x || !x.anh) return {ok: false, msg: 'Khong co anh'};
   return {ok: true, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(DriveApp.getFileById(x.anh).getBlob().getBytes())};
 }

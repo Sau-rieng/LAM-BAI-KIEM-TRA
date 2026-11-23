@@ -505,7 +505,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var nut = document.createElement('button'); nut.className = 'dot';
       nut.innerHTML = '<b></b><span></span>';
       nut.querySelector('b').textContent = b.ten; if (TAT.length > 1 && b._l) nut.querySelector('b').insertAdjacentHTML('beforeend', nhanLop(b));
-      nut.querySelector('span').textContent = String(b.diem).replace(',', '.') + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
+      nut.querySelector('span').textContent = b.xemDe ? 'Đề GV đang mở xem lại · bấm để xem đề' : String(b.diem).replace(',', '.') + ' điểm · đúng ' + b.socaudung + '/' + b.tongsocau + ' câu';
       if (b.khoa) { nut.querySelector('span').textContent += ' · 🔒 thầy/cô chưa mở xem lại'; nut.disabled = true; nut.style.opacity = '.75'; nut.style.cursor = 'default'; }
       else nut.onclick = function () { dungLop(b); baiDangXem = b; veBai(); };
       box.appendChild(nut);
