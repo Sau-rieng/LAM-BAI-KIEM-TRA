@@ -374,6 +374,17 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261123-104914",
+  "file": "tai-len/tl-261123-104914.html",
+  "anh": "",
+  "ten": "1. Khái niệm về Lipid, Chất béo & Acid béo (Hóa học 12 – KNTT)",
+  "khoi": "12",
+  "bai": "BAI CHAT BEO",
+  "loai": "Mô phỏng",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
