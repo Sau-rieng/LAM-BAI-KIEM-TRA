@@ -135,6 +135,7 @@ function doPost(e) {
       case 'gv_tl_anh':
       case 'gv_tl_layanh':
       case 'gv_tl_chuyen':
+      case 'gv_tl_xoa':
       case 'gv_tl_nen':
       case 'gv_tl_nen_ok':
       case 'gv_capmk':
@@ -233,6 +234,7 @@ function doPost(e) {
         if (d.action === 'gv_tl_ai') return json(gvTLAI(d));
         if (d.action === 'gv_tl_layanh') return json(gvTLLayAnh(d));
         if (d.action === 'gv_tl_chuyen') return json(gvTLChuyen(d));
+        if (d.action === 'gv_tl_xoa') return json(gvTLXoa(d));
         if (d.action === 'gv_tl_nen') return json(gvTLNen(d));
         if (d.action === 'gv_tl_nen_ok') return json(gvTLNenOK(d));
         if (d.action === 'gv_capmk') return json(gvCapMK(d));
@@ -1443,6 +1445,24 @@ function gvTLChuyen(d) {
   } finally { lock.releaseLock(); }
   try { DriveApp.getFileById(idTu).setName('TU LUAN - ' + den + ' - ' + hsDen.ten + '.jpg'); if (idDen) DriveApp.getFileById(idDen).setName('TU LUAN - ' + tu + ' - ' + hsTu.ten + '.jpg'); } catch (e) {}
   return {ok: true, doi: !!idDen};
+}
+// Anh mat sau chup nham (khong phai bai tu luan): xoa anh + bai cham (nhap/duyet) tu luan cua em do, anh vao thung rac Drive
+function gvTLXoa(d) {
+  const ca = String(d.ca || '').trim(), ma = String(d.mahs || '').trim();
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD); if (!sh || sh.getLastRow() < 2) return {ok: false, msg: 'Chua co anh tu luan'};
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  const ids = {}; let n = 0;
+  try {
+    const v = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TLD.length).getValues();
+    for (let i = v.length - 1; i >= 0; i--) {
+      if (String(v[i][0]).trim() !== ca || String(v[i][1]).trim() !== ma) continue;
+      if (String(v[i][5]).trim()) ids[String(v[i][5]).trim()] = 1;
+      sh.deleteRow(i + 2); n++;
+    }
+  } finally { lock.releaseLock(); }
+  if (!n) return {ok: false, msg: 'Em ' + ma + ' chua co anh mat sau'};
+  Object.keys(ids).forEach(function (id) { try { DriveApp.getFileById(id).setTrashed(true); } catch (e) {} });
+  return {ok: true, xoa: n};
 }
 // Quet phieu xong chup mat sau (tu luan): luu anh, gan vao bai em (chua cham)
 function gvTLAnh(d) {

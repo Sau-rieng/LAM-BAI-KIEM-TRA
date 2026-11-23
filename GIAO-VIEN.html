@@ -3424,6 +3424,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var d = document.createElement('div'); d.className = 'ptNut ctChuyen';
       d.innerHTML = '<span class="sub">Ảnh này của em khác?</span><select><option value="">— chọn em đúng —</option>' + j.hs.filter(function (x) { return x.mahs !== ma; }).map(function (x) { var c = j.tl[x.mahs]; return '<option value="' + esc(x.mahs) + '">' + esc(String(x.mahs).slice(-2) + '. ' + x.hoten) + (c && c.anh ? ' (đã có ảnh → đổi chỗ)' : '') + '</option>'; }).join('') + '</select><button class="btn2" type="button">↔ Chuyển ảnh</button><span class="sub ctChTT"></span>';
       im.parentNode.insertBefore(d, im.nextSibling);
+      var xoa = document.createElement('button'); xoa.className = 'btn2 ctXoaAnh'; xoa.type = 'button'; xoa.textContent = '🗑 Xóa ảnh này'; xoa.title = 'Ảnh chụp nhầm (không phải bài tự luận)'; d.appendChild(xoa);
+      xoa.onclick = function () {
+        var ten = (j.hs.filter(function (x) { return x.mahs === ma; })[0] || {}).hoten || ma, tt = d.querySelector('.ctChTT');
+        if (!confirm('Xóa ảnh mặt sau của ' + ten + '?\nẢnh này không phải bài tự luận: ảnh và điểm tự luận (nháp/đã duyệt) của em sẽ xóa, sau đó thầy/cô chụp lại ảnh đúng.')) return;
+        xoa.disabled = true; if (tt) tt.textContent = 'Đang xóa…';
+        goi(CT.lop.url, { action: 'gv_tl_xoa', ma: MA, ca: ca, mahs: ma }).then(function (r) {
+          if (!r.ok) throw r; CT.anhCo = null; CT.anhMa = null; taiDs();
+        }).catch(function (e) { xoa.disabled = false; if (tt) tt.textContent = 'Chưa xóa được: ' + loiSo(e); });
+      };
       d.querySelector('button').onclick = function () {
         var den = d.querySelector('select').value, tt = d.querySelector('.ctChTT'), bt = this; if (!den) { tt.textContent = 'Chọn em đúng trước.'; return; }
         var tenDen = (j.hs.filter(function (x) { return x.mahs === den; })[0] || {}).hoten || den;
