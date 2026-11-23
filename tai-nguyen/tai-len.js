@@ -370,7 +370,7 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "anh": "",
   "ten": "Bài tập 3: So sánh nhiệt độ sôi (Hóa học 12 – KNTT)",
   "khoi": "12",
-  "bai": "",
+  "bai": "BAI CHAT BEO",
   "loai": "Mô phỏng",
   "kienthuc": "",
   "mota": ""
