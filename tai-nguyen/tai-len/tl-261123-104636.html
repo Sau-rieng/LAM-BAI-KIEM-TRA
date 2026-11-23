@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4. Ứng dụng của chất béo và acid béo (Hóa học 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – LIGHT MODE)
+       ========================================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      --primary: #0b5cab;
+      --primary-dark: #084785;
+      --primary-soft: #eff6ff;
+      --primary-border: #bfdbfe;
+
+      --emerald: #059669;
+      --emerald-dark: #047857;
+      --emerald-soft: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --amber: #d97706;
+      --amber-dark: #92400e;
+      --amber-soft: #fffbeb;
+      --amber-border: #fde68a;
+
+      --rose: #dc2626;
+      --rose-dark: #991b1b;
+      --rose-soft: #fef2f2;
+      --rose-border: #fecaca;
+
+      --violet: #6d28d9;
+      --violet-soft: #f5f3ff;
+      --violet-border: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. CÔNG THỨC HÓA HỌC LIỀN MẠCH (CHỐNG VỠ CHỈ SỐ DƯỚI/TRÊN)
+       ========================================================================= */
+    .chem-formula {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chem-formula sub, sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    .chem-formula sup, sup {
+      font-size: 0.72em;
+      line-height: 0;
+      vertical-align: 0.42em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH 3 TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), #1d70c9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (AN TOÀN TUYỆT ĐỐI TRÊN IPAD/SAFARI)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-emerald {
+      background-color: var(--emerald);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-amber {
+      background-color: var(--amber);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-outline.active,
+    .btn-outline.active:hover,
+    .btn-outline.active:focus,
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--primary);
+      border-color: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--primary);
+        background-color: rgba(11, 92, 171, 0.08);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+      }
+      .btn-emerald:hover:not(:disabled) {
+        background-color: var(--emerald-dark);
+      }
+      .btn-amber:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .btn-outline:not(.active):hover:not(:disabled) {
+        background-color: var(--primary-soft);
+        border-color: var(--primary);
+      }
+      .vit-btn:not(.active):hover {
+        border-color: var(--primary);
+        background-color: var(--primary-soft);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--primary);
+        background-color: #f8fbff;
+      }
+    }
+
+    /* =========================================================================
+       5. BỐ CỤC CHUNG & CARD
+       ========================================================================= */
+    .main-container {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 42px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .sgk-callout {
+      background-color: var(--primary-soft);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 14px 16px;
+      font-size: 0.98rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    /* =========================================================================
+       6. TAB 1: 3 NHÓM ỨNG DỤNG CỦA CHẤT BÉO
+       ========================================================================= */
+    .tab1-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    @media (min-width: 960px) {
+      .tab1-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .slider-panel {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 15px;
+      margin-bottom: 14px;
+    }
+
+    .slider-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .val-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background-color: #0f172a;
+      color: #38bdf8;
+      font-size: 1rem;
+      font-weight: 800;
+      min-width: 68px;
+      justify-content: center;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .ticks-abs {
+      position: relative;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .ticks-abs span {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    .ref-note {
+      margin: 10px 0 0;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Nút chọn Vitamin */
+    .vit-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .vit-btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 2px solid var(--border-strong);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vit-btn.active,
+    .vit-btn.active:hover,
+    .vit-btn.active:focus {
+      background-color: var(--primary);
+      border-color: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    .vit-btn.vit-c {
+      border-style: dashed;
+      border-color: #38bdf8;
+      color: #0369a1;
+    }
+
+    .vit-btn.vit-c.active,
+    .vit-btn.vit-c.active:hover,
+    .vit-btn.vit-c.active:focus {
+      border-style: solid;
+      background-color: #0284c7;
+      border-color: #0369a1;
+      color: #ffffff;
+    }
+
+    .vit-result-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      font-size: 0.92rem;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .svg-smooth {
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================================================
+       7. TAB 2: ACID BÉO OMEGA-3 & OMEGA-6 (MỤC EM CÓ BIẾT)
+       ========================================================================= */
+    .em-co-biet-wrap {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1.5px solid #99d6cc;
+      background-color: #f5f2dc;
+      margin-bottom: 18px;
+    }
+
+    .ecb-head {
+      background-color: #9ad3cb;
+      color: #0f172a;
+      padding: 10px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    .ecb-content {
+      padding: 16px 18px;
+    }
+
+    .omega-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .omega-explain-bar {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background-color: #ffffff;
+      border: 1.5px solid var(--primary-border);
+      font-size: 0.96rem;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    @media (min-width: 780px) {
+      .compare-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .source-card {
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      border: 1.5px solid var(--border);
+    }
+
+    .source-card.w3 {
+      background-color: #eff6ff;
+      border-color: #93c5fd;
+    }
+
+    .source-card.w6 {
+      background-color: #fffbeb;
+      border-color: #fcd34d;
+    }
+
+    .source-title {
+      margin: 0 0 8px;
+      font-size: 1.04rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .balance-callout {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background-color: var(--emerald-soft);
+      border: 1.5px solid var(--emerald-border);
+      border-left: 5px solid var(--emerald);
+      font-size: 0.96rem;
+      color: #065f46;
+      line-height: 1.6;
+    }
+
+    .qa-box {
+      margin-top: 18px;
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      background-color: #f8fbff;
+      overflow: hidden;
+    }
+
+    .qa-head {
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .qa-q {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--text-main);
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .qa-ans {
+      padding: 14px 18px;
+      background-color: #ffffff;
+      border-top: 1px solid var(--primary-border);
+      font-size: 0.95rem;
+      color: var(--text-body);
+      line-height: 1.65;
+    }
+
+    /* =========================================================================
+       8. TAB 3: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--emerald));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .q-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.14s ease;
+    }
+
+    .q-dot.current {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+    .q-dot.correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+      color: var(--emerald);
+    }
+    .q-dot.wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      color: var(--primary-dark);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .level-badge.nb { background-color: var(--emerald-soft); color: var(--emerald-dark); border-color: var(--emerald-border); }
+    .level-badge.th { background-color: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
+    .level-badge.vd { background-color: var(--violet-soft); color: var(--violet); border-color: var(--violet-border); }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose);
+      color: #ffffff;
+    }
+
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+    .feedback-head.ok { background-color: var(--emerald-soft); color: #065f46; border-bottom: 1px solid var(--emerald-border); }
+    .feedback-head.err { background-color: var(--rose-soft); color: var(--rose-dark); border-bottom: 1px solid var(--rose-border); }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: #065f46;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #eff6ff, #ecfdf5);
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.24);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <!-- Icon SVG 44x44px -->
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="13" stroke="#ffffff" stroke-width="2.2" fill="none"/>
+              <text x="18" y="23" text-anchor="middle" font-size="16" font-weight="800" fill="#fde047">ω</text>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">4. Ứng dụng của chất béo và acid béo</h1>
+            <p class="brand-sub">Hóa học 12 – Kết nối tri thức với cuộc sống • Chương 1: Ester – Lipid</p>
+          </div>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+
+      <!-- Thanh 3 Tab -->
+      <nav class="tabs-bar" role="tablist" aria-label="Điều hướng 3 phần bài học">
+        <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+          1. Ứng dụng của chất béo
+        </button>
+        <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+          2. Acid béo Omega-3 &amp; Omega-6
+        </button>
+        <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+          3. Luyện tập nhanh (10 câu)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: ỨNG DỤNG CỦA CHẤT BÉO (3 NHÓM ỨNG DỤNG CHÍNH)
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+
+      <div class="tab1-grid">
+        <!-- ỨNG DỤNG 1: NGUỒN CUNG CẤP & DỰ TRỮ NĂNG LƯỢNG -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-row">
+              <span class="num-badge">1</span>
+              <h2 class="card-title">Cung cấp &amp; dự trữ năng lượng</h2>
+            </div>
+            <span class="pill-tag">Gấp &gt; 2 lần Carbohydrate</span>
+          </div>
+
+          <p style="margin: 0 0 12px; font-size: 0.95rem; color: var(--text-body);">
+            Chất béo là <b>nguồn cung cấp và dự trữ năng lượng</b> ở người và động vật. Khi chuyển hoá, chất béo cung cấp năng lượng <b>nhiều hơn</b> carbohydrate ở dạng tinh bột hoặc đường.
+          </p>
+
+          <div class="slider-panel">
+            <div class="slider-top">
+              <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main);">Khối lượng chất dinh dưỡng:</span>
+              <span id="massValPill" class="val-pill">5 g</span>
+            </div>
+            <input id="massSlider" type="range" class="range-slider" min="1" max="10" step="1" value="5" oninput="renderEnergyChart(this.value)" />
+            <div class="ticks-abs">
+              <span style="left: 0%;">1 g</span>
+              <span style="left: 44.44%; transform: translateX(-50%);">5 g</span>
+              <span style="left: 100%; transform: translateX(-100%);">10 g</span>
+            </div>
+          </div>
+
+          <!-- SVG Biểu đồ cột năng lượng tương tác -->
+          <div class="svg-stage">
+            <svg viewBox="0 0 460 226" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Biểu đồ so sánh năng lượng của chất béo và carbohydrate">
+              <!-- Trục đáy -->
+              <line x1="40" y1="184" x2="420" y2="184" stroke="#64748b" stroke-width="2" />
+              <!-- Đường lưới tham chiếu 90 kcal -->
+              <line x1="40" y1="44" x2="420" y2="44" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="4 4" />
+              <text x="34" y="48" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">90</text>
+              <line x1="40" y1="114" x2="420" y2="114" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="4 4" />
+              <text x="34" y="118" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">45</text>
+
+              <!-- Cột 1: Chất béo (~9 kcal/g) -->
+              <rect id="barFat" x="104" y="114" width="84" height="70" rx="8" fill="#f59e0b" />
+              <text id="lblFatKcal" x="146" y="104" text-anchor="middle" font-size="15" font-weight="800" fill="#b45309">45 kcal</text>
+              <text x="146" y="204" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f172a">Chất béo</text>
+              <text x="146" y="219" text-anchor="middle" font-size="10.5" font-weight="700" fill="#b45309">(~9 kcal / 1 g)</text>
+
+              <!-- Cột 2: Carbohydrate (~4 kcal/g) -->
+              <rect id="barCarb" x="272" y="153" width="84" height="31" rx="8" fill="#38bdf8" />
+              <text id="lblCarbKcal" x="314" y="143" text-anchor="middle" font-size="15" font-weight="800" fill="#0369a1">20 kcal</text>
+              <text x="314" y="204" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f172a">Carbohydrate</text>
+              <text x="314" y="219" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0369a1">(~4 kcal / 1 g)</text>
+            </svg>
+          </div>
+          <p class="ref-note">
+            * Số liệu sinh học tham khảo (1 g chất béo ≈ 9 kcal; 1 g tinh bột/đường ≈ 4 kcal → gấp 2,25 lần).
+          </p>
+        </div>
+
+        <!-- ỨNG DỤNG 2: DUNG MÔI HOÀ TAN VITAMIN A, D, E, K -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-row">
+              <span class="num-badge">2</span>
+              <h2 class="card-title">Cung cấp acid béo thiết yếu &amp; Hoà tan Vitamin</h2>
+            </div>
+            <span class="pill-tag">Vitamin A, D, E, K</span>
+          </div>
+
+          <p style="margin: 0 0 12px; font-size: 0.95rem; color: var(--text-body);">
+            Chất béo cung cấp <b>acid béo thiết yếu</b> cho cơ thể. Nhiều vitamin như <b>A, D, E và K</b> hoà tan tốt trong chất béo nên được <b>vận chuyển, hấp thụ</b> cùng chất béo.
+          </p>
+
+          <!-- Chọn viên vitamin để thả thử vào 2 cốc -->
+          <div class="vit-btn-row">
+            <button id="vitBtn-A" type="button" class="vit-btn active" onclick="testVitamin('A')"><span>Thả Vitamin A</span></button>
+            <button id="vitBtn-D" type="button" class="vit-btn" onclick="testVitamin('D')"><span>Thả Vitamin D</span></button>
+            <button id="vitBtn-E" type="button" class="vit-btn" onclick="testVitamin('E')"><span>Thả Vitamin E</span></button>
+            <button id="vitBtn-K" type="button" class="vit-btn" onclick="testVitamin('K')"><span>Thả Vitamin K</span></button>
+            <button id="vitBtn-C" type="button" class="vit-btn vit-c" onclick="testVitamin('C')"><span>Thả Vitamin C (đối chứng)</span></button>
+          </div>
+
+          <!-- SVG 2 cốc: Chất béo vs Nước -->
+          <div class="svg-stage">
+            <svg viewBox="0 0 460 224" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Thí nghiệm thả vitamin vào cốc chất béo và cốc nước">
+              <defs>
+                <clipPath id="clipVitFat"><rect x="64" y="72" width="116" height="106" rx="10" /></clipPath>
+                <clipPath id="clipVitWater"><rect x="280" y="72" width="116" height="106" rx="10" /></clipPath>
+              </defs>
+
+              <!-- Cốc 1: Chất béo (Dầu ăn) -->
+              <g>
+                <text x="122" y="28" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">Cốc Chất béo</text>
+                <g clip-path="url(#clipVitFat)">
+                  <rect id="vitFatLiq" x="64" y="102" width="116" height="76" fill="#fde047" opacity="0.86" />
+                  <!-- Các hạt phân tán khi tan tốt trong chất béo -->
+                  <g id="fatDissolveDots">
+                    <circle cx="92" cy="126" r="5" fill="#ea580c" opacity="0.85" />
+                    <circle cx="124" cy="142" r="6" fill="#ea580c" opacity="0.85" />
+                    <circle cx="152" cy="128" r="4.5" fill="#ea580c" opacity="0.85" />
+                    <circle cx="108" cy="158" r="5" fill="#ea580c" opacity="0.85" />
+                    <circle cx="144" cy="156" r="5.5" fill="#ea580c" opacity="0.85" />
+                  </g>
+                  <!-- Viên không tan nằm nguyên dưới đáy (khi thả Vitamin C) -->
+                  <g id="fatUndissolved" class="hidden">
+                    <rect x="104" y="156" width="36" height="18" rx="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.6" />
+                    <text x="122" y="169" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">C</text>
+                  </g>
+                </g>
+                <path d="M 58 66 L 64 72 L 64 168 A 10 10 0 0 0 74 178 L 170 178 A 10 10 0 0 0 180 168 L 180 72 L 186 66"
+                      fill="none" stroke="#475569" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+                <text id="fatCapTxt" x="122" y="204" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">✔ Hoà tan tốt</text>
+              </g>
+
+              <!-- Cốc 2: Nước -->
+              <g>
+                <text x="338" y="28" text-anchor="middle" font-size="13" font-weight="800" fill="#0369a1">Cốc Nước (H₂O)</text>
+                <g clip-path="url(#clipVitWater)">
+                  <rect id="vitWaterLiq" x="280" y="102" width="116" height="76" fill="#bae6fd" opacity="0.82" />
+                  <!-- Viên không tan nổi/lơ lửng khi thả A, D, E, K -->
+                  <g id="waterUndissolved">
+                    <rect x="320" y="104" width="36" height="18" rx="9" fill="#ea580c" stroke="#ffffff" stroke-width="1.6" />
+                    <text id="waterUndissolvedLbl" x="338" y="117" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">A</text>
+                  </g>
+                  <!-- Hạt phân tán khi thả Vitamin C -->
+                  <g id="waterDissolveDots" class="hidden">
+                    <circle cx="308" cy="126" r="5" fill="#0284c7" opacity="0.85" />
+                    <circle cx="340" cy="144" r="6" fill="#0284c7" opacity="0.85" />
+                    <circle cx="366" cy="130" r="4.5" fill="#0284c7" opacity="0.85" />
+                    <circle cx="322" cy="160" r="5" fill="#0284c7" opacity="0.85" />
+                    <circle cx="358" cy="158" r="5.5" fill="#0284c7" opacity="0.85" />
+                  </g>
+                </g>
+                <path d="M 274 66 L 280 72 L 280 168 A 10 10 0 0 0 290 178 L 386 178 A 10 10 0 0 0 396 168 L 396 72 L 402 66"
+                      fill="none" stroke="#475569" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+                <text id="waterCapTxt" x="338" y="204" text-anchor="middle" font-size="12" font-weight="800" fill="#dc2626">✘ Không tan trong nước</text>
+              </g>
+            </svg>
+          </div>
+
+          <div id="vitResultBox" class="vit-result-box"></div>
+        </div>
+      </div>
+
+      <!-- ỨNG DỤNG 3: NGUYÊN LIỆU CÔNG NGHIỆP -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">3</span>
+            <h2 class="card-title">Nguyên liệu cho công nghiệp thực phẩm, sản xuất xà phòng &amp; glycerol</h2>
+          </div>
+          <span class="pill-tag">Sơ đồ ứng dụng công nghiệp</span>
+        </div>
+
+        <div class="svg-stage">
+          <svg viewBox="0 0 820 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sơ đồ ứng dụng công nghiệp của chất béo">
+            <!-- Nút trung tâm: Chất béo -->
+            <rect x="28" y="64" width="166" height="62" rx="14" fill="#0b5cab" stroke="#084785" stroke-width="2" />
+            <text x="111" y="92" text-anchor="middle" font-size="15.5" font-weight="800" fill="#ffffff">CHẤT BÉO</text>
+            <text x="111" y="112" text-anchor="middle" font-size="11.5" font-weight="700" fill="#dbeafe">(Dầu thực vật, mỡ)</text>
+
+            <!-- 3 mũi tên phân nhánh -->
+            <path d="M 194 95 L 252 40 L 288 40" fill="none" stroke="#0b5cab" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            <polygon points="286,34 298,40 286,46" fill="#0b5cab" />
+
+            <line x1="194" y1="95" x2="288" y2="95" stroke="#059669" stroke-width="2.6" stroke-linecap="round" />
+            <polygon points="286,89 298,95 286,101" fill="#059669" />
+
+            <path d="M 194 95 L 252 150 L 288 150" fill="none" stroke="#d97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            <polygon points="286,144 298,150 286,156" fill="#d97706" />
+
+            <!-- Nhánh 1: Công nghiệp thực phẩm -->
+            <rect x="302" y="16" width="490" height="46" rx="11" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.6" />
+            <text x="320" y="37" font-size="13.5" font-weight="800" fill="#1d4ed8">🍞 Công nghiệp thực phẩm</text>
+            <text x="320" y="53" font-size="11.8" font-weight="600" fill="#334155">Sản xuất dầu ăn tinh luyện, bơ thực vật (margarine), bánh kẹo, đồ hộp...</text>
+
+            <!-- Nhánh 2: Sản xuất xà phòng -->
+            <rect x="302" y="72" width="490" height="46" rx="11" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.6" />
+            <text x="320" y="93" font-size="13.5" font-weight="800" fill="#047857">🧼 Sản xuất xà phòng</text>
+            <text x="320" y="109" font-size="11.8" font-weight="600" fill="#334155">Đun nóng chất béo với dung dịch NaOH / KOH thu muối sodium / potassium của acid béo.</text>
+
+            <!-- Nhánh 3: Sản xuất glycerol -->
+            <rect x="302" y="128" width="490" height="46" rx="11" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.6" />
+            <text x="320" y="149" font-size="13.5" font-weight="800" fill="#b45309">💧 Sản xuất glycerol</text>
+            <text x="320" y="165" font-size="11.8" font-weight="600" fill="#334155">Dùng trong mĩ phẩm (dưỡng ẩm), dược phẩm, công nghiệp dệt, mực in...</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: ACID BÉO OMEGA-3 & OMEGA-6 (MỤC EM CÓ BIẾT)
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">ω</span>
+            <h2 class="card-title">Acid béo Omega-3 và Omega-6</h2>
+          </div>
+          <span class="pill-tag">Đánh số từ nhóm methyl (–CH₃)</span>
+        </div>
+
+        <div class="sgk-callout">
+          <b>Định nghĩa chuẩn SGK:</b> <i>Acid béo omega-3 và omega-6</i> là các <b>acid béo không no</b> với <b>liên kết đôi đầu tiên ở vị trí số 3 và 6</b> khi đánh số từ <b>nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span>)</b>.
+        </div>
+
+        <!-- MỤC EM CÓ BIẾT + MÔ PHỎNG ĐẾM VỊ TRÍ TỪ –CH3 -->
+        <div class="em-co-biet-wrap">
+          <div class="ecb-head">💡 EM CÓ BIẾT – MỘT SỐ ACID BÉO OMEGA-3 VÀ OMEGA-6 THƯỜNG GẶP</div>
+          <div class="ecb-content">
+            <!-- 4 nút chọn 4 phân tử chuẩn hình SGK -->
+            <div class="omega-btn-row">
+              <button id="omBtn-0" type="button" class="btn btn-outline active" onclick="selectOmega(0)">
+                <span>(1) ω-3: 5 nối đôi (EPA – 20C)</span>
+              </button>
+              <button id="omBtn-1" type="button" class="btn btn-outline" onclick="selectOmega(1)">
+                <span>(2) ω-6 (mẫu 1): 1 nối đôi ở C6</span>
+              </button>
+              <button id="omBtn-2" type="button" class="btn btn-outline" onclick="selectOmega(2)">
+                <span>(3) ω-6 (mẫu 2): 2 nối đôi (Linoleic)</span>
+              </button>
+              <button id="omBtn-3" type="button" class="btn btn-outline" onclick="selectOmega(3)">
+                <span>(4) ω-6 (mẫu 3): 3 nối đôi (γ-Linolenic)</span>
+              </button>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px;">
+              <button id="btnCountOmega" type="button" class="btn btn-primary" onclick="runOmegaCount()">
+                <span>▶ Chạy hiệu ứng đánh số từ <span class="chem-formula">–CH<sub>3</sub></span></span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetOmegaCount()">
+                <span>↻ Đặt lại</span>
+              </button>
+              <span id="omegaStepStatus" class="pill-tag" style="background: #ffffff; border: 1px solid var(--primary-border);">Bấm nút để xem đánh số từ C1 (–CH₃)</span>
+            </div>
+
+            <!-- Khung SVG động vẽ mạch zig-zag + đánh số từng đỉnh -->
+            <div class="svg-stage">
+              <svg id="omegaSvg" viewBox="0 0 820 205" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng đánh số vị trí liên kết đôi đầu tiên từ nhóm methyl"></svg>
+            </div>
+
+            <div id="omegaExplainBar" class="omega-explain-bar"></div>
+          </div>
+        </div>
+
+        <!-- NGUỒN CUNG CẤP & CÂN BẰNG DINH DƯỠNG -->
+        <div class="compare-grid">
+          <div class="source-card w3">
+            <h3 class="source-title" style="color: var(--primary);">🐟 Nguồn cung cấp Acid béo Omega-3</h3>
+            <p style="margin: 0; font-size: 0.94rem; color: var(--text-body); line-height: 1.6;">
+              <b>Dầu cá biển</b> (cá hồi, cá thu, cá trích, cá mòi...) chứa nhiều acid béo omega-3 (như EPA, DHA). Ngoài ra còn có trong hạt chia, hạt lanh, quả óc chó.
+            </p>
+          </div>
+
+          <div class="source-card w6">
+            <h3 class="source-title" style="color: var(--amber-dark);">🌻 Nguồn cung cấp Acid béo Omega-6</h3>
+            <p style="margin: 0; font-size: 0.94rem; color: var(--text-body); line-height: 1.6;">
+              <b>Các loại dầu thực vật</b> như <b>dầu mè (vừng), dầu đậu nành, dầu hướng dương</b>, dầu ngô... chứa nhiều acid béo omega-6 (như linoleic acid).
+            </p>
+          </div>
+        </div>
+
+        <div class="balance-callout">
+          ⚖️ <b>Cân bằng dinh dưỡng (SGK):</b> Acid béo omega-3 và omega-6 đều có vai trò quan trọng đối với cơ thể, giúp phòng ngừa nhiều loại bệnh (tim mạch, viêm nhiễm...). Vì <b>nguồn cung cấp acid béo omega-6 phổ biến hơn so với acid béo omega-3</b> nên để có chế độ dinh dưỡng cân bằng, <b>cần chú ý tăng cường sử dụng các thực phẩm giàu acid béo omega-3</b>.
+        </div>
+
+        <!-- HỘP CÂU HỎI THẢO LUẬN SGK (ẨN ĐÁP ÁN MẶC ĐỊNH) -->
+        <div class="qa-box">
+          <div class="qa-head">
+            <p class="qa-q">
+              💬 Câu hỏi thảo luận (SGK): Em hãy tìm hiểu và chỉ ra một số thực phẩm giàu acid béo omega-3 và omega-6.
+            </p>
+            <button id="btnToggleOmegaQa" type="button" class="btn btn-primary" onclick="toggleOmegaQa()">
+              Hiện đáp án
+            </button>
+          </div>
+          <div id="omegaQaAns" class="qa-ans hidden">
+            <ul style="margin: 0; padding-left: 20px;">
+              <li><b>Thực phẩm giàu acid béo omega-3:</b> Các loại cá biển béo (cá hồi, cá thu, cá trích, cá mòi, cá ngừ), dầu cá biển, hàu, hạt chia, hạt lanh, quả óc chó, đậu nành...</li>
+              <li style="margin-top: 6px;"><b>Thực phẩm giàu acid béo omega-6:</b> Dầu thực vật (dầu mè, dầu đậu nành, dầu hướng dương, dầu ngô, dầu lạc), các loại hạt (hạt hướng dương, hạt bí, hạnh nhân), trứng, thịt gia cầm...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+         ======================================================================= -->
+    <section id="tabPanel-3" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: Ứng dụng của chất béo &amp; acid béo (10 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              4 Nhận biết • 3 Thông hiểu • 3 Vận dụng • Xáo trộn đáp án Fisher–Yates
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 10</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="btn btn-primary" onclick="submitQuiz()">✔ Nộp bài &amp; Tổng kết</button>
+            <button type="button" class="btn btn-secondary" onclick="resetQuiz()">↻ Làm lại từ đầu</button>
+          </div>
+        </div>
+
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)">← Câu trước</button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 10</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)">Câu tiếp theo →</button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--primary-dark);">Kết quả bài làm</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.94rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()">Làm lại &amp; Xáo trộn đáp án</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. DỮ LIỆU TAB 1 (VITAMIN) & TAB 2 (4 PHÂN TỬ OMEGA CHUẨN SGK)
+    // =========================================================================
+    const VITAMIN_INFO = {
+      A: { fatSoluble: true, desc: '<b>Vitamin A (tan trong chất béo):</b> Hoà tan tốt trong dầu mỡ, không tan trong nước. Chất béo giúp vận chuyển và hấp thụ vitamin A (tốt cho thị lực và da).' },
+      D: { fatSoluble: true, desc: '<b>Vitamin D (tan trong chất béo):</b> Hoà tan tốt trong dầu mỡ, không tan trong nước. Cần chất béo để hấp thụ hiệu quả (giúp hấp thu calcium cho xương).' },
+      E: { fatSoluble: true, desc: '<b>Vitamin E (tan trong chất béo):</b> Hoà tan tốt trong dầu mỡ, không tan trong nước. Có vai trò chống oxi hoá và bảo vệ màng tế bào.' },
+      K: { fatSoluble: true, desc: '<b>Vitamin K (tan trong chất béo):</b> Hoà tan tốt trong dầu mỡ, không tan trong nước. Đóng vai trò quan trọng trong quá trình đông máu.' },
+      C: { fatSoluble: false, desc: '<b>Vitamin C (đối chứng – tan trong nước):</b> Hoà tan rất tốt trong nước nhưng <b>không tan trong chất béo</b>, khác hẳn nhóm vitamin A, D, E, K.' }
+    };
+
+    // 4 phân tử đúng theo mục EM CÓ BIẾT SGK:
+    // doubleAt là các vị trí i (1-based từ nhóm –CH3) có liên kết đôi giữa C_i và C_(i+1)
+    const OMEGA_MOLECULES = [
+      {
+        id: 0,
+        badge: 'ω–3',
+        targetPos: 3,
+        totalC: 20,
+        doubleAt: [3, 6, 9, 12, 15],
+        title: 'Acid béo ω-3 (dạng EPA – 20C, 5 liên kết đôi)',
+        explain: 'Đánh số từ nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span> là C1): <b>1 → 2 → 3</b>. Liên kết đôi đầu tiên nằm ở vị trí <b>C3</b> ⇒ Đây là <b>acid béo omega-3 (ω-3)</b>.'
+      },
+      {
+        id: 1,
+        badge: 'ω–6',
+        targetPos: 6,
+        totalC: 16,
+        doubleAt: [6],
+        title: 'Acid béo ω-6 (mẫu 1 – 1 liên kết đôi ở C6)',
+        explain: 'Đánh số từ nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span> là C1): <b>1 → 2 → 3 → 4 → 5 → 6</b>. Liên kết đôi đầu tiên nằm ở vị trí <b>C6</b> ⇒ Đây là <b>acid béo omega-6 (ω-6)</b>.'
+      },
+      {
+        id: 2,
+        badge: 'ω–6',
+        targetPos: 6,
+        totalC: 18,
+        doubleAt: [6, 9],
+        title: 'Acid béo ω-6 (mẫu 2 – Linoleic acid, 2 liên kết đôi)',
+        explain: 'Đánh số từ nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span> là C1): <b>1 → 2 → 3 → 4 → 5 → 6</b>. Liên kết đôi đầu tiên nằm ở vị trí <b>C6</b> (và nối đôi thứ hai ở C9) ⇒ Đây là <b>acid béo omega-6 (ω-6)</b>.'
+      },
+      {
+        id: 3,
+        badge: 'ω–6',
+        targetPos: 6,
+        totalC: 18,
+        doubleAt: [6, 9, 12],
+        title: 'Acid béo ω-6 (mẫu 3 – γ-Linolenic acid, 3 liên kết đôi)',
+        explain: 'Đánh số từ nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span> là C1): <b>1 → 2 → 3 → 4 → 5 → 6</b>. Liên kết đôi đầu tiên nằm ở vị trí <b>C6</b> (tiếp theo ở C9, C12) ⇒ Đây là <b>acid béo omega-6 (ω-6)</b>.'
+      }
+    ];
+
+    // =========================================================================
+    // 2. NGÂN HÀNG 10 CÂU HỎI PHÂN HOÁ (4 NB – 3 TH – 3 VD, KHÔNG LỘ ĐÁP ÁN CHÉO)
+    // =========================================================================
+    const RAW_QUIZ_BANK = [
+      // --- 4 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được vai trò hoà tan và vận chuyển vitamin của chất béo',
+        question: 'Nhóm vitamin nào sau đây hoà tan tốt trong chất béo nên được vận chuyển và hấp thụ cùng với chất béo trong cơ thể?',
+        options: [
+          {
+            text: 'Vitamin A, D, E và K.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: các vitamin A, D, E và K tan tốt trong chất béo nên cần chất béo để vận chuyển và hấp thụ.'
+          },
+          {
+            text: 'Vitamin C và các vitamin nhóm B.',
+            isCorrect: false,
+            reason: 'Sai: vitamin C và nhóm B là các vitamin tan trong nước, không tan trong chất béo.'
+          },
+          {
+            text: 'Vitamin A, B1, C và D.',
+            isCorrect: false,
+            reason: 'Sai: chứa vitamin B1 và C là các vitamin tan trong nước.'
+          },
+          {
+            text: 'Chỉ có vitamin C và vitamin K.',
+            isCorrect: false,
+            reason: 'Sai: vitamin C tan trong nước, đồng thời thiếu các vitamin A, D, E.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được ứng dụng công nghiệp của chất béo',
+        question: 'Trong công nghiệp hoá chất, chất béo là nguyên liệu trực tiếp để sản xuất hai sản phẩm quan trọng nào sau đây?',
+        options: [
+          {
+            text: 'Xà phòng và glycerol.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: đun nóng chất béo với dung dịch kiềm (NaOH/KOH) thu được xà phòng và glycerol.'
+          },
+          {
+            text: 'Ethanol và acetic acid.',
+            isCorrect: false,
+            reason: 'Sai: ethanol và acetic acid thường sản xuất từ tinh bột/đường hoặc ethylene, không phải từ chất béo.'
+          },
+          {
+            text: 'Thuỷ tinh hữu cơ và sơn tường.',
+            isCorrect: false,
+            reason: 'Sai: thuỷ tinh hữu cơ (PMMA) và sơn tường (polyacrylate) được sản xuất từ polymer của ester không no, không phải từ chất béo.'
+          },
+          {
+            text: 'Nhựa PVC và cao su buna.',
+            isCorrect: false,
+            reason: 'Sai: PVC và cao su buna là các polymer tổng hợp từ hydrocarbon/dẫn xuất halogen.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được định nghĩa acid béo omega-3 và omega-6',
+        question: 'Acid béo omega-3 và omega-6 là các acid béo không no có liên kết đôi đầu tiên ở vị trí số 3 và số 6 khi đánh số bắt đầu từ đâu?',
+        options: [
+          {
+            text: 'Từ nguyên tử carbon của nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span>).',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: đánh số từ đầu nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span> là C1), liên kết đôi đầu tiên ở C3 là omega-3, ở C6 là omega-6.'
+          },
+          {
+            text: 'Từ nguyên tử carbon của nhóm carboxyl (<span class="chem-formula">–COOH</span>).',
+            isCorrect: false,
+            reason: 'Sai: đánh số từ nhóm <span class="chem-formula">–COOH</span> là quy tắc gọi tên IUPAC thông thường, không phải quy tắc định nghĩa omega (ω).'
+          },
+          {
+            text: 'Từ chính giữa mạch carbon đếm ra hai đầu.',
+            isCorrect: false,
+            reason: 'Sai: không có quy tắc đánh số từ giữa mạch carbon.'
+          },
+          {
+            text: 'Từ nguyên tử carbon của khung glycerol.',
+            isCorrect: false,
+            reason: 'Sai: acid béo là carboxylic acid tự do hoặc gốc acid béo, không đánh số từ glycerol.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được nguồn thực phẩm chính cung cấp omega-3 và omega-6',
+        question: 'Theo SGK, nguồn thực phẩm nào chứa nhiều acid béo omega-3 và nguồn nào chứa nhiều acid béo omega-6?',
+        options: [
+          {
+            text: 'Dầu cá biển giàu omega-3; các loại dầu thực vật (dầu mè, dầu đậu nành, dầu hướng dương,...) giàu omega-6.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: dầu cá biển chứa nhiều omega-3; dầu mè, dầu đậu nành, dầu hướng dương chứa nhiều omega-6.'
+          },
+          {
+            text: 'Dầu hướng dương giàu omega-3; dầu cá biển giàu omega-6.',
+            isCorrect: false,
+            reason: 'Sai: bị đảo ngược nguồn cung cấp giữa omega-3 và omega-6.'
+          },
+          {
+            text: 'Mỡ bò giàu omega-3; nước khoáng giàu omega-6.',
+            isCorrect: false,
+            reason: 'Sai: mỡ bò chủ yếu chứa gốc acid béo no; nước khoáng không chứa acid béo.'
+          },
+          {
+            text: 'Cả omega-3 và omega-6 chỉ có duy nhất trong tinh bột và đường mía.',
+            isCorrect: false,
+            reason: 'Sai: tinh bột và đường mía thuộc nhóm carbohydrate, không chứa acid béo.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Giải thích được vai trò của chất béo khi chế biến thực phẩm giàu vitamin A, D, E, K',
+        question: 'Trong bữa ăn hằng ngày, vì sao khi chế biến cà rốt hoặc cà chua (giàu tiền chất vitamin A) người ta thường xào hoặc trộn với một lượng nhỏ dầu ăn?',
+        options: [
+          {
+            text: 'Vì tiền chất vitamin A tan tốt trong chất béo, nên dầu ăn giúp cơ thể hoà tan, vận chuyển và hấp thụ hiệu quả hơn.',
+            isCorrect: true,
+            reason: 'Đúng: vitamin A thuộc nhóm tan trong chất béo (A, D, E, K), cần có chất béo làm dung môi để hấp thụ qua thành ruột.'
+          },
+          {
+            text: 'Vì dầu ăn phản ứng hoá học trực tiếp với cà rốt tạo ra vitamin C.',
+            isCorrect: false,
+            reason: 'Sai: dầu ăn không chuyển hoá thành vitamin C, chỉ đóng vai trò dung môi vật lí hoà tan.'
+          },
+          {
+            text: 'Vì vitamin A tan rất tốt trong nước nên cần dầu ăn để ngăn vitamin A bay hơi.',
+            isCorrect: false,
+            reason: 'Sai: vitamin A không tan trong nước.'
+          },
+          {
+            text: 'Vì dầu ăn có tác dụng phá huỷ hoàn toàn chất xơ trong rau củ.',
+            isCorrect: false,
+            reason: 'Sai: dầu ăn không phá huỷ chất xơ.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Giải thích được khuyến nghị dinh dưỡng cân bằng giữa omega-3 và omega-6',
+        question: 'Để có chế độ dinh dưỡng cân bằng giữa omega-3 và omega-6, vì sao các chuyên gia dinh dưỡng thường khuyên chú ý tăng cường sử dụng thực phẩm giàu acid béo omega-3?',
+        options: [
+          {
+            text: 'Vì nguồn cung cấp omega-6 trong khẩu phần ăn phổ biến hơn nhiều so với nguồn omega-3.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: cả hai đều cần thiết, nhưng nguồn omega-6 (dầu thực vật nấu ăn hằng ngày) phổ biến hơn nhiều nên cần chủ động bổ sung thêm omega-3.'
+          },
+          {
+            text: 'Vì acid béo omega-6 hoàn toàn không có vai trò gì đối với cơ thể người.',
+            isCorrect: false,
+            reason: 'Sai: cả omega-3 và omega-6 đều là acid béo thiết yếu, có vai trò quan trọng giúp phòng ngừa nhiều loại bệnh.'
+          },
+          {
+            text: 'Vì cơ thể người có thể tự tổng hợp được mọi loại omega-6 nhưng không hấp thụ được từ thức ăn.',
+            isCorrect: false,
+            reason: 'Sai: omega-6 cũng là acid béo thiết yếu cần cung cấp từ thức ăn.'
+          },
+          {
+            text: 'Vì omega-3 là acid béo no nên cung cấp năng lượng cao gấp đôi omega-6.',
+            isCorrect: false,
+            reason: 'Sai: omega-3 là acid béo không no và năng lượng cung cấp mỗi gam tương đương các chất béo khác.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'So sánh được giá trị năng lượng giữa chất béo và carbohydrate',
+        question: 'Khi so sánh cùng một khối lượng chất béo và carbohydrate (tinh bột hoặc đường) được chuyển hoá hoàn toàn trong cơ thể, nhận định nào sau đây đúng?',
+        options: [
+          {
+            text: 'Chất béo cung cấp năng lượng nhiều hơn (gấp hơn 2 lần) so với carbohydrate.',
+            isCorrect: true,
+            reason: 'Đúng: 1 g chất béo chuyển hoá cung cấp khoảng 9 kcal, nhiều hơn hẳn 1 g carbohydrate (khoảng 4 kcal).'
+          },
+          {
+            text: 'Carbohydrate cung cấp năng lượng nhiều hơn chất béo.',
+            isCorrect: false,
+            reason: 'Sai: bị ngược với kiến thức sinh học và SGK.'
+          },
+          {
+            text: 'Chất béo và carbohydrate cung cấp lượng năng lượng bằng nhau.',
+            isCorrect: false,
+            reason: 'Sai: 9 kcal/g lớn hơn nhiều so với 4 kcal/g.'
+          },
+          {
+            text: 'Chất béo chỉ có chức năng dự trữ chứ không cung cấp năng lượng.',
+            isCorrect: false,
+            reason: 'Sai: chất béo vừa là nguồn cung cấp vừa là nguồn dự trữ năng lượng.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU VẬN DỤNG ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Xác định được loại acid béo (ω-3 hay ω-6) từ công thức cấu tạo thu gọn',
+        question: 'Cho công thức cấu tạo thu gọn của acid béo không no X: <span class="chem-formula">CH<sub>3</sub>–CH<sub>2</sub>–CH=CH–CH<sub>2</sub>–CH=CH–CH<sub>2</sub>–CH=CH–[CH<sub>2</sub>]<sub>7</sub>–COOH</span> (α-linolenic acid). X thuộc loại acid béo nào sau đây?',
+        options: [
+          {
+            text: 'Acid béo <b>omega-3 (ω-3)</b>.',
+            isCorrect: true,
+            reason: 'Đúng: đánh số từ nhóm <span class="chem-formula">–CH<sub>3</sub></span> bên trái: C1(<span class="chem-formula">CH<sub>3</sub></span>) – C2(<span class="chem-formula">CH<sub>2</sub></span>) – C3(CH)=CH... Liên kết đôi đầu tiên ở vị trí số <b>3</b> ⇒ ω-3.'
+          },
+          {
+            text: 'Acid béo <b>omega-6 (ω-6)</b>.',
+            isCorrect: false,
+            reason: 'Sai: liên kết đôi thứ nhất ở C3 (không phải C6; ở C6 là liên kết đôi thứ hai).'
+          },
+          {
+            text: 'Acid béo <b>omega-9 (ω-9)</b>.',
+            isCorrect: false,
+            reason: 'Sai: C9 là vị trí liên kết đôi thứ ba tính từ nhóm methyl (hoặc đếm nhầm từ đầu <span class="chem-formula">–COOH</span>).'
+          },
+          {
+            text: 'Acid béo no (bão hoà).',
+            isCorrect: false,
+            reason: 'Sai: phân tử X có tới 3 liên kết đôi C=C nên là acid béo không no.'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính toán được năng lượng cung cấp từ khẩu phần chứa chất béo và carbohydrate',
+        question: 'Một phần thức ăn nhẹ chứa <b>10 gam chất béo</b> và <b>25 gam carbohydrate</b> (tinh bột, đường). Biết 1 gam chất béo cung cấp khoảng 9 kcal và 1 gam carbohydrate cung cấp khoảng 4 kcal. Tổng năng lượng (kcal) do hai chất này cung cấp là bao nhiêu?',
+        options: [
+          {
+            text: '<b>190 kcal</b>.',
+            isCorrect: true,
+            reason: 'Đúng: năng lượng từ chất béo = 10 × 9 = 90 kcal; năng lượng từ carbohydrate = 25 × 4 = 100 kcal ⇒ Tổng = 90 + 100 = <b>190 kcal</b>.'
+          },
+          {
+            text: '<b>265 kcal</b>.',
+            isCorrect: false,
+            reason: 'Sai: nhầm hệ số năng lượng (tính 10 × 4 + 25 × 9 = 265 kcal).'
+          },
+          {
+            text: '<b>140 kcal</b>.',
+            isCorrect: false,
+            reason: 'Sai: tính đồng loạt cả hai loại đều theo 4 kcal/g (35 × 4 = 140 kcal).'
+          },
+          {
+            text: '<b>315 kcal</b>.',
+            isCorrect: false,
+            reason: 'Sai: tính đồng loạt cả hai loại đều theo 9 kcal/g (35 × 9 = 315 kcal).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Đánh giá tổng hợp nhiều phát biểu đúng/sai về ứng dụng của chất béo và acid béo',
+        question: 'Cho các phát biểu sau:<br>(a) Chất béo cung cấp năng lượng nhiều hơn carbohydrate khi chuyển hoá cùng khối lượng.<br>(b) Linoleic acid (<span class="chem-formula">CH<sub>3</sub>[CH<sub>2</sub>]<sub>4</sub>CH=CHCH<sub>2</sub>CH=CH[CH<sub>2</sub>]<sub>7</sub>COOH</span>) thuộc loại acid béo omega-6.<br>(c) Khi đánh số xác định omega-3, omega-6, ta đánh số bắt đầu từ nguyên tử carbon của nhóm <span class="chem-formula">–COOH</span>.<br>(d) Chất béo là nguyên liệu cho công nghiệp thực phẩm, sản xuất xà phòng và glycerol.<br>Số phát biểu <b>đúng</b> là bao nhiêu?',
+        options: [
+          {
+            text: '3 phát biểu (a, b, d).',
+            isCorrect: true,
+            reason: 'Đúng: (a) đúng; (b) đúng (đếm từ <span class="chem-formula">–CH<sub>3</sub></span> có 1 + 4 + 1 = 6 → nối đôi đầu tiên ở C6 → ω-6); (c) <b>sai</b> (phải đánh số từ nhóm <span class="chem-formula">–CH<sub>3</sub></span>); (d) đúng.'
+          },
+          {
+            text: '4 phát biểu (a, b, c, d).',
+            isCorrect: false,
+            reason: 'Sai: phát biểu (c) sai vì đánh số omega bắt đầu từ nhóm methyl (<span class="chem-formula">–CH<sub>3</sub></span>), không phải <span class="chem-formula">–COOH</span>.'
+          },
+          {
+            text: '2 phát biểu (a, d).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (b) đúng (linoleic acid là acid béo omega-6 tiêu biểu).'
+          },
+          {
+            text: '2 phát biểu (b, d).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (a) đúng (1 g chất béo ~9 kcal > 1 g carbohydrate ~4 kcal).'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let currentOmegaIdx = 0;
+    let omegaStepTimer = null;
+    let omegaHighlightedStep = 0;
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+    let quizSubmitted = false;
+
+    // =========================================================================
+    // 4. CHUYỂN TAB & FULLSCREEN AN TOÀN (KHÔNG LỖI TRÊN IPHONE/IPAD)
+    // =========================================================================
+    function switchTab(num) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`tabPanel-${i}`).classList.toggle('hidden', i !== num);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        btn.classList.toggle('active', i === num);
+        btn.setAttribute('aria-selected', i === num ? 'true' : 'false');
+      }
+      if (num !== 2) stopOmegaTimer();
+      if (num === 3) renderQuizQuestion();
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 1: SO SÁNH NĂNG LƯỢNG & THẢ VITAMIN
+    // =========================================================================
+    function renderEnergyChart(mass) {
+      const m = Number(mass);
+      const fatKcal = m * 9;
+      const carbKcal = m * 4;
+
+      document.getElementById('massValPill').textContent = `${m} g`;
+
+      // Chiều cao tối đa 140px ứng với 90 kcal (đáy y=184)
+      const fatH = Math.round((fatKcal / 90) * 140);
+      const carbH = Math.round((carbKcal / 90) * 140);
+
+      const barFat = document.getElementById('barFat');
+      const lblFat = document.getElementById('lblFatKcal');
+      barFat.setAttribute('y', 184 - fatH);
+      barFat.setAttribute('height', fatH);
+      lblFat.setAttribute('y', 184 - fatH - 10);
+      lblFat.textContent = `${fatKcal} kcal`;
+
+      const barCarb = document.getElementById('barCarb');
+      const lblCarb = document.getElementById('lblCarbKcal');
+      barCarb.setAttribute('y', 184 - carbH);
+      barCarb.setAttribute('height', carbH);
+      lblCarb.setAttribute('y', 184 - carbH - 10);
+      lblCarb.textContent = `${carbKcal} kcal`;
+    }
+
+    function testVitamin(vitKey) {
+      ['A', 'D', 'E', 'K', 'C'].forEach(k => {
+        document.getElementById(`vitBtn-${k}`).classList.toggle('active', k === vitKey);
+      });
+
+      const info = VITAMIN_INFO[vitKey];
+      const fatDots = document.getElementById('fatDissolveDots');
+      const fatUndis = document.getElementById('fatUndissolved');
+      const fatCap = document.getElementById('fatCapTxt');
+      const fatLiq = document.getElementById('vitFatLiq');
+
+      const waterDots = document.getElementById('waterDissolveDots');
+      const waterUndis = document.getElementById('waterUndissolved');
+      const waterUndisLbl = document.getElementById('waterUndissolvedLbl');
+      const waterCap = document.getElementById('waterCapTxt');
+      const waterLiq = document.getElementById('vitWaterLiq');
+
+      if (info.fatSoluble) {
+        fatDots.classList.remove('hidden');
+        fatUndis.classList.add('hidden');
+        fatLiq.setAttribute('fill', '#fbbf24');
+        fatCap.textContent = `✔ Vitamin ${vitKey} hoà tan tốt`;
+        fatCap.setAttribute('fill', '#059669');
+
+        waterDots.classList.add('hidden');
+        waterUndis.classList.remove('hidden');
+        waterUndisLbl.textContent = vitKey;
+        waterLiq.setAttribute('fill', '#bae6fd');
+        waterCap.textContent = `✘ Vitamin ${vitKey} không tan`;
+        waterCap.setAttribute('fill', '#dc2626');
+      } else {
+        fatDots.classList.add('hidden');
+        fatUndis.classList.remove('hidden');
+        fatLiq.setAttribute('fill', '#fde047');
+        fatCap.textContent = '✘ Vitamin C không tan';
+        fatCap.setAttribute('fill', '#dc2626');
+
+        waterDots.classList.remove('hidden');
+        waterUndis.classList.add('hidden');
+        waterLiq.setAttribute('fill', '#7dd3fc');
+        waterCap.textContent = '✔ Vitamin C tan tốt trong nước';
+        waterCap.setAttribute('fill', '#059669');
+      }
+
+      document.getElementById('vitResultBox').innerHTML = info.desc;
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 2: MÔ PHỎNG ĐẾM VỊ TRÍ OMEGA-3 & OMEGA-6 TỪ –CH3
+    // =========================================================================
+    function stopOmegaTimer() {
+      if (omegaStepTimer) {
+        clearInterval(omegaStepTimer);
+        omegaStepTimer = null;
+      }
+    }
+
+    function selectOmega(idx) {
+      stopOmegaTimer();
+      currentOmegaIdx = idx;
+      omegaHighlightedStep = 0;
+
+      for (let i = 0; i < OMEGA_MOLECULES.length; i++) {
+        document.getElementById(`omBtn-${i}`).classList.toggle('active', i === idx);
+      }
+
+      const mol = OMEGA_MOLECULES[idx];
+      document.getElementById('omegaStepStatus').textContent = `Đang chọn: ${mol.title}`;
+      document.getElementById('omegaExplainBar').innerHTML = mol.explain;
+      renderOmegaSvg(0);
+    }
+
+    function renderOmegaSvg(activeStep) {
+      const svg = document.getElementById('omegaSvg');
+      const mol = OMEGA_MOLECULES[currentOmegaIdx];
+
+      // Tính tọa độ các đỉnh C1..C_totalC theo đường zig-zag thoáng đều
+      const startX = 128;
+      const dx = 30;
+      const yLow = 132;
+      const yHigh = 86;
+
+      const pts = [];
+      for (let i = 1; i <= mol.totalC; i++) {
+        const x = startX + (i - 1) * dx;
+        const y = (i % 2 === 1) ? yLow : yHigh;
+        pts.push({ idx: i, x, y });
+      }
+
+      // Vẽ đoạn nối đơn và nối đôi song song rõ ràng
+      let bondsMarkup = '';
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const cNum = i + 1;
+        const isDbl = mol.doubleAt.includes(cNum);
+        const isFirstDbl = cNum === mol.targetPos;
+
+        if (!isDbl) {
+          bondsMarkup += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
+        } else {
+          // Vector pháp tuyến tạo 2 nét song song cách nhau 7px
+          const vx = p2.x - p1.x;
+          const vy = p2.y - p1.y;
+          const len = Math.hypot(vx, vy);
+          const nx = (-vy / len) * 3.8;
+          const ny = (vx / len) * 3.8;
+          const col = (isFirstDbl && activeStep >= mol.targetPos) ? '#dc2626' : '#0b5cab';
+          bondsMarkup += `
+            <line x1="${(p1.x + nx).toFixed(1)}" y1="${(p1.y + ny).toFixed(1)}" x2="${(p2.x + nx).toFixed(1)}" y2="${(p2.y + ny).toFixed(1)}" stroke="${col}" stroke-width="3.2" stroke-linecap="round" />
+            <line x1="${(p1.x - nx).toFixed(1)}" y1="${(p1.y - ny).toFixed(1)}" x2="${(p2.x - nx).toFixed(1)}" y2="${(p2.y - ny).toFixed(1)}" stroke="${col}" stroke-width="3.2" stroke-linecap="round" />
+          `;
+        }
+      }
+
+      // Đánh số từ 1 đến targetPos (khoanh tròn xanh nổi bật ở đỉnh targetPos = 3 hoặc 6)
+      let labelsMarkup = '';
+      for (let i = 1; i <= mol.targetPos; i++) {
+        const p = pts[i - 1];
+        const isLit = activeStep >= i;
+        const isTarget = i === mol.targetPos;
+        const labelY = (i % 2 === 1) ? (p.y + 26) : (p.y - 22);
+
+        if (isTarget) {
+          const fillCol = isLit ? '#0b5cab' : '#dbeafe';
+          const txtCol = isLit ? '#ffffff' : '#1d4ed8';
+          labelsMarkup += `
+            <circle cx="${p.x}" cy="${labelY}" r="14" fill="${fillCol}" stroke="#0b5cab" stroke-width="2" />
+            <text x="${p.x}" y="${labelY + 5}" text-anchor="middle" font-size="13.5" font-weight="800" fill="${txtCol}">${i}</text>
+          `;
+        } else {
+          const fillCol = isLit ? '#fef08a' : '#f1f5f9';
+          const strokeCol = isLit ? '#d97706' : '#cbd5e1';
+          const txtCol = isLit ? '#92400e' : '#475569';
+          labelsMarkup += `
+            <circle cx="${p.x}" cy="${labelY}" r="11.5" fill="${fillCol}" stroke="${strokeCol}" stroke-width="1.6" />
+            <text x="${p.x}" y="${labelY + 4}" text-anchor="middle" font-size="12" font-weight="800" fill="${txtCol}">${i}</text>
+          `;
+        }
+      }
+
+      const lastP = pts[pts.length - 1];
+
+      svg.innerHTML = `
+        <!-- Huy hiệu ω-3 / ω-6 bên trái chuẩn SGK -->
+        <rect x="20" y="88" width="76" height="40" rx="10" fill="#93c5fd" stroke="#2563eb" stroke-width="1.8" />
+        <text x="58" y="114" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${mol.badge}</text>
+
+        <!-- Nhãn nhóm methyl C1 -->
+        <text x="${startX}" y="178" text-anchor="middle" font-size="12" font-weight="800" fill="#0b5cab">–CH₃ (C1)</text>
+
+        <!-- Các liên kết zig-zag -->
+        ${bondsMarkup}
+
+        <!-- Đỉnh đánh số 1..3 hoặc 1..6 -->
+        ${labelsMarkup}
+
+        <!-- Đầu nhóm –COOH bên phải -->
+        <text x="${lastP.x + 10}" y="${lastP.y + 6}" text-anchor="start" font-size="16" font-weight="800" fill="#0f172a">COOH</text>
+
+        <!-- Chú thích trên đầu -->
+        <text x="410" y="28" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a">${mol.title}</text>
+      `;
+    }
+
+    function runOmegaCount() {
+      stopOmegaTimer();
+      const mol = OMEGA_MOLECULES[currentOmegaIdx];
+      omegaHighlightedStep = 0;
+      renderOmegaSvg(0);
+
+      omegaStepTimer = setInterval(() => {
+        omegaHighlightedStep++;
+        renderOmegaSvg(omegaHighlightedStep);
+        if (omegaHighlightedStep < mol.targetPos) {
+          document.getElementById('omegaStepStatus').textContent = `Đang đếm từ –CH₃: vị trí C${omegaHighlightedStep}...`;
+        } else {
+          document.getElementById('omegaStepStatus').textContent = `✔ Nối đôi đầu tiên tại C${mol.targetPos} → Acid béo ${mol.badge}!`;
+          stopOmegaTimer();
+        }
+      }, 520);
+    }
+
+    function resetOmegaCount() {
+      stopOmegaTimer();
+      omegaHighlightedStep = 0;
+      renderOmegaSvg(0);
+      document.getElementById('omegaStepStatus').textContent = 'Bấm nút để xem đánh số từ C1 (–CH₃)';
+    }
+
+    function toggleOmegaQa() {
+      const ans = document.getElementById('omegaQaAns');
+      const btn = document.getElementById('btnToggleOmegaQa');
+      const isHidden = ans.classList.contains('hidden');
+      ans.classList.toggle('hidden', !isHidden);
+      btn.textContent = isHidden ? 'Ẩn đáp án' : 'Hiện đáp án';
+    }
+
+    // =========================================================================
+    // 7. LOGIC TAB 3: LUYỆN TẬP 10 CÂU + FISHER–YATES + NỘP BÀI TỔNG KẾT
+    // =========================================================================
+    function shuffleFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const opts = shuffleFisherYates(q.options);
+        const correctIdx = opts.findIndex(o => o.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: opts,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+      quizSubmitted = false;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndBanner() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      document.getElementById('quizProgressFill').style.width = `${Math.round((answered / shuffledQuiz.length) * 100)}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (quizSubmitted || answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Tổng điểm: ${score} / ${shuffledQuiz.length} điểm (${answered}/${shuffledQuiz.length} câu đã trả lời)`;
+        let msg = 'Hãy xem lại lời giải chi tiết từng câu và ôn lại Tab 1, Tab 2 nhé!';
+        if (score >= 9) msg = 'Xuất sắc! Em đã nắm vững toàn diện Ứng dụng của chất béo và acid béo omega-3, omega-6.';
+        else if (score >= 7) msg = 'Rất tốt! Em đã làm chủ phần lớn kiến thức trọng tâm của bài học.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const showResult = chosen !== null || quizSubmitted;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">YCCĐ: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (showResult) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = showResult ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span>${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const fb = document.getElementById('quizFeedbackPanel');
+      if (showResult) {
+        const isOk = chosen === q.correctIdx;
+        const headText = chosen === null
+          ? `ℹ Câu này chưa chọn — Đáp án đúng là ${letters[q.correctIdx]}.`
+          : (isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là ${letters[q.correctIdx]}.`);
+
+        const head = `<div class="feedback-head ${isOk ? 'ok' : 'err'}">${headText} — Giải thích chi tiết từng phương án:</div>`;
+        const items = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <b>${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</b> ${opt.reason}
+          </li>
+        `).join('');
+
+        fb.innerHTML = `${head}<ul class="option-reasons-list">${items}</ul>`;
+        fb.classList.remove('hidden');
+      } else {
+        fb.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndBanner();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null || quizSubmitted) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function submitQuiz() {
+      quizSubmitted = true;
+      renderQuizQuestion();
+      showToast('Đã nộp bài! Em có thể bấm từng câu 1–10 để xem lời giải chi tiết.');
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới 10 câu hỏi và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 8. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      renderEnergyChart(5);
+      testVitamin('A');
+      selectOmega(0);
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+  </script>
+</body>
+</html>
