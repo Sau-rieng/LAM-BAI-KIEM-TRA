@@ -1257,6 +1257,7 @@ function gvGiayLop(d) {
   if (sh && sh.getLastRow() > 1) boGV(sh.getRange(2, 1, sh.getLastRow() - 1, 13).getValues(), 2).forEach(function (r) {
     if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7], ct: String(r[9] || ''), anh: String(r[10] || ''), ghi: String(r[12] || '')};
   });
+  const tlm = docTLDiem(ca); Object.keys(da).forEach(function (m) { if (tlm[m]) da[m].tl = tlm[m].tong; });   // điểm tự luận đã duyệt (đã cộng trong diem)
   return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da, cho: demAnhCho(ca)};
 }
 // ---------------------------------------------------------------------
