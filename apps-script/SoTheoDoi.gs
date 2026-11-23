@@ -736,6 +736,7 @@ function ghiDaXem(d) {
   const ma = String(d.mahs || '').trim();
   const hs = timHS(ma);
   if (!dungMaXem(hs, d)) return {ok: false};
+  if (hs.gv || laGV(ma)) return {ok: true};   // tài khoản GV xem thử: không tính
   ghiDong(TAB_XL, HEAD_XL, [new Date(), String(d.madot || '').trim(), ma, hs.ten]);
   return {ok: true};
 }
@@ -1265,7 +1266,8 @@ function gvGiayLop(d) {
   if (sh && sh.getLastRow() > 1) boGV(sh.getRange(2, 1, sh.getLastRow() - 1, 13).getValues(), 2).forEach(function (r) {
     if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7], ct: String(r[9] || ''), anh: String(r[10] || ''), ghi: String(r[12] || '')};
   });
-  const tlm = docTLDiem(ca); Object.keys(da).forEach(function (m) { if (tlm[m]) da[m].tl = tlm[m].tong; });   // điểm tự luận đã duyệt (đã cộng trong diem)
+  const tlm = docTLDiem(ca); Object.keys(da).forEach(function (m) { if (tlm[m]) da[m].tl = tlm[m].tong; });
+  const xm = docXemLai(); Object.keys(da).forEach(function (m) { const x = (xm[da[m].madot] || {})[m]; if (x) { da[m].xem = x.lan; da[m].xemluc = x.luc instanceof Date ? x.luc.toISOString() : ''; } });   // điểm tự luận đã duyệt (đã cộng trong diem)
   return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da, cho: demAnhCho(ca)};
 }
 // ---------------------------------------------------------------------
@@ -2511,6 +2513,16 @@ function docBaiAn() {
   });
   return ra;
 }
+// So lan / luc HS mo xem lai tung bai: {madot: {mahs: {lan, luc}}}
+function docXemLai() {
+  const xl = SpreadsheetApp.getActive().getSheetByName(TAB_XL), o = {};
+  if (xl && xl.getLastRow() > 1) xl.getRange(2, 1, xl.getLastRow() - 1, 3).getValues().forEach(function (r) {
+    const md = String(r[1]).trim(), ma = String(r[2]).trim(); if (!md || !ma || laGV(ma)) return;
+    const x = ((o[md] = o[md] || {})[ma] = o[md][ma] || {lan: 0, luc: null}); x.lan++;
+    if (r[0] instanceof Date && (!x.luc || r[0] > x.luc)) x.luc = r[0];
+  });
+  return o;
+}
 // Lop nay da thi nhung dot nao, bao nhieu em da nop (de trang GV ghi "Da thi: 12G01 (38)")
 function gvDaThi() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
@@ -2526,7 +2538,8 @@ function gvDaThi() {
   Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
   let siso = 0, dakt = {}; try { siso = dsLopTX().length; dakt = docDaKT(); } catch (e) {}
   try { dongBoTK(); } catch (e) {}
-  return {ok: true, lop: lopNay(), dathi: dathi, siso: siso, dakt: dakt, tlNen: tlNenTT()};
+  const daxem = {}; try { const xm = docXemLai(); Object.keys(xm).forEach(function (md) { const n = Object.keys(xm[md]).filter(function (h) { return m[md] && m[md][h]; }).length; if (n) daxem[md] = n; }); } catch (e) {}
+  return {ok: true, lop: lopNay(), dathi: dathi, daxem: daxem, siso: siso, dakt: dakt, tlNen: tlNenTT()};
 }
 // De giay "da kiem tra" theo lop: mac dinh tu tich khi co bai quet; GV tich/bo tich tay luu o kho (tab DA KIEM TRA)
 const TAB_DAKT = 'DA KIEM TRA', HEAD_DAKT = ['Ca', 'Lop', 'TrangThai', 'Luc'];
