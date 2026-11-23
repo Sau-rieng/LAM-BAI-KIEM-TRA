@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bài tập 3: So sánh nhiệt độ sôi (Hóa học 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – LIGHT MODE)
+       ========================================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      --sgk-blue: #0b5cab;
+      --sgk-blue-dark: #084785;
+      --sgk-blue-soft: #eff6ff;
+      --sgk-blue-border: #bfdbfe;
+
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --emerald-200: #a7f3d0;
+
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --amber-200: #fde68a;
+
+      --rose-600: #dc2626;
+      --rose-50: #fef2f2;
+      --rose-200: #fecaca;
+
+      --violet-600: #6d28d9;
+      --violet-50: #f5f3ff;
+      --violet-200: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. CÔNG THỨC HÓA HỌC LIỀN MẠCH (CHỐNG VỠ CHỈ SỐ DƯỚI/TRÊN)
+       ========================================================================= */
+    .chem-formula {
+      display: inline;
+      white-space: nowrap;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chem-formula sub, sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    .chem-formula sup, sup {
+      font-size: 0.72em;
+      line-height: 0;
+      vertical-align: 0.4em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH 3 TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--sgk-blue), #1d70c9);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 9px 15px;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (AN TOÀN TUYỆT ĐỐI TRÊN IPAD/SAFARI – KHÔNG DÍNH HOVER)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--sgk-blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-emerald {
+      background-color: var(--emerald-600);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-amber {
+      background-color: var(--amber-600);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: var(--sgk-blue);
+      border-color: var(--sgk-blue-border);
+    }
+
+    .btn-outline.active,
+    .btn-outline.active:hover,
+    .btn-outline.active:focus,
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--sgk-blue);
+      border-color: var(--sgk-blue-dark);
+      color: #ffffff;
+    }
+
+    /* Toàn bộ hiệu ứng :hover bọc trong @media (hover: hover) để không dính trên iPad */
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--sgk-blue);
+        background-color: rgba(11, 92, 171, 0.08);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--sgk-blue-dark);
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .btn-emerald:hover:not(:disabled) {
+        background-color: #047857;
+      }
+      .btn-amber:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+      .btn-outline:not(.active):hover:not(:disabled) {
+        background-color: var(--sgk-blue-soft);
+        border-color: var(--sgk-blue);
+      }
+      .temp-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+      .drop-slot:hover {
+        border-color: var(--sgk-blue);
+        background-color: var(--sgk-blue-soft);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--sgk-blue);
+        background-color: #f8fbff;
+      }
+    }
+
+    /* =========================================================================
+       5. CONTAINER & CARD CHUNG
+       ========================================================================= */
+    .main-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 40px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--sgk-blue-soft);
+      color: var(--sgk-blue);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background-color: var(--sgk-blue-soft);
+      color: var(--sgk-blue);
+    }
+
+    /* =========================================================================
+       6. TAB 1: THỰC HÀNH GÁN NHIỆT ĐỘ SÔI (KÉO-THẢ & CHẠM-CHỌN)
+       ========================================================================= */
+    .problem-banner {
+      background-color: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      border-left: 5px solid #059669;
+      border-radius: var(--radius-md);
+      padding: 15px 18px;
+      font-size: 1.04rem;
+      color: var(--text-main);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    .problem-banner b {
+      color: #065f46;
+    }
+
+    .temp-tray {
+      background-color: var(--bg-page);
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .tray-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--text-body);
+      margin: 0 0 12px;
+    }
+
+    .temp-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      min-height: 58px;
+    }
+
+    .temp-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 122px;
+      padding: 12px 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0b5cab, #1d70c9);
+      color: #ffffff;
+      font-size: 1.24rem;
+      font-weight: 800;
+      border: 3px solid transparent;
+      box-shadow: var(--shadow-sm);
+      cursor: grab;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .temp-chip:active {
+      cursor: grabbing;
+    }
+
+    .temp-chip.selected {
+      border-color: #facc15;
+      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.42);
+      transform: scale(1.05);
+    }
+
+    .temp-chip.dragging {
+      opacity: 0.45;
+    }
+
+    .compounds-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 820px) {
+      .compounds-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .compound-card {
+      background-color: #ffffff;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .compound-card.state-correct {
+      border-color: var(--emerald-600);
+      background-color: var(--emerald-50);
+    }
+
+    .compound-card.state-wrong {
+      border-color: var(--rose-600);
+      background-color: var(--rose-50);
+    }
+
+    .compound-top {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .compound-type-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .type-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+    .type-badge.alcohol { background-color: #e0f2fe; color: #0369a1; }
+    .type-badge.acid { background-color: #d1fae5; color: #047857; }
+    .type-badge.ester { background-color: #fef9c3; color: #854d0e; }
+
+    .molar-mass {
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 3px 9px;
+      border-radius: 8px;
+    }
+
+    .compound-name {
+      margin: 4px 0 0;
+      font-size: 1.24rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .compound-formula {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 1.04rem;
+      font-weight: 700;
+      color: var(--sgk-blue-dark);
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      border-radius: 10px;
+      align-self: flex-start;
+    }
+
+    .drop-slot {
+      min-height: 76px;
+      border: 2.5px dashed #94a3b8;
+      border-radius: 14px;
+      background-color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .drop-slot.drag-over {
+      border-color: var(--sgk-blue);
+      background-color: #dbeafe;
+      transform: scale(1.02);
+    }
+
+    .drop-slot.ready-target {
+      border-color: var(--amber-600);
+      background-color: var(--amber-50);
+    }
+
+    .slot-placeholder {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .slot-status-text {
+      font-size: 0.86rem;
+      font-weight: 800;
+      margin-top: 6px;
+      text-align: center;
+      min-height: 20px;
+    }
+    .slot-status-text.ok { color: var(--emerald-600); }
+    .slot-status-text.err { color: var(--rose-600); }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feedback-banner {
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.98rem;
+      font-weight: 700;
+      border: 1.5px solid transparent;
+    }
+    .feedback-banner.ok {
+      background-color: var(--emerald-50);
+      border-color: var(--emerald-200);
+      color: #065f46;
+    }
+    .feedback-banner.err {
+      background-color: var(--rose-50);
+      border-color: var(--rose-200);
+      color: #991b1b;
+    }
+
+    .hint-box {
+      margin-top: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background-color: var(--amber-50);
+      border: 1.5px solid var(--amber-200);
+      color: #78350f;
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+
+    .solution-box {
+      margin-top: 14px;
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      background-color: #f8fbff;
+      border: 1.5px solid var(--sgk-blue-border);
+      color: var(--text-main);
+      font-size: 0.96rem;
+      line-height: 1.65;
+    }
+
+    .solution-box ul {
+      margin: 8px 0 0;
+      padding-left: 22px;
+    }
+
+    .solution-box li + li {
+      margin-top: 6px;
+    }
+
+    /* =========================================================================
+       7. TAB 2: THÍ NGHIỆM ĐUN NÓNG KIỂM CHỨNG & LIÊN KẾT HYDROGEN
+       ========================================================================= */
+    .exp-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (min-width: 1040px) {
+      .exp-grid {
+        grid-template-columns: 7fr 5fr;
+      }
+    }
+
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    @keyframes bubbleRise {
+      0% { transform: translateY(0px); opacity: 0; }
+      20% { opacity: 0.92; }
+      100% { transform: translateY(-64px); opacity: 0; }
+    }
+    .boil-bubble {
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .is-boiling .boil-bubble {
+      animation: bubbleRise 0.95s infinite ease-in;
+    }
+
+    @keyframes vaporUp {
+      0% { transform: translateY(0px) scale(0.85); opacity: 0; }
+      25% { opacity: 0.78; }
+      100% { transform: translateY(-44px) scale(1.25); opacity: 0; }
+    }
+    .vapor-puff {
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .is-boiling .vapor-puff {
+      animation: vaporUp 1.4s infinite ease-out;
+    }
+
+    .temp-control-panel {
+      margin-top: 14px;
+      padding: 15px 16px;
+      border-radius: var(--radius-lg);
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .temp-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .temp-readout {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .temp-readout-lbl {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    .temp-readout-val {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #38bdf8;
+      min-width: 82px;
+      text-align: right;
+    }
+
+    .pause-notice {
+      margin-bottom: 10px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      background-color: var(--amber-50);
+      border: 1.5px solid var(--amber-200);
+      color: #92400e;
+      font-size: 0.88rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .temp-slider {
+      width: 100%;
+      height: 11px;
+      border-radius: 999px;
+      accent-color: var(--sgk-blue);
+      cursor: pointer;
+    }
+
+    /* Nhãn mốc thanh trượt đặt ĐÚNG TỈ LỆ TOÁN HỌC (20->150: dải 130 độ) */
+    .temp-ticks-abs {
+      position: relative;
+      height: 28px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .temp-ticks-abs span {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .quick-temp-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mol-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mol-explain {
+      margin-top: 12px;
+      padding: 13px 15px;
+      border-radius: var(--radius-md);
+      background-color: var(--sgk-blue-soft);
+      border-left: 4px solid var(--sgk-blue);
+      font-size: 0.94rem;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    /* =========================================================================
+       8. TAB 3: LUYỆN TẬP NHANH (5 CÂU PHÂN HOÁ + FISHER–YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--sgk-blue), var(--emerald-600));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .q-dot {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.14s ease;
+    }
+
+    .q-dot.current {
+      border-color: var(--sgk-blue);
+      background-color: var(--sgk-blue-soft);
+      color: var(--sgk-blue);
+    }
+    .q-dot.correct {
+      border-color: var(--emerald-600);
+      background-color: var(--emerald-50);
+      color: var(--emerald-600);
+    }
+    .q-dot.wrong {
+      border-color: var(--rose-600);
+      background-color: var(--rose-50);
+      color: var(--rose-600);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--sgk-blue-soft);
+      border: 1px solid var(--sgk-blue-border);
+      color: var(--sgk-blue-dark);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .level-badge.nb { background-color: var(--emerald-50); color: #047857; border-color: var(--emerald-200); }
+    .level-badge.th { background-color: var(--sgk-blue-soft); color: var(--sgk-blue-dark); border-color: var(--sgk-blue-border); }
+    .level-badge.vd { background-color: var(--violet-50); color: var(--violet-600); border-color: var(--violet-200); }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald-600);
+      background-color: var(--emerald-50);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald-600);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose-600);
+      background-color: var(--rose-50);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose-600);
+      color: #ffffff;
+    }
+
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+    .feedback-head.ok { background-color: var(--emerald-50); color: #065f46; border-bottom: 1px solid var(--emerald-200); }
+    .feedback-head.err { background-color: var(--rose-50); color: #991b1b; border-bottom: 1px solid var(--rose-200); }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: var(--emerald-50);
+      border-color: var(--emerald-200);
+      color: #065f46;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #eff6ff, #ecfdf5);
+      border: 1.5px solid var(--sgk-blue-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.24);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <div class="brand-badge" aria-hidden="true">BT3</div>
+          <div>
+            <h1 class="brand-title">Bài tập 3: So sánh nhiệt độ sôi (M = 74)</h1>
+            <p class="brand-sub">Hóa học 12 • Kết nối tri thức với cuộc sống • Chương 1: Ester – Lipid</p>
+          </div>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+
+      <nav class="tabs-bar" role="tablist" aria-label="Điều hướng 3 phần mô phỏng">
+        <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+          1. Thực hành gán nhiệt độ sôi
+        </button>
+        <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+          2. Thí nghiệm đun nóng kiểm chứng
+        </button>
+        <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+          3. Luyện tập nhanh (5 câu)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: THỰC HÀNH GÁN NHIỆT ĐỘ SÔI (KÉO-THẢ & CHẠM-CHỌN)
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Thực hành gán nhiệt độ sôi cho từng hợp chất</h2>
+          </div>
+          <span class="pill-tag">Hỗ trợ Kéo–Thả (PC) &amp; Chạm–Chọn (iPad)</span>
+        </div>
+
+        <div class="problem-banner">
+          <b>Bài tập 3 (SGK):</b> Cho ba hợp chất <b>butan-1-ol</b>, <b>propanoic acid</b>, <b>methyl acetate</b> và các giá trị nhiệt độ sôi (không theo thứ tự) là: <b>57 °C; 118 °C; 141 °C</b>. Em hãy gán cho mỗi chất một giá trị nhiệt độ sôi thích hợp.
+        </div>
+
+        <!-- Khay chứa 3 thẻ nhiệt độ sôi -->
+        <div class="temp-tray" id="tempTray" ondragover="onDragOver(event)" ondrop="onDropToTray(event)">
+          <p class="tray-title">🌡️ Chọn hoặc kéo các thẻ nhiệt độ sôi bên dưới vào ô trống tương ứng:</p>
+          <div id="trayChips" class="temp-chips-wrap"></div>
+        </div>
+
+        <!-- 3 Thẻ hợp chất -->
+        <div class="compounds-grid">
+          <div id="card-butanol" class="compound-card">
+            <div class="compound-top">
+              <div class="compound-type-row">
+                <span class="type-badge alcohol">Alcohol</span>
+                <span class="molar-mass">M = 74</span>
+              </div>
+              <h3 class="compound-name">Butan-1-ol</h3>
+              <div class="compound-formula"><span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>CH<sub>2</sub>OH</span></div>
+            </div>
+            <div>
+              <div id="slot-butanol" class="drop-slot"
+                   onclick="onSlotClick('butanol')"
+                   ondragover="onDragOver(event)"
+                   ondragenter="onDragEnter(event, 'butanol')"
+                   ondragleave="onDragLeave(event, 'butanol')"
+                   ondrop="onDropToSlot(event, 'butanol')">
+                <span class="slot-placeholder">Chạm hoặc thả nhiệt độ sôi vào đây</span>
+              </div>
+              <div id="status-butanol" class="slot-status-text"></div>
+            </div>
+          </div>
+
+          <div id="card-acid" class="compound-card">
+            <div class="compound-top">
+              <div class="compound-type-row">
+                <span class="type-badge acid">Carboxylic acid</span>
+                <span class="molar-mass">M = 74</span>
+              </div>
+              <h3 class="compound-name">Propanoic acid</h3>
+              <div class="compound-formula"><span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOH</span></div>
+            </div>
+            <div>
+              <div id="slot-acid" class="drop-slot"
+                   onclick="onSlotClick('acid')"
+                   ondragover="onDragOver(event)"
+                   ondragenter="onDragEnter(event, 'acid')"
+                   ondragleave="onDragLeave(event, 'acid')"
+                   ondrop="onDropToSlot(event, 'acid')">
+                <span class="slot-placeholder">Chạm hoặc thả nhiệt độ sôi vào đây</span>
+              </div>
+              <div id="status-acid" class="slot-status-text"></div>
+            </div>
+          </div>
+
+          <div id="card-ester" class="compound-card">
+            <div class="compound-top">
+              <div class="compound-type-row">
+                <span class="type-badge ester">Ester</span>
+                <span class="molar-mass">M = 74</span>
+              </div>
+              <h3 class="compound-name">Methyl acetate</h3>
+              <div class="compound-formula"><span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span></div>
+            </div>
+            <div>
+              <div id="slot-ester" class="drop-slot"
+                   onclick="onSlotClick('ester')"
+                   ondragover="onDragOver(event)"
+                   ondragenter="onDragEnter(event, 'ester')"
+                   ondragleave="onDragLeave(event, 'ester')"
+                   ondrop="onDropToSlot(event, 'ester')">
+                <span class="slot-placeholder">Chạm hoặc thả nhiệt độ sôi vào đây</span>
+              </div>
+              <div id="status-ester" class="slot-status-text"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hàng nút chức năng -->
+        <div class="controls-row">
+          <button type="button" class="btn btn-emerald" onclick="checkAnswers()">✔ Kiểm tra đáp án</button>
+          <button type="button" class="btn btn-amber" onclick="toggleHint()">💡 Gợi ý</button>
+          <button type="button" class="btn btn-secondary" onclick="resetPractice()">↻ Làm lại</button>
+          <button id="btnSolution" type="button" class="btn btn-outline" onclick="toggleSolution()">📖 Xem lời giải chi tiết</button>
+        </div>
+
+        <div id="checkFeedback" class="feedback-banner hidden"></div>
+
+        <div id="hintBox" class="hint-box hidden">
+          <b>💡 Gợi ý:</b> Cả ba chất đều có cùng phân tử khối <b>M = 74</b>. Em hãy so sánh khả năng tạo <b>liên kết hydrogen liên phân tử</b> của từng loại hợp chất:
+          <i>Ester (không có) &lt; Alcohol (có) &lt; Carboxylic acid (có và bền hơn alcohol)</i>.
+        </div>
+
+        <div id="solutionBox" class="solution-box hidden">
+          <b>📖 Lời giải chi tiết:</b> Cả ba hợp chất đều có cùng phân tử khối (<b>M = 74</b>), do đó nhiệt độ sôi phụ thuộc chủ yếu vào liên kết hydrogen giữa các phân tử:
+          <ul>
+            <li><b>Methyl acetate (<span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span>) = 57 °C:</b> Các phân tử ester <b>không tạo được liên kết hydrogen liên phân tử</b> nên có nhiệt độ sôi thấp nhất.</li>
+            <li><b>Butan-1-ol (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>CH<sub>2</sub>OH</span>) = 118 °C:</b> Các phân tử alcohol <b>tạo được liên kết hydrogen liên phân tử</b> (O–H···O) nên có nhiệt độ sôi cao hơn nhiều so với ester.</li>
+            <li><b>Propanoic acid (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOH</span>) = 141 °C:</b> Các phân tử carboxylic acid <b>tạo được liên kết hydrogen liên phân tử bền hơn alcohol</b> (tạo vòng dimer 8 cạnh gồm 2 liên kết hydrogen) nên có nhiệt độ sôi cao nhất.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: THÍ NGHIỆM ĐUN NÓNG KIỂM CHỨNG (20 °C – 150 °C) & LIÊN KẾT HYDROGEN
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <div class="exp-grid">
+
+        <!-- CỘT TRÁI: 3 BÌNH CẦU ĐUN NÓNG TRÊN BẾP CHUNG -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-row">
+              <span class="num-badge">1</span>
+              <h2 class="card-title">Thí nghiệm đun nóng kiểm chứng (20 °C – 150 °C)</h2>
+            </div>
+            <span class="pill-tag">3 bình cầu trên bếp chung</span>
+          </div>
+
+          <div class="svg-stage">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Thí nghiệm đun nóng 3 bình cầu chứa Methyl acetate, Butan-1-ol và Propanoic acid">
+              <defs>
+                <clipPath id="clipFlask1"><circle cx="160" cy="204" r="56" /></clipPath>
+                <clipPath id="clipFlask2"><circle cx="380" cy="204" r="56" /></clipPath>
+                <clipPath id="clipFlask3"><circle cx="600" cy="204" r="56" /></clipPath>
+              </defs>
+
+              <!-- BẾP GIA NHIỆT CHUNG -->
+              <rect x="44" y="274" width="672" height="36" rx="10" fill="#334155" />
+              <rect x="58" y="281" width="644" height="22" rx="6" fill="#1e293b" />
+              <rect id="heaterPlate" x="66" y="266" width="628" height="10" rx="4" fill="#64748b" />
+              <text x="380" y="296" text-anchor="middle" font-size="11.5" font-weight="800" fill="#cbd5e1" letter-spacing="0.8">BẾP GIA NHIỆT ĐỒNG THỜI</text>
+
+              <!-- BÌNH CẦU 1: METHYL ACETATE (57 °C) -->
+              <g id="flask1">
+                <rect id="fBadgeBg1" x="82" y="12" width="156" height="30" rx="15" fill="#fef9c3" stroke="#eab308" stroke-width="1.6" />
+                <text id="fBadgeTxt1" x="160" y="32" text-anchor="middle" font-size="13" font-weight="800" fill="#854d0e">Thể lỏng</text>
+
+                <g>
+                  <path class="vapor-puff" d="M 148 96 Q 140 80 150 64" fill="none" stroke="#d97706" stroke-width="3" stroke-linecap="round" style="animation-delay: 0s;" />
+                  <path class="vapor-puff" d="M 160 96 Q 168 78 158 60" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round" style="animation-delay: 0.45s;" />
+                  <path class="vapor-puff" d="M 172 96 Q 166 80 176 64" fill="none" stroke="#d97706" stroke-width="3" stroke-linecap="round" style="animation-delay: 0.85s;" />
+                </g>
+
+                <g clip-path="url(#clipFlask1)">
+                  <!-- Mực chất lỏng giữ gần như cố định khi sôi (không tụt cạn theo nhiệt độ) -->
+                  <rect id="fLiq1" x="100" y="186" width="120" height="78" fill="#facc15" opacity="0.84" />
+                  <circle class="boil-bubble" cx="132" cy="252" r="4.5" fill="#ffffff" style="animation-delay: 0s;" />
+                  <circle class="boil-bubble" cx="154" cy="255" r="5.5" fill="#ffffff" style="animation-delay: 0.25s;" />
+                  <circle class="boil-bubble" cx="174" cy="250" r="4" fill="#ffffff" style="animation-delay: 0.55s;" />
+                  <circle class="boil-bubble" cx="190" cy="253" r="4.5" fill="#ffffff" style="animation-delay: 0.15s;" />
+                </g>
+
+                <path d="M 136 102 L 142 108 L 142 151 A 57 57 0 1 0 178 151 L 178 108 L 184 102"
+                      fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                <line x1="128" y1="262" x2="192" y2="262" stroke="#475569" stroke-width="3.2" stroke-linecap="round" />
+
+                <text x="160" y="331" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">Methyl acetate</text>
+                <text x="160" y="351" text-anchor="middle" font-size="12" font-weight="800" fill="#dc2626">CH₃COOCH₃ (57 °C)</text>
+              </g>
+
+              <!-- BÌNH CẦU 2: BUTAN-1-OL (118 °C) -->
+              <g id="flask2">
+                <rect id="fBadgeBg2" x="302" y="12" width="156" height="30" rx="15" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.6" />
+                <text id="fBadgeTxt2" x="380" y="32" text-anchor="middle" font-size="13" font-weight="800" fill="#0369a1">Thể lỏng</text>
+
+                <g>
+                  <path class="vapor-puff" d="M 368 96 Q 360 80 370 64" fill="none" stroke="#0284c7" stroke-width="3" stroke-linecap="round" style="animation-delay: 0.1s;" />
+                  <path class="vapor-puff" d="M 380 96 Q 388 78 378 60" fill="none" stroke="#0284c7" stroke-width="3.2" stroke-linecap="round" style="animation-delay: 0.55s;" />
+                  <path class="vapor-puff" d="M 392 96 Q 386 80 396 64" fill="none" stroke="#0284c7" stroke-width="3" stroke-linecap="round" style="animation-delay: 0.9s;" />
+                </g>
+
+                <g clip-path="url(#clipFlask2)">
+                  <rect id="fLiq2" x="320" y="186" width="120" height="78" fill="#60a5fa" opacity="0.78" />
+                  <circle class="boil-bubble" cx="352" cy="252" r="4.5" fill="#ffffff" style="animation-delay: 0.05s;" />
+                  <circle class="boil-bubble" cx="374" cy="255" r="5.5" fill="#ffffff" style="animation-delay: 0.3s;" />
+                  <circle class="boil-bubble" cx="394" cy="250" r="4" fill="#ffffff" style="animation-delay: 0.6s;" />
+                  <circle class="boil-bubble" cx="410" cy="253" r="4.5" fill="#ffffff" style="animation-delay: 0.2s;" />
+                </g>
+
+                <path d="M 356 102 L 362 108 L 362 151 A 57 57 0 1 0 398 151 L 398 108 L 404 102"
+                      fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                <line x1="348" y1="262" x2="412" y2="262" stroke="#475569" stroke-width="3.2" stroke-linecap="round" />
+
+                <text x="380" y="331" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">Butan-1-ol</text>
+                <text x="380" y="351" text-anchor="middle" font-size="12" font-weight="700" fill="#0369a1">CH₃CH₂CH₂CH₂OH (118 °C)</text>
+              </g>
+
+              <!-- BÌNH CẦU 3: PROPANOIC ACID (141 °C) -->
+              <g id="flask3">
+                <rect id="fBadgeBg3" x="522" y="12" width="156" height="30" rx="15" fill="#ecfdf5" stroke="#34d399" stroke-width="1.6" />
+                <text id="fBadgeTxt3" x="600" y="32" text-anchor="middle" font-size="13" font-weight="800" fill="#047857">Thể lỏng</text>
+
+                <g>
+                  <path class="vapor-puff" d="M 588 96 Q 580 80 590 64" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" style="animation-delay: 0.15s;" />
+                  <path class="vapor-puff" d="M 600 96 Q 608 78 598 60" fill="none" stroke="#059669" stroke-width="3.2" stroke-linecap="round" style="animation-delay: 0.5s;" />
+                  <path class="vapor-puff" d="M 612 96 Q 606 80 616 64" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" style="animation-delay: 0.95s;" />
+                </g>
+
+                <g clip-path="url(#clipFlask3)">
+                  <rect id="fLiq3" x="540" y="186" width="120" height="78" fill="#34d399" opacity="0.78" />
+                  <circle class="boil-bubble" cx="572" cy="252" r="4.5" fill="#ffffff" style="animation-delay: 0.1s;" />
+                  <circle class="boil-bubble" cx="594" cy="255" r="5.5" fill="#ffffff" style="animation-delay: 0.35s;" />
+                  <circle class="boil-bubble" cx="614" cy="250" r="4" fill="#ffffff" style="animation-delay: 0.65s;" />
+                  <circle class="boil-bubble" cx="630" cy="253" r="4.5" fill="#ffffff" style="animation-delay: 0.25s;" />
+                </g>
+
+                <path d="M 576 102 L 582 108 L 582 151 A 57 57 0 1 0 618 151 L 618 108 L 624 102"
+                      fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                <line x1="568" y1="262" x2="632" y2="262" stroke="#475569" stroke-width="3.2" stroke-linecap="round" />
+
+                <text x="600" y="331" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">Propanoic acid</text>
+                <text x="600" y="351" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">CH₃CH₂COOH (141 °C)</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- BẢNG ĐIỀU KHIỂN NHIỆT ĐỘ (20 °C -> 150 °C) -->
+          <div class="temp-control-panel">
+            <div class="temp-top-row">
+              <div class="temp-readout">
+                <span class="temp-readout-lbl">Nhiệt độ chất lỏng/hệ:</span>
+                <span id="tempReadoutVal" class="temp-readout-val">20 °C</span>
+              </div>
+
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button id="btnAutoHeat" type="button" class="btn btn-amber" onclick="toggleAutoHeat()">
+                  <span id="autoHeatIcon">▶</span>
+                  <span id="autoHeatText">Đun tự động</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetHeat()">
+                  ↻ Đặt lại (20 °C)
+                </button>
+              </div>
+            </div>
+
+            <!-- Thông báo tạm dừng 2 giây tại mốc sôi -->
+            <div id="pauseNotice" class="pause-notice hidden">
+              <span>⏸</span>
+              <span id="pauseNoticeText">Đang tạm dừng 2 giây để quan sát...</span>
+            </div>
+
+            <input id="tempSlider" type="range" class="temp-slider" min="20" max="150" step="1" value="20" oninput="onTempSlider(this.value)" />
+
+            <!-- Các nhãn mốc đặt chính xác theo tỉ lệ toán học: (T - 20) / 130 * 100% -->
+            <div class="temp-ticks-abs">
+              <span style="left: 0%;">20 °C</span>
+              <span style="left: 28.46%; transform: translateX(-50%); color: #dc2626;">57 °C<br>(Ester)</span>
+              <span style="left: 75.38%; transform: translateX(-50%); color: #0369a1;">118 °C<br>(Alcohol)</span>
+              <span style="left: 93.08%; transform: translateX(-50%); color: #047857;">141 °C<br>(Acid)</span>
+              <span style="left: 100%; transform: translateX(-100%);">150 °C</span>
+            </div>
+
+            <div class="quick-temp-row">
+              <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-muted);">Nhảy nhanh mốc sôi:</span>
+              <button type="button" class="btn btn-outline" onclick="jumpTemp(57)">57 °C (Methyl acetate)</button>
+              <button type="button" class="btn btn-outline" onclick="jumpTemp(118)">118 °C (Butan-1-ol)</button>
+              <button type="button" class="btn btn-outline" onclick="jumpTemp(141)">141 °C (Propanoic acid)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CỘT PHẢI: SO SÁNH LIÊN KẾT HYDROGEN (SVG VẼ LẠI CHUẨN XÁC) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-row">
+              <span class="num-badge">2</span>
+              <h2 class="card-title">So sánh liên kết hydrogen giữa 3 chất</h2>
+            </div>
+          </div>
+
+          <div class="mol-tabs">
+            <button id="molBtn-ester" type="button" class="btn btn-outline active" onclick="selectMol('ester')">
+              Methyl acetate
+            </button>
+            <button id="molBtn-alcohol" type="button" class="btn btn-outline" onclick="selectMol('alcohol')">
+              Butan-1-ol
+            </button>
+            <button id="molBtn-acid" type="button" class="btn btn-outline" onclick="selectMol('acid')">
+              Propanoic acid
+            </button>
+          </div>
+
+          <div class="svg-stage">
+            <!-- SVG 1: METHYL ACETATE (2 PHÂN TỬ TÁCH RỜI, KHÔNG CÓ LIÊN KẾT HYDROGEN) -->
+            <svg id="molSvg-ester" viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Methyl acetate không có liên kết hydrogen liên phân tử">
+              <text x="270" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#dc2626">Methyl acetate: Không có liên kết hydrogen liên phân tử</text>
+
+              <!-- Phân tử 1 -->
+              <rect x="28" y="64" width="206" height="84" rx="14" fill="#fef9c3" stroke="#eab308" stroke-width="2" />
+              <text x="131" y="102" text-anchor="middle" font-size="16" font-weight="800" fill="#854d0e">CH₃–C–O–CH₃</text>
+              <line x1="115" y1="108" x2="115" y2="122" stroke="#854d0e" stroke-width="2" />
+              <line x1="121" y1="108" x2="121" y2="122" stroke="#854d0e" stroke-width="2" />
+              <text x="118" y="139" text-anchor="middle" font-size="15" font-weight="800" fill="#854d0e">O</text>
+
+              <!-- Dấu X đỏ báo không có liên kết H -->
+              <text x="270" y="114" text-anchor="middle" font-size="24" font-weight="800" fill="#dc2626">✕</text>
+
+              <!-- Phân tử 2 -->
+              <rect x="306" y="64" width="206" height="84" rx="14" fill="#fef9c3" stroke="#eab308" stroke-width="2" />
+              <text x="409" y="102" text-anchor="middle" font-size="16" font-weight="800" fill="#854d0e">CH₃–C–O–CH₃</text>
+              <line x1="393" y1="108" x2="393" y2="122" stroke="#854d0e" stroke-width="2" />
+              <line x1="399" y1="108" x2="399" y2="122" stroke="#854d0e" stroke-width="2" />
+              <text x="396" y="139" text-anchor="middle" font-size="15" font-weight="800" fill="#854d0e">O</text>
+
+              <text x="270" y="192" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">Không có nguyên tử H linh động gắn với O (–OH)</text>
+              <text x="270" y="218" text-anchor="middle" font-size="13.5" font-weight="800" fill="#dc2626">→ Các phân tử tách rời → Nhiệt độ sôi thấp nhất (57 °C)</text>
+            </svg>
+
+            <!-- SVG 2: BUTAN-1-OL (NÉT ĐỨT ĐỎ NỐI TRỰC TIẾP H CỦA –OH SANG O CỦA PHÂN TỬ KIA) -->
+            <svg id="molSvg-alcohol" class="hidden" viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chuỗi liên kết hydrogen O-H...O giữa các phân tử butan-1-ol">
+              <text x="270" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#0369a1">Butan-1-ol: Chuỗi liên kết hydrogen liên phân tử (O–H ··· O)</text>
+
+              <rect x="20" y="48" width="500" height="130" rx="16" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.8" />
+
+              <!-- Phân tử 1: C4H9 - O - H -->
+              <text x="64" y="114" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">C₄H₉</text>
+              <line x1="92" y1="108" x2="114" y2="108" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="128" y="114" text-anchor="middle" font-size="19" font-weight="800" fill="#0369a1">O</text>
+              <line x1="142" y1="108" x2="164" y2="108" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="178" y="114" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">H</text>
+
+              <!-- Nét đứt đỏ nối trực tiếp từ H (phân tử 1) sang O (phân tử 2) -->
+              <line x1="194" y1="108" x2="246" y2="108" stroke="#dc2626" stroke-width="3.6" stroke-dasharray="5 5" stroke-linecap="round" />
+
+              <!-- Phân tử 2: O - H (với gốc C4H9 gắn phía dưới nguyên tử O) -->
+              <text x="262" y="114" text-anchor="middle" font-size="19" font-weight="800" fill="#0369a1">O</text>
+              <line x1="262" y1="122" x2="262" y2="144" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="262" y="164" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">C₄H₉</text>
+              <line x1="276" y1="108" x2="298" y2="108" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="312" y="114" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">H</text>
+
+              <!-- Nét đứt đỏ nối trực tiếp từ H (phân tử 2) sang O (phân tử 3) -->
+              <line x1="328" y1="108" x2="380" y2="108" stroke="#dc2626" stroke-width="3.6" stroke-dasharray="5 5" stroke-linecap="round" />
+
+              <!-- Phân tử 3: O - H (với gốc C4H9 gắn phía dưới nguyên tử O) -->
+              <text x="396" y="114" text-anchor="middle" font-size="19" font-weight="800" fill="#0369a1">O</text>
+              <line x1="396" y1="122" x2="396" y2="144" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="396" y="164" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">C₄H₉</text>
+              <line x1="410" y1="108" x2="432" y2="108" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="446" y="114" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">H</text>
+              <line x1="462" y1="108" x2="496" y2="108" stroke="#dc2626" stroke-width="3.2" stroke-dasharray="4 5" stroke-linecap="round" />
+
+              <!-- Chú thích -->
+              <line x1="124" y1="204" x2="176" y2="204" stroke="#dc2626" stroke-width="3.6" stroke-dasharray="5 5" stroke-linecap="round" />
+              <text x="188" y="209" font-size="13" font-weight="800" fill="#dc2626">Liên kết hydrogen trực tiếp H···O</text>
+              <text x="270" y="236" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">Nhiệt độ sôi cao hơn nhiều so với ester (118 °C)</text>
+            </svg>
+
+            <!-- SVG 3: PROPANOIC ACID (VÒNG DIMER 8 CẠNH ĐỐI XỨNG, 2 LIÊN KẾT HYDROGEN) -->
+            <svg id="molSvg-acid" class="hidden" viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vòng dimer 8 cạnh gồm 2 liên kết hydrogen bền vững giữa 2 phân tử propanoic acid">
+              <text x="270" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#047857">Propanoic acid: Vòng dimer 8 cạnh (2 liên kết hydrogen bền vững)</text>
+
+              <rect x="22" y="48" width="496" height="136" rx="16" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.8" />
+
+              <!-- Phân tử trái: C2H5 - C(=O) - O - H -->
+              <text x="76" y="122" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">C₂H₅</text>
+              <line x1="104" y1="116" x2="132" y2="116" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="146" y="122" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+
+              <!-- Nối đôi C=O hướng lên phải -->
+              <line x1="156" y1="103" x2="188" y2="85" stroke="#0f172a" stroke-width="2.2" />
+              <line x1="160" y1="110" x2="192" y2="92" stroke="#0f172a" stroke-width="2.2" />
+              <text x="206" y="88" text-anchor="middle" font-size="19" font-weight="800" fill="#047857">O</text>
+
+              <!-- Nối đơn C-O-H hướng xuống phải -->
+              <line x1="158" y1="126" x2="190" y2="144" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+              <text x="206" y="158" text-anchor="middle" font-size="19" font-weight="800" fill="#047857">O</text>
+              <line x1="220" y1="151" x2="244" y2="151" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+              <text x="258" y="158" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">H</text>
+
+              <!-- 2 Liên kết hydrogen nét đứt đỏ song song tạo vòng 8 cạnh -->
+              <!-- Trên: O=C ··· H-O -->
+              <line x1="222" y1="81" x2="268" y2="81" stroke="#dc2626" stroke-width="3.8" stroke-dasharray="5 5" stroke-linecap="round" />
+              <!-- Dưới: O-H ··· O=C -->
+              <line x1="272" y1="151" x2="318" y2="151" stroke="#dc2626" stroke-width="3.8" stroke-dasharray="5 5" stroke-linecap="round" />
+
+              <!-- Phân tử phải: H - O - C(=O) - C2H5 -->
+              <text x="282" y="88" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">H</text>
+              <line x1="296" y1="81" x2="320" y2="81" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+              <text x="334" y="88" text-anchor="middle" font-size="19" font-weight="800" fill="#047857">O</text>
+              <line x1="348" y1="88" x2="380" y2="106" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+
+              <text x="334" y="158" text-anchor="middle" font-size="19" font-weight="800" fill="#047857">O</text>
+              <line x1="346" y1="144" x2="378" y2="126" stroke="#0f172a" stroke-width="2.2" />
+              <line x1="350" y1="151" x2="382" y2="133" stroke="#0f172a" stroke-width="2.2" />
+
+              <text x="394" y="122" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+              <line x1="408" y1="116" x2="436" y2="116" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+              <text x="466" y="122" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">C₂H₅</text>
+
+              <text x="270" y="212" text-anchor="middle" font-size="13" font-weight="800" fill="#dc2626">Vòng dimer gồm 2 liên kết hydrogen bền hơn alcohol</text>
+              <text x="270" y="235" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">→ Nhiệt độ sôi cao nhất (141 °C)</text>
+            </svg>
+          </div>
+
+          <div id="molExplain" class="mol-explain"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: LUYỆN TẬP NHANH (5 CÂU PHÂN HOÁ: 2 NB – 2 TH – 1 VD)
+         ======================================================================= -->
+    <section id="tabPanel-3" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: So sánh nhiệt độ sôi (5 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              2 Nhận biết • 2 Thông hiểu • 1 Vận dụng • Xáo trộn đáp án Fisher–Yates
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 5</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="btn btn-primary" onclick="submitQuiz()">✔ Nộp bài &amp; Tổng kết</button>
+            <button type="button" class="btn btn-secondary" onclick="resetQuiz()">↻ Làm lại từ đầu</button>
+          </div>
+        </div>
+
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)">← Câu trước</button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 5</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)">Câu tiếp theo →</button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.08rem; font-weight: 800; color: var(--sgk-blue-dark);">Kết quả bài làm</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.92rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()">Làm lại &amp; Xáo trộn đáp án</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. DỮ LIỆU CHUYÊN MÔN & NGÂN HÀNG 5 CÂU HỎI PHÂN HOÁ
+    // =========================================================================
+    const TEMP_VALUES = ['57', '118', '141'];
+    const CORRECT_MAP = { ester: '57', butanol: '118', acid: '141' };
+
+    const MOL_TEXT = {
+      ester: '<b>Methyl acetate (<span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span>):</b> Không có nguyên tử H linh động gắn với O nên <b>không tạo được liên kết hydrogen liên phân tử</b> → Nhiệt độ sôi thấp nhất (<b>57 °C</b>).',
+      alcohol: '<b>Butan-1-ol (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>CH<sub>2</sub>OH</span>):</b> Có nhóm –OH nên tạo thành <b>chuỗi liên kết hydrogen liên phân tử O–H···O</b> → Nhiệt độ sôi cao hơn nhiều so với ester (<b>118 °C</b>).',
+      acid: '<b>Propanoic acid (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOH</span>):</b> Liên kết O–H phân cực mạnh hơn và tạo được <b>vòng dimer 8 cạnh gồm 2 liên kết hydrogen bền vững</b> → Nhiệt độ sôi cao nhất (<b>141 °C</b>).'
+    };
+
+    const RAW_QUIZ_BANK = [
+      // --- 2 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Sắp xếp được thứ tự nhiệt độ sôi của ester, alcohol, carboxylic acid có cùng M = 74',
+        question: 'Sắp xếp ba hợp chất cùng phân tử khối (M = 74) sau theo chiều <b>tăng dần</b> nhiệt độ sôi: butan-1-ol, propanoic acid, methyl acetate.',
+        options: [
+          {
+            text: 'Methyl acetate &lt; Butan-1-ol &lt; Propanoic acid.',
+            isCorrect: true,
+            reason: 'Đúng: nhiệt độ sôi tăng dần theo mức độ liên kết hydrogen liên phân tử: methyl acetate (57 °C) &lt; butan-1-ol (118 °C) &lt; propanoic acid (141 °C).'
+          },
+          {
+            text: 'Butan-1-ol &lt; Methyl acetate &lt; Propanoic acid.',
+            isCorrect: false,
+            reason: 'Sai: butan-1-ol có liên kết hydrogen (118 °C) nên sôi cao hơn hẳn methyl acetate (57 °C).'
+          },
+          {
+            text: 'Propanoic acid &lt; Butan-1-ol &lt; Methyl acetate.',
+            isCorrect: false,
+            reason: 'Sai: đây là chiều <b>giảm dần</b> nhiệt độ sôi, ngược với yêu cầu đề bài.'
+          },
+          {
+            text: 'Methyl acetate &lt; Propanoic acid &lt; Butan-1-ol.',
+            isCorrect: false,
+            reason: 'Sai: propanoic acid (141 °C) tạo liên kết hydrogen bền hơn butan-1-ol (118 °C) nên có nhiệt độ sôi cao nhất.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Xác định được chất không tạo liên kết hydrogen liên phân tử',
+        question: 'Trong ba hợp chất: butan-1-ol, propanoic acid và methyl acetate, hợp chất nào <b>không</b> tạo được liên kết hydrogen giữa các phân tử cùng loại?',
+        options: [
+          {
+            text: 'Methyl acetate (<span class="chem-formula">CH<sub>3</sub>COOCH<sub>3</sub></span>).',
+            isCorrect: true,
+            reason: 'Đúng: phân tử ester không có nguyên tử H linh động liên kết trực tiếp với O nên không tạo được liên kết hydrogen liên phân tử.'
+          },
+          {
+            text: 'Butan-1-ol (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>CH<sub>2</sub>OH</span>).',
+            isCorrect: false,
+            reason: 'Sai: butan-1-ol có nhóm –OH nên tạo được chuỗi liên kết hydrogen O–H···O.'
+          },
+          {
+            text: 'Propanoic acid (<span class="chem-formula">CH<sub>3</sub>CH<sub>2</sub>COOH</span>).',
+            isCorrect: false,
+            reason: 'Sai: propanoic acid có nhóm –COOH nên tạo được vòng dimer 2 liên kết hydrogen rất bền.'
+          },
+          {
+            text: 'Cả methyl acetate và butan-1-ol.',
+            isCorrect: false,
+            reason: 'Sai: butan-1-ol là alcohol nên có liên kết hydrogen liên phân tử.'
+          }
+        ]
+      },
+
+      // --- 2 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Giải thích được vì sao propanoic acid có nhiệt độ sôi cao hơn butan-1-ol cùng M = 74',
+        question: 'Vì sao propanoic acid (141 °C) lại có nhiệt độ sôi cao hơn butan-1-ol (118 °C) mặc dù cả hai đều có phân tử khối M = 74 và đều có liên kết hydrogen liên phân tử?',
+        options: [
+          {
+            text: 'Vì liên kết O–H trong nhóm –COOH phân cực mạnh hơn và hai phân tử acid tạo được vòng dimer gồm 2 liên kết hydrogen bền hơn alcohol.',
+            isCorrect: true,
+            reason: 'Đúng: nhóm –COOH có liên kết O–H phân cực mạnh hơn –OH của alcohol và dễ tạo vòng dimer 8 cạnh rất bền → cần nhiều nhiệt lượng hơn để phá vỡ khi sôi.'
+          },
+          {
+            text: 'Vì propanoic acid có mạch carbon dài hơn butan-1-ol.',
+            isCorrect: false,
+            reason: 'Sai: propanoic acid chỉ có 3 C, ngắn hơn mạch 4 C của butan-1-ol.'
+          },
+          {
+            text: 'Vì butan-1-ol không tạo được liên kết hydrogen liên phân tử.',
+            isCorrect: false,
+            reason: 'Sai: butan-1-ol vẫn tạo được liên kết hydrogen liên phân tử, chỉ kém bền hơn propanoic acid.'
+          },
+          {
+            text: 'Vì propanoic acid có phân tử khối lớn hơn butan-1-ol.',
+            isCorrect: false,
+            reason: 'Sai: cả hai chất đều có phân tử khối bằng nhau (M = 74).'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Dự đoán được hiện tượng khi đun nóng hỗn hợp 3 chất ở một mốc nhiệt độ xác định',
+        question: 'Đặt 3 bình cầu chứa riêng rẽ methyl acetate, butan-1-ol và propanoic acid trên cùng một bếp gia nhiệt và giữ nhiệt độ hệ ở <b>100 °C</b> (áp suất 1 atm). Hiện tượng quan sát được là gì?',
+        options: [
+          {
+            text: 'Chỉ có methyl acetate đang sôi mạnh; butan-1-ol và propanoic acid vẫn ở thể lỏng chưa sôi.',
+            isCorrect: true,
+            reason: 'Đúng: ở 100 °C đã vượt mốc sôi của methyl acetate (57 °C), nhưng vẫn thấp hơn mốc sôi của butan-1-ol (118 °C) và propanoic acid (141 °C).'
+          },
+          {
+            text: 'Cả methyl acetate và butan-1-ol đều đang sôi; chỉ có propanoic acid chưa sôi.',
+            isCorrect: false,
+            reason: 'Sai: butan-1-ol sôi ở 118 °C nên ở 100 °C vẫn chưa sôi.'
+          },
+          {
+            text: 'Cả 3 chất đều đã sôi mạnh vì vượt qua nhiệt độ sôi của nước.',
+            isCorrect: false,
+            reason: 'Sai: mốc sôi 100 °C là của nước, không phải của butan-1-ol (118 °C) và propanoic acid (141 °C).'
+          },
+          {
+            text: 'Chưa có chất nào sôi.',
+            isCorrect: false,
+            reason: 'Sai: methyl acetate có nhiệt độ sôi chỉ 57 °C nên đã sôi từ lâu trước khi hệ đạt 100 °C.'
+          }
+        ]
+      },
+
+      // --- 1 CÂU VẬN DỤNG ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Vận dụng quy luật liên kết hydrogen để gán nhiệt độ sôi cho bộ chất mới cùng M = 88',
+        question: 'Cho ba hợp chất đều có cùng phân tử khối <b>M = 88</b> là: <b>pentan-1-ol</b> (<span class="chem-formula">C<sub>5</sub>H<sub>11</sub>OH</span>), <b>butanoic acid</b> (<span class="chem-formula">C<sub>3</sub>H<sub>7</sub>COOH</span>) và <b>ethyl acetate</b> (<span class="chem-formula">CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub></span>). Các giá trị nhiệt độ sôi (không theo thứ tự) là <b>77 °C; 138 °C; 164 °C</b>. Nhiệt độ sôi của ethyl acetate, pentan-1-ol, butanoic acid lần lượt là gì?',
+        options: [
+          {
+            text: '77 °C; 138 °C; 164 °C.',
+            isCorrect: true,
+            reason: 'Đúng: áp dụng quy luật cùng M = 88: ester không có liên kết hydrogen (ethyl acetate = 77 °C) &lt; alcohol (pentan-1-ol = 138 °C) &lt; carboxylic acid (butanoic acid = 164 °C).'
+          },
+          {
+            text: '138 °C; 77 °C; 164 °C.',
+            isCorrect: false,
+            reason: 'Sai: đảo vị trí giữa ester và alcohol. Ethyl acetate không có liên kết hydrogen nên phải có nhiệt độ sôi thấp nhất (77 °C).'
+          },
+          {
+            text: '77 °C; 164 °C; 138 °C.',
+            isCorrect: false,
+            reason: 'Sai: đảo vị trí giữa alcohol và carboxylic acid. Butanoic acid phải sôi cao nhất (164 °C).'
+          },
+          {
+            text: '164 °C; 138 °C; 77 °C.',
+            isCorrect: false,
+            reason: 'Sai: sắp xếp ngược hoàn toàn bản chất liên kết hydrogen.'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let assignments = { butanol: null, acid: null, ester: null };
+    let selectedChipVal = null;
+    let draggedVal = null;
+
+    let currentTemp = 20;
+    let isAutoHeating = false;
+    let heatTimer = null;
+    let pauseTimer = null;
+    let pausedMilestones = new Set();
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+    let quizSubmitted = false;
+
+    // =========================================================================
+    // 3. CHUYỂN TAB & TOÀN MÀN HÌNH AN TOÀN (KHÔNG LỖI TRÊN IPHONE/IPAD)
+    // =========================================================================
+    function switchTab(tabNum) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`tabPanel-${i}`).classList.toggle('hidden', i !== tabNum);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        btn.classList.toggle('active', i === tabNum);
+        btn.setAttribute('aria-selected', i === tabNum ? 'true' : 'false');
+      }
+      if (tabNum !== 2) stopAutoHeat();
+      if (tabNum === 3) renderQuizQuestion();
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // =========================================================================
+    // 4. LOGIC TAB 1: KÉO-THẢ & CHẠM-CHỌN
+    // =========================================================================
+    function createChipHTML(val) {
+      const selClass = selectedChipVal === val ? 'selected' : '';
+      return `
+        <div class="temp-chip ${selClass}"
+             draggable="true"
+             ondragstart="onDragStart(event, '${val}')"
+             ondragend="onDragEnd(event)"
+             onclick="onChipClick(event, '${val}')">
+          ${val} °C
+        </div>
+      `;
+    }
+
+    function renderPracticeUI() {
+      const assignedVals = Object.values(assignments).filter(Boolean);
+      const trayEl = document.getElementById('trayChips');
+      const remaining = TEMP_VALUES.filter(v => !assignedVals.includes(v));
+
+      if (remaining.length === 0) {
+        trayEl.innerHTML = '<span style="font-size: 0.9rem; font-weight: 700; color: #64748b;">Đã gán hết 3 thẻ nhiệt độ sôi! Hãy bấm <b>Kiểm tra đáp án</b> (hoặc chạm vào thẻ trong ô để tháo ra).</span>';
+      } else {
+        trayEl.innerHTML = remaining.map(v => createChipHTML(v)).join('');
+      }
+
+      ['butanol', 'acid', 'ester'].forEach(key => {
+        const slot = document.getElementById(`slot-${key}`);
+        const val = assignments[key];
+        slot.classList.toggle('ready-target', !!selectedChipVal && !val);
+
+        if (val) {
+          slot.innerHTML = createChipHTML(val);
+        } else {
+          slot.innerHTML = `<span class="slot-placeholder">${selectedChipVal ? `Chạm để đặt ${selectedChipVal} °C vào đây` : 'Chạm hoặc thả nhiệt độ sôi vào đây'}</span>`;
+        }
+      });
+    }
+
+    function clearCheckStyles() {
+      ['butanol', 'acid', 'ester'].forEach(key => {
+        const card = document.getElementById(`card-${key}`);
+        const st = document.getElementById(`status-${key}`);
+        card.classList.remove('state-correct', 'state-wrong');
+        st.textContent = '';
+        st.className = 'slot-status-text';
+      });
+      document.getElementById('checkFeedback').classList.add('hidden');
+    }
+
+    function onChipClick(e, val) {
+      e.stopPropagation();
+      clearCheckStyles();
+      const ownerKey = Object.keys(assignments).find(k => assignments[k] === val);
+      if (ownerKey && selectedChipVal !== val) {
+        assignments[ownerKey] = null;
+        selectedChipVal = val;
+        renderPracticeUI();
+        return;
+      }
+      selectedChipVal = selectedChipVal === val ? null : val;
+      renderPracticeUI();
+    }
+
+    function onSlotClick(slotKey) {
+      clearCheckStyles();
+      if (selectedChipVal) {
+        Object.keys(assignments).forEach(k => {
+          if (assignments[k] === selectedChipVal) assignments[k] = null;
+        });
+        assignments[slotKey] = selectedChipVal;
+        selectedChipVal = null;
+        renderPracticeUI();
+      } else if (assignments[slotKey]) {
+        assignments[slotKey] = null;
+        renderPracticeUI();
+      }
+    }
+
+    function onDragStart(e, val) {
+      draggedVal = val;
+      selectedChipVal = null;
+      clearCheckStyles();
+      e.dataTransfer.setData('text/plain', val);
+      e.dataTransfer.effectAllowed = 'move';
+      e.currentTarget.classList.add('dragging');
+    }
+
+    function onDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      ['butanol', 'acid', 'ester'].forEach(k => {
+        document.getElementById(`slot-${k}`).classList.remove('drag-over');
+      });
+    }
+
+    function onDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function onDragEnter(e, slotKey) {
+      e.preventDefault();
+      document.getElementById(`slot-${slotKey}`).classList.add('drag-over');
+    }
+
+    function onDragLeave(e, slotKey) {
+      document.getElementById(`slot-${slotKey}`).classList.remove('drag-over');
+    }
+
+    function onDropToSlot(e, slotKey) {
+      e.preventDefault();
+      document.getElementById(`slot-${slotKey}`).classList.remove('drag-over');
+      const val = e.dataTransfer.getData('text/plain') || draggedVal;
+      if (!val || !TEMP_VALUES.includes(val)) return;
+
+      const prevOwner = Object.keys(assignments).find(k => assignments[k] === val);
+      const displacedVal = assignments[slotKey];
+      if (prevOwner && prevOwner !== slotKey) {
+        assignments[prevOwner] = displacedVal || null;
+      }
+      assignments[slotKey] = val;
+      draggedVal = null;
+      renderPracticeUI();
+    }
+
+    function onDropToTray(e) {
+      e.preventDefault();
+      const val = e.dataTransfer.getData('text/plain') || draggedVal;
+      if (!val) return;
+      Object.keys(assignments).forEach(k => {
+        if (assignments[k] === val) assignments[k] = null;
+      });
+      draggedVal = null;
+      renderPracticeUI();
+    }
+
+    function checkAnswers() {
+      const fb = document.getElementById('checkFeedback');
+      const allFilled = Object.values(assignments).every(v => v !== null);
+      if (!allFilled) {
+        fb.className = 'feedback-banner err';
+        fb.innerHTML = '⚠ Em hãy gán đủ cả 3 giá trị nhiệt độ sôi vào 3 ô trước khi bấm <b>Kiểm tra đáp án</b> nhé!';
+        fb.classList.remove('hidden');
+        return;
+      }
+
+      let correctCount = 0;
+      ['butanol', 'acid', 'ester'].forEach(key => {
+        const card = document.getElementById(`card-${key}`);
+        const st = document.getElementById(`status-${key}`);
+        const isOk = assignments[key] === CORRECT_MAP[key];
+
+        card.classList.remove('state-correct', 'state-wrong');
+        if (isOk) {
+          correctCount++;
+          card.classList.add('state-correct');
+          st.textContent = '✔ Chính xác!';
+          st.className = 'slot-status-text ok';
+        } else {
+          card.classList.add('state-wrong');
+          st.textContent = '✘ Chưa đúng, hãy thử lại!';
+          st.className = 'slot-status-text err';
+        }
+      });
+
+      fb.classList.remove('hidden');
+      if (correctCount === 3) {
+        fb.className = 'feedback-banner ok';
+        fb.innerHTML = '🎉 <b>Xuất sắc! Em đã gán chính xác 3/3 hợp chất:</b> Methyl acetate (57 °C) &lt; Butan-1-ol (118 °C) &lt; Propanoic acid (141 °C). Hãy chuyển sang <b>Tab 2</b> để đun nóng kiểm chứng!';
+      } else {
+        fb.className = 'feedback-banner err';
+        fb.innerHTML = `Em làm đúng <b>${correctCount} / 3</b> ô. Hãy bấm <b>Gợi ý</b> hoặc đổi lại các thẻ chưa đúng nhé!`;
+      }
+    }
+
+    function toggleHint() {
+      document.getElementById('hintBox').classList.toggle('hidden');
+    }
+
+    function toggleSolution() {
+      const box = document.getElementById('solutionBox');
+      const btn = document.getElementById('btnSolution');
+      const isHidden = box.classList.contains('hidden');
+      box.classList.toggle('hidden', !isHidden);
+      btn.textContent = isHidden ? '📖 Ẩn lời giải chi tiết' : '📖 Xem lời giải chi tiết';
+    }
+
+    function resetPractice() {
+      assignments = { butanol: null, acid: null, ester: null };
+      selectedChipVal = null;
+      clearCheckStyles();
+      renderPracticeUI();
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 2: THÍ NGHIỆM ĐUN NÓNG (20 °C -> 150 °C) + TẠM DỪNG 2 GIÂY
+    // =========================================================================
+    function updateFlask(idx, temp, bp, restColors) {
+      const group = document.getElementById(`flask${idx}`);
+      const bg = document.getElementById(`fBadgeBg${idx}`);
+      const txt = document.getElementById(`fBadgeTxt${idx}`);
+      const liq = document.getElementById(`fLiq${idx}`);
+
+      const isBoiling = temp >= bp;
+      group.classList.toggle('is-boiling', isBoiling);
+
+      // Giữ mực chất lỏng gần như cố định khi sôi (chỉ giảm nhẹ 4px so với ban đầu, KHÔNG tụt cạn theo nhiệt độ)
+      const baseBottom = 264;
+      const liqH = isBoiling ? 74 : 78;
+      liq.setAttribute('y', baseBottom - liqH);
+      liq.setAttribute('height', liqH);
+
+      if (isBoiling) {
+        bg.setAttribute('fill', '#fee2e2');
+        bg.setAttribute('stroke', '#ef4444');
+        txt.setAttribute('fill', '#b91c1c');
+        txt.textContent = `Đang sôi (${bp} °C)`;
+      } else {
+        bg.setAttribute('fill', restColors.bg);
+        bg.setAttribute('stroke', restColors.stroke);
+        txt.setAttribute('fill', restColors.text);
+        txt.textContent = 'Thể lỏng';
+      }
+    }
+
+    function renderTemperature(temp) {
+      currentTemp = Math.max(20, Math.min(150, Number(temp)));
+
+      const readout = document.getElementById('tempReadoutVal');
+      const slider = document.getElementById('tempSlider');
+      const plate = document.getElementById('heaterPlate');
+
+      readout.textContent = `${currentTemp} °C`;
+      slider.value = currentTemp;
+
+      if (currentTemp < 57) {
+        readout.style.color = '#38bdf8';
+        plate.setAttribute('fill', '#64748b');
+      } else if (currentTemp < 118) {
+        readout.style.color = '#fbbf24';
+        plate.setAttribute('fill', '#f59e0b');
+      } else if (currentTemp < 141) {
+        readout.style.color = '#fb923c';
+        plate.setAttribute('fill', '#f97316');
+      } else {
+        readout.style.color = '#f87171';
+        plate.setAttribute('fill', '#dc2626');
+      }
+
+      updateFlask(1, currentTemp, 57, { bg: '#fef9c3', stroke: '#eab308', text: '#854d0e' });
+      updateFlask(2, currentTemp, 118, { bg: '#e0f2fe', stroke: '#38bdf8', text: '#0369a1' });
+      updateFlask(3, currentTemp, 141, { bg: '#ecfdf5', stroke: '#34d399', text: '#047857' });
+    }
+
+    function onTempSlider(val) {
+      stopAutoHeat();
+      renderTemperature(val);
+    }
+
+    function jumpTemp(target) {
+      stopAutoHeat();
+      renderTemperature(target);
+    }
+
+    function resetHeat() {
+      stopAutoHeat();
+      pausedMilestones.clear();
+      renderTemperature(20);
+    }
+
+    function toggleAutoHeat() {
+      if (isAutoHeating) {
+        stopAutoHeat();
+      } else {
+        if (currentTemp >= 150) {
+          pausedMilestones.clear();
+          renderTemperature(20);
+        }
+        startAutoHeat();
+      }
+    }
+
+    function scheduleNextHeatStep() {
+      if (!isAutoHeating) return;
+
+      heatTimer = setTimeout(() => {
+        if (!isAutoHeating) return;
+        if (currentTemp >= 150) {
+          stopAutoHeat();
+          return;
+        }
+
+        renderTemperature(currentTemp + 1);
+
+        // Tạm dừng 2 giây tại đúng 3 mốc sôi 57 °C, 118 °C, 141 °C để học sinh kịp quan sát
+        const milestoneNames = {
+          57: '57 °C – Methyl acetate (Ester) bắt đầu sôi!',
+          118: '118 °C – Butan-1-ol (Alcohol) bắt đầu sôi!',
+          141: '141 °C – Propanoic acid (Carboxylic acid) bắt đầu sôi!'
+        };
+
+        if (milestoneNames[currentTemp] && !pausedMilestones.has(currentTemp)) {
+          pausedMilestones.add(currentTemp);
+          const notice = document.getElementById('pauseNotice');
+          document.getElementById('pauseNoticeText').textContent = `Tạm dừng 2 giây quan sát mốc ${milestoneNames[currentTemp]}`;
+          notice.classList.remove('hidden');
+
+          pauseTimer = setTimeout(() => {
+            notice.classList.add('hidden');
+            scheduleNextHeatStep();
+          }, 2000);
+        } else {
+          scheduleNextHeatStep();
+        }
+      }, 75);
+    }
+
+    function startAutoHeat() {
+      stopAutoHeat();
+      isAutoHeating = true;
+      updateAutoHeatUI();
+      scheduleNextHeatStep();
+    }
+
+    function stopAutoHeat() {
+      isAutoHeating = false;
+      if (heatTimer) { clearTimeout(heatTimer); heatTimer = null; }
+      if (pauseTimer) { clearTimeout(pauseTimer); pauseTimer = null; }
+      document.getElementById('pauseNotice').classList.add('hidden');
+      updateAutoHeatUI();
+    }
+
+    function updateAutoHeatUI() {
+      const icon = document.getElementById('autoHeatIcon');
+      const text = document.getElementById('autoHeatText');
+      if (isAutoHeating) {
+        icon.textContent = '⏸';
+        text.textContent = 'Tạm dừng';
+      } else {
+        icon.textContent = '▶';
+        text.textContent = currentTemp >= 150 ? 'Đun lại từ 20 °C' : 'Đun tự động';
+      }
+    }
+
+    function selectMol(type) {
+      ['ester', 'alcohol', 'acid'].forEach(k => {
+        document.getElementById(`molBtn-${k}`).classList.toggle('active', k === type);
+        document.getElementById(`molSvg-${k}`).classList.toggle('hidden', k !== type);
+      });
+      document.getElementById('molExplain').innerHTML = MOL_TEXT[type];
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 3: LUYỆN TẬP 5 CÂU + FISHER–YATES + NỘP BÀI TỔNG KẾT
+    // =========================================================================
+    function shuffleFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const opts = shuffleFisherYates(q.options);
+        const correctIdx = opts.findIndex(o => o.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: opts,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+      quizSubmitted = false;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndBanner() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      document.getElementById('quizProgressFill').style.width = `${Math.round((answered / shuffledQuiz.length) * 100)}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (quizSubmitted || answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Tổng điểm: ${score} / ${shuffledQuiz.length} câu đúng (${answered}/${shuffledQuiz.length} câu đã trả lời)`;
+        let msg = 'Hãy xem lại lời giải chi tiết từng câu và ôn lại Tab 2 để nắm chắc hơn nhé!';
+        if (score === 5) msg = 'Xuất sắc! Em đã nắm vững 100% cách so sánh nhiệt độ sôi dựa vào liên kết hydrogen.';
+        else if (score >= 4) msg = 'Rất tốt! Em đã hiểu rõ bản chất liên kết hydrogen giữa ester, alcohol và carboxylic acid.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const showResult = chosen !== null || quizSubmitted;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">YCCĐ: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (showResult) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = showResult ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span>${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const fb = document.getElementById('quizFeedbackPanel');
+      if (showResult) {
+        const isOk = chosen === q.correctIdx;
+        const headText = chosen === null
+          ? `ℹ Câu này chưa chọn — Đáp án đúng là ${letters[q.correctIdx]}.`
+          : (isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là ${letters[q.correctIdx]}.`);
+
+        const head = `<div class="feedback-head ${isOk ? 'ok' : 'err'}">${headText} — Giải thích chi tiết từng phương án:</div>`;
+        const items = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <b>${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</b> ${opt.reason}
+          </li>
+        `).join('');
+
+        fb.innerHTML = `${head}<ul class="option-reasons-list">${items}</ul>`;
+        fb.classList.remove('hidden');
+      } else {
+        fb.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndBanner();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null || quizSubmitted) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function submitQuiz() {
+      quizSubmitted = true;
+      renderQuizQuestion();
+      showToast('Đã nộp bài! Em có thể bấm từng câu 1–5 để xem lời giải chi tiết.');
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới 5 câu hỏi và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 7. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      renderPracticeUI();
+      renderTemperature(20);
+      selectMol('ester');
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+  </script>
+</body>
+</html>
