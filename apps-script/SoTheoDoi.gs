@@ -392,14 +392,15 @@ function xemLai(d) {
   const gtMap = docGiaiThich(), nxMap = docNhanXet();
   let tlMap = null;
   docCauHinh().forEach(function (c) {
-    if (!c.xemlai || !hopLop(c)) return;
-    const bai = timBaiDaNop(c.madot, ma);
+    if ((!c.xemlai && !hs.gv) || !hopLop(c)) return;   // tài khoản GV: thấy mọi đề của lớp (kể cả chưa mở xem lại)
+    let bai = timBaiDaNop(c.madot, ma);
+    if (!bai && hs.gv) bai = {diem: '', chitiet: '', lan: 1, luc: '', socaudung: 0, tongsocau: 0, file: '', xemDe: true};
     if (!bai) return;
     const chon = tachChiTiet(bai.chitiet);
     const de = docDe(c.madot);
     const kq = chamBai(de, function (q, i) { return chon[i]; });
     ketqua.push({
-      madot: c.madot, ten: c.ten + (bai.lan > 1 && !c.giay ? ' (lần ' + bai.lan + ')' : ''), diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
+      madot: c.madot, ten: c.ten + (bai.xemDe ? (c.giay ? ' · mã ' + c.madot.slice(-3) : '') + ' (xem đề – GV chưa làm)' : bai.lan > 1 && !c.giay ? ' (lần ' + bai.lan + ')' : ''), xemDe: !!bai.xemDe, diem: bai.diem, luc: bai.luc, socaudung: bai.socaudung, tongsocau: bai.tongsocau,
       giay: !!c.giay, coAnh: !!(c.giay && idTuUrl(bai.file)), nx: ((nxMap[ma + '|' + (c.ca || c.madot)] || nxMap[ma + '|' + c.madot]) || {}).nx || '',
       tlcham: c.giay ? (function () { const ca = c.ca || c.madot, x = docTLDiem(ca)[ma]; if (!x) return null; const rb = docRubric(ca); if (!x.duyet) return null; return {tong: x.tong, coAnh: !!x.anh, cau: Object.keys(x.cau).map(function (k) { return {cau: k, diem: x.cau[k].diem, nx: x.cau[k].nx || '', buoc: (function () { const bb = (rb[k] || {}).buoc || [], db = tlDiemBuoc(bb, x.cau[k].dat, x.cau[k].dB); return bb.map(function (b, i) { return {nd: b.nd, diem: b.diem, duoc: db[i], dat: db[i] > 0, lydo: x.cau[k].lydo[i] || ''}; }); })()}; })}; })() : null,
       tuluan: c.giay ? ((tlMap = tlMap || docTuLuan())[c.madot] || []).map(function (t) { return {cau: t.cau, hoi: t.hoi, hinh: t.hinh && t.hinh !== '-' ? anhDataUri(/^hinh\//.test(t.hinh) ? 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/' + t.hinh : t.hinh) : '', diem: t.diem, gt: t.gt}; }) : [], tongDiem: c.giay ? de.reduce(function (a, q) { return a + (Number(q.w) || 0); }, 0) : null,
@@ -432,7 +433,7 @@ function hsAnhPhieu(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma), madot = String(d.madot || '').trim();
   if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const c = timDot(madot);
-  if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
+  if (!c || !c.giay || (!c.xemlai && !hs.gv)) return {ok: false, msg: 'Bai nay chua mo xem lai'};
   const bai = timBaiDaNop(madot, ma), id = bai ? idTuUrl(bai.file) : '';
   if (!id) return {ok: false, msg: 'Khong co anh phieu'};
   const b = DriveApp.getFileById(id).getBlob();
@@ -1066,8 +1067,11 @@ function gvDoiMaOTP(d) {
 function tlNenDoc() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('tl_nen') || '{"viec":[]}'); } catch (e) { return {viec: []}; } }
 function tlNenGhi(q) { PropertiesService.getScriptProperties().setProperty('tl_nen', JSON.stringify(q)); }
 function tlNenTT() {
-  const q = tlNenDoc();
-  return q.viec.filter(function (v) { return !v.xem; }).map(function (v) { return {ca: v.ca, ten: v.ten, tong: v.tong, xong: v.xong, loi: v.loi, trong: v.trong || 0, con: v.cho.length, kt: v.kt || 0, bd: v.bd}; });
+  const q = tlNenDoc(); let doi = false;
+  // việc đã xong: đếm lại số bài còn chờ duyệt / 🔵 chưa xem theo dữ liệu thật; hết thì tự ẩn băng
+  q.viec.forEach(function (v) { if (v.xem || v.cho.length) return; try { const tl = docTLDiem(v.ca, true); let c = 0, t = 0; Object.keys(tl).forEach(function (m) { if (tl[m].nhap && !tl[m].duyet) c++; if (tl[m].duyet && tl[m].tu) t++; }); v.conDuyet = c; v.conTu = t; if (!c && !t) { v.xem = true; doi = true; } } catch (e) {} });
+  if (doi) tlNenGhi(q);
+  return q.viec.filter(function (v) { return !v.xem; }).map(function (v) { return {ca: v.ca, ten: v.ten, tong: v.tong, xong: v.xong, loi: v.loi, trong: v.conTu !== undefined ? v.conTu : (v.trong || 0), conDuyet: v.conDuyet, con: v.cho.length, kt: v.kt || 0, bd: v.bd}; });
 }
 function tlNenTrigger(bat) {
   const cu = ScriptApp.getProjectTriggers().filter(function (t) { return t.getHandlerFunction() === 'tlNenChay'; });
@@ -1523,7 +1527,7 @@ function gvTLAI(d) {
 function hsAnhTL(d) {
   const ma = String(d.mahs || '').trim(), hs = timHS(ma), c = timDot(String(d.madot || '').trim());
   if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
-  if (!c || !c.giay || !c.xemlai) return {ok: false, msg: 'Bai nay chua mo xem lai'};
+  if (!c || !c.giay || (!c.xemlai && !hs.gv)) return {ok: false, msg: 'Bai nay chua mo xem lai'};
   const x = docTLDiem(c.ca || c.madot)[ma]; if (!x || !x.anh) return {ok: false, msg: 'Khong co anh'};
   return {ok: true, anh: 'data:image/jpeg;base64,' + Utilities.base64Encode(DriveApp.getFileById(x.anh).getBlob().getBytes())};
 }

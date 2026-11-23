@@ -12,6 +12,7 @@
 .tlNut{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:4px 0;font:inherit;text-align:left;cursor:pointer}.tlNut b{font-size:17px}.tlNut span{color:#5b6b80;font-size:14px}.tlNut i{margin-left:auto;font-style:normal;color:#5b6b80}.tlCau .hoi{margin:10px 0}.tlHinh{display:block;max-width:100%;margin:8px auto}
 .nxBai{margin:12px 0;border-left:4px solid #1f5fbf;background:#eef4ff;border-radius:10px;padding:10px 14px;line-height:1.5}.nxBai b{display:block;margin-bottom:4px}
 .txTB{background:#eef4ff;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:17px}.txBangHS{width:100%;border-collapse:collapse}.txBangHS th,.txBangHS td{padding:8px;border-bottom:1px solid #e3e8f0;text-align:left}.txBangHS td:last-child,.txBangHS th:last-child{text-align:center;font-size:17px}
+#gvLop{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 4px}#gvLop .gvL{font:inherit;font-weight:700;font-size:14px;padding:6px 12px;border-radius:999px;border:1.5px solid #c9dbf3;background:#fff;color:#1e3a5f;cursor:pointer}#gvLop .gvL.on{background:#1d5fbf;border-color:#1d5fbf;color:#fff}
 </style>
 <style>
 :root{--ink:#172033;--muted:#5b6175;--line:#d9dce5;--bg:#f4f5f9;--card:#fff;--pri:#1f5fbf;--ok:#1e8e3e;--bad:#c5221f;--okbg:#e8f5ec;--badbg:#fdecea}
@@ -126,7 +127,7 @@ img{-webkit-user-drag:none;pointer-events:none}
 .loc{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
 .loc button{border:2px solid var(--line);background:#fff;padding:8px 14px;font-size:16px;color:var(--ink)}
 .loc button.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.baiTN{font-size:16px;font-weight:800;color:var(--muted);margin:22px 4px 10px}
+.baiTN{font-size:20px;font-weight:800;color:#fff;margin:26px 0 12px;padding:10px 16px;border-radius:14px;background:linear-gradient(90deg,#1d5fbf,#3b82f6);box-shadow:0 4px 12px rgba(29,95,191,.25);display:flex;align-items:center;gap:8px}.baiTN::before{content:"📘";font-size:20px}.baiTN.on2{background:linear-gradient(90deg,#b4235a,#e0457b)}.baiTN.lt{background:linear-gradient(90deg,#127a5a,#22a37a)}
 .luoiTN{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 .theTN{display:flex;flex-direction:column;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:0;overflow:hidden;color:var(--ink);font-weight:400}
 .theTN .anh{position:relative;aspect-ratio:16/10;background:#172033;overflow:hidden}
@@ -450,6 +451,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     (j.tx || []).forEach(function (c) { c._l = l; });
     (j.ks || []).forEach(function (k) { k._l = l; });
   }
+  // Tài khoản GV (SBD …00): chọn lớp ngay trong tài khoản (đăng nhập lại tài khoản GV của lớp đó, cùng mật khẩu)
+  function veGVLop() {
+    var o = $('gvLop'); if (!o) { o = document.createElement('div'); o.id = 'gvLop'; $('lopHome').parentNode.insertBefore(o, $('lopHome').nextSibling); }
+    if (!duLieu || !/^\d{6}00$/.test(duLieu.mahs)) { o.hidden = true; return; }
+    var ls = DS.filter(function (l) { return /^\d{6}$/.test(l.tiento) && (location.search.indexOf('demo') >= 0 || !/DEMO/i.test(l.ten)); });
+    o.hidden = false; o.innerHTML = '<span class="sub">👁 Xem lớp:</span> ' + ls.map(function (l) { return '<button type="button" class="gvL' + (lopChon && l.ten === lopChon.ten ? ' on' : '') + '" data-l="' + DS.indexOf(l) + '">' + l.ten + '</button>'; }).join('');
+    [].forEach.call(o.querySelectorAll('button'), function (b) { b.onclick = function () {
+      if (b.classList.contains('on')) return; var mx = duLieu.maxem; b.textContent = '…';
+      $('lop').value = b.getAttribute('data-l'); $('lop').onchange(); $('sbd').value = '00'; $('maxem').value = mx; $('btnXem').click();
+    }; });
+  }
   function taiLopKhac(ds) {
     var khac = ds.map(function (t) { return DS.filter(function (l) { return l.ten === t; })[0]; }).filter(function (l) { return l && l !== LOP_CHINH; });
     if (!khac.length) return;
@@ -695,6 +707,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('tenHome').textContent = duLieu.hoten;
     lopChon = LOP_CHINH || lopChon;
     $('lopHome').textContent = 'Lớp ' + (TAT.length > 1 ? TAT.map(function (x) { return x.l.ten; }).join(' · ') : (lopChon ? lopChon.ten : '')) + ' · SBD ' + duLieu.mahs;
+    veGVLop();
     var nTro = duLieu.bai.filter(function (b) { return b.tro; }).length, nKT = duLieu.bai.length - nTro;
     $('soBai').textContent = duLieu.bai.length ? (nKT ? nKT + ' bài giáo viên đã mở' : '') + (nKT && nTro ? ' · ' : '') + (nTro ? nTro + ' lượt trò chơi' : '') : 'Chưa có bài nào mở xem lại';
     var nTX = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; }).length;
@@ -1158,7 +1171,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var nhom = {}, thu = [];
     chon.forEach(function (t) { var k = (cac.length > 1 && khoiTN === 'tat' ? tenKhoi(String(t.khoi)) + ' · ' : '') + (t.bai || 'Khác'); if (!nhom[k]) { nhom[k] = []; thu.push(k); } nhom[k].push(t); });
     thu.forEach(function (k) {
-      var h = document.createElement('div'); h.className = 'baiTN'; h.textContent = k; box.appendChild(h);
+      var h = document.createElement('div'); h.className = 'baiTN' + (/ôn tập/i.test(k) ? ' on2' : /luyện tập/i.test(k) ? ' lt' : ''); h.textContent = k; box.appendChild(h);
       var luoi = document.createElement('div'); luoi.className = 'luoiTN'; box.appendChild(luoi);
       nhom[k].forEach(function (t) {
         var b = document.createElement('button'); b.className = 'theTN';

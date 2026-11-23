@@ -642,6 +642,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .qKhung{position:relative;background:#000;border-radius:12px;overflow:hidden}.qKhung video{display:block;width:100%;max-height:70vh;object-fit:contain}.qKhung canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .qTT{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;padding:10px 12px;font-size:16px;text-align:center}
 .qMatSau{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 64px);transform:translateX(-50%);z-index:3;font:inherit;font-weight:800;font-size:18px;padding:14px 22px;border-radius:999px;border:3px solid #fff;background:#1a56db;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.45);max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qMatSau[hidden]{display:none}.qMatSau:disabled{opacity:.7}
+.tfBaiHang{display:flex;gap:10px}.tfBaiHang #tfBaiSo{width:6em}
 .thLoai{display:block;font-size:11px;font-weight:600;color:#6b7a90;white-space:nowrap;margin-top:1px}
 .qDiemD{line-height:1.7}
 .tlBanD{margin:0 0 8px;padding:10px 12px;border-radius:12px;background:#eef6ff;border:1px solid #c9dbf3;font-size:15px}.tlBanD .btn2{padding:5px 10px;margin-left:6px}
@@ -843,8 +844,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     <button class="the3 qrThe" id="oQR"><span class="bt3" id="qrIcon"></span><b>Mã QR vào thi</b><span>Chiếu lên cho học sinh quét: các em vào trang chọn lớp và điền thông tin.</span><i class="nut3">Mở mã QR ▸</i></button>
     <div id="bmBan" hidden></div><div id="tlBan" hidden></div><div class="the3" id="homeMo"></div>
     <div class="the3" id="homeTroThe"></div>
-    <div class="the3" id="xhThe"><h2>👁 Xem như học sinh</h2><p class="sub">Đăng nhập Tài khoản HS bằng tài khoản GV (SBD <b>00</b>) để xem các em thấy gì. Mật khẩu đổi ở Cài đặt → Mã.</p>
-      <div class="xhO"><select id="xhLop"></select><span class="xhSbd"><span id="xhPre">------</span><input id="xhSo" inputmode="numeric" maxlength="8" value="00"></span><input id="xhMa" type="password" inputmode="numeric" placeholder="Mật khẩu" autocomplete="off"></div>
+    <div class="the3" id="xhThe"><h2>👁 Xem như học sinh</h2><p class="sub">Vào Tài khoản HS bằng tài khoản GV để xem các em thấy gì – thấy mọi đề của lớp. Vào trong rồi chọn lớp. Mật khẩu đổi ở Cài đặt → Mã.</p>
+      <div class="xhO"><select id="xhLop" hidden></select><span class="xhSbd" hidden><span id="xhPre">------</span><input id="xhSo" maxlength="8" value="00"></span><input id="xhMa" type="password" placeholder="Mật khẩu tài khoản GV" autocomplete="off" style="flex:1;min-width:10em"></div>
       <button class="btn2 nut3b" id="xhMo">Mở Tài khoản HS ▸</button><div class="msg" id="xhMsg"></div></div>
   </div>
   <div id="oNhom"></div>
@@ -2855,7 +2856,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     Object.keys(TLNEN).forEach(function (lop) { (TLNEN[lop] || []).forEach(function (v) {
       var d = DOT.filter(function (x) { return x.giay && (x.ca || x.madot) === v.ca; })[0], ten = esc(v.ten || (d ? d.ten : v.ca));
       if (v.con) h.push('<div class="tlBanD">⏳ Máy đang chấm ngầm tự luận <b>' + ten + '</b>: xong ' + v.xong + '/' + v.tong + ' em</div>');
-      else h.push('<div class="tlBanD">✅ Đã chấm xong tự luận <b>' + ten + '</b>: ' + (v.xong - (v.trong || 0) > 0 ? 'AI đã chấm nháp ' + (v.xong - (v.trong || 0)) + ' bài, mở để duyệt' : 'không còn bài chờ duyệt') + (v.trong ? ' · 🔵 ' + v.trong + ' bài 0 điểm máy đã tự chấm (chưa xem)' : '') + (v.loi ? ' · ' + v.loi + ' bài AI không đọc được' : '') +
+      else h.push('<div class="tlBanD">✅ Đã chấm xong tự luận <b>' + ten + '</b>: ' + (function () { var c = v.conDuyet !== undefined ? v.conDuyet : v.xong - (v.trong || 0); return c > 0 ? 'còn ' + c + ' bài AI chấm nháp chờ duyệt' : 'không còn bài chờ duyệt'; })() + (v.trong ? ' · 🔵 ' + v.trong + ' bài 0 điểm máy đã tự chấm (chưa xem)' : '') + (v.loi ? ' · ' + v.loi + ' bài AI không đọc được' : '') +
         ' <button class="btn2" data-mo="' + esc(v.ca) + '" data-lop="' + esc(lop) + '">Mở duyệt ▸</button> <button class="lienKet" data-an="' + esc(v.ca) + '" data-lop="' + esc(lop) + '">Ẩn</button></div>');
     }); });
     b.hidden = !h.length; b.innerHTML = h.join('');
@@ -5212,7 +5213,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('xhMo').onclick = function () {
       var so = $('xhSo').value.trim(), ma = $('xhMa').value.trim(), m = $('xhMsg');
       if (!/^\d{2}$/.test(so) && !/^\d{8}$/.test(so)) { m.textContent = 'SBD gồm 2 số cuối (hoặc đủ 8 số).'; return; }
-      if (!ma) { m.textContent = 'Nhập mật khẩu.'; return; }
+      if (!ma) { m.textContent = 'Nhập mật khẩu.'; return; } so = '00';
       try { localStorage.setItem('gv_xemhs', JSON.stringify({ tt: sel.value, sbd: so, mx: ma, t: Date.now() })); } catch (e) { m.textContent = 'Máy không cho lưu tạm, hãy mở Tài khoản HS và đăng nhập tay.'; return; }
       m.textContent = ''; $('xhMa').value = '';
       var w = window.open('XEM-LAI.html' + (window.LAM_DEMO ? '?demo' : ''), '_blank'); if (!w) location.href = 'XEM-LAI.html' + (window.LAM_DEMO ? '?demo' : '');
@@ -6676,8 +6677,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<div class="hang2"><div>' +
       '<div class="nhan">Tên tài nguyên</div><input type="text" id="tfTenTN" maxlength="140" placeholder="vd: Pin Daniell Zn – Cu hoạt động thế nào?">' +
       '<div class="nhan">Khối lớp</div><div class="loc" id="tfKhoi"></div>' +
-      '<div class="nhan">Bài</div><input type="text" id="tfBai" maxlength="140" list="tfBaiDs" placeholder="vd: Bài 15: Thế điện cực và nguồn điện hóa học"><datalist id="tfBaiDs">' +
-      baiCo.map(function (b) { return '<option value="' + esc(b) + '">'; }).join('') + '</datalist>' +
+      '<div class="nhan">Mục</div><div class="loc" id="tfBaiLoai">' + ['Bài', 'Ôn tập chương', 'Luyện tập'].map(function (x) { return '<button type="button" data-v="' + x + '">' + x.toUpperCase() + '</button>'; }).join('') + '</div>' +
+      '<div class="tfBaiHang"><div><div class="nhan">Số / chữ</div><input type="text" id="tfBaiSo" maxlength="12" placeholder="15"></div>' +
+      '<div style="flex:1"><div class="nhan">Tên bài / chương</div><input type="text" id="tfBaiTen" maxlength="120" list="tfBaiDs" placeholder="Thế điện cực và nguồn điện hóa học"></div></div>' +
+      '<input type="hidden" id="tfBai"><div class="sub" id="tfBaiXem"></div><datalist id="tfBaiDs">' +
+      baiCo.map(function (b) { return '<option value="' + esc(String(b).replace(/^(Bài|Ôn tập chương|Luyện tập)\s*[^:]*:\s*/i, '')) + '">'; }).join('') + '</datalist>' +
       '<div class="nhan">Loại</div><div class="loc" id="tfLoai"></div>' +
       '<div class="nhan">Mô tả ngắn (không bắt buộc)</div><input type="text" id="tfMoTa" maxlength="300" placeholder="Một câu cho học sinh biết sẽ xem gì">' +
       '<div class="nhan">Kiến thức – yêu cầu cần đạt (không bắt buộc)</div><input type="text" id="tfKT" maxlength="300">' +
@@ -6685,7 +6689,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<div class="chonTep" style="margin-top:8px"><label><input type="file" id="tfAnh" accept="image/*">🖼 Chọn ảnh</label>' + (anhHien ? '<button class="btn2 nho" type="button" id="tfBoAnh">Bỏ ảnh</button>' : '') + '</div>' +
       '<div class="goiY">Ảnh chụp màn hình mô phỏng; tự cắt 16:10 và nén nhỏ.</div></div></div>' +
       '<div class="hangNut"><button class="btn2 huy" type="button" id="tfHuy">Hủy</button><button class="luu" type="button" id="tfLuu">' + (f.cu ? 'Lưu thay đổi' : '📥 Tải lên') + '</button></div><div class="msg" id="tfMsg"></div></div>';
-    $('tfTenTN').value = f.ten || ''; $('tfBai').value = f.bai || ''; $('tfMoTa').value = f.mota || ''; $('tfKT').value = f.kienthuc || '';
+    // Mục bài: BÀI / ÔN TẬP CHƯƠNG / LUYỆN TẬP + số + tên → "Bài 15: Thế điện cực…"
+    var tfL = 'Bài', mB = /^(Bài|Ôn tập chương|Luyện tập)\s*([^:]*?)\s*:\s*(.*)$/i.exec(f.bai || '');
+    if (mB) { tfL = ['Bài', 'Ôn tập chương', 'Luyện tập'].filter(function (x) { return x.toLowerCase() === mB[1].toLowerCase(); })[0] || 'Bài'; $('tfBaiSo').value = mB[2]; $('tfBaiTen').value = mB[3]; } else $('tfBaiTen').value = f.bai || '';
+    var ghepBai = function () { var so = $('tfBaiSo').value.trim(), ten = $('tfBaiTen').value.trim(); $('tfBai').value = ten || so ? tfL + (so ? ' ' + so : '') + ': ' + ten : ''; $('tfBaiXem').textContent = $('tfBai').value ? 'Học sinh thấy mục: ' + $('tfBai').value : ''; };
+    [].forEach.call($('tfBaiLoai').children, function (b) { b.classList.toggle('on', b.getAttribute('data-v') === tfL); b.onclick = function () { tfL = b.getAttribute('data-v'); [].forEach.call($('tfBaiLoai').children, function (x) { x.classList.toggle('on', x === b); }); ghepBai(); }; });
+    $('tfBaiSo').oninput = $('tfBaiTen').oninput = ghepBai; ghepBai();
+    $('tfTenTN').value = f.ten || ''; $('tfMoTa').value = f.mota || ''; $('tfKT').value = f.kienthuc || '';
     var truong = { tfTenTN: 'ten', tfBai: 'bai', tfMoTa: 'mota', tfKT: 'kienthuc' };
     Object.keys(truong).forEach(function (id) { $(id).oninput = function () { f[truong[id]] = this.value; }; });
     var kb = $('tfKhoi');
