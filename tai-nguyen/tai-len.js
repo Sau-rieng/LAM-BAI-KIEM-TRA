@@ -326,17 +326,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261123-104636",
-  "file": "tai-len/tl-261123-104636.html",
-  "anh": "",
-  "ten": "4. Ứng dụng của chất béo và acid béo (Hóa học 12 – KNTT)",
-  "khoi": "12",
-  "bai": "BAI CHAT BEO",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261123-104717",
   "file": "tai-len/tl-261123-104717.html",
   "anh": "",
