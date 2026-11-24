@@ -217,10 +217,11 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "anh": "",
   "ten": "Sơ đồ tư duy & Luyện tập Chương 2: Carbohydrate (Hóa 12 – KNTT)",
   "khoi": "12",
-  "bai": "",
+  "bai": "Ôn tập chương 2:",
   "loai": "Mô phỏng",
   "kienthuc": "",
-  "mota": ""
+  "mota": "",
+  "kenh": "mp"
  },
  {
   "ma": "tl-261120-190336",
