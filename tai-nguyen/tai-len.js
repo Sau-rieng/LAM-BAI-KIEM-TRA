@@ -403,17 +403,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261123-105242",
-  "file": "tai-len/tl-261123-105242.html",
-  "anh": "",
-  "ten": "3. Tính chất vật lí của Ester (Hóa học 12 – KNTT)",
-  "khoi": "12",
-  "bai": "Bài 1: ESTER",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261124-193126",
   "file": "tai-len/tl-261124-193126.pdf",
   "anh": "",
