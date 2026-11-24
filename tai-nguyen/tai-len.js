@@ -489,6 +489,21 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "kenh": "tl",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261124-193343",
+  "file": "tai-len/tl-261124-193343.pdf",
+  "anh": "",
+  "tep": "pdf",
+  "tenTep": "H12-HK1-245.pdf",
+  "kb": 75,
+  "ten": "H12 HK1 245",
+  "khoi": "12",
+  "bai": "",
+  "loai": "Đề ôn tập",
+  "kenh": "tl",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
