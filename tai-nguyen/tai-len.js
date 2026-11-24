@@ -229,10 +229,11 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "anh": "",
   "ten": "Sơ đồ tư duy & Luyện tập Chương 3: Hợp chất chứa nitrogen (Hóa 12 – KNTT)",
   "khoi": "12",
-  "bai": "",
+  "bai": "Ôn tập chương 3:",
   "loai": "Mô phỏng",
   "kienthuc": "",
-  "mota": ""
+  "mota": "",
+  "kenh": "mp"
  },
  {
   "ma": "tl-261120-190355",
