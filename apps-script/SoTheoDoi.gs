@@ -652,6 +652,7 @@ function gvTnNap(d) {
       } else if (muc.anh) { ghXoa(gh, pa, 'Bo anh bia: ' + ten); muc.anh = ''; }
     }
     muc.ten = ten; muc.khoi = khoi; muc.bai = chuTN(t.bai, 140); muc.loai = chuTN(t.loai, 40); muc.kenh = kenh;
+    if (!cu || html || tep) muc.ngay = Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyyy-MM-dd');
     muc.kienthuc = chuTN(t.kienthuc, 300); muc.mota = chuTN(t.mota, 300);
     if (!cu) ds.push(muc);
     ghGhiDs(gh, ds, dsF.sha, (cu ? 'Sua' : 'Them') + ' muc tai nguyen: ' + ten);
@@ -681,6 +682,7 @@ function gvTnLink(d) {
     if (!/^\d{1,2}$/.test(khoi) || !bai) return {ok: false, msg: 'Thieu khoi/bai'};
     const muc = cu || {ma: 'lk-' + Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyMMdd-HHmmss')};
     muc.ten = ten; muc.khoi = khoi; muc.bai = bai; muc.link = url; muc.kenh = chuTN(d.kenh, 20) || muc.kenh || 'mp';
+    if (!cu) muc.ngay = Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyyy-MM-dd');
     if (!cu) ds.push(muc);
     ghGhiDs(gh, ds, dsF.sha, (cu ? 'Sua' : 'Them') + ' link thi nghiem: ' + ten);
     return {ok: true, ma: muc.ma, tailen: ds};
