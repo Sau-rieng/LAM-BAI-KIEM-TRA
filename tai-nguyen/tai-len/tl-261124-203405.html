@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chương 4 • Bài 12: Đại cương về Polymer (Hóa học 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – LIGHT MODE)
+       ========================================================================= */
+    :root {
+      --bg-page: #f4f7fb;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      --primary: #0b5cab;
+      --primary-dark: #084785;
+      --primary-soft: #eff6ff;
+      --primary-border: #bfdbfe;
+
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #f0fdfa;
+      --teal-border: #99f6e4;
+
+      --emerald: #059669;
+      --emerald-dark: #047857;
+      --emerald-soft: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --amber: #d97706;
+      --amber-dark: #92400e;
+      --amber-soft: #fffbeb;
+      --amber-border: #fde68a;
+
+      --rose: #dc2626;
+      --rose-dark: #991b1b;
+      --rose-soft: #fef2f2;
+      --rose-border: #fecaca;
+
+      --violet: #6d28d9;
+      --violet-dark: #5b21b6;
+      --violet-soft: #f5f3ff;
+      --violet-border: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. CÔNG THỨC HÓA HỌC LIỀN MẠCH (CHỐNG VỠ CHỈ SỐ DƯỚI/TRÊN TRONG FLEXBOX)
+       ========================================================================= */
+    .chem-formula {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chem-formula sub, sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    .chem-formula sup, sup {
+      font-size: 0.72em;
+      line-height: 0;
+      vertical-align: 0.42em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH 4 TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 10px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (TỐI ƯU CẢM ỨNG IPAD/SAFARI – KHÔNG DÍNH HOVER)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 15px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-teal {
+      background-color: var(--teal);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-violet {
+      background-color: var(--violet);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-amber {
+      background-color: var(--amber);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-outline.active,
+    .btn-outline.active:hover,
+    .btn-outline.active:focus,
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--primary);
+      border-color: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    .btn-teal.active,
+    .btn-teal.active:hover,
+    .btn-teal.active:focus {
+      background-color: var(--teal-dark);
+      border-color: var(--teal-dark);
+      color: #ffffff;
+    }
+
+    .btn-violet.active,
+    .btn-violet.active:hover,
+    .btn-violet.active:focus {
+      background-color: var(--violet-dark);
+      border-color: var(--violet-dark);
+      color: #ffffff;
+    }
+
+    .btn-amber.active,
+    .btn-amber.active:hover,
+    .btn-amber.active:focus {
+      background-color: var(--amber-dark);
+      border-color: var(--amber-dark);
+      color: #ffffff;
+    }
+
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--primary);
+        background-color: rgba(11, 92, 171, 0.08);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+      }
+      .btn-teal:hover:not(:disabled) {
+        background-color: var(--teal-dark);
+      }
+      .btn-violet:hover:not(:disabled) {
+        background-color: var(--violet-dark);
+      }
+      .btn-amber:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .btn-outline:not(.active):hover:not(:disabled) {
+        background-color: var(--primary-soft);
+        border-color: var(--primary);
+      }
+      .poly-row:not(.active):hover {
+        background-color: var(--primary-soft);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--primary);
+        background-color: #f8fbff;
+      }
+    }
+
+    /* =========================================================================
+       5. BỐ CỤC CHUNG & CARD
+       ========================================================================= */
+    .main-container {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 42px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .num-badge.teal {
+      background-color: var(--teal-soft);
+      color: var(--teal);
+    }
+
+    .num-badge.violet {
+      background-color: var(--violet-soft);
+      color: var(--violet);
+    }
+
+    .num-badge.amber {
+      background-color: var(--amber-soft);
+      color: var(--amber-dark);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.14rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .pill-tag.teal {
+      background-color: var(--teal-soft);
+      color: var(--teal-dark);
+      border: 1px solid var(--teal-border);
+    }
+
+    .pill-tag.violet {
+      background-color: var(--violet-soft);
+      color: var(--violet);
+      border: 1px solid var(--violet-border);
+    }
+
+    .pill-tag.amber {
+      background-color: var(--amber-soft);
+      color: var(--amber-dark);
+      border: 1px solid var(--amber-border);
+    }
+
+    .sgk-callout {
+      background-color: var(--primary-soft);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 14px 16px;
+      font-size: 0.96rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      line-height: 1.62;
+    }
+
+    .sgk-callout ul {
+      margin: 6px 0 0;
+      padding-left: 20px;
+    }
+
+    .sgk-callout li + li {
+      margin-top: 5px;
+    }
+
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    .svg-smooth {
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease, fill 0.35s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* =========================================================================
+       6. BẢNG DỮ LIỆU, HỘP MÔ TẢ & THANH TRƯỢT CHUẨN TỈ LỆ
+       ========================================================================= */
+    .data-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+      background-color: #ffffff;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .data-table thead th {
+      background-color: var(--primary-soft);
+      color: var(--text-main);
+      font-weight: 800;
+    }
+
+    .poly-row {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .poly-row.active {
+      background-color: #dbeafe;
+    }
+
+    .poly-highlight-bar {
+      margin-top: 12px;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      background-color: #f8fbff;
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    .status-desc-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background-color: #f8fbff;
+      border: 1.5px solid var(--primary-border);
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.62;
+    }
+
+    .dual-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    @media (min-width: 920px) {
+      .dual-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .slider-panel {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      margin-bottom: 14px;
+    }
+
+    .slider-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .readout-box {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 7px 15px;
+      border-radius: 11px;
+      font-weight: 800;
+    }
+
+    .readout-box .lbl {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    .readout-box .val {
+      font-size: 1.24rem;
+      color: #38bdf8;
+      min-width: 58px;
+      text-align: right;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 11px;
+      border-radius: 999px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Nhãn mốc căn chuẩn theo tỉ lệ phần trăm toán học */
+    .ticks-abs {
+      position: relative;
+      height: 26px;
+      margin-top: 7px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .ticks-abs span {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    /* =========================================================================
+       7. CÂU HỎI THẢO LUẬN & HIỆU ỨNG
+       ========================================================================= */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 820px) {
+      .qa-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .qa-card {
+      border: 1.5px solid var(--teal-border);
+      border-radius: var(--radius-lg);
+      background-color: var(--teal-soft);
+      overflow: hidden;
+    }
+
+    .qa-head {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .qa-q {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .qa-ans {
+      padding: 13px 16px;
+      background-color: #ffffff;
+      border-top: 1px solid var(--teal-border);
+      font-size: 0.94rem;
+      color: var(--text-body);
+      line-height: 1.62;
+    }
+
+    @keyframes flameFlicker {
+      0%, 100% { transform: scaleY(1) scaleX(1); opacity: 0.92; }
+      50% { transform: scaleY(1.12) scaleX(0.92); opacity: 1; }
+    }
+
+    .flame-anim {
+      transform-box: fill-box;
+      transform-origin: center bottom;
+      animation: flameFlicker 0.35s infinite ease-in-out;
+    }
+
+    /* =========================================================================
+       8. TAB 4: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--violet));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .q-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.14s ease;
+    }
+
+    .q-dot.current {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+    .q-dot.correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+      color: var(--emerald);
+    }
+    .q-dot.wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      color: var(--primary-dark);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .level-badge.nb { background-color: var(--emerald-soft); color: var(--emerald-dark); border-color: var(--emerald-border); }
+    .level-badge.th { background-color: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
+    .level-badge.vd { background-color: var(--violet-soft); color: var(--violet); border-color: var(--violet-border); }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose);
+      color: #ffffff;
+    }
+
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+    .feedback-head.ok { background-color: var(--emerald-soft); color: #065f46; border-bottom: 1px solid var(--emerald-border); }
+    .feedback-head.err { background-color: var(--rose-soft); color: var(--rose-dark); border-bottom: 1px solid var(--rose-border); }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: #065f46;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.24);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+  
+    .lesson-video-row { margin-top: 8px; }
+    .lesson-video-row .btn, .real-video-row .btn { text-decoration: none; padding: 6px 12px; font-size: 0.82rem; }
+    .real-video-row { margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <!-- Icon SVG chuỗi mắt xích Polymer 44x44px -->
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="18" r="4" fill="#93c5fd" stroke="#ffffff" stroke-width="1.6"/>
+              <line x1="12" y1="18" x2="14" y2="18" stroke="#ffffff" stroke-width="2.4"/>
+              <circle cx="18" cy="18" r="4" fill="#fde047" stroke="#ffffff" stroke-width="1.6"/>
+              <line x1="22" y1="18" x2="24" y2="18" stroke="#ffffff" stroke-width="2.4"/>
+              <circle cx="28" cy="18" r="4" fill="#99f6e4" stroke="#ffffff" stroke-width="1.6"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">CHƯƠNG 4 • BÀI 12: ĐẠI CƯƠNG VỀ POLYMER</h1>
+            <p class="brand-sub">Hóa học 12 – Kết nối tri thức với cuộc sống</p>
+            <div class="lesson-video-row">
+              <a id="lessonVideoLink" class="btn btn-outline" target="_blank" rel="noopener noreferrer"><span>▶ Xem video thí nghiệm / bài giảng trên YouTube</span></a>
+            </div>
+          </div>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+
+      <!-- Thanh điều hướng 4 Tab -->
+      <nav class="tabs-bar" role="tablist" aria-label="Điều hướng 4 phần bài học">
+        <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+          <span>1. Khái niệm, Danh pháp &amp; Cấu trúc mạch</span>
+        </button>
+        <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+          <span>2. Tính chất vật lí &amp; Hóa học</span>
+        </button>
+        <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+          <span>3. Phương pháp tổng hợp Polymer</span>
+        </button>
+        <button id="tabBtn-4" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(4)">
+          <span>4. Luyện tập (10 câu)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: KHÁI NIỆM, DANH PHÁP & CẤU TRÚC MẠCH
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+      <!-- Thẻ tóm tắt khái niệm & quy tắc gọi tên -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Khái niệm &amp; Quy tắc gọi tên Polymer (SGK KNTT)</h2>
+          </div>
+          <span class="pill-tag">poly + tên monomer</span>
+        </div>
+
+        <div class="sgk-callout">
+          <b>Khái niệm:</b> <b>Polymer</b> là những hợp chất có <b>phân tử khối lớn</b> do nhiều đơn vị nhỏ (gọi là <b>mắt xích</b>) liên kết với nhau tạo nên. Số lượng mắt xích trong một phân tử polymer gọi là <b>hệ số polymer hóa (<span class="chem-formula">n</span>)</b>. Các phân tử nhỏ ban đầu tạo nên mắt xích gọi là <b>monomer</b>.
+          <ul>
+            <li><b>Quy tắc gọi tên:</b> Ghép từ <b>poly</b> trước <b>tên monomer</b>.</li>
+            <li><b>Lưu ý dấu ngoặc đơn:</b> Nếu tên monomer gồm từ <b>2 cụm từ trở lên</b> (hoặc từ 2 nhánh), đặt tên monomer trong dấu ngoặc đơn — ví dụ: <b>poly(vinyl chloride)</b>, <b>poly(methyl methacrylate)</b>.</li>
+          </ul>
+        </div>
+
+        <!-- Bảng tương tác 4 polymer phổ biến -->
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ký hiệu</th>
+                <th>Monomer ban đầu</th>
+                <th>Công thức Polymer (Mắt xích)</th>
+                <th>Tên gọi chuẩn (SGK)</th>
+                <th>M mắt xích</th>
+              </tr>
+            </thead>
+            <tbody id="polyTableBody"></tbody>
+          </table>
+        </div>
+
+        <div id="polyHighlightBar" class="poly-highlight-bar"></div>
+      </div>
+
+      <!-- Mô phỏng SVG 3 dạng mạch polymer -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge violet">2</span>
+            <h2 class="card-title">Mô phỏng 3 dạng cấu trúc mạch Polymer</h2>
+          </div>
+          <span id="chainBadge" class="pill-tag violet">Mạch không phân nhánh</span>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="chBtn-linear" type="button" class="btn btn-outline active" onclick="selectChainType('linear')">
+              <span>1. Mạch không phân nhánh</span>
+            </button>
+            <button id="chBtn-branched" type="button" class="btn btn-outline" onclick="selectChainType('branched')">
+              <span>2. Mạch phân nhánh</span>
+            </button>
+            <button id="chBtn-network" type="button" class="btn btn-outline" onclick="selectChainType('network')">
+              <span>3. Mạch mạng không gian</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="svg-stage">
+          <svg id="chainSvg" viewBox="0 0 820 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng 3 dạng cấu trúc mạch polymer"></svg>
+        </div>
+
+        <div id="chainDescBox" class="status-desc-box"></div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: TÍNH CHẤT VẬT LÍ & TÍNH CHẤT HÓA HỌC
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <!-- Phần 1: Tính chất vật lí & Nhiệt dẻo vs Nhiệt rắn -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge teal">1</span>
+            <h2 class="card-title">Tính chất vật lí: Polymer nhiệt dẻo vs Polymer nhiệt rắn</h2>
+          </div>
+          <span id="thermoBadge" class="pill-tag teal">Polymer nhiệt dẻo (Tái chế được)</span>
+        </div>
+
+        <div class="sgk-callout" style="margin-bottom: 14px;">
+          <b>Tính chất vật lí chung:</b> Hầu hết polymer là <b>chất rắn, không bay hơi</b>, <b>không có nhiệt độ nóng chảy xác định</b> (nóng chảy trong một khoảng nhiệt độ rộng) và <b>đa số không tan trong nước</b> cũng như các dung môi thông thường.
+        </div>
+
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="thBtn-plastic" type="button" class="btn btn-outline active" onclick="selectThermo('plastic')">
+              <span>♻️ Polymer nhiệt dẻo (PE, PVC, PP...)</span>
+            </button>
+            <button id="thBtn-set" type="button" class="btn btn-outline" onclick="selectThermo('set')">
+              <span>🔥 Polymer nhiệt rắn (Nhựa bakelite, PPF...)</span>
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button id="btnHeatThermo" type="button" class="btn btn-amber" onclick="toggleThermoHeat()">
+              <span id="txtHeatThermo">🔥 Đun nóng kiểm chứng</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="svg-stage">
+          <svg id="thermoSvg" viewBox="0 0 820 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="So sánh polymer nhiệt dẻo và polymer nhiệt rắn khi đun nóng"></svg>
+        </div>
+        <div class="real-video-row">
+          <a id="vidThermo" class="btn btn-outline" target="_blank" rel="noopener noreferrer"><span>▶ Xem thí nghiệm thật trên YouTube</span></a>
+        </div>
+
+        <div id="thermoDescBox" class="status-desc-box"></div>
+      </div>
+
+      <!-- Phần 2: Phòng thí nghiệm ảo 3 loại phản ứng hóa học -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">2</span>
+            <h2 class="card-title">Phòng thí nghiệm ảo: 3 loại phản ứng hóa học của Polymer</h2>
+          </div>
+          <span id="rxnBadge" class="pill-tag">Phản ứng cắt mạch (Depolymer hóa PS)</span>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="rxnBtn-cut" type="button" class="btn btn-outline active" onclick="selectPolyRxn('cut')">
+              <span>✂ 1. Phản ứng cắt mạch</span>
+            </button>
+            <button id="rxnBtn-keep" type="button" class="btn btn-outline" onclick="selectPolyRxn('keep')">
+              <span>🔄 2. Phản ứng giữ nguyên mạch</span>
+            </button>
+            <button id="rxnBtn-cross" type="button" class="btn btn-outline" onclick="selectPolyRxn('cross')">
+              <span>🕸️ 3. Phản ứng tăng mạch (khâu mạch)</span>
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button id="btnRunRxn" type="button" class="btn btn-primary" onclick="setRxnDone(true)">
+              <span>▶ Thực hiện phản ứng</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="setRxnDone(false)">
+              <span>↻ Đặt lại</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="svg-stage">
+          <svg id="polyRxnSvg" viewBox="0 0 820 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng 3 loại phản ứng hóa học của polymer"></svg>
+        </div>
+
+        <div id="polyRxnDesc" class="status-desc-box"></div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: PHƯƠNG PHÁP TỔNG HỢP POLYMER
+         ======================================================================= -->
+    <section id="tabPanel-3" class="stack-col hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Mô phỏng 2 phương pháp tổng hợp Polymer: Trùng hợp &amp; Trùng ngưng</h2>
+          </div>
+          <span id="synBadge" class="pill-tag">Phản ứng trùng hợp (PE)</span>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="synMode-add" type="button" class="btn btn-outline active" onclick="selectSynMode('add')">
+              <span>🔗 1. Phản ứng trùng hợp</span>
+            </button>
+            <button id="synMode-cond" type="button" class="btn btn-outline" onclick="selectSynMode('cond')">
+              <span>💧 2. Phản ứng trùng ngưng (Nylon-6,6)</span>
+            </button>
+          </div>
+
+          <!-- Bộ chọn PE / PVC chỉ hiện ở chế độ Trùng hợp -->
+          <div id="addSubWrap" class="btn-group">
+            <button id="addSub-pe" type="button" class="btn btn-teal active" onclick="selectAddMonomer('pe')">
+              <span>Ethylene (<span class="chem-formula">CH<sub>2</sub>=CH<sub>2</sub></span> → PE)</span>
+            </button>
+            <button id="addSub-pvc" type="button" class="btn btn-teal" onclick="selectAddMonomer('pvc')">
+              <span>Vinyl chloride (<span class="chem-formula">CH<sub>2</sub>=CHCl</span> → PVC)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Thanh trượt tiến trình 0-100% căn mốc chuẩn tỉ lệ -->
+        <div class="slider-panel">
+          <div class="slider-top">
+            <div class="btn-group">
+              <button id="btnSynAuto" type="button" class="btn btn-primary" onclick="toggleSynAuto()">
+                <span id="synAutoIcon">▶</span>
+                <span id="synAutoText">Chạy tự động</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetSyn()">
+                <span>↻ Đặt lại (0%)</span>
+              </button>
+            </div>
+
+            <div class="readout-box">
+              <span class="lbl">Tiến trình:</span>
+              <span id="synPctVal" class="val">0%</span>
+            </div>
+          </div>
+
+          <input id="synSlider" type="range" class="range-slider" min="0" max="100" step="1" value="0" oninput="onSynSlider(this.value)" />
+
+          <!-- 3 mốc 0%, 50%, 100% đặt chính xác theo tỉ lệ toán học -->
+          <div class="ticks-abs">
+            <span style="left: 0%;">0% (Monomer ban đầu)</span>
+            <span style="left: 50%; transform: translateX(-50%);">50% (Đang kết hợp)</span>
+            <span style="left: 100%; transform: translateX(-100%); color: var(--emerald-dark);">100% (Tạo mạch Polymer)</span>
+          </div>
+        </div>
+
+        <!-- Khung SVG mô phỏng trùng hợp / trùng ngưng -->
+        <div class="svg-stage">
+          <svg id="synSvg" viewBox="0 0 820 285" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng phản ứng trùng hợp và trùng ngưng tổng hợp polymer"></svg>
+        </div>
+        <div class="real-video-row">
+          <a id="vidSyn" class="btn btn-outline" target="_blank" rel="noopener noreferrer"><span>▶ Xem thí nghiệm thật trên YouTube</span></a>
+        </div>
+
+        <div id="synEqBox" class="status-desc-box"></div>
+      </div>
+
+      <!-- Bảng so sánh Trùng hợp vs Trùng ngưng -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge teal">2</span>
+            <h2 class="card-title">So sánh Phản ứng trùng hợp và Phản ứng trùng ngưng</h2>
+          </div>
+        </div>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 24%;">Tiêu chí so sánh</th>
+                <th>Phản ứng trùng hợp</th>
+                <th>Phản ứng trùng ngưng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Điều kiện monomer</b></td>
+                <td>Phân tử có <b>liên kết bội (<span class="chem-formula">C=C</span>)</b> hoặc <b>vòng kém bền</b>.</td>
+                <td>Phân tử có <b>ít nhất 2 nhóm chức</b> có khả năng phản ứng tạo liên kết (như <span class="chem-formula">–NH<sub>2</sub></span>, <span class="chem-formula">–COOH</span>, <span class="chem-formula">–OH</span>...).</td>
+              </tr>
+              <tr>
+                <td><b>Sản phẩm phụ</b></td>
+                <td><b>Không</b> giải phóng phân tử nhỏ.</td>
+                <td>Giải phóng các <b>phân tử nhỏ</b> (thường là <span class="chem-formula">H<sub>2</sub>O</span>).</td>
+              </tr>
+              <tr>
+                <td><b>Thành phần nguyên tố</b></td>
+                <td>Polymer có thành phần nguyên tố giống monomer.</td>
+                <td>Polymer có thành phần nguyên tố khác monomer (do đã tách <span class="chem-formula">H<sub>2</sub>O</span>).</td>
+              </tr>
+              <tr>
+                <td><b>Ví dụ tiêu biểu</b></td>
+                <td>PE, PVC, PP, PS, PMMA, cao su buna...</td>
+                <td>Tơ nylon-6,6, tơ capron (nylon-6), nhựa PPF...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2 Câu hỏi thảo luận trên lớp (ẩn đáp án mặc định) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge amber">?</span>
+            <h2 class="card-title">Câu hỏi thảo luận trên lớp</h2>
+          </div>
+          <span class="pill-tag amber">Bấm để Hiện / Ẩn đáp án</span>
+        </div>
+
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 1: Vì sao trong thực tế các vỏ chai nhựa PE, PP có thể thu gom nấu chảy tái chế, còn ổ cắm điện làm từ nhựa bakelite (nhiệt rắn) lại không tái chế bằng cách nấu chảy được?</p>
+              <div>
+                <button id="btnQa1" type="button" class="btn btn-teal" onclick="toggleQa(1)"><span>Xem đáp án gợi ý</span></button>
+              </div>
+            </div>
+            <div id="qaAns1" class="qa-ans hidden">
+              <b>Đáp án:</b> Nhựa PE, PP là <b>polymer nhiệt dẻo</b> (mạch không phân nhánh, chỉ liên kết với nhau bằng lực van der Waals yếu) nên khi đun nóng sẽ mềm chảy thành chất lỏng nhớt và có thể đúc lại thành sản phẩm mới. Ngược lại, nhựa bakelite là <b>polymer nhiệt rắn</b> có cấu trúc <b>mạng không gian</b> với các liên kết cộng hóa trị bền chặt nối ngang giữa các mạch, nên khi đun nóng không nóng chảy mà bị phân hủy (cháy khét).
+            </div>
+          </div>
+
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 2: Quá trình lưu hóa cao su thiên nhiên bằng lưu huỳnh thuộc loại phản ứng nào của polymer và giúp cải thiện tính chất nào của cao su?</p>
+              <div>
+                <button id="btnQa2" type="button" class="btn btn-teal" onclick="toggleQa(2)"><span>Xem đáp án gợi ý</span></button>
+              </div>
+            </div>
+            <div id="qaAns2" class="qa-ans hidden">
+              <b>Đáp án:</b> Lưu hóa cao su là <b>phản ứng tăng mạch (khâu mạch)</b>. Các nguyên tử lưu huỳnh tạo ra các <b>cầu nối disulfur (<span class="chem-formula">–S–S–</span>)</b> nối các mạch polyisoprene thẳng lại thành <b>mạng không gian</b>, giúp cao su lưu hóa có <b>độ đàn hồi tốt hơn, chịu nhiệt, lâu mòn và khó tan</b> trong dung môi hữu cơ hơn nhiều so với cao su thô.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 4: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+         ======================================================================= -->
+    <section id="tabPanel-4" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: Đại cương về Polymer (10 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              4 Nhận biết • 3 Thông hiểu • 3 Vận dụng • Xáo trộn đáp án Fisher–Yates
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 10</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="btn btn-primary" onclick="submitQuiz()"><span>✔ Nộp bài &amp; Tổng kết</span></button>
+            <button type="button" class="btn btn-secondary" onclick="resetQuiz()"><span>↻ Làm lại (Xáo trộn đáp án)</span></button>
+          </div>
+        </div>
+
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)"><span>← Câu trước</span></button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 10</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)"><span>Câu tiếp theo →</span></button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--primary-dark);">Kết quả bài làm</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.94rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()"><span>Làm lại (Xáo trộn đáp án)</span></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. DỮ LIỆU TAB 1 (4 POLYMER PHỔ BIẾN) & NGÂN HÀNG 10 CÂU HỎI
+    // =========================================================================
+    const COMMON_POLYMERS = [
+      {
+        code: 'PE',
+        monomer: '<span class="chem-formula">CH<sub>2</sub>=CH<sub>2</sub></span> (ethylene)',
+        unit: '<span class="chem-formula">–(CH<sub>2</sub>–CH<sub>2</sub>)<sub>n</sub>–</span>',
+        name: 'polyethylene',
+        mUnit: 28,
+        note: 'Tên monomer chỉ có 1 từ (<i>ethylene</i>) nên viết liền <b>polyethylene</b>, không cần ngoặc đơn.'
+      },
+      {
+        code: 'PVC',
+        monomer: '<span class="chem-formula">CH<sub>2</sub>=CHCl</span> (vinyl chloride)',
+        unit: '<span class="chem-formula">–(CH<sub>2</sub>–CHCl)<sub>n</sub>–</span>',
+        name: 'poly(vinyl chloride)',
+        mUnit: 62.5,
+        note: 'Tên monomer gồm 2 cụm từ (<i>vinyl chloride</i>) nên đặt trong dấu ngoặc đơn: <b>poly(vinyl chloride)</b>.'
+      },
+      {
+        code: 'PS',
+        monomer: '<span class="chem-formula">C<sub>6</sub>H<sub>5</sub>CH=CH<sub>2</sub></span> (styrene)',
+        unit: '<span class="chem-formula">–(CH<sub>2</sub>–CH(C<sub>6</sub>H<sub>5</sub>))<sub>n</sub>–</span>',
+        name: 'polystyrene',
+        mUnit: 104,
+        note: 'Tên monomer chỉ có 1 từ (<i>styrene</i>) nên viết liền <b>polystyrene</b>.'
+      },
+      {
+        code: 'PMMA',
+        monomer: '<span class="chem-formula">CH<sub>2</sub>=C(CH<sub>3</sub>)COOCH<sub>3</sub></span> (methyl methacrylate)',
+        unit: '<span class="chem-formula">–(CH<sub>2</sub>–C(CH<sub>3</sub>)(COOCH<sub>3</sub>))<sub>n</sub>–</span>',
+        name: 'poly(methyl methacrylate)',
+        mUnit: 100,
+        note: 'Tên monomer gồm 2 cụm từ (<i>methyl methacrylate</i>) nên đặt trong dấu ngoặc đơn: <b>poly(methyl methacrylate)</b>.'
+      }
+    ];
+
+    const RAW_QUIZ_BANK = [
+      // --- 4 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nhận diện được tên gọi đúng của polymer theo quy tắc danh pháp SGK',
+        question: 'Polymer có công thức <span class="chem-formula">–(CH<sub>2</sub>–CHCl)<sub>n</sub>–</span> có tên gọi đúng theo quy tắc danh pháp là gì?',
+        options: [
+          {
+            text: 'poly(vinyl chloride).',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: monomer là <i>vinyl chloride</i> (2 cụm từ) nên đặt trong dấu ngoặc đơn sau tiền tố <i>poly</i>.'
+          },
+          {
+            text: 'polyethylene.',
+            isCorrect: false,
+            reason: 'Sai: polyethylene có mắt xích <span class="chem-formula">–CH<sub>2</sub>–CH<sub>2</sub>–</span>, không chứa nguyên tử Cl.'
+          },
+          {
+            text: 'polystyrene.',
+            isCorrect: false,
+            reason: 'Sai: polystyrene có nhánh vòng benzene <span class="chem-formula">–C<sub>6</sub>H<sub>5</sub></span>.'
+          },
+          {
+            text: 'poly(methyl methacrylate).',
+            isCorrect: false,
+            reason: 'Sai: PMMA được tổng hợp từ ester không no methyl methacrylate.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Phân loại được polymer theo cấu trúc mạch không phân nhánh, phân nhánh, mạng không gian',
+        question: 'Polymer nào sau đây có cấu trúc <b>mạch mạng không gian</b>?',
+        options: [
+          {
+            text: 'Cao su lưu hóa và nhựa bakelite.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: cao su lưu hóa (có cầu nối <span class="chem-formula">–S–S–</span>) và nhựa bakelite có cấu trúc mạch mạng không gian bền chắc.'
+          },
+          {
+            text: 'Polyethylene (PE) và cellulose.',
+            isCorrect: false,
+            reason: 'Sai: PE và cellulose có cấu trúc <b>mạch không phân nhánh</b>.'
+          },
+          {
+            text: 'Amylopectin và glycogen.',
+            isCorrect: false,
+            reason: 'Sai: amylopectin và glycogen có cấu trúc <b>mạch phân nhánh</b>.'
+          },
+          {
+            text: 'Amylose và poly(vinyl chloride).',
+            isCorrect: false,
+            reason: 'Sai: cả amylose và PVC đều thuộc loại <b>mạch không phân nhánh</b>.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được tính chất vật lí chung của polymer',
+        question: 'Đặc điểm vật lí chung nào sau đây là <b>đúng</b> đối với hầu hết các polymer?',
+        options: [
+          {
+            text: 'Là chất rắn, không bay hơi, nóng chảy trong một khoảng nhiệt độ rộng và đa số không tan trong nước.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: do là hỗn hợp nhiều mạch có hệ số <i>n</i> khác nhau nên polymer không có nhiệt độ nóng chảy cố định mà nóng chảy trong khoảng rộng.'
+          },
+          {
+            text: 'Là chất lỏng dễ bay hơi và có nhiệt độ sôi xác định.',
+            isCorrect: false,
+            reason: 'Sai: polymer có phân tử khối rất lớn nên ở thể rắn và không bay hơi.'
+          },
+          {
+            text: 'Đều tan vô hạn trong nước lạnh và ethanol.',
+            isCorrect: false,
+            reason: 'Sai: đa số polymer không tan trong nước và dung môi thông thường.'
+          },
+          {
+            text: 'Đều dẫn điện tốt như kim loại.',
+            isCorrect: false,
+            reason: 'Sai: đa số polymer thông thường là chất cách điện tốt (nên dùng làm vỏ bọc dây điện).'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được điều kiện của monomer tham gia phản ứng trùng hợp',
+        question: 'Để tham gia <b>phản ứng trùng hợp</b> tạo polymer, phân tử monomer cần có đặc điểm cấu tạo nào sau đây?',
+        options: [
+          {
+            text: 'Có liên kết bội (như <span class="chem-formula">C=C</span>) hoặc vòng kém bền có thể mở ra.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: phản ứng trùng hợp xảy ra nhờ mở liên kết π ở liên kết bội hoặc mở vòng kém bền.'
+          },
+          {
+            text: 'Chỉ chứa toàn các liên kết đơn C–C mạch hở.',
+            isCorrect: false,
+            reason: 'Sai: alkane mạch hở chỉ có liên kết đơn bền vững nên không thể tham gia phản ứng trùng hợp.'
+          },
+          {
+            text: 'Bắt buộc phải giải phóng phân tử nước (<span class="chem-formula">H<sub>2</sub>O</span>).',
+            isCorrect: false,
+            reason: 'Sai: giải phóng phân tử nhỏ như <span class="chem-formula">H<sub>2</sub>O</span> là đặc trưng của <b>phản ứng trùng ngưng</b>.'
+          },
+          {
+            text: 'Phải là hợp chất vô cơ không chứa carbon.',
+            isCorrect: false,
+            reason: 'Sai: các monomer trùng hợp phổ biến đều là hợp chất hữu cơ.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Phân loại được các phản ứng cắt mạch, giữ nguyên mạch và tăng mạch polymer',
+        question: 'Phản ứng thủy phân poly(vinyl acetate) bằng dung dịch NaOH thu được poly(vinyl alcohol) thuộc loại phản ứng nào của polymer?',
+        options: [
+          {
+            text: 'Phản ứng giữ nguyên mạch polymer.',
+            isCorrect: true,
+            reason: 'Đúng: khung mạch chính <span class="chem-formula">–(CH<sub>2</sub>–CH)<sub>n</sub>–</span> vẫn giữ nguyên chiều dài, chỉ thay đổi nhóm thế bên từ <span class="chem-formula">–OCOCH<sub>3</sub></span> thành <span class="chem-formula">–OH</span>.'
+          },
+          {
+            text: 'Phản ứng cắt mạch polymer.',
+            isCorrect: false,
+            reason: 'Sai: cắt mạch là phản ứng bẻ gãy mạch chính thành các phân tử ngắn hơn (như thủy phân tinh bột, nhiệt phân PS).'
+          },
+          {
+            text: 'Phản ứng tăng mạch (khâu mạch) polymer.',
+            isCorrect: false,
+            reason: 'Sai: tăng mạch tạo thêm liên kết nối dài hoặc nối ngang các mạch với nhau (như lưu hóa cao su).'
+          },
+          {
+            text: 'Phản ứng trùng hợp.',
+            isCorrect: false,
+            reason: 'Sai: chất tham gia đã là polymer, không phải phản ứng trùng hợp từ monomer.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Phân biệt được polymer điều chế bằng phản ứng trùng hợp và trùng ngưng',
+        question: 'Polymer nào sau đây được tổng hợp bằng <b>phản ứng trùng ngưng</b>?',
+        options: [
+          {
+            text: 'Tơ nylon-6,6.',
+            isCorrect: true,
+            reason: 'Đúng: nylon-6,6 được tổng hợp bằng phản ứng trùng ngưng giữa hexamethylenediamine và adipic acid (có tách phân tử nhỏ <span class="chem-formula">H<sub>2</sub>O</span>).'
+          },
+          {
+            text: 'Polyethylene (PE).',
+            isCorrect: false,
+            reason: 'Sai: PE được tổng hợp bằng phản ứng trùng hợp ethylene (<span class="chem-formula">CH<sub>2</sub>=CH<sub>2</sub></span>).'
+          },
+          {
+            text: 'Poly(vinyl chloride) (PVC).',
+            isCorrect: false,
+            reason: 'Sai: PVC được tổng hợp bằng phản ứng trùng hợp vinyl chloride (<span class="chem-formula">CH<sub>2</sub>=CHCl</span>).'
+          },
+          {
+            text: 'Polystyrene (PS).',
+            isCorrect: false,
+            reason: 'Sai: PS được tổng hợp bằng phản ứng trùng hợp styrene.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Phân biệt được đặc tính của polymer nhiệt dẻo và polymer nhiệt rắn',
+        question: 'Điểm khác nhau cơ bản giữa <b>polymer nhiệt dẻo</b> và <b>polymer nhiệt rắn</b> khi đun nóng là gì?',
+        options: [
+          {
+            text: 'Polymer nhiệt dẻo mềm chảy khi đun nóng và tái chế được; polymer nhiệt rắn không nóng chảy mà bị phân hủy khi đun mạnh.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: polymer nhiệt dẻo có thể làm nóng chảy để đúc lại nhiều lần, còn polymer nhiệt rắn (mạng không gian) không nóng chảy.'
+          },
+          {
+            text: 'Polymer nhiệt dẻo không nóng chảy, còn polymer nhiệt rắn dễ nóng chảy và tái chế.',
+            isCorrect: false,
+            reason: 'Sai: bị đảo ngược hoàn toàn đặc tính giữa hai loại polymer.'
+          },
+          {
+            text: 'Cả hai loại đều hóa hơi hoàn toàn ở 100 °C.',
+            isCorrect: false,
+            reason: 'Sai: polymer không bay hơi.'
+          },
+          {
+            text: 'Polymer nhiệt rắn tan rất tốt trong nước nóng, còn polymer nhiệt dẻo không tan.',
+            isCorrect: false,
+            reason: 'Sai: nhựa nhiệt rắn mạng không gian hoàn toàn không tan trong nước nóng.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU VẬN DỤNG ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính được hệ số polymer hóa n của PVC khi biết phân tử khối trung bình',
+        question: 'Một mẫu poly(vinyl chloride) (PVC, <span class="chem-formula">–(CH<sub>2</sub>–CHCl)<sub>n</sub>–</span>) có phân tử khối trung bình là <b>62 500</b>. Hệ số polymer hóa (<i>n</i>) của mẫu PVC này là bao nhiêu? (Biết C = 12, H = 1, Cl = 35,5)',
+        options: [
+          {
+            text: '<b>1 000</b>.',
+            isCorrect: true,
+            reason: 'Đúng: phân tử khối 1 mắt xích <span class="chem-formula">–CH<sub>2</sub>–CHCl–</span> là <span class="chem-formula">M = 2×12 + 3×1 + 35,5 = 62,5</span> ⇒ <span class="chem-formula">n = 62 500 / 62,5 = 1 000</span>.'
+          },
+          {
+            text: '<b>100</b>.',
+            isCorrect: false,
+            reason: 'Sai: tính thiếu một chữ số 0 (<span class="chem-formula">100 × 62,5 = 6 250</span>).'
+          },
+          {
+            text: '<b>10 000</b>.',
+            isCorrect: false,
+            reason: 'Sai: dư một chữ số 0 (<span class="chem-formula">10 000 × 62,5 = 625 000</span>).'
+          },
+          {
+            text: '<b>2 232</b>.',
+            isCorrect: false,
+            reason: 'Sai: chia nhầm cho phân tử khối mắt xích PE (28) thay vì PVC (62,5).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính được hệ số polymer hóa n của PE khi biết phân tử khối trung bình',
+        question: 'Một mẫu polyethylene (PE, <span class="chem-formula">–(CH<sub>2</sub>–CH<sub>2</sub>)<sub>n</sub>–</span>) có phân tử khối trung bình là <b>280 000</b>. Hệ số polymer hóa (<i>n</i>) của mẫu PE này là bao nhiêu? (Biết C = 12, H = 1)',
+        options: [
+          {
+            text: '<b>10 000</b>.',
+            isCorrect: true,
+            reason: 'Đúng: phân tử khối 1 mắt xích <span class="chem-formula">–CH<sub>2</sub>–CH<sub>2</sub>–</span> là <span class="chem-formula">M = 2×12 + 4×1 = 28</span> ⇒ <span class="chem-formula">n = 280 000 / 28 = 10 000</span>.'
+          },
+          {
+            text: '<b>1 000</b>.',
+            isCorrect: false,
+            reason: 'Sai: tính thiếu một chữ số 0 (<span class="chem-formula">1 000 × 28 = 28 000</span>).'
+          },
+          {
+            text: '<b>20 000</b>.',
+            isCorrect: false,
+            reason: 'Sai: chia nhầm cho 14 (chỉ tính 1 nhóm <span class="chem-formula">–CH<sub>2</sub>–</span> thay vì mắt xích <span class="chem-formula">–CH<sub>2</sub>–CH<sub>2</sub>–</span>).'
+          },
+          {
+            text: '<b>4 480</b>.',
+            isCorrect: false,
+            reason: 'Sai: chia nhầm cho phân tử khối mắt xích PVC (62,5).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Đánh giá tổng hợp các phát biểu đúng/sai về đại cương polymer',
+        question: 'Cho các phát biểu sau về polymer:<br>(a) Phản ứng nhiệt phân polystyrene tạo thành styrene là phản ứng cắt mạch (depolymer hóa).<br>(b) Phản ứng lưu hóa cao su thiên nhiên tạo cầu nối disulfur (<span class="chem-formula">–S–S–</span>) là phản ứng tăng mạch.<br>(c) Phản ứng trùng hợp luôn giải phóng phân tử nước (<span class="chem-formula">H<sub>2</sub>O</span>) kèm theo.<br>(d) Amylopectin và glycogen là các polymer có cấu trúc mạch phân nhánh.<br>Số phát biểu <b>đúng</b> là bao nhiêu?',
+        options: [
+          {
+            text: '<b>3 phát biểu</b> (a, b, d).',
+            isCorrect: true,
+            reason: 'Đúng: (a), (b), (d) đều đúng; phát biểu (c) <b>sai</b> vì phản ứng trùng hợp <b>không giải phóng phân tử nhỏ</b> (tách <span class="chem-formula">H<sub>2</sub>O</span> là của phản ứng trùng ngưng).'
+          },
+          {
+            text: '<b>4 phát biểu</b> (a, b, c, d).',
+            isCorrect: false,
+            reason: 'Sai: phát biểu (c) sai vì nhầm phản ứng trùng hợp với trùng ngưng.'
+          },
+          {
+            text: '<b>2 phát biểu</b> (a, b).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (d) đúng.'
+          },
+          {
+            text: '<b>2 phát biểu</b> (b, d).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (a) đúng.'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let activePolyIdx = 0;
+    let activeChain = 'linear'; // 'linear' | 'branched' | 'network'
+
+    let thermoType = 'plastic'; // 'plastic' | 'set'
+    let thermoHeated = false;
+
+    let activeRxn = 'cut';      // 'cut' | 'keep' | 'cross'
+    let rxnDone = false;
+
+    let synMode = 'add';        // 'add' | 'cond'
+    let addMonomer = 'pe';      // 'pe' | 'pvc'
+    let synPct = 0;
+    let synAutoRunning = false;
+    let synTimer = null;
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+    let quizSubmitted = false;
+
+    // =========================================================================
+    // 3. CHUYỂN TAB & FULLSCREEN AN TOÀN (KHÔNG LỖI TRÊN IPHONE/IPAD)
+    // =========================================================================
+    function switchTab(num) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`tabPanel-${i}`).classList.toggle('hidden', i !== num);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        btn.classList.toggle('active', i === num);
+        btn.setAttribute('aria-selected', i === num ? 'true' : 'false');
+      }
+      if (num !== 3) stopSynAuto();
+      if (num === 4) renderQuizQuestion();
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // =========================================================================
+    // 4. LOGIC TAB 1: BẢNG 4 POLYMER & 3 DẠNG CẤU TRÚC MẠCH
+    // =========================================================================
+    function selectPolyRow(idx) {
+      activePolyIdx = idx;
+      renderPolyTable();
+    }
+
+    function renderPolyTable() {
+      const tbody = document.getElementById('polyTableBody');
+      tbody.innerHTML = COMMON_POLYMERS.map((p, i) => `
+        <tr class="poly-row ${i === activePolyIdx ? 'active' : ''}" onclick="selectPolyRow(${i})">
+          <td><b>${p.code}</b></td>
+          <td>${p.monomer}</td>
+          <td><b>${p.unit}</b></td>
+          <td style="color: var(--primary-dark); font-weight: 800;">${p.name}</td>
+          <td><b>${p.mUnit}</b></td>
+        </tr>
+      `).join('');
+
+      const cur = COMMON_POLYMERS[activePolyIdx];
+      document.getElementById('polyHighlightBar').innerHTML = `
+        <div><b>Đang chọn ${cur.code} (${cur.name}):</b> ${cur.note}</div>
+        <span class="pill-tag">M mắt xích = ${cur.mUnit}</span>
+      `;
+    }
+
+    function selectChainType(type) {
+      activeChain = type;
+      ['linear', 'branched', 'network'].forEach(k => {
+        document.getElementById(`chBtn-${k}`).classList.toggle('active', k === type);
+      });
+      renderChainSvg();
+    }
+
+    function renderChainSvg() {
+      const svg = document.getElementById('chainSvg');
+      const badge = document.getElementById('chainBadge');
+      const desc = document.getElementById('chainDescBox');
+
+      if (activeChain === 'linear') {
+        badge.textContent = '1. Mạch không phân nhánh';
+        svg.innerHTML = `
+          <text x="410" y="28" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Cấu trúc mạch không phân nhánh (PE, PVC, Amylose, Cellulose)
+          </text>
+          ${[88, 146, 204].map((y, idx) => {
+            const col = idx === 1 ? '#0f766e' : '#0b5cab';
+            let row = `<line x1="90" y1="${y}" x2="730" y2="${y}" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`;
+            for (let x = 110; x <= 710; x += 60) {
+              row += `<circle cx="${x}" cy="${y}" r="11" fill="#ffffff" stroke="${col}" stroke-width="3"/>`;
+            }
+            return row;
+          }).join('')}
+          <text x="410" y="252" text-anchor="middle" font-size="12.5" font-weight="800" fill="#334155">
+            Các mắt xích nối tiếp liên tục thành chuỗi dài không nhánh → Dễ trượt lên nhau khi đun nóng (nhiệt dẻo)
+          </text>
+        `;
+        desc.innerHTML = '<b>Mạch không phân nhánh:</b> Các mắt xích liên kết nối tiếp thành chuỗi dài thẳng hoặc xoắn (ví dụ: <b>PE, PVC, amylose, cellulose</b>). Lực hút giữa các mạch chủ yếu là tương tác van der Waals (hoặc liên kết hydrogen ở cellulose) nên đa số dễ nóng chảy, dễ gia công kéo sợi.';
+      } else if (activeChain === 'branched') {
+        badge.textContent = '2. Mạch phân nhánh';
+        svg.innerHTML = `
+          <text x="410" y="28" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Cấu trúc mạch phân nhánh (Amylopectin, Glycogen)
+          </text>
+          <!-- Mạch chính -->
+          <line x1="90" y1="162" x2="730" y2="162" stroke="#0b5cab" stroke-width="6" stroke-linecap="round"/>
+          <!-- Các nhánh phụ -->
+          <path d="M 210 162 L 260 98 L 380 98" fill="none" stroke="#6d28d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 450 162 L 500 92 L 640 92" fill="none" stroke="#6d28d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 330 162 L 380 218 L 510 218" fill="none" stroke="#d97706" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Nút mắt xích trên mạch chính & nhánh -->
+          ${[110, 160, 210, 270, 330, 390, 450, 510, 570, 630, 690].map(x =>
+            `<circle cx="${x}" cy="162" r="9.5" fill="${(x===210||x===330||x===450)?'#dc2626':'#ffffff'}" stroke="#0b5cab" stroke-width="2.6"/>`
+          ).join('')}
+          ${[[260,98],[320,98],[380,98],[500,92],[570,92],[640,92]].map(p =>
+            `<circle cx="${p[0]}" cy="${p[1]}" r="8.5" fill="#f5f3ff" stroke="#6d28d9" stroke-width="2.5"/>`
+          ).join('')}
+          ${[[380,218],[445,218],[510,218]].map(p =>
+            `<circle cx="${p[0]}" cy="${p[1]}" r="8.5" fill="#fffbeb" stroke="#d97706" stroke-width="2.5"/>`
+          ).join('')}
+
+          <text x="410" y="254" text-anchor="middle" font-size="12.5" font-weight="800" fill="#5b21b6">
+            Chấm đỏ: Điểm phân nhánh • Cấu trúc cồng kềnh, kém xếp chặt hơn mạch không nhánh
+          </text>
+        `;
+        desc.innerHTML = '<b>Mạch phân nhánh:</b> Từ mạch chính có nhiều đoạn mạch ngắn phân nhánh tỏa ra xung quanh (ví dụ: <b>amylopectin</b> trong tinh bột, <b>glycogen</b> trong gan động vật). Cấu trúc cồng kềnh nên độ bền kéo và khối lượng riêng thường thấp hơn mạch không nhánh.';
+      } else {
+        badge.textContent = '3. Mạch mạng không gian';
+        const ys = [80, 144, 208];
+        let lines = ys.map(y => `<line x1="100" y1="${y}" x2="720" y2="${y}" stroke="#0f766e" stroke-width="5.5" stroke-linecap="round"/>`).join('');
+        // Cầu nối ngang cộng hóa trị (đỏ cam)
+        const bridges = [[180,80,144],[340,80,144],[520,80,144],[660,80,144],[260,144,208],[430,144,208],[600,144,208]];
+        let brHtml = bridges.map(b =>
+          `<line x1="${b[0]}" y1="${b[1]}" x2="${b[0]}" y2="${b[2]}" stroke="#dc2626" stroke-width="4.2" stroke-dasharray="6 3"/>
+           <circle cx="${b[0]}" cy="${(b[1]+b[2])/2}" r="8" fill="#fef08a" stroke="#dc2626" stroke-width="2"/>`
+        ).join('');
+        let nodes = '';
+        ys.forEach(y => {
+          for (let x = 120; x <= 700; x += 60) {
+            nodes += `<circle cx="${x}" cy="${y}" r="9" fill="#ffffff" stroke="#0f766e" stroke-width="2.6"/>`;
+          }
+        });
+
+        svg.innerHTML = `
+          <text x="410" y="28" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Cấu trúc mạch mạng không gian (Cao su lưu hóa, Nhựa bakelite)
+          </text>
+          ${lines}
+          ${brHtml}
+          ${nodes}
+          <text x="410" y="252" text-anchor="middle" font-size="12.5" font-weight="800" fill="#991b1b">
+            Các cầu nối ngang cộng hóa trị khóa chặt các mạch → Rất bền cơ học, chịu nhiệt, khó nóng chảy &amp; không tan
+          </text>
+        `;
+        desc.innerHTML = '<b>Mạch mạng không gian:</b> Các mạch polymer được nối ngang với nhau bằng các <b>liên kết cộng hóa trị bền chặt</b> tạo thành mạng lưới 3 chiều (ví dụ: <b>cao su lưu hóa, nhựa bakelite</b>). Nhờ đó vật liệu rất bền cơ học, đàn hồi tốt (cao su lưu hóa) hoặc cứng, chịu nhiệt, không nóng chảy (nhựa bakelite).';
+      }
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 2: NHIỆT DẺO / NHIỆT RẮN & 3 PHẢN ỨNG HÓA HỌC
+    // =========================================================================
+    function selectThermo(type) {
+      thermoType = type;
+      thermoHeated = false;
+      document.getElementById('thBtn-plastic').classList.toggle('active', type === 'plastic');
+      document.getElementById('thBtn-set').classList.toggle('active', type === 'set');
+      document.getElementById('thermoBadge').textContent = type === 'plastic'
+        ? 'Polymer nhiệt dẻo (Tái chế được)'
+        : 'Polymer nhiệt rắn (Không nóng chảy)';
+      renderThermoSvg();
+    }
+
+    function toggleThermoHeat() {
+      thermoHeated = !thermoHeated;
+      renderThermoSvg();
+    }
+
+    function renderThermoSvg() {
+      const svg = document.getElementById('thermoSvg');
+      const desc = document.getElementById('thermoDescBox');
+      const btn = document.getElementById('btnHeatThermo');
+      const txt = document.getElementById('txtHeatThermo');
+      btn.classList.toggle('active', thermoHeated);
+      txt.textContent = thermoHeated ? '❄️ Làm nguội lại (Ban đầu)' : '🔥 Đun nóng kiểm chứng';
+
+      const flame = thermoHeated
+        ? `<path class="flame-anim" d="M 180 226 Q 166 206 180 190 Q 194 206 180 226 Z" fill="#f97316"/>
+           <path class="flame-anim" d="M 180 224 Q 174 210 180 200 Q 186 210 180 224 Z" fill="#fde047"/>`
+        : '';
+
+      if (thermoType === 'plastic') {
+        const blockPath = thermoHeated
+          ? 'M 96 172 Q 130 156 180 162 Q 230 168 264 172 Q 274 186 248 188 L 112 188 Q 86 186 96 172 Z'
+          : 'M 124 114 L 236 114 L 236 184 L 124 184 Z';
+        const chainShift = thermoHeated ? 16 : 0;
+
+        svg.innerHTML = `
+          <text x="410" y="26" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">
+            Polymer nhiệt dẻo (PE, PVC, PP) — ${thermoHeated ? 'Đang đun nóng: Mềm chảy thành khối dẻo' : 'Ở nhiệt độ thường: Khối rắn định hình'}
+          </text>
+          <!-- Bên trái: Vĩ mô -->
+          <rect x="64" y="184" width="232" height="10" rx="5" fill="#94a3b8"/>
+          <path d="${blockPath}" fill="#60a5fa" stroke="#0b5cab" stroke-width="2.6" class="svg-smooth"/>
+          <text x="180" y="${thermoHeated ? 180 : 154}" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">
+            ${thermoHeated ? 'Nóng chảy (Dẻo)' : 'Mẫu PE rắn'}
+          </text>
+          ${flame}
+
+          <!-- Bên phải: Vi mô các mạch trượt lên nhau -->
+          <rect x="370" y="46" width="420" height="184" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8"/>
+          <text x="580" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="#1d4ed8">🔬 Vi mô: Các mạch không nhánh không có cầu nối ngang</text>
+          <path d="M 410 112 Q 490 96 580 112 T 750 112" fill="none" stroke="#0b5cab" stroke-width="5" stroke-linecap="round" class="svg-smooth" style="transform: translate(${chainShift}px, ${-chainShift/2}px);"/>
+          <path d="M 410 148 Q 490 132 580 148 T 750 148" fill="none" stroke="#0284c7" stroke-width="5" stroke-linecap="round" class="svg-smooth" style="transform: translate(${-chainShift}px, 0px);"/>
+          <path d="M 410 184 Q 490 168 580 184 T 750 184" fill="none" stroke="#0b5cab" stroke-width="5" stroke-linecap="round" class="svg-smooth" style="transform: translate(${chainShift}px, ${chainShift/2}px);"/>
+          <text x="580" y="216" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">
+            ${thermoHeated ? '✔ Mạch trượt tự do → Nóng chảy, dễ đúc lại (tái chế được)' : 'Bấm "Đun nóng kiểm chứng" để quan sát'}
+          </text>
+        `;
+        desc.innerHTML = '<b>Polymer nhiệt dẻo (PE, PVC, PP, PS...):</b> Khi đun nóng, các mạch polymer không có liên kết ngang dễ dàng trượt lên nhau làm vật liệu <b>mềm chảy thành chất lỏng nhớt</b>; khi để nguội lại đông cứng. Do đó <b>có thể tái chế nhiều lần</b>.';
+      } else {
+        svg.innerHTML = `
+          <text x="410" y="26" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">
+            Polymer nhiệt rắn (Nhựa bakelite) — ${thermoHeated ? 'Đun mạnh: KHÔNG nóng chảy, bị phân hủy cháy đen' : 'Ở nhiệt độ thường: Khối rắn cứng'}
+          </text>
+          <rect x="64" y="184" width="232" height="10" rx="5" fill="#94a3b8"/>
+          <rect x="124" y="114" width="112" height="70" rx="8" fill="${thermoHeated ? '#334155' : '#92400e'}" stroke="#1e293b" stroke-width="2.6" class="svg-smooth"/>
+          <text x="180" y="154" text-anchor="middle" font-size="12.5" font-weight="800" fill="#ffffff">
+            ${thermoHeated ? 'Cháy / Phân hủy!' : 'Nhựa Bakelite'}
+          </text>
+          ${flame}
+
+          <rect x="370" y="46" width="420" height="184" rx="14" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.8"/>
+          <text x="580" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="#991b1b">🔬 Vi mô: Mạng không gian bị khóa chặt bởi cầu nối ngang</text>
+          <line x1="410" y1="108" x2="750" y2="108" stroke="#7f1d1d" stroke-width="4.5"/>
+          <line x1="410" y1="148" x2="750" y2="148" stroke="#7f1d1d" stroke-width="4.5"/>
+          <line x1="410" y1="188" x2="750" y2="188" stroke="#7f1d1d" stroke-width="4.5"/>
+          <line x1="470" y1="108" x2="470" y2="188" stroke="#dc2626" stroke-width="3.6" stroke-dasharray="${thermoHeated ? '4 4' : 'none'}"/>
+          <line x1="580" y1="108" x2="580" y2="188" stroke="#dc2626" stroke-width="3.6" stroke-dasharray="${thermoHeated ? '4 4' : 'none'}"/>
+          <line x1="690" y1="108" x2="690" y2="188" stroke="#dc2626" stroke-width="3.6" stroke-dasharray="${thermoHeated ? '4 4' : 'none'}"/>
+          <text x="580" y="216" text-anchor="middle" font-size="12" font-weight="800" fill="#dc2626">
+            ${thermoHeated ? '✘ Không trượt được → Không nóng chảy, bị đứt gãy phân hủy!' : 'Bấm "Đun nóng kiểm chứng" để quan sát'}
+          </text>
+        `;
+        desc.innerHTML = '<b>Polymer nhiệt rắn (Nhựa bakelite, PPF...):</b> Có cấu trúc <b>mạng không gian</b> với các liên kết ngang bền chắc nên khi đun nóng <b>không bị nóng chảy</b>; nếu tiếp tục tăng nhiệt độ cao sẽ bị <b>phân hủy (cháy khét)</b> → không tái chế bằng cách nấu chảy được.';
+      }
+    }
+
+    // --- 3 LOẠI PHẢN ỨNG HÓA HỌC CỦA POLYMER ---
+    function selectPolyRxn(r) {
+      activeRxn = r;
+      rxnDone = false;
+      ['cut', 'keep', 'cross'].forEach(k => {
+        document.getElementById(`rxnBtn-${k}`).classList.toggle('active', k === r);
+      });
+      const titles = {
+        cut: '1. Phản ứng cắt mạch (Depolymer hóa Polystyrene)',
+        keep: '2. Phản ứng giữ nguyên mạch (PVA + NaOH → PVOH)',
+        cross: '3. Phản ứng tăng mạch / khâu mạch (Lưu hóa cao su)'
+      };
+      document.getElementById('rxnBadge').textContent = titles[r];
+      renderPolyRxnSvg();
+    }
+
+    function setRxnDone(v) {
+      rxnDone = v;
+      renderPolyRxnSvg();
+    }
+
+    function renderPolyRxnSvg() {
+      const svg = document.getElementById('polyRxnSvg');
+      const desc = document.getElementById('polyRxnDesc');
+
+      if (activeRxn === 'cut') {
+        const xs = [160, 326, 492, 658];
+        const shifts = rxnDone ? [-36, -12, 12, 36] : [0, 0, 0, 0];
+
+        let links = '';
+        for (let i = 0; i < 3; i++) {
+          const mx = (xs[i] + xs[i + 1]) / 2;
+          links += rxnDone
+            ? `<text x="${mx}" y="114" text-anchor="middle" font-size="15" font-weight="800" fill="#dc2626">✂ t°</text>`
+            : `<line x1="${xs[i] + 54}" y1="142" x2="${xs[i + 1] - 54}" y2="142" stroke="#0b5cab" stroke-width="3.6"/>`;
+        }
+
+        let units = xs.map((x, i) => `
+          <g class="svg-smooth" style="transform: translateX(${shifts[i]}px);">
+            <rect x="${x - 54}" y="116" width="108" height="52" rx="11" fill="${rxnDone ? '#ecfdf5' : '#eff6ff'}" stroke="${rxnDone ? '#059669' : '#0b5cab'}" stroke-width="2.4"/>
+            <text x="${x}" y="147" text-anchor="middle" font-size="12.5" font-weight="800" fill="${rxnDone ? '#065f46' : '#0b5cab'}">
+              ${rxnDone ? 'CH₂=CH–C₆H₅' : '–CH₂–CH(C₆H₅)–'}
+            </text>
+          </g>
+        `).join('');
+
+        svg.innerHTML = `
+          <text x="410" y="32" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Phản ứng cắt mạch: Nhiệt phân Polystyrene (Depolymer hóa) tạo Monomer Styrene
+          </text>
+          ${links}
+          ${units}
+          <rect x="130" y="220" width="560" height="44" rx="10" fill="${rxnDone ? '#ecfdf5' : '#f1f5f9'}" stroke="${rxnDone ? '#059669' : '#cbd5e1'}" stroke-width="1.5"/>
+          <text x="410" y="247" text-anchor="middle" font-size="13" font-weight="800" fill="${rxnDone ? '#065f46' : '#475569'}">
+            ${rxnDone ? '✔ Mạch dài bị cắt đứt hoàn toàn tái tạo monomer Styrene (CH₂=CH–C₆H₅)!' : 'Bấm "Thực hiện phản ứng" để quan sát sự cắt mạch tạo monomer'}
+          </text>
+        `;
+        desc.innerHTML = '<b>Phản ứng cắt mạch polymer:</b> Các liên kết trên mạch chính bị bẻ gãy tạo thành phân tử ngắn hơn hoặc tái tạo monomer (depolymer hóa).<br><b>Ví dụ:</b> Nhiệt phân polystyrene (<span class="chem-formula">–(CH<sub>2</sub>–CH(C<sub>6</sub>H<sub>5</sub>))<sub>n</sub>–</span> &nbsp;<sup>t°</sup>→&nbsp; <span class="chem-formula">n C<sub>6</sub>H<sub>5</sub>CH=CH<sub>2</sub></span>); thủy phân tinh bột, cellulose, protein, tơ nylon-6,6.';
+      } else if (activeRxn === 'keep') {
+        const grpTxt = rxnDone ? 'OH' : 'OCOCH₃';
+        const grpFill = rxnDone ? '#d1fae5' : '#fef3c7';
+        const grpStroke = rxnDone ? '#059669' : '#d97706';
+        const grpCol = rxnDone ? '#047857' : '#92400e';
+
+        svg.innerHTML = `
+          <text x="410" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Phản ứng giữ nguyên mạch: Thủy phân Poly(vinyl acetate) bằng NaOH → Poly(vinyl alcohol)
+          </text>
+          <!-- Khung mạch chính C-C giữ nguyên vẹn 100% -->
+          <rect x="74" y="78" width="672" height="52" rx="12" fill="#eff6ff" stroke="#0b5cab" stroke-width="2.4"/>
+          <text x="410" y="110" text-anchor="middle" font-size="18" font-weight="800" fill="#0b5cab">
+            ··· – CH₂ – CH – CH₂ – CH – CH₂ – CH – ···   (Mạch chính giữ nguyên!)
+          </text>
+
+          <!-- 3 nhóm thế bên thay đổi từ -OCOCH3 sang -OH -->
+          ${[256, 410, 564].map(x => `
+            <line x1="${x}" y1="130" x2="${x}" y2="162" stroke="#0f172a" stroke-width="2.6"/>
+            <rect x="${x - 44}" y="162" width="88" height="38" rx="9" fill="${grpFill}" stroke="${grpStroke}" stroke-width="2.2" class="svg-smooth"/>
+            <text x="${x}" y="186" text-anchor="middle" font-size="14.5" font-weight="800" fill="${grpCol}">${grpTxt}</text>
+          `).join('')}
+
+          <rect x="110" y="226" width="600" height="42" rx="10" fill="${rxnDone ? '#ecfdf5' : '#fffbeb'}" stroke="${rxnDone ? '#059669' : '#f59e0b'}" stroke-width="1.5"/>
+          <text x="410" y="252" text-anchor="middle" font-size="12.8" font-weight="800" fill="${rxnDone ? '#065f46' : '#92400e'}">
+            ${rxnDone
+              ? '✔ Đã thay nhóm –OCOCH₃ bằng nhóm –OH (+ n CH₃COONa), khung mạch carbon giữ nguyên!'
+              : 'Bấm "Thực hiện phản ứng" để thủy phân nhóm ester bên bằng dung dịch NaOH'}
+          </text>
+        `;
+        desc.innerHTML = '<b>Phản ứng giữ nguyên mạch:</b> Xảy ra ở các nhóm chức gắn vào mạch chính (hoặc cộng vào liên kết đôi) mà <b>không làm thay đổi độ dài mạch polymer</b>.<br><b>PTHH:</b> <span class="chem-formula">–(CH<sub>2</sub>–CH(OCOCH<sub>3</sub>))<sub>n</sub>– + nNaOH</span> &nbsp;<sup>t°</sup>→&nbsp; <span class="chem-formula">–(CH<sub>2</sub>–CH(OH))<sub>n</sub>– + nCH<sub>3</sub>COONa</span>.';
+      } else {
+        // Tăng mạch: Lưu hóa cao su thiên nhiên với lưu huỳnh tạo cầu nối -S-S-
+        const sOp = rxnDone ? 1 : 0;
+        svg.innerHTML = `
+          <text x="410" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Phản ứng tăng mạch (khâu mạch): Lưu hóa cao su thiên nhiên tạo cầu nối disulfur (–S–S–)
+          </text>
+
+          <!-- 2 mạch polyisoprene song song -->
+          <line x1="84" y1="98" x2="736" y2="98" stroke="#0f766e" stroke-width="6.5" stroke-linecap="round"/>
+          <text x="410" y="84" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f766e">Mạch Polyisoprene 1: ···–CH₂–C(CH₃)=CH–CH₂–···</text>
+
+          <line x1="84" y1="196" x2="736" y2="196" stroke="#0f766e" stroke-width="6.5" stroke-linecap="round"/>
+          <text x="410" y="220" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f766e">Mạch Polyisoprene 2: ···–CH₂–C(CH₃)=CH–CH₂–···</text>
+
+          <!-- Các cầu nối disulfur -S-S- xuất hiện khi lưu hóa -->
+          <g style="opacity: ${sOp};" class="svg-smooth">
+            ${[210, 410, 610].map(x => `
+              <line x1="${x}" y1="102" x2="${x}" y2="192" stroke="#d97706" stroke-width="4.5"/>
+              <circle cx="${x}" cy="132" r="14" fill="#fef08a" stroke="#d97706" stroke-width="2.2"/>
+              <text x="${x}" y="137" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">S</text>
+              <circle cx="${x}" cy="164" r="14" fill="#fef08a" stroke="#d97706" stroke-width="2.2"/>
+              <text x="${x}" y="169" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">S</text>
+            `).join('')}
+          </g>
+
+          <rect x="50" y="238" width="720" height="38" rx="10" fill="${rxnDone ? '#fffbeb' : '#f1f5f9'}" stroke="${rxnDone ? '#d97706' : '#cbd5e1'}" stroke-width="1.5"/>
+          <text x="410" y="262" text-anchor="middle" font-size="12.8" font-weight="800" fill="${rxnDone ? '#92400e' : '#475569'}">
+            ${rxnDone
+              ? '✔ Các cầu nối –S–S– đã khâu mạch thẳng thành mạng không gian → Cao su lưu hóa bền, đàn hồi!'
+              : 'Bấm "Thực hiện phản ứng" để đun nóng cao su thiên nhiên với lưu huỳnh (S)'}
+          </text>
+        `;
+        desc.innerHTML = '<b>Phản ứng tăng mạch (khâu mạch):</b> Khi đun nóng cao su thiên nhiên (polyisoprene) với lưu huỳnh (khoảng 1–3%), các nguyên tử S tạo <b>cầu nối disulfur (<span class="chem-formula">–S–S–</span>)</b> nối ngang các mạch thẳng thành <b>mạng không gian</b> (cao su lưu hóa) có tính đàn hồi, chịu nhiệt và chống mài mòn vượt trội.';
+      }
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 3: PHƯƠNG PHÁP TỔNG HỢP (TRÙNG HỢP & TRÙNG NGƯNG)
+    // =========================================================================
+    function selectSynMode(mode) {
+      stopSynAuto();
+      synMode = mode;
+      synPct = 0;
+      document.getElementById('synMode-add').classList.toggle('active', mode === 'add');
+      document.getElementById('synMode-cond').classList.toggle('active', mode === 'cond');
+      document.getElementById('addSubWrap').classList.toggle('hidden', mode !== 'add');
+      updateSynBadge();
+      renderSynSvg(0);
+    }
+
+    function selectAddMonomer(m) {
+      stopSynAuto();
+      addMonomer = m;
+      document.getElementById('addSub-pe').classList.toggle('active', m === 'pe');
+      document.getElementById('addSub-pvc').classList.toggle('active', m === 'pvc');
+      updateSynBadge();
+      renderSynSvg(synPct);
+    }
+
+    function updateSynBadge() {
+      const b = document.getElementById('synBadge');
+      if (synMode === 'add') {
+        b.textContent = addMonomer === 'pe' ? 'Phản ứng trùng hợp (PE)' : 'Phản ứng trùng hợp (PVC)';
+      } else {
+        b.textContent = 'Phản ứng trùng ngưng (Nylon-6,6)';
+      }
+    }
+
+    function onSynSlider(val) {
+      stopSynAuto();
+      renderSynSvg(val);
+    }
+
+    function resetSyn() {
+      stopSynAuto();
+      renderSynSvg(0);
+    }
+
+    function toggleSynAuto() {
+      if (synAutoRunning) {
+        stopSynAuto();
+      } else {
+        if (synPct >= 100) renderSynSvg(0);
+        synAutoRunning = true;
+        document.getElementById('synAutoIcon').textContent = '⏸';
+        document.getElementById('synAutoText').textContent = 'Tạm dừng';
+        synTimer = setInterval(() => {
+          if (synPct >= 100) {
+            stopSynAuto();
+            return;
+          }
+          renderSynSvg(synPct + 2);
+        }, 65);
+      }
+    }
+
+    function stopSynAuto() {
+      synAutoRunning = false;
+      if (synTimer) { clearInterval(synTimer); synTimer = null; }
+      document.getElementById('synAutoIcon').textContent = '▶';
+      document.getElementById('synAutoText').textContent = synPct >= 100 ? 'Chạy lại từ 0%' : 'Chạy tự động';
+    }
+
+    function renderSynSvg(pct) {
+      synPct = Math.max(0, Math.min(100, Number(pct)));
+      document.getElementById('synSlider').value = synPct;
+      document.getElementById('synPctVal').textContent = `${synPct}%`;
+
+      const svg = document.getElementById('synSvg');
+      const eq = document.getElementById('synEqBox');
+      const r = synPct / 100;
+
+      if (synMode === 'add') {
+        // Trùng hợp 3 phân tử CH2=CH2 (hoặc CH2=CHCl) mở liên kết pi ghép thành mạch liên tục
+        const isPvc = addMonomer === 'pvc';
+        const rightAtom = isPvc ? 'CHCl' : 'CH₂';
+        const piOp = Math.max(0, 1 - r * 1.4).toFixed(2);
+        const joinOp = Math.max(0, (r - 0.35) / 0.65).toFixed(2);
+        const shiftL = (r * 38).toFixed(1);
+        const shiftR = (-r * 38).toFixed(1);
+
+        const drawUnit = (cx, tx) => `
+          <g style="transform: translateX(${tx}px);">
+            <rect x="${cx - 72}" y="106" width="144" height="58" rx="12" fill="#eff6ff" stroke="#0b5cab" stroke-width="2.4"/>
+            <text x="${cx - 34}" y="142" text-anchor="middle" font-size="16.5" font-weight="800" fill="#0f172a">CH₂</text>
+            <!-- Liên kết sigma luôn giữ -->
+            <line x1="${cx - 12}" y1="136" x2="${cx + 12}" y2="136" stroke="#0f172a" stroke-width="2.8"/>
+            <!-- Liên kết pi (màu đỏ) mờ dần khi mở liên kết -->
+            <line x1="${cx - 12}" y1="128" x2="${cx + 12}" y2="128" stroke="#dc2626" stroke-width="2.8" opacity="${piOp}"/>
+            <text x="${cx + 38}" y="142" text-anchor="middle" font-size="16.5" font-weight="800" fill="${isPvc ? '#059669' : '#0f172a'}">${rightAtom}</text>
+          </g>
+        `;
+
+        svg.innerHTML = `
+          <text x="410" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Phản ứng trùng hợp ${isPvc ? 'Vinyl chloride (→ PVC)' : 'Ethylene (→ PE)'} — Mở liên kết π, KHÔNG tách phân tử nhỏ
+          </text>
+
+          <!-- Liên kết nối giữa các mắt xích (hiện rõ khi r > 0.35) -->
+          <g opacity="${joinOp}">
+            <line x1="258" y1="135" x2="338" y2="135" stroke="#dc2626" stroke-width="4"/>
+            <line x1="482" y1="135" x2="562" y2="135" stroke="#dc2626" stroke-width="4"/>
+            <line x1="126" y1="135" x2="178" y2="135" stroke="#64748b" stroke-width="3.2" stroke-dasharray="5 4"/>
+            <line x1="642" y1="135" x2="694" y2="135" stroke="#64748b" stroke-width="3.2" stroke-dasharray="5 4"/>
+          </g>
+
+          ${drawUnit(200, shiftL)}
+          ${drawUnit(410, 0)}
+          ${drawUnit(620, shiftR)}
+
+          <rect x="50" y="216" width="720" height="42" rx="10" fill="${synPct >= 85 ? '#ecfdf5' : '#eff6ff'}" stroke="${synPct >= 85 ? '#059669' : '#93c5fd'}" stroke-width="1.5"/>
+          <text x="410" y="242" text-anchor="middle" font-size="13" font-weight="800" fill="${synPct >= 85 ? '#065f46' : '#1d4ed8'}">
+            ${synPct >= 85
+              ? `✔ Đã mở liên kết π tạo mạch ${isPvc ? 'PVC –(CH₂–CHCl)ₙ–' : 'PE –(CH₂–CH₂)ₙ–'} hoàn chỉnh (không sinh sản phẩm phụ)!`
+              : 'Kéo thanh trượt hoặc bấm "Chạy tự động" để xem liên kết π (đỏ) mở ra ghép thành mạch dài'}
+          </text>
+        `;
+
+        eq.innerHTML = isPvc
+          ? `<b>Phương trình trùng hợp PVC:</b> <span class="chem-formula">n CH<sub>2</sub>=CHCl</span> &nbsp;<sup>t°, p, xt</sup>→&nbsp; <span class="chem-formula">–(CH<sub>2</sub>–CHCl)<sub>n</sub>–</span> (poly(vinyl chloride)).`
+          : `<b>Phương trình trùng hợp PE:</b> <span class="chem-formula">n CH<sub>2</sub>=CH<sub>2</sub></span> &nbsp;<sup>t°, p, xt</sup>→&nbsp; <span class="chem-formula">–(CH<sub>2</sub>–CH<sub>2</sub>)<sub>n</sub>–</span> (polyethylene).`;
+      } else {
+        // Trùng ngưng: Hexamethylenediamine + Adipic acid -> Nylon-6,6 + H2O
+        const shiftL = (r * 52).toFixed(1);
+        const shiftR = (-r * 52).toFixed(1);
+        const h2oY = (-r * 58).toFixed(1);
+        const h2oOp = Math.min(1, r * 1.4).toFixed(2);
+        const bondOp = Math.max(0, (r - 0.45) / 0.55).toFixed(2);
+
+        svg.innerHTML = `
+          <text x="410" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">
+            Phản ứng trùng ngưng tổng hợp Tơ Nylon-6,6 (Có tách phân tử nhỏ H₂O)
+          </text>
+
+          <!-- Phân tử H2O tách ra bay lên -->
+          <g style="transform: translateY(${h2oY}px); opacity: ${h2oOp};">
+            <rect x="358" y="106" width="104" height="32" rx="16" fill="#fee2e2" stroke="#dc2626" stroke-width="1.8"/>
+            <text x="410" y="127" text-anchor="middle" font-size="13" font-weight="800" fill="#b91c1c">↑ Tách H₂O</text>
+          </g>
+
+          <!-- Monomer 1: H2N-[CH2]6-NH2 -->
+          <g style="transform: translateX(${shiftL}px);">
+            <rect x="64" y="138" width="260" height="58" rx="12" fill="#eff6ff" stroke="#0b5cab" stroke-width="2.4"/>
+            <text x="194" y="172" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0b5cab">
+              ${synPct >= 75 ? '–HN–[CH₂]₆–NH' : 'H₂N–[CH₂]₆–NH₂'}
+            </text>
+          </g>
+
+          <!-- Liên kết amide -NH-CO- ở giữa -->
+          <g opacity="${bondOp}">
+            <rect x="364" y="146" width="92" height="42" rx="9" fill="#fef08a" stroke="#d97706" stroke-width="2.2"/>
+            <text x="410" y="172" text-anchor="middle" font-size="13.5" font-weight="800" fill="#92400e">–NH–CO–</text>
+          </g>
+
+          <!-- Monomer 2: HOOC-[CH2]4-COOH -->
+          <g style="transform: translateX(${shiftR}px);">
+            <rect x="496" y="138" width="260" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2.4"/>
+            <text x="626" y="172" text-anchor="middle" font-size="15.5" font-weight="800" fill="#047857">
+              ${synPct >= 75 ? 'CO–[CH₂]₄–CO–' : 'HOOC–[CH₂]₄–COOH'}
+            </text>
+          </g>
+
+          <rect x="110" y="222" width="600" height="42" rx="10" fill="${synPct >= 85 ? '#ecfdf5' : '#f0fdfa'}" stroke="${synPct >= 85 ? '#059669' : '#5eead4'}" stroke-width="1.5"/>
+          <text x="410" y="248" text-anchor="middle" font-size="13" font-weight="800" fill="${synPct >= 85 ? '#065f46' : '#115e59'}">
+            ${synPct >= 85
+              ? '✔ Đã ghép 2 monomer tạo liên kết amide (–NH–CO–) của Tơ Nylon-6,6 và tách phân tử H₂O!'
+              : 'Kéo thanh trượt hoặc bấm "Chạy tự động" để quan sát sự kết hợp và tách nước'}
+          </text>
+        `;
+
+        eq.innerHTML = `<b>Phương trình trùng ngưng Nylon-6,6:</b><br>
+          <span class="chem-formula">n H<sub>2</sub>N–[CH<sub>2</sub>]<sub>6</sub>–NH<sub>2</sub> + n HOOC–[CH<sub>2</sub>]<sub>4</sub>–COOH</span> &nbsp;<sup>t°, xt</sup>→&nbsp; <span class="chem-formula">–(HN–[CH<sub>2</sub>]<sub>6</sub>–NH–CO–[CH<sub>2</sub>]<sub>4</sub>–CO)<sub>n</sub>– + 2n H<sub>2</sub>O</span>`;
+      }
+    }
+
+    function toggleQa(num) {
+      const ans = document.getElementById(`qaAns${num}`);
+      const btn = document.getElementById(`btnQa${num}`);
+      const hidden = ans.classList.contains('hidden');
+      ans.classList.toggle('hidden', !hidden);
+      btn.innerHTML = hidden ? '<span>Ẩn đáp án gợi ý</span>' : '<span>Xem đáp án gợi ý</span>';
+    }
+
+    // =========================================================================
+    // 7. LOGIC TAB 4: LUYỆN TẬP 10 CÂU + FISHER–YATES + NỘP BÀI TỔNG KẾT
+    // =========================================================================
+    function shuffleFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const opts = shuffleFisherYates(q.options);
+        const correctIdx = opts.findIndex(o => o.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: opts,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+      quizSubmitted = false;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndBanner() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      document.getElementById('quizProgressFill').style.width = `${Math.round((answered / shuffledQuiz.length) * 100)}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (quizSubmitted || answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Tổng điểm: ${score} / ${shuffledQuiz.length} điểm (${answered}/${shuffledQuiz.length} câu đã trả lời)`;
+        let msg = 'Hãy xem lại lời giải chi tiết từng câu và ôn lại các Tab 1, 2, 3 nhé!';
+        if (score >= 9) msg = 'Xuất sắc! Em đã nắm vững toàn diện Đại cương về Polymer từ Cấu trúc mạch đến Phương pháp tổng hợp.';
+        else if (score >= 7) msg = 'Rất tốt! Em đã làm chủ phần lớn kiến thức trọng tâm của bài học.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const showResult = chosen !== null || quizSubmitted;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">YCCĐ: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (showResult) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = showResult ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span>${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const fb = document.getElementById('quizFeedbackPanel');
+      if (showResult) {
+        const isOk = chosen === q.correctIdx;
+        const headText = chosen === null
+          ? `ℹ Câu này chưa chọn — Đáp án đúng là ${letters[q.correctIdx]}.`
+          : (isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là ${letters[q.correctIdx]}.`);
+
+        const head = `<div class="feedback-head ${isOk ? 'ok' : 'err'}">${headText} — Giải thích chi tiết từng phương án:</div>`;
+        const items = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <b>${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</b> ${opt.reason}
+          </li>
+        `).join('');
+
+        fb.innerHTML = `${head}<ul class="option-reasons-list">${items}</ul>`;
+        fb.classList.remove('hidden');
+      } else {
+        fb.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndBanner();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null || quizSubmitted) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function submitQuiz() {
+      quizSubmitted = true;
+      renderQuizQuestion();
+      showToast('Đã nộp bài! Em có thể bấm từng câu 1–10 để xem lời giải chi tiết.');
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới 10 câu hỏi và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 8. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      renderPolyTable();
+      renderChainSvg();
+      renderThermoSvg();
+      renderPolyRxnSvg();
+      renderSynSvg(0);
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+  
+    /* ===== LINK YOUTUBE (dán link video của bạn vào url; để trống '' thì mở trang tìm kiếm YouTube) ===== */
+    const LESSON_VIDEO_URL = '';
+    const LESSON_VIDEO_QUERY = 'đại cương polymer trùng hợp trùng ngưng hóa 12';
+    const EXP_VIDEOS = {
+      vidThermo: { url: '', query: 'thí nghiệm polymer nhiệt dẻo nhiệt rắn đun nóng' },
+      vidSyn: { url: '', query: 'thí nghiệm trùng hợp trùng ngưng tổng hợp polymer nylon-6,6' }
+    };
+    (function () {
+      const yt = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+      const a = document.getElementById('lessonVideoLink');
+      if (a) a.href = LESSON_VIDEO_URL || yt(LESSON_VIDEO_QUERY);
+      Object.keys(EXP_VIDEOS).forEach(id => {
+        const el = document.getElementById(id), c = EXP_VIDEOS[id];
+        if (el) el.href = c.url || yt(c.query);
+      });
+    })();
+  </script>
+</body>
+</html>
