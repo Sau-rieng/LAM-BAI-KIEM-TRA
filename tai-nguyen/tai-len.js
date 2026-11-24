@@ -241,10 +241,11 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "anh": "",
   "ten": "Sơ đồ tư duy & Luyện tập Chương 4: Polymer (Hóa 12 – KNTT)",
   "khoi": "12",
-  "bai": "",
+  "bai": "Ôn tập chương 4:",
   "loai": "Mô phỏng",
   "kienthuc": "",
-  "mota": ""
+  "mota": "",
+  "kenh": "mp"
  },
  {
   "ma": "tl-261120-190615",
