@@ -581,6 +581,18 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "kenh": "mp",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261124-203441",
+  "file": "tai-len/tl-261124-203441.html",
+  "anh": "",
+  "ten": "Bài 13 – Vật liệu polymer (Hóa học 12 – KNTT)",
+  "khoi": "12",
+  "bai": "Bài 13: Vật liệu polymer",
+  "loai": "Mô phỏng",
+  "kenh": "mp",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
