@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>II. Glucose và Fructose (Hóa học 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – LIGHT MODE)
+       ========================================================================= */
+    :root {
+      --bg-page: #f4f7fb;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      --primary: #0b5cab;
+      --primary-dark: #084785;
+      --primary-soft: #eff6ff;
+      --primary-border: #bfdbfe;
+
+      --emerald: #059669;
+      --emerald-dark: #047857;
+      --emerald-soft: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --amber: #d97706;
+      --amber-dark: #92400e;
+      --amber-soft: #fffbeb;
+      --amber-border: #fde68a;
+
+      --rose: #dc2626;
+      --rose-dark: #991b1b;
+      --rose-soft: #fef2f2;
+      --rose-border: #fecaca;
+
+      --violet: #6d28d9;
+      --violet-soft: #f5f3ff;
+      --violet-border: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. CÔNG THỨC HÓA HỌC LIỀN MẠCH (CHỐNG VỠ CHỈ SỐ DƯỚI/TRÊN)
+       ========================================================================= */
+    .chem-formula {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chem-formula sub, sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    .chem-formula sup, sup {
+      font-size: 0.72em;
+      line-height: 0;
+      vertical-align: 0.42em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH 4 TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), #1d70c9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (AN TOÀN TUYỆT ĐỐI TRÊN IPAD/SAFARI)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-emerald {
+      background-color: var(--emerald);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-amber {
+      background-color: var(--amber);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-outline.active,
+    .btn-outline.active:hover,
+    .btn-outline.active:focus,
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--primary);
+      border-color: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--primary);
+        background-color: rgba(11, 92, 171, 0.08);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+      }
+      .btn-emerald:hover:not(:disabled) {
+        background-color: var(--emerald-dark);
+      }
+      .btn-amber:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .btn-outline:not(.active):hover:not(:disabled) {
+        background-color: var(--primary-soft);
+        border-color: var(--primary);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--primary);
+        background-color: #f8fbff;
+      }
+    }
+
+    /* =========================================================================
+       5. BỐ CỤC CHUNG & CARD
+       ========================================================================= */
+    .main-container {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 42px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .pill-tag.warn {
+      background-color: var(--amber-soft);
+      color: var(--amber-dark);
+      border: 1px solid var(--amber-border);
+    }
+
+    .pill-tag.ok {
+      background-color: var(--emerald-soft);
+      color: var(--emerald-dark);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .sgk-callout {
+      background-color: var(--primary-soft);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 14px 16px;
+      font-size: 0.96rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    .svg-smooth {
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================================================
+       6. TAB 1: CẤU TẠO PHÂN TỬ (MẠCH HỞ & MẠCH VÒNG)
+       ========================================================================= */
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .info-panel {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background-color: #f8fbff;
+      border: 1.5px solid var(--primary-border);
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .compare-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+      background-color: #ffffff;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .compare-table thead th {
+      background-color: var(--primary-soft);
+      color: var(--text-main);
+      font-weight: 800;
+    }
+
+    /* =========================================================================
+       7. TAB 2: PHÒNG THÍ NGHIỆM ẢO TÍNH CHẤT HOÁ HỌC
+       ========================================================================= */
+    .rxn-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 780px) {
+      .rxn-selector-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .control-panel {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .control-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .percent-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .percent-badge .val {
+      color: #38bdf8;
+      font-size: 1.1rem;
+      min-width: 48px;
+      text-align: right;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 11px;
+      border-radius: 999px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .ticks-abs {
+      position: relative;
+      height: 22px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .ticks-abs span {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    .eq-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background-color: #f8fbff;
+      border: 1.5px solid var(--primary-border);
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.65;
+    }
+
+    .distinguish-banner {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background-color: var(--amber-soft);
+      border: 1.5px solid var(--amber-border);
+      border-left: 5px solid var(--amber);
+      color: var(--amber-dark);
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .extra-rxn-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 780px) {
+      .extra-rxn-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .extra-card {
+      padding: 13px 15px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      font-size: 0.92rem;
+      color: var(--text-body);
+      line-height: 1.55;
+    }
+
+    @keyframes riseBubble {
+      0% { transform: translateY(0px); opacity: 0; }
+      20% { opacity: 0.9; }
+      100% { transform: translateY(-96px); opacity: 0; }
+    }
+
+    .co2-bubble {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    .ferment-active .co2-bubble {
+      animation: riseBubble 1.4s infinite ease-in;
+    }
+
+    /* =========================================================================
+       8. TAB 3: TRẠNG THÁI TỰ NHIÊN & ỨNG DỤNG
+       ========================================================================= */
+    .cards-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 820px) {
+      .cards-grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .cards-grid-4 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .cards-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .cards-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .visual-card {
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      background-color: var(--bg-page);
+      padding: 15px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .visual-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .visual-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-body);
+      line-height: 1.55;
+    }
+
+    .mini-svg-box {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qa-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 820px) {
+      .qa-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .qa-card {
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      background-color: #f8fbff;
+      overflow: hidden;
+    }
+
+    .qa-head {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .qa-q {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .qa-ans {
+      padding: 13px 16px;
+      background-color: #ffffff;
+      border-top: 1px solid var(--primary-border);
+      font-size: 0.93rem;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+
+    /* =========================================================================
+       9. TAB 4: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--emerald));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .q-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.14s ease;
+    }
+
+    .q-dot.current {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+    .q-dot.correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+      color: var(--emerald);
+    }
+    .q-dot.wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      color: var(--primary-dark);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .level-badge.nb { background-color: var(--emerald-soft); color: var(--emerald-dark); border-color: var(--emerald-border); }
+    .level-badge.th { background-color: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
+    .level-badge.vd { background-color: var(--violet-soft); color: var(--violet); border-color: var(--violet-border); }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose);
+      color: #ffffff;
+    }
+
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+    .feedback-head.ok { background-color: var(--emerald-soft); color: #065f46; border-bottom: 1px solid var(--emerald-border); }
+    .feedback-head.err { background-color: var(--rose-soft); color: var(--rose-dark); border-bottom: 1px solid var(--rose-border); }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: #065f46;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #eff6ff, #ecfdf5);
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.24);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <!-- Icon SVG 44x44px (vòng 6 cạnh glucose) -->
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="18,6 28,12 28,24 18,30 8,24 8,12" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linejoin="round"/>
+              <circle cx="23" cy="9" r="3.4" fill="#fde047"/>
+              <text x="18" y="21.5" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff">C₆</text>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">II. Glucose và Fructose (<span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span>)</h1>
+            <p class="brand-sub">Hóa học 12 – Kết nối tri thức với cuộc sống • Chương 2 – Bài 4</p>
+          </div>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+
+      <!-- Thanh điều hướng 4 Tab -->
+      <nav class="tabs-bar" role="tablist" aria-label="Điều hướng 4 phần bài học">
+        <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+          <span>1. Cấu tạo (Mạch hở &amp; Vòng)</span>
+        </button>
+        <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+          <span>2. Thí nghiệm Tính chất hoá học</span>
+        </button>
+        <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+          <span>3. Tự nhiên &amp; Ứng dụng</span>
+        </button>
+        <button id="tabBtn-4" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(4)">
+          <span>4. Luyện tập (10 câu)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: CẤU TẠO PHÂN TỬ (MẠCH HỞ & MẠCH VÒNG)
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Mô phỏng cấu tạo Glucose &amp; Fructose (<span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span>, M = 180)</h2>
+          </div>
+          <span id="structBadge" class="pill-tag">Glucose • Dạng mạch hở</span>
+        </div>
+
+        <!-- Bộ chuyển đổi chất & dạng mạch -->
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="molSel-glu" type="button" class="btn btn-outline active" onclick="selectSugar('glu')">
+              <span>Glucose (Vòng 6 cạnh)</span>
+            </button>
+            <button id="molSel-fru" type="button" class="btn btn-outline" onclick="selectSugar('fru')">
+              <span>Fructose (Vòng 5 cạnh)</span>
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button id="formSel-open" type="button" class="btn btn-outline active" onclick="selectForm('open')">
+              <span>Dạng mạch hở</span>
+            </button>
+            <button id="formSel-alpha" type="button" class="btn btn-outline" onclick="selectForm('alpha')">
+              <span>Dạng vòng α</span>
+            </button>
+            <button id="formSel-beta" type="button" class="btn btn-outline" onclick="selectForm('beta')">
+              <span>Dạng vòng β</span>
+            </button>
+          </div>
+
+          <button id="btnHighlightHemi" type="button" class="btn btn-amber" onclick="toggleHemiHighlight()">
+            <span>✨ Nổi bật nhóm –OH hemiacetal / chức đặc trưng</span>
+          </button>
+        </div>
+
+        <!-- Sân khấu SVG cấu tạo phân tử -->
+        <div class="svg-stage">
+          <svg id="structSvg" viewBox="0 0 820 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng cấu tạo dạng mạch hở và mạch vòng của Glucose và Fructose"></svg>
+        </div>
+
+        <div id="structInfoPanel" class="info-panel"></div>
+      </div>
+
+      <!-- Bảng so sánh nhanh cấu tạo Glucose vs Fructose -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">2</span>
+            <h2 class="card-title">So sánh nhanh cấu tạo Glucose và Fructose</h2>
+          </div>
+          <span class="pill-tag">Đồng phân cấu tạo (<span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span>)</span>
+        </div>
+
+        <div class="compare-table-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th style="width: 24%;">Đặc điểm</th>
+                <th>Glucose</th>
+                <th>Fructose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Công thức phân tử &amp; M</b></td>
+                <td colspan="2"><span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span> (M = 180) — Hai chất là đồng phân cấu tạo của nhau.</td>
+              </tr>
+              <tr>
+                <td><b>Dạng mạch hở</b></td>
+                <td>5 nhóm –OH và <b>1 nhóm aldehyde (–CH=O)</b> ở C1:<br><span class="chem-formula">CH<sub>2</sub>OH[CHOH]<sub>4</sub>CH=O</span></td>
+                <td>5 nhóm –OH và <b>1 nhóm ketone (&gt;C=O)</b> ở C2:<br><span class="chem-formula">CH<sub>2</sub>OH[CHOH]<sub>3</sub>COCH<sub>2</sub>OH</span></td>
+              </tr>
+              <tr>
+                <td><b>Dạng mạch vòng (chủ yếu)</b></td>
+                <td><b>Vòng 6 cạnh</b> (α-glucose và β-glucose), chứa nhóm <b>–OH hemiacetal</b> tại C1.</td>
+                <td><b>Vòng 5 cạnh</b> (α-fructose và β-fructose ở trạng thái rắn), chứa nhóm <b>–OH hemiketal</b> tại C2.</td>
+              </tr>
+              <tr>
+                <td><b>Trong dung dịch</b></td>
+                <td colspan="2">Tồn tại cân bằng giữa dạng mạch hở (tỉ lệ nhỏ) và dạng mạch vòng (chủ yếu).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: PHÒNG THÍ NGHIỆM ẢO TÍNH CHẤT HOÁ HỌC
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">🧪</span>
+            <h2 class="card-title">Phòng thí nghiệm ảo: Tính chất hoá học của Glucose &amp; Fructose</h2>
+          </div>
+          <span id="labStatusPill" class="pill-tag">Sẵn sàng (0%)</span>
+        </div>
+
+        <!-- 4 nút chọn thí nghiệm -->
+        <div class="rxn-selector-grid">
+          <button id="rxnBtn-cu" type="button" class="btn btn-outline active" onclick="selectRxn('cu')">
+            <span>(1) Tác dụng <span class="chem-formula">Cu(OH)<sub>2</sub></span></span>
+          </button>
+          <button id="rxnBtn-ag" type="button" class="btn btn-outline" onclick="selectRxn('ag')">
+            <span>(2) Thuốc thử Tollens</span>
+          </button>
+          <button id="rxnBtn-br" type="button" class="btn btn-outline" onclick="selectRxn('br')">
+            <span>(3) Nước Bromine (<span class="chem-formula">Br<sub>2</sub></span>)</span>
+          </button>
+          <button id="rxnBtn-ferm" type="button" class="btn btn-outline" onclick="selectRxn('ferm')">
+            <span>(4) Lên men &amp; –OH hemiacetal</span>
+          </button>
+        </div>
+
+        <!-- Thanh điều khiển tiến trình 0–100% -->
+        <div class="control-panel">
+          <div class="control-top">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button id="btnRunLab" type="button" class="btn btn-primary" onclick="toggleLabAuto()">
+                <span id="labAutoIcon">▶</span>
+                <span id="labAutoText">Chạy thí nghiệm</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetLab()">
+                <span>↻ Làm lại</span>
+              </button>
+            </div>
+
+            <div class="percent-badge">
+              <span>Tiến trình:</span>
+              <span id="labPctVal" class="val">0%</span>
+            </div>
+          </div>
+
+          <input id="labSlider" type="range" class="range-slider" min="0" max="100" step="1" value="0" oninput="onLabSlider(this.value)" />
+
+          <!-- Nhãn mốc căn đúng tỉ lệ 0% / 50% / 100% -->
+          <div class="ticks-abs">
+            <span style="left: 0%;">0% (Ban đầu)</span>
+            <span style="left: 50%; transform: translateX(-50%);">50% (Đang phản ứng)</span>
+            <span style="left: 100%; transform: translateX(-100%);">100% (Hoàn thành)</span>
+          </div>
+        </div>
+
+        <!-- Sân khấu SVG Phòng thí nghiệm ảo (nhãn hoàn toàn ngoài ống nghiệm) -->
+        <div class="svg-stage">
+          <svg id="labSvg" viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng thí nghiệm tính chất hoá học của Glucose và Fructose"></svg>
+        </div>
+
+        <!-- Liên kết xem thí nghiệm thật (cần Internet; có thể thay bằng link video cụ thể trong REAL_VIDEO_LINKS) -->
+        <div class="real-video-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px;">
+          <a id="realVideoLink" class="btn btn-outline" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration:none;"><span>▶ Xem thí nghiệm thật trên YouTube</span></a>
+          <span style="font-size:0.84rem;color:var(--text-muted);">Mở tab mới • cần kết nối Internet</span>
+        </div>
+
+        <!-- Phương trình hoá học & Hiện tượng -->
+        <div id="labEqBox" class="eq-box"></div>
+
+        <!-- Huy hiệu nổi bật cho thí nghiệm (3) Br2 -->
+        <div id="brDistinguishBox" class="distinguish-banner hidden">
+          ⭐ <b>Thuốc thử phân biệt Glucose và Fructose:</b> Dùng <b>nước bromine (<span class="chem-formula">Br<sub>2</sub></span>)</b>! Glucose làm <b>mất màu vàng nâu</b> của nước bromine (do có nhóm –CH=O bị oxi hoá thành gluconic acid), còn Fructose <b>không làm mất màu</b> nước bromine (do không chuyển hoá thành glucose trong môi trường trung tính/acid).
+        </div>
+
+        <!-- Tóm tắt bổ sung cho thí nghiệm (4): Lên men lactic & –OH hemiacetal -->
+        <div id="extraRxn4Box" class="extra-rxn-grid hidden">
+          <div class="extra-card">
+            <b style="color: var(--primary-dark);">🥛 Phản ứng lên men lactic (làm sữa chua, muối dưa):</b><br>
+            <span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span> &nbsp;<sup>enzyme</sup>→&nbsp; <span class="chem-formula">2CH<sub>3</sub>–CH(OH)–COOH</span> (lactic acid).
+          </div>
+          <div class="extra-card">
+            <b style="color: var(--emerald-dark);">🔗 Phản ứng của nhóm –OH hemiacetal (với <span class="chem-formula">CH<sub>3</sub>OH</span> / HCl khan):</b><br>
+            Ở dạng vòng, nhóm –OH hemiacetal (C1 của glucose) tác dụng với <span class="chem-formula">CH<sub>3</sub>OH</span> (xúc tác HCl khan) tạo <b>methyl α/β-glucoside</b> và <span class="chem-formula">H<sub>2</sub>O</span>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: TRẠNG THÁI TỰ NHIÊN & ỨNG DỤNG
+         ======================================================================= -->
+    <section id="tabPanel-3" class="stack-col hidden">
+
+      <!-- TRẠNG THÁI TỰ NHIÊN -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Trạng thái tự nhiên của Glucose và Fructose</h2>
+          </div>
+          <span class="pill-tag">Chất rắn kết tinh, không màu, vị ngọt, dễ tan trong nước</span>
+        </div>
+
+        <div class="cards-grid-3">
+          <!-- Thẻ 1: Nho chín (Glucose) -->
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="140" height="84" viewBox="0 0 140 84" xmlns="http://www.w3.org/2000/svg" aria-label="Chùm nho chín giàu glucose">
+                <path d="M 70 12 Q 78 6 88 12" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="54" cy="30" r="10" fill="#7c3aed" stroke="#5b21b6" stroke-width="1.5"/>
+                <circle cx="70" cy="30" r="10" fill="#8b5cf6" stroke="#5b21b6" stroke-width="1.5"/>
+                <circle cx="86" cy="30" r="10" fill="#7c3aed" stroke="#5b21b6" stroke-width="1.5"/>
+                <circle cx="62" cy="46" r="10" fill="#6d28d9" stroke="#5b21b6" stroke-width="1.5"/>
+                <circle cx="78" cy="46" r="10" fill="#8b5cf6" stroke="#5b21b6" stroke-width="1.5"/>
+                <circle cx="70" cy="62" r="10" fill="#7c3aed" stroke="#5b21b6" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <h3>🍇 Quả chín (đặc biệt là nho chín)</h3>
+            <p>Glucose có nhiều trong hầu hết các bộ phận của cây, đặc biệt là <b>quả nho chín</b> (nên còn gọi là <b>đường nho</b>).</p>
+          </div>
+
+          <!-- Thẻ 2: Mật ong (Fructose & Glucose) -->
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="140" height="84" viewBox="0 0 140 84" xmlns="http://www.w3.org/2000/svg" aria-label="Hũ mật ong giàu fructose và glucose">
+                <rect x="48" y="12" width="44" height="12" rx="4" fill="#92400e"/>
+                <rect x="42" y="24" width="56" height="50" rx="14" fill="#fbbf24" stroke="#b45309" stroke-width="2.2"/>
+                <rect x="52" y="38" width="36" height="22" rx="5" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+                <text x="70" y="53" text-anchor="middle" font-size="9.5" font-weight="800" fill="#92400e">HONEY</text>
+              </svg>
+            </div>
+            <h3>🍯 Mật ong &amp; Hoa quả ngọt</h3>
+            <p>Mật ong chứa khoảng <b>40% fructose</b> và <b>30% glucose</b>. Fructose có vị ngọt sắc hơn glucose nên tạo vị ngọt đậm cho mật ong.</p>
+          </div>
+
+          <!-- Thẻ 3: Máu người (Nồng độ đường huyết) -->
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="140" height="84" viewBox="0 0 140 84" xmlns="http://www.w3.org/2000/svg" aria-label="Giọt máu người chứa glucose">
+                <path d="M 70 12 C 70 12 46 38 46 54 C 46 67 57 76 70 76 C 83 76 94 67 94 54 C 94 38 70 12 70 12 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+                <text x="70" y="57" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">C₆H₁₂O₆</text>
+              </svg>
+            </div>
+            <h3>🩸 Trong máu người trưởng thành</h3>
+            <p>Nồng độ glucose trong máu người trưởng thành, khoẻ mạnh (lúc đói) tương đối ổn định khoảng <b>4,4 – 7,2 mmol/L</b> (hay 80 – 130 mg/dL).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ỨNG DỤNG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">2</span>
+            <h2 class="card-title">Ứng dụng thực tiễn của Glucose và Fructose</h2>
+          </div>
+          <span class="pill-tag ok">Y học • Công nghiệp • Thực phẩm</span>
+        </div>
+
+        <div class="cards-grid-4">
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="96" height="72" viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg" aria-label="Túi dịch truyền glucose y tế">
+                <rect x="28" y="8" width="40" height="48" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+                <line x1="48" y1="56" x2="48" y2="68" stroke="#0284c7" stroke-width="2.4"/>
+                <rect x="44" y="20" width="8" height="20" rx="2" fill="#dc2626"/>
+                <rect x="38" y="26" width="20" height="8" rx="2" fill="#dc2626"/>
+              </svg>
+            </div>
+            <h3>🏥 Y học (Dịch truyền)</h3>
+            <p>Pha chế <b>dịch truyền glucose 5%</b> cung cấp năng lượng nhanh cho người bệnh, người suy nhược cơ thể.</p>
+          </div>
+
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="96" height="72" viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg" aria-label="Tráng gương và ruột phích">
+                <ellipse cx="48" cy="36" rx="28" ry="26" fill="#e2e8f0" stroke="#475569" stroke-width="2.4"/>
+                <line x1="34" y1="22" x2="54" y2="42" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+                <line x1="46" y1="18" x2="62" y2="34" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>🪞 Tráng gương, ruột phích</h3>
+            <p>Dùng glucose khử <span class="chem-formula">[Ag(NH<sub>3</sub>)<sub>2</sub>]OH</span> tạo lớp bạc sáng bám đều, an toàn hơn aldehyde độc hại.</p>
+          </div>
+
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="96" height="72" viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg" aria-label="Lên men sản xuất ethanol">
+                <path d="M 38 12 L 58 12 L 58 26 L 70 54 A 8 8 0 0 1 62 64 L 34 64 A 8 8 0 0 1 26 54 L 38 26 Z" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+                <circle cx="44" cy="48" r="3" fill="#ffffff"/>
+                <circle cx="54" cy="40" r="2.5" fill="#ffffff"/>
+                <circle cx="48" cy="30" r="2.5" fill="#ffffff"/>
+              </svg>
+            </div>
+            <h3>⚗️ Sản xuất Ethanol</h3>
+            <p>Lên men dung dịch glucose nhờ enzyme tạo <b>ethanol</b> (<span class="chem-formula">C<sub>2</sub>H<sub>5</sub>OH</span>) dùng trong thực phẩm và nhiên liệu sinh học.</p>
+          </div>
+
+          <div class="visual-card">
+            <div class="mini-svg-box">
+              <svg width="96" height="72" viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg" aria-label="Công nghiệp thực phẩm">
+                <rect x="20" y="22" width="56" height="34" rx="10" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+                <circle cx="38" cy="39" r="7" fill="#f472b6"/>
+                <circle cx="58" cy="39" r="7" fill="#fbbf24"/>
+              </svg>
+            </div>
+            <h3>🍬 Công nghiệp thực phẩm</h3>
+            <p>Glucose và fructose được dùng làm chất tạo ngọt, sản xuất bánh kẹo, nước giải khát, đồ hộp và thực phẩm dinh dưỡng.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 CÂU HỎI THẢO LUẬN TRÊN LỚP (ẨN ĐÁP ÁN MẶC ĐỊNH) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">?</span>
+            <h2 class="card-title">Câu hỏi thảo luận trên lớp</h2>
+          </div>
+          <span class="pill-tag">Bấm để mở / ẩn đáp án</span>
+        </div>
+
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 1: Vì sao trong công nghiệp tráng gương và ruột phích người ta dùng glucose mà không dùng formaldehyde (HCHO) dù HCHO cũng tráng bạc được?</p>
+              <div>
+                <button id="btnQa1" type="button" class="btn btn-primary" onclick="toggleQa(1)"><span>Xem đáp án gợi ý</span></button>
+              </div>
+            </div>
+            <div id="qaAns1" class="qa-ans hidden">
+              <b>Đáp án:</b> Formaldehyde (HCHO) là chất <b>rất độc, dễ bay hơi, có mùi xốc và gây ung thư</b>, nguy hiểm cho công nhân sản xuất. Ngược lại, <b>glucose không độc, không bay hơi, dễ bảo quản và an toàn cho sức khoẻ</b>, đồng thời tạo lớp bạc mịn, sáng bóng bám chắc vào thuỷ tinh.
+            </div>
+          </div>
+
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 2: Vì sao fructose không có nhóm –CH=O trong cấu tạo nhưng vẫn tham gia phản ứng tráng bạc với thuốc thử Tollens, còn với nước bromine thì không phản ứng?</p>
+              <div>
+                <button id="btnQa2" type="button" class="btn btn-primary" onclick="toggleQa(2)"><span>Xem đáp án gợi ý</span></button>
+              </div>
+            </div>
+            <div id="qaAns2" class="qa-ans hidden">
+              <b>Đáp án:</b> Thuốc thử Tollens (<span class="chem-formula">[Ag(NH<sub>3</sub>)<sub>2</sub>]OH</span>) có <b>môi trường kiềm (<span class="chem-formula">OH<sup>−</sup></span>)</b> nên xảy ra cân bằng chuyển hoá <b>fructose ⇌ glucose</b>; lượng glucose sinh ra phản ứng tráng bạc. Trong khi đó, nước bromine có môi trường trung tính/acid nhẹ nên fructose <b>không chuyển hoá thành glucose</b> và không làm mất màu nước <span class="chem-formula">Br<sub>2</sub></span>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 4: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+         ======================================================================= -->
+    <section id="tabPanel-4" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: Glucose và Fructose (10 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              4 Nhận biết • 3 Thông hiểu • 3 Vận dụng (gồm bài toán tráng bạc &amp; lên men rượu) • Xáo trộn Fisher–Yates
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 10</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="btn btn-primary" onclick="submitQuiz()"><span>✔ Nộp bài &amp; Tổng kết</span></button>
+            <button type="button" class="btn btn-secondary" onclick="resetQuiz()"><span>↻ Làm lại từ đầu</span></button>
+          </div>
+        </div>
+
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)"><span>← Câu trước</span></button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 10</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)"><span>Câu tiếp theo →</span></button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--primary-dark);">Kết quả bài làm</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.94rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()"><span>Làm lại &amp; Xáo trộn đáp án</span></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. NGÂN HÀNG 10 CÂU HỎI PHÂN HOÁ (4 NB – 3 TH – 3 VD, KHÔNG LỘ ĐÁP ÁN CHÉO)
+    // =========================================================================
+    const RAW_QUIZ_BANK = [
+      // --- 4 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được công thức phân tử và dạng vòng của glucose',
+        question: 'Ở trạng thái tinh thể, glucose (<span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span>) tồn tại chủ yếu ở dạng cấu trúc nào sau đây?',
+        options: [
+          {
+            text: 'Dạng mạch vòng 6 cạnh (α-glucose và β-glucose).',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: glucose tồn tại chủ yếu ở dạng vòng 6 cạnh gồm hai đồng phân α-glucose và β-glucose.'
+          },
+          {
+            text: 'Dạng mạch vòng 5 cạnh.',
+            isCorrect: false,
+            reason: 'Sai: dạng vòng 5 cạnh là dạng vòng chủ yếu ở trạng thái rắn của fructose, không phải của glucose.'
+          },
+          {
+            text: 'Hoàn toàn ở dạng mạch hở không đóng vòng.',
+            isCorrect: false,
+            reason: 'Sai: dạng mạch hở chỉ chiếm tỉ lệ rất nhỏ trong dung dịch nước, không phải dạng chủ yếu.'
+          },
+          {
+            text: 'Dạng mạch vòng 4 cạnh.',
+            isCorrect: false,
+            reason: 'Sai: vòng 4 cạnh kém bền về sức căng vòng, không phải cấu tạo của glucose.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nhận diện được tính chất polyalcohol của glucose và fructose',
+        question: 'Ở nhiệt độ thường, khi nhỏ dung dịch glucose hoặc fructose vào ống nghiệm chứa kết tủa <span class="chem-formula">Cu(OH)<sub>2</sub></span> (màu xanh nhạt) rồi lắc nhẹ, hiện tượng quan sát được là gì?',
+        options: [
+          {
+            text: 'Kết tủa <span class="chem-formula">Cu(OH)<sub>2</sub></span> tan ra tạo thành dung dịch màu xanh lam thẫm.',
+            isCorrect: true,
+            reason: 'Đúng: cả glucose và fructose đều có nhiều nhóm –OH kề nhau (tính chất polyalcohol) nên hoà tan <span class="chem-formula">Cu(OH)<sub>2</sub></span> ở nhiệt độ thường tạo phức đồng màu xanh lam thẫm.'
+          },
+          {
+            text: 'Xuất hiện kết tủa đỏ gạch ngay ở nhiệt độ thường.',
+            isCorrect: false,
+            reason: 'Sai: kết tủa đỏ gạch <span class="chem-formula">Cu<sub>2</sub>O</span> chỉ xuất hiện khi đun nóng hỗn hợp với <span class="chem-formula">Cu(OH)<sub>2</sub></span> trong môi trường kiềm.'
+          },
+          {
+            text: 'Không có hiện tượng gì, kết tủa <span class="chem-formula">Cu(OH)<sub>2</sub></span> không tan.',
+            isCorrect: false,
+            reason: 'Sai: do có các nhóm –OH kề nhau nên cả hai đường đơn đều hoà tan tốt <span class="chem-formula">Cu(OH)<sub>2</sub></span>.'
+          },
+          {
+            text: 'Có bọt khí không màu thoát ra mạnh.',
+            isCorrect: false,
+            reason: 'Sai: phản ứng tạo phức đồng không sinh ra chất khí.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được trạng thái tự nhiên và hàm lượng đường trong mật ong, máu người',
+        question: 'Loại monosaccharide nào chiếm tỉ lệ cao nhất (khoảng 40%) tạo nên vị ngọt sắc đặc trưng của mật ong?',
+        options: [
+          {
+            text: 'Fructose.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: mật ong chứa khoảng 40% fructose và khoảng 30% glucose; fructose có vị ngọt đậm hơn glucose.'
+          },
+          {
+            text: 'Glucose.',
+            isCorrect: false,
+            reason: 'Sai: glucose chỉ chiếm khoảng 30% trong mật ong (thấp hơn fructose).'
+          },
+          {
+            text: 'Saccharose.',
+            isCorrect: false,
+            reason: 'Sai: saccharose là disaccharide (đường mía), không phải monosaccharide và chỉ có tỉ lệ rất nhỏ trong mật ong.'
+          },
+          {
+            text: 'Maltose.',
+            isCorrect: false,
+            reason: 'Sai: maltose là disaccharide có trong mạch nha.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được ứng dụng thực tiễn của glucose trong y học và đời sống',
+        question: 'Ứng dụng nào sau đây <b>không</b> phải là ứng dụng của glucose?',
+        options: [
+          {
+            text: 'Làm nguyên liệu chính để tổng hợp trực tiếp nhựa PVC.',
+            isCorrect: true,
+            reason: 'Đúng (đây là ứng dụng sai cần chọn): nhựa PVC được tổng hợp từ vinyl chloride (<span class="chem-formula">CH<sub>2</sub>=CHCl</span>), không phải từ glucose.'
+          },
+          {
+            text: 'Pha chế dịch truyền tĩnh mạch cung cấp năng lượng cho người bệnh.',
+            isCorrect: false,
+            reason: 'Sai (đây là ứng dụng đúng của glucose trong y học).'
+          },
+          {
+            text: 'Dùng trong công nghiệp tráng gương và tráng ruột phích.',
+            isCorrect: false,
+            reason: 'Sai (đây là ứng dụng đúng dựa trên phản ứng khử ion <span class="chem-formula">Ag<sup>+</sup></span>).'
+          },
+          {
+            text: 'Lên men sản xuất ethanol và đồ uống có cồn.',
+            isCorrect: false,
+            reason: 'Sai (đây là ứng dụng đúng dựa trên phản ứng lên men rượu của glucose).'
+          }
+        ]
+      },
+
+      // --- 3 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Chọn được thuốc thử hoá học để phân biệt dung dịch glucose và dung dịch fructose',
+        question: 'Để phân biệt hai dung dịch mất nhãn đựng riêng biệt <b>glucose</b> và <b>fructose</b>, thuốc thử thích hợp nhất là gì?',
+        options: [
+          {
+            text: 'Nước bromine (<span class="chem-formula">Br<sub>2</sub></span>).',
+            isCorrect: true,
+            reason: 'Đúng: glucose làm mất màu vàng nâu của nước bromine (tạo gluconic acid), còn fructose không làm mất màu nước bromine.'
+          },
+          {
+            text: 'Thuốc thử Tollens (<span class="chem-formula">[Ag(NH<sub>3</sub>)<sub>2</sub>]OH</span>, đun nóng).',
+            isCorrect: false,
+            reason: 'Sai: cả glucose và fructose đều cho hiện tượng giống nhau là tạo lớp bạc sáng bám thành ống nghiệm.'
+          },
+          {
+            text: 'Kết tủa <span class="chem-formula">Cu(OH)<sub>2</sub></span> ở nhiệt độ thường.',
+            isCorrect: false,
+            reason: 'Sai: cả hai chất đều hoà tan <span class="chem-formula">Cu(OH)<sub>2</sub></span> tạo dung dịch màu xanh lam thẫm giống nhau.'
+          },
+          {
+            text: 'Quỳ tím.',
+            isCorrect: false,
+            reason: 'Sai: cả hai dung dịch đều trung tính, không làm đổi màu quỳ tím.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Giải thích được vị trí và tính chất nhóm –OH hemiacetal của glucose',
+        question: 'Khi cho glucose tác dụng với <span class="chem-formula">CH<sub>3</sub>OH</span> (có mặt khí HCl khan làm xúc tác), chỉ có 1 nhóm –OH trong phân tử glucose phản ứng tạo methyl glucoside. Nhóm –OH đó nằm ở vị trí nào?',
+        options: [
+          {
+            text: 'Nhóm –OH hemiacetal ở nguyên tử carbon số 1 (C1) của dạng mạch vòng.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: ở dạng mạch vòng 6 cạnh, nhóm –OH gắn ở C1 là nhóm –OH hemiacetal có khả năng phản ứng riêng biệt với <span class="chem-formula">CH<sub>3</sub>OH</span>/HCl khan.'
+          },
+          {
+            text: 'Nhóm –OH ở nguyên tử carbon số 6 (C6 – nhóm <span class="chem-formula">–CH<sub>2</sub>OH</span>).',
+            isCorrect: false,
+            reason: 'Sai: nhóm –OH ở C6 là nhóm alcohol bậc I thông thường, không phải nhóm –OH hemiacetal.'
+          },
+          {
+            text: 'Nhóm –OH ở nguyên tử carbon số 3 (C3).',
+            isCorrect: false,
+            reason: 'Sai: nhóm –OH ở C3 là nhóm alcohol bậc II, không tạo methyl glucoside.'
+          },
+          {
+            text: 'Cả 5 nhóm –OH đều phản ứng tạo pentamethyl ether.',
+            isCorrect: false,
+            reason: 'Sai: đề bài nêu rõ chỉ có 1 nhóm –OH phản ứng tạo methyl glucoside (chính là nhóm –OH hemiacetal ở C1).'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Viết được sản phẩm của phản ứng lên men rượu và lên men lactic từ glucose',
+        question: 'Sản phẩm hữu cơ tạo thành khi lên men glucose nhờ enzyme theo con đường <b>lên men rượu</b> và <b>lên men lactic</b> lần lượt là gì?',
+        options: [
+          {
+            text: 'Ethanol (<span class="chem-formula">C<sub>2</sub>H<sub>5</sub>OH</span>) và lactic acid (<span class="chem-formula">CH<sub>3</sub>CH(OH)COOH</span>).',
+            isCorrect: true,
+            reason: 'Đúng: lên men rượu tạo <span class="chem-formula">2C<sub>2</sub>H<sub>5</sub>OH + 2CO<sub>2</sub></span>; lên men lactic tạo <span class="chem-formula">2CH<sub>3</sub>CH(OH)COOH</span>.'
+          },
+          {
+            text: 'Methanol (<span class="chem-formula">CH<sub>3</sub>OH</span>) và acetic acid (<span class="chem-formula">CH<sub>3</sub>COOH</span>).',
+            isCorrect: false,
+            reason: 'Sai: lên men rượu tạo ethanol (2 C), không tạo methanol (1 C); lên men lactic tạo lactic acid (3 C), không tạo acetic acid.'
+          },
+          {
+            text: 'Gluconic acid và ethanol.',
+            isCorrect: false,
+            reason: 'Sai: gluconic acid là sản phẩm khi oxi hoá glucose bằng nước bromine.'
+          },
+          {
+            text: 'Glycerol và formic acid.',
+            isCorrect: false,
+            reason: 'Sai: không phải sản phẩm của hai quá trình lên men này.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU VẬN DỤNG (2 BÀI TOÁN + 1 CÂU TỔNG HỢP) ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính được khối lượng bạc kết tủa trong phản ứng tráng bạc của glucose',
+        question: 'Cho <b>18,0 gam glucose</b> (<span class="chem-formula">M = 180</span>) tác dụng hoàn toàn với lượng dư thuốc thử Tollens (<span class="chem-formula">[Ag(NH<sub>3</sub>)<sub>2</sub>]OH</span>) đun nóng. Khối lượng bạc (Ag, M = 108) tối đa thu được là bao nhiêu?',
+        options: [
+          {
+            text: '<b>21,6 gam</b>.',
+            isCorrect: true,
+            reason: 'Đúng: <span class="chem-formula">n<sub>glucose</sub> = 18,0 / 180 = 0,1 mol</span>. Theo tỉ lệ phản ứng tráng bạc: 1 mol glucose → 2 mol Ag ⇒ <span class="chem-formula">n<sub>Ag</sub> = 0,2 mol</span> ⇒ <span class="chem-formula">m<sub>Ag</sub> = 0,2 × 108 = 21,6 g</span>.'
+          },
+          {
+            text: '<b>10,8 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: quên nhân hệ số 2 (1 mol glucose tạo 2 mol Ag, không phải 1 mol Ag).'
+          },
+          {
+            text: '<b>43,2 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: nhân nhầm hệ số 4 (nhầm với tỉ lệ tráng bạc của HCHO).'
+          },
+          {
+            text: '<b>16,2 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: tính sai số mol Ag (0,15 × 108 = 16,2 g).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính được khối lượng ethanol tạo thành khi lên men rượu theo hiệu suất',
+        question: 'Lên men rượu <b>90,0 gam glucose</b> (<span class="chem-formula">M = 180</span>) với hiệu suất quá trình đạt <b>80%</b>. Khối lượng ethanol (<span class="chem-formula">C<sub>2</sub>H<sub>5</sub>OH</span>, M = 46) thu được là bao nhiêu?',
+        options: [
+          {
+            text: '<b>36,8 gam</b>.',
+            isCorrect: true,
+            reason: 'Đúng: <span class="chem-formula">n<sub>glucose</sub> = 90 / 180 = 0,5 mol</span>. Theo PTHH: <span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> → 2C<sub>2</sub>H<sub>5</sub>OH + 2CO<sub>2</sub></span> ⇒ <span class="chem-formula">n<sub>C2H5OH</sub> = 2 × 0,5 × 80% = 0,8 mol</span> ⇒ <span class="chem-formula">m = 0,8 × 46 = 36,8 g</span>.'
+          },
+          {
+            text: '<b>46,0 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: quên nhân hiệu suất 80% (1,0 × 46 = 46,0 g là khối lượng lí thuyết).'
+          },
+          {
+            text: '<b>18,4 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: quên nhân hệ số 2 cho số mol ethanol trong phương trình lên men.'
+          },
+          {
+            text: '<b>57,5 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: chia nhầm cho 0,8 thay vì nhân 0,8 (46 / 0,8 = 57,5 g).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Đánh giá tổng hợp các phát biểu đúng/sai về cấu tạo và tính chất của glucose, fructose',
+        question: 'Cho các phát biểu sau về glucose và fructose:<br>(a) Trong môi trường kiềm của thuốc thử Tollens, fructose chuyển hoá một phần thành glucose nên có phản ứng tráng bạc.<br>(b) Fructose làm mất màu nước bromine nhanh hơn glucose.<br>(c) Ở dạng mạch hở, mỗi phân tử glucose và fructose đều có 5 nhóm –OH.<br>(d) Nồng độ glucose trong máu người trưởng thành khoẻ mạnh khoảng 4,4 – 7,2 mmol/L.<br>Số phát biểu <b>đúng</b> là bao nhiêu?',
+        options: [
+          {
+            text: '<b>3 phát biểu</b> (a, c, d).',
+            isCorrect: true,
+            reason: 'Đúng: (a), (c), (d) đều đúng; phát biểu (b) <b>sai</b> vì fructose <b>không làm mất màu</b> nước bromine.'
+          },
+          {
+            text: '<b>4 phát biểu</b> (a, b, c, d).',
+            isCorrect: false,
+            reason: 'Sai: phát biểu (b) sai vì chỉ glucose làm mất màu nước bromine.'
+          },
+          {
+            text: '<b>2 phát biểu</b> (a, c).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (d) đúng (chỉ số đường huyết chuẩn trong SGK).'
+          },
+          {
+            text: '<b>2 phát biểu</b> (c, d).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (a) đúng (cơ chế tráng bạc của fructose).'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let currentSugar = 'glu'; // 'glu' | 'fru'
+    let currentForm = 'open'; // 'open' | 'alpha' | 'beta'
+    let highlightHemi = false;
+
+    let currentRxn = 'cu';    // 'cu' | 'ag' | 'br' | 'ferm'
+    let labPct = 0;
+    let labAutoRunning = false;
+    let labTimer = null;
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+    let quizSubmitted = false;
+
+    // =========================================================================
+    // 3. CHUYỂN TAB & FULLSCREEN AN TOÀN (KHÔNG LỖI TRÊN IPHONE/IPAD)
+    // =========================================================================
+    function switchTab(num) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`tabPanel-${i}`).classList.toggle('hidden', i !== num);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        btn.classList.toggle('active', i === num);
+        btn.setAttribute('aria-selected', i === num ? 'true' : 'false');
+      }
+      if (num !== 2) stopLabAuto();
+      if (num === 4) renderQuizQuestion();
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // =========================================================================
+    // 4. LOGIC TAB 1: CẤU TẠO PHÂN TỬ (MẠCH HỞ & MẠCH VÒNG α/β)
+    // =========================================================================
+    function selectSugar(s) {
+      currentSugar = s;
+      document.getElementById('molSel-glu').classList.toggle('active', s === 'glu');
+      document.getElementById('molSel-fru').classList.toggle('active', s === 'fru');
+      renderStructureSvg();
+    }
+
+    function selectForm(f) {
+      currentForm = f;
+      ['open', 'alpha', 'beta'].forEach(k => {
+        document.getElementById(`formSel-${k}`).classList.toggle('active', k === f);
+      });
+      renderStructureSvg();
+    }
+
+    function toggleHemiHighlight() {
+      highlightHemi = !highlightHemi;
+      const btn = document.getElementById('btnHighlightHemi');
+      btn.classList.toggle('btn-primary', highlightHemi);
+      btn.classList.toggle('btn-amber', !highlightHemi);
+      renderStructureSvg();
+    }
+
+    function renderStructureSvg() {
+      const svg = document.getElementById('structSvg');
+      const badge = document.getElementById('structBadge');
+      const info = document.getElementById('structInfoPanel');
+      const sugarName = currentSugar === 'glu' ? 'Glucose' : 'Fructose';
+      const formName = currentForm === 'open' ? 'Dạng mạch hở' : (currentForm === 'alpha' ? 'Dạng vòng α' : 'Dạng vòng β');
+      badge.textContent = `${sugarName} • ${formName}`;
+
+      if (currentForm === 'open') {
+        if (currentSugar === 'glu') {
+          const hlFill = highlightHemi ? '#fee2e2' : '#fff5f5';
+          const hlStroke = highlightHemi ? '#dc2626' : '#f87171';
+          const hlScale = highlightHemi ? 'scale(1.06)' : 'scale(1)';
+          svg.innerHTML = `
+            <text x="410" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">Glucose – Dạng mạch hở (CH₂OH–[CHOH]₄–CH=O)</text>
+            <line x1="94" y1="154" x2="704" y2="154" stroke="#0f172a" stroke-width="2.8" />
+
+            <!-- C6 -->
+            <g>
+              <rect x="52" y="130" width="84" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="94" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH₂<tspan fill="#059669">OH</tspan></text>
+              <text x="94" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C6</text>
+            </g>
+            <!-- C5 -->
+            <g>
+              <rect x="164" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="204" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="204" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C5</text>
+            </g>
+            <!-- C4 -->
+            <g>
+              <rect x="272" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="312" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="312" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C4</text>
+            </g>
+            <!-- C3 -->
+            <g>
+              <rect x="380" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="420" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="420" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C3</text>
+            </g>
+            <!-- C2 -->
+            <g>
+              <rect x="488" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="528" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="528" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C2</text>
+            </g>
+
+            <!-- C1: Nhóm aldehyde -CH=O tách thoáng nối đôi C=O -->
+            <g class="svg-smooth" style="transform: ${hlScale};">
+              <rect x="606" y="96" width="154" height="122" rx="14" fill="${hlFill}" stroke="${hlStroke}" stroke-width="2.4"/>
+              <text x="683" y="116" text-anchor="middle" font-size="12" font-weight="800" fill="#dc2626">C1 (Aldehyde)</text>
+              <text x="656" y="160" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">C</text>
+              <line x1="670" y1="153" x2="704" y2="153" stroke="#0f172a" stroke-width="2.6"/>
+              <text x="720" y="160" text-anchor="middle" font-size="21" font-weight="800" fill="#0f172a">H</text>
+              <!-- Nối đôi C=O hướng xuống tách thoáng -->
+              <line x1="652" y1="168" x2="652" y2="186" stroke="#dc2626" stroke-width="2.4"/>
+              <line x1="660" y1="168" x2="660" y2="186" stroke="#dc2626" stroke-width="2.4"/>
+              <text x="656" y="208" text-anchor="middle" font-size="21" font-weight="800" fill="#dc2626">O</text>
+            </g>
+
+            <text x="410" y="268" text-anchor="middle" font-size="13.5" font-weight="700" fill="#334155">
+              5 nhóm –OH (xanh lá) tạo tính chất polyalcohol • 1 nhóm –CH=O ở C1 (đỏ) tạo tính chất aldehyde
+            </text>
+          `;
+          info.innerHTML = '<b>Glucose mạch hở:</b> Chứa <b>5 nhóm –OH</b> ở các carbon liên tiếp và <b>1 nhóm aldehyde (–CH=O)</b> tại C1. Khi nhóm –OH ở C5 cộng vào nhóm C=O ở C1 sẽ đóng vòng tạo thành <b>vòng 6 cạnh</b>.';
+        } else {
+          const hlFill = highlightHemi ? '#ede9fe' : '#f5f3ff';
+          const hlStroke = highlightHemi ? '#6d28d9' : '#a78bfa';
+          const hlScale = highlightHemi ? 'scale(1.06)' : 'scale(1)';
+          svg.innerHTML = `
+            <text x="410" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">Fructose – Dạng mạch hở (CH₂OH–[CHOH]₃–CO–CH₂OH)</text>
+            <line x1="94" y1="154" x2="720" y2="154" stroke="#0f172a" stroke-width="2.8" />
+
+            <!-- C6 -->
+            <g>
+              <rect x="52" y="130" width="84" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="94" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH₂<tspan fill="#059669">OH</tspan></text>
+              <text x="94" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C6</text>
+            </g>
+            <!-- C5 -->
+            <g>
+              <rect x="164" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="204" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="204" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C5</text>
+            </g>
+            <!-- C4 -->
+            <g>
+              <rect x="272" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="312" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="312" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C4</text>
+            </g>
+            <!-- C3 -->
+            <g>
+              <rect x="380" y="130" width="80" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="420" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH<tspan fill="#059669">OH</tspan></text>
+              <text x="420" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C3</text>
+            </g>
+
+            <!-- C2: Nhóm Ketone >C=O tách thoáng -->
+            <g class="svg-smooth" style="transform: ${hlScale};">
+              <rect x="492" y="96" width="128" height="122" rx="14" fill="${hlFill}" stroke="${hlStroke}" stroke-width="2.4"/>
+              <text x="556" y="116" text-anchor="middle" font-size="12" font-weight="800" fill="#6d28d9">C2 (Ketone)</text>
+              <text x="556" y="160" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">C</text>
+              <line x1="552" y1="168" x2="552" y2="186" stroke="#6d28d9" stroke-width="2.4"/>
+              <line x1="560" y1="168" x2="560" y2="186" stroke="#6d28d9" stroke-width="2.4"/>
+              <text x="556" y="208" text-anchor="middle" font-size="21" font-weight="800" fill="#6d28d9">O</text>
+            </g>
+
+            <!-- C1 -->
+            <g>
+              <rect x="652" y="130" width="88" height="48" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6"/>
+              <text x="696" y="160" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">CH₂<tspan fill="#059669">OH</tspan></text>
+              <text x="696" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#64748b">C1</text>
+            </g>
+
+            <text x="410" y="268" text-anchor="middle" font-size="13.5" font-weight="700" fill="#334155">
+              5 nhóm –OH (xanh lá) • 1 nhóm ketone (&gt;C=O) tại C2 (tím) — KHÔNG có nhóm –CH=O
+            </text>
+          `;
+          info.innerHTML = '<b>Fructose mạch hở:</b> Chứa <b>5 nhóm –OH</b> và <b>1 nhóm ketone (&gt;C=O)</b> tại C2. Khi nhóm –OH ở C5 cộng vào nhóm C=O ở C2 sẽ đóng vòng tạo thành <b>vòng 5 cạnh</b>.';
+        }
+      } else if (currentSugar === 'glu') {
+        // VÒNG 6 CẠNH α-GLUCOSE HOẶC β-GLUCOSE
+        const isAlpha = currentForm === 'alpha';
+        const ohY = isAlpha ? 206 : 114;
+        const hY = isAlpha ? 114 : 206;
+        const hlCircle = highlightHemi
+          ? `<circle cx="516" cy="${ohY - 4}" r="28" fill="#fef08a" stroke="#dc2626" stroke-width="2.6" stroke-dasharray="5 3"/>`
+          : '';
+        svg.innerHTML = `
+          <text x="410" y="32" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">
+            ${isAlpha ? 'α-Glucose (vòng 6 cạnh — nhóm –OH ở C1 hướng xuống dưới)' : 'β-Glucose (vòng 6 cạnh — nhóm –OH ở C1 hướng lên trên)'}
+          </text>
+
+          <!-- Vòng 6 cạnh Haworth: C4(294,160) - C5(346,112) - O(454,112) - C1(506,160) - C2(454,208) - C3(346,208) -->
+          <polygon points="294,160 346,112 454,112 506,160 454,208 346,208" fill="#eff6ff" stroke="#0b5cab" stroke-width="3.2" stroke-linejoin="round"/>
+          <!-- Cạnh trước đậm (C3-C2) -->
+          <line x1="346" y1="208" x2="454" y2="208" stroke="#084785" stroke-width="5.2" stroke-linecap="round"/>
+
+          <!-- Nguyên tử O trong vòng -->
+          <circle cx="454" cy="112" r="15" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+          <text x="454" y="118" text-anchor="middle" font-size="16" font-weight="800" fill="#dc2626">O</text>
+
+          <!-- Nhánh C6 (-CH2OH) tại C5 -->
+          <line x1="346" y1="112" x2="346" y2="76" stroke="#0f172a" stroke-width="2.4"/>
+          <text x="346" y="68" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">CH₂OH (C6)</text>
+          <text x="354" y="132" font-size="11.5" font-weight="800" fill="#64748b">5</text>
+
+          <!-- Các nhóm -OH cố định ở C4, C3, C2 -->
+          <line x1="294" y1="160" x2="294" y2="196" stroke="#0f172a" stroke-width="2.2"/>
+          <text x="294" y="214" text-anchor="middle" font-size="14" font-weight="800" fill="#059669">OH</text>
+          <text x="278" y="164" font-size="11.5" font-weight="800" fill="#64748b">4</text>
+
+          <line x1="346" y1="208" x2="346" y2="174" stroke="#0f172a" stroke-width="2.2"/>
+          <text x="346" y="168" text-anchor="middle" font-size="14" font-weight="800" fill="#059669" stroke="#eff6ff" stroke-width="5" paint-order="stroke">OH</text>
+          <text x="332" y="224" font-size="11.5" font-weight="800" fill="#64748b">3</text>
+
+          <line x1="454" y1="208" x2="454" y2="244" stroke="#0f172a" stroke-width="2.2"/>
+          <text x="454" y="262" text-anchor="middle" font-size="14" font-weight="800" fill="#059669">OH</text>
+          <text x="468" y="224" font-size="11.5" font-weight="800" fill="#64748b">2</text>
+
+          <!-- C1: Nhóm -OH hemiacetal -->
+          <text x="488" y="165" font-size="12" font-weight="800" fill="#dc2626">1</text>
+          <line x1="506" y1="160" x2="506" y2="${isAlpha ? ohY - 14 : ohY + 8}" stroke="#dc2626" stroke-width="2.8"/>
+          <line x1="506" y1="160" x2="506" y2="${hY + (isAlpha ? 10 : -10)}" stroke="#64748b" stroke-width="2"/>
+          ${hlCircle}
+          <text x="513" y="${ohY}" text-anchor="start" font-size="16" font-weight="800" fill="#dc2626">OH</text>
+          <text x="513" y="${hY}" text-anchor="start" font-size="15" font-weight="700" fill="#64748b">H</text>
+
+          <!-- Nhãn chú thích ngoài vòng (x=586..800) -->
+          <line x1="548" y1="${ohY - 4}" x2="584" y2="${ohY - 4}" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="4 3"/>
+          <rect x="586" y="${ohY - 26}" width="214" height="44" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="1.6"/>
+          <text x="693" y="${ohY - 8}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#b91c1c">Nhóm –OH hemiacetal (C1)</text>
+          <text x="693" y="${ohY + 10}" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">${isAlpha ? 'Khác phía CH₂OH → đồng phân α' : 'Cùng phía CH₂OH → đồng phân β'}</text>
+
+          <text x="30" y="286" font-size="11.5" font-weight="700" fill="#64748b">Quy ước Haworth: nhóm vẽ hướng lên nằm phía trên mặt phẳng vòng, hướng xuống nằm phía dưới.</text>
+          <text x="30" y="302" font-size="11.5" font-weight="700" fill="#64748b">(Nhóm –OH ở C3 hướng lên nên được vẽ chồng lên mặt vòng do phối cảnh.)</text>
+        `;
+        info.innerHTML = isAlpha
+          ? '<b>α-Glucose (vòng 6 cạnh):</b> Nhóm <b>–OH hemiacetal</b> tại C1 nằm ở vị trí <b>hướng xuống dưới</b> (khác phía với nhóm <span class="chem-formula">–CH<sub>2</sub>OH</span> ở C6).'
+          : '<b>β-Glucose (vòng 6 cạnh):</b> Nhóm <b>–OH hemiacetal</b> tại C1 nằm ở vị trí <b>hướng lên trên</b> (cùng phía với nhóm <span class="chem-formula">–CH<sub>2</sub>OH</span> ở C6).';
+      } else {
+        // VÒNG 5 CẠNH α-FRUCTOSE HOẶC β-FRUCTOSE
+        const isAlpha = currentForm === 'alpha';
+        const ohY = isAlpha ? 210 : 114;
+        const ch2Y = isAlpha ? 114 : 210;
+        const hlCircle = highlightHemi
+          ? `<circle cx="510" cy="${ohY - 4}" r="28" fill="#fef08a" stroke="#6d28d9" stroke-width="2.6" stroke-dasharray="5 3"/>`
+          : '';
+        svg.innerHTML = `
+          <text x="410" y="32" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">
+            ${isAlpha ? 'α-Fructose (vòng 5 cạnh — nhóm –OH ở C2 hướng xuống dưới)' : 'β-Fructose (vòng 5 cạnh — nhóm –OH ở C2 hướng lên trên)'}
+          </text>
+
+          <!-- Vòng 5 cạnh: O(400,98) - C2(496,158) - C3(458,218) - C4(342,218) - C5(304,158) -->
+          <polygon points="400,98 496,158 458,218 342,218 304,158" fill="#f5f3ff" stroke="#6d28d9" stroke-width="3.2" stroke-linejoin="round"/>
+          <line x1="342" y1="218" x2="458" y2="218" stroke="#5b21b6" stroke-width="5.2" stroke-linecap="round"/>
+
+          <!-- Nguyên tử O trên đỉnh vòng -->
+          <circle cx="400" cy="98" r="15" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+          <text x="400" y="104" text-anchor="middle" font-size="16" font-weight="800" fill="#dc2626">O</text>
+
+          <!-- Nhánh C6 (-CH2OH) tại C5 -->
+          <line x1="304" y1="158" x2="304" y2="112" stroke="#0f172a" stroke-width="2.4"/>
+          <text x="278" y="102" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">CH₂OH (C6)</text>
+          <text x="316" y="164" font-size="11.5" font-weight="800" fill="#64748b">5</text>
+
+          <!-- Nhóm -OH ở C4 và C3 -->
+          <line x1="342" y1="218" x2="342" y2="252" stroke="#0f172a" stroke-width="2.2"/>
+          <text x="342" y="270" text-anchor="middle" font-size="14" font-weight="800" fill="#059669">OH</text>
+          <text x="328" y="230" font-size="11.5" font-weight="800" fill="#64748b">4</text>
+
+          <line x1="458" y1="218" x2="458" y2="182" stroke="#0f172a" stroke-width="2.2"/>
+          <text x="458" y="176" text-anchor="middle" font-size="14" font-weight="800" fill="#059669" stroke="#f5f3ff" stroke-width="5" paint-order="stroke">OH</text>
+          <text x="470" y="230" font-size="11.5" font-weight="800" fill="#64748b">3</text>
+
+          <!-- C2: Nhóm -OH hemiketal & -CH2OH (C1) -->
+          <text x="478" y="162" font-size="12" font-weight="800" fill="#6d28d9">2</text>
+          <line x1="496" y1="158" x2="496" y2="${ohY - 14}" stroke="#6d28d9" stroke-width="2.8"/>
+          <line x1="496" y1="158" x2="496" y2="${ch2Y + (isAlpha ? 10 : -10)}" stroke="#0f172a" stroke-width="2.2"/>
+          ${hlCircle}
+          <text x="510" y="${ohY}" text-anchor="middle" font-size="16" font-weight="800" fill="#6d28d9">OH</text>
+          <text x="510" y="${ch2Y}" text-anchor="start" font-size="14.5" font-weight="800" fill="#0f172a">CH₂OH (C1)</text>
+
+          <!-- Nhãn chú thích ngoài vòng -->
+          <line x1="538" y1="${ohY - 4}" x2="584" y2="${ohY - 4}" stroke="#6d28d9" stroke-width="1.8" stroke-dasharray="4 3"/>
+          <rect x="586" y="${ohY - 26}" width="214" height="44" rx="10" fill="#f5f3ff" stroke="#6d28d9" stroke-width="1.6"/>
+          <text x="693" y="${ohY - 8}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#5b21b6">Nhóm –OH hemiketal (C2)</text>
+          <text x="693" y="${ohY + 10}" text-anchor="middle" font-size="11" font-weight="700" fill="#6d28d9">${isAlpha ? 'Khác phía C6 → đồng phân α' : 'Cùng phía C6 → đồng phân β'}</text>
+        `;
+        info.innerHTML = isAlpha
+          ? '<b>α-Fructose (vòng 5 cạnh):</b> Nhóm <b>–OH hemiketal</b> tại C2 nằm hướng xuống dưới (khác phía với nhóm <span class="chem-formula">–CH<sub>2</sub>OH</span> ở C6).'
+          : '<b>β-Fructose (vòng 5 cạnh):</b> Nhóm <b>–OH hemiketal</b> tại C2 nằm hướng lên trên (cùng phía với nhóm <span class="chem-formula">–CH<sub>2</sub>OH</span> ở C6).';
+      }
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 2: PHÒNG THÍ NGHIỆM ẢO 4 PHẢN ỨNG
+    // =========================================================================
+    function selectRxn(rxn) {
+      stopLabAuto();
+      currentRxn = rxn;
+      labPct = 0;
+      ['cu', 'ag', 'br', 'ferm'].forEach(k => {
+        document.getElementById(`rxnBtn-${k}`).classList.toggle('active', k === rxn);
+      });
+      document.getElementById('brDistinguishBox').classList.toggle('hidden', rxn !== 'br');
+      document.getElementById('extraRxn4Box').classList.toggle('hidden', rxn !== 'ferm');
+      renderLabScene(0);
+    }
+
+    function onLabSlider(val) {
+      stopLabAuto();
+      renderLabScene(val);
+    }
+
+    function resetLab() {
+      stopLabAuto();
+      renderLabScene(0);
+    }
+
+    function toggleLabAuto() {
+      if (labAutoRunning) {
+        stopLabAuto();
+      } else {
+        if (labPct >= 100) renderLabScene(0);
+        labAutoRunning = true;
+        document.getElementById('labAutoIcon').textContent = '⏸';
+        document.getElementById('labAutoText').textContent = 'Tạm dừng';
+        labTimer = setInterval(() => {
+          if (labPct >= 100) {
+            stopLabAuto();
+            return;
+          }
+          renderLabScene(labPct + 2);
+        }, 70);
+      }
+    }
+
+    function stopLabAuto() {
+      labAutoRunning = false;
+      if (labTimer) { clearInterval(labTimer); labTimer = null; }
+      document.getElementById('labAutoIcon').textContent = '▶';
+      document.getElementById('labAutoText').textContent = labPct >= 100 ? 'Chạy lại thí nghiệm' : 'Chạy thí nghiệm';
+    }
+
+    // Link xem thí nghiệm thật. Mặc định là kết quả tìm kiếm YouTube; muốn dùng video cụ thể, thay chuỗi bằng link video.
+    const REAL_VIDEO_LINKS = {
+      cu: 'https://www.youtube.com/results?search_query=thí+nghiệm+glucose+tác+dụng+Cu(OH)2+dung+dịch+xanh+lam',
+      ag: 'https://www.youtube.com/results?search_query=thí+nghiệm+glucose+phản+ứng+tráng+bạc+thuốc+thử+Tollens',
+      br: 'https://www.youtube.com/results?search_query=thí+nghiệm+glucose+nước+bromine+mất+màu+fructose',
+      ferm: 'https://www.youtube.com/results?search_query=thí+nghiệm+lên+men+rượu+glucose+men+rượu+nước+vôi+trong'
+    };
+    function updateRealVideoLink() {
+      const a = document.getElementById('realVideoLink');
+      if (a) a.href = REAL_VIDEO_LINKS[currentRxn];
+    }
+
+    function renderLabScene(pct) {
+      updateRealVideoLink();
+      labPct = Math.max(0, Math.min(100, Number(pct)));
+      document.getElementById('labSlider').value = labPct;
+      document.getElementById('labPctVal').textContent = `${labPct}%`;
+      const pill = document.getElementById('labStatusPill');
+      pill.textContent = labPct === 0 ? 'Sẵn sàng (0%)' : (labPct < 100 ? `Đang phản ứng (${labPct}%)` : 'Hoàn thành thí nghiệm (100%)');
+
+      const svg = document.getElementById('labSvg');
+      const eq = document.getElementById('labEqBox');
+      const r = labPct / 100;
+
+      if (currentRxn === 'cu') {
+        // (1) Cu(OH)2: cả 2 ống đều tan kết tủa xanh nhạt -> dung dịch xanh lam thẫm
+        const liqCol = r < 0.3 ? '#bae6fd' : (r < 0.7 ? '#3b82f6' : '#1d4ed8');
+        const pptOp = Math.max(0, 1 - r * 1.4).toFixed(2);
+        const resTxt = r >= 0.85 ? 'Dung dịch xanh lam thẫm' : (r > 0 ? 'Kết tủa Cu(OH)₂ đang tan...' : 'Kết tủa xanh nhạt Cu(OH)₂');
+
+        svg.innerHTML = buildTwoTubeLab({
+          topTitle: 'Thí nghiệm 1: Glucose & Fructose tác dụng với Cu(OH)₂ ở nhiệt độ thường',
+          t1Color: liqCol, t2Color: liqCol,
+          t1Extra: `<ellipse cx="268" cy="242" rx="22" ry="12" fill="#38bdf8" opacity="${pptOp}"/>`,
+          t2Extra: `<ellipse cx="552" cy="242" rx="22" ry="12" fill="#38bdf8" opacity="${pptOp}"/>`,
+          leftNote1: 'Ống (1): Glucose', leftNote2: resTxt, leftBg: r >= 0.85 ? '#dbeafe' : '#f8fafc', leftStroke: r >= 0.85 ? '#1d4ed8' : '#cbd5e1',
+          rightNote1: 'Ống (2): Fructose', rightNote2: resTxt, rightBg: r >= 0.85 ? '#dbeafe' : '#f8fafc', rightStroke: r >= 0.85 ? '#1d4ed8' : '#cbd5e1',
+          showHeat: false
+        });
+
+        eq.innerHTML = `
+          <b>Phương trình phản ứng (tính chất polyalcohol):</b><br>
+          <span class="chem-formula">2C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> + Cu(OH)<sub>2</sub> → (C<sub>6</sub>H<sub>11</sub>O<sub>6</sub>)<sub>2</sub>Cu + 2H<sub>2</sub>O</span><br>
+          <b>Hiện tượng:</b> Cả <b>glucose</b> và <b>fructose</b> đều hoà tan kết tủa <span class="chem-formula">Cu(OH)<sub>2</sub></span> ở nhiệt độ thường tạo thành <b>dung dịch phức đồng màu xanh lam thẫm</b> (chứng minh phân tử có nhiều nhóm –OH kề nhau).
+        `;
+      } else if (currentRxn === 'ag') {
+        // (2) Thuốc thử Tollens: cả 2 ống đều tạo lớp bạc sáng bám thành ống
+        const agOp = Math.min(0.95, r * 1.15).toFixed(2);
+        const resTxt = r >= 0.85 ? 'Lớp bạc sáng bóng bám thành ống' : (r > 0 ? 'Đang kết tủa bạc (Ag)...' : 'Dd [Ag(NH₃)₂]OH không màu');
+
+        svg.innerHTML = buildTwoTubeLab({
+          topTitle: 'Thí nghiệm 2: Phản ứng tráng bạc với thuốc thử Tollens [Ag(NH₃)₂]OH (đun nóng)',
+          t1Color: '#e2e8f0', t2Color: '#e2e8f0',
+          t1Extra: `
+            <rect x="242" y="138" width="52" height="114" fill="url(#silverGrad)" opacity="${agOp}"/>
+            <line x1="252" y1="150" x2="252" y2="230" stroke="#ffffff" stroke-width="4" opacity="${agOp}" stroke-linecap="round"/>
+          `,
+          t2Extra: `
+            <rect x="526" y="138" width="52" height="114" fill="url(#silverGrad)" opacity="${agOp}"/>
+            <line x1="536" y1="150" x2="536" y2="230" stroke="#ffffff" stroke-width="4" opacity="${agOp}" stroke-linecap="round"/>
+          `,
+          leftNote1: 'Ống (1): Glucose', leftNote2: resTxt, leftBg: r >= 0.85 ? '#f1f5f9' : '#f8fafc', leftStroke: r >= 0.85 ? '#475569' : '#cbd5e1',
+          rightNote1: 'Ống (2): Fructose', rightNote2: resTxt, rightBg: r >= 0.85 ? '#f1f5f9' : '#f8fafc', rightStroke: r >= 0.85 ? '#475569' : '#cbd5e1',
+          showHeat: r > 0
+        });
+
+        eq.innerHTML = `
+          <b>Phương trình phản ứng tráng bạc (t°):</b><br>
+          <span class="chem-formula">CH<sub>2</sub>OH[CHOH]<sub>4</sub>CHO + 2[Ag(NH<sub>3</sub>)<sub>2</sub>]OH</span> &nbsp;<sup>t°</sup>→&nbsp; <span class="chem-formula">CH<sub>2</sub>OH[CHOH]<sub>4</sub>COONH<sub>4</sub> + 2Ag↓ + 3NH<sub>3</sub> + H<sub>2</sub>O</span><br>
+          <b>Giải thích Fructose:</b> Trong môi trường kiềm (<span class="chem-formula">OH<sup>−</sup></span>) của thuốc thử Tollens, <b>fructose chuyển hoá thuận nghịch thành glucose</b> nên cả hai ống nghiệm đều xuất hiện <b>lớp bạc sáng bóng bám trên thành ống</b>.
+        `;
+      } else if (currentRxn === 'br') {
+        // (3) Nước bromine: ống 1 (Glucose) mất màu vàng nâu -> không màu; ống 2 (Fructose) giữ nguyên màu vàng nâu
+        const gCol = r < 0.35 ? '#d97706' : (r < 0.75 ? '#fcd34d' : '#f1f5f9');
+        const gNote = r >= 0.8 ? 'Mất màu (tạo gluconic acid)' : (r > 0 ? 'Màu vàng nâu đang nhạt dần...' : 'Nước Br₂ màu vàng nâu');
+        const fNote = r >= 0.5 ? 'Giữ nguyên màu vàng nâu' : 'Nước Br₂ màu vàng nâu';
+
+        svg.innerHTML = buildTwoTubeLab({
+          topTitle: 'Thí nghiệm 3: Phản ứng với nước Bromine (Br₂) — Phân biệt Glucose & Fructose',
+          t1Color: gCol, t2Color: '#d97706',
+          t1Extra: '', t2Extra: '',
+          leftNote1: 'Ống (1): Glucose', leftNote2: gNote, leftBg: r >= 0.8 ? '#ecfdf5' : '#fffbeb', leftStroke: r >= 0.8 ? '#059669' : '#f59e0b',
+          rightNote1: 'Ống (2): Fructose', rightNote2: fNote, rightBg: '#fffbeb', rightStroke: '#d97706',
+          showHeat: false
+        });
+
+        eq.innerHTML = `
+          <b>Phương trình phản ứng ở ống (1) – Glucose:</b><br>
+          <span class="chem-formula">CH<sub>2</sub>OH[CHOH]<sub>4</sub>CHO + Br<sub>2</sub> + H<sub>2</sub>O → CH<sub>2</sub>OH[CHOH]<sub>4</sub>COOH (gluconic acid) + 2HBr</span><br>
+          <b>Hiện tượng:</b> Ống (1) chứa <b>glucose làm mất màu vàng nâu</b> của nước bromine; ống (2) chứa <b>fructose giữ nguyên màu vàng nâu</b> (không phản ứng).
+        `;
+      } else {
+        // (4) Lên men rượu: bình cầu lên men glucose -> ethanol + bọt khí CO2 sục sang nước vôi trong
+        const isActive = r > 0.05;
+        const limeCol = r >= 0.5 ? '#e2e8f0' : '#e0f2fe';
+        const limeTxt = r >= 0.5 ? 'Nước vôi trong bị vẩn đục (CaCO₃↓)' : 'Nước vôi trong Ca(OH)₂';
+
+        svg.innerHTML = `
+          <g class="${isActive ? 'ferment-active' : ''}">
+            <text x="410" y="28" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">
+              Thí nghiệm 4: Lên men rượu Glucose tạo Ethanol và khí CO₂
+            </text>
+
+            <!-- Bình cầu lên men bên trái -->
+            <defs>
+              <clipPath id="clipFermFlask"><circle cx="230" cy="214" r="64"/></clipPath>
+            </defs>
+            <g clip-path="url(#clipFermFlask)">
+              <rect x="160" y="196" width="140" height="90" fill="#fef3c7"/>
+              <circle class="co2-bubble" cx="204" cy="256" r="5" fill="#ffffff" stroke="#d97706" stroke-width="1.2" style="animation-delay:0s;"/>
+              <circle class="co2-bubble" cx="230" cy="260" r="6" fill="#ffffff" stroke="#d97706" stroke-width="1.2" style="animation-delay:0.35s;"/>
+              <circle class="co2-bubble" cx="254" cy="254" r="4.5" fill="#ffffff" stroke="#d97706" stroke-width="1.2" style="animation-delay:0.7s;"/>
+            </g>
+            <path d="M 206 104 L 212 110 L 212 153 A 65 65 0 1 0 248 153 L 248 110 L 254 104" fill="none" stroke="#475569" stroke-width="3" stroke-linejoin="round"/>
+            <rect x="210" y="96" width="40" height="14" rx="4" fill="#334155"/>
+
+            <!-- Ống dẫn khí CO2 sang ống nghiệm nước vôi trong -->
+            <path d="M 230 96 L 230 68 L 560 68 L 560 220" fill="none" stroke="#64748b" stroke-width="4" stroke-linejoin="round"/>
+            <text x="395" y="58" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0b5cab">Khí CO₂ thoát ra →</text>
+
+            <!-- Ống nghiệm đựng nước vôi trong bên phải -->
+            <defs>
+              <clipPath id="clipLimeTube"><path d="M 532 126 L 588 126 L 588 242 A 28 28 0 0 1 532 242 Z"/></clipPath>
+            </defs>
+            <g clip-path="url(#clipLimeTube)">
+              <rect x="530" y="168" width="60" height="106" fill="${limeCol}"/>
+              <circle class="co2-bubble" cx="560" cy="230" r="4.5" fill="#ffffff" stroke="#0369a1" stroke-width="1.2" style="animation-delay:0.2s;"/>
+              <circle class="co2-bubble" cx="552" cy="240" r="4" fill="#ffffff" stroke="#0369a1" stroke-width="1.2" style="animation-delay:0.65s;"/>
+            </g>
+            <path d="M 530 124 L 590 124 L 590 242 A 30 30 0 0 1 530 242 Z" fill="none" stroke="#475569" stroke-width="2.8"/>
+
+            <!-- Nhãn chú thích ngoài bình/ống -->
+            <rect x="64" y="290" width="330" height="36" rx="9" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="229" y="313" text-anchor="middle" font-size="12.5" font-weight="800" fill="#92400e">Bình lên men: Glucose + Enzyme nấm men</text>
+
+            <rect x="424" y="290" width="320" height="36" rx="9" fill="#eff6ff" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="584" y="313" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0369a1">${limeTxt}</text>
+          </g>
+        `;
+
+        eq.innerHTML = `
+          <b>Phương trình phản ứng lên men rượu:</b><br>
+          <span class="chem-formula">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span> &nbsp;<sup>enzyme</sup>→&nbsp; <span class="chem-formula">2C<sub>2</sub>H<sub>5</sub>OH + 2CO<sub>2</sub>↑</span><br>
+          <b>Hiện tượng:</b> Xuất hiện nhiều <b>bọt khí <span class="chem-formula">CO<sub>2</sub></span></b> sủi lên trong bình lên men; dẫn khí qua dung dịch nước vôi trong <span class="chem-formula">Ca(OH)<sub>2</sub></span> thấy xuất hiện <b>kết tủa trắng <span class="chem-formula">CaCO<sub>3</sub></span></b> làm vẩn đục dung dịch.
+        `;
+      }
+    }
+
+    function buildTwoTubeLab(cfg) {
+      const heatMarkup = cfg.showHeat
+        ? `
+          <rect x="218" y="270" width="100" height="12" rx="4" fill="#ef4444"/>
+          <rect x="502" y="270" width="100" height="12" rx="4" fill="#ef4444"/>
+          <text x="410" y="281" text-anchor="middle" font-size="12" font-weight="800" fill="#dc2626">🔥 Đun nóng nhẹ</text>
+        `
+        : '';
+
+      return `
+        <defs>
+          <clipPath id="clipLabT1"><path d="M 242 84 L 294 84 L 294 232 A 26 26 0 0 1 242 232 Z"/></clipPath>
+          <clipPath id="clipLabT2"><path d="M 526 84 L 578 84 L 578 232 A 26 26 0 0 1 526 232 Z"/></clipPath>
+          <linearGradient id="silverGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#94a3b8"/>
+            <stop offset="45%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#64748b"/>
+          </linearGradient>
+        </defs>
+
+        <text x="410" y="28" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">${cfg.topTitle}</text>
+
+        <!-- Giá đỡ đáy -->
+        <rect x="190" y="288" width="440" height="12" rx="5" fill="#cbd5e1"/>
+        ${heatMarkup}
+
+        <!-- Ống nghiệm (1): Glucose -->
+        <text x="268" y="68" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0b5cab">Ống (1): Glucose</text>
+        <g clip-path="url(#clipLabT1)">
+          <rect x="240" y="138" width="56" height="124" fill="${cfg.t1Color}"/>
+          ${cfg.t1Extra}
+        </g>
+        <path d="M 240 82 L 296 82 L 296 232 A 28 28 0 0 1 240 232 Z" fill="none" stroke="#475569" stroke-width="2.8"/>
+        <ellipse cx="268" cy="82" rx="30" ry="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
+
+        <!-- Ống nghiệm (2): Fructose -->
+        <text x="552" y="68" text-anchor="middle" font-size="13.5" font-weight="800" fill="#6d28d9">Ống (2): Fructose</text>
+        <g clip-path="url(#clipLabT2)">
+          <rect x="524" y="138" width="56" height="124" fill="${cfg.t2Color}"/>
+          ${cfg.t2Extra}
+        </g>
+        <path d="M 524 82 L 580 82 L 580 232 A 28 28 0 0 1 524 232 Z" fill="none" stroke="#475569" stroke-width="2.8"/>
+        <ellipse cx="552" cy="82" rx="30" ry="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
+
+        <!-- Nhãn bên trái (ngoài ống 1: x=14..216) -->
+        <line x1="216" y1="196" x2="238" y2="196" stroke="${cfg.leftStroke}" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <rect x="14" y="172" width="202" height="48" rx="10" fill="${cfg.leftBg}" stroke="${cfg.leftStroke}" stroke-width="1.6"/>
+        <text x="115" y="192" text-anchor="middle" font-size="12" font-weight="800" fill="#0f172a">${cfg.leftNote1}</text>
+        <text x="115" y="210" text-anchor="middle" font-size="10.8" font-weight="700" fill="#334155">${cfg.leftNote2}</text>
+
+        <!-- Nhãn bên phải (ngoài ống 2: x=604..806) -->
+        <line x1="582" y1="196" x2="604" y2="196" stroke="${cfg.rightStroke}" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <rect x="604" y="172" width="202" height="48" rx="10" fill="${cfg.rightBg}" stroke="${cfg.rightStroke}" stroke-width="1.6"/>
+        <text x="705" y="192" text-anchor="middle" font-size="12" font-weight="800" fill="#0f172a">${cfg.rightNote1}</text>
+        <text x="705" y="210" text-anchor="middle" font-size="10.8" font-weight="700" fill="#334155">${cfg.rightNote2}</text>
+      `;
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 3: CÂU HỎI THẢO LUẬN
+    // =========================================================================
+    function toggleQa(num) {
+      const ans = document.getElementById(`qaAns${num}`);
+      const btn = document.getElementById(`btnQa${num}`);
+      const hidden = ans.classList.contains('hidden');
+      ans.classList.toggle('hidden', !hidden);
+      btn.innerHTML = hidden ? '<span>Ẩn đáp án gợi ý</span>' : '<span>Xem đáp án gợi ý</span>';
+    }
+
+    // =========================================================================
+    // 7. LOGIC TAB 4: LUYỆN TẬP 10 CÂU + FISHER–YATES + NỘP BÀI TỔNG KẾT
+    // =========================================================================
+    function shuffleFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const opts = shuffleFisherYates(q.options);
+        const correctIdx = opts.findIndex(o => o.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: opts,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+      quizSubmitted = false;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndBanner() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      document.getElementById('quizProgressFill').style.width = `${Math.round((answered / shuffledQuiz.length) * 100)}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (quizSubmitted || answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Tổng điểm: ${score} / ${shuffledQuiz.length} điểm (${answered}/${shuffledQuiz.length} câu đã trả lời)`;
+        let msg = 'Hãy xem lại lời giải chi tiết từng câu và ôn lại các Tab 1, 2, 3 nhé!';
+        if (score >= 9) msg = 'Xuất sắc! Em đã làm chủ toàn diện kiến thức Glucose và Fructose từ Nhận biết đến Vận dụng tính toán.';
+        else if (score >= 7) msg = 'Rất tốt! Em đã nắm vững phần lớn kiến thức trọng tâm của bài học.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const showResult = chosen !== null || quizSubmitted;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">YCCĐ: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (showResult) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = showResult ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span>${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const fb = document.getElementById('quizFeedbackPanel');
+      if (showResult) {
+        const isOk = chosen === q.correctIdx;
+        const headText = chosen === null
+          ? `ℹ Câu này chưa chọn — Đáp án đúng là ${letters[q.correctIdx]}.`
+          : (isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là ${letters[q.correctIdx]}.`);
+
+        const head = `<div class="feedback-head ${isOk ? 'ok' : 'err'}">${headText} — Giải thích chi tiết từng phương án:</div>`;
+        const items = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <b>${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</b> ${opt.reason}
+          </li>
+        `).join('');
+
+        fb.innerHTML = `${head}<ul class="option-reasons-list">${items}</ul>`;
+        fb.classList.remove('hidden');
+      } else {
+        fb.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndBanner();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null || quizSubmitted) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function submitQuiz() {
+      quizSubmitted = true;
+      renderQuizQuestion();
+      showToast('Đã nộp bài! Em có thể bấm từng câu 1–10 để xem lời giải chi tiết.');
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới 10 câu hỏi và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 8. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      renderStructureSvg();
+      selectRxn('cu');
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+  </script>
+</body>
+</html>
