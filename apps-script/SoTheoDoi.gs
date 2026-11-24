@@ -183,6 +183,7 @@ function doPost(e) {
       case 'gv_sodo_luu':
       case 'gv_vipham':
       case 'gv_tn_nap':
+      case 'gv_tn_link':
       case 'gv_tn_dat':
       case 'gv_tn_xoa':
       case 'gv_tn_lay':
@@ -287,6 +288,7 @@ function doPost(e) {
         if (d.action === 'gv_sodo_luu') return json(gvSoDoLuu(d));
         if (d.action === 'gv_vipham') return json(gvViPham(d));
         if (d.action === 'gv_tn_nap') return json(gvTnNap(d));
+        if (d.action === 'gv_tn_link') return json(gvTnLink(d));
         if (d.action === 'gv_tn_dat') return json(gvTnDat(d));
         if (d.action === 'gv_tn_xoa') return json(gvTnXoa(d));
         if (d.action === 'gv_tn_lay') return json(gvTnLay(d));
@@ -607,6 +609,34 @@ function gvTnNap(d) {
     if (!cu) ds.push(muc);
     ghGhiDs(gh, ds, dsF.sha, (cu ? 'Sua' : 'Them') + ' muc tai nguyen: ' + ten);
     return {ok: true, ma: ma, tailen: ds};
+  } finally {
+    lock.releaseLock();
+  }
+}
+// Link thi nghiem / hinh anh gan vao 1 bai (YouTube, anh, Drive, PhET...): luu cung danh sach tai-len.js, khong co tep
+function gvTnLink(d) {
+  const gh = ghCauHinh();
+  if (!gh.token) return {ok: false, loi: 'token', msg: 'Chua co ma GitHub: them dong GithubToken vao tab MA cua kho de'};
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const dsF = ghDocDs(gh); let ds = dsF.ds;
+    const ma = chuTN(d.matn, 40), cu = ma ? ds.filter(function (x) { return x.ma === ma && x.link; })[0] : null;
+    if (ma && !cu) return {ok: false, msg: 'Khong tim thay link ' + ma};
+    if (d.xoa) {
+      ds = ds.filter(function (x) { return x.ma !== ma; });
+      ghGhiDs(gh, ds, dsF.sha, 'Xoa link thi nghiem: ' + cu.ten);
+      return {ok: true, tailen: ds};
+    }
+    const url = chuTN(d.url, 1000), ten = chuTN(d.ten, 140), khoi = chuTN(d.khoi, 4), bai = chuTN(d.bai, 140);
+    if (!/^https?:\/\/[^\s<>"]+$/i.test(url)) return {ok: false, msg: 'Link phai bat dau bang https://'};
+    if (!ten) return {ok: false, msg: 'Thieu ten link'};
+    if (!/^\d{1,2}$/.test(khoi) || !bai) return {ok: false, msg: 'Thieu khoi/bai'};
+    const muc = cu || {ma: 'lk-' + Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyMMdd-HHmmss')};
+    muc.ten = ten; muc.khoi = khoi; muc.bai = bai; muc.link = url;
+    if (!cu) ds.push(muc);
+    ghGhiDs(gh, ds, dsF.sha, (cu ? 'Sua' : 'Them') + ' link thi nghiem: ' + ten);
+    return {ok: true, ma: muc.ma, tailen: ds};
   } finally {
     lock.releaseLock();
   }

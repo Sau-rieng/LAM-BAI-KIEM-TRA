@@ -694,6 +694,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 /* Tai nguyen */
 .tnDong{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
 .dsGon .tnDong:first-child{border-top:0}
+.tnLkGV{padding:0 14px;border-top:1px dashed var(--line)}.tnLkGV:empty{display:none}.tnLkGV>*:last-child{margin-bottom:10px}.tnBaiLk{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.tnBaiLk .lkThem{text-transform:none;letter-spacing:0;margin:0}.lkDong{display:flex;align-items:center;gap:10px;padding:6px 0}.lkBiaGV{position:relative;flex:0 0 64px;height:40px;border-radius:6px;overflow:hidden;background:#fdebc8;display:flex;align-items:center;justify-content:center}.lkBiaGV img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.lkBiaGV i{position:relative;font-style:normal}.lkChuGV{flex:1;min-width:0}.lkChuGV b{display:block}.lkChuGV small{color:var(--muted)}.lkThem{margin-top:4px}.lkForm{background:#fff8ec;border:1px solid #f3d9a6;border-radius:12px;padding:10px 12px;margin-top:6px}.lkForm input{width:100%}
 .tnBai{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:12px 14px 6px;background:var(--bg);border-top:1px solid var(--line)}
 .dsGon .tnBai:first-child{border-top:0}
 .tnDong.an{opacity:.6}
@@ -6575,8 +6576,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // Danh sach = danh-muc.js (Claude dua len) + tai-len.js (giao vien tai len, GitHub) + tai nguyen Drive cu (neu con)
   function dsTN() {
     var goc = (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file && !t.tailen; });
-    var tl = (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || []).filter(function (t) { return t && t.tailen; })).map(function (t) { t.nguon = 'github'; return t; });
+    var tl = (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || []).filter(function (t) { return t && t.tailen; })).filter(function (t) { return !t.link; }).map(function (t) { t.nguon = 'github'; return t; });
     return goc.concat(tl).concat((TNX.drive || []).map(function (t) { t.nguon = 'drive'; return t; }));
+  }
+  function dsLinkTN() { return (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || [])).filter(function (t) { return t && t.link; }); }
+  function kieuLinkGV(u) {
+    u = String(u || ''); var m;
+    if ((m = /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([\w-]{11})/i.exec(u))) return { icon: '▶', nhan: 'Video YouTube', bia: 'https://i.ytimg.com/vi/' + m[1] + '/mqdefault.jpg' };
+    if (/\.(jpe?g|png|gif|webp|svg)(\?|#|$)/i.test(u) || /googleusercontent\.com\//i.test(u)) return { icon: '🖼', nhan: 'Hình ảnh', bia: u };
+    if (/drive\.google\.com|docs\.google\.com/i.test(u)) return { icon: '📁', nhan: 'Google Drive', bia: '' };
+    return { icon: '🔬', nhan: /phet\.colorado/i.test(u) ? 'Mô phỏng PhET' : 'Trang web', bia: '' };
   }
   function anhTN(t) { return !t.anh ? '' : t.nguon === 'drive' ? t.anh : 'tai-nguyen/' + encodeURI(t.anh); }
   function moTN() { man('scrTN'); veTN(); taiTN(false); }
@@ -6629,10 +6638,23 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       kt.appendChild(b);
     });
     khoi.filter(function (k) { return k === TNX.khoi; }).forEach(function (k) {
-      var baiTr = null;
+      var baiTr = null, lkK = dsLinkTN().filter(function (t) { return String(t.khoi) === k; }), daBai = {};
+      var veLk = function (bai) {
+        if (bai === null || daBai[bai]) return; daBai[bai] = 1;
+        var ls = lkK.filter(function (t) { return (t.bai || '') === (bai || ''); });
+        h += '<div class="tnLkGV" data-bai="' + esc(bai || '') + '">' + ls.map(function (t) {
+          var kl = kieuLinkGV(t.link);
+          return '<div class="lkDong" data-ma="' + esc(t.ma) + '"><span class="lkBiaGV">' + (kl.bia ? '<img alt="" loading="lazy" src="' + esc(kl.bia) + '" onerror="this.remove()">' : '') + '<i>' + kl.icon + '</i></span>' +
+            '<span class="lkChuGV"><b>' + esc(t.ten) + '</b><small>' + kl.nhan + ' · <a href="' + esc(t.link) + '" target="_blank" rel="noopener">mở link</a></small></span>' +
+            '<button class="btn2 nho lkSua">✎</button><button class="btn2 nho lkXoa" title="Xóa link">🗑</button></div>';
+        }).join('') + (TNX.lkForm && TNX.lkForm.bai === (bai || '') && TNX.lkForm.khoi === k ? '<div class="lkForm"></div>' : '') + '</div>';
+      };
       h += '<div class="dsGon">';
-      ds.filter(function (t) { return String(t.khoi) === k; }).forEach(function (t) {
-        if (t.bai !== baiTr) { baiTr = t.bai; h += '<div class="tnBai">' + esc(t.bai || 'Khác') + '</div>'; }
+      var dsK = ds.filter(function (t) { return String(t.khoi) === k; });
+      lkK.forEach(function (t) { if (!dsK.some(function (x) { return (x.bai || '') === (t.bai || ''); }) && !dsK.some(function (x) { return x.lkGia && x.bai === t.bai; })) dsK.push({ lkGia: 1, bai: t.bai || '' }); });
+      dsK.forEach(function (t) {
+        if (t.bai !== baiTr) { veLk(baiTr); baiTr = t.bai; h += '<div class="tnBai tnBaiLk" data-bai="' + esc(t.bai || '') + '"><span>' + esc(t.bai || 'Khác') + '</span><button class="btn2 nho lkThem">🔗 Thêm link thí nghiệm / hình ảnh</button></div>'; }
+        if (t.lkGia) return;
         var x = theo[t.ma] || { luot: 0, em: {} }, soEm = Object.keys(x.em).length;
         h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="' + anhTN(t) + '">' : '<span>3D</span>') + '</div>' +
           '<div class="tnChu"><b>' + esc(t.ten) + (t.nguon === 'drive' ? '<span class="tnNguon">Drive</span>' : t.nguon === 'github' ? '<span class="tnNguon">Tải lên</span>' : '') + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
@@ -6646,9 +6668,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         }
         h += '</div>';
       });
+      veLk(baiTr);
       h += '</div>';
     });
     box.innerHTML = h;
+    ganLinkTN(box);
     [].forEach.call(box.querySelectorAll('.tnDong .ai'), function (b) {
       b.onclick = function () { var ma = b.closest('.tnDong').getAttribute('data-ma'); TNX.mo = TNX.mo === ma ? null : ma; veTN(); };
     });
@@ -6670,6 +6694,38 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           .catch(function (e) { alert('Chưa xóa được: ' + e.message); veTN(); });
       };
     });
+  }
+  // Link thí nghiệm / hình ảnh gắn dưới tên bài (YouTube, ảnh, Drive, PhET…): HS xem ngay trong trang
+  function ganLinkTN(box) {
+    var lkCua = function (el) { var ma = el.closest('.lkDong').getAttribute('data-ma'); return dsLinkTN().filter(function (t) { return t.ma === ma; })[0]; };
+    var khoiBai = function (el) { var g = el.closest('.tnLkGV') || el.closest('.tnBaiLk'); return { khoi: TNX.khoi, bai: g.getAttribute('data-bai') }; };
+    [].forEach.call(box.querySelectorAll('.lkThem'), function (b) { b.onclick = function () { var kb = khoiBai(b); TNX.lkForm = { khoi: kb.khoi, bai: kb.bai, ten: '', url: '' }; veTN(); }; });
+    [].forEach.call(box.querySelectorAll('.lkSua'), function (b) { b.onclick = function () { var t = lkCua(b); TNX.lkForm = { khoi: String(t.khoi), bai: t.bai || '', ten: t.ten, url: t.link, ma: t.ma }; veTN(); }; });
+    [].forEach.call(box.querySelectorAll('.lkXoa'), function (b) {
+      b.onclick = function () {
+        var t = lkCua(b); if (!confirm('Xóa link "' + t.ten + '"?')) return; b.disabled = true;
+        goiBatKy({ action: 'gv_tn_link', ma: MA, matn: t.ma, xoa: true}).then(function (j) { if (!j.ok) throw new Error(loiTN(j)); capNhatDs(j); veTN(); })
+          .catch(function (e) { b.disabled = false; alert('Chưa xóa được: ' + e.message); });
+      };
+    });
+    var fo = box.querySelector('.lkForm'); if (!fo) return;
+    var F = TNX.lkForm;
+    fo.innerHTML = '<div class="nhan">Link (YouTube, ảnh, Google Drive, PhET, trang web…)</div><input type="url" id="lkUrl" placeholder="https://www.youtube.com/watch?v=…">' +
+      '<div class="nhan">Tên hiển thị cho học sinh</div><input type="text" id="lkTen" maxlength="140" placeholder="vd: Natri tác dụng với nước">' +
+      '<div class="sub" id="lkXem"></div><div class="hangNut" style="justify-content:flex-start"><button class="btn2 nho" id="lkHuy" type="button">Hủy</button><button class="luu nho" id="lkLuu" type="button">' + (F.ma ? 'Lưu' : '➕ Thêm') + '</button></div><div class="msg" id="lkMsg"></div>';
+    $('lkUrl').value = F.url; $('lkTen').value = F.ten;
+    var xem = function () { F.url = $('lkUrl').value.trim(); F.ten = $('lkTen').value; var kl = kieuLinkGV(F.url); $('lkXem').innerHTML = F.url ? 'Máy nhận: <b>' + kl.icon + ' ' + kl.nhan + '</b> · Mục: ' + esc(F.bai || 'Khác') : ''; };
+    $('lkUrl').oninput = $('lkTen').oninput = xem; xem(); $('lkUrl').focus();
+    $('lkHuy').onclick = function () { TNX.lkForm = null; veTN(); };
+    $('lkLuu').onclick = function () {
+      xem();
+      if (!/^https?:\/\/\S+$/i.test(F.url)) { $('lkMsg').textContent = 'Dán link bắt đầu bằng https://'; return; }
+      if (!F.ten.trim()) { $('lkMsg').textContent = 'Nhập tên hiển thị.'; return; }
+      $('lkLuu').disabled = true; $('lkMsg').textContent = 'Đang lưu…';
+      goiBatKy({ action: 'gv_tn_link', ma: MA, matn: F.ma || '', khoi: F.khoi, bai: F.bai, ten: F.ten.trim(), url: F.url }).then(function (j) {
+        if (!j.ok) throw new Error(loiTN(j)); capNhatDs(j); TNX.lkForm = null; veTN();
+      }).catch(function (e) { $('lkLuu').disabled = false; $('lkMsg').textContent = 'Chưa lưu được: ' + e.message; });
+    };
   }
   function capNhatDs(j) { if (j.tailen) TNX.tailen = j.tailen; if (j.ds) TNX.drive = j.ds; }
   function loiTN(j) {
