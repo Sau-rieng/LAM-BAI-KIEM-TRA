@@ -1,0 +1,2582 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>II. Tính chất giặt rửa &amp; III.1. Sản xuất xà phòng (Hóa 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – LIGHT MODE)
+       ========================================================================= */
+    :root {
+      --bg-page: #f4f7fb;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      --primary: #0b5cab;
+      --primary-dark: #084785;
+      --primary-soft: #eff6ff;
+      --primary-border: #bfdbfe;
+
+      --cyan: #0ea5e9;
+      --cyan-dark: #0369a1;
+      --cyan-soft: #e0f2fe;
+      --cyan-border: #7dd3fc;
+
+      --emerald: #059669;
+      --emerald-dark: #047857;
+      --emerald-soft: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --amber: #d97706;
+      --amber-dark: #92400e;
+      --amber-soft: #fffbeb;
+      --amber-border: #fde68a;
+
+      --peach: #fed7aa;
+      --peach-strong: #fdba74;
+      --peach-dark: #9a3412;
+
+      --rose: #dc2626;
+      --rose-dark: #991b1b;
+      --rose-soft: #fef2f2;
+      --rose-border: #fecaca;
+
+      --violet: #6d28d9;
+      --violet-soft: #f5f3ff;
+      --violet-border: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. CÔNG THỨC HÓA HỌC LIỀN MẠCH (CHỐNG VỠ CHỈ SỐ DƯỚI/TRÊN)
+       ========================================================================= */
+    .chem-formula {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chem-formula sub, sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    .chem-formula sup, sup {
+      font-size: 0.72em;
+      line-height: 0;
+      vertical-align: 0.42em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH 3 TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.16rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (CHỐNG DÍNH HOVER TRÊN IPAD/SAFARI)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-cyan {
+      background-color: var(--cyan);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-emerald {
+      background-color: var(--emerald);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-amber {
+      background-color: var(--amber);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-outline.active,
+    .btn-outline.active:hover,
+    .btn-outline.active:focus,
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--primary);
+      border-color: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--primary);
+        background-color: rgba(11, 92, 171, 0.08);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+      }
+      .btn-cyan:hover:not(:disabled) {
+        background-color: var(--cyan-dark);
+      }
+      .btn-emerald:hover:not(:disabled) {
+        background-color: var(--emerald-dark);
+      }
+      .btn-amber:hover:not(:disabled) {
+        background-color: #b45309;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .btn-outline:not(.active):hover:not(:disabled) {
+        background-color: var(--primary-soft);
+        border-color: var(--primary);
+      }
+      .alkane-block:not(.active):hover {
+        border-color: #ea580c;
+        transform: translateY(-2px);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--primary);
+        background-color: #f8fbff;
+      }
+    }
+
+    /* =========================================================================
+       5. BỐ CỤC CHUNG & CARD
+       ========================================================================= */
+    .main-container {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 42px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .sgk-callout {
+      background-color: var(--primary-soft);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 14px 16px;
+      font-size: 0.96rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    .svg-smooth {
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================================================
+       6. TAB 1: TÍNH CHẤT GIẶT RỬA (MÔ PHỎNG HÌNH 2.3)
+       ========================================================================= */
+    .stage-btn-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 720px) {
+      .stage-btn-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .control-panel {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .control-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-strong);
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-label input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--primary);
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .pause-banner {
+      margin-bottom: 10px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      background-color: var(--amber-soft);
+      border: 1.5px solid var(--amber-border);
+      color: var(--amber-dark);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 11px;
+      border-radius: 999px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Nhãn mốc đặt chính xác theo tỉ lệ toán học: 0%, 33.33%, 66.67%, 100% */
+    .ticks-abs {
+      position: relative;
+      height: 26px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .ticks-abs span {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    .stage-desc-card {
+      margin-top: 14px;
+      padding: 15px 18px;
+      border-radius: var(--radius-lg);
+      background-color: #f8fbff;
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stage-desc-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .stage-desc-body {
+      font-size: 0.95rem;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+
+    /* =========================================================================
+       7. TAB 2: PHƯƠNG PHÁP SẢN XUẤT XÀ PHÒNG
+       ========================================================================= */
+    .method-switch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    /* Sơ đồ khối xanh chuẩn SGK (Cách 1) */
+    .sgk-flow-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .flow-box-blue {
+      background-color: #bae6fd;
+      border: 1.5px solid #38bdf8;
+      color: #0c4a6e;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.94rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .flow-box-blue small {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #0369a1;
+      margin-top: 2px;
+    }
+
+    .flow-op {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-body);
+    }
+
+    .flow-arrow {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      color: var(--primary);
+      font-weight: 800;
+      margin: 0 4px;
+    }
+
+    .flow-arrow span.cond {
+      font-size: 0.78rem;
+      margin-bottom: 2px;
+    }
+
+    .flow-arrow span.sym {
+      font-size: 1.4rem;
+      line-height: 0.8;
+    }
+
+    /* Sơ đồ khối màu cam đào chuẩn SGK (Cách 2: Dầu mỏ) */
+    .alkane-flow-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      background-color: #fff7ed;
+      border: 1.5px solid #fed7aa;
+      margin-bottom: 16px;
+    }
+
+    .alkane-block {
+      background-color: var(--peach);
+      border: 2px solid var(--peach-strong);
+      color: var(--peach-dark);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+      min-width: 190px;
+    }
+
+    .alkane-block.active,
+    .alkane-block.active:hover,
+    .alkane-block.active:focus {
+      background-color: #ea580c;
+      border-color: #9a3412;
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alkane-arrow {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #dc2626;
+    }
+
+    .soap-finish-strip {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background-color: var(--emerald-soft);
+      border: 1.5px solid var(--emerald-border);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 720px) {
+      .soap-finish-strip {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .finish-step {
+      background-color: #ffffff;
+      border: 1px solid var(--emerald-border);
+      border-radius: 11px;
+      padding: 11px 13px;
+      font-size: 0.9rem;
+      color: var(--text-body);
+    }
+
+    .finish-step b {
+      display: block;
+      color: var(--emerald-dark);
+      margin-bottom: 3px;
+    }
+
+    /* Hộp câu hỏi thảo luận trên lớp */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    @media (min-width: 820px) {
+      .qa-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .qa-card {
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      background-color: #f8fbff;
+      overflow: hidden;
+    }
+
+    .qa-head {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .qa-q {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .qa-ans {
+      padding: 13px 16px;
+      background-color: #ffffff;
+      border-top: 1px solid var(--primary-border);
+      font-size: 0.93rem;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+
+    /* =========================================================================
+       8. TAB 3: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--emerald));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .q-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.14s ease;
+    }
+
+    .q-dot.current {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      color: var(--primary);
+    }
+    .q-dot.correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+      color: var(--emerald);
+    }
+    .q-dot.wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      color: var(--primary-dark);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .level-badge.nb { background-color: var(--emerald-soft); color: var(--emerald-dark); border-color: var(--emerald-border); }
+    .level-badge.th { background-color: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
+    .level-badge.vd { background-color: var(--violet-soft); color: var(--violet); border-color: var(--violet-border); }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose);
+      color: #ffffff;
+    }
+
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+    .feedback-head.ok { background-color: var(--emerald-soft); color: #065f46; border-bottom: 1px solid var(--emerald-border); }
+    .feedback-head.err { background-color: var(--rose-soft); color: var(--rose-dark); border-bottom: 1px solid var(--rose-border); }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: #065f46;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #eff6ff, #ecfdf5);
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.24);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+
+    /* ===== Nút YouTube ===== */
+    .yt-row { margin-top: 8px; }
+    .yt-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 11px; border: 1.5px solid #bfdbfe; background: #ffffff; color: #0b5cab; font-family: inherit; font-size: 0.82rem; font-weight: 700; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .yt-link:active { transform: scale(0.98); }
+    .yt-exp { margin-top: 10px; }
+    @media (hover: hover) { .yt-link:hover { background: #eff6ff; border-color: #0b5cab; } }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <!-- Icon SVG 44x44px (hạt micelle + bọt xà phòng) -->
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="6" fill="#92400e" />
+              <line x1="18" y1="6" x2="18" y2="12" stroke="#ffffff" stroke-width="1.8" />
+              <line x1="18" y1="24" x2="18" y2="30" stroke="#ffffff" stroke-width="1.8" />
+              <line x1="6" y1="18" x2="12" y2="18" stroke="#ffffff" stroke-width="1.8" />
+              <line x1="24" y1="18" x2="30" y2="18" stroke="#ffffff" stroke-width="1.8" />
+              <circle cx="18" cy="5.5" r="2.6" fill="#bae6fd" />
+              <circle cx="18" cy="30.5" r="2.6" fill="#bae6fd" />
+              <circle cx="5.5" cy="18" r="2.6" fill="#bae6fd" />
+              <circle cx="30.5" cy="18" r="2.6" fill="#bae6fd" />
+              <circle cx="9.2" cy="9.2" r="2.4" fill="#bae6fd" />
+              <circle cx="26.8" cy="9.2" r="2.4" fill="#bae6fd" />
+              <circle cx="9.2" cy="26.8" r="2.4" fill="#bae6fd" />
+              <circle cx="26.8" cy="26.8" r="2.4" fill="#bae6fd" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">II. Tính chất giặt rửa &amp; III.1. Sản xuất xà phòng</h1>
+            <p class="brand-sub">Hóa học 12 – Kết nối tri thức với cuộc sống (Trang 15–16)</p>
+            <div class="yt-row"><a id="lessonVideoLink" class="yt-link" target="_blank" rel="noopener noreferrer"><span>▶ Xem video thí nghiệm / bài giảng trên YouTube</span></a></div>
+          </div>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+
+      <!-- Thanh điều hướng 3 Tab -->
+      <nav class="tabs-bar" role="tablist" aria-label="Điều hướng 3 phần bài học">
+        <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+          <span>1. Tính chất giặt rửa (Hình 2.3)</span>
+        </button>
+        <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+          <span>2. Phương pháp sản xuất xà phòng</span>
+        </button>
+        <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+          <span>3. Luyện tập nhanh (10 câu)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: II. TÍNH CHẤT GIẶT RỬA (MÔ PHỎNG HÌNH 2.3 SGK)
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">II</span>
+            <h2 class="card-title">Tính chất giặt rửa – Mô phỏng cơ chế 4 giai đoạn (Hình 2.3 SGK)</h2>
+          </div>
+          <span id="washStagePill" class="pill-tag">Giai đoạn (a): Tiếp xúc &amp; Thấm ướt</span>
+        </div>
+
+        <div class="sgk-callout">
+          <b>Nguyên lí giặt rửa (SGK):</b> Khi xà phòng, chất giặt rửa tan vào nước sẽ tạo dung dịch có <b>sức căng bề mặt nhỏ</b> làm cho vật cần giặt rửa <b>dễ thấm ướt</b>. <b>Đuôi kị nước</b> thâm nhập vào vết bẩn (Hình 2.3b), phân chia vết bẩn thành những hạt rất nhỏ có <b>đầu ưa nước quay ra ngoài</b> (Hình 2.3c), các hạt này phân tán vào nước và bị rửa trôi (Hình 2.3d).
+        </div>
+
+        <!-- 4 nút chọn giai đoạn trực tiếp -->
+        <div class="stage-btn-row">
+          <button id="wStageBtn-0" type="button" class="btn btn-outline active" onclick="jumpWashStage(0)">
+            <span>(a) Tiếp xúc &amp; Thấm ướt</span>
+          </button>
+          <button id="wStageBtn-1" type="button" class="btn btn-outline" onclick="jumpWashStage(1)">
+            <span>(b) Đuôi kị nước thâm nhập</span>
+          </button>
+          <button id="wStageBtn-2" type="button" class="btn btn-outline" onclick="jumpWashStage(2)">
+            <span>(c) Phân chia vết bẩn</span>
+          </button>
+          <button id="wStageBtn-3" type="button" class="btn btn-outline" onclick="jumpWashStage(3)">
+            <span>(d) Tạo micelle &amp; Rửa trôi</span>
+          </button>
+        </div>
+
+        <!-- Thanh điều khiển tự động, thanh trượt 0-100% và Bật/Tắt nhãn -->
+        <div class="control-panel">
+          <div class="control-top">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+              <button id="btnWashAuto" type="button" class="btn btn-primary" onclick="toggleWashAuto()">
+                <span id="washAutoIcon">▶</span>
+                <span id="washAutoText">Chạy tự động</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetWash()">
+                <span>↻ Đặt lại</span>
+              </button>
+            </div>
+
+            <label class="toggle-label">
+              <input id="toggleWashLabels" type="checkbox" checked onchange="toggleWashLabels()" />
+              <span>Bật/Tắt nhãn chú thích</span>
+            </label>
+          </div>
+
+          <div id="washPauseBanner" class="pause-banner hidden">
+            ⏸ Đang tạm dừng 2 giây tại mốc giai đoạn để quan sát...
+          </div>
+
+          <input id="washSlider" type="range" class="range-slider" min="0" max="100" step="1" value="0" oninput="onWashSlider(this.value)" />
+
+          <!-- 4 nhãn mốc căn đúng tỉ lệ toán học: 0%, 33%, 67%, 100% -->
+          <div class="ticks-abs">
+            <span style="left: 0%;">(a) 0%</span>
+            <span style="left: 33%; transform: translateX(-50%);">(b) 33%</span>
+            <span style="left: 67%; transform: translateX(-50%);">(c) 67%</span>
+            <span style="left: 100%; transform: translateX(-100%);">(d) 100%</span>
+          </div>
+        </div>
+
+        <!-- KHUNG MÔ PHỎNG SVG HÌNH 2.3 (viewBox 820x380) -->
+        <div class="svg-stage">
+          <svg id="washSvg" viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng 4 giai đoạn cơ chế giặt rửa Hình 2.3 SGK">
+            <defs>
+              <!-- Nền nước xanh lam nhạt -->
+              <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e0f2fe" />
+                <stop offset="100%" stop-color="#bae6fd" />
+              </linearGradient>
+              <!-- Hoạ tiết sợi vải nhẹ cho lớp vật liệu -->
+              <pattern id="fabricPat" width="24" height="16" patternUnits="userSpaceOnUse">
+                <path d="M 0 8 Q 6 3 12 8 T 24 8" fill="none" stroke="#f4b6b6" stroke-width="1.2" opacity="0.6" />
+              </pattern>
+            </defs>
+
+            <!-- MÔI TRƯỜNG NƯỚC (y=12..300) -->
+            <rect x="14" y="12" width="792" height="288" rx="14" fill="url(#waterGrad)" stroke="#7dd3fc" stroke-width="1.8" />
+            <!-- Đường sóng nhẹ mặt nước -->
+            <path d="M 28 32 Q 60 26 92 32 T 156 32 T 220 32 T 284 32 T 348 32 T 412 32 T 476 32 T 540 32 T 604 32 T 668 32 T 732 32 T 792 32"
+                  fill="none" stroke="#38bdf8" stroke-width="1.6" opacity="0.45" />
+
+            <!-- LỚP ĐÁY: VẬT LIỆU (màu hồng phấn có sợi vải) -->
+            <rect x="14" y="298" width="792" height="68" rx="10" fill="#fde2e4" stroke="#f9a8d4" stroke-width="1.8" />
+            <rect x="14" y="298" width="792" height="68" rx="10" fill="url(#fabricPat)" />
+            <line x1="14" y1="298" x2="806" y2="298" stroke="#f472b6" stroke-width="2" opacity="0.7" />
+
+            <!-- KÍNH LÚP PHÓNG TO 1 PHÂN TỬ XÀ PHÒNG (Góc trên trái) -->
+            <g id="magnifierGroup">
+              <circle cx="88" cy="84" r="46" fill="#ffffff" stroke="#0b5cab" stroke-width="3" />
+              <!-- 1 phân tử xà phòng phóng to -->
+              <line x1="88" y1="78" x2="64" y2="110" stroke="#0c4a6e" stroke-width="4.2" stroke-linecap="round" />
+              <circle cx="94" cy="70" r="13" fill="#0284c7" stroke="#0369a1" stroke-width="2" />
+              <circle cx="90" cy="66" r="3.5" fill="#bae6fd" opacity="0.85" />
+            </g>
+
+            <!-- LỚP ĐỘNG ĐƯỢC VẼ THEO TIẾN TRÌNH 0% -> 100% -->
+            <g id="washDynamicLayer"></g>
+
+            <!-- NHÓM NHÃN CHÚ THÍCH (BẬT/TẮT BẰNG CHECKBOX, KHÔNG ĐÈ HÌNH) -->
+            <g id="washLabelsGroup">
+              <!-- Chú thích kính lúp: Đầu ưa nước & Đuôi kị nước -->
+              <line x1="106" y1="62" x2="152" y2="48" stroke="#0369a1" stroke-width="1.6" />
+              <rect x="152" y="34" width="112" height="26" rx="7" fill="#ffffff" stroke="#0284c7" stroke-width="1.4" />
+              <text x="208" y="51" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0369a1">Đầu ưa nước</text>
+
+              <line x1="74" y1="102" x2="152" y2="106" stroke="#0f172a" stroke-width="1.6" />
+              <rect x="152" y="92" width="112" height="26" rx="7" fill="#ffffff" stroke="#475569" stroke-width="1.4" />
+              <text x="208" y="109" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0f172a">Đuôi kị nước</text>
+
+              <!-- Nhãn Môi trường nước (góc trên phải) -->
+              <rect x="646" y="24" width="144" height="28" rx="8" fill="#ffffff" fill-opacity="0.92" stroke="#38bdf8" stroke-width="1.4" />
+              <text x="718" y="42" text-anchor="middle" font-size="12" font-weight="800" fill="#0369a1">Môi trường nước</text>
+
+              <!-- Nhãn Vật liệu (góc dưới trái) -->
+              <rect x="28" y="316" width="174" height="32" rx="8" fill="#ffffff" fill-opacity="0.92" stroke="#f472b6" stroke-width="1.4" />
+              <text x="115" y="336" text-anchor="middle" font-size="12.5" font-weight="800" fill="#9d174d">Vật liệu (sợi vải / da)</text>
+
+              <!-- Nhãn động chỉ vết bẩn hoặc hạt micelle -->
+              <g id="washDynamicLabel"></g>
+            </g>
+          </svg>
+        </div>
+<div class="yt-exp"><a id="vidWash" class="yt-link" target="_blank" rel="noopener noreferrer"><span>▶ Xem thí nghiệm thật trên YouTube</span></a></div>
+
+        <!-- Bảng mô tả chi tiết diễn biến ở giai đoạn đang chọn -->
+        <div id="washDescCard" class="stage-desc-card">
+          <div id="washDescTitle" class="stage-desc-title"></div>
+          <div id="washDescBody" class="stage-desc-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: III.1. PHƯƠNG PHÁP SẢN XUẤT XÀ PHÒNG
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">III</span>
+            <h2 class="card-title">Phương pháp sản xuất xà phòng (SGK trang 15–16)</h2>
+          </div>
+          <span class="pill-tag">2 phương pháp chính</span>
+        </div>
+
+        <!-- 2 nút chuyển đổi phương pháp sản xuất -->
+        <div class="method-switch-row">
+          <button id="prodBtn-fat" type="button" class="btn btn-outline active" onclick="selectProdMethod('fat')">
+            <span>Cách 1: Từ chất béo (Phản ứng xà phòng hoá)</span>
+          </button>
+          <button id="prodBtn-oil" type="button" class="btn btn-outline" onclick="selectProdMethod('oil')">
+            <span>Cách 2: Sản xuất từ dầu mỏ (Alkane)</span>
+          </button>
+        </div>
+
+        <!-- ==================== CÁCH 1: TỪ CHẤT BÉO (XÀ PHÒNG HOÁ) ==================== -->
+        <div id="prodPanel-fat">
+          <p style="margin: 0 0 12px; font-size: 0.96rem; color: var(--text-body);">
+            Xà phòng được sản xuất bằng cách <b>đun chất béo với dung dịch NaOH đặc hoặc KOH đặc</b> (phản ứng xà phòng hoá):
+          </p>
+
+          <!-- Sơ đồ khối xanh chuẩn SGK -->
+          <div class="sgk-flow-row">
+            <div class="flow-box-blue">Chất béo</div>
+            <span class="flow-op">+</span>
+            <div class="flow-box-blue">NaOH / KOH (đặc)</div>
+            <div class="flow-arrow">
+              <span class="cond">t°</span>
+              <span class="sym">→</span>
+            </div>
+            <div class="flow-box-blue">Glycerol</div>
+            <span class="flow-op">+</span>
+            <div class="flow-box-blue">
+              Muối sodium / potassium của acid béo
+              <small>(Thành phần chính của xà phòng)</small>
+            </div>
+          </div>
+
+          <!-- 3 nút điều khiển từng bước -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+            <button id="sapStep-1" type="button" class="btn btn-outline active" onclick="setSapStep(1)">
+              <span>Bước 1: Hỗn hợp ban đầu</span>
+            </button>
+            <button id="sapStep-2" type="button" class="btn btn-outline" onclick="setSapStep(2)">
+              <span>Bước 2: Đun nóng – Cắt liên kết ester</span>
+            </button>
+            <button id="sapStep-3" type="button" class="btn btn-outline" onclick="setSapStep(3)">
+              <span>Bước 3: Tạo sản phẩm &amp; Ép bánh xà phòng</span>
+            </button>
+          </div>
+
+          <!-- SVG PHƯƠNG TRÌNH KHAI TRIỂN TRISTEARIN + 3NaOH (C=O TÁCH THOÁNG TUYỆT ĐỐI) -->
+          <div class="svg-stage">
+            <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mô phỏng phản ứng xà phòng hoá tristearin với 3NaOH tạo glycerol và 3 sodium stearate">
+              <!-- Đường cắt 3 liên kết ester (hiện ở Bước 2 & 3) -->
+              <g id="sapCutLine" class="svg-smooth" style="opacity: 0;">
+                <line x1="262" y1="30" x2="262" y2="314" stroke="#dc2626" stroke-width="2.6" stroke-dasharray="7 5" />
+                <rect x="196" y="8" width="132" height="24" rx="12" fill="#fee2e2" stroke="#dc2626" stroke-width="1.4" />
+                <text x="262" y="24" text-anchor="middle" font-size="11.5" font-weight="800" fill="#b91c1c">✂ Cắt 3 liên kết ester</text>
+              </g>
+
+              <!-- KHỐI TRÁI: PHẦN GLYCEROL (H2C-O / HC-O / H2C-O) -->
+              <g id="sapGlycGroup" class="svg-smooth" style="transform: translateX(0px);">
+                <rect x="28" y="42" width="212" height="270" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8" />
+                <text id="sapLeftTitle" x="134" y="64" text-anchor="middle" font-size="12.5" font-weight="800" fill="#1d4ed8">Khung Glycerol (Tristearin)</text>
+
+                <!-- Liên kết dọc C-C-C -->
+                <line x1="84" y1="110" x2="84" y2="162" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                <line x1="84" y1="196" x2="84" y2="248" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+
+                <!-- Hàng 1 -->
+                <text x="84" y="102" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">H<tspan dy="5" font-size="13">2</tspan><tspan dy="-5">C</tspan></text>
+                <line x1="112" y1="95" x2="146" y2="95" stroke="#0f172a" stroke-width="2.4" />
+                <text x="162" y="102" text-anchor="middle" font-size="19" font-weight="800" fill="#0b5cab">O</text>
+                <text id="sapH1" x="190" y="102" text-anchor="middle" font-size="19" font-weight="800" fill="#059669" class="svg-smooth" style="opacity: 0;">–H</text>
+
+                <!-- Hàng 2 -->
+                <text x="84" y="186" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">HC</text>
+                <line x1="106" y1="179" x2="146" y2="179" stroke="#0f172a" stroke-width="2.4" />
+                <text x="162" y="186" text-anchor="middle" font-size="19" font-weight="800" fill="#0b5cab">O</text>
+                <text id="sapH2" x="190" y="186" text-anchor="middle" font-size="19" font-weight="800" fill="#059669" class="svg-smooth" style="opacity: 0;">–H</text>
+
+                <!-- Hàng 3 -->
+                <text x="84" y="270" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">H<tspan dy="5" font-size="13">2</tspan><tspan dy="-5">C</tspan></text>
+                <line x1="112" y1="263" x2="146" y2="263" stroke="#0f172a" stroke-width="2.4" />
+                <text x="162" y="270" text-anchor="middle" font-size="19" font-weight="800" fill="#0b5cab">O</text>
+                <text id="sapH3" x="190" y="270" text-anchor="middle" font-size="19" font-weight="800" fill="#059669" class="svg-smooth" style="opacity: 0;">–H</text>
+              </g>
+
+              <!-- 3 LIÊN KẾT ESTER LIỀN MẠCH O—C (ẩn đi ở Bước 2 & 3) -->
+              <g id="sapBonds" class="svg-smooth" style="opacity: 1;">
+                <line x1="174" y1="95" x2="342" y2="95" stroke="#0f172a" stroke-width="2.6" />
+                <line x1="174" y1="179" x2="342" y2="179" stroke="#0f172a" stroke-width="2.6" />
+                <line x1="174" y1="263" x2="342" y2="263" stroke="#0f172a" stroke-width="2.6" />
+              </g>
+
+              <!-- KHỐI GIỮA: 3 GỐC ACID BÉO -> 3 SODIUM STEARATE -->
+              <g id="sapSaltGroup" class="svg-smooth" style="transform: translateX(0px);">
+                <rect x="282" y="42" width="332" height="270" rx="14" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.8" />
+                <text id="sapRightTitle" x="448" y="64" text-anchor="middle" font-size="12.5" font-weight="800" fill="#92400e">3 gốc Stearic (–C(=O)–C₁₇H₃₅)</text>
+
+                <!-- Trạng thái Bước 1: 3 gốc acyl nối trực tiếp với glycerol -->
+                <g id="sapAcylInitial" class="svg-smooth" style="opacity: 1;">
+                  <!-- Hàng 1 -->
+                  <text x="356" y="102" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+                  <line x1="352" y1="108" x2="352" y2="122" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="360" y1="108" x2="360" y2="122" stroke="#0f172a" stroke-width="2.2" />
+                  <text x="356" y="139" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">O</text>
+                  <line x1="370" y1="95" x2="404" y2="95" stroke="#0f172a" stroke-width="2.4" />
+                  <rect x="406" y="76" width="188" height="38" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6" />
+                  <text x="500" y="101" text-anchor="middle" font-size="17" font-weight="800" fill="#92400e">C₁₇H₃₅</text>
+
+                  <!-- Hàng 2 -->
+                  <text x="356" y="186" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+                  <line x1="352" y1="192" x2="352" y2="206" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="360" y1="192" x2="360" y2="206" stroke="#0f172a" stroke-width="2.2" />
+                  <text x="356" y="223" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">O</text>
+                  <line x1="370" y1="179" x2="404" y2="179" stroke="#0f172a" stroke-width="2.4" />
+                  <rect x="406" y="160" width="188" height="38" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6" />
+                  <text x="500" y="185" text-anchor="middle" font-size="17" font-weight="800" fill="#92400e">C₁₇H₃₅</text>
+
+                  <!-- Hàng 3 -->
+                  <text x="356" y="270" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+                  <line x1="352" y1="276" x2="352" y2="290" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="360" y1="276" x2="360" y2="290" stroke="#0f172a" stroke-width="2.2" />
+                  <text x="356" y="307" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">O</text>
+                  <line x1="370" y1="263" x2="404" y2="263" stroke="#0f172a" stroke-width="2.4" />
+                  <rect x="406" y="244" width="188" height="38" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6" />
+                  <text x="500" y="269" text-anchor="middle" font-size="17" font-weight="800" fill="#92400e">C₁₇H₃₅</text>
+                </g>
+
+                <!-- Trạng thái Bước 2 & 3: 3 phân tử C17H35-C(=O)-O⁻ Na⁺ (Na bên phải O, dấu tách thoáng) -->
+                <g id="sapSaltProducts" class="svg-smooth" style="opacity: 0;">
+                  <!-- Hàng 1 -->
+                  <rect x="296" y="76" width="108" height="38" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6" />
+                  <text x="350" y="101" text-anchor="middle" font-size="16.5" font-weight="800" fill="#92400e">C₁₇H₃₅</text>
+                  <line x1="404" y1="95" x2="430" y2="95" stroke="#0f172a" stroke-width="2.4" />
+                  <text x="444" y="102" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+                  <line x1="440" y1="108" x2="440" y2="122" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="448" y1="108" x2="448" y2="122" stroke="#0f172a" stroke-width="2.2" />
+                  <text x="444" y="139" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">O</text>
+                  <line x1="458" y1="95" x2="484" y2="95" stroke="#dc2626" stroke-width="2.4" />
+                  <text x="498" y="102" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">O</text>
+                  <text x="513" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#dc2626">−</text>
+                  <text x="550" y="102" text-anchor="middle" font-size="18.5" font-weight="800" fill="#0b5cab">Na</text>
+                  <text x="571" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#0b5cab">+</text>
+
+                  <!-- Hàng 2 -->
+                  <rect x="296" y="160" width="108" height="38" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6" />
+                  <text x="350" y="185" text-anchor="middle" font-size="16.5" font-weight="800" fill="#92400e">C₁₇H₃₅</text>
+                  <line x1="404" y1="179" x2="430" y2="179" stroke="#0f172a" stroke-width="2.4" />
+                  <text x="444" y="186" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+                  <line x1="440" y1="192" x2="440" y2="206" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="448" y1="192" x2="448" y2="206" stroke="#0f172a" stroke-width="2.2" />
+                  <text x="444" y="223" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">O</text>
+                  <line x1="458" y1="179" x2="484" y2="179" stroke="#dc2626" stroke-width="2.4" />
+                  <text x="498" y="186" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">O</text>
+                  <text x="513" y="172" text-anchor="middle" font-size="14" font-weight="800" fill="#dc2626">−</text>
+                  <text x="550" y="186" text-anchor="middle" font-size="18.5" font-weight="800" fill="#0b5cab">Na</text>
+                  <text x="571" y="172" text-anchor="middle" font-size="14" font-weight="800" fill="#0b5cab">+</text>
+
+                  <!-- Hàng 3 -->
+                  <rect x="296" y="244" width="108" height="38" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6" />
+                  <text x="350" y="269" text-anchor="middle" font-size="16.5" font-weight="800" fill="#92400e">C₁₇H₃₅</text>
+                  <line x1="404" y1="263" x2="430" y2="263" stroke="#0f172a" stroke-width="2.4" />
+                  <text x="444" y="270" text-anchor="middle" font-size="19" font-weight="800" fill="#0f172a">C</text>
+                  <line x1="440" y1="276" x2="440" y2="290" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="448" y1="276" x2="448" y2="290" stroke="#0f172a" stroke-width="2.2" />
+                  <text x="444" y="307" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">O</text>
+                  <line x1="458" y1="263" x2="484" y2="263" stroke="#dc2626" stroke-width="2.4" />
+                  <text x="498" y="270" text-anchor="middle" font-size="19" font-weight="800" fill="#dc2626">O</text>
+                  <text x="513" y="256" text-anchor="middle" font-size="14" font-weight="800" fill="#dc2626">−</text>
+                  <text x="550" y="270" text-anchor="middle" font-size="18.5" font-weight="800" fill="#0b5cab">Na</text>
+                  <text x="571" y="256" text-anchor="middle" font-size="14" font-weight="800" fill="#0b5cab">+</text>
+                </g>
+              </g>
+
+              <!-- KHỐI PHẢI: 3NaOH THAM GIA (Bước 1-2) HOẶC BÁNH XÀ PHÒNG HOÀN THIỆN (Bước 3) -->
+              <g id="sapNaohPanel" class="svg-smooth">
+                <rect x="640" y="42" width="156" height="270" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.8" />
+                <text x="718" y="68" text-anchor="middle" font-size="13" font-weight="800" fill="#047857">Tác nhân</text>
+                <rect x="664" y="114" width="108" height="44" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.8" />
+                <text x="718" y="142" text-anchor="middle" font-size="19" font-weight="800" fill="#059669">+ 3NaOH</text>
+                <text id="sapNaohSub1" x="718" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">Dung dịch đặc</text>
+                <text id="sapNaohSub2" x="718" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="#dc2626">Đun nóng (t°)</text>
+              </g>
+
+              <g id="sapBarPanel" class="svg-smooth hidden">
+                <rect x="640" y="42" width="156" height="270" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8" />
+                <text x="718" y="68" text-anchor="middle" font-size="12.5" font-weight="800" fill="#1d4ed8">Bánh xà phòng</text>
+                <!-- Minh hoạ bánh xà phòng hồng/xanh + bọt -->
+                <rect x="664" y="106" width="108" height="62" rx="18" fill="#bae6fd" stroke="#0284c7" stroke-width="2.4" />
+                <rect x="676" y="118" width="84" height="38" rx="10" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.4" />
+                <text x="718" y="142" text-anchor="middle" font-size="13" font-weight="800" fill="#0b5cab">SOAP</text>
+                <circle cx="672" cy="96" r="7" fill="#ffffff" stroke="#38bdf8" stroke-width="1.6" />
+                <circle cx="764" cy="92" r="9" fill="#ffffff" stroke="#38bdf8" stroke-width="1.6" />
+                <circle cx="776" cy="112" r="5" fill="#ffffff" stroke="#38bdf8" stroke-width="1.4" />
+                <text x="718" y="200" text-anchor="middle" font-size="11.5" font-weight="800" fill="#047857">Đã tách muối,</text>
+                <text x="718" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">trộn phụ gia &amp;</text>
+                <text x="718" y="236" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">ép khuôn thành bánh</text>
+              </g>
+            </svg>
+          </div>
+<div class="yt-exp"><a id="vidSap" class="yt-link" target="_blank" rel="noopener noreferrer"><span>▶ Xem thí nghiệm thật trên YouTube</span></a></div>
+
+          <div id="sapStepDesc" class="stage-desc-card" style="margin-top: 12px;"></div>
+
+          <!-- Dải minh hoạ quy trình hoàn thiện xà phòng bánh (hiện rõ ở Bước 3) -->
+          <div id="soapFinishStrip" class="soap-finish-strip hidden">
+            <div class="finish-step">
+              <b>① Tách muối acid béo</b>
+              Tách lấy phần muối sodium/potassium của acid béo (thành phần chính của xà phòng) ra khỏi hỗn hợp sau phản ứng.
+            </div>
+            <div class="finish-step">
+              <b>② Trộn các chất phụ gia</b>
+              Trộn muối acid béo với <b>chất diệt khuẩn, chất tạo hương, chất tạo màu, chất dưỡng ẩm,...</b>
+            </div>
+            <div class="finish-step">
+              <b>③ Ép thành bánh thương mại</b>
+              Ép khuôn thành các bánh xà phòng có nhiều hình dạng, màu sắc và mùi thơm khác nhau.
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== CÁCH 2: SẢN XUẤT TỪ DẦU MỎ (ALKANE) ==================== -->
+        <div id="prodPanel-oil" class="hidden">
+          <p style="margin: 0 0 12px; font-size: 0.96rem; color: var(--text-body);">
+            Ngoài nguồn chất béo tự nhiên, xà phòng còn được sản xuất từ <b>dầu mỏ</b> theo sơ đồ sau (bấm vào từng khối để xem chi tiết):
+          </p>
+
+          <!-- Sơ đồ khối cam đào chuẩn SGK -->
+          <div class="alkane-flow-row">
+            <button id="alkBlock-0" type="button" class="alkane-block active" onclick="selectAlkaneStage(0)">
+              <span>Alkane<br>(lấy từ dầu mỏ)</span>
+            </button>
+            <span class="alkane-arrow" aria-hidden="true">→</span>
+            <button id="alkBlock-1" type="button" class="alkane-block" onclick="selectAlkaneStage(1)">
+              <span>Acid béo<br>(Carboxylic acid mạch dài)</span>
+            </button>
+            <span class="alkane-arrow" aria-hidden="true">→</span>
+            <button id="alkBlock-2" type="button" class="alkane-block" onclick="selectAlkaneStage(2)">
+              <span>Muối sodium / potassium<br>của acid béo</span>
+            </button>
+          </div>
+
+          <!-- 2 nút chọn nhanh Giai đoạn 1 / Giai đoạn 2 -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+            <button id="alkStageBtn-1" type="button" class="btn btn-outline active" onclick="selectAlkaneStage(1)">
+              <span>Giai đoạn 1: Oxi hoá alkane thành acid béo</span>
+            </button>
+            <button id="alkStageBtn-2" type="button" class="btn btn-outline" onclick="selectAlkaneStage(2)">
+              <span>Giai đoạn 2: Trung hoà bằng NaOH / KOH</span>
+            </button>
+          </div>
+
+          <!-- Khung SVG minh hoạ sơ đồ hoá học từ Alkane -->
+          <div class="svg-stage">
+            <svg id="alkaneSvg" viewBox="0 0 820 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sơ đồ sản xuất xà phòng từ alkane dầu mỏ"></svg>
+          </div>
+
+          <div id="alkaneDescBox" class="stage-desc-card" style="margin-top: 12px;"></div>
+        </div>
+      </div>
+
+      <!-- HỘP CÂU HỎI THẢO LUẬN TRÊN LỚP (ẨN ĐÁP ÁN MẶC ĐỊNH) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">?</span>
+            <h2 class="card-title">Câu hỏi thảo luận trên lớp</h2>
+          </div>
+          <span class="pill-tag">Bấm để mở / ẩn đáp án gợi ý</span>
+        </div>
+
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 1: Vì sao trong phản ứng xà phòng hoá người ta thường dùng dung dịch NaOH đặc (hoặc KOH đặc) và đun nóng?</p>
+              <div>
+                <button id="btnQa1" type="button" class="btn btn-primary" onclick="toggleProdQa(1)"><span>Xem đáp án gợi ý</span></button>
+              </div>
+            </div>
+            <div id="prodQaAns1" class="qa-ans hidden">
+              <b>Đáp án:</b>
+              <ul style="margin: 6px 0 0; padding-left: 18px;">
+                <li><b>Đun nóng:</b> Chất béo không tan trong nước nên phản ứng xà phòng hoá ở nhiệt độ thường xảy ra rất chậm; đun nóng giúp tăng tốc độ phản ứng mạnh.</li>
+                <li style="margin-top: 5px;"><b>Dùng dung dịch kiềm đặc:</b> Tăng nồng độ <span class="chem-formula">OH<sup>−</sup></span> giúp phản ứng xảy ra <b>nhanh hơn</b>, đồng thời lượng nước trong hỗn hợp ít nên <b>dễ tách muối</b> của acid béo ra khỏi hỗn hợp. <i>(Mở rộng: thực tế thường thêm dung dịch NaCl bão hoà để muối xà phòng tách lớp nổi lên trên dễ thu hồi hơn.)</i></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 2: So sánh ưu điểm của việc sản xuất xà phòng từ dầu mỏ so với từ chất béo (dầu thực vật, mỡ động vật).</p>
+              <div>
+                <button id="btnQa2" type="button" class="btn btn-primary" onclick="toggleProdQa(2)"><span>Xem đáp án gợi ý</span></button>
+              </div>
+            </div>
+            <div id="prodQaAns2" class="qa-ans hidden">
+              <b>Đáp án:</b>
+              <ul style="margin: 6px 0 0; padding-left: 18px;">
+                <li><b>Tiết kiệm nguồn lương thực – thực phẩm:</b> Không phải tiêu tốn dầu thực vật và mỡ động vật (vốn dùng làm thực phẩm cho con người).</li>
+                <li style="margin-top: 5px;"><b>Chủ động nguồn nguyên liệu công nghiệp:</b> Alkane mạch dài lấy từ dầu mỏ có trữ lượng lớn, dễ sản xuất quy mô công nghiệp <i>(mở rộng: thường giúp tối ưu chi phí và giá thành sản xuất)</i>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: LUYỆN TẬP NHANH (10 CÂU HỎI PHÂN HOÁ + FISHER–YATES)
+         ======================================================================= -->
+    <section id="tabPanel-3" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: Tính chất giặt rửa &amp; Sản xuất xà phòng (10 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              4 Nhận biết • 3 Thông hiểu • 3 Vận dụng (gồm 2 bài toán thực tiễn) • Xáo trộn đáp án Fisher–Yates
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 10</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="btn btn-primary" onclick="submitQuiz()"><span>✔ Nộp bài &amp; Tổng kết</span></button>
+            <button type="button" class="btn btn-secondary" onclick="resetQuiz()"><span>↻ Làm lại từ đầu</span></button>
+          </div>
+        </div>
+
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)"><span>← Câu trước</span></button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 10</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)"><span>Câu tiếp theo →</span></button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--primary-dark);">Kết quả bài làm</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.94rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()"><span>Làm lại &amp; Xáo trộn đáp án</span></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. DỮ LIỆU TAB 1 (4 GIAI ĐOẠN HÌNH 2.3) & TAB 2 (SẢN XUẤT XÀ PHÒNG)
+    // =========================================================================
+    const WASH_STAGES = [
+      {
+        pct: 0,
+        badge: 'Giai đoạn (a): Tiếp xúc & Thấm ướt',
+        title: 'Hình 2.3(a): Dung dịch xà phòng tiếp xúc và làm ướt bề mặt vật liệu',
+        body: 'Khi xà phòng hoặc chất giặt rửa tan vào nước, sức căng bề mặt của dung dịch giảm xuống rất nhỏ, giúp nước dễ dàng thấm ướt bề mặt vải sợi/vật liệu. Các phân tử xà phòng phân tán tự do trong nước xung quanh vết bẩn dầu mỡ.'
+      },
+      {
+        pct: 33,
+        badge: 'Giai đoạn (b): Đuôi kị nước thâm nhập',
+        title: 'Hình 2.3(b): Đuôi kị nước thâm nhập vào vết bẩn dầu mỡ',
+        body: 'Các phần không phân cực (<b>đuôi kị nước</b> – mạch hydrocarbon dài) của phân tử xà phòng hướng về phía vết bẩn dầu mỡ và cắm sâu vào bề mặt vết bẩn, trong khi <b>đầu ưa nước</b> vẫn hướng ra phía môi trường nước.'
+      },
+      {
+        pct: 67,
+        badge: 'Giai đoạn (c): Phân chia vết bẩn',
+        title: 'Hình 2.3(c): Phân chia vết bẩn thành các giọt nhỏ tách khỏi bề mặt',
+        body: 'Các phân tử xà phòng tiếp tục chen sâu làm giảm lực bám dính giữa vết bẩn và bề mặt vật liệu. Vết bẩn bị kéo phồng, thắt cổ chai và phân chia thành những hạt dầu mỡ rất nhỏ có đầu ưa nước quay ra ngoài.'
+      },
+      {
+        pct: 100,
+        badge: 'Giai đoạn (d): Tạo hạt micelle & Rửa trôi',
+        title: 'Hình 2.3(d): Hình thành hạt micelle phân tán vào nước và bị rửa trôi',
+        body: 'Vết bẩn tách hoàn toàn khỏi bề mặt vật liệu thành các <b>hạt cầu rất nhỏ (micelle)</b> gồm lõi dầu mỡ ở giữa, đuôi kị nước cắm hướng tâm vào trong và đầu ưa nước tích điện quay ra ngoài. Nhờ lực đẩy tĩnh điện giữa các đầu ưa nước, các hạt này không dính lại mà phân tán vào nước và bị dòng nước rửa trôi, trả lại bề mặt vật liệu sạch bóng.'
+      }
+    ];
+
+    // =========================================================================
+    // 2. NGÂN HÀNG 10 CÂU HỎI PHÂN HOÁ (4 NB – 3 TH – 3 VD)
+    // =========================================================================
+    const RAW_QUIZ_BANK = [
+      // --- 4 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được vai trò của đuôi kị nước trong cơ chế giặt rửa',
+        question: 'Trong cơ chế giặt rửa của xà phòng, bộ phận nào của phân tử xà phòng trực tiếp thâm nhập vào vết bẩn dầu mỡ?',
+        options: [
+          {
+            text: 'Đuôi kị nước (gốc hydrocarbon mạch dài, không phân cực).',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK (Hình 2.3b): đuôi kị nước không phân cực tương thích với dầu mỡ nên thâm nhập vào vết bẩn.'
+          },
+          {
+            text: 'Đầu ưa nước (nhóm carboxylate phân cực).',
+            isCorrect: false,
+            reason: 'Sai: đầu ưa nước tương tác với nước nên luôn quay ra ngoài tiếp xúc với nước, không thâm nhập vào dầu mỡ.'
+          },
+          {
+            text: 'Ion kim loại <span class="chem-formula">Na<sup>+</sup></span> tự do.',
+            isCorrect: false,
+            reason: 'Sai: ion <span class="chem-formula">Na<sup>+</sup></span> hoà tan trong nước, không thâm nhập vào vết bẩn dầu mỡ.'
+          },
+          {
+            text: 'Chất phụ gia tạo mùi thơm trong bánh xà phòng.',
+            isCorrect: false,
+            reason: 'Sai: chất tạo hương chỉ có tác dụng tạo mùi dễ chịu, không trực tiếp bóc tách vết bẩn dầu mỡ.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được đặc điểm sức căng bề mặt của dung dịch xà phòng',
+        question: 'Khi xà phòng tan vào nước, dung dịch thu được có đặc điểm nào giúp vật cần giặt rửa dễ thấm ướt?',
+        options: [
+          {
+            text: 'Có sức căng bề mặt nhỏ.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK trang 15: xà phòng, chất giặt rửa tan vào nước tạo dung dịch có sức căng bề mặt nhỏ làm cho vật cần giặt rửa dễ thấm ướt.'
+          },
+          {
+            text: 'Có sức căng bề mặt rất lớn.',
+            isCorrect: false,
+            reason: 'Sai: sức căng bề mặt lớn khiến nước vo tròn thành giọt, khó thấm ướt vải sợi.'
+          },
+          {
+            text: 'Có tính oxi hoá rất mạnh.',
+            isCorrect: false,
+            reason: 'Sai: cơ chế làm thấm ướt của xà phòng là cơ chế vật lí (giảm sức căng bề mặt), không phải oxi hoá mạnh.'
+          },
+          {
+            text: 'Có nhiệt độ sôi thấp hơn nhiều so với nước tinh khiết.',
+            isCorrect: false,
+            reason: 'Sai: nhiệt độ sôi không phải nguyên nhân giúp vật dễ thấm ướt.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được phương pháp sản xuất xà phòng từ chất béo',
+        question: 'Phản ứng hoá học chính dùng để sản xuất xà phòng từ chất béo là gì?',
+        options: [
+          {
+            text: 'Đun nóng chất béo với dung dịch NaOH đặc hoặc KOH đặc.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK trang 15: đây là phản ứng xà phòng hoá dùng để sản xuất xà phòng từ chất béo.'
+          },
+          {
+            text: 'Đun nóng chất béo với dung dịch <span class="chem-formula">H<sub>2</sub>SO<sub>4</sub></span> loãng.',
+            isCorrect: false,
+            reason: 'Sai: thuỷ phân chất béo trong môi trường acid tạo ra acid béo tự do, không tạo muối xà phòng.'
+          },
+          {
+            text: 'Cho chất béo tác dụng với khí <span class="chem-formula">H<sub>2</sub></span> (xúc tác Ni, t°, p).',
+            isCorrect: false,
+            reason: 'Sai: đây là phản ứng hydrogen hoá chuyển chất béo lỏng thành chất béo rắn (bơ thực vật), không tạo xà phòng.'
+          },
+          {
+            text: 'Đốt cháy hoàn toàn chất béo trong khí oxygen dư.',
+            isCorrect: false,
+            reason: 'Sai: đốt cháy tạo <span class="chem-formula">CO<sub>2</sub></span> và <span class="chem-formula">H<sub>2</sub>O</span>.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được nguyên liệu ban đầu sản xuất xà phòng từ dầu mỏ',
+        question: 'Trong quy trình sản xuất xà phòng từ dầu mỏ (mục III.1 SGK), nguyên liệu ban đầu là hợp chất nào?',
+        options: [
+          {
+            text: 'Alkane mạch dài lấy từ dầu mỏ.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK trang 16: sản xuất xà phòng từ dầu mỏ đi từ alkane mạch dài → oxi hoá thành acid béo → trung hoà thành muối sodium/potassium của acid béo.'
+          },
+          {
+            text: 'Khí methane (<span class="chem-formula">CH<sub>4</sub></span>).',
+            isCorrect: false,
+            reason: 'Sai: methane chỉ có 1 nguyên tử C, không tạo được acid béo mạch dài (12–24 C).'
+          },
+          {
+            text: 'Tinh bột và cellulose.',
+            isCorrect: false,
+            reason: 'Sai: tinh bột và cellulose thuộc nhóm carbohydrate thực vật, không lấy từ dầu mỏ.'
+          },
+          {
+            text: 'Ethylene (<span class="chem-formula">C<sub>2</sub>H<sub>4</sub></span>) tinh khiết.',
+            isCorrect: false,
+            reason: 'Sai: theo sơ đồ SGK trang 16, nguyên liệu lấy từ dầu mỏ là các alkane mạch dài.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Mô tả được sự sắp xếp phân tử xà phòng quanh giọt dầu mỡ (hạt micelle)',
+        question: 'Trong quá trình phân chia vết bẩn thành các hạt rất nhỏ phân tán vào nước (Hình 2.3c, d), các phân tử xà phòng sắp xếp xung quanh giọt dầu mỡ như thế nào?',
+        options: [
+          {
+            text: 'Đuôi kị nước hướng vào trong giọt dầu mỡ, đầu ưa nước quay ra ngoài tiếp xúc với nước.',
+            isCorrect: true,
+            reason: 'Đúng: phần không phân cực tương tác với lõi dầu mỡ, còn phần phân cực tiếp xúc với môi trường nước xung quanh.'
+          },
+          {
+            text: 'Đầu ưa nước hướng vào trong giọt dầu mỡ, đuôi kị nước quay ra ngoài tiếp xúc với nước.',
+            isCorrect: false,
+            reason: 'Sai: bị đảo ngược hoàn toàn bản chất tương tác phân cực / không phân cực.'
+          },
+          {
+            text: 'Các phân tử xà phòng xếp nằm song song thành tấm phẳng, không bao bọc giọt dầu mỡ.',
+            isCorrect: false,
+            reason: 'Sai: để kéo tách và phân tán giọt dầu vào nước, các phân tử xà phòng phải bao bọc xung quanh giọt dầu tạo hạt cầu micelle.'
+          },
+          {
+            text: 'Cả đầu ưa nước và đuôi kị nước đều nằm hoàn toàn bên trong giọt dầu mỡ.',
+            isCorrect: false,
+            reason: 'Sai: đầu ưa nước mang điện tích phân cực nên không thể nằm trong lõi dầu không phân cực.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Xác định được sản phẩm khi xà phòng hoá tristearin bằng NaOH đặc',
+        question: 'Sau khi đun nóng hoàn toàn tristearin (<span class="chem-formula">(C<sub>17</sub>H<sub>35</sub>COO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub></span>) với dung dịch NaOH đặc, hai sản phẩm thu được là gì?',
+        options: [
+          {
+            text: 'Glycerol và sodium stearate (<span class="chem-formula">C<sub>17</sub>H<sub>35</sub>COONa</span>).',
+            isCorrect: true,
+            reason: 'Đúng theo phương trình SGK trang 16: <span class="chem-formula">(C<sub>17</sub>H<sub>35</sub>COO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub> + 3NaOH → C<sub>3</sub>H<sub>5</sub>(OH)<sub>3</sub> + 3C<sub>17</sub>H<sub>35</sub>COONa</span>.'
+          },
+          {
+            text: 'Glycerol và stearic acid (<span class="chem-formula">C<sub>17</sub>H<sub>35</sub>COOH</span>).',
+            isCorrect: false,
+            reason: 'Sai: stearic acid chỉ thu được khi thuỷ phân trong môi trường acid, còn trong dung dịch NaOH tạo muối sodium stearate.'
+          },
+          {
+            text: 'Ethanol và sodium stearate (<span class="chem-formula">C<sub>17</sub>H<sub>35</sub>COONa</span>).',
+            isCorrect: false,
+            reason: 'Sai: chất béo là triester của glycerol, không phải của ethanol.'
+          },
+          {
+            text: 'Glycerol và sodium palmitate (<span class="chem-formula">C<sub>15</sub>H<sub>31</sub>COONa</span>).',
+            isCorrect: false,
+            reason: 'Sai: tristearin có gốc <span class="chem-formula">C<sub>17</sub>H<sub>35</sub>COO–</span> nên tạo sodium stearate, không phải sodium palmitate.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Trình bày được bước hoàn thiện tạo thành bánh xà phòng thương mại',
+        question: 'Sau khi tách được muối của acid béo từ phản ứng xà phòng hoá, người ta thường thực hiện công đoạn nào để tạo thành xà phòng bánh thương mại?',
+        options: [
+          {
+            text: 'Trộn thêm chất diệt khuẩn, chất tạo hương,... rồi ép thành bánh với nhiều hình dạng khác nhau.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK trang 16: các muối của acid béo tách ra được đem trộn với chất diệt khuẩn, chất tạo hương,... rồi ép thành bánh với nhiều hình dạng khác nhau.'
+          },
+          {
+            text: 'Đun nóng lại với dung dịch acid mạnh để chuyển muối thành acid béo.',
+            isCorrect: false,
+            reason: 'Sai: chuyển lại thành acid béo sẽ làm mất hoàn toàn tính giặt rửa của xà phòng.'
+          },
+          {
+            text: 'Trộn thêm dầu thực vật thô và nước lã rồi đóng chai.',
+            isCorrect: false,
+            reason: 'Sai: dầu thực vật không tan trong nước và không làm thành bánh xà phòng thương mại.'
+          },
+          {
+            text: 'Đem nung ở nhiệt độ trên 500 °C cho cháy hết tạp chất.',
+            isCorrect: false,
+            reason: 'Sai: ở nhiệt độ cao muối hữu cơ của acid béo sẽ bị phân huỷ nhiệt và cháy hỏng.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU VẬN DỤNG ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính được số bánh xà phòng sản xuất từ khối lượng chất béo cho trước',
+        question: 'Xà phòng hoá hoàn toàn <b>1,78 kg tristearin</b> (<span class="chem-formula">M = 890</span>) bằng dung dịch NaOH đặc vừa đủ (hiệu suất 100%). Toàn bộ lượng muối sodium stearate (<span class="chem-formula">M = 306</span>) thu được đem trộn với phụ gia để ép thành các bánh xà phòng loại <b>100 g/bánh</b>, biết mỗi bánh chứa <b>76,5%</b> muối sodium stearate về khối lượng. Số bánh xà phòng tối đa sản xuất được là bao nhiêu?',
+        options: [
+          {
+            text: '<b>24 bánh</b>.',
+            isCorrect: true,
+            reason: 'Đúng: <span class="chem-formula">n<sub>tristearin</sub> = 1780 / 890 = 2 mol</span> ⇒ <span class="chem-formula">n<sub>muối</sub> = 3 × 2 = 6 mol</span> ⇒ <span class="chem-formula">m<sub>muối</sub> = 6 × 306 = 1836 g</span>. Khối lượng xà phòng bánh = <span class="chem-formula">1836 / 0,765 = 2400 g</span> ⇒ Số bánh = <span class="chem-formula">2400 / 100 = 24 bánh</span>.'
+          },
+          {
+            text: '<b>8 bánh</b>.',
+            isCorrect: false,
+            reason: 'Sai: quên nhân hệ số 3 cho số mol muối sodium stearate (1 mol tristearin tạo 3 mol muối).'
+          },
+          {
+            text: '<b>18 bánh</b>.',
+            isCorrect: false,
+            reason: 'Sai: quên chia cho hàm lượng 76,5% muối trong mỗi bánh (tính nhầm 1836 / 100 ≈ 18 bánh).'
+          },
+          {
+            text: '<b>14 bánh</b>.',
+            isCorrect: false,
+            reason: 'Sai: nhân nhầm với 0,765 thay vì chia cho 0,765 (1836 × 0,765 / 100 ≈ 14 bánh).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Tính được khối lượng muối potassium stearate khi xà phòng hoá bằng KOH',
+        question: 'Đun nóng hoàn toàn <b>44,5 gam tristearin</b> (<span class="chem-formula">M = 890</span>) với dung dịch KOH đặc vừa đủ. Khối lượng muối potassium stearate (<span class="chem-formula">C<sub>17</sub>H<sub>35</sub>COOK</span>, <span class="chem-formula">M = 322</span>) thu được là bao nhiêu?',
+        options: [
+          {
+            text: '<b>48,3 gam</b>.',
+            isCorrect: true,
+            reason: 'Đúng: <span class="chem-formula">n<sub>tristearin</sub> = 44,5 / 890 = 0,05 mol</span> ⇒ <span class="chem-formula">n<sub>muối</sub> = 3 × 0,05 = 0,15 mol</span> ⇒ <span class="chem-formula">m<sub>muối</sub> = 0,15 × 322 = 48,3 g</span>.'
+          },
+          {
+            text: '<b>45,9 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: dùng nhầm phân tử khối của muối sodium stearate (306) thay vì potassium stearate (322): 0,15 × 306 = 45,9 g.'
+          },
+          {
+            text: '<b>16,1 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: quên nhân hệ số 3 cho số mol muối (0,05 × 322 = 16,1 g).'
+          },
+          {
+            text: '<b>52,9 gam</b>.',
+            isCorrect: false,
+            reason: 'Sai: cộng nhầm khối lượng glycerol (4,6 g) vào khối lượng muối (48,3 + 4,6 = 52,9 g).'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Đánh giá tổng hợp nhiều phát biểu đúng/sai về tính chất giặt rửa và sản xuất xà phòng',
+        question: 'Cho các phát biểu sau về tính chất giặt rửa và sản xuất xà phòng:<br>(a) Dung dịch xà phòng làm giảm sức căng bề mặt của nước, giúp vải sợi dễ thấm ướt.<br>(b) Trong các hạt dầu mỡ phân tán vào nước, đầu ưa nước của phân tử xà phòng hướng vào bên trong giọt dầu.<br>(c) Phản ứng xà phòng hoá chất béo bằng dung dịch NaOH là phản ứng thuận nghịch.<br>(d) Có thể sản xuất xà phòng từ nguồn alkane lấy từ dầu mỏ qua giai đoạn trung gian tạo acid béo.<br>Số phát biểu <b>đúng</b> là bao nhiêu?',
+        options: [
+          {
+            text: '<b>2 phát biểu</b> (a và d).',
+            isCorrect: true,
+            reason: 'Đúng: (a) đúng; (b) <b>sai</b> vì đầu ưa nước quay ra ngoài tiếp xúc với nước, đuôi kị nước mới hướng vào trong giọt dầu; (c) <b>sai</b> vì xà phòng hoá bằng NaOH là phản ứng <b>một chiều</b>; (d) đúng.'
+          },
+          {
+            text: '<b>3 phát biểu</b> (a, c và d).',
+            isCorrect: false,
+            reason: 'Sai: phát biểu (c) sai vì phản ứng thuỷ phân chất béo trong môi trường kiềm (xà phòng hoá) là phản ứng một chiều.'
+          },
+          {
+            text: '<b>3 phát biểu</b> (a, b và d).',
+            isCorrect: false,
+            reason: 'Sai: phát biểu (b) sai vì đầu ưa nước luôn quay ra ngoài môi trường nước.'
+          },
+          {
+            text: '<b>1 phát biểu</b> (chỉ có a).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (d) đúng (theo sơ đồ sản xuất xà phòng từ dầu mỏ trong SGK trang 16).'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let washPct = 0;
+    let washAutoRunning = false;
+    let washTimer = null;
+    let washPauseTimer = null;
+    let washPausedMilestones = new Set();
+
+    let prodMethod = 'fat'; // 'fat' | 'oil'
+    let sapStep = 1;
+    let alkaneStage = 0;
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+    let quizSubmitted = false;
+
+    // =========================================================================
+    // 4. CHUYỂN TAB & FULLSCREEN AN TOÀN (KHÔNG LỖI TRÊN IPHONE/IPAD)
+    // =========================================================================
+    function switchTab(num) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`tabPanel-${i}`).classList.toggle('hidden', i !== num);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        btn.classList.toggle('active', i === num);
+        btn.setAttribute('aria-selected', i === num ? 'true' : 'false');
+      }
+      if (num !== 1) stopWashAuto();
+      if (num === 3) renderQuizQuestion();
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 1: MÔ PHỎNG CƠ CHẾ GIẶT RỬA 4 GIAI ĐOẠN (HÌNH 2.3)
+    // =========================================================================
+    // Vẽ 1 phân tử xà phòng (đuôi từ (tx,ty) tới đầu tròn (hx,hy))
+    function soapMolSvg(tx, ty, hx, hy) {
+      return `
+        <line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#0c4a6e" stroke-width="2.4" stroke-linecap="round" />
+        <circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="5.5" fill="#0284c7" stroke="#0369a1" stroke-width="1.2" />
+      `;
+    }
+
+    // Vẽ 1 hạt micelle tại tâm (cx, cy) với bán kính lõi dầu rCore
+    function micelleSvg(cx, cy, rCore, count) {
+      let s = `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rCore}" fill="#78350f" stroke="#451a03" stroke-width="1.6" />`;
+      for (let i = 0; i < count; i++) {
+        const ang = (i / count) * Math.PI * 2;
+        const tx = cx + Math.cos(ang) * (rCore - 3);
+        const ty = cy + Math.sin(ang) * (rCore - 3);
+        const hx = cx + Math.cos(ang) * (rCore + 18);
+        const hy = cy + Math.sin(ang) * (rCore + 18);
+        s += soapMolSvg(tx, ty, hx, hy);
+      }
+      return s;
+    }
+
+    function getStageIndex(pct) {
+      if (pct < 33) return 0;
+      if (pct < 67) return 1;
+      if (pct < 100) return 2;
+      return 3;
+    }
+
+    function renderWashSimulation(pct) {
+      washPct = Math.max(0, Math.min(100, Number(pct)));
+      document.getElementById('washSlider').value = washPct;
+
+      const stageIdx = getStageIndex(washPct);
+      const st = WASH_STAGES[stageIdx];
+
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`wStageBtn-${i}`).classList.toggle('active', i === stageIdx);
+      }
+      document.getElementById('washStagePill').textContent = st.badge;
+      document.getElementById('washDescTitle').textContent = st.title;
+      document.getElementById('washDescBody').innerHTML = st.body;
+
+      const layer = document.getElementById('washDynamicLayer');
+      const dynLabel = document.getElementById('washDynamicLabel');
+      let html = '';
+      let lblHtml = '';
+
+      if (stageIdx === 0) {
+        // GIAI ĐOẠN (a): Vết bẩn dầu mỡ nằm bẹt trên vật liệu, các phân tử xà phòng lơ lửng trong nước
+        html += `<path d="M 285 298 Q 315 272 370 258 Q 425 246 480 264 Q 535 280 565 298 Z" fill="#78350f" stroke="#451a03" stroke-width="2" />`;
+        const freeMols = [
+          [310, 178, 326, 158], [362, 146, 372, 122], [420, 166, 434, 144],
+          [478, 138, 464, 116], [534, 170, 550, 150], [270, 212, 286, 192],
+          [580, 216, 594, 194], [392, 206, 408, 186], [462, 204, 446, 184],
+          [518, 224, 534, 204], [336, 226, 320, 208], [620, 162, 636, 142]
+        ];
+        freeMols.forEach(m => { html += soapMolSvg(m[0], m[1], m[2], m[3]); });
+
+        lblHtml = `
+          <line x1="546" y1="286" x2="616" y2="270" stroke="#78350f" stroke-width="1.8" stroke-dasharray="4 3" />
+          <rect x="616" y="254" width="174" height="32" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.4" />
+          <text x="703" y="274" text-anchor="middle" font-size="12" font-weight="800" fill="#78350f">Vết bẩn dầu mỡ</text>
+        `;
+      } else if (stageIdx === 1) {
+        // GIAI ĐOẠN (b): Đuôi kị nước cắm dày đặc vào bề mặt vết bẩn dầu mỡ
+        html += `<path d="M 290 298 Q 320 266 375 250 Q 430 238 485 256 Q 532 272 558 298 Z" fill="#78350f" stroke="#451a03" stroke-width="2" />`;
+        // 13 phân tử cắm đuôi dọc theo đường cong vết bẩn
+        const attachPts = [
+          [304, 286, 286, 272], [322, 274, 308, 254], [344, 264, 334, 242],
+          [368, 256, 362, 232], [392, 250, 390, 226], [418, 248, 418, 224],
+          [444, 249, 448, 225], [470, 254, 478, 232], [494, 262, 506, 242],
+          [518, 272, 534, 254], [540, 284, 558, 270]
+        ];
+        attachPts.forEach(m => { html += soapMolSvg(m[0], m[1], m[2], m[3]); });
+        // Thêm vài phân tử tự do bên trên
+        html += soapMolSvg(342, 162, 356, 142);
+        html += soapMolSvg(486, 152, 472, 132);
+        html += soapMolSvg(578, 178, 594, 158);
+
+        lblHtml = `
+          <line x1="484" y1="230" x2="586" y2="206" stroke="#0369a1" stroke-width="1.8" stroke-dasharray="4 3" />
+          <rect x="586" y="186" width="204" height="42" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="1.4" />
+          <text x="688" y="204" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0369a1">Đuôi kị nước cắm vào dầu</text>
+          <text x="688" y="220" text-anchor="middle" font-size="10.5" font-weight="700" fill="#475569">Đầu ưa nước hướng ra nước</text>
+        `;
+      } else if (stageIdx === 2) {
+        // GIAI ĐOẠN (c): Vết bẩn bị kéo phồng, thắt cổ chai, tách lên trên thành giọt nhỏ
+        html += `<path d="M 332 298 Q 372 288 394 268 Q 402 252 388 232 Q 368 206 392 180 Q 422 158 456 178 Q 478 202 460 232 Q 446 254 454 270 Q 474 288 514 298 Z" fill="#78350f" stroke="#451a03" stroke-width="2" />`;
+        // Các phân tử bao quanh phần phồng phía trên & cổ chai
+        const neckPts = [
+          [378, 212, 354, 208], [382, 188, 362, 174], [402, 170, 392, 148],
+          [426, 166, 428, 142], [450, 174, 464, 154], [468, 194, 490, 184],
+          [466, 218, 488, 224], [388, 246, 366, 250], [456, 248, 478, 254],
+          [352, 288, 336, 272], [494, 288, 510, 272]
+        ];
+        neckPts.forEach(m => { html += soapMolSvg(m[0], m[1], m[2], m[3]); });
+
+        // Mũi tên chỉ lực kéo nâng giọt dầu lên
+        html += `
+          <line x1="424" y1="126" x2="424" y2="86" stroke="#059669" stroke-width="3.2" stroke-linecap="round" />
+          <polygon points="416,90 424,74 432,90" fill="#059669" />
+        `;
+
+        lblHtml = `
+          <line x1="494" y1="184" x2="584" y2="162" stroke="#b45309" stroke-width="1.8" stroke-dasharray="4 3" />
+          <rect x="584" y="142" width="208" height="44" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.4" />
+          <text x="688" y="160" text-anchor="middle" font-size="11.5" font-weight="800" fill="#92400e">Vết bẩn bị kéo tách lên</text>
+          <text x="688" y="176" text-anchor="middle" font-size="10.5" font-weight="700" fill="#78350f">Phân chia thành hạt rất nhỏ</text>
+        `;
+      } else {
+        // GIAI ĐOẠN (d): Tạo các hạt micelle trôi theo dòng nước rửa trôi, bề mặt vật liệu sạch bóng
+        html += micelleSvg(354, 166, 26, 12);
+        html += micelleSvg(486, 124, 22, 10);
+        html += micelleSvg(570, 206, 20, 10);
+
+        // Mũi tên dòng nước rửa trôi đặt ở vùng thoáng bên trái/dưới (KHÔNG bao giờ chạm khung nhãn bên phải)
+        html += `
+          <path d="M 184 188 L 268 188" stroke="#0284c7" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 4" />
+          <polygon points="266,181 280,188 266,195" fill="#0284c7" />
+          <path d="M 226 238 L 314 238" stroke="#0284c7" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 4" />
+          <polygon points="312,231 326,238 312,245" fill="#0284c7" />
+          <text x="226" y="176" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0369a1">Dòng nước rửa trôi</text>
+        `;
+
+        // Lấp lánh sạch bóng trên bề mặt vật liệu
+        html += `
+          <text x="424" y="290" text-anchor="middle" font-size="13.5" font-weight="800" fill="#059669">✨ Bề mặt vật liệu đã sạch bóng vết dầu mỡ ✨</text>
+        `;
+
+        lblHtml = `
+          <line x1="528" y1="114" x2="594" y2="94" stroke="#0b5cab" stroke-width="1.8" stroke-dasharray="4 3" />
+          <rect x="594" y="72" width="198" height="44" rx="8" fill="#ffffff" stroke="#0b5cab" stroke-width="1.6" />
+          <text x="693" y="90" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0b5cab">Hạt Micelle (bị rửa trôi)</text>
+          <text x="693" y="106" text-anchor="middle" font-size="10.2" font-weight="700" fill="#475569">Lõi dầu trong • Đầu ưa nước ngoài</text>
+        `;
+      }
+
+      layer.innerHTML = html;
+      dynLabel.innerHTML = lblHtml;
+    }
+
+    function jumpWashStage(idx) {
+      stopWashAuto();
+      washPausedMilestones.clear();
+      renderWashSimulation(WASH_STAGES[idx].pct);
+    }
+
+    function onWashSlider(val) {
+      stopWashAuto();
+      washPausedMilestones.clear();
+      renderWashSimulation(val);
+    }
+
+    function resetWash() {
+      stopWashAuto();
+      washPausedMilestones.clear();
+      renderWashSimulation(0);
+    }
+
+    function toggleWashLabels() {
+      const checked = document.getElementById('toggleWashLabels').checked;
+      document.getElementById('washLabelsGroup').style.display = checked ? 'block' : 'none';
+    }
+
+    function toggleWashAuto() {
+      if (washAutoRunning) {
+        stopWashAuto();
+      } else {
+        if (washPct >= 100) {
+          washPausedMilestones.clear();
+          renderWashSimulation(0);
+        }
+        startWashAuto();
+      }
+    }
+
+    function scheduleNextWashStep() {
+      if (!washAutoRunning) return;
+      washTimer = setTimeout(() => {
+        if (!washAutoRunning) return;
+        if (washPct >= 100) {
+          stopWashAuto();
+          return;
+        }
+
+        renderWashSimulation(washPct + 1);
+
+        const milestones = {
+          33: 'Giai đoạn (b) – Đuôi kị nước đang thâm nhập sâu vào vết bẩn dầu mỡ!',
+          67: 'Giai đoạn (c) – Vết bẩn đang bị kéo thắt cổ chai và phân chia thành hạt nhỏ!',
+          100: 'Giai đoạn (d) – Tạo thành các hạt micelle phân tán vào nước và bị rửa trôi!'
+        };
+
+        if (milestones[washPct] && !washPausedMilestones.has(washPct)) {
+          washPausedMilestones.add(washPct);
+          const banner = document.getElementById('washPauseBanner');
+          banner.textContent = `⏸ Tạm dừng 2 giây quan sát: ${milestones[washPct]}`;
+          banner.classList.remove('hidden');
+
+          washPauseTimer = setTimeout(() => {
+            banner.classList.add('hidden');
+            if (washPct >= 100) stopWashAuto();
+            else scheduleNextWashStep();
+          }, 2000);
+        } else {
+          scheduleNextWashStep();
+        }
+      }, 60);
+    }
+
+    function startWashAuto() {
+      stopWashAuto();
+      washAutoRunning = true;
+      document.getElementById('washAutoIcon').textContent = '⏸';
+      document.getElementById('washAutoText').textContent = 'Tạm dừng';
+
+      // Nếu bắt đầu từ 0%, tạm dừng 2 giây tại mốc (a) trước khi chạy tiếp
+      if (washPct === 0 && !washPausedMilestones.has(0)) {
+        washPausedMilestones.add(0);
+        const banner = document.getElementById('washPauseBanner');
+        banner.textContent = '⏸ Tạm dừng 2 giây quan sát: Giai đoạn (a) – Dung dịch xà phòng giảm sức căng bề mặt, làm ướt vật liệu!';
+        banner.classList.remove('hidden');
+        washPauseTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+          scheduleNextWashStep();
+        }, 2000);
+      } else {
+        scheduleNextWashStep();
+      }
+    }
+
+    function stopWashAuto() {
+      washAutoRunning = false;
+      if (washTimer) { clearTimeout(washTimer); washTimer = null; }
+      if (washPauseTimer) { clearTimeout(washPauseTimer); washPauseTimer = null; }
+      document.getElementById('washPauseBanner').classList.add('hidden');
+      document.getElementById('washAutoIcon').textContent = '▶';
+      document.getElementById('washAutoText').textContent = washPct >= 100 ? 'Chạy lại từ đầu' : 'Chạy tự động';
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 2: PHƯƠNG PHÁP SẢN XUẤT XÀ PHÒNG (CÁCH 1 & CÁCH 2)
+    // =========================================================================
+    function selectProdMethod(m) {
+      prodMethod = m;
+      document.getElementById('prodBtn-fat').classList.toggle('active', m === 'fat');
+      document.getElementById('prodBtn-oil').classList.toggle('active', m === 'oil');
+      document.getElementById('prodPanel-fat').classList.toggle('hidden', m !== 'fat');
+      document.getElementById('prodPanel-oil').classList.toggle('hidden', m !== 'oil');
+    }
+
+    function setSapStep(step) {
+      sapStep = step;
+      [1, 2, 3].forEach(i => {
+        document.getElementById(`sapStep-${i}`).classList.toggle('active', i === step);
+      });
+
+      const cutLine = document.getElementById('sapCutLine');
+      const bonds = document.getElementById('sapBonds');
+      const glycG = document.getElementById('sapGlycGroup');
+      const saltG = document.getElementById('sapSaltGroup');
+      const acylInit = document.getElementById('sapAcylInitial');
+      const saltProd = document.getElementById('sapSaltProducts');
+      const naohP = document.getElementById('sapNaohPanel');
+      const barP = document.getElementById('sapBarPanel');
+      const strip = document.getElementById('soapFinishStrip');
+      const desc = document.getElementById('sapStepDesc');
+
+      if (step === 1) {
+        cutLine.style.opacity = '0';
+        bonds.style.opacity = '1';
+        glycG.style.transform = 'translateX(0px)';
+        saltG.style.transform = 'translateX(0px)';
+        acylInit.style.opacity = '1';
+        saltProd.style.opacity = '0';
+        ['sapH1', 'sapH2', 'sapH3'].forEach(id => {
+          document.getElementById(id).style.opacity = '0';
+        });
+        naohP.classList.remove('hidden');
+        barP.classList.add('hidden');
+        strip.classList.add('hidden');
+        document.getElementById('sapLeftTitle').textContent = 'Khung Glycerol (Tristearin)';
+        document.getElementById('sapRightTitle').textContent = '3 gốc Stearic (–C(=O)–C₁₇H₃₅)';
+        desc.innerHTML = `
+          <div class="stage-desc-title">Bước 1: Hỗn hợp ban đầu (Chất béo + Dung dịch NaOH đặc)</div>
+          <div class="stage-desc-body">Cho chất béo (ví dụ <b>tristearin</b>: <span class="chem-formula">(C<sub>17</sub>H<sub>35</sub>COO)<sub>3</sub>C<sub>3</sub>H<sub>5</sub></span>) tiếp xúc với dung dịch <b>NaOH đặc</b> (hoặc KOH đặc) theo tỉ lệ mol 1 : 3.</div>
+        `;
+      } else if (step === 2) {
+        cutLine.style.opacity = '1';
+        bonds.style.opacity = '0';
+        glycG.style.transform = 'translateX(-14px)';
+        saltG.style.transform = 'translateX(14px)';
+        acylInit.style.opacity = '0';
+        saltProd.style.opacity = '1';
+        ['sapH1', 'sapH2', 'sapH3'].forEach(id => {
+          document.getElementById(id).style.opacity = '1';
+        });
+        naohP.classList.remove('hidden');
+        barP.classList.add('hidden');
+        strip.classList.add('hidden');
+        document.getElementById('sapLeftTitle').textContent = 'Nhận 3H → Glycerol';
+        document.getElementById('sapRightTitle').textContent = 'Nhận 3 –O⁻ Na⁺ → 3 Sodium stearate';
+        desc.innerHTML = `
+          <div class="stage-desc-title">Bước 2: Đun nóng – Cắt đứt 3 liên kết ester (–O–C(=O)–)</div>
+          <div class="stage-desc-body">Khi đun nóng, 3 liên kết ester trong phân tử tristearin bị cắt đứt hoàn toàn (phản ứng một chiều). Phần khung <span class="chem-formula">C<sub>3</sub>H<sub>5</sub>O<sub>3</sub>–</span> nhận 3 nguyên tử H tạo <b>glycerol</b>; 3 gốc acyl nhận nhóm <span class="chem-formula">–O<sup>−</sup> Na<sup>+</sup></span> tạo <b>3 phân tử sodium stearate</b>.</div>
+        `;
+      } else {
+        cutLine.style.opacity = '1';
+        bonds.style.opacity = '0';
+        glycG.style.transform = 'translateX(-14px)';
+        saltG.style.transform = 'translateX(14px)';
+        acylInit.style.opacity = '0';
+        saltProd.style.opacity = '1';
+        ['sapH1', 'sapH2', 'sapH3'].forEach(id => {
+          document.getElementById(id).style.opacity = '1';
+        });
+        naohP.classList.add('hidden');
+        barP.classList.remove('hidden');
+        strip.classList.remove('hidden');
+        document.getElementById('sapLeftTitle').textContent = 'Glycerol – C₃H₅(OH)₃';
+        document.getElementById('sapRightTitle').textContent = '3C₁₇H₃₅COO⁻ Na⁺ (Xà phòng)';
+        desc.innerHTML = `
+          <div class="stage-desc-title">Bước 3: Tạo sản phẩm hoàn chỉnh &amp; Ép thành bánh xà phòng</div>
+          <div class="stage-desc-body">Thu được <b>glycerol</b> và <b>3 phân tử sodium stearate</b> (thành phần chính của xà phòng). Sau đó muối của acid béo được tách ra, trộn thêm phụ gia (chất diệt khuẩn, chất tạo hương,...) rồi ép thành bánh xà phòng.</div>
+        `;
+      }
+    }
+
+    function selectAlkaneStage(stage) {
+      alkaneStage = stage;
+      [0, 1, 2].forEach(i => {
+        document.getElementById(`alkBlock-${i}`).classList.toggle('active', i === stage);
+      });
+      document.getElementById('alkStageBtn-1').classList.toggle('active', stage === 1);
+      document.getElementById('alkStageBtn-2').classList.toggle('active', stage === 2);
+
+      const svg = document.getElementById('alkaneSvg');
+      const desc = document.getElementById('alkaneDescBox');
+
+      if (stage === 0) {
+        svg.innerHTML = `
+          <rect x="44" y="34" width="732" height="142" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.8" />
+          <text x="410" y="68" text-anchor="middle" font-size="15.5" font-weight="800" fill="#9a3412">Nguyên liệu đầu vào: Alkane mạch dài lấy từ dầu mỏ</text>
+          <path d="M 118 122 L 154 98 L 190 122 L 226 98 L 262 122 L 298 98 L 334 122 L 370 98 L 406 122 L 442 98 L 478 122 L 514 98 L 550 122 L 586 98 L 622 122 L 658 98 L 694 122"
+                fill="none" stroke="#c2410c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <text x="410" y="156" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7c2d12">R–CH₂–CH₂–R' (Các alkane mạch dài khoảng 25–35 nguyên tử C từ phân đoạn parafin dầu mỏ)</text>
+        `;
+        desc.innerHTML = `
+          <div class="stage-desc-title">Nguyên liệu: Alkane mạch dài từ dầu mỏ</div>
+          <div class="stage-desc-body">Các alkane mạch dài (phân đoạn parafin lấy từ quá trình chế biến dầu mỏ) là nguồn nguyên liệu dồi dào, giá thành thấp dùng để tổng hợp acid béo nhân tạo thay thế dầu mỡ thực phẩm.</div>
+        `;
+      } else if (stage === 1) {
+        svg.innerHTML = `
+          <text x="410" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="#0b5cab">Giai đoạn 1: Oxi hoá không hoàn toàn alkane mạch dài thành acid béo</text>
+          <rect x="34" y="66" width="210" height="84" rx="12" fill="#fed7aa" stroke="#ea580c" stroke-width="2" />
+          <text x="139" y="102" text-anchor="middle" font-size="16" font-weight="800" fill="#7c2d12">R–CH₂–CH₂–R'</text>
+          <text x="139" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#9a3412">(Alkane mạch dài)</text>
+
+          <line x1="256" y1="108" x2="454" y2="108" stroke="#dc2626" stroke-width="3.2" />
+          <polygon points="452,100 468,108 452,116" fill="#dc2626" />
+          <text x="358" y="92" text-anchor="middle" font-size="13.5" font-weight="800" fill="#dc2626">+ O₂ (không khí)</text>
+          <text x="358" y="132" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">t°, xúc tác (muối Mn)</text>
+
+          <rect x="480" y="66" width="306" height="84" rx="12" fill="#eff6ff" stroke="#38bdf8" stroke-width="2" />
+          <text x="633" y="102" text-anchor="middle" font-size="16" font-weight="800" fill="#0b5cab">R–COOH + R'–COOH</text>
+          <text x="633" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#0369a1">(Hỗn hợp acid béo mạch dài + H₂O)</text>
+        `;
+        desc.innerHTML = `
+          <div class="stage-desc-title">Giai đoạn 1: Oxi hoá alkane mạch dài thành acid béo</div>
+          <div class="stage-desc-body">Oxi hoá các alkane mạch dài bằng oxygen không khí ở nhiệt độ cao có xúc tác thích hợp sẽ cắt mạch carbon tạo thành hỗn hợp các <b>carboxylic acid mạch dài (acid béo)</b>.</div>
+        `;
+      } else {
+        svg.innerHTML = `
+          <text x="410" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="#047857">Giai đoạn 2: Trung hoà acid béo bằng dung dịch NaOH hoặc KOH</text>
+          <rect x="34" y="66" width="224" height="84" rx="12" fill="#eff6ff" stroke="#38bdf8" stroke-width="2" />
+          <text x="146" y="102" text-anchor="middle" font-size="17" font-weight="800" fill="#0b5cab">R–COOH</text>
+          <text x="146" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#0369a1">(Acid béo tổng hợp)</text>
+
+          <line x1="270" y1="108" x2="462" y2="108" stroke="#059669" stroke-width="3.2" />
+          <polygon points="460,100 476,108 460,116" fill="#059669" />
+          <text x="366" y="92" text-anchor="middle" font-size="14" font-weight="800" fill="#059669">+ NaOH (hoặc KOH)</text>
+          <text x="366" y="132" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">Phản ứng trung hoà</text>
+
+          <rect x="488" y="66" width="298" height="84" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2" />
+          <text x="637" y="102" text-anchor="middle" font-size="16.5" font-weight="800" fill="#047857">R–COONa (R–COOK) + H₂O</text>
+          <text x="637" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">(Muối của acid béo – Thành phần chính xà phòng)</text>
+        `;
+        desc.innerHTML = `
+          <div class="stage-desc-title">Giai đoạn 2: Trung hoà tạo muối sodium / potassium của acid béo</div>
+          <div class="stage-desc-body">Cho hỗn hợp acid béo thu được tác dụng với dung dịch <b>NaOH</b> (hoặc <b>KOH</b>) tạo thành <b>muối sodium / potassium của acid béo</b> (thành phần chính của xà phòng) và nước.</div>
+        `;
+      }
+    }
+
+    function toggleProdQa(num) {
+      const ans = document.getElementById(`prodQaAns${num}`);
+      const btn = document.getElementById(`btnQa${num}`);
+      const hidden = ans.classList.contains('hidden');
+      ans.classList.toggle('hidden', !hidden);
+      btn.innerHTML = hidden ? '<span>Ẩn đáp án gợi ý</span>' : '<span>Xem đáp án gợi ý</span>';
+    }
+
+    // =========================================================================
+    // 7. LOGIC TAB 3: LUYỆN TẬP 10 CÂU + FISHER–YATES + NỘP BÀI TỔNG KẾT
+    // =========================================================================
+    function shuffleFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const opts = shuffleFisherYates(q.options);
+        const correctIdx = opts.findIndex(o => o.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: opts,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+      quizSubmitted = false;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndBanner() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      document.getElementById('quizProgressFill').style.width = `${Math.round((answered / shuffledQuiz.length) * 100)}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (quizSubmitted || answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Tổng điểm: ${score} / ${shuffledQuiz.length} điểm (${answered}/${shuffledQuiz.length} câu đã trả lời)`;
+        let msg = 'Hãy xem lại lời giải chi tiết từng câu và ôn lại Tab 1, Tab 2 nhé!';
+        if (score >= 9) msg = 'Xuất sắc! Em đã nắm vững toàn diện cơ chế giặt rửa và phương pháp sản xuất xà phòng.';
+        else if (score >= 7) msg = 'Rất tốt! Em đã làm chủ phần lớn kiến thức trọng tâm của bài học.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const showResult = chosen !== null || quizSubmitted;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">YCCĐ: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (showResult) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = showResult ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span>${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const fb = document.getElementById('quizFeedbackPanel');
+      if (showResult) {
+        const isOk = chosen === q.correctIdx;
+        const headText = chosen === null
+          ? `ℹ Câu này chưa chọn — Đáp án đúng là ${letters[q.correctIdx]}.`
+          : (isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là ${letters[q.correctIdx]}.`);
+
+        const head = `<div class="feedback-head ${isOk ? 'ok' : 'err'}">${headText} — Giải thích chi tiết từng phương án:</div>`;
+        const items = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <b>${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</b> ${opt.reason}
+          </li>
+        `).join('');
+
+        fb.innerHTML = `${head}<ul class="option-reasons-list">${items}</ul>`;
+        fb.classList.remove('hidden');
+      } else {
+        fb.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndBanner();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null || quizSubmitted) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function submitQuiz() {
+      quizSubmitted = true;
+      renderQuizQuestion();
+      showToast('Đã nộp bài! Em có thể bấm từng câu 1–10 để xem lời giải chi tiết.');
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới 10 câu hỏi và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 8. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      renderWashSimulation(0);
+      setSapStep(1);
+      selectAlkaneStage(0);
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+    /* ===== LINK YOUTUBE (dán link video của bạn vào url; để trống '' thì mở trang tìm kiếm YouTube) ===== */
+    const LESSON_VIDEO_URL = '';
+    const LESSON_VIDEO_QUERY = 'xà phòng và chất giặt rửa hóa 12';
+    const EXP_VIDEOS = {
+      vidWash: { url: '', query: 'thí nghiệm xà phòng tẩy vết dầu mỡ cơ chế giặt rửa' },
+      vidSap: { url: '', query: 'thí nghiệm điều chế xà phòng xà phòng hóa chất béo NaOH' }
+    };
+    (function () {
+      const yt = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+      const a = document.getElementById('lessonVideoLink');
+      if (a) a.href = LESSON_VIDEO_URL || yt(LESSON_VIDEO_QUERY);
+      Object.keys(EXP_VIDEOS).forEach(id => {
+        const el = document.getElementById(id), c = EXP_VIDEOS[id];
+        if (el) el.href = c.url || yt(c.query);
+      });
+    })();
+  </script>
+</body>
+</html>
