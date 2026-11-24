@@ -184,6 +184,7 @@ function doPost(e) {
       case 'gv_vipham':
       case 'gv_tn_nap':
       case 'gv_tn_link':
+      case 'gv_tn_kenh':
       case 'gv_tn_dat':
       case 'gv_tn_xoa':
       case 'gv_tn_lay':
@@ -289,6 +290,7 @@ function doPost(e) {
         if (d.action === 'gv_vipham') return json(gvViPham(d));
         if (d.action === 'gv_tn_nap') return json(gvTnNap(d));
         if (d.action === 'gv_tn_link') return json(gvTnLink(d));
+        if (d.action === 'gv_tn_kenh') return json(gvTnKenh(d));
         if (d.action === 'gv_tn_dat') return json(gvTnDat(d));
         if (d.action === 'gv_tn_xoa') return json(gvTnXoa(d));
         if (d.action === 'gv_tn_lay') return json(gvTnLay(d));
@@ -573,6 +575,34 @@ function ghGhiDs(gh, ds, sha, loiNhan) {
     '(function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();\n';
   ghGhi(gh, GH_DS, text, loiNhan, sha);
 }
+const TN_DUOI = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'txt', 'mp3', 'mp4'];
+// Cac tab (kenh) tai nguyen: luu trong muc dac biet ma '_kenh' cua tai-len.js. 'mp' (Mo phong) luon co.
+function gvTnKenh(d) {
+  const gh = ghCauHinh();
+  if (!gh.token) return {ok: false, loi: 'token', msg: 'Chua co ma GitHub: them dong GithubToken vao tab MA cua kho de'};
+  const vao = Array.isArray(d.kenh) ? d.kenh : [];
+  const ds2 = [], thay = {};
+  vao.forEach(function (k) {
+    const id = chuTN(k.id, 20).replace(/[^a-z0-9-]/gi, '') || ('k' + Date.now().toString(36) + ds2.length), ten = chuTN(k.ten, 40);
+    if (!ten || thay[id]) return; thay[id] = 1;
+    ds2.push({id: id, ten: ten, icon: chuTN(k.icon, 4) || '📁'});
+  });
+  if (!thay.mp) return {ok: false, msg: 'Khong duoc xoa tab Mo phong'};
+  if (ds2.length > 12) return {ok: false, msg: 'Toi da 12 tab'};
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const dsF = ghDocDs(gh); let ds = dsF.ds;
+    const con = ds.filter(function (x) { return x.ma !== '_kenh' && x.kenh && x.kenh !== 'mp' && !thay[x.kenh]; });
+    if (con.length) return {ok: false, msg: 'Tab con ' + con.length + ' tai nguyen, chuyen hoac xoa truoc khi xoa tab'};
+    ds = ds.filter(function (x) { return x.ma !== '_kenh'; });
+    ds.unshift({ma: '_kenh', kenh: ds2});
+    ghGhiDs(gh, ds, dsF.sha, 'Cap nhat tab tai nguyen');
+    return {ok: true, tailen: ds};
+  } finally {
+    lock.releaseLock();
+  }
+}
 function gvTnNap(d) {
   const t = d.tn || {};
   const gh = ghCauHinh();
@@ -582,16 +612,33 @@ function gvTnNap(d) {
   if (!/^\d{1,2}$/.test(khoi)) return {ok: false, msg: 'Khoi khong hop le'};
   const html = typeof t.html === 'string' ? t.html : '';
   if (html.length > TN_TOI_DA) return {ok: false, msg: 'File qua lon (toi da 15 MB)'};
+  // Tai lieu (PDF, Word, Excel, PowerPoint, anh...): data URL base64
+  let tep = null;
+  if (typeof t.tep === 'string' && t.tep) {
+    const mt = /^data:[^;,]*(?:;[^;,]*)*;base64,(.+)$/.exec(t.tep);
+    const duoi = (String(t.tenTep || '').match(/\.([a-z0-9]{1,5})$/i) || [])[1];
+    if (!mt || !duoi || TN_DUOI.indexOf(duoi.toLowerCase()) < 0) return {ok: false, msg: 'Loai file khong ho tro (' + (duoi || '?') + ')'};
+    if (mt[1].length > 28 * 1024 * 1024) return {ok: false, msg: 'File qua lon (toi da 20 MB)'};
+    tep = {duoi: duoi.toLowerCase(), b64: mt[1], ten: chuTN(t.tenTep, 140)};
+  }
+  const kenh = chuTN(t.kenh, 20) || 'mp';
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
     const dsF = ghDocDs(gh), ds = dsF.ds;
     const cu = t.ma ? ds.filter(function (x) { return x.ma === String(t.ma).trim(); })[0] : null;
     if (t.ma && !cu) return {ok: false, msg: 'Khong tim thay tai nguyen ' + t.ma};
-    if (!cu && !html) return {ok: false, msg: 'Chua co noi dung HTML'};
+    if (!cu && !html && !tep) return {ok: false, msg: 'Chua chon file'};
     const ma = cu ? cu.ma : 'tl-' + Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyMMdd-HHmmss');
     const muc = cu || {ma: ma, file: 'tai-len/' + ma + '.html', anh: ''};
-    if (html) {
+    const doiTep = function (moi) { if (cu && muc.file !== moi) { try { ghXoa(gh, 'tai-nguyen/' + muc.file, 'Doi file: ' + ten); } catch (e) {} } muc.file = moi; };
+    if (tep) {
+      doiTep('tai-len/' + ma + '.' + tep.duoi);
+      const f = cu ? ghLay(gh, 'tai-nguyen/' + muc.file) : null;
+      ghGhi(gh, 'tai-nguyen/' + muc.file, Utilities.base64Decode(tep.b64), (cu ? 'Cap nhat' : 'Them') + ' tai lieu: ' + ten, f ? f.sha : '');
+      muc.tep = tep.duoi; muc.tenTep = tep.ten; muc.kb = Math.round(tep.b64.length * 0.75 / 1024);
+    } else if (html) {
+      doiTep('tai-len/' + ma + '.html'); delete muc.tep; delete muc.tenTep; delete muc.kb;
       const f = cu ? ghLay(gh, 'tai-nguyen/' + muc.file) : null;
       ghGhi(gh, 'tai-nguyen/' + muc.file, html, (cu ? 'Cap nhat' : 'Them') + ' tai nguyen: ' + ten, f ? f.sha : '');
     }
@@ -604,7 +651,7 @@ function gvTnNap(d) {
         muc.anh = 'anh/' + ma + '.jpg';
       } else if (muc.anh) { ghXoa(gh, pa, 'Bo anh bia: ' + ten); muc.anh = ''; }
     }
-    muc.ten = ten; muc.khoi = khoi; muc.bai = chuTN(t.bai, 140); muc.loai = chuTN(t.loai, 40);
+    muc.ten = ten; muc.khoi = khoi; muc.bai = chuTN(t.bai, 140); muc.loai = chuTN(t.loai, 40); muc.kenh = kenh;
     muc.kienthuc = chuTN(t.kienthuc, 300); muc.mota = chuTN(t.mota, 300);
     if (!cu) ds.push(muc);
     ghGhiDs(gh, ds, dsF.sha, (cu ? 'Sua' : 'Them') + ' muc tai nguyen: ' + ten);
@@ -633,7 +680,7 @@ function gvTnLink(d) {
     if (!ten) return {ok: false, msg: 'Thieu ten link'};
     if (!/^\d{1,2}$/.test(khoi) || !bai) return {ok: false, msg: 'Thieu khoi/bai'};
     const muc = cu || {ma: 'lk-' + Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyMMdd-HHmmss')};
-    muc.ten = ten; muc.khoi = khoi; muc.bai = bai; muc.link = url;
+    muc.ten = ten; muc.khoi = khoi; muc.bai = bai; muc.link = url; muc.kenh = chuTN(d.kenh, 20) || muc.kenh || 'mp';
     if (!cu) ds.push(muc);
     ghGhiDs(gh, ds, dsF.sha, (cu ? 'Sua' : 'Them') + ' link thi nghiem: ' + ten);
     return {ok: true, ma: muc.ma, tailen: ds};

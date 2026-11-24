@@ -695,6 +695,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .tnDong{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
 .dsGon .tnDong:first-child{border-top:0}
 .tnLkGV{padding:0 14px;border-top:1px dashed var(--line)}.tnLkGV:empty{display:none}.tnLkGV>*:last-child{margin-bottom:10px}.tnBaiLk{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.tnBaiLk .lkThem{text-transform:none;letter-spacing:0;margin:0}.lkDong{display:flex;align-items:center;gap:10px;padding:6px 0}.lkBiaGV{position:relative;flex:0 0 64px;height:40px;border-radius:6px;overflow:hidden;background:#fdebc8;display:flex;align-items:center;justify-content:center}.lkBiaGV img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.lkBiaGV i{position:relative;font-style:normal}.lkChuGV{flex:1;min-width:0}.lkChuGV b{display:block}.lkChuGV small{color:var(--muted)}.lkThem{margin-top:4px}.lkForm{background:#fff8ec;border:1px solid #f3d9a6;border-radius:12px;padding:10px 12px;margin-top:6px}.lkForm input{width:100%}
+.tnKenh{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px;border-bottom:2px solid var(--line);padding-bottom:0}.tnKenh button{border:0;background:none;padding:10px 16px;font:inherit;font-weight:700;font-size:16px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;border-radius:10px 10px 0 0;display:flex;align-items:center;gap:6px}.tnKenh button.on{color:var(--ink);border-bottom-color:#c2185b;background:#fff}.tnKenh button small{background:var(--bg);border-radius:10px;padding:1px 7px;font-size:12px}.tnKenh .tnKenhSuaNut{margin-left:auto;font-size:14px;font-weight:600}.tnKS{margin-bottom:12px}.ksDong{display:flex;gap:6px;align-items:center;margin:6px 0}.ksDong .ksIc{width:52px;text-align:center}.ksDong .ksTen{flex:1}.tnTepIc{font-size:30px}
 .tnBai{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:12px 14px 6px;background:var(--bg);border-top:1px solid var(--line)}
 .dsGon .tnBai:first-child{border-top:0}
 .tnDong.an{opacity:.6}
@@ -961,6 +962,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="top"><div><h1>Tài nguyên học tập</h1><p class="sub" id="soTN"></p></div><div><button class="napNut" id="tnTaiLen">📥 Tải tài nguyên lên</button> <button class="btn2" id="tnQR">▦ QR tài khoản HS</button> <button class="btn2" id="tnMoi">↻</button></div></div>
   <p class="sub" style="margin:0 2px 10px">Học sinh đăng nhập tài khoản (SBD + mã xem bài) → <b>Tài nguyên</b>. Mỗi lần em mở một tài nguyên được tính 1 lượt xem.</p>
   <div id="tnForm"></div>
+  <div class="tnKenh" id="tnKenh"></div>
+  <div id="tnKenhSua"></div>
   <div class="loc khoi" id="tnKhoi"></div>
   <div class="loc" id="tnLop"></div>
   <div id="dsTN"></div>
@@ -6572,11 +6575,16 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // TAI NGUYEN HOC TAP (tai-nguyen/danh-muc.js) – luot xem theo lop
   // =====================================================================
   var TNX = { data: {}, lop: 'tat', mo: null, khoi: null, drive: null, tailen: null, form: null };
-  try { TNX.khoi = localStorage.getItem('gv_tnkhoi'); } catch (e) {}
+  try { TNX.khoi = localStorage.getItem('gv_tnkhoi'); TNX.kenh = localStorage.getItem('gv_tnkenh') || 'mp'; } catch (e) { TNX.kenh = 'mp'; }
+  var KENH_MD = [{ id: 'mp', ten: 'Mô phỏng', icon: '🧪' }, { id: 'tl', ten: 'Tài liệu', icon: '📚' }];
+  function kenhDs() { var g = (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || [])).filter(function (t) { return t && t.ma === '_kenh'; })[0]; return g && g.kenh && g.kenh.length ? g.kenh : KENH_MD; }
+  function kenhCua(t) { var k = t.kenh || 'mp'; return kenhDs().some(function (x) { return x.id === k; }) ? k : 'mp'; }
+  var TEP_IC = { pdf: ['📕', 'PDF'], doc: ['📘', 'Word'], docx: ['📘', 'Word'], xls: ['📗', 'Excel'], xlsx: ['📗', 'Excel'], ppt: ['📙', 'PowerPoint'], pptx: ['📙', 'PowerPoint'], jpg: ['🖼', 'Ảnh'], jpeg: ['🖼', 'Ảnh'], png: ['🖼', 'Ảnh'], gif: ['🖼', 'Ảnh'], webp: ['🖼', 'Ảnh'], txt: ['📄', 'Văn bản'], mp3: ['🎧', 'Âm thanh'], mp4: ['🎬', 'Video'] };
+  function laAnhTep(t) { return /^(jpe?g|png|gif|webp)$/.test(t.tep || ''); }
   // Danh sach = danh-muc.js (Claude dua len) + tai-len.js (giao vien tai len, GitHub) + tai nguyen Drive cu (neu con)
   function dsTN() {
     var goc = (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma && t.file && !t.tailen; });
-    var tl = (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || []).filter(function (t) { return t && t.tailen; })).filter(function (t) { return !t.link; }).map(function (t) { t.nguon = 'github'; return t; });
+    var tl = (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || []).filter(function (t) { return t && t.tailen; })).filter(function (t) { return !t.link && t.ma !== '_kenh'; }).map(function (t) { t.nguon = 'github'; return t; });
     return goc.concat(tl).concat((TNX.drive || []).map(function (t) { t.nguon = 'drive'; return t; }));
   }
   function dsLinkTN() { return (TNX.tailen !== null ? TNX.tailen : (window.TAI_NGUYEN || [])).filter(function (t) { return t && t.link; }); }
@@ -6604,7 +6612,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('tinTai').onclick = function () { taiTinTatCa(); if (TINX.chon) moCuoc(TINX.chon); };
   $('tnQR').onclick = function () { moQR('xem'); };
   function veTN() {
-    var ds = dsTN(), box = $('dsTN');
+    var dsTat = dsTN(), box = $('dsTN'), KD = kenhDs();
+    if (!KD.some(function (x) { return x.id === TNX.kenh; })) TNX.kenh = 'mp';
+    var lkTat = dsLinkTN(), kt0 = $('tnKenh'); kt0.innerHTML = '';
+    KD.forEach(function (x) {
+      var n = dsTat.filter(function (t) { return kenhCua(t) === x.id; }).length + lkTat.filter(function (t) { return kenhCua(t) === x.id; }).length;
+      var b = document.createElement('button'); b.type = 'button'; b.className = x.id === TNX.kenh ? 'on' : '';
+      b.innerHTML = '<span>' + esc(x.icon) + '</span>' + esc(x.ten) + '<small>' + n + '</small>';
+      b.onclick = function () { TNX.kenh = x.id; TNX.mo = null; TNX.lkForm = null; try { localStorage.setItem('gv_tnkenh', x.id); } catch (e) {} veTN(); };
+      kt0.appendChild(b);
+    });
+    var sua = document.createElement('button'); sua.type = 'button'; sua.className = 'tnKenhSuaNut'; sua.textContent = '⚙ Thêm / sửa tab'; sua.onclick = function () { TNX.suaKenh = !TNX.suaKenh; veKenhSua(); }; kt0.appendChild(sua);
+    veKenhSua();
+    var ds = dsTat.filter(function (t) { return kenhCua(t) === TNX.kenh; });
     var lops = DS.slice();
     if (TNX.lop !== 'tat' && !lops.some(function (l) { return l.ten === TNX.lop; })) TNX.lop = 'tat';
     var tab = $('tnLop'); tab.innerHTML = '';
@@ -6626,19 +6646,20 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('soTN').textContent = ds.length + ' tài nguyên' + (dang ? ' · đang tải ' + dang + ' lớp…' : '');
     var h = '';
     chon.forEach(function (l) { var j = TNX.data[l.ten]; if (j && j.loi) h += '<div class="card loi">' + esc(l.ten) + ': ' + esc(j.loi) + '</div>'; });
-    if (!ds.length) h += '<div class="card sub">Chưa có tài nguyên nào. Bấm <b>📥 Tải tài nguyên lên</b> để thêm file mô phỏng (HTML).</div>';
-    var khoi = []; ds.forEach(function (t) { if (khoi.indexOf(String(t.khoi)) < 0) khoi.push(String(t.khoi)); });
+    var lkKenh = lkTat.filter(function (t) { return kenhCua(t) === TNX.kenh; });
+    if (!ds.length && !lkKenh.length) h += '<div class="card sub">Tab này chưa có tài nguyên nào. Bấm <b>📥 Tải tài nguyên lên</b> để thêm file (mô phỏng HTML, PDF, Word, Excel, PowerPoint, ảnh…).</div>';
+    var khoi = []; ds.concat(lkKenh).forEach(function (t) { if (khoi.indexOf(String(t.khoi)) < 0) khoi.push(String(t.khoi)); });
     khoi.sort(function (a, b) { return Number(a) - Number(b); });
     if (khoi.indexOf(TNX.khoi) < 0) TNX.khoi = khoi[0] || null;
     var kt = $('tnKhoi'); kt.innerHTML = '';
     khoi.forEach(function (k) {
       var b = document.createElement('button'); b.className = k === TNX.khoi ? 'on' : '';
-      b.innerHTML = (k === '9' ? 'KHTN 9' : 'Hóa ' + esc(k)) + '<small>' + ds.filter(function (t) { return String(t.khoi) === k; }).length + '</small>';
+      b.innerHTML = (k === '9' ? 'KHTN 9' : 'Hóa ' + esc(k)) + '<small>' + ds.concat(lkKenh).filter(function (t) { return String(t.khoi) === k; }).length + '</small>';
       b.onclick = function () { TNX.khoi = k; TNX.mo = null; try { localStorage.setItem('gv_tnkhoi', k); } catch (e) {} veTN(); };
       kt.appendChild(b);
     });
     khoi.filter(function (k) { return k === TNX.khoi; }).forEach(function (k) {
-      var baiTr = null, lkK = dsLinkTN().filter(function (t) { return String(t.khoi) === k; }), daBai = {};
+      var baiTr = null, lkK = lkKenh.filter(function (t) { return String(t.khoi) === k; }), daBai = {};
       var veLk = function (bai) {
         if (bai === null || daBai[bai]) return; daBai[bai] = 1;
         var ls = lkK.filter(function (t) { return (t.bai || '') === (bai || ''); });
@@ -6656,8 +6677,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         if (t.bai !== baiTr) { veLk(baiTr); baiTr = t.bai; h += '<div class="tnBai tnBaiLk" data-bai="' + esc(t.bai || '') + '"><span>' + esc(t.bai || 'Khác') + '</span><button class="btn2 nho lkThem">🔗 Thêm link thí nghiệm / hình ảnh</button></div>'; }
         if (t.lkGia) return;
         var x = theo[t.ma] || { luot: 0, em: {} }, soEm = Object.keys(x.em).length;
-        h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (t.anh ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>3D</span>\'" src="' + anhTN(t) + '">' : '<span>3D</span>') + '</div>' +
-          '<div class="tnChu"><b>' + esc(t.ten) + (t.nguon === 'drive' ? '<span class="tnNguon">Drive</span>' : t.nguon === 'github' ? '<span class="tnNguon">Tải lên</span>' : '') + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc(t.loai || '') + '</span>' +
+        var ic = t.tep ? (TEP_IC[t.tep] || ['📄', t.tep.toUpperCase()]) : null, anhT = t.anh ? anhTN(t) : laAnhTep(t) ? 'tai-nguyen/' + encodeURI(t.file) : '';
+        h += '<div class="tnDong' + (t.an ? ' an' : '') + '" data-ma="' + esc(t.ma) + '"><div class="tnAnh">' + (anhT ? '<img alt="" loading="lazy" onerror="this.outerHTML=\'<span>' + (ic ? ic[0] : '3D') + '</span>\'" src="' + anhT + '">' : '<span' + (ic ? ' class="tnTepIc"' : '') + '>' + (ic ? ic[0] : '3D') + '</span>') + '</div>' +
+          '<div class="tnChu"><b>' + esc(t.ten) + (t.nguon === 'drive' ? '<span class="tnNguon">Drive</span>' : t.nguon === 'github' ? '<span class="tnNguon">Tải lên</span>' : '') + (t.an ? ' <span class="chip">đang ẩn</span>' : '') + '</b><span>' + esc([ic ? ic[1] + (t.kb ? ' · ' + (t.kb >= 1024 ? (t.kb / 1024).toFixed(1) + ' MB' : t.kb + ' KB') : '') : '', t.loai || ''].filter(Boolean).join(' · ')) + '</span>' +
           '<span class="tnSo"><b>' + x.luot + '</b> lượt xem · <b>' + soEm + '</b>' + (siSo ? '/' + siSo : '') + ' em đã xem</span></div>' +
           '<div class="tnNut">' + (t.nguon === 'drive' ? '<button class="btn2 xemD">▶ Xem</button>' : '<a class="btn2" href="tai-nguyen/' + encodeURI(t.file) + '" target="_blank" rel="noopener">▶ Xem</a>') +
             '<button class="btn2 ai"' + (soEm ? '' : ' disabled') + '>' + (TNX.mo === t.ma ? 'Ẩn' : 'Ai đã xem') + '</button>' +
@@ -6695,12 +6717,43 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       };
     });
   }
+  // Quản lý tab (kênh) tài nguyên: thêm, đổi tên/biểu tượng, xếp thứ tự, xóa tab trống
+  function veKenhSua() {
+    var box = $('tnKenhSua');
+    if (!TNX.suaKenh) { box.innerHTML = ''; return; }
+    var K = TNX.kenhNhap = TNX.kenhNhap || kenhDs().map(function (x) { return { id: x.id, ten: x.ten, icon: x.icon }; });
+    var dem = function (id) { return dsTN().concat(dsLinkTN()).filter(function (t) { return kenhCua(t) === id; }).length; };
+    box.innerHTML = '<div class="card tnKS"><b>⚙ Các tab tài nguyên</b><div class="sub">Tab <b>Mô phỏng</b> luôn có. Chỉ xóa được tab trống. Học sinh chỉ thấy tab có tài nguyên.</div>' +
+      K.map(function (x, i) {
+        return '<div class="ksDong" data-i="' + i + '"><input class="ksIc" maxlength="4" value="' + esc(x.icon) + '"><input class="ksTen" maxlength="40" value="' + esc(x.ten) + '" placeholder="Tên tab">' +
+          '<button class="btn2 nho ksLen" type="button"' + (i ? '' : ' disabled') + '>↑</button><button class="btn2 nho ksXuong" type="button"' + (i < K.length - 1 ? '' : ' disabled') + '>↓</button>' +
+          (x.id === 'mp' ? '<span class="sub" style="min-width:34px"></span>' : '<button class="btn2 nho ksXoa" type="button"' + (dem(x.id) ? ' disabled title="Tab còn tài nguyên"' : '') + '>🗑</button>') + '<span class="sub">' + (x.id && dem(x.id) ? dem(x.id) + ' mục' : '') + '</span></div>';
+      }).join('') +
+      '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 nho" id="ksThem" type="button">➕ Thêm tab</button><span style="flex:1"></span><button class="btn2 nho" id="ksHuy" type="button">Hủy</button><button class="luu nho" id="ksLuu" type="button">Lưu các tab</button></div><div class="msg" id="ksMsg"></div></div>';
+    var doc = function () { [].forEach.call(box.querySelectorAll('.ksDong'), function (d) { var x = K[+d.getAttribute('data-i')]; x.icon = d.querySelector('.ksIc').value.trim(); x.ten = d.querySelector('.ksTen').value; }); };
+    [].forEach.call(box.querySelectorAll('.ksDong'), function (d) {
+      var i = +d.getAttribute('data-i');
+      d.querySelector('.ksLen').onclick = function () { doc(); K.splice(i - 1, 0, K.splice(i, 1)[0]); veKenhSua(); };
+      d.querySelector('.ksXuong').onclick = function () { doc(); K.splice(i + 1, 0, K.splice(i, 1)[0]); veKenhSua(); };
+      var x = d.querySelector('.ksXoa'); if (x) x.onclick = function () { doc(); K.splice(i, 1); veKenhSua(); };
+    });
+    $('ksThem').onclick = function () { doc(); K.push({ id: 'k' + Date.now().toString(36), ten: '', icon: '📁' }); veKenhSua(); var o = box.querySelectorAll('.ksTen'); o[o.length - 1].focus(); };
+    $('ksHuy').onclick = function () { TNX.suaKenh = false; TNX.kenhNhap = null; veKenhSua(); };
+    $('ksLuu').onclick = function () {
+      doc(); var b = this;
+      if (K.some(function (x) { return !x.ten.trim(); })) { $('ksMsg').textContent = 'Tab nào cũng cần có tên.'; return; }
+      b.disabled = true; $('ksMsg').textContent = 'Đang lưu…';
+      goiBatKy({ action: 'gv_tn_kenh', ma: MA, kenh: K.map(function (x) { return { id: x.id, ten: x.ten.trim(), icon: x.icon || '📁' }; }) }).then(function (j) {
+        if (!j.ok) throw new Error(loiTN(j)); capNhatDs(j); TNX.suaKenh = false; TNX.kenhNhap = null; veTN();
+      }).catch(function (e) { b.disabled = false; $('ksMsg').textContent = 'Chưa lưu được: ' + e.message; });
+    };
+  }
   // Link thí nghiệm / hình ảnh gắn dưới tên bài (YouTube, ảnh, Drive, PhET…): HS xem ngay trong trang
   function ganLinkTN(box) {
     var lkCua = function (el) { var ma = el.closest('.lkDong').getAttribute('data-ma'); return dsLinkTN().filter(function (t) { return t.ma === ma; })[0]; };
     var khoiBai = function (el) { var g = el.closest('.tnLkGV') || el.closest('.tnBaiLk'); return { khoi: TNX.khoi, bai: g.getAttribute('data-bai') }; };
     [].forEach.call(box.querySelectorAll('.lkThem'), function (b) { b.onclick = function () { var kb = khoiBai(b); TNX.lkForm = { khoi: kb.khoi, bai: kb.bai, ten: '', url: '' }; veTN(); }; });
-    [].forEach.call(box.querySelectorAll('.lkSua'), function (b) { b.onclick = function () { var t = lkCua(b); TNX.lkForm = { khoi: String(t.khoi), bai: t.bai || '', ten: t.ten, url: t.link, ma: t.ma }; veTN(); }; });
+    [].forEach.call(box.querySelectorAll('.lkSua'), function (b) { b.onclick = function () { var t = lkCua(b); TNX.lkForm = { khoi: String(t.khoi), bai: t.bai || '', ten: t.ten, url: t.link, ma: t.ma, kenh: kenhCua(t) }; veTN(); }; });
     [].forEach.call(box.querySelectorAll('.lkXoa'), function (b) {
       b.onclick = function () {
         var t = lkCua(b); if (!confirm('Xóa link "' + t.ten + '"?')) return; b.disabled = true;
@@ -6722,7 +6775,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (!/^https?:\/\/\S+$/i.test(F.url)) { $('lkMsg').textContent = 'Dán link bắt đầu bằng https://'; return; }
       if (!F.ten.trim()) { $('lkMsg').textContent = 'Nhập tên hiển thị.'; return; }
       $('lkLuu').disabled = true; $('lkMsg').textContent = 'Đang lưu…';
-      goiBatKy({ action: 'gv_tn_link', ma: MA, matn: F.ma || '', khoi: F.khoi, bai: F.bai, ten: F.ten.trim(), url: F.url }).then(function (j) {
+      goiBatKy({ action: 'gv_tn_link', ma: MA, matn: F.ma || '', khoi: F.khoi, bai: F.bai, ten: F.ten.trim(), url: F.url, kenh: F.kenh || TNX.kenh }).then(function (j) {
         if (!j.ok) throw new Error(loiTN(j)); capNhatDs(j); TNX.lkForm = null; veTN();
       }).catch(function (e) { $('lkLuu').disabled = false; $('lkMsg').textContent = 'Chưa lưu được: ' + e.message; });
     };
@@ -6745,6 +6798,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 
   // ---------- Tai tai nguyen len (luu Google Drive cua giao vien) ----------
   var LOAI_TN = ['Mô phỏng', 'Thí nghiệm', 'Cấu trúc', 'Hiện tượng', 'Quy trình', 'Khác'];
+  var LOAI_TL = ['Lý thuyết', 'Bài tập', 'Đề ôn tập', 'Phiếu học tập', 'Hình ảnh', 'Khác'];
   var KHOI_TN = ['8', '9', '10', '11', '12'];
   function tenKhoiTN(k) { return Number(k) <= 9 ? 'KHTN ' + k : 'Hóa ' + k; }
   // Anh bia 16:10 nho gon (< 45 KB) de luu thang trong Google Sheet
@@ -6777,8 +6831,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     return canh;
   }
   function moFormTN(cu) {
-    TNX.form = { cu: cu || null, html: null, tenTep: '', anh: undefined, ten: cu ? cu.ten : '', khoi: cu ? String(cu.khoi) : (TNX.khoi || ''),
-      bai: cu ? cu.bai : '', loai: cu ? (cu.loai || 'Mô phỏng') : 'Mô phỏng', mota: cu ? cu.mota : '', kienthuc: cu ? cu.kienthuc : '' };
+    TNX.form = { cu: cu || null, html: null, tep: null, tenGoc: '', tenTep: '', kenh: cu ? kenhCua(cu) : TNX.kenh, anh: undefined, ten: cu ? cu.ten : '', khoi: cu ? String(cu.khoi) : (TNX.khoi || ''),
+      bai: cu ? cu.bai : '', loai: cu ? (cu.loai || '') : (TNX.kenh === 'mp' ? 'Mô phỏng' : ''), mota: cu ? cu.mota : '', kienthuc: cu ? cu.kienthuc : '' };
     veFormTN(); $('tnForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function veFormTN() {
@@ -6793,8 +6847,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<li>Đặt tên (vd “Khám phá Hóa học”), Expiration chọn 1 năm; Repository access → <b>Only select repositories</b> → chọn <b>LAM-BAI-KIEM-TRA</b>.</li>' +
       '<li>Permissions → Repository permissions → <b>Contents: Read and write</b> → <b>Generate token</b> → sao chép mã (bắt đầu bằng github_pat_).</li>' +
       '<li>Mở KHODEHOA → tab <b>MA</b> → thêm dòng: cột A <b>GithubToken</b>, cột B dán mã. Không gửi mã này cho ai.</li></ol></details>' +
-      '<div class="nhan">File HTML' + (f.cu ? ' (để trống nếu giữ file cũ)' : '') + '</div>' +
-      '<div class="chonTep"><label><input type="file" id="tfTep" accept=".html,.htm,text/html">📂 Chọn file .html</label><span class="goiY">' + esc(f.tenTep || (f.cu ? 'Đang dùng file cũ' : 'Chưa chọn')) + '</span>' +
+      '<div class="nhan">Đưa vào tab</div><div class="loc" id="tfKenh"></div>' +
+      '<div class="nhan">File' + (f.cu ? ' (để trống nếu giữ file cũ)' : '') + ' – mô phỏng .html, hoặc tài liệu PDF, Word, Excel, PowerPoint, ảnh (tối đa 20 MB)</div>' +
+      '<div class="chonTep"><label><input type="file" id="tfTep" accept=".html,.htm,text/html,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp3,.mp4,image/*">📂 Chọn file</label><span class="goiY">' + esc(f.tenTep || (f.cu ? 'Đang dùng file cũ' : 'Chưa chọn')) + '</span>' +
       (f.html ? '<button class="btn2 nho" type="button" id="tfThu">▶ Xem thử</button>' : '') + '</div><div id="tfCanh"></div>' +
       '<div class="hang2"><div>' +
       '<div class="nhan">Tên tài nguyên</div><input type="text" id="tfTenTN" maxlength="140" placeholder="vd: Pin Daniell Zn – Cu hoạt động thế nào?">' +
@@ -6822,15 +6877,32 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     Object.keys(truong).forEach(function (id) { $(id).oninput = function () { f[truong[id]] = this.value; }; });
     var kb = $('tfKhoi');
     KHOI_TN.forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = tenKhoiTN(k); b.className = String(f.khoi) === k ? 'on' : ''; b.onclick = function () { f.khoi = k; veFormTN(); }; kb.appendChild(b); });
-    var lb = $('tfLoai');
-    LOAI_TN.forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = k; b.className = f.loai === k ? 'on' : ''; b.onclick = function () { f.loai = k; [].forEach.call(lb.children, function (x) { x.className = x === b ? 'on' : ''; }); }; lb.appendChild(b); });
+    var kk = $('tfKenh');
+    kenhDs().forEach(function (x) { var b = document.createElement('button'); b.type = 'button'; b.textContent = x.icon + ' ' + x.ten; b.className = f.kenh === x.id ? 'on' : ''; b.onclick = function () { f.kenh = x.id; [].forEach.call(kk.children, function (y) { y.className = y === b ? 'on' : ''; }); }; kk.appendChild(b); });
+    var laTL = f.tep || (!f.html && f.cu && f.cu.tep), lb = $('tfLoai');
+    (laTL ? LOAI_TL : LOAI_TN).forEach(function (k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = k; b.className = f.loai === k ? 'on' : ''; b.onclick = function () { f.loai = k; [].forEach.call(lb.children, function (x) { x.className = x === b ? 'on' : ''; }); }; lb.appendChild(b); });
     if (f.html) $('tfCanh').innerHTML = kiemHTML(f.html).map(function (x) { return '<div class="canh">⚠ ' + esc(x) + '</div>'; }).join('');
     $('tfTep').onchange = function () {
       var tep = this.files && this.files[0]; if (!tep) return;
+      var duoi = (tep.name.match(/\.([a-z0-9]{1,5})$/i) || [])[1] || '';
+      if (!/^html?$/i.test(duoi)) {
+        if (!TEP_IC[duoi.toLowerCase()]) { $('tfMsg').textContent = 'Chưa hỗ trợ loại file .' + duoi; return; }
+        if (tep.size > 20 * 1024 * 1024) { $('tfMsg').textContent = 'File quá lớn (tối đa 20 MB).'; return; }
+        var r2 = new FileReader();
+        r2.onload = function () {
+          f.tep = String(r2.result); f.html = null; f.tenGoc = tep.name; f.tenTep = tep.name + ' · ' + (tep.size >= 1048576 ? (tep.size / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(tep.size / 1024)) + ' KB');
+          if (!f.ten) f.ten = tep.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').slice(0, 140);
+          if (LOAI_TL.indexOf(f.loai) < 0) f.loai = /^(jpe?g|png|gif|webp)$/i.test(duoi) ? 'Hình ảnh' : '';
+          if (f.kenh === 'mp' && kenhDs().some(function (x) { return x.id === 'tl'; })) f.kenh = 'tl';
+          veFormTN();
+        };
+        r2.onerror = function () { $('tfMsg').textContent = 'Không đọc được file.'; };
+        r2.readAsDataURL(tep); return;
+      }
       if (tep.size > 15 * 1024 * 1024) { $('tfMsg').textContent = 'File quá lớn (tối đa 15 MB).'; return; }
       var r = new FileReader();
       r.onload = function () {
-        f.html = String(r.result); f.tenTep = tep.name + ' · ' + Math.max(1, Math.round(tep.size / 1024)) + ' KB';
+        f.html = String(r.result); f.tep = null; if (LOAI_TN.indexOf(f.loai) < 0) f.loai = 'Mô phỏng'; f.tenTep = tep.name + ' · ' + Math.max(1, Math.round(tep.size / 1024)) + ' KB';
         var tt = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(f.html);
         if (!f.ten && tt) f.ten = tt[1].replace(/\s+/g, ' ').replace(/&amp;/g, '&').trim().slice(0, 140);
         if (!f.ten) f.ten = tep.name.replace(/\.html?$/i, '').replace(/[-_]+/g, ' ');
@@ -6845,16 +6917,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     $('tfHuy').onclick = function () { TNX.form = null; veFormTN(); };
     $('tfLuu').onclick = function () {
       var b = this; f.ten = $('tfTenTN').value.trim();
-      if (!f.cu && !f.html) { $('tfMsg').textContent = 'Thầy/cô chưa chọn file .html.'; return; }
+      if (!f.cu && !f.html && !f.tep) { $('tfMsg').textContent = 'Thầy/cô chưa chọn file.'; return; }
       if (!f.ten) { $('tfMsg').textContent = 'Thầy/cô chưa nhập tên tài nguyên.'; $('tfTenTN').focus(); return; }
       if (!f.khoi) { $('tfMsg').textContent = 'Thầy/cô chưa chọn khối lớp.'; return; }
-      var tn = { ma: f.cu ? f.cu.ma : '', ten: f.ten, khoi: f.khoi, bai: $('tfBai').value.trim(), loai: f.loai, mota: $('tfMoTa').value.trim(), kienthuc: $('tfKT').value.trim() };
+      var tn = { ma: f.cu ? f.cu.ma : '', kenh: f.kenh, ten: f.ten, khoi: f.khoi, bai: $('tfBai').value.trim(), loai: f.loai, mota: $('tfMoTa').value.trim(), kienthuc: $('tfKT').value.trim() };
       if (f.html) tn.html = f.html;
+      if (f.tep) { tn.tep = f.tep; tn.tenTep = f.tenGoc; }
       if (f.anh !== undefined) tn.anh = f.anh;
       b.disabled = true; b.textContent = 'Đang tải lên…'; $('tfMsg').textContent = '';
       goiBatKy({ action: 'gv_tn_nap', ma: MA, tn: tn }).then(function (j) {
         if (!j.ok) throw new Error(loiTN(j));
-        capNhatDs(j); TNX.khoi = String(f.khoi); TNX.form = null; veFormTN(); veTN();
+        capNhatDs(j); TNX.khoi = String(f.khoi); TNX.kenh = f.kenh; TNX.form = null; veFormTN(); veTN();
         var dong = document.querySelector('.tnDong[data-ma="' + j.ma + '"]');
         if (dong) {
           dong.scrollIntoView({ behavior: 'smooth', block: 'center' }); dong.style.background = '#e8f5ec';

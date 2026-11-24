@@ -128,6 +128,7 @@ img{-webkit-user-drag:none;pointer-events:none}
 .loc button{border:2px solid var(--line);background:#fff;padding:8px 14px;font-size:16px;color:var(--ink)}
 .loc button.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .baiTN{font-size:20px;font-weight:800;color:#fff;margin:26px 0 12px;padding:10px 16px;border-radius:14px;background:linear-gradient(90deg,#1d5fbf,#3b82f6);box-shadow:0 4px 12px rgba(29,95,191,.25);display:flex;align-items:center;gap:8px}.baiTN::before{content:"📘";font-size:20px}.baiTN.on2{background:linear-gradient(90deg,#b4235a,#e0457b)}.baiTN.lt{background:linear-gradient(90deg,#127a5a,#22a37a)}
+.tnKenhHS{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}.tnKenhHS button{border:2px solid #d9e2ef;background:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-weight:800;font-size:16px;color:var(--ink);cursor:pointer}.tnKenhHS button.on{background:#c2185b;border-color:#c2185b;color:#fff}.theTN .bia.tepBia{background:linear-gradient(135deg,#fff4e0,#fde2c2);color:#7a4a00;align-items:center;justify-content:center}.theTN .bia.tepBia i{font-size:54px}.xtVe{background:#ffd54f;color:#172033;padding:8px 14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:15px}
 .tnLk{margin:14px 0 6px;padding:12px 14px;border-radius:14px;background:#fff8ec;border:1.5px solid #f3d9a6}.tnLkTieu{font-weight:800;color:#9a5b00;margin-bottom:10px}.tnLkDs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.lkThe{display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:1.5px solid #f0d49c;border-radius:12px;padding:6px;cursor:pointer;color:var(--ink);font:inherit}.lkThe:hover{border-color:#e08a00}.lkBia{position:relative;flex:0 0 88px;height:56px;border-radius:8px;overflow:hidden;background:#fdebc8;display:flex;align-items:center;justify-content:center}.lkBia img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.lkBia i{position:relative;font-style:normal;font-size:22px;background:rgba(255,255,255,.85);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center}.lkChu b{display:block;font-size:15px;line-height:1.25}.lkChu small{color:#8a6a2c}.xtMoi{position:absolute;right:10px;bottom:10px;z-index:3;background:rgba(0,0,0,.65);color:#fff;padding:6px 10px;border-radius:8px;font-size:13px;text-decoration:none}.xtAnh{max-width:100%;max-height:100%;object-fit:contain;display:block;margin:auto;position:absolute;inset:0}
 .luoiTN{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 .theTN{display:flex;flex-direction:column;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:0;overflow:hidden;color:var(--ink);font-weight:400}
@@ -272,7 +273,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="card">
     <div class="dau"><button class="btn2" id="tnLai">◀ Tài khoản</button></div>
     <h1>Tài nguyên học tập</h1>
-    <p class="sub">Mô phỏng 3D, thí nghiệm ảo. Bấm vào để xem; máy chỉ tải tạm khi em đang xem.</p>
+    <p class="sub">Mô phỏng, thí nghiệm, tài liệu học tập. Bấm vào để xem.</p>
+    <div class="tnKenhHS" id="tnKenhHS"></div>
     <div class="loc" id="tnKhoi"></div>
   </div>
   <div id="dsTN"></div>
@@ -377,7 +379,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 </main>
 <div id="nhanIn"></div>
 <div class="xemTN" id="xemTN" hidden role="dialog" aria-modal="true" aria-labelledby="xtTen">
-  <div class="xtBar"><b id="xtTen"></b><button id="xtDong">✕ Đóng</button></div>
+  <div class="xtBar"><b id="xtTen"></b><a id="xtVe" class="xtVe" hidden download target="_blank" rel="noopener">⬇ Tải về</a><button id="xtDong">✕ Đóng</button></div>
   <div class="xtKhung" id="xtKhung"><div class="xtTai" id="xtTai"><div class="vong"></div><span>Đang tải tài nguyên…</span></div></div>
 </div>
 <script src="cau-hinh-lop.js"></script>
@@ -1216,10 +1218,23 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('btnRa0').onclick = function () { TAT = []; LOP_CHINH = null; duLieu = null; KT = null; hinhMo(''); man('scrLogin'); };
 
   // ---------- Tai nguyen ----------
-  var khoiTN = null;
+  var khoiTN = null, kenhTN = null;
+  var KENH_MD = [{ id: 'mp', ten: 'Mô phỏng', icon: '🧪' }, { id: 'tl', ten: 'Tài liệu', icon: '📚' }];
+  function kenhDs() { var g = (window.TAI_NGUYEN || []).filter(function (t) { return t && t.ma === '_kenh'; })[0]; return g && g.kenh && g.kenh.length ? g.kenh : KENH_MD; }
+  function kenhCua(t) { var k = t.kenh || 'mp'; return kenhDs().some(function (x) { return x.id === k; }) ? k : 'mp'; }
+  var TEP_IC = { pdf: ['📕', 'PDF'], doc: ['📘', 'Word'], docx: ['📘', 'Word'], xls: ['📗', 'Excel'], xlsx: ['📗', 'Excel'], ppt: ['📙', 'PowerPoint'], pptx: ['📙', 'PowerPoint'], jpg: ['🖼', 'Ảnh'], jpeg: ['🖼', 'Ảnh'], png: ['🖼', 'Ảnh'], gif: ['🖼', 'Ảnh'], webp: ['🖼', 'Ảnh'], txt: ['📄', 'Văn bản'], mp3: ['🎧', 'Âm thanh'], mp4: ['🎬', 'Video'] };
   function tenKhoi(k) { return k === '9' ? 'KHTN 9' : 'Hóa ' + k; }
   function veTN() {
-    var ds = dsTN(), cac = [];
+    var dsTat = dsTN(), lkTat = dsLinkTN(), kt0 = $('tnKenhHS');
+    var coK = kenhDs().filter(function (x) { return dsTat.concat(lkTat).some(function (t) { return kenhCua(t) === x.id; }); });
+    if (!coK.some(function (x) { return x.id === kenhTN; })) kenhTN = coK.length ? coK[0].id : 'mp';
+    kt0.innerHTML = '';
+    if (coK.length > 1) coK.forEach(function (x) {
+      var b = document.createElement('button'); b.className = x.id === kenhTN ? 'on' : ''; b.innerHTML = '<span>' + esc(x.icon) + '</span> ' + esc(x.ten);
+      b.onclick = function () { kenhTN = x.id; khoiTN = null; veTN(); }; kt0.appendChild(b);
+    });
+    var ds = dsTat.filter(function (t) { return kenhCua(t) === kenhTN; }), cac = [];
+    lkTat.filter(function (t) { return kenhCua(t) === kenhTN; }).forEach(function (t) { var k = String(t.khoi || ''); if (cac.indexOf(k) < 0) cac.push(k); });
     ds.forEach(function (t) { var k = String(t.khoi || ''); if (cac.indexOf(k) < 0) cac.push(k); });
     cac.sort(function (a, b) { return Number(a) - Number(b); });
     if (khoiTN === null) khoiTN = cac.indexOf(khoiHS()) >= 0 ? khoiHS() : cac[0];
@@ -1231,7 +1246,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     });
     var box = $('dsTN'); box.innerHTML = '';
     var chon = ds.filter(function (t) { return khoiTN === 'tat' || String(t.khoi) === khoiTN; });
-    var lk = dsLinkTN().filter(function (t) { return khoiTN === 'tat' || String(t.khoi) === khoiTN; });
+    var lk = lkTat.filter(function (t) { return kenhCua(t) === kenhTN && (khoiTN === 'tat' || String(t.khoi) === khoiTN); });
     if (!chon.length && !lk.length) { box.innerHTML = '<div class="card trongTN">Giáo viên chưa đưa tài nguyên nào lên. Em quay lại sau nhé.</div>'; return; }
     var nhom = {}, thu = [];
     var nhomLk = {}, khoa = function (t) { return (cac.length > 1 && khoiTN === 'tat' ? tenKhoi(String(t.khoi)) + ' · ' : '') + (t.bai || 'Khác'); };
@@ -1241,13 +1256,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var h = document.createElement('div'); h.className = 'baiTN' + (/ôn tập/i.test(k) ? ' on2' : /luyện tập/i.test(k) ? ' lt' : ''); h.textContent = k; box.appendChild(h);
       var luoi = document.createElement('div'); luoi.className = 'luoiTN'; box.appendChild(luoi);
       nhom[k].forEach(function (t) {
-        var b = document.createElement('button'); b.className = 'theTN';
-        var bia = t.anh ? '<img loading="lazy" alt="" src="' + (t.nguon === 'drive' ? t.anh : 'tai-nguyen/' + encodeURI(t.anh)) + '">'
+        var b = document.createElement('button'); b.className = 'theTN' + (t.tep ? ' tep' : '');
+        var ic = t.tep ? (TEP_IC[t.tep] || ['📄', String(t.tep).toUpperCase()]) : null;
+        var bia = ic && !t.anh ? (/^(jpe?g|png|gif|webp)$/.test(t.tep) ? '<img loading="lazy" alt="" src="tai-nguyen/' + encodeURI(t.file) + '">' : '<div class="bia tepBia"><i>' + ic[0] + '</i><small>' + ic[1] + '</small></div>') : t.anh ? '<img loading="lazy" alt="" src="' + (t.nguon === 'drive' ? t.anh : 'tai-nguyen/' + encodeURI(t.anh)) + '">'
           : '<div class="bia"><i>' + (t.loai === 'Thí nghiệm' ? '⚗' : '3D') + '</i><small>' + esc(t.ten) + '</small></div>';
-        b.innerHTML = '<span class="anh">' + bia + (t.loai ? '<span class="loai">' + esc(t.loai) + '</span>' : '') + '<span class="play" aria-hidden="true">▶</span></span>' +
+        b.innerHTML = '<span class="anh">' + bia + (t.loai ? '<span class="loai">' + esc(t.loai) + '</span>' : '') + '<span class="play" aria-hidden="true">' + (ic ? '👁' : '▶') + '</span></span>' +
           '<span class="chu"><b>' + esc(t.ten) + '</b>' + (t.mota ? '<span>' + esc(t.mota) + '</span>' : '') + '</span>';
         var im = b.querySelector('img'); if (im) im.onerror = function () { im.outerHTML = '<div class="bia"><i>3D</i><small>' + esc(t.ten) + '</small></div>'; };
-        b.onclick = function () { moTaiNguyen(t); };
+        b.onclick = function () { if (t.tep) moTep(t); else moTaiNguyen(t); };
         luoi.appendChild(b);
       });
       if (!nhom[k].length) luoi.remove();
@@ -1270,6 +1286,31 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   var luotMo = 0;
   // Tai TAM file tai nguyen (khong luu bo nho dem), chay trong khung; dong la xoa khoi trang
+  // Tài liệu (PDF, Word, Excel, PowerPoint, ảnh…): xem trước trong trang + nút ⬇ Tải về
+  function moTep(t) {
+    var khung = $('xtKhung'), duoi = String(t.tep || ''), luot = ++luotMo;
+    var goc = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '') + 'tai-nguyen/', url = goc + encodeURI(t.file);
+    ghiXemTN(t);
+    $('xtTen').textContent = t.ten;
+    [].slice.call(khung.querySelectorAll('iframe,.xtAnh,.xtMoi,video,audio')).forEach(function (f) { f.remove(); });
+    $('xtTai').innerHTML = '<div class="vong"></div><span>Đang tải tài liệu…</span>'; $('xtTai').hidden = false;
+    $('xemTN').hidden = false; document.body.style.overflow = 'hidden';
+    var ve = $('xtVe'); ve.hidden = false; ve.href = url; ve.setAttribute('download', (t.tenTep || (t.ten + '.' + duoi)).replace(/[\\/:*?"<>|]+/g, '_'));
+    var moi = document.createElement('a'); moi.className = 'xtMoi'; moi.href = url; moi.target = '_blank'; moi.rel = 'noopener'; moi.textContent = '↗ Không hiện? Mở ở thẻ mới'; khung.appendChild(moi);
+    var xong = function () { if (luot === luotMo) $('xtTai').hidden = true; };
+    if (/^(jpe?g|png|gif|webp)$/.test(duoi)) {
+      var im = document.createElement('img'); im.className = 'xtAnh'; im.alt = t.ten; im.src = url; im.onload = xong;
+      im.onerror = function () { $('xtTai').innerHTML = '<span>Không tải được ảnh. Em thử lại sau ít phút.</span>'; };
+      khung.appendChild(im); return;
+    }
+    if (duoi === 'mp4' || duoi === 'mp3') {
+      var v = document.createElement(duoi === 'mp4' ? 'video' : 'audio'); v.className = 'xtAnh'; v.controls = true; v.src = url; v.oncanplay = xong; khung.appendChild(v); setTimeout(xong, 3000); return;
+    }
+    var f = document.createElement('iframe'); f.title = t.ten; f.setAttribute('allowfullscreen', '');
+    f.src = duoi === 'txt' ? url : /^(docx?|xlsx?|pptx?)$/.test(duoi) ? 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(url)
+      : 'https://docs.google.com/viewer?embedded=true&url=' + encodeURIComponent(url);
+    f.onload = xong; khung.appendChild(f); setTimeout(xong, 6000);
+  }
   function moTaiNguyen(t) {
     var luot = ++luotMo, khung = $('xtKhung');
     $('xtTen').textContent = t.ten;
@@ -1303,6 +1344,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       });
   }
   function dongTN() {
+    $('xtVe').hidden = true;
     luotMo++;
     [].slice.call($('xtKhung').querySelectorAll('iframe')).forEach(function (f) { f.srcdoc = ''; f.src = 'about:blank'; f.remove(); });
     [].slice.call($('xtKhung').querySelectorAll('.xtAnh,.xtMoi')).forEach(function (f) { f.remove(); });
