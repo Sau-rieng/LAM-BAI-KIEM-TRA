@@ -326,17 +326,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261123-104823",
-  "file": "tai-len/tl-261123-104823.html",
-  "anh": "",
-  "ten": "Bài tập 3: So sánh nhiệt độ sôi (Hóa học 12 – KNTT)",
-  "khoi": "12",
-  "bai": "BAI CHAT BEO",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261123-104914",
   "file": "tai-len/tl-261123-104914.html",
   "anh": "",
