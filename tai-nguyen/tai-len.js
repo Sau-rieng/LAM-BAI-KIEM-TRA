@@ -253,10 +253,11 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "anh": "",
   "ten": "Sơ đồ tư duy & Luyện tập Chương 5: Pin điện và điện phân (Hóa 12 – KNTT)",
   "khoi": "12",
-  "bai": "",
+  "bai": "Ôn tập chương 5:",
   "loai": "Mô phỏng",
   "kienthuc": "",
-  "mota": ""
+  "mota": "",
+  "kenh": "mp"
  },
  {
   "ma": "tl-261120-192302",
