@@ -420,17 +420,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261124-071051",
-  "file": "tai-len/tl-261124-071051.html",
-  "anh": "",
-  "ten": "Bài 5 – I. Cấu tạo, Tính chất vật lí & Tự nhiên của Saccharose và Maltose (Hóa 12 – KNTT)",
-  "khoi": "12",
-  "bai": "Bài 5: SACCAROSE-MALTOSE",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261124-193126",
   "file": "tai-len/tl-261124-193126.pdf",
   "anh": "",
