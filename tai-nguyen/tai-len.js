@@ -326,17 +326,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261123-104914",
-  "file": "tai-len/tl-261123-104914.html",
-  "anh": "",
-  "ten": "1. Khái niệm về Lipid, Chất béo & Acid béo (Hóa học 12 – KNTT)",
-  "khoi": "12",
-  "bai": "BAI CHAT BEO",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261124-193126",
   "file": "tai-len/tl-261124-193126.pdf",
   "anh": "",
