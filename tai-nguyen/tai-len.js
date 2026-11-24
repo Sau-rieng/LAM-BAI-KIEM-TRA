@@ -326,17 +326,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261121-211626",
-  "file": "tai-len/tl-261121-211626.html",
-  "anh": "",
-  "ten": "Mô Phỏng Thí Nghiệm: Phản Ứng Thuỷ Phân Ester (Hóa 12 - KNTT)",
-  "khoi": "12",
-  "bai": "Bài 1: ESTER",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261123-104636",
   "file": "tai-len/tl-261123-104636.html",
   "anh": "",
