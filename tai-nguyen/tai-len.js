@@ -605,6 +605,18 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "kenh": "mp",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261124-205221",
+  "file": "tai-len/tl-261124-205221.html",
+  "anh": "",
+  "ten": "Bài 1 – Ester và Lipid (Hóa học 12 – KNTT)",
+  "khoi": "12",
+  "bai": "Bài 1: Ester và Lipid",
+  "loai": "Mô phỏng",
+  "kenh": "mp",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
