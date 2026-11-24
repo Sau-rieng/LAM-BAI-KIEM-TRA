@@ -1,0 +1,2601 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chương 5 • Bài 15: Thế điện cực chuẩn của kim loại (Hóa học 12 – KNTT)</title>
+  <style>
+    /* =========================================================================
+       1. BIẾN MÀU & THIẾT LẬP CHUNG (100% OFFLINE – ZERO CDN – LIGHT MODE)
+       ========================================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-soft: #e0f2fe;
+      --primary-border: #7dd3fc;
+
+      --emerald: #059669;
+      --emerald-dark: #047857;
+      --emerald-soft: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --orange: #ea580c;
+      --orange-dark: #c2410c;
+      --orange-soft: #fff7ed;
+      --orange-border: #fed7aa;
+
+      --violet: #7c3aed;
+      --violet-dark: #6d28d9;
+      --violet-soft: #f5f3ff;
+      --violet-border: #ddd6fe;
+
+      --rose: #dc2626;
+      --rose-dark: #991b1b;
+      --rose-soft: #fef2f2;
+      --rose-border: #fecaca;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.58;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. CHỐNG VỠ CÔNG THỨC HOÁ HỌC (SUB / SUP LIỀN MẠCH TRONG FLEXBOX)
+       ========================================================================= */
+    .chem {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chem sub, sub {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: -0.22em;
+    }
+
+    .chem sup, sup {
+      font-size: 0.72em;
+      line-height: 0;
+      vertical-align: 0.42em;
+    }
+
+    /* =========================================================================
+       3. HEADER & THANH 3 TAB
+       ========================================================================= */
+    .site-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.16rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      min-height: 44px;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.94rem;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active,
+    .tab-btn.active:hover,
+    .tab-btn.active:focus {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================================
+       4. HỆ THỐNG NÚT BẤM (TỐI ƯU CẢM ỨNG IPAD/SAFARI – CHỐNG DÍNH HOVER)
+       ========================================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-emerald {
+      background-color: var(--emerald);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-orange {
+      background-color: var(--orange);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-violet {
+      background-color: var(--violet);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-soft);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: var(--primary-dark);
+      border-color: var(--primary-border);
+    }
+
+    .btn-outline.active,
+    .btn-outline.active:hover,
+    .btn-outline.active:focus,
+    .btn.active,
+    .btn.active:hover,
+    .btn.active:focus {
+      background-color: var(--primary);
+      border-color: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    .btn-emerald.active,
+    .btn-emerald.active:hover,
+    .btn-emerald.active:focus {
+      background-color: var(--emerald-dark);
+      border-color: var(--emerald-dark);
+      color: #ffffff;
+    }
+
+    .btn-orange.active,
+    .btn-orange.active:hover,
+    .btn-orange.active:focus {
+      background-color: var(--orange-dark);
+      border-color: var(--orange-dark);
+      color: #ffffff;
+    }
+
+    .btn-violet.active,
+    .btn-violet.active:hover,
+    .btn-violet.active:focus {
+      background-color: var(--violet-dark);
+      border-color: var(--violet-dark);
+      color: #ffffff;
+    }
+
+    @media (hover: hover) {
+      .tab-btn:not(.active):hover {
+        color: var(--primary-dark);
+        background-color: rgba(2, 132, 199, 0.09);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+      }
+      .btn-emerald:hover:not(:disabled) {
+        background-color: var(--emerald-dark);
+      }
+      .btn-orange:hover:not(:disabled) {
+        background-color: var(--orange-dark);
+      }
+      .btn-violet:hover:not(:disabled) {
+        background-color: var(--violet-dark);
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+      .btn-outline:not(.active):hover:not(:disabled) {
+        background-color: var(--primary-soft);
+        border-color: var(--primary);
+      }
+      .ruler-cell:not(.active):hover {
+        border-color: var(--primary);
+        background-color: var(--primary-soft);
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--primary);
+        background-color: #f0f9ff;
+      }
+    }
+
+    /* =========================================================================
+       5. BỐ CỤC CHUNG & CARD
+       ========================================================================= */
+    .main-container {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 20px 44px;
+      flex: 1;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 22px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .num-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background-color: var(--primary-soft);
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.92rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .num-badge.emerald { background-color: var(--emerald-soft); color: var(--emerald-dark); }
+    .num-badge.orange { background-color: var(--orange-soft); color: var(--orange-dark); }
+    .num-badge.violet { background-color: var(--violet-soft); color: var(--violet-dark); }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      background-color: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    .pill-tag.emerald { background-color: var(--emerald-soft); color: var(--emerald-dark); border: 1px solid var(--emerald-border); }
+    .pill-tag.orange { background-color: var(--orange-soft); color: var(--orange-dark); border: 1px solid var(--orange-border); }
+    .pill-tag.violet { background-color: var(--violet-soft); color: var(--violet-dark); border: 1px solid var(--violet-border); }
+    .pill-tag.rose { background-color: var(--rose-soft); color: var(--rose-dark); border: 1px solid var(--rose-border); }
+
+    .sgk-callout {
+      background-color: var(--primary-soft);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 14px 16px;
+      font-size: 0.97rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      line-height: 1.62;
+    }
+
+    .sgk-callout ul {
+      margin: 6px 0 0;
+      padding-left: 20px;
+    }
+
+    .sgk-callout li + li {
+      margin-top: 5px;
+    }
+
+    .svg-stage {
+      width: 100%;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .svg-stage svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background-color: var(--bg-soft);
+      border: 1px solid var(--border-strong);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      margin: 0;
+      cursor: pointer;
+    }
+
+    /* =========================================================================
+       6. TAB 1: HỆ ĐO SHE & BẢNG THÔNG SỐ ĐỒNG BỘ
+       ========================================================================= */
+    .elec-info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 680px) {
+      .elec-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1040px) {
+      .elec-info-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .info-tile {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 15px;
+    }
+
+    .info-tile-lbl {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .info-tile-val {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.48;
+    }
+
+    /* Hoạt ảnh bọt khí H2 */
+    @keyframes h2BubbleUp {
+      0% { transform: translateY(0px); opacity: 0; }
+      20% { opacity: 0.9; }
+      100% { transform: translateY(-64px); opacity: 0; }
+    }
+
+    .h2-bub {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: h2BubbleUp 1.45s infinite ease-in;
+      will-change: transform, opacity;
+    }
+
+    /* Hoạt ảnh dòng electron trên dây dẫn */
+    @keyframes eFlowLeftToRight {
+      0% { stroke-dashoffset: 36; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes eFlowRightToLeft {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 36; }
+    }
+
+    .e-wire-ltr {
+      stroke-dasharray: 7 11;
+      animation: eFlowLeftToRight 0.9s linear infinite;
+    }
+
+    .e-wire-rtl {
+      stroke-dasharray: 7 11;
+      animation: eFlowRightToLeft 0.9s linear infinite;
+    }
+
+    /* =========================================================================
+       7. TAB 2: THƯỚC DÃY E°, XƯỞNG QUY TẮC α & PHÒNG THÍ NGHIỆM ẢO
+       ========================================================================= */
+    .ruler-wrap {
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .ruler-arrow-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .ruler-arrow-bar.ox {
+      background: linear-gradient(90deg, #eff6ff, #dbeafe, #bfdbfe);
+      color: var(--primary-dark);
+      border: 1px solid var(--primary-border);
+    }
+
+    .ruler-arrow-bar.red {
+      margin-top: 8px;
+      margin-bottom: 0;
+      background: linear-gradient(90deg, #fed7aa, #ffedd5, #fff7ed);
+      color: var(--orange-dark);
+      border: 1px solid var(--orange-border);
+    }
+
+    .ruler-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(96px, 1fr));
+      gap: 6px;
+    }
+
+    .ruler-cell {
+      border: 1.8px solid var(--border-strong);
+      border-radius: 11px;
+      background-color: #ffffff;
+      padding: 8px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ruler-cell.is-h2 {
+      background-color: #f0fdfa;
+      border-color: var(--emerald);
+    }
+
+    .ruler-cell.active-left {
+      background-color: var(--orange-soft);
+      border-color: var(--orange);
+      box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.22);
+    }
+
+    .ruler-cell.active-right {
+      background-color: var(--primary-soft);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.22);
+    }
+
+    .rc-ox {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .rc-sep {
+      width: 72%;
+      height: 1.5px;
+      background-color: var(--border-strong);
+    }
+
+    .rc-red {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--orange-dark);
+    }
+
+    .rc-val {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Bộ chọn cặp cho Quy tắc Alpha */
+    .alpha-selectors {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 720px) {
+      .alpha-selectors {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .select-box {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .select-box label {
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .select-input {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      border: 1.5px solid var(--border-strong);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Hiệu ứng vẽ nét chữ Alpha */
+    @keyframes drawAlphaStroke {
+      from { stroke-dashoffset: 900; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .alpha-path-anim {
+      stroke-dasharray: 900;
+      stroke-dashoffset: 0;
+      animation: drawAlphaStroke 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .eq-result-box {
+      margin-top: 14px;
+      padding: 15px 18px;
+      border-radius: var(--radius-md);
+      background-color: var(--emerald-soft);
+      border: 1.5px solid var(--emerald-border);
+      color: #065f46;
+      font-size: 0.98rem;
+      line-height: 1.62;
+    }
+
+    .eq-result-box.warn {
+      background-color: var(--orange-soft);
+      border-color: var(--orange-border);
+      color: var(--orange-dark);
+    }
+
+    /* Phòng thí nghiệm ảo Kim loại + Dung dịch */
+    .lab-controls-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 820px) {
+      .lab-controls-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .lab-picker-box {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+
+    .lab-picker-title {
+      margin: 0 0 8px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-body);
+    }
+
+    .svg-smooth {
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, fill 0.6s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    /* Hộp Thảo luận */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 820px) {
+      .qa-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .qa-card {
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      background-color: var(--primary-soft);
+      overflow: hidden;
+    }
+
+    .qa-head {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .qa-q {
+      margin: 0;
+      font-size: 0.97rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .qa-ans {
+      padding: 14px 16px;
+      background-color: #ffffff;
+      border-top: 1px solid var(--primary-border);
+      font-size: 0.95rem;
+      color: var(--text-body);
+      line-height: 1.62;
+    }
+
+    /* =========================================================================
+       8. TAB 3: LUYỆN TẬP NHANH (10 CÂU PHÂN HOÁ + FISHER–YATES)
+       ========================================================================= */
+    .quiz-shell {
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background-color: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--emerald));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .q-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.14s ease;
+    }
+
+    .q-dot.current {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+    .q-dot.correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+      color: var(--emerald-dark);
+    }
+    .q-dot.wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+      color: var(--rose-dark);
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      color: var(--primary-dark);
+      padding: 8px 15px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .level-badge.nb { background-color: var(--emerald-soft); color: var(--emerald-dark); border-color: var(--emerald-border); }
+    .level-badge.th { background-color: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
+    .level-badge.vd { background-color: var(--violet-soft); color: var(--violet-dark); border-color: var(--violet-border); }
+
+    .yccd-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+    }
+
+    .quiz-question-text {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.58;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .option-btn {
+      width: 100%;
+      min-height: 54px;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: var(--bg-soft);
+      color: var(--text-body);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-btn.opt-correct {
+      border-color: var(--emerald);
+      background-color: var(--emerald-soft);
+    }
+    .option-btn.opt-correct .opt-letter {
+      background-color: var(--emerald);
+      color: #ffffff;
+    }
+
+    .option-btn.opt-wrong {
+      border-color: var(--rose);
+      background-color: var(--rose-soft);
+    }
+    .option-btn.opt-wrong .opt-letter {
+      background-color: var(--rose);
+      color: #ffffff;
+    }
+
+    .feedback-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .feedback-head {
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+    .feedback-head.ok { background-color: var(--emerald-soft); color: #065f46; border-bottom: 1px solid var(--emerald-border); }
+    .feedback-head.err { background-color: var(--rose-soft); color: var(--rose-dark); border-bottom: 1px solid var(--rose-border); }
+
+    .option-reasons-list {
+      list-style: none;
+      margin: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.52;
+      border: 1px solid var(--border);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+    }
+
+    .reason-item.is-right {
+      background-color: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: #065f46;
+    }
+
+    .quiz-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-counter {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background-color: var(--bg-soft);
+      padding: 7px 14px;
+      border-radius: 999px;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #e0f2fe, #ecfdf5);
+      border: 1.5px solid var(--primary-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.24);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    :fullscreen, :-webkit-full-screen {
+      background-color: var(--bg-page);
+      overflow-y: auto;
+    }
+    .lesson-video-row { margin-top: 8px; }
+    .lesson-video-row .btn, .real-video-row .btn { text-decoration: none; padding: 6px 12px; font-size: 0.82rem; }
+    .real-video-row { margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <!-- Icon SVG Vôn kế đo thế điện cực E° -->
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="13" stroke="#ffffff" stroke-width="2.2"/>
+              <text x="18" y="22.5" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fde047">E°</text>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">CHƯƠNG 5 • BÀI 15: THẾ ĐIỆN CỰC CHUẨN CỦA KIM LOẠI</h1>
+            <p class="brand-sub">Hóa học 12 – Kết nối tri thức với cuộc sống • Mục I &amp; Mục II</p>
+            <div class="lesson-video-row">
+              <a id="lessonVideoLink" class="btn btn-outline" target="_blank" rel="noopener noreferrer"><span>▶ Xem video thí nghiệm / bài giảng trên YouTube</span></a>
+            </div>
+          </div>
+        </div>
+
+        <button id="btnFullscreen" type="button" class="btn btn-secondary" onclick="toggleFullscreen()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+          <span id="textFullscreen">Toàn màn hình</span>
+        </button>
+      </div>
+
+      <!-- Thanh điều hướng 3 Tab chính -->
+      <nav class="tabs-bar" role="tablist" aria-label="Điều hướng 3 phần bài học">
+        <button id="tabBtn-1" type="button" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(1)">
+          <span>1. I. Cặp oxi hoá – khử &amp; Đo <span class="chem">E<sup>o</sup></span> (SHE)</span>
+        </button>
+        <button id="tabBtn-2" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(2)">
+          <span>2. II. Ý nghĩa <span class="chem">E<sup>o</sup></span>, Quy tắc α &amp; TN ảo</span>
+        </button>
+        <button id="tabBtn-3" type="button" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(3)">
+          <span>3. Luyện tập nhanh (10 câu)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= NỘI DUNG CHÍNH ================= -->
+  <main class="main-container">
+
+    <!-- =======================================================================
+         TAB 1: I. CẶP OXI HOÁ – KHỬ & II.1. ĐO THẾ ĐIỆN CỰC CHUẨN (E°)
+         ======================================================================= -->
+    <section id="tabPanel-1" class="stack-col">
+      <!-- 1. Thẻ tóm tắt chuẩn SGK -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">I</span>
+            <h2 class="card-title">Cặp oxi hoá – khử &amp; Điều kiện đo Thế điện cực chuẩn (SGK KNTT)</h2>
+          </div>
+          <span class="pill-tag emerald">SHE: <span class="chem">E<sup>o</sup>(2H<sup>+</sup>/H<sub>2</sub>) = 0,000 V</span></span>
+        </div>
+
+        <div class="sgk-callout" style="margin-bottom: 0;">
+          <ul>
+            <li><b>Cặp oxi hoá – khử của kim loại (<span class="chem">M<sup>n+</sup>/M</span>):</b> Gồm dạng oxi hoá (<span class="chem">M<sup>n+</sup></span>) và dạng khử (<span class="chem">M</span>) của cùng một nguyên tố kim loại; bán phản ứng tổng quát: <span class="chem"><b>M<sup>n+</sup> + ne ⇌ M</b></span>.</li>
+            <li><b>Mở rộng:</b> Còn có cặp oxi hoá – khử của phi kim (ví dụ <span class="chem"><b>2H<sup>+</sup>/H<sub>2</sub></b></span>) hoặc giữa hai ion của cùng một nguyên tố (ví dụ <span class="chem"><b>Fe<sup>3+</sup>/Fe<sup>2+</sup></b></span>).</li>
+            <li><b>Điều kiện chuẩn:</b> Nồng độ ion trong dung dịch bằng <b>1 M</b>, áp suất khí bằng <b>1 bar</b>, nhiệt độ thường là <b>25 °C (298 K)</b>.</li>
+            <li><b>Quy ước quốc tế:</b> Điện cực hydrogen chuẩn (<b>SHE</b>) có thế điện cực chuẩn bằng <b>0,000 V</b>: <span class="chem"><b>E<sup>o</sup>(2H<sup>+</sup>/H<sub>2</sub>) = 0,000 V</b></span>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 2. Mô phỏng SVG Hệ đo Thế điện cực chuẩn với SHE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge violet">II.1</span>
+            <h2 class="card-title">Mô phỏng hệ đo Thế điện cực chuẩn với Điện cực Hydrogen chuẩn (SHE)</h2>
+          </div>
+          <span id="sheVoltBadge" class="pill-tag">E°(Zn²⁺/Zn) = −0,762 V</span>
+        </div>
+
+        <!-- Chọn 1 trong 5 điện cực cần đo -->
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="sheBtn-Zn" type="button" class="btn btn-outline active" onclick="selectSheElectrode('Zn')"><span><span class="chem">Zn<sup>2+</sup>/Zn</span> (−0,762 V)</span></button>
+            <button id="sheBtn-Fe" type="button" class="btn btn-outline" onclick="selectSheElectrode('Fe')"><span><span class="chem">Fe<sup>2+</sup>/Fe</span> (−0,440 V)</span></button>
+            <button id="sheBtn-Mg" type="button" class="btn btn-outline" onclick="selectSheElectrode('Mg')"><span><span class="chem">Mg<sup>2+</sup>/Mg</span> (−2,356 V)</span></button>
+            <button id="sheBtn-Cu" type="button" class="btn btn-outline" onclick="selectSheElectrode('Cu')"><span><span class="chem">Cu<sup>2+</sup>/Cu</span> (+0,340 V)</span></button>
+            <button id="sheBtn-Ag" type="button" class="btn btn-outline" onclick="selectSheElectrode('Ag')"><span><span class="chem">Ag<sup>+</sup>/Ag</span> (+0,799 V)</span></button>
+          </div>
+        </div>
+
+        <!-- Nút Bật/Tắt dòng electron & Bật/Tắt nhãn chú thích SVG -->
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="btnToggleEFlow" type="button" class="btn btn-orange active" onclick="toggleElectronFlow()">
+              <span id="txtEFlow">⚡ Đang bật dòng electron (Bấm để tắt)</span>
+            </button>
+          </div>
+
+          <label class="toggle-label">
+            <input id="chkSheLabels" type="checkbox" checked onchange="toggleSheLabels()" />
+            <span>Bật/Tắt nhãn chú thích (SVG)</span>
+          </label>
+        </div>
+
+        <!-- Sân khấu SVG Hệ đo SHE (viewBox="0 0 820 340") -->
+        <div class="svg-stage">
+          <svg id="sheSvg" viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hệ đo thế điện cực chuẩn gồm điện cực hydrogen chuẩn SHE ghép với điện cực kim loại"></svg>
+        </div>
+        <div class="real-video-row">
+          <a id="vidShe" class="btn btn-outline" target="_blank" rel="noopener noreferrer"><span>▶ Xem thí nghiệm thật trên YouTube</span></a>
+        </div>
+
+        <!-- Bảng thông tin đồng bộ bên dưới (LUÔN HIỂN THỊ, không bị ẩn bởi nút nhãn SVG) -->
+        <div class="elec-info-grid">
+          <div class="info-tile">
+            <div class="info-tile-lbl">Cặp oxi hoá – khử đang đo</div>
+            <div id="shePairOut" class="info-tile-val" style="color: var(--primary-dark);"></div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-lbl">Giá trị thế điện cực chuẩn</div>
+            <div id="sheValOut" class="info-tile-val"></div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-lbl">Vai trò điện cực &amp; Chiều e⁻</div>
+            <div id="sheRoleOut" class="info-tile-val" style="color: var(--orange-dark);"></div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-lbl">Bán phản ứng xảy ra</div>
+            <div id="sheHalfOut" class="info-tile-val" style="font-size: 0.9rem; color: var(--emerald-dark);"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: II.2. Ý NGHĨA CỦA E°, QUY TẮC α & PHÒNG THÍ NGHIỆM ẢO
+         ======================================================================= -->
+    <section id="tabPanel-2" class="stack-col hidden">
+      <!-- 1. Thước Dãy thế điện cực chuẩn tương tác (10 cặp) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge">1</span>
+            <h2 class="card-title">Thước Dãy thế điện cực chuẩn tương tác (10 cặp tiêu biểu – SGK KNTT)</h2>
+          </div>
+          <span class="pill-tag">Chạm 2 cặp bất kỳ để đưa vào Xưởng Quy tắc α</span>
+        </div>
+
+        <div class="ruler-wrap">
+          <div class="ruler-arrow-bar ox">
+            <span>Tính oxi hoá yếu</span>
+            <span>E° tăng dần → Tính oxi hoá của dạng oxi hoá TĂNG DẦN ⟶</span>
+            <span>Tính oxi hoá mạnh</span>
+          </div>
+
+          <div id="rulerGrid" class="ruler-grid"></div>
+
+          <div class="ruler-arrow-bar red">
+            <span>Tính khử mạnh</span>
+            <span>⟶ Tính khử của dạng khử GIẢM DẦN</span>
+            <span>Tính khử yếu</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Xưởng Quy tắc α (Alpha) tự động -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge orange">2</span>
+            <h2 class="card-title">Xưởng Quy tắc α (Alpha) tự động – Dự đoán chiều phản ứng</h2>
+          </div>
+          <span id="alphaDeltaBadge" class="pill-tag emerald">ΔE° = +1,102 V &gt; 0</span>
+        </div>
+
+        <!-- 4 nút ví dụ nhanh SGK -->
+        <div class="toolbar-row">
+          <div class="btn-group" style="align-items: center;">
+            <span style="font-size: 0.86rem; font-weight: 800; color: var(--text-muted);">Ví dụ nhanh SGK:</span>
+            <button type="button" class="btn btn-secondary" style="padding: 7px 12px; font-size: 0.86rem;" onclick="loadAlphaPreset('Zn','Cu')"><span><span class="chem">Zn<sup>2+</sup>/Zn</span> &amp; <span class="chem">Cu<sup>2+</sup>/Cu</span></span></button>
+            <button type="button" class="btn btn-secondary" style="padding: 7px 12px; font-size: 0.86rem;" onclick="loadAlphaPreset('Cu','Ag')"><span><span class="chem">Cu<sup>2+</sup>/Cu</span> &amp; <span class="chem">Ag<sup>+</sup>/Ag</span></span></button>
+            <button type="button" class="btn btn-secondary" style="padding: 7px 12px; font-size: 0.86rem;" onclick="loadAlphaPreset('Fe2','H')"><span><span class="chem">Fe<sup>2+</sup>/Fe</span> &amp; <span class="chem">2H<sup>+</sup>/H<sub>2</sub></span></span></button>
+            <button type="button" class="btn btn-secondary" style="padding: 7px 12px; font-size: 0.86rem;" onclick="loadAlphaPreset('Cu','Fe3')"><span><span class="chem">Cu<sup>2+</sup>/Cu</span> &amp; <span class="chem">Fe<sup>3+</sup>/Fe<sup>2+</sup></span></span></button>
+          </div>
+
+          <button type="button" class="btn btn-orange" onclick="replayAlphaAnim()">
+            <span>▶ Chạy hiệu ứng Quy tắc α</span>
+          </button>
+        </div>
+
+        <!-- 2 Bộ chọn Dropdown cho Cặp 1 và Cặp 2 -->
+        <div class="alpha-selectors">
+          <div class="select-box">
+            <label for="selPair1">Chọn Cặp oxi hoá – khử thứ nhất:</label>
+            <select id="selPair1" class="select-input" onchange="onAlphaSelectChange()"></select>
+          </div>
+          <div class="select-box">
+            <label for="selPair2">Chọn Cặp oxi hoá – khử thứ hai:</label>
+            <select id="selPair2" class="select-input" onchange="onAlphaSelectChange()"></select>
+          </div>
+        </div>
+
+        <!-- Khung SVG Quy tắc Alpha (viewBox="0 0 700 220") -->
+        <div class="svg-stage">
+          <svg id="alphaSvg" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sơ đồ Quy tắc Alpha dự đoán chiều phản ứng oxi hoá - khử"></svg>
+        </div>
+
+        <!-- Kết quả ΔE° và phương trình ion rút gọn đã cân bằng -->
+        <div id="alphaEqBox" class="eq-result-box"></div>
+      </div>
+
+      <!-- 3. Phòng thí nghiệm ảo: Thử phản ứng Kim loại + Dung dịch -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge emerald">3</span>
+            <h2 class="card-title">Phòng thí nghiệm ảo: Nhúng thanh kim loại vào dung dịch</h2>
+          </div>
+
+          <label class="toggle-label">
+            <input id="chkLabLabels" type="checkbox" checked onchange="toggleLabLabels()" />
+            <span>Bật/Tắt nhãn chú thích (SVG)</span>
+          </label>
+        </div>
+
+        <div class="lab-controls-grid">
+          <div class="lab-picker-box">
+            <p class="lab-picker-title">1. Chọn Thanh kim loại:</p>
+            <div class="btn-group">
+              <button id="labM-Zn" type="button" class="btn btn-outline active" onclick="selectLabMetal('Zn')"><span>Thanh Zn</span></button>
+              <button id="labM-Fe" type="button" class="btn btn-outline" onclick="selectLabMetal('Fe')"><span>Thanh Fe</span></button>
+              <button id="labM-Cu" type="button" class="btn btn-outline" onclick="selectLabMetal('Cu')"><span>Thanh Cu</span></button>
+              <button id="labM-Ag" type="button" class="btn btn-outline" onclick="selectLabMetal('Ag')"><span>Thanh Ag</span></button>
+            </div>
+          </div>
+
+          <div class="lab-picker-box">
+            <p class="lab-picker-title">2. Chọn Dung dịch (1 M):</p>
+            <div class="btn-group">
+              <button id="labS-HCl" type="button" class="btn btn-emerald active" onclick="selectLabSol('HCl')"><span><span class="chem">HCl</span> 1 M</span></button>
+              <button id="labS-CuSO4" type="button" class="btn btn-emerald" onclick="selectLabSol('CuSO4')"><span><span class="chem">CuSO<sub>4</sub></span> 1 M</span></button>
+              <button id="labS-AgNO3" type="button" class="btn btn-emerald" onclick="selectLabSol('AgNO3')"><span><span class="chem">AgNO<sub>3</sub></span> 1 M</span></button>
+              <button id="labS-FeSO4" type="button" class="btn btn-emerald" onclick="selectLabSol('FeSO4')"><span><span class="chem">FeSO<sub>4</sub></span> 1 M</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="btn-group">
+            <button id="btnDipMetal" type="button" class="btn btn-primary" onclick="setLabDipped(true)">
+              <span>▶ Nhúng thanh kim loại</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="setLabDipped(false)">
+              <span>↻ Rút thanh ra / Làm lại</span>
+            </button>
+          </div>
+          <span id="labStatusBadge" class="pill-tag">Chưa nhúng thanh kim loại</span>
+        </div>
+
+        <!-- SVG Cốc thí nghiệm ảo -->
+        <div class="svg-stage">
+          <svg id="virtualLabSvg" viewBox="0 0 740 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Thí nghiệm ảo nhúng thanh kim loại vào dung dịch muối hoặc acid"></svg>
+        </div>
+        <div class="real-video-row">
+          <a id="vidLab" class="btn btn-outline" target="_blank" rel="noopener noreferrer"><span>▶ Xem thí nghiệm thật trên YouTube</span></a>
+        </div>
+
+        <!-- Giải thích kết quả thí nghiệm (LUÔN HIỂN THỊ) -->
+        <div id="labResultBox" class="eq-result-box"></div>
+      </div>
+
+      <!-- 4. Hộp Thảo luận trên lớp (2 câu SGK, ẩn đáp án mặc định) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-row">
+            <span class="num-badge violet">?</span>
+            <h2 class="card-title">Thảo luận trên lớp (SGK)</h2>
+          </div>
+          <span class="pill-tag violet">Bấm để Xem / Ẩn đáp án</span>
+        </div>
+
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 1: Vì sao trong thực tế đồng (Cu) không tan trong dung dịch HCl loãng nhưng lại tan được trong dung dịch <span class="chem">FeCl<sub>3</sub></span>?</p>
+              <div>
+                <button id="btnQa1" type="button" class="btn btn-primary" onclick="toggleQa(1)"><span>Xem đáp án</span></button>
+              </div>
+            </div>
+            <div id="qaAns1" class="qa-ans hidden">
+              <b>Đáp án:</b> So sánh giá trị thế điện cực chuẩn:
+              <br>• <span class="chem">E<sup>o</sup>(2H<sup>+</sup>/H<sub>2</sub>) = 0,000 V &lt; E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span> → ion <span class="chem">H<sup>+</sup></span> không đủ mạnh để oxi hoá Cu nên Cu <b>không tan trong HCl loãng</b>.
+              <br>• <span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V &lt; E<sup>o</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>) = +0,771 V</span> → theo quy tắc α, ion <span class="chem">Fe<sup>3+</sup></span> oxi hoá được Cu theo phương trình:
+              <br><span class="chem"><b>Cu + 2Fe<sup>3+</sup> → Cu<sup>2+</sup> + 2Fe<sup>2+</sup></b></span> (hay <span class="chem">Cu + 2FeCl<sub>3</sub> → CuCl<sub>2</sub> + 2FeCl<sub>2</sub></span>), nên Cu tan trong dung dịch <span class="chem">FeCl<sub>3</sub></span>.
+            </div>
+          </div>
+
+          <div class="qa-card">
+            <div class="qa-head">
+              <p class="qa-q">Câu 2: Dựa vào bảng thế điện cực chuẩn, hãy giải thích vì sao kim loại Ag, Au thường tồn tại ở dạng đơn chất trong tự nhiên, còn Mg, Al chỉ tồn tại ở dạng hợp chất?</p>
+              <div>
+                <button id="btnQa2" type="button" class="btn btn-primary" onclick="toggleQa(2)"><span>Xem đáp án</span></button>
+              </div>
+            </div>
+            <div id="qaAns2" class="qa-ans hidden">
+              <b>Đáp án:</b>
+              <br>• <b>Ag</b> (<span class="chem">E<sup>o</sup> = +0,799 V</span>) và <b>Au</b> (<span class="chem-formula chem">E<sup>o</sup> = +1,520 V</span>) có giá trị thế điện cực chuẩn <b>rất dương</b> → <b>tính khử rất yếu</b>, rất khó bị oxi hoá bởi <span class="chem">O<sub>2</sub></span>, nước và các tác nhân tự nhiên nên tồn tại bền vững ở dạng <b>đơn chất tự do</b>.
+              <br>• <b>Mg</b> (<span class="chem">E<sup>o</sup> = −2,356 V</span>) và <b>Al</b> (<span class="chem">E<sup>o</sup> = −1,676 V</span>) có giá trị thế điện cực chuẩn <b>rất âm</b> → <b>tính khử rất mạnh</b>, dễ dàng phản ứng với <span class="chem">O<sub>2</sub></span>, <span class="chem">H<sub>2</sub>O</span>, <span class="chem">CO<sub>2</sub></span>... chuyển thành ion dương trong các khoáng vật nên trong tự nhiên chỉ tồn tại ở dạng <b>hợp chất</b>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: LUYỆN TẬP NHANH (10 CÂU HỎI PHÂN HOÁ + FISHER–YATES)
+         ======================================================================= -->
+    <section id="tabPanel-3" class="quiz-shell hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" style="font-size: 1.18rem;">Luyện tập nhanh: Thế điện cực chuẩn của kim loại (10 câu)</h2>
+            <p style="margin: 3px 0 0; font-size: 0.86rem; color: var(--text-muted);">
+              4 Nhận biết • 3 Thông hiểu • 3 Vận dụng • Xáo trộn đáp án Fisher–Yates
+            </p>
+          </div>
+          <div class="score-pill">
+            <span>Điểm số:</span>
+            <span id="quizScoreText">0 / 10</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="quizProgressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="quiz-topbar">
+          <div id="quizDots" class="quiz-dots"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="btn btn-primary" onclick="submitQuiz()"><span>✔ Nộp bài &amp; Tổng kết</span></button>
+            <button type="button" class="btn btn-secondary" onclick="resetQuiz()"><span>↻ Làm lại (Xáo đáp án)</span></button>
+          </div>
+        </div>
+
+        <div id="quizMetaBadges" class="meta-badges-row"></div>
+
+        <div>
+          <p id="quizQuestionText" class="quiz-question-text"></p>
+          <div id="quizOptions" class="options-grid"></div>
+          <div id="quizFeedbackPanel" class="feedback-panel hidden"></div>
+        </div>
+
+        <div class="quiz-footer">
+          <button id="btnQuizPrev" type="button" class="btn btn-secondary" onclick="moveQuiz(-1)"><span>← Câu trước</span></button>
+          <span id="quizStepLabel" class="step-counter">Câu 1 / 10</span>
+          <button id="btnQuizNext" type="button" class="btn btn-primary" onclick="moveQuiz(1)"><span>Câu tiếp theo →</span></button>
+        </div>
+
+        <div id="quizResultBanner" class="result-banner hidden">
+          <div>
+            <h3 id="resultHeading" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--primary-dark);">Kết quả bài làm</h3>
+            <p id="resultSubtext" style="margin: 4px 0 0; font-size: 0.94rem; color: var(--text-body);"></p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="resetQuiz()"><span>Làm lại (Xáo đáp án)</span></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // 1. DỮ LIỆU CHUYÊN MÔN (CHUẨN 100% SGK HÓA HỌC 12 – KNTT)
+    // =========================================================================
+    const SHE_ELECTRODES = {
+      Zn: {
+        key: 'Zn', symbol: 'Zn', pairHtml: '<span class="chem">Zn<sup>2+</sup>/Zn</span>',
+        pairSvg: 'Zn²⁺ / Zn', solSvg: 'dd Zn²⁺ 1 M', e0: -0.762, e0Str: '−0,762 V',
+        metalColor: '#94a3b8', solColor: '#e0f2fe',
+        oxRxn: '<span class="chem">Zn → Zn<sup>2+</sup> + 2e</span>',
+        redRxn: '<span class="chem">2H<sup>+</sup> + 2e → H<sub>2</sub>↑</span>'
+      },
+      Fe: {
+        key: 'Fe', symbol: 'Fe', pairHtml: '<span class="chem">Fe<sup>2+</sup>/Fe</span>',
+        pairSvg: 'Fe²⁺ / Fe', solSvg: 'dd Fe²⁺ 1 M', e0: -0.440, e0Str: '−0,440 V',
+        metalColor: '#64748b', solColor: '#dcfce7',
+        oxRxn: '<span class="chem">Fe → Fe<sup>2+</sup> + 2e</span>',
+        redRxn: '<span class="chem">2H<sup>+</sup> + 2e → H<sub>2</sub>↑</span>'
+      },
+      Mg: {
+        key: 'Mg', symbol: 'Mg', pairHtml: '<span class="chem">Mg<sup>2+</sup>/Mg</span>',
+        pairSvg: 'Mg²⁺ / Mg', solSvg: 'dd Mg²⁺ 1 M', e0: -2.356, e0Str: '−2,356 V',
+        metalColor: '#cbd5e1', solColor: '#f1f5f9',
+        oxRxn: '<span class="chem">Mg → Mg<sup>2+</sup> + 2e</span>',
+        redRxn: '<span class="chem">2H<sup>+</sup> + 2e → H<sub>2</sub>↑</span>'
+      },
+      Cu: {
+        key: 'Cu', symbol: 'Cu', pairHtml: '<span class="chem">Cu<sup>2+</sup>/Cu</span>',
+        pairSvg: 'Cu²⁺ / Cu', solSvg: 'dd Cu²⁺ 1 M', e0: 0.340, e0Str: '+0,340 V',
+        metalColor: '#ea580c', solColor: '#bae6fd',
+        oxRxn: '<span class="chem">H<sub>2</sub> → 2H<sup>+</sup> + 2e</span>',
+        redRxn: '<span class="chem">Cu<sup>2+</sup> + 2e → Cu</span>'
+      },
+      Ag: {
+        key: 'Ag', symbol: 'Ag', pairHtml: '<span class="chem">Ag<sup>+</sup>/Ag</span>',
+        pairSvg: 'Ag⁺ / Ag', solSvg: 'dd Ag⁺ 1 M', e0: 0.799, e0Str: '+0,799 V',
+        metalColor: '#e2e8f0', solColor: '#f8fafc',
+        oxRxn: '<span class="chem">H<sub>2</sub> → 2H<sup>+</sup> + 2e</span>',
+        redRxn: '<span class="chem">2Ag<sup>+</sup> + 2e → 2Ag</span>'
+      }
+    };
+
+    // 10 cặp chuẩn theo thứ tự E° tăng dần của SGK KNTT
+    const SERIES_COUPLES = [
+      { id: 'Li',  oxHtml: '<span class="chem">Li<sup>+</sup></span>',   redHtml: '<span class="chem">Li</span>',       oxSvg: 'Li⁺',   redSvg: 'Li',   label: 'Li⁺/Li (−3,040 V)',        e0: -3.040, n: 1, oxBase: 1, redBase: 1 },
+      { id: 'Mg',  oxHtml: '<span class="chem">Mg<sup>2+</sup></span>',  redHtml: '<span class="chem">Mg</span>',       oxSvg: 'Mg²⁺',  redSvg: 'Mg',   label: 'Mg²⁺/Mg (−2,356 V)',       e0: -2.356, n: 2, oxBase: 1, redBase: 1 },
+      { id: 'Al',  oxHtml: '<span class="chem">Al<sup>3+</sup></span>',  redHtml: '<span class="chem">Al</span>',       oxSvg: 'Al³⁺',  redSvg: 'Al',   label: 'Al³⁺/Al (−1,676 V)',       e0: -1.676, n: 3, oxBase: 1, redBase: 1 },
+      { id: 'Zn',  oxHtml: '<span class="chem">Zn<sup>2+</sup></span>',  redHtml: '<span class="chem">Zn</span>',       oxSvg: 'Zn²⁺',  redSvg: 'Zn',   label: 'Zn²⁺/Zn (−0,762 V)',       e0: -0.762, n: 2, oxBase: 1, redBase: 1 },
+      { id: 'Fe2', oxHtml: '<span class="chem">Fe<sup>2+</sup></span>',  redHtml: '<span class="chem">Fe</span>',       oxSvg: 'Fe²⁺',  redSvg: 'Fe',   label: 'Fe²⁺/Fe (−0,440 V)',       e0: -0.440, n: 2, oxBase: 1, redBase: 1 },
+      { id: 'H',   oxHtml: '<span class="chem">2H<sup>+</sup></span>',   redHtml: '<span class="chem">H<sub>2</sub></span>', oxSvg: '2H⁺', redSvg: 'H₂', label: '2H⁺/H₂ (0,000 V)',        e0:  0.000, n: 2, oxBase: 2, redBase: 1, oxAtomHtml: '<span class="chem">H<sup>+</sup></span>', isGasRed: true },
+      { id: 'Cu',  oxHtml: '<span class="chem">Cu<sup>2+</sup></span>',  redHtml: '<span class="chem">Cu</span>',       oxSvg: 'Cu²⁺',  redSvg: 'Cu',   label: 'Cu²⁺/Cu (+0,340 V)',       e0:  0.340, n: 2, oxBase: 1, redBase: 1 },
+      { id: 'Fe3', oxHtml: '<span class="chem">Fe<sup>3+</sup></span>',  redHtml: '<span class="chem">Fe<sup>2+</sup></span>', oxSvg: 'Fe³⁺', redSvg: 'Fe²⁺', label: 'Fe³⁺/Fe²⁺ (+0,771 V)', e0:  0.771, n: 1, oxBase: 1, redBase: 1 },
+      { id: 'Ag',  oxHtml: '<span class="chem">Ag<sup>+</sup></span>',   redHtml: '<span class="chem">Ag</span>',       oxSvg: 'Ag⁺',   redSvg: 'Ag',   label: 'Ag⁺/Ag (+0,799 V)',        e0:  0.799, n: 1, oxBase: 1, redBase: 1 },
+      { id: 'Au',  oxHtml: '<span class="chem">Au<sup>3+</sup></span>',  redHtml: '<span class="chem">Au</span>',       oxSvg: 'Au³⁺',  redSvg: 'Au',   label: 'Au³⁺/Au (+1,520 V)',       e0:  1.520, n: 3, oxBase: 1, redBase: 1 }
+    ];
+
+    const LAB_METALS = {
+      Zn: { sym: 'Zn', e0: -0.762, color: '#94a3b8', ionHtml: '<span class="chem">Zn<sup>2+</sup></span>', coupleId: 'Zn' },
+      Fe: { sym: 'Fe', e0: -0.440, color: '#64748b', ionHtml: '<span class="chem">Fe<sup>2+</sup></span>', coupleId: 'Fe2' },
+      Cu: { sym: 'Cu', e0:  0.340, color: '#ea580c', ionHtml: '<span class="chem">Cu<sup>2+</sup></span>', coupleId: 'Cu' },
+      Ag: { sym: 'Ag', e0:  0.799, color: '#cbd5e1', ionHtml: '<span class="chem">Ag<sup>+</sup></span>',  coupleId: 'Ag' }
+    };
+
+    const LAB_SOLUTIONS = {
+      HCl:   { name: 'HCl 1 M',   e0:  0.000, initColor: '#f1f5f9', oxCouple: '2H⁺/H₂',  coupleId: 'H',   depositColor: null },
+      CuSO4: { name: 'CuSO₄ 1 M', e0:  0.340, initColor: '#7dd3fc', oxCouple: 'Cu²⁺/Cu', coupleId: 'Cu',  depositColor: '#ea580c', depositName: 'đồng (Cu) màu đỏ cam' },
+      AgNO3: { name: 'AgNO₃ 1 M', e0:  0.799, initColor: '#f8fafc', oxCouple: 'Ag⁺/Ag',  coupleId: 'Ag',  depositColor: '#e2e8f0', depositName: 'bạc (Ag) màu trắng xám' },
+      FeSO4: { name: 'FeSO₄ 1 M', e0: -0.440, initColor: '#dcfce7', oxCouple: 'Fe²⁺/Fe', coupleId: 'Fe2', depositColor: '#475569', depositName: 'sắt (Fe) màu xám đen' }
+    };
+
+    // =========================================================================
+    // 2. NGÂN HÀNG 10 CÂU HỎI PHÂN HOÁ (4 NB – 3 TH – 3 VD, KHÔNG LỘ ĐÁP ÁN CHÉO)
+    // =========================================================================
+    const RAW_QUIZ_BANK = [
+      // --- 4 CÂU NHẬN BIẾT ---
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Viết được kí hiệu đúng của cặp oxi hoá – khử',
+        question: 'Kí hiệu đúng của cặp oxi hoá – khử tạo bởi hai ion <span class="chem">Fe<sup>3+</sup></span> và <span class="chem">Fe<sup>2+</sup></span> là gì?',
+        options: [
+          {
+            text: '<span class="chem">Fe<sup>3+</sup>/Fe<sup>2+</sup></span>.',
+            isCorrect: true,
+            reason: 'Đúng quy ước SGK: cặp oxi hoá – khử luôn viết dạng oxi hoá (số oxi hoá cao hơn) trước, dạng khử (số oxi hoá thấp hơn) sau, cách nhau bởi dấu gạch chéo (/).'
+          },
+          {
+            text: '<span class="chem">Fe<sup>2+</sup>/Fe<sup>3+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai thứ tự: viết ngược dạng khử trước dạng oxi hoá.'
+          },
+          {
+            text: '<span class="chem">Fe<sup>3+</sup>/Fe</span>.',
+            isCorrect: false,
+            reason: 'Sai thành phần: đề bài hỏi cặp tạo bởi hai ion <span class="chem">Fe<sup>3+</sup></span> và <span class="chem">Fe<sup>2+</sup></span>.'
+          },
+          {
+            text: '<span class="chem">Fe/Fe<sup>2+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai cả thành phần và thứ tự quy ước.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được giá trị quy ước của điện cực hydrogen chuẩn (SHE)',
+        question: 'Ở điều kiện chuẩn (nồng độ <span class="chem">H<sup>+</sup></span> 1 M, áp suất khí <span class="chem">H<sub>2</sub></span> 1 bar, 25 °C), thế điện cực chuẩn của điện cực hydrogen chuẩn (SHE) được quy ước bằng bao nhiêu?',
+        options: [
+          {
+            text: '<b>0,000 V</b>.',
+            isCorrect: true,
+            reason: 'Đúng quy ước quốc tế (SGK): điện cực hydrogen chuẩn (SHE) được chọn làm điện cực so sánh với <span class="chem">E<sup>o</sup>(2H<sup>+</sup>/H<sub>2</sub>) = 0,000 V</span>.'
+          },
+          {
+            text: '<b>+1,000 V</b>.',
+            isCorrect: false,
+            reason: 'Sai: không phải +1,000 V; giá trị chuẩn quy ước là 0,000 V.'
+          },
+          {
+            text: '<b>−1,000 V</b>.',
+            isCorrect: false,
+            reason: 'Sai: giá trị quy ước của SHE bằng 0,000 V.'
+          },
+          {
+            text: '<b>+0,340 V</b>.',
+            isCorrect: false,
+            reason: 'Sai: +0,340 V là thế điện cực chuẩn của cặp <span class="chem">Cu<sup>2+</sup>/Cu</span>.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nêu được mối liên hệ giữa giá trị E° với tính oxi hoá và tính khử',
+        question: 'Trong dãy thế điện cực chuẩn, nhận xét nào sau đây đúng khi giá trị <span class="chem">E<sup>o</sup></span> của cặp oxi hoá – khử càng lớn?',
+        options: [
+          {
+            text: 'Dạng oxi hoá có tính oxi hoá càng mạnh và dạng khử có tính khử càng yếu.',
+            isCorrect: true,
+            reason: 'Đúng chuẩn SGK: <span class="chem">E<sup>o</sup></span> càng lớn thì khả năng nhận electron của dạng oxi hoá càng mạnh, còn khả năng nhường electron của dạng khử càng yếu.'
+          },
+          {
+            text: 'Dạng oxi hoá có tính oxi hoá càng yếu và dạng khử có tính khử càng mạnh.',
+            isCorrect: false,
+            reason: 'Sai: đây là quy luật khi <span class="chem">E<sup>o</sup></span> càng nhỏ (càng âm).'
+          },
+          {
+            text: 'Cả dạng oxi hoá và dạng khử đều có tính oxi hoá mạnh dần.',
+            isCorrect: false,
+            reason: 'Sai: dạng khử thể hiện tính khử và biến thiên ngược chiều với tính oxi hoá của dạng oxi hoá.'
+          },
+          {
+            text: 'Giá trị <span class="chem">E<sup>o</sup></span> không liên quan đến tính oxi hoá hay tính khử.',
+            isCorrect: false,
+            reason: 'Sai: thế điện cực chuẩn là đại lượng định lượng trực tiếp độ mạnh yếu của tính oxi hoá – khử.'
+          }
+        ]
+      },
+      {
+        level: 'Nhận biết',
+        levelCode: 'nb',
+        yccd: 'Nhận diện được kim loại không phản ứng với dung dịch HCl loãng dựa vào E°',
+        question: 'Ở điều kiện chuẩn, kim loại nào sau đây <b>không</b> phản ứng với dung dịch HCl loãng giải phóng khí <span class="chem">H<sub>2</sub></span>?',
+        options: [
+          {
+            text: 'Cu (<span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span>).',
+            isCorrect: true,
+            reason: 'Đúng: vì <span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V &gt; E<sup>o</sup>(2H<sup>+</sup>/H<sub>2</sub>) = 0,000 V</span> nên Cu không khử được ion <span class="chem">H<sup>+</sup></span>.'
+          },
+          {
+            text: 'Zn (<span class="chem">E<sup>o</sup>(Zn<sup>2+</sup>/Zn) = −0,762 V</span>).',
+            isCorrect: false,
+            reason: 'Sai: Zn có <span class="chem">E<sup>o</sup> &lt; 0</span> nên phản ứng mạnh với HCl giải phóng khí <span class="chem">H<sub>2</sub></span>.'
+          },
+          {
+            text: 'Fe (<span class="chem">E<sup>o</sup>(Fe<sup>2+</sup>/Fe) = −0,440 V</span>).',
+            isCorrect: false,
+            reason: 'Sai: Fe có <span class="chem">E<sup>o</sup> &lt; 0</span> nên tan trong HCl tạo <span class="chem">FeCl<sub>2</sub></span> và <span class="chem">H<sub>2</sub></span>.'
+          },
+          {
+            text: 'Mg (<span class="chem">E<sup>o</sup>(Mg<sup>2+</sup>/Mg) = −2,356 V</span>).',
+            isCorrect: false,
+            reason: 'Sai: Mg có <span class="chem">E<sup>o</sup></span> rất âm nên phản ứng rất mãnh liệt với HCl.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU THÔNG HIỂU ---
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'So sánh được tính oxi hoá của các ion kim loại dựa vào E°',
+        question: 'Cho các giá trị thế điện cực chuẩn: <span class="chem">E<sup>o</sup>(Mg<sup>2+</sup>/Mg) = −2,356 V</span>; <span class="chem">E<sup>o</sup>(Zn<sup>2+</sup>/Zn) = −0,762 V</span>; <span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span>; <span class="chem">E<sup>o</sup>(Ag<sup>+</sup>/Ag) = +0,799 V</span>. Ion kim loại có <b>tính oxi hoá mạnh nhất</b> trong số các ion sau là gì?',
+        options: [
+          {
+            text: '<span class="chem">Ag<sup>+</sup></span>.',
+            isCorrect: true,
+            reason: 'Đúng: cặp <span class="chem">Ag<sup>+</sup>/Ag</span> có <span class="chem">E<sup>o</sup> = +0,799 V</span> lớn nhất trong 4 cặp ⇒ ion <span class="chem">Ag<sup>+</sup></span> có tính oxi hoá mạnh nhất.'
+          },
+          {
+            text: '<span class="chem">Mg<sup>2+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem">Mg<sup>2+</sup>/Mg</span> có <span class="chem">E<sup>o</sup></span> nhỏ nhất (−2,356 V) nên <span class="chem">Mg<sup>2+</sup></span> có tính oxi hoá yếu nhất (chỉ kim loại Mg có tính khử mạnh nhất).'
+          },
+          {
+            text: '<span class="chem">Zn<sup>2+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem">E<sup>o</sup>(Zn<sup>2+</sup>/Zn) = −0,762 V &lt; +0,799 V</span>.'
+          },
+          {
+            text: '<span class="chem">Cu<sup>2+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V &lt; +0,799 V</span>.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Vận dụng quy tắc α để xác định phản ứng oxi hoá – khử tự diễn biến',
+        question: 'Dựa vào dãy thế điện cực chuẩn, phản ứng nào sau đây <b>tự diễn biến</b> ở điều kiện chuẩn theo quy tắc α?',
+        options: [
+          {
+            text: '<span class="chem">Cu + 2Ag<sup>+</sup> → Cu<sup>2+</sup> + 2Ag</span>.',
+            isCorrect: true,
+            reason: 'Đúng: vì <span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V &lt; E<sup>o</sup>(Ag<sup>+</sup>/Ag) = +0,799 V</span> nên chất oxi hoá mạnh hơn (<span class="chem">Ag<sup>+</sup></span>) tác dụng với chất khử mạnh hơn (Cu).'
+          },
+          {
+            text: '<span class="chem">2Ag + Cu<sup>2+</sup> → 2Ag<sup>+</sup> + Cu</span>.',
+            isCorrect: false,
+            reason: 'Sai: đây là chiều ngược lại (<span class="chem">ΔE<sup>o</sup> &lt; 0</span>), không tự xảy ra ở điều kiện chuẩn.'
+          },
+          {
+            text: '<span class="chem">Cu + Zn<sup>2+</sup> → Cu<sup>2+</sup> + Zn</span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem">E<sup>o</sup>(Zn<sup>2+</sup>/Zn) = −0,762 V &lt; E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span> nên <span class="chem">Zn<sup>2+</sup></span> không oxi hoá được Cu.'
+          },
+          {
+            text: '<span class="chem">Fe + Mg<sup>2+</sup> → Fe<sup>2+</sup> + Mg</span>.',
+            isCorrect: false,
+            reason: 'Sai: <span class="chem">E<sup>o</sup>(Mg<sup>2+</sup>/Mg) = −2,356 V &lt; E<sup>o</sup>(Fe<sup>2+</sup>/Fe) = −0,440 V</span> nên <span class="chem">Mg<sup>2+</sup></span> không oxi hoá được Fe.'
+          }
+        ]
+      },
+      {
+        level: 'Thông hiểu',
+        levelCode: 'th',
+        yccd: 'Xác định được chiều dòng electron khi ghép điện cực kim loại với SHE',
+        question: 'Khi ghép điện cực chuẩn <span class="chem">Zn<sup>2+</sup>/Zn</span> (<span class="chem">E<sup>o</sup> = −0,762 V</span>) với điện cực hydrogen chuẩn SHE (<span class="chem">E<sup>o</sup> = 0,000 V</span>) qua cầu muối và dây dẫn ngoài, chiều dòng electron ở mạch ngoài di chuyển như thế nào?',
+        options: [
+          {
+            text: 'Từ điện cực Zn (anode) sang điện cực Pt của SHE (cathode).',
+            isCorrect: true,
+            reason: 'Đúng: vì <span class="chem">E<sup>o</sup>(Zn<sup>2+</sup>/Zn) &lt; E<sup>o</sup>(2H<sup>+</sup>/H<sub>2</sub>)</span> nên tại cực Zn xảy ra quá trình oxi hoá (<span class="chem">Zn → Zn<sup>2+</sup> + 2e</span>), electron đi từ điện cực Zn qua dây dẫn sang cực Pt (SHE).'
+          },
+          {
+            text: 'Từ điện cực Pt của SHE sang điện cực Zn.',
+            isCorrect: false,
+            reason: 'Sai: chiều này chỉ xảy ra khi ghép SHE với điện cực có <span class="chem">E<sup>o</sup> &gt; 0</span> (như <span class="chem">Cu<sup>2+</sup>/Cu</span> hoặc <span class="chem">Ag<sup>+</sup>/Ag</span>).'
+          },
+          {
+            text: 'Electron đi qua cầu muối KCl từ dung dịch <span class="chem">Zn<sup>2+</sup></span> sang dung dịch <span class="chem">H<sup>+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai bản chất: electron chỉ di chuyển trên dây dẫn mạch ngoài; trong cầu muối chỉ có sự di chuyển của các ion (<span class="chem">K<sup>+</sup>, Cl<sup>−</sup></span>).'
+          },
+          {
+            text: 'Không có dòng electron di chuyển vì hai điện cực có thế bằng nhau.',
+            isCorrect: false,
+            reason: 'Sai: có hiệu điện thế <span class="chem">0,762 V</span> giữa hai điện cực nên dòng electron di chuyển rất rõ.'
+          }
+        ]
+      },
+
+      // --- 3 CÂU VẬN DỤNG ---
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Xác định được thứ tự ưu tiên phản ứng oxi hoá – khử trong hỗn hợp dung dịch muối',
+        question: 'Cho dãy thế điện cực chuẩn: <span class="chem">E<sup>o</sup>(Fe<sup>2+</sup>/Fe) = −0,440 V</span>; <span class="chem">E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span>; <span class="chem">E<sup>o</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>) = +0,771 V</span>; <span class="chem">E<sup>o</sup>(Ag<sup>+</sup>/Ag) = +0,799 V</span>. Nhúng một lá đồng (Cu) dư vào dung dịch hỗn hợp chứa <span class="chem">Fe(NO<sub>3</sub>)<sub>3</sub></span> và <span class="chem">AgNO<sub>3</sub></span>, thứ tự các ion bị khử là gì?',
+        options: [
+          {
+            text: '<span class="chem">Ag<sup>+</sup></span> bị khử trước (tạo Ag), sau đó đến <span class="chem">Fe<sup>3+</sup></span> bị khử (tạo <span class="chem">Fe<sup>2+</sup></span>).',
+            isCorrect: true,
+            reason: 'Đúng: chất oxi hoá mạnh hơn bị khử trước. Vì <span class="chem">E<sup>o</sup>(Ag<sup>+</sup>/Ag) = +0,799 V &gt; E<sup>o</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>) = +0,771 V &gt; E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span> nên <span class="chem">Ag<sup>+</sup></span> phản ứng trước, sau đó đến <span class="chem">Fe<sup>3+</sup></span> (dừng ở <span class="chem">Fe<sup>2+</sup></span> vì Cu không khử được <span class="chem">Fe<sup>2+</sup></span>).'
+          },
+          {
+            text: '<span class="chem">Fe<sup>3+</sup></span> bị khử trước, sau đó đến <span class="chem">Ag<sup>+</sup></span>.',
+            isCorrect: false,
+            reason: 'Sai thứ tự: <span class="chem">Ag<sup>+</sup></span> có <span class="chem">E<sup>o</sup> = +0,799 V &gt; +0,771 V</span> nên có tính oxi hoá mạnh hơn <span class="chem">Fe<sup>3+</sup></span>.'
+          },
+          {
+            text: '<span class="chem">Ag<sup>+</sup></span> bị khử trước, sau đó <span class="chem">Fe<sup>3+</sup></span> bị khử hoàn toàn về kim loại Fe.',
+            isCorrect: false,
+            reason: 'Sai sản phẩm: Cu không khử được <span class="chem">Fe<sup>2+</sup></span> về Fe vì <span class="chem">E<sup>o</sup>(Fe<sup>2+</sup>/Fe) = −0,440 V &lt; +0,340 V</span>.'
+          },
+          {
+            text: 'Chỉ có <span class="chem">Ag<sup>+</sup></span> bị khử, còn <span class="chem">Fe<sup>3+</sup></span> không phản ứng với Cu.',
+            isCorrect: false,
+            reason: 'Sai: vì <span class="chem">E<sup>o</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>) = +0,771 V &gt; +0,340 V</span> nên <span class="chem">Fe<sup>3+</sup></span> vẫn oxi hoá được Cu.'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Đếm được số thí nghiệm xảy ra phản ứng oxi hoá – khử dựa vào bảng E°',
+        question: 'Cho các giá trị thế điện cực chuẩn: <span class="chem">Fe<sup>2+</sup>/Fe (−0,440 V)</span>; <span class="chem">Ni<sup>2+</sup>/Ni (−0,257 V)</span>; <span class="chem">2H<sup>+</sup>/H<sub>2</sub> (0,000 V)</span>; <span class="chem">Cu<sup>2+</sup>/Cu (+0,340 V)</span>; <span class="chem">Fe<sup>3+</sup>/Fe<sup>2+</sup> (+0,771 V)</span>. Cho kim loại Fe lần lượt vào 4 dung dịch riêng biệt ở điều kiện chuẩn: (1) <span class="chem">NiSO<sub>4</sub></span>, (2) <span class="chem">CuSO<sub>4</sub></span>, (3) <span class="chem">Fe<sub>2</sub>(SO<sub>4</sub>)<sub>3</sub></span>, (4) HCl loãng. Số trường hợp xảy ra phản ứng hoá học là bao nhiêu?',
+        options: [
+          {
+            text: '<b>4 trường hợp</b> (cả 1, 2, 3 và 4).',
+            isCorrect: true,
+            reason: 'Đúng: <span class="chem">E<sup>o</sup>(Fe<sup>2+</sup>/Fe) = −0,440 V</span> nhỏ hơn cả 4 cặp <span class="chem">Ni<sup>2+</sup>/Ni</span> (−0,257), <span class="chem">2H<sup>+</sup>/H<sub>2</sub></span> (0,000), <span class="chem">Cu<sup>2+</sup>/Cu</span> (+0,340) và <span class="chem">Fe<sup>3+</sup>/Fe<sup>2+</sup></span> (+0,771) nên Fe phản ứng được với cả 4 dung dịch.'
+          },
+          {
+            text: '<b>3 trường hợp</b> (chỉ 1, 2 và 4).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót trường hợp (3) — Fe khử <span class="chem">Fe<sup>3+</sup></span> tạo <span class="chem">Fe<sup>2+</sup></span>: <span class="chem">Fe + 2Fe<sup>3+</sup> → 3Fe<sup>2+</sup></span>.'
+          },
+          {
+            text: '<b>2 trường hợp</b> (chỉ 2 và 4).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót cả (1) (<span class="chem">Fe + Ni<sup>2+</sup> → Fe<sup>2+</sup> + Ni</span>) và (3).'
+          },
+          {
+            text: '<b>3 trường hợp</b> (chỉ 2, 3 và 4).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót trường hợp (1) vì <span class="chem">−0,440 V &lt; −0,257 V</span> nên Fe đẩy được Ni ra khỏi muối.'
+          }
+        ]
+      },
+      {
+        level: 'Vận dụng',
+        levelCode: 'vd',
+        yccd: 'Đánh giá tổng hợp 4 phát biểu đúng/sai về thế điện cực chuẩn và quy tắc α',
+        question: 'Cho các phát biểu sau về thế điện cực chuẩn của kim loại:<br>(a) Cặp <span class="chem">M<sup>n+</sup>/M</span> có giá trị <span class="chem">E<sup>o</sup></span> càng âm thì kim loại M có tính khử càng mạnh.<br>(b) Kim loại có <span class="chem">E<sup>o</sup>(M<sup>n+</sup>/M) &gt; 0</span> không đẩy được khí <span class="chem">H<sub>2</sub></span> ra khỏi dung dịch HCl loãng ở điều kiện chuẩn.<br>(c) Phản ứng <span class="chem">Fe<sup>2+</sup> + Cu → Fe + Cu<sup>2+</sup></span> tự xảy ra ở điều kiện chuẩn.<br>(d) Dung dịch <span class="chem">FeCl<sub>3</sub></span> hoà tan được bột Cu tạo dung dịch chứa <span class="chem">FeCl<sub>2</sub></span> và <span class="chem">CuCl<sub>2</sub></span>.<br>Số phát biểu <b>đúng</b> là bao nhiêu?',
+        options: [
+          {
+            text: '<b>3 phát biểu</b> (a, b và d).',
+            isCorrect: true,
+            reason: 'Đúng: (a), (b), (d) đều đúng; phát biểu (c) <b>sai</b> vì <span class="chem">E<sup>o</sup>(Fe<sup>2+</sup>/Fe) = −0,440 V &lt; E<sup>o</sup>(Cu<sup>2+</sup>/Cu) = +0,340 V</span> nên <span class="chem">Fe<sup>2+</sup></span> không oxi hoá được Cu (chiều ngược lại <span class="chem">Fe + Cu<sup>2+</sup> → Fe<sup>2+</sup> + Cu</span> mới tự xảy ra).'
+          },
+          {
+            text: '<b>4 phát biểu</b> (a, b, c và d).',
+            isCorrect: false,
+            reason: 'Sai: mắc bẫy ở phát biểu (c) — Cu không đẩy được Fe ra khỏi dung dịch muối <span class="chem">Fe<sup>2+</sup></span>.'
+          },
+          {
+            text: '<b>2 phát biểu</b> (a và b).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (d) đúng (<span class="chem">Cu + 2FeCl<sub>3</sub> → CuCl<sub>2</sub> + 2FeCl<sub>2</sub></span>).'
+          },
+          {
+            text: '<b>2 phát biểu</b> (b và d).',
+            isCorrect: false,
+            reason: 'Sai: bỏ sót phát biểu (a) đúng.'
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let activeSheKey = 'Zn';
+    let eFlowOn = true;
+
+    let alphaId1 = 'Zn';
+    let alphaId2 = 'Cu';
+    let rulerPickSlot = 1; // Luân phiên gán vào Cặp 1 hoặc Cặp 2 khi bấm trực tiếp lên thước
+
+    let labMetal = 'Zn';
+    let labSol = 'HCl';
+    let labDipped = false;
+
+    let shuffledQuiz = [];
+    let currentQuizIdx = 0;
+    let userAnswers = [];
+    let quizSubmitted = false;
+
+    // =========================================================================
+    // 4. TIỆN ÍCH CHUNG: CHUYỂN TAB, FULLSCREEN, TOAST, GCD, FISHER-YATES
+    // =========================================================================
+    function switchTab(num) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`tabPanel-${i}`).classList.toggle('hidden', i !== num);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        btn.classList.toggle('active', i === num);
+        btn.setAttribute('aria-selected', i === num ? 'true' : 'false');
+      }
+      if (num === 3) renderQuizQuestion();
+    }
+
+    function initFullscreenButton() {
+      const btn = document.getElementById('btnFullscreen');
+      const el = document.documentElement;
+      if (!el.requestFullscreen && !el.webkitRequestFullscreen) {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        if (!document.fullscreenElement) {
+          el.requestFullscreen().catch(() => showToast('Không thể bật toàn màn hình trên trình duyệt này.'));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (el.webkitRequestFullscreen) {
+        if (!document.webkitFullscreenElement) {
+          el.webkitRequestFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        showToast('Thiết bị hiện tại không hỗ trợ chế độ toàn màn hình.');
+      }
+    }
+
+    function syncFullscreenText() {
+      const lbl = document.getElementById('textFullscreen');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (lbl) lbl.textContent = isFs ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenText);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenText);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    function gcd(a, b) {
+      return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function fmtE0(val) {
+      if (val === 0) return '0,000 V';
+      const sign = val > 0 ? '+' : '−';
+      return `${sign}${Math.abs(val).toFixed(3).replace('.', ',')} V`;
+    }
+
+    function shuffleFisherYates(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    // =========================================================================
+    // 5. LOGIC TAB 1: HỆ ĐO THẾ ĐIỆN CỰC CHUẨN VỚI SHE
+    // =========================================================================
+    function selectSheElectrode(key) {
+      activeSheKey = key;
+      ['Zn', 'Fe', 'Mg', 'Cu', 'Ag'].forEach(k => {
+        document.getElementById(`sheBtn-${k}`).classList.toggle('active', k === key);
+      });
+      renderSheSvg();
+    }
+
+    function toggleElectronFlow() {
+      eFlowOn = !eFlowOn;
+      const btn = document.getElementById('btnToggleEFlow');
+      btn.classList.toggle('active', eFlowOn);
+      document.getElementById('txtEFlow').textContent = eFlowOn
+        ? '⚡ Đang bật dòng electron (Bấm để tắt)'
+        : '▶ Bật dòng electron (e⁻)';
+      renderSheSvg();
+    }
+
+    function toggleSheLabels() {
+      const checked = document.getElementById('chkSheLabels').checked;
+      const g = document.querySelector('#sheSvg .svg-labels');
+      if (g) g.style.display = checked ? 'block' : 'none';
+    }
+
+    function renderSheSvg() {
+      const el = SHE_ELECTRODES[activeSheKey];
+      const showLbl = document.getElementById('chkSheLabels').checked;
+      const isNeg = el.e0 < 0; // E° < 0: e- đi từ Kim loại (phải) sang SHE (trái)
+
+      // Cập nhật badge & 4 thẻ thông tin đồng bộ bên dưới
+      document.getElementById('sheVoltBadge').textContent = `E°(${el.pairSvg}) = ${el.e0Str}`;
+      document.getElementById('shePairOut').innerHTML = el.pairHtml;
+      const valOut = document.getElementById('sheValOut');
+      valOut.textContent = el.e0Str;
+      valOut.style.color = isNeg ? '#ea580c' : '#0284c7';
+
+      document.getElementById('sheRoleOut').innerHTML = isNeg
+        ? `Cực <b>${el.symbol}</b> là <b>Anode (−)</b>; SHE là <b>Cathode (+)</b><br><span style="font-size:0.84rem; color:#475569;">e⁻ chạy từ ${el.symbol} → SHE</span>`
+        : `SHE là <b>Anode (−)</b>; Cực <b>${el.symbol}</b> là <b>Cathode (+)</b><br><span style="font-size:0.84rem; color:#475569;">e⁻ chạy từ SHE → ${el.symbol}</span>`;
+
+      document.getElementById('sheHalfOut').innerHTML = `• Oxi hoá (Anode): ${el.oxRxn}<br>• Khử (Cathode): ${el.redRxn}`;
+
+      const wireCls = eFlowOn ? (isNeg ? 'e-wire-rtl' : 'e-wire-ltr') : '';
+      const eArrowMarkup = eFlowOn
+        ? (isNeg
+            ? `<polygon points="292,50 308,42 308,58" fill="#ea580c"/>
+               <polygon points="502,50 518,42 518,58" fill="#ea580c"/>
+               <text x="536" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#ea580c">← Dòng e⁻ (${el.symbol} → SHE)</text>`
+            : `<polygon points="310,50 294,42 294,58" fill="#ea580c"/>
+               <polygon points="520,50 504,42 504,58" fill="#ea580c"/>
+               <text x="536" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#ea580c">Dòng e⁻ (SHE → ${el.symbol}) →</text>`)
+        : '';
+
+      document.getElementById('sheSvg').innerHTML = `
+        <defs>
+          <clipPath id="clipSheLeft"><rect x="120" y="162" width="184" height="134" rx="10"/></clipPath>
+          <clipPath id="clipSheRight"><rect x="516" y="162" width="184" height="134" rx="10"/></clipPath>
+        </defs>
+
+        <!-- DÂY DẪN MẠCH NGOÀI TỪ PT (x=196) QUA VÔN KẾ (x=410) ĐẾN KIM LOẠI (x=624) -->
+        <path d="M 196 154 L 196 50 L 342 50" fill="none" stroke="#334155" stroke-width="3.4" stroke-linejoin="round"/>
+        <path d="M 478 50 L 624 50 L 624 154" fill="none" stroke="#334155" stroke-width="3.4" stroke-linejoin="round"/>
+        ${eFlowOn ? `
+          <path d="M 196 154 L 196 50 L 342 50" fill="none" stroke="#ea580c" stroke-width="3.6" class="${wireCls}"/>
+          <path d="M 478 50 L 624 50 L 624 154" fill="none" stroke="#ea580c" stroke-width="3.6" class="${wireCls}"/>
+        ` : ''}
+        ${eArrowMarkup}
+
+        <!-- VÔN KẾ ĐIỆN TỬ Ở PHÍA TRÊN (x=342..478, y=20..80) -->
+        <rect x="342" y="20" width="136" height="60" rx="12" fill="#0f172a" stroke="#334155" stroke-width="2.6"/>
+        <text x="410" y="39" text-anchor="middle" font-size="10.5" font-weight="800" fill="#94a3b8">VÔN KẾ (E° CHUẨN)</text>
+        <text x="410" y="66" text-anchor="middle" font-size="20" font-weight="900" fill="${isNeg ? '#fb923c' : '#38bdf8'}">${el.e0Str}</text>
+
+        <!-- CẦU MUỐI KCl NỐI 2 CỐC (x=274..546) -->
+        <path d="M 274 236 L 274 128 Q 274 110 292 110 L 528 110 Q 546 110 546 128 L 546 236"
+              fill="none" stroke="#cbd5e1" stroke-width="18" stroke-linecap="round"/>
+        <path d="M 274 236 L 274 128 Q 274 110 292 110 L 528 110 Q 546 110 546 128 L 546 236"
+              fill="none" stroke="#fef3c7" stroke-width="12" stroke-linecap="round"/>
+        <rect x="352" y="98" width="116" height="24" rx="12" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+        <text x="410" y="114" text-anchor="middle" font-size="11.5" font-weight="800" fill="#92400e">Cầu muối KCl</text>
+
+        <!-- ==================== CỐC TRÁI: ĐIỆN CỰC HYDROGEN CHUẨN (SHE) ==================== -->
+        <g clip-path="url(#clipSheLeft)">
+          <rect x="120" y="186" width="184" height="110" fill="#e0f2fe" opacity="0.88"/>
+          <!-- Bọt khí H2 bay lên mượt quanh lá Pt -->
+          <circle class="h2-bub" cx="182" cy="264" r="3.6" fill="#ffffff" stroke="#0284c7" stroke-width="1.1" style="animation-delay:0s;"/>
+          <circle class="h2-bub" cx="208" cy="268" r="4.2" fill="#ffffff" stroke="#0284c7" stroke-width="1.1" style="animation-delay:0.4s;"/>
+          <circle class="h2-bub" cx="196" cy="260" r="3.4" fill="#ffffff" stroke="#0284c7" stroke-width="1.1" style="animation-delay:0.85s;"/>
+        </g>
+        <!-- Ống thuỷ tinh sục khí H2 (1 bar) bao quanh lá Pt -->
+        <path d="M 164 134 L 180 134 L 180 264 M 212 152 L 212 264" fill="none" stroke="#64748b" stroke-width="2.2"/>
+        <!-- Dây Pt và lá bạch kim Pt -->
+        <line x1="196" y1="146" x2="196" y2="232" stroke="#475569" stroke-width="2.4"/>
+        <rect x="186" y="232" width="20" height="34" rx="3" fill="#475569" stroke="#1e293b" stroke-width="1.8"/>
+        <!-- Thành cốc trái -->
+        <path d="M 114 156 L 120 162 L 120 286 A 10 10 0 0 0 130 296 L 294 296 A 10 10 0 0 0 304 286 L 304 162 L 310 156"
+              fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="212" y="320" text-anchor="middle" font-size="13" font-weight="800" fill="#0369a1">
+          Điện cực Hydrogen chuẩn (SHE) • ${isNeg ? 'Cathode (+)' : 'Anode (−)'}
+        </text>
+
+        <!-- ==================== CỐC PHẢI: ĐIỆN CỰC KIM LOẠI CẦN ĐO ==================== -->
+        <g clip-path="url(#clipSheRight)">
+          <rect x="516" y="186" width="184" height="110" fill="${el.solColor}" opacity="0.9"/>
+        </g>
+        <!-- Thanh kim loại M -->
+        <rect x="610" y="146" width="28" height="122" rx="4" fill="${el.metalColor}" stroke="#1e293b" stroke-width="2"/>
+        <text x="624" y="214" text-anchor="middle" font-size="13" font-weight="900" fill="${el.key === 'Cu' ? '#ffffff' : '#0f172a'}">${el.symbol}</text>
+        <!-- Thành cốc phải -->
+        <path d="M 510 156 L 516 162 L 516 286 A 10 10 0 0 0 526 296 L 690 296 A 10 10 0 0 0 700 286 L 700 162 L 706 156"
+              fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="608" y="320" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">
+          Điện cực ${el.pairSvg} • ${isNeg ? 'Anode (−)' : 'Cathode (+)'}
+        </text>
+
+        <!-- ==================== NHÓM NHÃN CHÚ THÍCH (BẬT/TẮT ĐỘC LẬP) ==================== -->
+        <g class="svg-labels" style="display: ${showLbl ? 'block' : 'none'};">
+          <!-- Nhãn H2 1 bar bên trái -->
+          <line x1="112" y1="134" x2="162" y2="134" stroke="#0284c7" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="12" y="116" width="100" height="36" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.4"/>
+          <text x="62" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#0369a1">Khí H₂</text>
+          <text x="62" y="146" text-anchor="middle" font-size="10.2" font-weight="700" fill="#334155">(1 bar, 25 °C)</text>
+
+          <!-- Nhãn dd H+ 1 M & lá Pt bên trái -->
+          <line x1="112" y1="246" x2="184" y2="246" stroke="#334155" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="12" y="224" width="100" height="44" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1.4"/>
+          <text x="62" y="242" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">Lá Pt</text>
+          <text x="62" y="258" text-anchor="middle" font-size="10.2" font-weight="700" fill="#0284c7">dd H⁺ 1 M</text>
+
+          <!-- Nhãn Thanh M bên phải -->
+          <line x1="640" y1="168" x2="710" y2="168" stroke="#0f172a" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="710" y="150" width="98" height="36" rx="8" fill="#ffffff" stroke="#475569" stroke-width="1.4"/>
+          <text x="759" y="172" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0f172a">Thanh ${el.symbol}</text>
+
+          <!-- Nhãn dd M^n+ 1 M bên phải -->
+          <line x1="696" y1="246" x2="710" y2="246" stroke="#059669" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="710" y="226" width="98" height="40" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.4"/>
+          <text x="759" y="244" text-anchor="middle" font-size="11" font-weight="800" fill="#047857">${el.solSvg}</text>
+          <text x="759" y="259" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">25 °C</text>
+        </g>
+      `;
+    }
+
+    // =========================================================================
+    // 6. LOGIC TAB 2: THƯỚC DÃY E°, XƯỞNG QUY TẮC α & PHÒNG THÍ NGHIỆM ẢO
+    // =========================================================================
+    function initAlphaSelectors() {
+      const s1 = document.getElementById('selPair1');
+      const s2 = document.getElementById('selPair2');
+      const optsHtml = SERIES_COUPLES.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+      s1.innerHTML = optsHtml;
+      s2.innerHTML = optsHtml;
+      s1.value = alphaId1;
+      s2.value = alphaId2;
+    }
+
+    function renderRuler() {
+      const c1 = SERIES_COUPLES.find(c => c.id === alphaId1);
+      const c2 = SERIES_COUPLES.find(c => c.id === alphaId2);
+      const leftId = (c1 && c2 && c1.e0 <= c2.e0) ? alphaId1 : alphaId2;
+      const rightId = (c1 && c2 && c1.e0 <= c2.e0) ? alphaId2 : alphaId1;
+
+      document.getElementById('rulerGrid').innerHTML = SERIES_COUPLES.map(c => {
+        let cls = 'ruler-cell';
+        if (c.id === 'H') cls += ' is-h2';
+        if (c.id === leftId) cls += ' active-left';
+        else if (c.id === rightId) cls += ' active-right';
+        return `
+          <button type="button" class="${cls}" onclick="pickFromRuler('${c.id}')">
+            <span class="rc-ox">${c.oxHtml}</span>
+            <span class="rc-sep"></span>
+            <span class="rc-red">${c.redHtml}</span>
+            <span class="rc-val">${fmtE0(c.e0)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function pickFromRuler(id) {
+      if (rulerPickSlot === 1) {
+        alphaId1 = id;
+        rulerPickSlot = 2;
+      } else {
+        alphaId2 = id;
+        rulerPickSlot = 1;
+      }
+      document.getElementById('selPair1').value = alphaId1;
+      document.getElementById('selPair2').value = alphaId2;
+      renderRuler();
+      renderAlphaWorkshop(true);
+    }
+
+    function loadAlphaPreset(id1, id2) {
+      alphaId1 = id1;
+      alphaId2 = id2;
+      document.getElementById('selPair1').value = id1;
+      document.getElementById('selPair2').value = id2;
+      renderRuler();
+      renderAlphaWorkshop(true);
+    }
+
+    function onAlphaSelectChange() {
+      alphaId1 = document.getElementById('selPair1').value;
+      alphaId2 = document.getElementById('selPair2').value;
+      renderRuler();
+      renderAlphaWorkshop(true);
+    }
+
+    function replayAlphaAnim() {
+      renderAlphaWorkshop(true);
+    }
+
+    function fmtCoef(n, html) {
+      return n === 1 ? html : `${n}${html}`;
+    }
+
+    function renderAlphaWorkshop(animate) {
+      const svg = document.getElementById('alphaSvg');
+      const eqBox = document.getElementById('alphaEqBox');
+      const badge = document.getElementById('alphaDeltaBadge');
+
+      const cA = SERIES_COUPLES.find(c => c.id === alphaId1);
+      const cB = SERIES_COUPLES.find(c => c.id === alphaId2);
+
+      if (cA.id === cB.id) {
+        badge.textContent = 'ΔE° = 0,000 V';
+        badge.className = 'pill-tag orange';
+        svg.innerHTML = `
+          <text x="350" y="114" text-anchor="middle" font-size="16" font-weight="800" fill="#c2410c">
+            ⚠ Hai cặp đang trùng nhau (${cA.oxSvg}/${cA.redSvg}). Hãy chọn 2 cặp khác nhau để áp dụng Quy tắc α!
+          </text>
+        `;
+        eqBox.className = 'eq-result-box warn';
+        eqBox.innerHTML = '<b>Lưu ý:</b> Cần chọn <b>2 cặp oxi hoá – khử khác nhau</b> để dự đoán chiều phản ứng theo quy tắc α.';
+        return;
+      }
+
+      // Đặt cặp E° nhỏ hơn bên trái (L), cặp E° lớn hơn bên phải (R)
+      const L = cA.e0 < cB.e0 ? cA : cB;
+      const R = cA.e0 < cB.e0 ? cB : cA;
+      const deltaE = (R.e0 - L.e0).toFixed(3).replace('.', ',');
+
+      badge.textContent = `ΔE° = +${deltaE} V > 0`;
+      badge.className = 'pill-tag emerald';
+
+      // Cân bằng phương trình ion rút gọn tối giản
+      const g = gcd(L.n, R.n);
+      const mL = R.n / g;
+      const mR = L.n / g;
+
+      const cRedL = mL * L.redBase;
+      const cOxL  = mL * L.oxBase;
+      const cOxR  = mR * R.oxBase;
+      const cRedR = mR * R.redBase;
+
+      const oxLStr  = L.oxAtomHtml ? fmtCoef(cOxL, L.oxAtomHtml) : fmtCoef(cOxL, L.oxHtml);
+      const oxRStr  = R.oxAtomHtml ? fmtCoef(cOxR, R.oxAtomHtml) : fmtCoef(cOxR, R.oxHtml);
+      const redLStr = fmtCoef(cRedL, L.redHtml);
+      const redRStr = fmtCoef(cRedR, R.redHtml) + (R.isGasRed ? '↑' : '');
+
+      let rhsHtml = `${oxLStr} + ${redRStr}`;
+      // Xử lí gộp đặc biệt khi Fe + 2Fe3+ -> 3Fe2+
+      if (L.id === 'Fe2' && R.id === 'Fe3') {
+        rhsHtml = `3<span class="chem">Fe<sup>2+</sup></span>`;
+      }
+
+      const eqHtml = `${redLStr} + ${oxRStr} &nbsp;⟶&nbsp; ${rhsHtml}`;
+
+      // Đường chữ α chuẩn: Ox(phải, trên: 492,70) → Red(trái, dưới: 208,162) → Ox(trái, trên: 208,70) → Red(phải, dưới: 492,162)
+      const animCls = animate ? 'alpha-path-anim' : '';
+
+      svg.innerHTML = `
+        <defs>
+          <marker id="alphaHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#ea580c"/>
+          </marker>
+        </defs>
+        <text x="350" y="17" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">Quy tắc α: Chất oxi hoá mạnh (${R.oxSvg}) + Chất khử mạnh (${L.redSvg})</text>
+        <text x="350" y="34" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">→ Chất oxi hoá yếu (${L.oxSvg}) + Chất khử yếu (${R.redSvg})</text>
+
+        <!-- Khung Cặp TRÁI (E° nhỏ hơn) -->
+        <rect x="136" y="46" width="144" height="144" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.8"/>
+        <text x="200" y="84" text-anchor="middle" font-size="22" font-weight="900" fill="#0369a1">${L.oxSvg}</text>
+        <line x1="160" y1="114" x2="240" y2="114" stroke="#cbd5e1" stroke-width="2"/>
+        <text x="200" y="162" text-anchor="middle" font-size="22" font-weight="900" fill="#c2410c">${L.redSvg}</text>
+        <text x="208" y="208" text-anchor="middle" font-size="12.5" font-weight="800" fill="#c2410c">E° nhỏ: ${fmtE0(L.e0)}</text>
+
+        <!-- Khung Cặp PHẢI (E° lớn hơn) -->
+        <rect x="420" y="46" width="144" height="144" rx="14" fill="#eff6ff" stroke="#7dd3fc" stroke-width="1.8"/>
+        <text x="500" y="84" text-anchor="middle" font-size="22" font-weight="900" fill="#0369a1">${R.oxSvg}</text>
+        <line x1="444" y1="114" x2="524" y2="114" stroke="#cbd5e1" stroke-width="2"/>
+        <text x="500" y="162" text-anchor="middle" font-size="22" font-weight="900" fill="#c2410c">${R.redSvg}</text>
+        <text x="492" y="208" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0369a1">E° lớn: ${fmtE0(R.e0)}</text>
+
+        <!-- Hai mũi tên chéo tạo chữ α: (1) Ox mạnh → (2) Red mạnh ; (3) Ox yếu → (4) Red yếu -->
+        <path d="M 428 72 L 296 150" fill="none" stroke="#ea580c" stroke-width="4" stroke-linecap="round" marker-end="url(#alphaHead)" class="${animCls}"/>
+        <path d="M 296 72 L 428 150" fill="none" stroke="#059669" stroke-width="4" stroke-linecap="round" marker-end="url(#alphaHead)" class="${animCls}"/>
+
+        <!-- Số thứ tự các chất -->
+        <circle cx="440" cy="68" r="10" fill="#ea580c"/><text x="440" y="72" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">1</text>
+        <circle cx="286" cy="158" r="10" fill="#ea580c"/><text x="286" y="162" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">2</text>
+        <circle cx="286" cy="68" r="10" fill="#059669"/><text x="286" y="72" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">3</text>
+        <circle cx="440" cy="158" r="10" fill="#059669"/><text x="440" y="162" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">4</text>
+      `;
+
+      eqBox.className = 'eq-result-box';
+      eqBox.innerHTML = `
+        <b>Tính hiệu thế điện cực:</b> <span class="chem">ΔE<sup>o</sup> = E<sup>o</sup>(${R.oxSvg}/${R.redSvg}) − E<sup>o</sup>(${L.oxSvg}/${L.redSvg}) = (${fmtE0(R.e0)}) − (${fmtE0(L.e0)}) = <b>+${deltaE} V &gt; 0</b></span><br>
+        <b>Phương trình ion rút gọn tự diễn biến:</b> <span style="font-size: 1.08rem; font-weight: 800; color: #0f172a;">${eqHtml}</span>
+      `;
+    }
+
+    // --- PHÒNG THÍ NGHIỆM ẢO: KIM LOẠI + DUNG DỊCH ---
+    function selectLabMetal(m) {
+      labMetal = m;
+      labDipped = false;
+      ['Zn', 'Fe', 'Cu', 'Ag'].forEach(k => {
+        document.getElementById(`labM-${k}`).classList.toggle('active', k === m);
+      });
+      renderVirtualLab();
+    }
+
+    function selectLabSol(s) {
+      labSol = s;
+      labDipped = false;
+      ['HCl', 'CuSO4', 'AgNO3', 'FeSO4'].forEach(k => {
+        document.getElementById(`labS-${k}`).classList.toggle('active', k === s);
+      });
+      renderVirtualLab();
+    }
+
+    function setLabDipped(v) {
+      labDipped = v;
+      renderVirtualLab();
+    }
+
+    function toggleLabLabels() {
+      const checked = document.getElementById('chkLabLabels').checked;
+      const g = document.querySelector('#virtualLabSvg .svg-labels');
+      if (g) g.style.display = checked ? 'block' : 'none';
+    }
+
+    function renderVirtualLab() {
+      const m = LAB_METALS[labMetal];
+      const s = LAB_SOLUTIONS[labSol];
+      const svg = document.getElementById('virtualLabSvg');
+      const resBox = document.getElementById('labResultBox');
+      const badge = document.getElementById('labStatusBadge');
+      const showLbl = document.getElementById('chkLabLabels').checked;
+
+      const reacts = m.e0 < s.e0;
+      const stripY = labDipped ? 56 : 0;
+
+      // Xác định màu dung dịch cuối cùng, bọt khí, lớp bám
+      let solFill = s.initColor;
+      let showGas = false;
+      let depositMarkup = '';
+      let phenomText = '';
+      let eqText = '';
+
+      if (labDipped && reacts) {
+        if (labSol === 'HCl') {
+          showGas = true;
+          if (labMetal === 'Fe') solFill = '#dcfce7';
+          phenomText = `Thanh ${m.sym} tan dần, xuất hiện nhiều <b>bọt khí <span class="chem">H<sub>2</sub></span> không màu</b> thoát ra mạnh${labMetal === 'Fe' ? ', dung dịch chuyển màu lục nhạt (<span class="chem">Fe<sup>2+</sup></span>)' : ''}.`;
+          eqText = `<span class="chem">${m.sym} + 2H<sup>+</sup> → ${m.sym}<sup>2+</sup> + H<sub>2</sub>↑</span>`;
+        } else if (labSol === 'CuSO4') {
+          solFill = labMetal === 'Fe' ? '#bbf7d0' : '#e0f2fe';
+          depositMarkup = `<rect x="353" y="98" width="34" height="60" rx="4" fill="${s.depositColor}" opacity="0.92"/>`;
+          phenomText = `Màu xanh lam của dung dịch <span class="chem">CuSO<sub>4</sub></span> <b>nhạt dần</b>, xuất hiện lớp kim loại <b>${s.depositName}</b> bám dày lên thanh ${m.sym}.`;
+          eqText = `<span class="chem">${m.sym} + Cu<sup>2+</sup> → ${m.sym}<sup>2+</sup> + Cu↓</span>`;
+        } else if (labSol === 'AgNO3') {
+          if (labMetal === 'Cu') solFill = '#7dd3fc';
+          else if (labMetal === 'Fe') solFill = '#dcfce7';
+          depositMarkup = `<rect x="353" y="98" width="34" height="60" rx="4" fill="${s.depositColor}" stroke="#94a3b8" stroke-width="1.4" opacity="0.96"/>`;
+          phenomText = `Xuất hiện lớp kim loại <b>${s.depositName}</b> sáng bóng bám lên thanh ${m.sym}${labMetal === 'Cu' ? ', dung dịch không màu <b>chuyển sang màu xanh lam</b> (<span class="chem">Cu<sup>2+</sup></span>)' : (labMetal === 'Fe' ? ', dung dịch chuyển màu lục nhạt (<span class="chem">Fe<sup>2+</sup></span>)' : '')}.`;
+          eqText = `<span class="chem">${m.sym} + 2Ag<sup>+</sup> → ${m.sym}<sup>2+</sup> + 2Ag↓</span>`;
+        } else if (labSol === 'FeSO4') {
+          solFill = '#f8fafc';
+          depositMarkup = `<rect x="353" y="98" width="34" height="60" rx="4" fill="${s.depositColor}" opacity="0.88"/>`;
+          phenomText = `Màu lục nhạt của dung dịch <span class="chem">FeSO<sub>4</sub></span> nhạt dần, xuất hiện lớp kim loại <b>${s.depositName}</b> bám lên thanh Zn.`;
+          eqText = `<span class="chem">Zn + Fe<sup>2+</sup> → Zn<sup>2+</sup> + Fe↓</span>`;
+        }
+      }
+
+      if (!labDipped) {
+        badge.textContent = `Chưa nhúng thanh ${m.sym} vào ${s.name}`;
+        badge.className = 'pill-tag';
+      } else if (reacts) {
+        badge.textContent = `✔ Có phản ứng hoá học (ΔE° > 0)`;
+        badge.className = 'pill-tag emerald';
+      } else {
+        badge.textContent = `✘ Không xảy ra phản ứng`;
+        badge.className = 'pill-tag rose';
+      }
+
+      svg.innerHTML = `
+        <defs>
+          <clipPath id="clipLabBeaker"><rect x="276" y="106" width="188" height="142" rx="10"/></clipPath>
+        </defs>
+
+        <text x="370" y="24" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">
+          Thí nghiệm: Nhúng thanh ${m.sym} vào dung dịch ${s.name}
+        </text>
+
+        <!-- Mặt bàn -->
+        <rect x="220" y="250" width="300" height="12" rx="5" fill="#cbd5e1"/>
+
+        <!-- Dung dịch trong cốc -->
+        <g clip-path="url(#clipLabBeaker)">
+          <rect x="276" y="138" width="188" height="110" fill="${solFill}" class="svg-smooth"/>
+          ${showGas ? `
+            <circle class="h2-bub" cx="348" cy="222" r="4" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" style="animation-delay:0s;"/>
+            <circle class="h2-bub" cx="390" cy="228" r="4.5" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" style="animation-delay:0.35s;"/>
+            <circle class="h2-bub" cx="362" cy="216" r="3.6" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" style="animation-delay:0.75s;"/>
+            <circle class="h2-bub" cx="384" cy="214" r="3.8" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" style="animation-delay:1.05s;"/>
+          ` : ''}
+        </g>
+
+        <!-- Thanh kim loại (hạ xuống khi labDipped = true) -->
+        <g class="svg-smooth" style="transform: translateY(${stripY}px);">
+          <rect x="355" y="42" width="30" height="116" rx="4" fill="${m.color}" stroke="#1e293b" stroke-width="2"/>
+          <text x="370" y="76" text-anchor="middle" font-size="13" font-weight="900" fill="${m.sym === 'Cu' ? '#ffffff' : '#0f172a'}">${m.sym}</text>
+          ${depositMarkup}
+        </g>
+
+        <!-- Thành cốc thuỷ tinh -->
+        <path d="M 270 100 L 276 106 L 276 238 A 10 10 0 0 0 286 248 L 454 248 A 10 10 0 0 0 464 238 L 464 106 L 470 100"
+              fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- NHÓM NHÃN CHÚ THÍCH NGOÀI CỐC -->
+        <g class="svg-labels" style="display: ${showLbl ? 'block' : 'none'};">
+          <line x1="210" y1="86" x2="352" y2="86" stroke="#0f172a" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="26" y="64" width="184" height="44" rx="9" fill="#ffffff" stroke="#475569" stroke-width="1.4"/>
+          <text x="118" y="83" text-anchor="middle" font-size="12" font-weight="800" fill="#0f172a">Thanh ${m.sym}</text>
+          <text x="118" y="100" text-anchor="middle" font-size="10.8" font-weight="700" fill="#64748b">E° = ${fmtE0(m.e0)}</text>
+
+          <line x1="466" y1="196" x2="530" y2="196" stroke="#0284c7" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="530" y="172" width="188" height="48" rx="9" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.4"/>
+          <text x="624" y="192" text-anchor="middle" font-size="12" font-weight="800" fill="#0369a1">Dung dịch ${s.name}</text>
+          <text x="624" y="210" text-anchor="middle" font-size="10.8" font-weight="700" fill="#334155">E°(${s.oxCouple}) = ${fmtE0(s.e0)}</text>
+        </g>
+      `;
+
+      if (!labDipped) {
+        resBox.className = 'eq-result-box';
+        resBox.style.background = '#f8fafc';
+        resBox.style.borderColor = '#cbd5e1';
+        resBox.style.color = '#334155';
+        resBox.innerHTML = `Nhấn <b>▶ Nhúng thanh kim loại</b> để kiểm chứng phản ứng giữa thanh <b>${m.sym}</b> (<span class="chem">E<sup>o</sup> = ${fmtE0(m.e0)}</span>) và dung dịch <b>${s.name}</b> (<span class="chem">E<sup>o</sup> = ${fmtE0(s.e0)}</span>).`;
+      } else if (reacts) {
+        resBox.className = 'eq-result-box';
+        resBox.removeAttribute('style');
+        resBox.innerHTML = `
+          <b>✔ Có phản ứng xảy ra</b> vì <span class="chem">E<sup>o</sup>(${m.sym}<sup>n+</sup>/${m.sym}) = ${fmtE0(m.e0)} &lt; E<sup>o</sup>(${s.oxCouple}) = ${fmtE0(s.e0)}</span>.<br>
+          <b>Hiện tượng:</b> ${phenomText}<br>
+          <b>Phương trình ion rút gọn:</b> <b>${eqText}</b>
+        `;
+      } else {
+        resBox.className = 'eq-result-box warn';
+        resBox.removeAttribute('style');
+        resBox.innerHTML = `
+          <b>✘ Không xảy ra phản ứng hoá học!</b> Thanh <b>${m.sym}</b> giữ nguyên bề mặt và dung dịch <b>${s.name}</b> không đổi màu.<br>
+          <b>Giải thích:</b> Vì <span class="chem">E<sup>o</sup>(${m.sym}<sup>n+</sup>/${m.sym}) = ${fmtE0(m.e0)} ≥ E<sup>o</sup>(${s.oxCouple}) = ${fmtE0(s.e0)}</span> nên kim loại ${m.sym} không khử được dạng oxi hoá trong dung dịch.
+        `;
+      }
+    }
+
+    function toggleQa(num) {
+      const ans = document.getElementById(`qaAns${num}`);
+      const btn = document.getElementById(`btnQa${num}`);
+      const hidden = ans.classList.contains('hidden');
+      ans.classList.toggle('hidden', !hidden);
+      btn.innerHTML = hidden ? '<span>Ẩn đáp án</span>' : '<span>Xem đáp án</span>';
+    }
+
+    // =========================================================================
+    // 7. LOGIC TAB 3: LUYỆN TẬP 10 CÂU + FISHER–YATES + NỘP BÀI TỔNG KẾT
+    // =========================================================================
+    function buildShuffledQuiz() {
+      shuffledQuiz = RAW_QUIZ_BANK.map(q => {
+        const opts = shuffleFisherYates(q.options);
+        const correctIdx = opts.findIndex(o => o.isCorrect);
+        return {
+          level: q.level,
+          levelCode: q.levelCode,
+          yccd: q.yccd,
+          question: q.question,
+          options: opts,
+          correctIdx: correctIdx
+        };
+      });
+      userAnswers = new Array(shuffledQuiz.length).fill(null);
+      currentQuizIdx = 0;
+      quizSubmitted = false;
+    }
+
+    function renderQuizDots() {
+      document.getElementById('quizDots').innerHTML = shuffledQuiz.map((q, idx) => {
+        let cls = 'q-dot';
+        if (idx === currentQuizIdx) cls += ' current';
+        if (userAnswers[idx] !== null) {
+          cls += userAnswers[idx] === q.correctIdx ? ' correct' : ' wrong';
+        }
+        return `<button type="button" class="${cls}" onclick="jumpQuiz(${idx})" aria-label="Câu ${idx + 1}">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    function updateQuizScoreAndBanner() {
+      let score = 0;
+      let answered = 0;
+      shuffledQuiz.forEach((q, idx) => {
+        if (userAnswers[idx] !== null) {
+          answered++;
+          if (userAnswers[idx] === q.correctIdx) score++;
+        }
+      });
+
+      document.getElementById('quizScoreText').textContent = `${score} / ${shuffledQuiz.length}`;
+      document.getElementById('quizProgressFill').style.width = `${Math.round((answered / shuffledQuiz.length) * 100)}%`;
+
+      const banner = document.getElementById('quizResultBanner');
+      if (quizSubmitted || answered === shuffledQuiz.length) {
+        banner.classList.remove('hidden');
+        document.getElementById('resultHeading').textContent = `Tổng điểm: ${score} / ${shuffledQuiz.length} điểm (${answered}/${shuffledQuiz.length} câu đã trả lời)`;
+        let msg = 'Hãy xem lại lời giải chi tiết từng câu và ôn lại Tab 1, Tab 2 nhé!';
+        if (score >= 9) msg = 'Xuất sắc! Em đã nắm vững toàn diện kiến thức Cặp oxi hoá – khử, Thế điện cực chuẩn và Quy tắc α.';
+        else if (score >= 7) msg = 'Rất tốt! Em đã làm chủ phần lớn kiến thức trọng tâm của bài học.';
+        document.getElementById('resultSubtext').textContent = msg;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = shuffledQuiz[currentQuizIdx];
+      const chosen = userAnswers[currentQuizIdx];
+      const showResult = chosen !== null || quizSubmitted;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('quizMetaBadges').innerHTML = `
+        <span class="level-badge ${q.levelCode}">Mức độ: ${q.level}</span>
+        <span class="yccd-badge">YCCĐ: ${q.yccd}</span>
+      `;
+
+      document.getElementById('quizQuestionText').innerHTML = `Câu ${currentQuizIdx + 1}: ${q.question}`;
+      document.getElementById('quizStepLabel').textContent = `Câu ${currentQuizIdx + 1} / ${shuffledQuiz.length}`;
+
+      document.getElementById('quizOptions').innerHTML = q.options.map((opt, idx) => {
+        let cls = 'option-btn';
+        if (showResult) {
+          if (idx === q.correctIdx) cls += ' opt-correct';
+          else if (idx === chosen) cls += ' opt-wrong';
+        }
+        const dis = showResult ? 'disabled' : '';
+        return `
+          <button type="button" class="${cls}" ${dis} onclick="answerQuiz(${idx})">
+            <span class="opt-letter">${letters[idx]}</span>
+            <span>${opt.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const fb = document.getElementById('quizFeedbackPanel');
+      if (showResult) {
+        const isOk = chosen === q.correctIdx;
+        const headText = chosen === null
+          ? `ℹ Câu này chưa chọn — Đáp án đúng là ${letters[q.correctIdx]}.`
+          : (isOk ? '✔ Chính xác!' : `✘ Chưa chính xác. Đáp án đúng là ${letters[q.correctIdx]}.`);
+
+        const head = `<div class="feedback-head ${isOk ? 'ok' : 'err'}">${headText} — Giải thích chi tiết từng phương án:</div>`;
+        const items = q.options.map((opt, idx) => `
+          <li class="reason-item ${opt.isCorrect ? 'is-right' : ''}">
+            <b>${letters[idx]} (${opt.isCorrect ? 'Đúng' : 'Loại'}):</b> ${opt.reason}
+          </li>
+        `).join('');
+
+        fb.innerHTML = `${head}<ul class="option-reasons-list">${items}</ul>`;
+        fb.classList.remove('hidden');
+      } else {
+        fb.classList.add('hidden');
+      }
+
+      document.getElementById('btnQuizPrev').disabled = currentQuizIdx === 0;
+      document.getElementById('btnQuizNext').disabled = currentQuizIdx === shuffledQuiz.length - 1;
+
+      renderQuizDots();
+      updateQuizScoreAndBanner();
+    }
+
+    function answerQuiz(optIdx) {
+      if (userAnswers[currentQuizIdx] !== null || quizSubmitted) return;
+      userAnswers[currentQuizIdx] = optIdx;
+      renderQuizQuestion();
+    }
+
+    function submitQuiz() {
+      quizSubmitted = true;
+      renderQuizQuestion();
+      showToast('Đã nộp bài! Em có thể bấm từng câu 1–10 để xem lời giải chi tiết.');
+    }
+
+    function moveQuiz(delta) {
+      const next = currentQuizIdx + delta;
+      if (next >= 0 && next < shuffledQuiz.length) {
+        currentQuizIdx = next;
+        renderQuizQuestion();
+      }
+    }
+
+    function jumpQuiz(idx) {
+      currentQuizIdx = idx;
+      renderQuizQuestion();
+    }
+
+    function resetQuiz() {
+      buildShuffledQuiz();
+      renderQuizQuestion();
+      showToast('Đã làm mới 10 câu hỏi và xáo trộn ngẫu nhiên đáp án A, B, C, D.');
+    }
+
+    // =========================================================================
+    // 8. KHỞI TẠO KHI TẢI TRANG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initFullscreenButton();
+      renderSheSvg();
+      initAlphaSelectors();
+      renderRuler();
+      renderAlphaWorkshop(false);
+      renderVirtualLab();
+      buildShuffledQuiz();
+      renderQuizQuestion();
+    });
+    /* ===== LINK YOUTUBE (dán link video của bạn vào url; để trống '' thì mở trang tìm kiếm YouTube) ===== */
+    const LESSON_VIDEO_URL = '';
+    const LESSON_VIDEO_QUERY = 'thế điện cực chuẩn của kim loại hóa 12';
+    const EXP_VIDEOS = {
+      vidShe: { url: '', query: 'đo thế điện cực chuẩn pin Galvani Zn Cu điện cực hydrogen chuẩn' },
+      vidLab: { url: '', query: 'thí nghiệm kim loại tác dụng dung dịch muối Zn CuSO4 Cu AgNO3 Fe HCl' }
+    };
+    (function () {
+      const yt = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+      const a = document.getElementById('lessonVideoLink');
+      if (a) a.href = LESSON_VIDEO_URL || yt(LESSON_VIDEO_QUERY);
+      Object.keys(EXP_VIDEOS).forEach(id => {
+        const el = document.getElementById(id), c = EXP_VIDEOS[id];
+        if (el) el.href = c.url || yt(c.query);
+      });
+    })();
+  </script>
+</body>
+</html>
