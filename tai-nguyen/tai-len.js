@@ -617,6 +617,18 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "kenh": "mp",
   "kienthuc": "",
   "mota": ""
+ },
+ {
+  "ma": "tl-261124-205343",
+  "file": "tai-len/tl-261124-205343.html",
+  "anh": "",
+  "ten": "II. Tính chất giặt rửa & III.1. Sản xuất xà phòng (Hóa 12 – KNTT)",
+  "khoi": "12",
+  "bai": "Bài 2: Xà phòng-chất giặt rửa",
+  "loai": "Mô phỏng",
+  "kenh": "mp",
+  "kienthuc": "",
+  "mota": ""
  }
 ]/*HET*/;
 (function () { var a = window.TAI_NGUYEN_TAILEN || []; a.forEach(function (t) { t.tailen = 1; }); window.TAI_NGUYEN = (window.TAI_NGUYEN || []).concat(a); })();
