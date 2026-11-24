@@ -409,17 +409,6 @@ window.TAI_NGUYEN_TAILEN = /*DS*/[
   "mota": ""
  },
  {
-  "ma": "tl-261124-071004",
-  "file": "tai-len/tl-261124-071004.html",
-  "anh": "",
-  "ten": "II. Glucose và Fructose (Hóa học 12 – KNTT)",
-  "khoi": "12",
-  "bai": "Bài 4: carbohydrate. Glucose va fructose",
-  "loai": "Mô phỏng",
-  "kienthuc": "",
-  "mota": ""
- },
- {
   "ma": "tl-261124-193126",
   "file": "tai-len/tl-261124-193126.pdf",
   "anh": "",
