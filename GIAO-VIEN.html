@@ -666,6 +666,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .voTay{display:flex;gap:8px;padding:8px 12px;background:#141a22}.voTay input{flex:1;font:inherit;font-size:16px;padding:9px 12px;border-radius:10px;border:1px solid #3a4452;background:#0b0f14;color:#fff}.voChe{display:flex;gap:8px;padding:0 12px 10px}.voChe button{flex:1;font:inherit;font-weight:800;font-size:16px;padding:12px;border-radius:12px;border:2px solid #3a4452;background:#1b222c;color:#cfd6e0}.voChe button.on[data-tre="0"]{background:#fff;color:#111;border-color:#fff}.voChe button.on[data-tre="1"]{background:#ffd43b;color:#111;border-color:#ffd43b}.voKQ.tre{background:#ffd43b;color:#111}
 
 .voTab{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0;border-bottom:2px solid var(--line)}.voTab button{border:0;background:none;padding:10px 14px;font:inherit;font-weight:700;font-size:16px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;border-radius:10px 10px 0 0;display:flex;align-items:center;gap:6px}.voTab button.on{color:var(--ink);border-bottom-color:#2e7d32;background:#f1f8f1}.voTab button small{background:var(--bg);border-radius:10px;padding:1px 7px;font-size:12px}.voTab .voTabSuaN{margin-left:auto;font-size:14px;font-weight:600}.txBang td.voR,.voChu.voR{font-weight:800;background:#c5cae9}.voChu{padding:0 5px;border-radius:5px}.voChu.voT{background:#ffe066}.voChu.voK{background:#fbd5d5;color:#a52714}.voBangT td.voS{text-align:center;font-weight:700;background:#f6f8fb}.txNhap label.co.voR{background:#e8eaf6}
+.voDong{display:flex;gap:6px;align-items:center}.voDong .voDoi{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:6px 2px;cursor:pointer}.voDong .voBo{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:8px;width:34px;height:34px;font-size:16px;cursor:pointer}
 #voNen{position:fixed;inset:0;z-index:90;background:#0b0f14;color:#fff;display:flex;flex-direction:column}#voNen[hidden]{display:none}.voTren{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px}.voTren b{font-size:17px}.voKhung{position:relative;flex:1;min-height:0;overflow:hidden;background:#000}.voKhung video{width:100%;height:100%;object-fit:cover}.voO{position:absolute;left:50%;top:45%;width:min(62vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}.voKQ{position:absolute;left:12px;right:12px;bottom:14px;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.7);font-size:15px;text-align:center}.voKQ.tot{background:#1e7d32}.voKQ.trung{background:#6b5d00}.voKQ.xau{background:#a52714}.voKQ big{display:block;font-size:26px;font-weight:800;line-height:1.25}.voDs{max-height:30vh;overflow:auto;padding:8px 12px 14px;font-size:14px;background:#141a22}.voDs div{padding:4px 0;border-bottom:1px solid #2a323d}.voDs .sub{color:#aab}
 .kqHang{display:flex;gap:6px;align-items:center}.kqHang .kqDong{flex:1}
 .nxDot{border-top:1px solid var(--line);padding:10px 0}.nxDot textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin:6px 0}.nxTT{float:right;font-size:13px;color:var(--muted)}.emXoa,.emXoaL{align-self:center}
@@ -1000,7 +1001,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   <div class="card" id="voBang"></div>
 </section>
 <div id="voNen" hidden role="dialog" aria-modal="true" aria-label="Quét nộp vở">
-  <div class="voTren"><div><b id="voTieu">📗 Quét nộp vở</b><div class="sub" id="voDem" style="color:#cde"></div></div><button class="btn2" id="voXong">✓ Xong</button></div>
+  <div class="voTren"><div><b id="voTieu">📗 Quét nộp vở</b><div class="sub" id="voDem" style="color:#cde"></div></div><button class="btn2" id="voXong">✓ Xong &amp; gửi</button></div>
   <div class="voChe" role="group" aria-label="Chế độ nộp"><button data-tt="V" class="on">X Nộp đúng hạn</button><button data-tt="T">⏰ Nộp trễ</button><button data-tt="R">▢ Vở trống</button></div>
   <div class="voKhung"><video id="voVideo" playsinline muted autoplay></video><div class="voO"></div><div class="voKQ" id="voKQ">Đang mở camera…</div></div>
   <div class="voTay"><input id="voSBD" inputmode="numeric" maxlength="8" placeholder="Nhãn hỏng? Gõ 2 số cuối SBD" aria-label="Số báo danh"><button class="btn2" id="voGhiTay">Ghi</button></div>
@@ -1421,7 +1422,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function voVeDs() {
     var dem = function (t) { return VO.ds.filter(function (x) { return x.tt === t; }).length; }, CH = { V: 'đúng hạn', T: 'trễ', R: 'vở trống' };
     $('voDem').textContent = VO.l.ten + ' · ' + VO.tabTen + ' · ' + (VO.ds.length ? VO.ds.length + (VO.siso ? '/' + VO.siso : '') + ' vở · đúng hạn ' + dem('V') + ' · trễ ' + dem('T') + ' · vở trống ' + dem('R') : 'chưa quét vở nào');
-    if (VO.ds.length) $('voDs').innerHTML = VO.ds.slice().reverse().map(function (x) { return '<div>' + (x.tt === 'T' ? '<b style="background:#ffd43b;color:#111;padding:0 5px;border-radius:5px">X</b> ' : x.tt === 'R' ? '<b style="background:#c5cae9;color:#111;padding:0 5px;border-radius:5px">Tr</b> ' : '<b>X</b> ') + esc(x.hoten) + ' <span class="sub">· ' + CH[x.tt] + ' · ' + esc(x.gio) + (x.trung ? ' · đã ghi trước đó' : '') + '</span></div>'; }).join('');
+    if (VO.ds.length) {
+      $('voDs').innerHTML = '<div class="sub">📱 Đã lưu trong máy · chưa gửi. Chạm tên để đổi X / trễ / trống, ✕ để xóa. Bấm <b>✓ Xong &amp; gửi</b> để đẩy lên sổ.</div>' + VO.ds.map(function (x, i) { return [x, i]; }).reverse().map(function (a) { var x = a[0];
+        return '<div class="voDong" data-i="' + a[1] + '"><button type="button" class="voDoi">' + (x.tt === 'T' ? '<b style="background:#ffd43b;color:#111;padding:0 5px;border-radius:5px">X</b> ' : x.tt === 'R' ? '<b style="background:#c5cae9;color:#111;padding:0 5px;border-radius:5px">Tr</b> ' : '<b>X</b> ') + esc(x.hoten) + ' <span class="sub">· ' + CH[x.tt] + ' · ' + esc(x.gio) + '</span></button><button type="button" class="voBo" title="Xóa">✕</button></div>'; }).join('');
+      [].forEach.call($('voDs').querySelectorAll('.voDong'), function (d) {
+        var i = +d.getAttribute('data-i');
+        d.querySelector('.voDoi').onclick = function () { var x = VO.ds[i]; x.tt = { V: 'T', T: 'R', R: 'V' }[x.tt]; VO.xong[x.mahs].tt = x.tt; voLuuMay(); voVeDs(); };
+        d.querySelector('.voBo').onclick = function () { var x = VO.ds[i]; if (!confirm('Bỏ ' + x.hoten + ' khỏi danh sách đã quét?')) return; VO.ds.splice(i, 1); delete VO.xong[x.mahs]; delete VO.gan[x.mahs]; voLuuMay(); voVeDs(); };
+      });
+    }
   }
   function voCheDo(tt) {
     VO.tt = /^[VTR]$/.test(tt) ? tt : 'V';
@@ -1433,7 +1442,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     if (VO.gan[sbd] && now - VO.gan[sbd] < 4000) return;   // cùng quyển còn trong khung
     VO.gan[sbd] = now;
     var l = VO.l;   // em học nhiều lớp dùng chung 1 SBD: để sổ lớp đang quét tự kiểm tra em có trong danh sách không
-    if (VO.xong[sbd]) { voBao('trung', VO.xong[sbd].hoten, 'Đã ghi rồi · ' + VO_TEN[VO.xong[sbd].tt]); bip(true); return; }
+    if (VO.xong[sbd]) { voBao('trung', VO.xong[sbd].hoten, 'Đã quét rồi · ' + VO_TEN[VO.xong[sbd].tt]); bip(true); return; }
+    if (VO.lop) {   // ghi vào máy, không chờ mạng
+      var ten = VO.lop[sbd];
+      if (!ten) { voBao('xau', '', 'Vở ' + sbd + (voLopSBD(sbd) ? ' (lớp ' + voLopSBD(sbd).ten + ')' : '') + ' không có trong danh sách lớp ' + l.ten + '.'); bip(false); return; }
+      if (VO.cu[sbd] && VO.cu[sbd] !== 'K') { voBao('trung', ten, 'Đã ghi trên sổ trước đó · ' + VO_TEN[VO.cu[sbd]]); bip(true); return; }
+      var d0 = new Date(); VO.xong[sbd] = { hoten: ten, tt: VO.tt };
+      VO.ds.push({ mahs: sbd, hoten: ten, tt: VO.tt, gio: ('0' + d0.getHours()).slice(-2) + ':' + ('0' + d0.getMinutes()).slice(-2) });
+      voLuuMay(); voBao(VO.tt === 'V' ? 'tot' : 'tre', ten, VO_KH[VO.tt] + ' · ' + VO_TEN[VO.tt] + ' · đã lưu máy'); bip(true); voVeDs(); return;
+    }
     if (VO.dang[sbd]) return;
     var ttQ = VO.tt;
     VO.dang[sbd] = 1; voBao('', '', 'Đang ghi ' + sbd + '…');
@@ -1462,13 +1479,23 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function moQuetVo(ngay, l, tab, tabTen) {
     taoAm();
-    VO = { ngay: ngay, l: l, tab: tab || 'v', tabTen: tabTen || 'Vở', ds: [], xong: {}, dang: {}, gan: {}, siso: 0, dung: false, tt: 'V' };
+    VO = { ngay: ngay, l: l, tab: tab || 'v', tabTen: tabTen || 'Vở', ds: [], xong: {}, dang: {}, gan: {}, siso: 0, dung: false, tt: 'V', lop: null, cu: {}, ghichu: '' };
+    var jL = TX.data[l.ten], idC = ngay + '#' + VO.tab;
+    if (jL && jL.hs) {
+      VO.lop = {}; jL.hs.forEach(function (x) { VO.lop[x.mahs] = x.hoten; }); VO.siso = jL.hs.length;
+      Object.keys((jL.tx && jL.tx.nop) || {}).forEach(function (m) { var t = jL.tx.nop[m][idC]; if (t) VO.cu[m] = t; });
+      var cC = ((jL.tx && jL.tx.vocot) || []).filter(function (c) { return c.id === idC; })[0]; if (cC && cC.ghichu !== 'Nộp vở') VO.ghichu = cC.ghichu || '';
+      try { var luu = JSON.parse(localStorage.getItem('vo_cho') || '{}')[l.ten + '|' + idC]; if (luu && luu.ds) luu.ds.forEach(function (x) { if (VO.lop[x.mahs] && !VO.xong[x.mahs]) { VO.ds.push(x); VO.xong[x.mahs] = { hoten: x.hoten, tt: x.tt }; } }); } catch (e) {}
+    }
     var p = ngay.split('-');
     $('voTieu').textContent = '📗 ' + (tabTen || 'Nộp vở') + ' · ' + l.ten + ' · ' + p[2] + '/' + p[1];
     $('voXong').disabled = false; voCheDo('V');
     $('voDs').innerHTML = '<div class="sub">Chọn <b>Nộp đúng hạn</b>, <b>Nộp trễ</b> hoặc <b>Vở trống</b> rồi đưa nhãn QR trên vở vào khung. Chỉ nhận vở lớp ' + esc(l.ten) + '. Quét xong bấm “Xong” để thoát; sau đó tích KN cho em không nộp hoặc sửa trạng thái.</div>';
     voVeDs(); voBao('', '', 'Đang mở camera…'); $('voNen').hidden = false;
     voMoCam();
+  }
+  function voLuuMay() {
+    try { var a = JSON.parse(localStorage.getItem('vo_cho') || '{}'), k = VO.l.ten + '|' + VO.ngay + '#' + VO.tab; if (VO.ds.length) a[k] = { ds: VO.ds, luc: Date.now() }; else delete a[k]; localStorage.setItem('vo_cho', JSON.stringify(a)); } catch (e) {}
   }
   function voMoCam() {
     var bdOk = Promise.resolve(!!VO.bd);
@@ -1494,10 +1521,20 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   window.__voGhi = function (t) { var s = voDocMa(t); if (s && VO) voGhi(s); };   // dùng khi thử tự động
   // Xong: tắt camera, thoát ra bảng; mở luôn phần chỉnh cột nộp vở hôm đó (GV tích KN / sửa đúng hạn, trễ hoặc Hủy để thoát)
   $('voXong').onclick = function () {
-    if (!VO) return; VO.dung = true; clearTimeout(VO.hen);
+    if (!VO) return;
+    if (VO.lop && VO.ds.length && !VO.gui) {
+      var bt = this, V0 = VO, diemG = {}; V0.ds.forEach(function (x) { diemG[x.mahs] = x.tt; });
+      V0.gui = true; bt.disabled = true; bt.textContent = 'Đang gửi ' + V0.ds.length + ' vở…'; voBao('', '', 'Đang gửi lên sổ…');
+      goi(V0.l.url, { action: 'gv_tx_luu', ma: MA, id: '', vo: V0.tab, ngay: V0.ngay, ghichu: V0.ghichu, diem: diemG }).then(function (r) {
+        if (!r.ok) throw new Error(/hop le/i.test(r.msg || '') ? 'Sổ lớp ' + V0.l.ten + ' chưa cập nhật bản mới.' : r.msg || 'lỗi');
+        V0.ds = []; voLuuMay(); bt.disabled = false; bt.textContent = '✓ Xong & gửi'; $('voXong').onclick();
+      }).catch(function (e) { V0.gui = false; bt.disabled = false; bt.textContent = '✓ Xong & gửi'; voBao('xau', '', 'Chưa gửi được (' + e.message + '). Bài vẫn lưu trong máy, bấm lại để gửi.'); bip(false); });
+      return;
+    }
+    VO.dung = true; clearTimeout(VO.hen);
     if (VO.st) VO.st.getTracks().forEach(function (t) { t.stop(); });
     $('voVideo').srcObject = null;
-    var co = VO.ds.length, id = VO.ngay + '#' + VO.tab, l = VO.l; VO = null; $('voNen').hidden = true;
+    var co = VO.ds.length || VO.gui, id = VO.ngay + '#' + VO.tab, l = VO.l; VO = null; $('voNen').hidden = true;
     delete HS_CACHE[l.ten]; delete TX.data[l.ten];
     VOX.moCot = co ? id : null;
     if (!$('scrVO').classList.contains('hidden')) taiVO();
