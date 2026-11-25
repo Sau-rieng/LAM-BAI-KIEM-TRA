@@ -2818,7 +2818,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function khoiSo(madot) { return (/^[A-Z]+(\d+)-/i.exec(madot) || [])[1] || ''; }
   function monChu(madot) { var k = khoiSo(madot); return k === '9' || k === '8' || k === '7' || k === '6' ? 'KHOA HỌC TỰ NHIÊN ' + k : 'HÓA HỌC – Lớp ' + k; }
-  var CSS_IN = '@page{size:A4;margin:12mm 12mm 14mm}*{box-sizing:border-box}body{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.32;color:#000;margin:0;background:#fff}' +
+  var CSS_IN = '@page{size:A4;margin:12mm 12mm 14mm}*{box-sizing:border-box}body{font-family:"Times New Roman",Times,"Cambria Math","Segoe UI Symbol","Noto Serif","DejaVu Serif",serif;font-size:11pt;line-height:1.32;color:#000;margin:0;background:#fff}' +
     '.thanh{position:sticky;top:0;background:#1a2b4a;color:#fff;padding:10px 14px;font:15px sans-serif;display:flex;gap:12px;align-items:center;flex-wrap:wrap;z-index:9}.thanh button{font:700 15px sans-serif;padding:8px 16px;border-radius:8px;border:0;background:#fff;color:#1a2b4a}' +
     '@media print{.thanh{display:none}}@media screen{.trang{max-width:210mm;margin:12px auto;padding:12mm;box-shadow:0 1px 6px rgba(0,0,0,.25)}}' +
     'img{max-width:100%;filter:grayscale(1)}sub,sup{line-height:0}table{border-collapse:collapse}';
