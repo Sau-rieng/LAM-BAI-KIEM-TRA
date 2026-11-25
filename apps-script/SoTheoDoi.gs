@@ -1999,6 +1999,26 @@ function gvNapDe(d) {
       if (!cau.length) return {ok: false, msg: 'De ' + madot + ' khong co cau hoi nao'};
       if (cau.length > 200) return {ok: false, msg: 'De ' + madot + ' qua 200 cau'};
       const tab = ss.getSheetByName(madot), dong = dongCH[madot];
+      if (x.suaND) {
+        // De da thi: chi sua noi dung cau / phuong an / hinh / loi giai / kien thuc. Cau, loai, diem, dap an, goc phai giu nguyen (dap an sua bang Phan tich de)
+        if (!tab) return {ok: false, msg: 'Kho chua co de ' + madot};
+        const cuV = tab.getDataRange().getValues(); cuV.shift();
+        const cuR = cuV.filter(function (r) { return String(r[0] || '').trim(); });
+        const chuan = function (v) { return String(v == null ? '' : v).trim().toUpperCase().replace(/,/g, '.').replace(/\s+/g, ''); };
+        if (cuR.length !== cau.length) return {ok: false, msg: 'De ' + madot + ': so cau khac kho (' + cau.length + ' / ' + cuR.length + ')'};
+        for (let i = 0; i < cau.length; i++) {
+          const a = cau[i], b = cuR[i], ten = String(b[0]).trim();
+          if (String(a[0]).trim() !== ten || chuan(a[8]) !== chuan(b[8])) return {ok: false, msg: 'De ' + madot + ': cau ' + ten + ' khac thu tu/loai so voi kho'};
+          if (chuan(a[6]) !== chuan(b[6]) && !(Number(chuan(a[6])) === Number(chuan(b[6])) && chuan(a[6]) !== '')) return {ok: false, loi: 'dapan', madot: madot, msg: 'De ' + madot + ' cau ' + ten + ': dap an file (' + a[6] + ') khac kho (' + b[6] + '). Sua dap an bang Phan tich de truoc (de cham lai), roi nap lai.'};
+          if (Number(chuan(a[9]) || 0) !== Number(chuan(b[9]) || 0)) return {ok: false, msg: 'De ' + madot + ' cau ' + ten + ': diem khac kho'};
+        }
+        viec.push({madot: madot, suaND: true, ten: madot, cau: cau.map(function (r) { const o = []; for (let j = 0; j < 11; j++) o.push(r[j] === undefined || r[j] === null ? '' : String(r[j])); return o; }),
+          coGoc: cuV.length && tab.getLastColumn() >= 11 || cau.some(function (r) { return String(r[10] || '').trim(); }),
+          kt: (Array.isArray(x.kt) ? x.kt : []).filter(function (r) { return Array.isArray(r) && String(r[0] || '').trim() !== ''; })
+            .map(function (r) { return [madot, String(r[0]).trim(), String(r[1] || '').trim(), String(r[2] || '').trim(), String(r[3] || '').trim(), String(r[4] || '').trim()]; }),
+          gt: gt, tl: tl, rb: [], tab: tab, dong: null});
+        continue;
+      }
       if ((tab || dong) && !x.thay) return {ok: false, loi: 'trung', madot: madot, msg: 'Kho da co de ' + madot};
       if (dong && (dong.tt === 'MO' || dong.tt === 'CHO')) return {ok: false, madot: madot, msg: 'De ' + madot + ' dang mo, hay dong de truoc khi thay'};
       const ph = Math.round(Number(x.phut));
@@ -2028,7 +2048,8 @@ function gvNapDe(d) {
       sh.getRange(1, 1, bang.length, nc).setNumberFormat('@').setValues(bang);
       sh.getRange(1, 1, 1, nc).setFontWeight('bold');
       sh.setFrozenRows(1);
-      if (v.dong) {
+      if (v.suaND) {
+      } else if (v.dong) {
         ch.getRange(v.dong.so, 2, 1, 2).setValues([[v.ten, v.phut]]);
         ch.getRange(v.dong.so, 6).setValue(v.lop);
         if (v.giay || v.thang) ch.getRange(v.dong.so, 8, 1, 3).setValues([[v.ca, v.giay ? 'GIAY' : '', v.thang]]);
@@ -2041,7 +2062,7 @@ function gvNapDe(d) {
       }
     });
     // KIEN THUC: bo dong cu cua cac dot vua nap (tru dot chi them loi giai), them dong moi
-    const cacMa = viec.filter(function (v) { return !v.chiGT; }).map(function (v) { return v.madot; });
+    const cacMa = viec.filter(function (v) { return !v.chiGT && !(v.suaND && !v.kt.length); }).map(function (v) { return v.madot; });
     const ktV = kt.getLastRow() > 1 ? kt.getRange(2, 1, kt.getLastRow() - 1, 6).getValues() : [];
     const giu = ktV.filter(function (r) { return String(r[0]).trim() !== '' && cacMa.indexOf(String(r[0]).trim()) < 0; });
     const moi = giu.concat.apply(giu, viec.map(function (v) { return v.kt; }));
@@ -2050,14 +2071,14 @@ function gvNapDe(d) {
     // GIAI THICH: thay dong cua moi dot vua nap
     let gtSh = ss.getSheetByName('GIAI THICH');
     if (!gtSh) { gtSh = ss.insertSheet('GIAI THICH'); gtSh.getRange(1, 1, 1, 3).setValues([['MaDot', 'Cau', 'GiaiThich']]).setFontWeight('bold'); gtSh.setFrozenRows(1); }
-    const maGT = viec.filter(function (v) { return !v.chiGT || v.gt.length; }).map(function (v) { return v.madot; });
+    const maGT = viec.filter(function (v) { return (!v.chiGT && !v.suaND) || v.gt.length; }).map(function (v) { return v.madot; });
     const gtV = gtSh.getLastRow() > 1 ? gtSh.getRange(2, 1, gtSh.getLastRow() - 1, 3).getValues() : [];
     const gtGiu = gtV.filter(function (r) { return String(r[0]).trim() !== '' && maGT.indexOf(String(r[0]).trim()) < 0; });
     const gtMoi = gtGiu.concat.apply(gtGiu, viec.map(function (v) { return v.gt; }));
     if (gtV.length) gtSh.getRange(2, 1, gtV.length, 3).clearContent();
     if (gtMoi.length) gtSh.getRange(2, 1, gtMoi.length, 3).setNumberFormat('@').setValues(gtMoi);
     // TU LUAN (Phan IV de giay): thay dong cua cac dot vua nap co tu luan (hoac nap lai de)
-    const maTL = viec.filter(function (v) { return !v.chiGT || v.tl.length; }).map(function (v) { return v.madot; });
+    const maTL = viec.filter(function (v) { return (!v.chiGT && !v.suaND) || v.tl.length; }).map(function (v) { return v.madot; });
     if (viec.some(function (v) { return v.tl.length; }) || ss.getSheetByName('TU LUAN')) {
       let tlSh = ss.getSheetByName('TU LUAN');
       if (!tlSh) { tlSh = ss.insertSheet('TU LUAN'); tlSh.getRange(1, 1, 1, 6).setValues([['MaDot', 'Cau', 'NoiDung', 'Hinh', 'Diem', 'LoiGiai']]).setFontWeight('bold'); tlSh.setFrozenRows(1); }
@@ -2087,7 +2108,7 @@ function gvNapDe(d) {
     ds.forEach(function (x) { const goc = String((x && x.goc) || '').trim(), moi = String((x && x.madot) || '').trim(); if (goc && goc !== moi && /^[A-Za-z0-9][A-Za-z0-9_.\-]{1,39}$/.test(goc)) ghiDoiMa(goc, moi); });
     SpreadsheetApp.flush();
     const r = gvDot();
-    r.nap = viec.map(function (v) { return {madot: v.madot, hinh: ketHinh[v.madot] || null, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, sotl: (v.tl || []).length, sorb: (v.rb || []).length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
+    r.nap = viec.map(function (v) { return {suaND: !!v.suaND, madot: v.madot, hinh: ketHinh[v.madot] || null, ten: v.ten || v.madot, socau: v.cau.length, sokt: v.kt.length, sogt: v.gt.length, sotl: (v.tl || []).length, sorb: (v.rb || []).length, lop: v.lop || '', thay: !!(v.tab || v.dong), chiGT: !!v.chiGT, giay: !!v.giay}; });
     return r;
   } finally {
     lock.releaseLock();
