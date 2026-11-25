@@ -130,6 +130,7 @@ img{-webkit-user-drag:none;pointer-events:none}
 .baiTN{font-size:20px;font-weight:800;color:#fff;margin:26px 0 12px;padding:10px 16px;border-radius:14px;background:linear-gradient(90deg,#1d5fbf,#3b82f6);box-shadow:0 4px 12px rgba(29,95,191,.25);display:flex;align-items:center;gap:8px}.baiTN::before{content:"📘";font-size:20px}.baiTN.on2{background:linear-gradient(90deg,#b4235a,#e0457b)}.baiTN.lt{background:linear-gradient(90deg,#127a5a,#22a37a)}
 .tnKenhHS{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}.tnKenhHS button{border:2px solid #d9e2ef;background:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-weight:800;font-size:16px;color:var(--ink);cursor:pointer}.tnKenhHS button.on{background:#c2185b;border-color:#c2185b;color:#fff}.theTN .bia.tepBia{background:linear-gradient(135deg,#fff4e0,#fde2c2);color:#7a4a00;align-items:center;justify-content:center}.theTN .bia.tepBia i{font-size:54px}.xtVe{background:#ffd54f;color:#172033;padding:8px 14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:15px}
 .theTN .chu .ngayTN{display:block;font-size:12.5px;color:#6b7280;margin-top:3px}
+.llTong{background:#eef6ff;border:1.5px solid #9cc3f5}.llBox{margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:#f3f0ff;border:1.5px solid #c9bdf5}.llDau{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}.llVo{font-size:14px;color:#5b3fb0;font-weight:700}.llThanh{height:8px;background:#e2dcfa;border-radius:6px;margin:8px 0;overflow:hidden}.llThanh i{display:block;height:100%;background:#7048e8}.llNut,.llGui{background:#7048e8;color:#fff;border:0;border-radius:10px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer;margin-top:6px}.llLam .nd{margin:8px 0}.llLam img{max-width:100%}.llPa{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border:1.5px solid #d6cff5;border-radius:10px;background:#fff;font:inherit;cursor:pointer;color:inherit}.llPa.on{border-color:#7048e8;background:#ece6ff}.llY{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:6px 0}.llDS{white-space:nowrap}.llDS button{border:1.5px solid #d6cff5;background:#fff;border-radius:8px;padding:6px 10px;margin-left:4px;font:inherit;cursor:pointer}.llDS button.on{background:#7048e8;color:#fff;border-color:#7048e8}.llO{width:100%;padding:9px 12px;border:1.5px solid #d6cff5;border-radius:10px;font:inherit;margin:6px 0}.llTB{margin-top:8px;font-weight:700}
 .tnLk{margin:14px 0 6px;padding:12px 14px;border-radius:14px;background:#fff8ec;border:1.5px solid #f3d9a6}.tnLkTieu{font-weight:800;color:#9a5b00;margin-bottom:10px}.tnLkDs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.lkThe{display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:1.5px solid #f0d49c;border-radius:12px;padding:6px;cursor:pointer;color:var(--ink);font:inherit}.lkThe:hover{border-color:#e08a00}.lkBia{position:relative;flex:0 0 88px;height:56px;border-radius:8px;overflow:hidden;background:#fdebc8;display:flex;align-items:center;justify-content:center}.lkBia img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.lkBia i{position:relative;font-style:normal;font-size:22px;background:rgba(255,255,255,.85);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center}.lkChu b{display:block;font-size:15px;line-height:1.25}.lkChu small{color:#8a6a2c}.xtMoi{position:absolute;right:10px;bottom:10px;z-index:3;background:rgba(0,0,0,.65);color:#fff;padding:6px 10px;border-radius:8px;font-size:13px;text-decoration:none}.xtAnh{max-width:100%;max-height:100%;object-fit:contain;display:block;margin:auto;position:absolute;inset:0}
 .luoiTN{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 .theTN{display:flex;flex-direction:column;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:0;overflow:hidden;color:var(--ink);font-weight:400}
@@ -634,6 +635,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function veCau() {
     var box = $('dsCau'); box.innerHTML = '';
     var chiSai = $('chiSai').checked, phanTruoc = null;
+    var LL = baiDangXem.lamlai;
+    if (LL) {
+      var cs = baiDangXem.cau.filter(function (q) { return !q.dung; }), xong = cs.filter(function (q) { return llDa(q) >= llCan(q); }).length;
+      if (cs.length) { var tb = document.createElement('div'); tb.className = 'card llTong'; tb.innerHTML = '<b>🔁 Làm lại câu sai: ' + xong + '/' + cs.length + ' câu đã xong</b><div class="sub">Mỗi câu sai em phải làm lại đúng đủ số lần: mức <b>Biết ' + LL.so.biet + ' lần</b> · <b>Hiểu ' + LL.so.hieu + ' lần</b> · mức khác <b>' + LL.so.khac + ' lần</b>, và <b>chép lại câu + lời giải vào vở</b> đủ số lần đó. Bấm 🔁 Làm lại ở từng câu.</div>'; box.appendChild(tb); }
+    }
     baiDangXem.cau.forEach(function (q) {
       if (chiSai && q.dung) return;
       var n = nhan(q);
@@ -683,12 +689,55 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         g.onclick = function () { var mo = khung.hidden; khung.hidden = !mo; g.setAttribute('aria-expanded', mo ? 'true' : 'false'); g.textContent = mo ? '💡 Ẩn giải thích' : '💡 Giải thích'; };
         hang.appendChild(g); the.appendChild(khung);
       }
+      if (LL && !q.dung) the.appendChild(khungLamLai(q));
       var b = document.createElement('button'); b.className = 'hoiCau'; b.textContent = '💬 Hỏi thầy/cô câu này';
       b.onclick = function () { moTin({ madot: baiDangXem.madot, cau: q.cau, chu: 'Câu ' + n.so + (n.phan ? ' (Phần ' + n.phan + ')' : '') + ' · ' + baiDangXem.ten }); };
       hang.appendChild(b); the.insertBefore(hang, the.querySelector('.giaiThich'));
     });
     if (!box.children.length) box.innerHTML = '<div class="card">Không có câu sai nào.</div>';
     veTuLuan(box);
+  }
+  // ---------- LÀM LẠI CÂU SAI (Biết 14 · Hiểu 7 · khác 3 lần): làm trên app + chép vở ----------
+  function llCan(q) { var S = baiDangXem.lamlai.so, m = String(q.md || '').toLowerCase(); return /^biết/.test(m) ? S.biet : /^hiểu/.test(m) ? S.hieu : S.khac; }
+  function llDa(q) { return Math.min(llCan(q), (baiDangXem.lamlai.dung || {})[q.cau] || 0); }
+  function khungLamLai(q) {
+    var o = document.createElement('div'); o.className = 'llBox';
+    var ve = function (tb) {
+      var can = llCan(q), da = llDa(q), mucT = q.md ? 'mức ' + q.md : 'câu này';
+      o.innerHTML = '<div class="llDau"><b>🔁 ' + (da >= can ? '✓ Đã làm lại đủ ' + can + '/' + can + ' lần' : 'Làm lại ' + can + ' lần (' + mucT + ') · đã đúng ' + da + '/' + can) + '</b>' +
+        '<span class="llVo">✍ Chép câu + lời giải vào vở ' + can + ' lần</span></div><div class="llThanh"><i style="width:' + Math.round(da / can * 100) + '%"></i></div>' +
+        (da >= can ? '' : '<button type="button" class="llNut">🔁 Làm lại</button>') + '<div class="llLam"></div>' + (tb ? '<div class="llTB">' + tb + '</div>' : '');
+      var n = o.querySelector('.llNut'); if (n) n.onclick = function () { lam(); };
+    };
+    var lam = function () {
+      var k = o.querySelector('.llLam'), h = '<div class="nd">' + q.hoi + '</div>' + (q.hinh ? '<img src="' + q.hinh + '" alt="">' : ''), chon = '';
+      o.querySelector('.llNut').hidden = true; var tb0 = o.querySelector('.llTB'); if (tb0) tb0.remove();
+      if (q.loai === 'TN') {
+        var L = ['A', 'B', 'C', 'D'].filter(function (x) { return String(q.pa[x]).trim() !== ''; }).sort(function () { return Math.random() - 0.5; });
+        h += L.map(function (x, i) { return '<button type="button" class="llPa" data-l="' + x + '"><span>' + 'ABCD'[i] + '.</span> ' + q.pa[x] + '</button>'; }).join('');
+      } else if (q.loai === 'DS') {
+        h += ['A', 'B', 'C', 'D'].map(function (x, y) { return '<div class="llY"><span>' + 'abcd'[y] + ') ' + q.pa[x] + '</span><span class="llDS" data-y="' + y + '"><button type="button" data-v="D">Đúng</button><button type="button" data-v="S">Sai</button></span></div>'; }).join('');
+      } else h += '<input type="text" class="llO" inputmode="decimal" placeholder="Đáp số của em" autocomplete="off">';
+      h += '<button type="button" class="llGui">Kiểm tra</button>';
+      k.innerHTML = h;
+      var ds = ['', '', '', ''];
+      [].forEach.call(k.querySelectorAll('.llPa'), function (b) { b.onclick = function () { chon = b.getAttribute('data-l'); [].forEach.call(k.querySelectorAll('.llPa'), function (x) { x.classList.toggle('on', x === b); }); }; });
+      [].forEach.call(k.querySelectorAll('.llDS'), function (g) { [].forEach.call(g.querySelectorAll('button'), function (b) { b.onclick = function () { ds[+g.getAttribute('data-y')] = b.getAttribute('data-v'); [].forEach.call(g.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); }); }; }); });
+      k.querySelector('.llGui').onclick = function () {
+        var gui = q.loai === 'DS' ? ds.join('') : q.loai === 'TLN' ? k.querySelector('.llO').value.trim().replace(',', '.') : chon;
+        if (q.loai === 'DS' ? gui.length < 4 : !gui) { alert(q.loai === 'DS' ? 'Em chọn Đúng/Sai cho đủ 4 ý.' : 'Em chưa trả lời.'); return; }
+        var bt = this; bt.disabled = true; bt.textContent = 'Đang kiểm tra…';
+        fetch(lopChon.url, { method: 'POST', body: JSON.stringify({ action: 'hs_lamlai', mahs: duLieu.mahs, maxem: duLieu.maxem, madot: baiDangXem.madot, cau: q.cau, chon: gui }) })
+          .then(function (r) { return r.json(); }).then(function (j) {
+            if (!j.ok) throw new Error(j.msg || 'lỗi');
+            if (!j.gv) (baiDangXem.lamlai.dung = baiDangXem.lamlai.dung || {})[q.cau] = j.so;
+            ve(j.dung ? '✓ Đúng rồi! ' + (llDa(q) >= llCan(q) ? 'Em đã làm đủ số lần câu này.' : 'Làm tiếp lần nữa nhé.') : '✗ Chưa đúng. Em xem lại đáp án, 💡 lời giải rồi làm lại (lần sai không tính).');
+            var t = document.querySelector('.llTong b'); if (t) { var cs = baiDangXem.cau.filter(function (x) { return !x.dung; }); t.textContent = '🔁 Làm lại câu sai: ' + cs.filter(function (x) { return llDa(x) >= llCan(x); }).length + '/' + cs.length + ' câu đã xong'; }
+          }).catch(function (e) { bt.disabled = false; bt.textContent = 'Kiểm tra'; alert('Chưa gửi được: ' + e.message); });
+      };
+    };
+    ve('');
+    return o;
   }
   // Phần IV tự luận (đề giấy): bấm câu nào mới hiện đề và lời giải câu đó
   function veTuLuan(box) {

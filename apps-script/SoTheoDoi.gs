@@ -77,6 +77,7 @@ function doPost(e) {
       case 'vaobai': return json(ghiVaoBai(d));
       case 'xemlai': return json(xemLai(d));
       case 'hs_anhphieu': return json(hsAnhPhieu(d));
+      case 'hs_lamlai': return json(hsLamLai(d));
       case 'hs_anhtl': return json(hsAnhTL(d));
       case 'hs_kienthuc': return json(hsKienThuc(d));
       case 'hs_luyen': return json(hsLuyen(d));
@@ -97,6 +98,8 @@ function doPost(e) {
       case 'tc_tiendo': return json(tcTienDo(d));
       case 'gv_dot':
       case 'gv_dat':
+      case 'gv_solamlai':
+      case 'gv_lamlai_lop':
       case 'gv_theodoi':
       case 'gv_hoso':
       case 'gv_anbai':
@@ -200,6 +203,8 @@ function doPost(e) {
         AN_GV = true;   // trang GV: an bai/diem cua tai khoan GV (SBD ...00) khoi moi thong ke
         if (d.action === 'gv_dot') return json(gvDot());
         if (d.action === 'gv_dat') return json(gvDat(d));
+        if (d.action === 'gv_solamlai') return json(gvSoLamLai(d));
+        if (d.action === 'gv_lamlai_lop') return json(gvLamLaiLop(d));
         if (d.action === 'gv_hoso') return json(hoSoLop());
         if (d.action === 'gv_anbai') return json(gvAnBai(d));
         if (d.action === 'gv_baomat') return json(gvBaoMat(d));
@@ -392,6 +397,87 @@ function nopBai(d) {
 }
 
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// LAM LAI CAU SAI: de bat LamLai (cot K CAU HINH), HS lam lai cau sai tren app theo muc do (Biet 14 · Hieu 7 · khac 3 lan dung)
+//  So lan: kho tab CAI DAT, dong SoLamLai = "14,7,3". Tien do: so lop tab LAM LAI (MaHS | MaDot | Cau | Dung | CapNhat)
+// ---------------------------------------------------------------------
+const TAB_LL = 'LAM LAI';
+function soLamLai() {
+  return nho('sll', function () {
+    let s = '';
+    try { const sh = kho().getSheetByName('CAI DAT'); if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) { if (String(r[0]).trim() === 'SoLamLai') s = String(r[1]); }); } catch (e) {}
+    const a = s.split(/[,;\s]+/).map(Number);
+    return {biet: a[0] >= 1 ? Math.round(a[0]) : 14, hieu: a[1] >= 1 ? Math.round(a[1]) : 7, khac: a[2] >= 1 ? Math.round(a[2]) : 3};
+  });
+}
+function canLamLai(md, so) { const m = khongDau(md); return m.indexOf('BIET') === 0 ? so.biet : m.indexOf('HIEU') === 0 ? so.hieu : so.khac; }
+function gvSoLamLai(d) {
+  const a = (Array.isArray(d.giatri) ? d.giatri : []).map(function (x) { return Math.round(Number(x)); });
+  if (a.length !== 3 || a.some(function (x) { return !(x >= 1 && x <= 50); })) return {ok: false, msg: 'So lan tu 1 den 50'};
+  const ss = kho(); let sh = ss.getSheetByName('CAI DAT');
+  if (!sh) { sh = ss.insertSheet('CAI DAT'); sh.getRange(1, 1, 1, 2).setValues([['Khoa', 'GiaTri']]).setFontWeight('bold'); }
+  const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues() : [];
+  let i = v.findIndex(function (r) { return String(r[0]).trim() === 'SoLamLai'; });
+  if (i < 0) { sh.appendRow(['SoLamLai', a.join(',')]); } else sh.getRange(i + 2, 2).setValue(a.join(','));
+  if (MEMO) delete MEMO.sll;
+  return {ok: true, solamlai: {biet: a[0], hieu: a[1], khac: a[2]}};
+}
+function docLamLai(ma) {   // {madot: {cau: so lan dung}} cua 1 em (ma) hoac ca lop (ma rong: {mahs: {...}})
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_LL), o = {};
+  if (!sh || sh.getLastRow() < 2) return o;
+  sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+    const m = String(r[0]).trim().replace(/^'/, ''); if (!m || (ma && m !== ma)) return;
+    const g = ma ? o : (o[m] = o[m] || {});
+    (g[String(r[1]).trim()] = g[String(r[1]).trim()] || {})[String(r[2]).trim()] = Number(r[3]) || 0;
+  });
+  return o;
+}
+// HS gui 1 lan lam lai: may cham bang dap an kho (khong tin may HS); dung thi +1
+function hsLamLai(d) {
+  const ma = String(d.mahs || '').trim(), hs = timHS(ma), madot = String(d.madot || '').trim(), cauId = String(d.cau || '').trim();
+  if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
+  if (hs.gv) return {ok: true, dung: chamCau((docDe(madot).filter(function (q) { return q.cau === cauId; })[0]) || {}, d.chon).dung, so: 0, gv: true};
+  const c = timDot(madot);
+  if (!c || !c.xemlai || !c.lamlai) return {ok: false, msg: 'De nay khong bat lam lai'};
+  const bai = timBaiDaNop(madot, ma); if (!bai) return {ok: false, msg: 'Em chua lam de nay'};
+  const de = docDe(madot), i = de.findIndex(function (q) { return q.cau === cauId; });
+  if (i < 0) return {ok: false, msg: 'Khong co cau ' + cauId};
+  const q = de[i];
+  if (chamCau(q, tachChiTiet(bai.chitiet)[i]).dung) return {ok: false, msg: 'Cau nay em da lam dung'};
+  const r = chamCau(q, d.chon), can = canLamLai((docKienThuc()[madot + '|' + cauId] || {}).md, soLamLai());
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const ss = SpreadsheetApp.getActive(); let sh = ss.getSheetByName(TAB_LL);
+    if (!sh) { sh = ss.insertSheet(TAB_LL); sh.getRange(1, 1, 1, 5).setValues([['MaHS', 'MaDot', 'Cau', 'Dung', 'CapNhat']]).setFontWeight('bold'); sh.setFrozenRows(1); }
+    const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues() : [];
+    let k = v.findIndex(function (x) { return String(x[0]).trim().replace(/^'/, '') === ma && String(x[1]).trim() === madot && String(x[2]).trim() === cauId; });
+    let so = k >= 0 ? Number(v[k][3]) || 0 : 0;
+    if (r.dung && so < can) {
+      so++;
+      if (k >= 0) sh.getRange(k + 2, 4, 1, 2).setValues([[so, new Date()]]);
+      else sh.appendRow(["'" + ma, madot, cauId, so, new Date()]);
+    }
+    return {ok: true, dung: r.dung, so: so, can: can, dapan: r.dung ? '' : ''};
+  } finally { lock.releaseLock(); }
+}
+// GV: tien do lam lai cua lop cho 1 dot/ca: {mahs: {xong: so cau du, tong: so cau phai lam, lan: tong lan dung, canLan}}
+function gvLamLaiLop(d) {
+  const mas = (Array.isArray(d.madots) ? d.madots : [d.madot]).map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+  const ll = docLamLai(''), so = soLamLai(), kt = docKienThuc(), sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL), kq = {};
+  if (!sh || sh.getLastRow() < 2) return {ok: true, lop: lopNay(), hs: kq};
+  const de = {}; mas.forEach(function (m) { try { de[m] = docDe(m); } catch (e) {} });
+  sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_BL.length).getValues().forEach(function (r) {
+    const m = String(r[1]).trim(), h = String(r[2]).trim(); if (!de[m] || laGV(h)) return;
+    const chon = tachChiTiet(r[9]), o = {xong: 0, tong: 0, lan: 0, canLan: 0};
+    de[m].forEach(function (q, i) {
+      if (chamCau(q, chon[i]).dung) return;
+      const can = canLamLai((kt[m + '|' + q.cau] || {}).md, so), n = Math.min(can, ((ll[h] || {})[m] || {})[q.cau] || 0);
+      o.tong++; o.canLan += can; o.lan += n; if (n >= can) o.xong++;
+    });
+    kq[h] = o;   // lan nop sau ghi de lan truoc
+  });
+  return {ok: true, lop: lopNay(), hs: kq};
+}
 // Xem lai bai: SBD + ma xem rieng; chi cac dot GV bat "ChoXemLai = CO"
 // ---------------------------------------------------------------------
 function xemLai(d) {
@@ -400,7 +486,7 @@ function xemLai(d) {
   if (!dungMaXem(hs, d)) return {ok: false, msg: BM_MSG || 'SBD hoac ma xem bai chua dung'};
   const ketqua = [];
   const gtMap = docGiaiThich(), nxMap = docNhanXet();
-  let tlMap = null;
+  let tlMap = null, llMap = null, ktMap = null;
   docCauHinh().forEach(function (c) {
     if (!c.xemlai || !hopLop(c)) return;   // chỉ đề GV đang mở xem lại; tài khoản GV thấy cả đề mình chưa làm
     let bai = timBaiDaNop(c.madot, ma);
@@ -415,9 +501,10 @@ function xemLai(d) {
       tlcham: c.giay ? (function () { const ca = c.ca || c.madot, x = docTLDiem(ca)[ma]; if (!x) return null; const rb = docRubric(ca); if (!x.duyet) return null; return {tong: x.tong, coAnh: !!x.anh, cau: Object.keys(x.cau).map(function (k) { return {cau: k, diem: x.cau[k].diem, nx: x.cau[k].nx || '', buoc: (function () { const bb = (rb[k] || {}).buoc || [], db = tlDiemBuoc(bb, x.cau[k].dat, x.cau[k].dB); return bb.map(function (b, i) { return {nd: b.nd, diem: b.diem, duoc: db[i], dat: db[i] > 0, lydo: x.cau[k].lydo[i] || ''}; }); })()}; })}; })() : null,
       tuluan: c.giay ? ((tlMap = tlMap || docTuLuan())[c.madot] || []).map(function (t) { return {cau: t.cau, hoi: t.hoi, hinh: t.hinh && t.hinh !== '-' ? anhDataUri(/^hinh\//.test(t.hinh) ? 'https://sau-rieng.github.io/LAM-BAI-KIEM-TRA/' + t.hinh : t.hinh) : '', diem: t.diem, gt: t.gt}; }) : [], tongDiem: c.giay ? de.reduce(function (a, q) { return a + (Number(q.w) || 0); }, 0) : null,
       goiy: typeof layGoiYAI === 'function' ? layGoiYAI(c.madot, ma) : null,
+      lamlai: c.lamlai && !bai.xemDe ? (function () { const ll = (llMap = llMap || docLamLai(ma))[c.madot] || {}; return {so: soLamLai(), dung: ll}; })() : null,
       cau: kq.ct.map(function (q) {
         return {cau: q.cau, loai: q.loai, hoi: q.hoi, pa: q.pa, hinh: anhDataUri(q.hinh), chon: q.chon, dapan: q.dapan,
-          dung: q.dung, soY: q.soY, diem: q.diemCau, toiDa: q.w, gt: gtMap[c.madot + '|' + q.cau] || ''};
+          dung: q.dung, soY: q.soY, diem: q.diemCau, toiDa: q.w, gt: gtMap[c.madot + '|' + q.cau] || '', md: ((ktMap = ktMap || docKienThuc())[c.madot + '|' + q.cau] || {}).md || ''};
       })
     });
   });
@@ -1229,8 +1316,8 @@ function gvDot() {
     return {madot: String(r[0]).trim(), ten: String(r[1] || r[0]).trim(), phut: Number(r[2]) || 15,
       tt: tt, mo: tt === 'MO', xemlai: khongDau(r[4]) === 'CO', lop: String(r[5] || 'TAT CA').trim(),
       batdauluc: r[6] instanceof Date ? r[6].getTime() : 0, ca: String(r[7] || '').trim(),
-      giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9])};
-  }), doima: docDoiMa(), bayGio: Date.now()};
+      giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9]), lamlai: khongDau(r[10]) === 'CO'};
+  }), doima: docDoiMa(), bayGio: Date.now(), solamlai: soLamLai()};
 }
 // Doi TrangThai (MO/DONG) hoac ChoXemLai (CO/KHONG) cua 1 dot trong KHO DE
 function gvDat(d) {
@@ -1246,7 +1333,8 @@ function gvDat(d) {
   for (let i = 1; i < v.length; i++) if (i === i0 || (ca && d.truong !== 'ten' && String(v[i][7] || '').trim() === ca)) hang.push(i);
   if (d.truong === 'ten' && !String(d.giatri || '').trim()) return {ok: false, msg: 'Ten bai khong duoc de trong'};
   if (d.truong === 'phut') { const ph = Math.round(Number(d.giatri)); if (!(ph >= 1 && ph <= 180)) return {ok: false, msg: 'Thoi gian phai tu 1 den 180 phut'}; }
-  if (['trangthai', 'mo', 'xemlai', 'ten', 'phut', 'lop'].indexOf(d.truong) < 0) return {ok: false, msg: 'Truong khong hop le'};
+  if (d.truong === 'lamlai' && !String(sh.getRange(1, 11).getValue()).trim()) sh.getRange(1, 11).setValue('LamLai').setFontWeight('bold');
+  if (['trangthai', 'mo', 'xemlai', 'ten', 'phut', 'lop', 'lamlai'].indexOf(d.truong) < 0) return {ok: false, msg: 'Truong khong hop le'};
   if (d.truong === 'trangthai' && ['MO', 'CHO'].indexOf(String(d.giatri)) >= 0 && khongDau(sh.getRange(i0 + 1, 9).getValue()) === 'GIAY')
     return {ok: false, msg: 'De giay khong mo tren iPad duoc'};
   hang.forEach(function (i) {
@@ -1262,6 +1350,7 @@ function gvDat(d) {
       try { CacheService.getScriptCache().remove('tt_' + String(v[i][0]).trim()); } catch (e) {}
     } else if (d.truong === 'mo') sh.getRange(i + 1, 4).setValue(d.giatri ? 'MO' : 'DONG');
     else if (d.truong === 'xemlai') sh.getRange(i + 1, 5).setValue(d.giatri ? 'CO' : 'KHONG');
+    else if (d.truong === 'lamlai') sh.getRange(i + 1, 11).setValue(d.giatri ? 'CO' : 'KHONG');
     else if (d.truong === 'ten') sh.getRange(i + 1, 2).setValue(String(d.giatri).trim());
     else if (d.truong === 'phut') sh.getRange(i + 1, 3).setValue(Math.round(Number(d.giatri)));
     else if (d.truong === 'lop') sh.getRange(i + 1, 6).setValue(chuanDsLop(d.giatri));
@@ -1353,6 +1442,8 @@ function gvGiayLop(d) {
     if (mas.indexOf(String(r[1]).trim()) >= 0) da[String(r[2]).trim()] = {madot: String(r[1]).trim(), diem: r[5], dung: r[6], tong: r[7], ct: String(r[9] || ''), anh: String(r[10] || ''), ghi: String(r[12] || '')};
   });
   const tlm = docTLDiem(ca); Object.keys(da).forEach(function (m) { if (tlm[m]) da[m].tl = tlm[m].tong; });
+  try { const cs = docCauHinh().filter(function (c) { return c.giay && (c.ca || c.madot) === ca && c.lamlai; }).map(function (c) { return c.madot; });
+    if (cs.length) { const ll = gvLamLaiLop({madots: cs}).hs; Object.keys(da).forEach(function (m) { if (ll[m] && ll[m].tong) da[m].ll = ll[m]; }); } } catch (e) {}
   const xm = docXemLai(); Object.keys(da).forEach(function (m) { const x = (xm[da[m].madot] || {})[m]; if (x) { da[m].xem = x.lan; da[m].xemluc = x.luc instanceof Date ? x.luc.toISOString() : ''; } });   // điểm tự luận đã duyệt (đã cộng trong diem)
   return {ok: true, lop: lopNay(), ca: ca, ma: mas, hs: hs, da: da, cho: demAnhCho(ca)};
 }
@@ -2056,6 +2147,8 @@ function gvNapDe(d) {
       } else {
         ch.appendRow(v.giay || v.thang ? [v.madot, v.ten, v.phut, 'DONG', 'KHONG', v.lop, '', v.ca, v.giay ? 'GIAY' : '', v.thang] : [v.madot, v.ten, v.phut, 'DONG', 'KHONG', v.lop]);
         dongCH[v.madot] = {so: ch.getLastRow(), tt: 'DONG'};
+        if (!String(ch.getRange(1, 11).getValue()).trim()) ch.getRange(1, 11).setValue('LamLai').setFontWeight('bold');
+        ch.getRange(ch.getLastRow(), 11).setValue('CO');   // de moi: bat lam lai cau sai
       }
       if ((v.giay || v.thang) && !String(ch.getRange(1, 9).getValue()).trim()) {
         ch.getRange(1, 7, 1, 4).setValues([[String(ch.getRange(1, 7).getValue() || 'BatDauLuc'), String(ch.getRange(1, 8).getValue() || 'CaThi'), 'Kieu', 'ThangDS']]).setFontWeight('bold');
@@ -2313,6 +2406,7 @@ function gvTheoDoi1(d) {
   const vang = {};
   docVang().forEach(function (v) { if (v.madot === madot) vang[v.mahs] = v; });
   const ngay = function (x) { return x instanceof Date ? x.toISOString() : ''; };
+  let llL = null; try { const cD = timDot(madot); if (cD && cD.lamlai) llL = gvLamLaiLop({madot: madot}).hs; } catch (e) {}
   const hs = ds.map(function (r) {
     const ma = String(r[0]).trim(), n = nop[ma], s = bd[ma];
     const o = {mahs: ma, hoten: String(r[1]).trim()};
@@ -2321,6 +2415,7 @@ function gvTheoDoi1(d) {
     else if (cho[ma]) { o.tt = 'dangcho'; o.vaocho = ngay(cho[ma]); }
     else o.tt = 'chua';
     if (xem[ma]) { o.daxem = xem[ma].lan; o.xemluc = ngay(xem[ma].luc); }
+    if (llL && llL[ma] && llL[ma].tong) o.ll = llL[ma];
     if (vang[ma]) o.vang = vang[ma].ghichu || 'Vắng';
     return o;
   });
@@ -3738,7 +3833,7 @@ function docCauHinhGoc() {
       batdauluc: r[6] instanceof Date ? r[6].getTime() : 0,
       ca: String(r[7] || '').trim(),
       // Cot I Kieu = GIAY: de in giay (khong lam tren iPad); cot J ThangDS: thang cau dung/sai rieng cua de
-      giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9])
+      giay: khongDau(r[8]) === 'GIAY', thang: docThang(r[9]), lamlai: khongDau(r[10]) === 'CO'
     };
   });
 }
