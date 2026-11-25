@@ -103,6 +103,7 @@ function doPost(e) {
       case 'gv_tx':
       case 'gv_tx_vo':
       case 'gv_tx_vo_chot':
+      case 'gv_vo_tab':
       case 'gv_baomat':
       case 'gv_baomat_xem':
       case 'gv_nhatky':
@@ -217,7 +218,8 @@ function doPost(e) {
         if (d.action === 'gv_luyen_duyet') return json(gvLuyenDuyet(d));
         if (d.action === 'gv_tx_vo') return json(gvTxVo(d));
         if (d.action === 'gv_tx_vo_chot') return json(gvTxVoChot(d));
-        if (d.action === 'gv_tx') return json({ok: true, lop: lopNay(), hs: dsLopTX(), tx: docTX()});
+        if (d.action === 'gv_vo_tab') return json(gvVoTab(d));
+        if (d.action === 'gv_tx') return json({ok: true, lop: lopNay(), hs: dsLopTX(), tx: docTX(), votab: voTabs()});
         if (d.action === 'gv_tx_luu') return json(gvTxLuu(d));
         if (d.action === 'gv_tx_xoa') return json(gvTxXoa(d));
         if (d.action === 'gv_tx_ai') return json(gvTxAI(d));
@@ -421,7 +423,12 @@ function xemLai(d) {
   });
   try { baiTroHS(ma).forEach(function (b) { b.nx = ((nxMap[ma + '|' + b.dot] || {}).nx) || ''; delete b.dot; ketqua.push(b); }); } catch (e) {}
   let tx = [];
-  try { const T = docTX(), dm = T.diem[ma] || {}; tx = T.cot.map(function (c) { return {ngay: c.ngay, ghichu: c.ghichu, diem: dm[c.id] === undefined ? null : dm[c.id], nop: (T.nop[ma] || {})[c.id] || '', vo: /#v$/.test(c.id)}; }); } catch (e) {}
+  let vo = [];
+  try {
+    const T = docTX(), dm = T.diem[ma] || {}, tb = {}; voTabs().forEach(function (x) { tb[x.id] = x.ten; });
+    tx = T.cot.map(function (c) { return {ngay: c.ngay, ghichu: c.ghichu, diem: dm[c.id] === undefined ? null : dm[c.id]}; });
+    vo = T.vocot.filter(function (c) { return (T.nop[ma] || {})[c.id]; }).map(function (c) { return {ngay: c.ngay, tab: tb[c.tab] || 'Vở', ghichu: c.ghichu === 'Nộp vở' ? '' : c.ghichu, tt: T.nop[ma][c.id]}; });
+  } catch (e) {}
   // Bang diem cua em: moi bai kiem tra em da lam (ke ca de chua mo xem lai: chi diem, khong cau hoi/dap an); de giay nhieu ma = 1 dong
   const bang = [], daCa = {};
   try {
@@ -433,7 +440,7 @@ function xemLai(d) {
       bang.push({madot: c.madot, ten: c.ten, luc: b.luc, diem: b.diem, giay: !!c.giay, xem: !!c.xemlai});
     });
   } catch (e) {}
-  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, bangdiem: bang, ks: ksChoHS(ma), cacLop: (function () { try { return (tkMap()[ma] || {}).cl || []; } catch (e) { return []; } })()};
+  return {ok: true, hoten: hs.ten, bai: ketqua, tinMoi: demTinMoi(ma, 'GV'), tn: dsTNDrive(true), tx: tx, vo: vo, bangdiem: bang, ks: ksChoHS(ma), cacLop: (function () { try { return (tkMap()[ma] || {}).cl || []; } catch (e) { return []; } })()};
 }
 
 // HS xem anh phieu de giay cua minh (de da bat "cho xem lai")
@@ -1045,8 +1052,8 @@ function gvNkHoanTac(d) {
       let i = -1; v.forEach(function (x, j) { if (String(x[0]).trim() === k[1] && String(x[3]).trim().replace(/^'/, '') === k[2]) i = j; });
       if (i >= 0 && String(v[i][4]) !== sau) return {ok: false, msg: 'Điểm đã đổi tiếp sau lần này, không hoàn tác được'};
       if (truoc === '') { if (i >= 0) tx.deleteRow(i + 2); }
-      else if (i >= 0) tx.getRange(i + 2, 5).setValue(/^[VTK]$/.test(truoc) ? truoc : Number(truoc));
-      else { const ng = /^(\d{4}-\d{2}-\d{2})/.exec(k[1]); tx.appendRow([k[1], ng ? new Date(ng[1] + 'T07:00:00') : new Date(), /#v$/.test(k[1]) ? 'Nộp vở' : '', "'" + k[2], /^[VTK]$/.test(truoc) ? truoc : Number(truoc), new Date(), '']); }
+      else if (i >= 0) tx.getRange(i + 2, 5).setValue(VO_TT.test(truoc) ? truoc : Number(truoc));
+      else { const ng = /^(\d{4}-\d{2}-\d{2})/.exec(k[1]); tx.appendRow([k[1], ng ? new Date(ng[1] + 'T07:00:00') : new Date(), laVo(k[1]) ? 'Nộp vở' : '', "'" + k[2], VO_TT.test(truoc) ? truoc : Number(truoc), new Date(), '']); }
     } else if (k[0] === 'BL') {
       const bl = SpreadsheetApp.getActive().getSheetByName(TAB_BL), v = bl.getRange(2, 1, bl.getLastRow() - 1, HEAD_BL.length).getValues();
       let i = -1; v.forEach(function (x, j) { if (String(x[1]).trim() === k[1] && String(x[2]).trim() === k[2] && String(Number(x[11]) || 1) === k[3]) i = j; });
@@ -2443,20 +2450,44 @@ function dsLopTX() {
   return hs;
 }
 const TAB_TX = 'DIEM TX', HEAD_TX = ['Cot', 'Ngay', 'GhiChu', 'MaHS', 'Diem', 'ThoiGian', 'Anh'];
+// NOP VO (tach rieng khoi diem TX): cot id 'yyyy-mm-dd#v' (tab dau) hoac 'yyyy-mm-dd#v<k>' (tab khac); trang thai V dung han, T tre, R vo trong (chua lam), K khong nop
+const VO_RE = /#(v[a-z0-9]*)$/, VO_TT = /^[VTRK]$/i;
+function laVo(id) { return VO_RE.test(String(id || '')); }
+function tabVo(id) { const m = VO_RE.exec(String(id || '')); return m ? m[1] : ''; }
+function voTabs() {
+  let t = []; try { t = JSON.parse(PropertiesService.getScriptProperties().getProperty('vo_tab') || '[]'); } catch (e) {}
+  if (!t.some(function (x) { return x.id === 'v'; })) t.unshift({id: 'v', ten: 'Vở ghi'});
+  return t;
+}
+function gvVoTab(d) {
+  const vao = Array.isArray(d.tabs) ? d.tabs : [], ra = [], co = {};
+  vao.forEach(function (x) {
+    let id = String(x.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!/^v[a-z0-9]*$/.test(id) || co[id]) { let k = 2; while (co['v' + k] || vao.some(function (y) { return y.id === 'v' + k; })) k++; id = 'v' + k; }
+    const ten = String(x.ten || '').trim().slice(0, 40); if (!ten) return;
+    co[id] = 1; ra.push({id: id, ten: ten});
+  });
+  if (!co.v) return {ok: false, msg: 'Khong duoc xoa tab dau'};
+  const T = docTX(), dung = {}; T.vocot.forEach(function (c) { dung[c.tab] = 1; });
+  const mat = Object.keys(dung).filter(function (k) { return !co[k]; });
+  if (mat.length) return {ok: false, msg: 'Tab con cot nop vo, xoa cac cot truoc khi xoa tab'};
+  PropertiesService.getScriptProperties().setProperty('vo_tab', JSON.stringify(ra));
+  return {ok: true, votab: ra};
+}
 function ngayTX(v) { return v instanceof Date ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd') : String(v || '').trim().slice(0, 10); }
 function docTX() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TX), cot = {}, diem = {}, nop = {};
-  if (!sh || sh.getLastRow() < 2) return {cot: [], diem: {}, nop: {}};
+  if (!sh || sh.getLastRow() < 2) return {cot: [], diem: {}, nop: {}, vocot: []};
   sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TX.length).getValues().forEach(function (r) {
     const id = String(r[0]).trim(); if (!id) return;
     if (!cot[id]) cot[id] = {id: id, ngay: ngayTX(r[1]), ghichu: String(r[2] || ''), anh: String(r[6] || '')};
     if (!cot[id].anh && r[6]) cot[id].anh = String(r[6]);
     const ma = String(r[3]).trim().replace(/^'/, ''), v = String(r[4]).replace(',', '.').trim();
-    if (ma && /#v$/.test(id) && v !== '') (nop[ma] = nop[ma] || {})[id] = /^[VTK]$/i.test(v) ? v.toUpperCase() : 'V';   // nop vo: V dung han, T tre, K khong nop
-    if (ma && v !== '' && !/^[VTK]$/i.test(v) && !isNaN(Number(v))) (diem[ma] = diem[ma] || {})[id] = Number(v);
+    if (ma && laVo(id) && v !== '') (nop[ma] = nop[ma] || {})[id] = VO_TT.test(v) ? v.toUpperCase() : 'V';   // nop vo
+    if (ma && !laVo(id) && v !== '' && !VO_TT.test(v) && !isNaN(Number(v))) (diem[ma] = diem[ma] || {})[id] = Number(v);
   });
   const ds = Object.keys(cot).map(function (k) { return cot[k]; }).sort(function (a, b) { return a.id < b.id ? -1 : 1; });
-  return {cot: ds, diem: diem, nop: nop};
+  return {cot: ds.filter(function (c) { return !laVo(c.id); }), diem: diem, nop: nop, vocot: ds.filter(function (c) { return laVo(c.id); }).map(function (c) { c.tab = tabVo(c.id); return c; })};
 }
 function gvTxLuu(d) {
   const ngay = String(d.ngay || '').trim();
@@ -2469,14 +2500,21 @@ function gvTxLuu(d) {
     let id = String(d.id || '').trim(), anhCu = '';
     const nopCu = {};
     const n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, HEAD_TX.length).getValues() : [];
-    if (!id) {   // cot moi: yyyy-mm-dd#so thu tu trong ngay
+    const tabMoi = String(d.vo || '').toLowerCase();
+    if (!id && /^v[a-z0-9]*$/.test(tabMoi)) id = ngay + '#' + tabMoi;   // cot nop vo GV ghi tay (trung ngay: sua cot cu)
+    if (laVo(id)) {
+      for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === id) {
+        const m0 = String(v[i][3]).trim().replace(/^'/, '');
+        if (m0) { cuD[m0] = String(v[i][4]).trim(); nopCu[m0] = [VO_TT.test(String(v[i][4]).trim()) ? String(v[i][4]).trim().toUpperCase() : 'V', v[i][5]]; }
+        sh.deleteRow(i + 2);
+      }
+    } else if (!id) {   // cot moi: yyyy-mm-dd#so thu tu trong ngay
       let so = 0; v.forEach(function (r) { const m = String(r[0]).match(/^(\d{4}-\d{2}-\d{2})#(\d+)$/); if (m && m[1] === ngay) so = Math.max(so, Number(m[2])); });
       id = ngay + '#' + (so + 1);
     } else {
       for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]).trim() === id) {
         if (!anhCu && v[i][6]) anhCu = String(v[i][6]);
         const m0 = String(v[i][3]).trim().replace(/^'/, ''); if (m0 && String(v[i][4]).trim() !== '') cuD[m0] = String(v[i][4]).trim();
-        if (/#v$/.test(id) && m0) nopCu[m0] = [/^[VTK]$/i.test(String(v[i][4]).trim()) ? String(v[i][4]).trim().toUpperCase() : 'V', v[i][5]];   // cot nop vo: giu trang thai
         sh.deleteRow(i + 2);
       }
     }
@@ -2492,19 +2530,19 @@ function gvTxLuu(d) {
     const moi = [], bay = new Date(), ngD = new Date(ngay + 'T07:00:00');
     Object.keys(bang).forEach(function (ma) {
       const x = String(bang[ma] == null ? '' : bang[ma]).replace(',', '.').trim();
-      if (hs[ma] && /#v$/.test(id) && /^[VTK]$/i.test(x)) { const cu = nopCu[ma]; moi.push([id, ngD, ghi, "'" + ma, x.toUpperCase(), cu && cu[0] === x.toUpperCase() ? cu[1] : bay, anh]); return; }
+      if (hs[ma] && laVo(id)) { if (!VO_TT.test(x)) return; const cu = nopCu[ma]; moi.push([id, ngD, ghi, "'" + ma, x.toUpperCase(), cu && cu[0] === x.toUpperCase() ? cu[1] : bay, anh]); return; }
       if (!hs[ma] || x === '' || isNaN(Number(x)) || Number(x) < 0 || Number(x) > 10) return;
       moi.push([id, ngD, ghi, "'" + ma, Number(x), bay, anh]);
     });
     Object.keys(nopCu).forEach(function (ma) { if (!(ma in bang) && !moi.some(function (r) { return r[3] === "'" + ma; })) moi.push([id, ngD, ghi, "'" + ma, nopCu[ma][0], nopCu[ma][1] || bay, anh]); });
-    if (!moi.length) moi.push([id, ngD, ghi, '', '', bay, anh]);   // cot rong van giu (de GV nhap sau)
+    if (!moi.length) moi.push([id, ngD, ghi || (laVo(id) ? 'Nộp vở' : ''), '', '', bay, anh]);   // cot rong van giu (de GV nhap sau)
     sh.getRange(sh.getLastRow() + 1, 1, moi.length, HEAD_TX.length).setValues(moi);
-    if (String(d.id || '').trim()) {   // sua cot cu: ghi nhat ky tung em doi diem
+    if (String(d.id || '').trim() || Object.keys(cuD).length) {   // sua cot cu: ghi nhat ky tung em doi diem
       const moiD = {}; moi.forEach(function (r) { if (r[3]) moiD[String(r[3]).replace(/^'/, '')] = String(r[4]); });
       const nk = [];
       Object.keys(cuD).concat(Object.keys(moiD)).filter(function (m, i, a) { return a.indexOf(m) === i; }).forEach(function (m) {
         const a = cuD[m] === undefined ? '' : cuD[m], b = moiD[m] === undefined ? '' : moiD[m];
-        if (a !== b && String(Number(a)) !== String(Number(b)) || (a === '') !== (b === '')) nk.push(['SUA_TX', m, tenHS[m] || '', 'TX ' + id + (ghi ? ' · ' + ghi : ''), a, b, 'TX|' + id + '|' + m]);
+        if (a !== b && String(Number(a)) !== String(Number(b)) || (a === '') !== (b === '')) nk.push([laVo(id) ? 'NOP_VO' : 'SUA_TX', m, tenHS[m] || '', 'TX ' + id + (ghi ? ' · ' + ghi : ''), a, b, 'TX|' + id + '|' + m]);
       });
       nkGhi(nk);
     }
@@ -2516,14 +2554,14 @@ function gvTxVo(d) {
   const ma = String(d.mahs || '').replace(/\D/g, ''), ngay = String(d.ngay || '').trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay)) return {ok: false, msg: 'Ngay khong hop le'};
   const hs = timHS(ma); if (!hs || hs.gv) return {ok: false, msg: 'SBD ' + ma + ' khong co trong lop ' + lopNay()};
-  const id = ngay + '#v';
+  const tab = /^v[a-z0-9]*$/.test(String(d.tab || '')) ? String(d.tab) : 'v', id = ngay + '#' + tab;
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    const tt = d.tre ? 'T' : 'V';
+    const tt = /^[VTR]$/.test(String(d.tt || '')) ? String(d.tt) : d.tre ? 'T' : 'V';
     const sh = layTab(TAB_TX, HEAD_TX), n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 5).getValues() : [];
     for (let i = 0; i < v.length; i++) if (String(v[i][0]).trim() === id && String(v[i][3]).trim().replace(/^'/, '') === ma) {
       const cu = String(v[i][4]).trim().toUpperCase();
-      if (cu !== 'K') return {ok: true, trung: true, tt: /^[VT]$/.test(cu) ? cu : 'V', mahs: ma, hoten: hs.ten, lop: lopNay()};
+      if (cu !== 'K') return {ok: true, trung: true, tt: /^[VTR]$/.test(cu) ? cu : 'V', mahs: ma, hoten: hs.ten, lop: lopNay()};
       sh.getRange(i + 2, 5, 1, 2).setValues([[tt, new Date()]]);   // truoc da chot "khong nop", nay mang vo toi
       nkGhi([['NOP_VO', ma, hs.ten, 'TX ' + id, 'K', tt, 'TX|' + id + '|' + ma]]);
       return {ok: true, tt: tt, doi: true, mahs: ma, hoten: hs.ten, lop: lopNay(), siso: dsLopTX().length};
@@ -2537,7 +2575,7 @@ function gvTxVo(d) {
 function gvTxVoChot(d) {
   const ngay = String(d.ngay || '').trim(), ds = Array.isArray(d.ds) ? d.ds : [];
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay)) return {ok: false, msg: 'Ngay khong hop le'};
-  const id = ngay + '#v', hs = {}; dsLopTX().forEach(function (h) { hs[h.mahs] = 1; });
+  const id = ngay + '#' + (/^v[a-z0-9]*$/.test(String(d.tab || '')) ? String(d.tab) : 'v'), hs = {}; dsLopTX().forEach(function (h) { hs[h.mahs] = 1; });
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const sh = layTab(TAB_TX, HEAD_TX), n = sh.getLastRow(), v = n > 1 ? sh.getRange(2, 1, n - 1, 4).getValues() : [], co = {};

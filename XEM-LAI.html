@@ -453,7 +453,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function ganLop(j, l) {
     (j.bai || []).forEach(function (b) { b._l = l; });
     (j.bangdiem || []).forEach(function (b) { b._l = l; });
-    (j.tx || []).forEach(function (c) { c._l = l; });
+    (j.tx || []).forEach(function (c) { c._l = l; }); (j.vo || []).forEach(function (c) { c._l = l; });
     (j.ks || []).forEach(function (k) { k._l = l; });
   }
   // Tài khoản GV (SBD …00): chọn lớp ngay trong tài khoản (đăng nhập lại tài khoản GV của lớp đó, cùng mật khẩu)
@@ -478,7 +478,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       kq.filter(Boolean).forEach(function (x) {
         ganLop(x.j, x.l); TAT.push(x);
         goc.bai = goc.bai.concat(x.j.bai || []); goc.bangdiem = (goc.bangdiem || []).concat(x.j.bangdiem || []);
-        goc.tx = (goc.tx || []).concat(x.j.tx || []); goc.ks = (goc.ks || []).concat(x.j.ks || []);
+        goc.tx = (goc.tx || []).concat(x.j.tx || []); goc.vo = (goc.vo || []).concat(x.j.vo || []); goc.ks = (goc.ks || []).concat(x.j.ks || []);
         goc.tinMoi = (goc.tinMoi || 0) + (x.j.tinMoi || 0);
       });
       if (TAT.length > 1 && !$('scrHome').classList.contains('hidden')) veHome();
@@ -787,7 +787,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var nTro = duLieu.bai.filter(function (b) { return b.tro; }).length, nKT = duLieu.bai.length - nTro;
     $('soBai').textContent = duLieu.bai.length ? (nKT ? nKT + ' bài giáo viên đã mở' : '') + (nKT && nTro ? ' · ' : '') + (nTro ? nTro + ' lượt trò chơi' : '') : 'Chưa có bài nào mở xem lại';
     var nTX = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; }).length;
-    var nVo = (duLieu.tx || []).filter(function (c) { return c.nop && c.nop !== 'K' && (c.diem === null || c.diem === undefined); }).length;
+    var nVo = (duLieu.vo || []).filter(function (c) { return c.tt && c.tt !== 'K'; }).length;
     $('soTX').textContent = nTX || nVo ? (nTX ? nTX + ' lần có điểm' : '') + (nTX && nVo ? ' · ' : '') + (nVo ? nVo + ' lần nộp vở' : '') : 'Điểm thầy/cô cho trên lớp';
     var n = dsTN().length;
     $('soTN').textContent = n ? n + ' mô phỏng, thí nghiệm' : 'Sắp có';
@@ -800,14 +800,28 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('moTX').onclick = function () {
     man('scrTX');
     var tx = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; });
-    var hien = (duLieu.tx || []).filter(function (c) { return (c.diem !== null && c.diem !== undefined) || c.nop; });
-    if (!hien.length) { $('txNoi').innerHTML = '<p class="sub">Em chưa có điểm TX nào.</p>'; return; }
+    var hien = tx;
+    if (!hien.length) { $('txNoi').innerHTML = '<p class="sub">Em chưa có điểm TX nào.</p>' + voHS(); return; }
     var tb = tx.length ? Math.round(tx.reduce(function (a, c) { return a + Number(c.diem); }, 0) / tx.length * 100) / 100 : null;
     function ng(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : s; }
-    $('txNoi').innerHTML = '<div class="txTB">Trung bình điểm TX: <b>' + (tb === null ? '–' : String(tb)) + '</b> · ' + tx.length + ' lần có điểm' + txVoChu() + '</div>' +
+    $('txNoi').innerHTML = '<div class="txTB">Trung bình điểm TX: <b>' + (tb === null ? '–' : String(tb)) + '</b> · ' + tx.length + ' lần có điểm</div>' +
       '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm TX</th></tr></thead><tbody>' +
-      hien.slice().sort(function (a, b) { return String(a.ngay) < String(b.ngay) ? 1 : -1; }).map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + nhanLop(c) + '</td><td>' + txO(c) + '</td></tr>'; }).join('') + '</tbody></table>';
+      hien.slice().sort(function (a, b) { return String(a.ngay) < String(b.ngay) ? 1 : -1; }).map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + nhanLop(c) + '</td><td>' + txO(c) + '</td></tr>'; }).join('') + '</tbody></table>' + voHS();
   };
+  // Nộp vở (riêng, không tính vào điểm TX): từng loại vở, từng lần nộp
+  var VO_HS = { V: ['X', 'Nộp đúng hạn', ''], T: ['X', 'Nộp trễ', 'background:#ffe066'], R: ['Tr', 'Nộp vở trống (chưa làm bài)', 'background:#c5cae9'], K: ['KN', 'Không nộp', 'background:#fbd5d5;color:#a52714'] };
+  function voHS() {
+    var v = duLieu.vo || []; if (!v.length) return '';
+    var nhom = {}, thu = []; v.forEach(function (c) { if (!nhom[c.tab]) { nhom[c.tab] = []; thu.push(c.tab); } nhom[c.tab].push(c); });
+    function ng(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : s; }
+    return '<h2 style="margin-top:18px">📗 Nộp vở</h2><p class="sub">Theo dõi riêng, không tính vào điểm TX.</p>' + thu.map(function (t) {
+      var ds = nhom[t], d = { V: 0, T: 0, R: 0, K: 0 }; ds.forEach(function (c) { d[c.tt] = (d[c.tt] || 0) + 1; });
+      return '<div class="txTB">' + String(t).replace(/</g, '&lt;') + ': đúng hạn <b>' + d.V + '</b> · trễ <b>' + d.T + '</b> · vở trống <b>' + d.R + '</b> · không nộp <b>' + d.K + '</b></div>' +
+        '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Trạng thái</th></tr></thead><tbody>' + ds.slice().sort(function (a, b) { return String(a.ngay) < String(b.ngay) ? 1 : -1; }).map(function (c) {
+          var k = VO_HS[c.tt] || VO_HS.V; return '<tr><td>' + ng(c.ngay) + '</td><td>' + String(c.ghichu || '').replace(/</g, '&lt;') + nhanLop(c) + '</td><td><b style="padding:0 6px;border-radius:6px;' + k[2] + '">' + k[0] + '</b> <small>' + k[1] + '</small></td></tr>';
+        }).join('') + '</tbody></table>';
+    }).join('');
+  }
   $('txVe').onclick = function () { man('scrHome'); };
   function voTT(c) { return c.nop === true ? 'V' : c.nop || ''; }
   function txO(c) {
@@ -976,7 +990,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     h += '<h2 style="margin-top:14px">🎮 Trò chơi (điểm cao nhất mỗi buổi)</h2>' + (tro.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Trò chơi</th><th>Điểm</th></tr></thead><tbody>' + tro.slice().reverse().map(function (x) {
       return '<tr><td>' + ng(x.ngay) + '</td><td>' + e(x.ten) + (x.luot > 1 ? ' <small>(' + x.luot + ' lượt)</small>' : '') + '</td><td><b>' + so(x.cao) + '</b></td></tr>';
     }).join('') + '</tbody></table>' : '<p class="sub">Em chưa chơi trò nào.</p>');
-    var txH = (duLieu.tx || []).filter(function (c) { return (c.diem !== null && c.diem !== undefined) || c.nop; });
+    var txH = (duLieu.tx || []).filter(function (c) { return c.diem !== null && c.diem !== undefined; });
     h += '<h2 style="margin-top:14px">📒 Điểm TX</h2>' + (txH.length ? '<table class="txBangHS"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>' + txH.slice().sort(function (a, b) { return String(a.ngay) < String(b.ngay) ? 1 : -1; }).map(function (c) { return '<tr><td>' + ng(c.ngay) + '</td><td>' + e(c.ghichu) + nhanLop(c) + '</td><td>' + txO(c) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="sub">Em chưa có điểm TX nào.</p>');
     $('bdNoi').innerHTML = h;
     [].forEach.call($('bdNoi').querySelectorAll('.bdXem'), function (b) { b.onclick = function () { var md = b.getAttribute('data-md'), lt = b.getAttribute('data-l'), x = (duLieu.bai || []).filter(function (z) { return z.madot === md && (!lt || !z._l || z._l.ten === lt); })[0]; if (x) { dungLop(x); baiDangXem = x; veBai(); } }; });
