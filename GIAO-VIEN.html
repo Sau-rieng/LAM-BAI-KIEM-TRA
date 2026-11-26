@@ -667,6 +667,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 
 .voTab{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0;border-bottom:2px solid var(--line)}.voTab button{border:0;background:none;padding:10px 14px;font:inherit;font-weight:700;font-size:16px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;border-radius:10px 10px 0 0;display:flex;align-items:center;gap:6px}.voTab button.on{color:var(--ink);border-bottom-color:#2e7d32;background:#f1f8f1}.voTab button small{background:var(--bg);border-radius:10px;padding:1px 7px;font-size:12px}.voTab .voTabSuaN{margin-left:auto;font-size:14px;font-weight:600}.txBang td.voR,.voChu.voR{font-weight:800;background:#c5cae9}.voChu{padding:0 5px;border-radius:5px}.voChu.voT{background:#ffe066}.voChu.voK{background:#fbd5d5;color:#a52714}.voBangT td.voS{text-align:center;font-weight:700;background:#f6f8fb}.txNhap label.co.voR{background:#e8eaf6}
 .voDong{display:flex;gap:6px;align-items:center}.voDong .voDoi{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:6px 2px;cursor:pointer}.voDong .voBo{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:8px;width:34px;height:34px;font-size:16px;cursor:pointer}
+.voLoc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}.vLoc{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;cursor:pointer}.vLoc:disabled{opacity:.45;cursor:default}.vLoc.on{outline:3px solid #1a56c4;outline-offset:1px}.vlK{background:#fbd5d5;color:#a52714}.vlC{background:#eef1f6}.vlT{background:#ffe066}.vlR{background:#c5cae9}.vlV{background:#e8f5ec;color:#1e7a35}.voLocDs ol{margin:6px 0 8px 20px;padding:0;columns:2;column-gap:20px}.voLocDs li{break-inside:avoid;margin:2px 0}.voLocDs .btn2{margin:0 6px 6px 0}
 #voNen{position:fixed;inset:0;z-index:90;background:#0b0f14;color:#fff;display:flex;flex-direction:column}#voNen[hidden]{display:none}.voTren{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px}.voTren b{font-size:17px}.voKhung{position:relative;flex:1;min-height:0;overflow:hidden;background:#000}.voKhung video{width:100%;height:100%;object-fit:cover}.voO{position:absolute;left:50%;top:45%;width:min(62vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}.voKQ{position:absolute;left:12px;right:12px;bottom:14px;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.7);font-size:15px;text-align:center}.voKQ.tot{background:#1e7d32}.voKQ.trung{background:#6b5d00}.voKQ.xau{background:#a52714}.voKQ big{display:block;font-size:26px;font-weight:800;line-height:1.25}.voDs{max-height:30vh;overflow:auto;padding:8px 12px 14px;font-size:14px;background:#141a22}.voDs div{padding:4px 0;border-bottom:1px solid #2a323d}.voDs .sub{color:#aab}
 .kqHang{display:flex;gap:6px;align-items:center}.kqHang .kqDong{flex:1}
 .nxDot{border-top:1px solid var(--line);padding:10px 0}.nxDot textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin:6px 0}.nxTT{float:right;font-size:13px;color:var(--muted)}.emXoa,.emXoaL{align-self:center}
@@ -1653,10 +1654,35 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     [].forEach.call(bg.querySelectorAll('.txCotN'), function (nb) {
       nb.onclick = function () {
         var c = cot.filter(function (z) { return z.id === nb.getAttribute('data-id'); })[0], mn = $('voMenu');
-        mn.innerHTML = '<div class="xdBox"><b>' + esc(tab.ten) + ' ngày ' + ngC(c) + '</b><div class="hangNut" style="justify-content:flex-start;margin-top:8px"><button class="btn2 nho vSua">✎ Sửa</button><button class="btn2 nho vQuet">📷 Quét tiếp</button><button class="btn2 nho vXoa">🗑 Xóa lần nộp</button><button class="btn2 nho vDong">Đóng</button></div></div>';
+        var nhom = { V: [], T: [], R: [], K: [], '': [] };
+        j.hs.forEach(function (x) { var st = ((T.nop || {})[x.mahs] || {})[c.id] || ''; nhom[st].push(x); });
+        var NH = [['K', 'KN không nộp'], ['', 'Chưa ghi'], ['T', 'Nộp trễ'], ['R', 'Vở trống'], ['V', 'Đúng hạn']];
+        mn.innerHTML = '<div class="xdBox"><b>' + esc(tab.ten) + ' ngày ' + ngC(c) + '</b>' +
+          '<div class="voLoc">' + NH.map(function (n) { return '<button type="button" class="vLoc vl' + (n[0] || 'C') + '" data-k="' + n[0] + '"' + (nhom[n[0]].length ? '' : ' disabled') + '>' + n[1] + ' <b>' + nhom[n[0]].length + '</b></button>'; }).join('') + '</div><div class="voLocDs"></div>' +
+          '<div class="hangNut" style="justify-content:flex-start;margin-top:8px"><button class="btn2 nho vSua">✎ Sửa</button><button class="btn2 nho vQuet">📷 Quét tiếp</button><button class="btn2 nho vXoa">🗑 Xóa lần nộp</button><button class="btn2 nho vDong">Đóng</button></div></div>';
         mn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         mn.querySelector('.vDong').onclick = function () { mn.innerHTML = ''; };
         mn.querySelector('.vSua').onclick = function () { voSuaCot(j, c); };
+        var hienLoc = function (k) {
+          [].forEach.call(mn.querySelectorAll('.vLoc'), function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
+          var ds = nhom[k], o = mn.querySelector('.voLocDs');
+          o.innerHTML = '<ol>' + ds.map(function (x) { return '<li>' + esc(x.hoten) + ' <span class="sub">' + esc(x.mahs) + '</span></li>'; }).join('') + '</ol>' +
+            (k === '' && ds.length ? '<button class="btn2 nho vDatK" type="button">Đặt KN cho ' + ds.length + ' em chưa ghi</button>' : '') +
+            '<button class="btn2 nho vChep" type="button">📋 Chép danh sách</button>';
+          var dk = o.querySelector('.vDatK');
+          if (dk) dk.onclick = function () {
+            if (!confirm('Đặt KN (không nộp) cho ' + ds.length + ' em chưa ghi ngày ' + ngC(c) + '?')) return;
+            var d = {}; ds.forEach(function (x) { d[x.mahs] = 'K'; }); dk.disabled = true; dk.textContent = 'Đang lưu…';
+            goi(l.url, { action: 'gv_tx_luu', ma: MA, id: '', vo: tab.id, ngay: c.ngay, ghichu: c.ghichu === 'Nộp vở' ? '' : c.ghichu, diem: d }).then(function (r) { if (!r.ok) throw new Error(r.msg || 'lỗi'); delete HS_CACHE[l.ten]; taiVO(); })
+              .catch(function (e) { dk.disabled = false; dk.textContent = 'Đặt KN cho ' + ds.length + ' em chưa ghi'; alert('Chưa lưu được: ' + e.message); });
+          };
+          o.querySelector('.vChep').onclick = function () {
+            var t = tab.ten + ' ' + ngC(c) + ' – ' + NH.filter(function (n) { return n[0] === k; })[0][1] + ' (' + ds.length + '):\n' + ds.map(function (x, i) { return (i + 1) + '. ' + x.hoten; }).join('\n'), b = this;
+            (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = '✓ Đã chép'; }).catch(function () { prompt('Chép danh sách:', t); });
+          };
+        };
+        [].forEach.call(mn.querySelectorAll('.vLoc'), function (b) { b.onclick = function () { hienLoc(b.getAttribute('data-k')); }; });
+        var dau = NH.filter(function (n) { return n[0] !== 'V' && nhom[n[0]].length; })[0]; if (dau) hienLoc(dau[0]);
         mn.querySelector('.vQuet').onclick = function () { moQuetVo(c.ngay, l, tab.id, tab.ten); };
         mn.querySelector('.vXoa').onclick = function () {
           if (!confirm('Xóa lần nộp ' + tab.ten + ' ngày ' + ngC(c) + ' của lớp ' + l.ten + '?')) return;
