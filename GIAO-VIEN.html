@@ -673,7 +673,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .nxDot{border-top:1px solid var(--line);padding:10px 0}.nxDot textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin:6px 0}.nxTT{float:right;font-size:13px;color:var(--muted)}.emXoa,.emXoaL{align-self:center}
 .troO{background:#f5f0ff}th.troO{color:#6b3fc4}
 .bdDau{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}.bdBang td,.bdBang th{text-align:center}.bdBang .tn{text-align:left}.bdChua td{color:var(--muted)}.bdXoa{border:0;background:none;cursor:pointer;font-size:15px;padding:0 4px;opacity:.65}.bdXoa:hover{opacity:1}.bdAn{display:grid;gap:6px}.bdAn>div{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff7e6;border-radius:10px;padding:8px 12px}
-.kqDs{display:grid;gap:6px;margin-top:8px}.kqDong{display:grid;grid-template-columns:1fr auto auto;gap:2px 12px;align-items:center;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit}.kqDong.chua{opacity:.55}.kqTen{font-weight:600}.kqSbd{color:var(--muted);font-size:14px}.kqD{font-weight:700;color:#c5221f;font-size:18px;min-width:42px;text-align:right}.kqLL{color:#7048e8;font-weight:700}.kqLL.xong{color:#1e8e3e}.llG.on{background:#ece6ff;border-color:#7048e8;color:#4b2fb0}.llCD{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}.llCD label{display:flex;align-items:center;gap:6px}.llCD input{width:70px}.kqSauAnh{display:block;max-width:100%;max-height:80vh;margin:8px auto;border-radius:10px;cursor:zoom-in}.kqSauAnh.to{max-height:none;cursor:zoom-out}.kqXem{color:#1e8e3e;font-weight:700}.kqXem.chua{color:#8a8f9c;font-weight:600}.ktXem{color:#1a56c4;font-weight:700;margin-left:4px}.kqPhu{grid-column:1/-1;font-size:13px;color:var(--muted)}.kqC{color:#b06000}.kqLoc{flex-wrap:wrap}
+.kqDs{display:grid;gap:6px;margin-top:8px}.kqDong{display:grid;grid-template-columns:1fr auto auto;gap:2px 12px;align-items:center;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit}.kqDong.chua{opacity:.55}.kqTen{font-weight:600}.kqSbd{color:var(--muted);font-size:14px}.kqD{font-weight:700;color:#c5221f;font-size:18px;min-width:42px;text-align:right}.kqLL{color:#7048e8;font-weight:700}.kqLL.xong{color:#1e8e3e}.llG.on{background:#ece6ff;border-color:#7048e8;color:#4b2fb0}.llCD{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}.llCD label{display:flex;align-items:center;gap:6px}.llCD input{width:70px}.kqSauAnh{display:block;max-width:100%;max-height:80vh;margin:8px auto;border-radius:10px;cursor:zoom-in}.kqSauAnh.to{max-height:none;cursor:zoom-out}#guiNen{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;background:#172033;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.3);font-size:15px}#guiNen small{display:block;color:#b8c3d9;margin-top:4px;font-size:12.5px}#guiNen button{margin-left:8px;background:#fff;color:#172033;border:0;border-radius:8px;padding:5px 12px;font:inherit;font-weight:700}.kqXem{color:#1e8e3e;font-weight:700}.kqXem.chua{color:#8a8f9c;font-weight:600}.ktXem{color:#1a56c4;font-weight:700;margin-left:4px}.kqPhu{grid-column:1/-1;font-size:13px;color:var(--muted)}.kqC{color:#b06000}.kqLoc{flex-wrap:wrap}
 .qCheDo{display:grid;gap:8px;margin-top:12px}.qCheDo button{text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;display:flex;flex-direction:column;gap:2px}.qCheDo button b{font-size:17px}.qCheDo button span{font-size:13px;color:var(--muted)}
 .qNut{display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap}.qDs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.qDs span{background:#f1f3f4;border-radius:8px;padding:4px 8px;font-size:13px;color:var(--ink)}
 .qAnh img{width:100%;border-radius:8px;border:1px solid var(--line)}.qSua{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}.qSua select{display:block;padding:8px;font-size:15px;border-radius:8px;border:1px solid var(--line);max-width:100%}
@@ -2775,21 +2775,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       var kq = o.querySelector('.qMayKQ');
       [].forEach.call(o.querySelectorAll('.qMayXoa1'), function (b) { b.onclick = function () { var id = b.parentNode.getAttribute('data-id'); if (!confirm('Xóa tờ này khỏi máy? Tờ chưa gửi, xóa là mất.')) return; KM.xoa(id).then(function () { veMay(ca, lopTen, loiO); }); }; });
       var g = o.querySelector('.qMayGui'); if (g) g.onclick = function () {
-        g.disabled = true; var i = 0, loi = 0, soSau = 0, loiMsg = '';
-        var tiep = function () {
-          if (i >= cg.length) { kq.innerHTML = loi ? '<span style="color:var(--bad)">Gửi được ' + (cg.length - loi) + '/' + cg.length + ' tờ' + (loiMsg ? ' (' + esc(loiMsg) + ')' : '') + '. Bấm Gửi lại cho các tờ còn lại.</span>' : '<span style="color:var(--ok);font-weight:700">✓ Đã gửi ' + cg.length + ' tờ lên Drive' + (soSau ? ', ' + soSau + ' mặt sau đã ghép vào bài tự luận' : '') + '. Bấm 🗂 Chấm tất cả bài đã gửi' + (soSau ? ', rồi vào ✍ Chấm tự luận' : '') + '.</span>'; setTimeout(function () { veMay(ca, lopTen, loiO); }, loi ? 4000 : 2500); return; }
-          var z = cg[i++]; kq.textContent = 'Đang gửi tờ ' + i + '/' + cg.length + '…';
-          var loiSo2 = function (j) { return new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới.' : j.msg || 'lỗi'); };
-          (z.gui ? Promise.resolve() : goi(l.url, { action: 'gv_giay_anh', ma: MA, ca: ca, anh: z.anh, sbd: z.sbd, made: z.made }).then(function (j) {
-            if (!j.ok) throw loiSo2(j);
-            z.gui = 1; z.anhId = j.id; return KM.luu(z);
-          })).then(function () {
-            if (!z.sau || z.guiSau) return;
-            if (!/^\d{8}$/.test(z.sbd)) { z.guiSau = 2; (z.canh = z.canh || []).push('Mặt sau chưa ghép được vì SBD tô sai – chụp lại ở ✍ Chấm tự luận'); return KM.luu(z); }
-            return goi(l.url, { action: 'gv_tl_anh', ma: MA, ca: ca, mahs: z.sbd, anh: z.sau }).then(function (j) { if (!j.ok) throw loiSo2(j); z.guiSau = 1; soSau++; return KM.luu(z); });
-          }).catch(function (e) { loi++; loiMsg = e.message || String(e); }).then(tiep);
-        };
-        tiep();
+        g.disabled = true; kq.textContent = 'Đang gửi… có thể chuyển sang mục khác, máy vẫn gửi tiếp.';
+        guiNenThem(ca, lopTen, function () { if (document.body.contains(o)) veMay(ca, lopTen, loiO); });
       };
       o.querySelector('.qMayCham').onclick = function () {
         if (cg.length && !confirm('Còn ' + cg.length + ' tờ chưa gửi lên Drive – các tờ này chưa được chấm. Vẫn chấm các bài đã gửi?')) return;
@@ -2801,6 +2788,54 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       };
     }).catch(function (e) { o.innerHTML = '<div class="sub">Không đọc được bài lưu trong máy: ' + esc(e.message) + '</div>'; });
   }
+  // ---------- GỬI NỀN: bấm 1 lần, gửi hết các tờ trong máy (chạy tiếp khi chuyển mục; tự gửi tiếp khi mở lại trang) ----------
+  var GN = { chay: false, xong: null, khoa: {} };
+  try { GN.khoa = JSON.parse(localStorage.getItem('km_guinen') || '{}') || {}; } catch (e) {}
+  function gnLuu() { try { localStorage.setItem('km_guinen', JSON.stringify(GN.khoa)); } catch (e) {} }
+  function guiNenThem(ca, lop, xong) { GN.khoa[ca + '|' + lop] = 1; gnLuu(); if (xong) GN.xong = xong; guiNenChay(); }
+  function gnBao(h) {
+    var b = $('guiNen'); if (!b) { b = document.createElement('div'); b.id = 'guiNen'; document.body.appendChild(b); }
+    if (!h) { b.hidden = true; return; } b.hidden = false; b.innerHTML = h;
+  }
+  function guiMot(z, l) {
+    var loiSo2 = function (j) { return new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới.' : j.msg || 'lỗi'); };
+    return (z.gui ? Promise.resolve() : goi(l.url, { action: 'gv_giay_anh', ma: MA, ca: z.ca, anh: z.anh, sbd: z.sbd, made: z.made }).then(function (j) {
+      if (!j.ok) throw loiSo2(j);
+      z.gui = 1; z.anhId = j.id; return KM.luu(z);
+    })).then(function () {
+      if (!z.sau || z.guiSau) return;
+      if (!/^\d{8}$/.test(z.sbd)) { z.guiSau = 2; (z.canh = z.canh || []).push('Mặt sau chưa ghép được vì SBD tô sai – chụp lại ở ✍ Chấm tự luận'); return KM.luu(z); }
+      return goi(l.url, { action: 'gv_tl_anh', ma: MA, ca: z.ca, mahs: z.sbd, anh: z.sau }).then(function (j) { if (!j.ok) throw loiSo2(j); z.guiSau = 1; return KM.luu(z); });
+    });
+  }
+  function guiNenChay() {
+    if (GN.chay || !MA || !DS || !DS.length) return;
+    if (!Object.keys(GN.khoa).length) { try { GN.khoa = JSON.parse(localStorage.getItem('km_guinen') || '{}') || {}; } catch (e) { GN.khoa = {}; } }
+    if (!Object.keys(GN.khoa).length) return;
+    GN.chay = true;
+    var giu = null; try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { giu = w; }).catch(function () {}); } catch (e) {}
+    KM.tatCa().then(function (v) {
+      var ds = v.filter(function (z) { return GN.khoa[z.ca + '|' + z.lop] && canGui(z) && DS.some(function (l) { return l.ten === z.lop; }); });
+      var tong = ds.length, xong = 0, loi = 0, loiMsg = '', i = 0;
+      var bao = function () { gnBao('☁ Đang gửi bài quét lên Drive: <b>' + xong + '/' + tong + '</b>' + (loi ? ' · <span style="color:#ffb4a8">' + loi + ' lỗi</span>' : '') + '<small>Giữ trang này mở (có thể chuyển mục khác). Thoát trình duyệt hoặc khóa máy thì tạm dừng, mở lại trang sẽ tự gửi tiếp.</small>'); };
+      bao();
+      var luong = function () {
+        if (i >= ds.length) return Promise.resolve();
+        var z = ds[i++], l = DS.filter(function (x) { return x.ten === z.lop; })[0];
+        return guiMot(z, l).then(function () { xong++; }, function (e) { loi++; loiMsg = e.message || String(e); }).then(function () { bao(); return luong(); });
+      };
+      return Promise.all([luong(), luong()]).then(function () {
+        if (!loi) { Object.keys(GN.khoa).forEach(function (k) { if (!ds.some(function (z) { return z.ca + '|' + z.lop === k && canGui(z); })) delete GN.khoa[k]; }); GN.khoa = {}; gnLuu(); }
+        gnBao(tong ? (loi ? '⚠ Gửi được ' + (tong - loi) + '/' + tong + ' tờ (' + esc(loiMsg) + '). <button type="button" id="gnLai">Gửi lại</button>' : '✓ Đã gửi xong ' + tong + ' tờ lên Drive. <button type="button" id="gnDong">OK</button>') : '');
+        var a = $('gnLai'); if (a) a.onclick = function () { guiNenChay(); };
+        var d = $('gnDong'); if (d) d.onclick = function () { gnBao(''); };
+        if (!loi) setTimeout(function () { var b = $('guiNen'); if (b && /Đã gửi xong/.test(b.textContent)) gnBao(''); }, 8000);
+      });
+    }).catch(function (e) { gnBao('⚠ Chưa gửi được: ' + esc(e.message) + ' <button type="button" id="gnLai">Gửi lại</button>'); var a = $('gnLai'); if (a) a.onclick = function () { guiNenChay(); }; })
+      .then(function () { GN.chay = false; if (giu) try { giu.release(); } catch (e) {} if (GN.xong) { var f = GN.xong; GN.xong = null; f(); } });
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) guiNenChay(); });
+  setInterval(guiNenChay, 15000);   // mở lại trang / vừa đăng nhập xong: tự gửi tiếp phần còn dở
   // nhắc ở trang chọn bài: còn tờ chưa gửi ở bài/lớp nào
   function mayTong(box, chon) {
     KM.tatCa().then(function (v) {
