@@ -2734,6 +2734,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var vt = JSON.stringify([r.made.s, r.p1.map(function (x) { return x.chon; }), r.p2.map(function (c) { return c.map(function (y) { return y.chon; }).join(''); }), r.p3.map(function (x) { return x.chon; })]);
     if (Q.cuoi && sbd === Q.cuoi.sbd && giongVT(Q.cuoi.vt, vt)) { Q.trangThai = 'doiTo'; $('qTT').textContent = 'Tờ này vừa quét xong. Lật sang tờ khác.'; return; }
     var nh = nhanMay(r), cung = r.sbd.loi ? [] : Q.may.filter(function (o) { return o.sbd === sbd; });
+    var daGui = cung.filter(function (o) { return o.gui && o.vt && giongVT(o.vt, vt); })[0];
+    if (daGui) { Q.trangThai = 'doiTo'; Q.cuoi = { sbd: sbd, vt: vt }; hienKQ('ok', '⏭ ' + esc(docTenLop(Q.lop.ten)[sbd] || sbd), 'Tờ này đã quét và gửi rồi – không lưu thêm'); bip(true); return; }
     var cu = cung.filter(function (o) { return !o.anh || (!o.gui && giongVT(o.vt, vt)); })[0];
     var khac = cung.filter(function (o) { return o.anh && o !== cu && o.vt && !giongVT(o.vt, vt); });
     if (cu && cu.anh) nh.c.push('Quét lại tờ này – thay lần quét lúc ' + gio(new Date(cu.luc).toISOString()));
@@ -2799,9 +2801,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   }
   function guiMot(z, l) {
     var loiSo2 = function (j) { return new Error(/khong hop le/i.test(j.msg || '') ? 'Sổ theo dõi chưa cập nhật bản mới.' : j.msg || 'lỗi'); };
-    return (z.gui ? Promise.resolve() : goi(l.url, { action: 'gv_giay_anh', ma: MA, ca: z.ca, anh: z.anh, sbd: z.sbd, made: z.made }).then(function (j) {
+    return (z.gui ? Promise.resolve() : goi(l.url, { action: 'gv_giay_anh', ma: MA, ca: z.ca, anh: z.anh, sbd: z.sbd, made: z.made, vt: z.vt || '' }).then(function (j) {
       if (!j.ok) throw loiSo2(j);
-      z.gui = 1; z.anhId = j.id; return KM.luu(z);
+      z.gui = 1; z.anhId = j.id; if (j.trung) { z.trungSv = 1; GN.trungSv = (GN.trungSv || 0) + 1; } return KM.luu(z);
     })).then(function () {
       if (!z.sau || z.guiSau) return;
       if (!/^\d{8}$/.test(z.sbd)) { z.guiSau = 2; (z.canh = z.canh || []).push('Mặt sau chưa ghép được vì SBD tô sai – chụp lại ở ✍ Chấm tự luận'); return KM.luu(z); }
@@ -2815,6 +2817,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     GN.chay = true;
     var giu = null; try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { giu = w; }).catch(function () {}); } catch (e) {}
     KM.tatCa().then(function (v) {
+      // dọn tờ trùng trước khi gửi: cùng SBD + đáp án giống ≥90% → giữ 1 tờ (ưu tiên tờ đã gửi, rồi tờ mới nhất), ghép mặt sau
+      var bo = [], g = {};
+      v.filter(function (z) { return GN.khoa[z.ca + '|' + z.lop] && /^\d{8}$/.test(z.sbd || '') && z.vt; }).sort(function (a, b) { return (b.gui ? 1 : 0) - (a.gui ? 1 : 0) || b.luc - a.luc; }).forEach(function (z) {
+        var k = z.ca + '|' + z.lop + '|' + z.sbd, giu = (g[k] = g[k] || []).filter(function (y) { return giongVT(y.vt, z.vt); })[0];
+        if (!giu) { g[k].push(z); return; }
+        if (z.gui) return;   // 2 tờ đã gửi: để nguyên
+        if (z.sau && !giu.sau) { giu.sau = z.sau; giu.guiSau = 0; KM.luu(giu).catch(function () {}); }
+        bo.push(z);
+      });
+      return Promise.all(bo.map(function (z) { return KM.xoa(z.id); })).then(function () { GN.boTrung = bo.length; return v.filter(function (z) { return bo.indexOf(z) < 0; }); });
+    }).then(function (v) {
       var ds = v.filter(function (z) { return GN.khoa[z.ca + '|' + z.lop] && canGui(z) && DS.some(function (l) { return l.ten === z.lop; }); });
       var tong = ds.length, xong = 0, loi = 0, loiMsg = '', i = 0;
       var bao = function () { gnBao('☁ Đang gửi bài quét lên Drive: <b>' + xong + '/' + tong + '</b>' + (loi ? ' · <span style="color:#ffb4a8">' + loi + ' lỗi</span>' : '') + '<small>Giữ trang này mở (có thể chuyển mục khác). Thoát trình duyệt hoặc khóa máy thì tạm dừng, mở lại trang sẽ tự gửi tiếp.</small>'); };
@@ -2826,7 +2839,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       };
       return Promise.all([luong(), luong()]).then(function () {
         if (!loi) { Object.keys(GN.khoa).forEach(function (k) { if (!ds.some(function (z) { return z.ca + '|' + z.lop === k && canGui(z); })) delete GN.khoa[k]; }); GN.khoa = {}; gnLuu(); }
-        gnBao(tong ? (loi ? '⚠ Gửi được ' + (tong - loi) + '/' + tong + ' tờ (' + esc(loiMsg) + '). <button type="button" id="gnLai">Gửi lại</button>' : '✓ Đã gửi xong ' + tong + ' tờ lên Drive. <button type="button" id="gnDong">OK</button>') : '');
+        var them = (GN.boTrung ? ' · đã xóa ' + GN.boTrung + ' tờ trùng trong máy' : '') + (GN.trungSv ? ' · ' + GN.trungSv + ' tờ đã có trên Drive nên không tải lại' : ''); GN.boTrung = 0; GN.trungSv = 0;
+        gnBao(tong || them ? (loi ? '⚠ Gửi được ' + (tong - loi) + '/' + tong + ' tờ (' + esc(loiMsg) + ')' + them + '. <button type="button" id="gnLai">Gửi lại</button>' : '✓ Đã gửi xong ' + tong + ' tờ lên Drive' + them + '. <button type="button" id="gnDong">OK</button>') : '');
         var a = $('gnLai'); if (a) a.onclick = function () { guiNenChay(); };
         var d = $('gnDong'); if (d) d.onclick = function () { gnBao(''); };
         if (!loi) setTimeout(function () { var b = $('guiNen'); if (b && /Đã gửi xong/.test(b.textContent)) gnBao(''); }, 8000);

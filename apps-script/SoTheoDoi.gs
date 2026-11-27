@@ -1776,11 +1776,28 @@ function gvGiayAnh(d) {
   if (!maCa(ca).length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
   if (!/^data:image\/jpeg;base64,/.test(String(d.anh || ''))) return {ok: false, msg: 'Thieu anh'};
   const sbd = String(d.sbd || '').replace(/[^0-9_*]/g, '').slice(0, 8), made = String(d.made || '').replace(/[^0-9_*]/g, '').slice(0, 4);
+  const vt = String(d.vt || '').slice(0, 2000);
+  if (vt && /^\d{8}$/.test(sbd)) {   // cung SBD + dap an giong (>=90%) da gui truoc do (tu may nay hay may khac) -> khong tao file moi
+    const sh0 = SpreadsheetApp.getActive().getSheetByName(TAB_AG);
+    if (sh0 && sh0.getLastRow() > 1) {
+      const v = sh0.getRange(2, 1, sh0.getLastRow() - 1, HEAD_AG.length).getValues();
+      for (let i = v.length - 1; i >= 0; i--) {
+        const r = v[i]; if (String(r[1]).trim() !== ca || String(r[4]).replace(/^'/, '') !== sbd || String(r[6]) === 'BO') continue;
+        const vt0 = (String(r[8]).match(/^vt:(.*)$/) || [])[1];
+        if (vt0 && giongVTSv(vt0, vt)) return {ok: true, id: String(r[2]), trung: true, cho: demAnhCho(ca)};
+      }
+    }
+  }
   const f = thuMucAnhGiay(ca).createFile(Utilities.newBlob(Utilities.base64Decode(String(d.anh).split(',')[1]), 'image/jpeg',
     'CHUP - ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss') + ' - ' + (sbd || 'khong-ro') + '.jpg'));
   const sh = layTab(TAB_AG, HEAD_AG);
-  sh.appendRow([new Date(), ca, f.getId(), f.getUrl(), "'" + sbd, "'" + made, 'CHO', '', '']);
+  sh.appendRow([new Date(), ca, f.getId(), f.getUrl(), "'" + sbd, "'" + made, 'CHO', '', vt ? 'vt:' + vt : '']);
   return {ok: true, id: f.getId(), cho: demAnhCho(ca)};
+}
+function giongVTSv(a, b) {   // van tay dap an 2 lan quet: cung ma de, >= 90% o to giong nhau
+  try { const x = JSON.parse(a), y = JSON.parse(b); if (x[0] !== y[0]) return false;
+    const p = [].concat(x[1], x[2], x[3]), q = [].concat(y[1], y[2], y[3]); let n = 0, g = 0;
+    p.forEach(function (v, i) { if (v || q[i]) { n++; if (v === q[i]) g++; } }); return !n || g / n >= 0.9; } catch (e) { return false; }
 }
 function docAnhGiay(ca) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_AG), ra = [];
