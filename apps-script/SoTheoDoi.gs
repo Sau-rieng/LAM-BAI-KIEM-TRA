@@ -2776,20 +2776,24 @@ function docXemLai() {
 // Lop nay da thi nhung dot nao, bao nhieu em da nop (de trang GV ghi "Da thi: 12G01 (38)")
 function gvDaThi() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_BL);
-  const m = {};
+  const m = {}, quet = {};
   if (sh && sh.getLastRow() > 1) {
-    boGV(sh.getRange(2, 2, sh.getLastRow() - 1, 2).getValues(), 1).forEach(function (r) {
-      const d = String(r[0]).trim(), ma = String(r[1]).trim();
+    boGV(sh.getRange(2, 1, sh.getLastRow() - 1, 5).getValues(), 2).forEach(function (r) {
+      const d = String(r[1]).trim(), ma = String(r[2]).trim();
       if (!d || !ma) return;
       (m[d] = m[d] || {})[ma] = 1;
+      if (String(r[4]).trim() === 'GIAY' && r[0] instanceof Date && (!quet[d] || r[0] > quet[d])) quet[d] = r[0];   // ngay quet gan nhat
     });
   }
+  try { const ag = SpreadsheetApp.getActive().getSheetByName(TAB_AG);
+    if (ag && ag.getLastRow() > 1) ag.getRange(2, 1, ag.getLastRow() - 1, 2).getValues().forEach(function (r) { const k = '@' + String(r[1]).trim(); if (r[0] instanceof Date && (!quet[k] || r[0] > quet[k])) quet[k] = r[0]; }); } catch (e) {}
+  Object.keys(quet).forEach(function (k) { quet[k] = quet[k].toISOString(); });
   const dathi = {};
   Object.keys(m).forEach(function (d) { dathi[d] = Object.keys(m[d]).length; });
   let siso = 0, dakt = {}; try { siso = dsLopTX().length; dakt = docDaKT(); } catch (e) {}
   try { dongBoTK(); } catch (e) {}
   const daxem = {}; try { const xm = docXemLai(); Object.keys(xm).forEach(function (md) { const n = Object.keys(xm[md]).filter(function (h) { return m[md] && m[md][h]; }).length; if (n) daxem[md] = n; }); } catch (e) {}
-  return {ok: true, lop: lopNay(), dathi: dathi, daxem: daxem, siso: siso, dakt: dakt, tlNen: tlNenTT()};
+  return {ok: true, lop: lopNay(), dathi: dathi, daxem: daxem, quet: quet, siso: siso, dakt: dakt, tlNen: tlNenTT()};
 }
 // De giay "da kiem tra" theo lop: mac dinh tu tich khi co bai quet; GV tich/bo tich tay luu o kho (tab DA KIEM TRA)
 const TAB_DAKT = 'DA KIEM TRA', HEAD_DAKT = ['Ca', 'Lop', 'TrangThai', 'Luc'];
