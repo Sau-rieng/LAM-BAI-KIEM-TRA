@@ -3492,8 +3492,13 @@ function tcVao(d) {
   if (!t.mo) return {ok: false, loi: 'dong', msg: 'Trò chơi đang đóng. Em chờ giáo viên mở nhé.'};
   if (!hopLop(t)) return {ok: false, loi: 'lop', msg: 'Trò chơi này chưa mở cho lớp ' + lopNay() + '.'};
   if (String(d.ma || '').trim() !== docMaNhanh().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
-  const sbdV = String(d.mahs || '').trim();   // tro ca nhan: SBD phai co trong danh sach lop, neu khong ket qua se khong ghi duoc
-  if (/^\d{8}$/.test(sbdV) && !timHS(sbdV)) return {ok: false, loi: 'sbd', msg: 'SBD ' + sbdV + ' không có trong danh sách lớp ' + lopNay() + '. Em nhập đúng SBD của mình (SBD lớp chính, vd 2612xxxx).'};
+  let sbdV = String(d.mahs || '').trim();   // tro ca nhan: SBD phai co trong danh sach lop, neu khong ket qua se khong ghi duoc
+  if (/^\d{8}$/.test(sbdV) && !timHS(sbdV)) {
+    // lop gop (12AFTER: HS nhieu lop khac nhau, SBD khac tien to): em go 2 so cuoi -> tim theo 2 so cuoi + ho ten
+    const tim = timSbdTheoTen(sbdV.slice(-2), d.ten);
+    if (tim.length === 1) { sbdV = tim[0]; d.mahs = sbdV; }
+    else return {ok: false, loi: 'sbd', msg: tim.length > 1 ? 'Lớp ' + lopNay() + ' có nhiều bạn trùng 2 số cuối và tên. Em nhập đủ 8 số SBD của mình.' : 'SBD ' + sbdV + ' không có trong danh sách lớp ' + lopNay() + '. Em nhập đủ 8 số SBD thật của mình (SBD lớp chính của em, vd 261203xx) và họ tên đúng như danh sách lớp.'};
+  }
   const k = thongTinKhung(t);
   let bo = null;
   if (t.khung) {
@@ -3519,7 +3524,17 @@ function tcVao(d) {
   }
   if (t.tt === 'CHO' && !t.xp) ghiVach(t.matro, d);
   ghiCaNhan(t.matro, d.mahs, {vao: Date.now()});
-  return Object.assign({ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now(), boCau: bo, lan: lan}, k);
+  return Object.assign({ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now(), boCau: bo, lan: lan, mahs: sbdV}, k);
+}
+// Lop gop: tim SBD trong DANHSACH theo 2 so cuoi + ho ten (bo dau, khong phan biet hoa thuong)
+function timSbdTheoTen(duoi, ten) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), kq = [], tn = khongDau(String(ten || '')).replace(/\s+/g, ' ').trim();
+  if (!sh || sh.getLastRow() < 2 || !tn) return kq;
+  sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues().forEach(function (r) {
+    const m = String(r[0]).trim().replace(/^'/, '');
+    if (/^\d{8}$/.test(m) && m.slice(-2) === duoi && khongDau(String(r[1])).replace(/\s+/g, ' ').trim() === tn) kq.push(m);
+  });
+  return kq;
 }
 // So luot ca nhan em da nop hom nay cua tro (tab KQ TRO CHOI cua so nay)
 function soLuotHomNay(matro, mahs, ngay) {
