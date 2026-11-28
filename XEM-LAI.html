@@ -392,6 +392,22 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
 <script src="danh-dau.js"></script>
 <script src="hinh/giao-dien/bieu-tuong.js"></script>
 <script>
+  // Trang GV bam "👁 Xem như HS" (chon 1 em): mo trang nay bang SBD em + ma quan ly GV (chi doc, so khong ghi gi)
+  (function () {
+    var x = null; try { x = JSON.parse(localStorage.getItem('gv_xemhs') || 'null'); } catch (e) {}
+    if (!x || !x.gv || Date.now() - x.t > 120000) return;
+    try { localStorage.removeItem('gv_xemhs'); } catch (e) {}
+    window.__XEMHS = x; var gv = x.gv, f = window.fetch;
+    window.fetch = function (u, o) { try { if (o && o.method === 'POST' && typeof o.body === 'string' && o.body.indexOf('"maxem"') >= 0) { var b = JSON.parse(o.body); b.gvxem = gv; o = Object.assign({}, o, { body: JSON.stringify(b) }); } } catch (e) {} return f.call(window, u, o); };
+    document.addEventListener('DOMContentLoaded', function () {
+      var bn = document.createElement('div'); bn.id = 'gvXemBang';
+      bn.innerHTML = '👁 Thầy/cô đang xem như học sinh <b>' + String(x.ten || x.sbd).replace(/[<>&]/g, '') + '</b> · chỉ xem: làm lại câu sai được chấm thử nhưng không ghi vào sổ của em';
+      bn.style.cssText = 'position:sticky;top:0;z-index:50;background:#5b2bb5;color:#fff;font:600 14px/1.4 system-ui,sans-serif;padding:8px 14px;text-align:center';
+      document.body.insertBefore(bn, document.body.firstChild);
+    });
+  })();
+</script>
+<script>
   // May da dang nhap trang GV (cung trang web) gui kem ma thiet bi → mo duoc tai khoan GV (SBD ...00, ma 0000)
   (function () { var tb = ''; try { tb = localStorage.getItem('gv_tb') || ''; } catch (e) {} if (!tb || !window.fetch) return; var f = window.fetch;
     window.fetch = function (u, o) { try { if (o && o.method === 'POST' && typeof o.body === 'string' && o.body.indexOf('"maxem"') >= 0) { var b = JSON.parse(o.body); b.tb = tb; o = Object.assign({}, o, { body: JSON.stringify(b) }); } } catch (e) {} return f.call(this, u, o); }; })();[].forEach.call(document.querySelectorAll("[data-bt]"),function(e){if(window.BT)e.innerHTML=BT[e.getAttribute("data-bt")];});</script>
@@ -409,8 +425,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   $('lop').onchange = function () { lopChon = DS[this.value] || null; $('pre').textContent = lopChon ? lopChon.tiento : '------'; };
   // Trang GV bam "Xem nhu hoc sinh": tu chon lop, dien SBD + mat khau va dang nhap
   setTimeout(function () {
-    var x = null; try { x = JSON.parse(localStorage.getItem('gv_xemhs') || 'null'); localStorage.removeItem('gv_xemhs'); } catch (e) {}
+    var x = window.__XEMHS || null; if (!x) try { x = JSON.parse(localStorage.getItem('gv_xemhs') || 'null'); localStorage.removeItem('gv_xemhs'); } catch (e) {}
     if (!x || Date.now() - x.t > 120000) return;
+    if (x.gv) x.mx = 'gv';
     var i = -1; DS.forEach(function (l, k) { if (l.tiento === x.tt) i = k; }); if (i < 0) return;
     $('lop').value = i; $('lop').onchange(); $('sbd').value = x.sbd; $('maxem').value = x.mx; $('btnXem').click();
   }, 0);
@@ -434,6 +451,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         .then(function (j) {
           if (!j.ok && /SBD hoac ma xem/i.test(j.msg || '')) { $('btnXem').disabled = false; return loi('SBD hoặc mã xem bài chưa đúng.'); }
           if (!j.ok && /Tài khoản GV/.test(j.msg || '')) { $('btnXem').disabled = false; return loi(j.msg); }
+          if (!j.ok && /Mã quản lý|Tạm khóa|chỉ để xem/.test(j.msg || '')) { $('btnXem').disabled = false; return loi(j.msg); }
           if (!j.ok) throw new Error(j.msg || 'loi');
           $('btnXem').disabled = false;
           duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; KT = null; KT_SEL = 'tat'; $('maxem').value = ''; $('msg').textContent = '';

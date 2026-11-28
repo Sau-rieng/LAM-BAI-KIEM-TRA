@@ -60,11 +60,16 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  CH_NHO = null; AN_GV = false; BM_MSG = '';
+  CH_NHO = null; AN_GV = false; BM_MSG = ''; XEM_GV = false;
   try {
     const d = JSON.parse(e.postData.contents);
     BM_TB = (String(d.tb || '').slice(0, 40) + ' · ' + String(d.ua || '').slice(0, 160)).replace(/^ · $/, '');
     if (d.maxem !== undefined && d.mahs && bmKhoa('kx_' + String(d.mahs).trim())) return json({ok: false, khoa: true, msg: 'Em nhập sai mã quá nhiều lần. Thử lại sau 15 phút hoặc hỏi thầy/cô.'});
+    // GV "Xem như HS" (trang GV mo Xem lai bang SBD em + ma quan ly): chi doc, khong ghi gi vao so cua em
+    if (d.gvxem !== undefined && d.action) {
+      if (d.action === 'daxem' || d.action === 'xemtn') return json({ok: true, gv: true});
+      if (['xemlai', 'hs_anhphieu', 'hs_anhtl', 'hs_kienthuc', 'hs_lamlai', 'tn_lay'].indexOf(d.action) < 0) return json({ok: false, msg: 'Chế độ giáo viên xem như học sinh chỉ để xem, không ghi.'});
+    }
     if (d.loai === 'hoatdong') return json(ghiHoatDong(d));
     if (d.loai === 'nhom') return json(ghiChoiNhom(d));
     switch (d.action) {
@@ -447,6 +452,7 @@ function hsLamLai(d) {
   const q = de[i];
   if (chamCau(q, tachChiTiet(bai.chitiet)[i]).dung) return {ok: false, msg: 'Cau nay em da lam dung'};
   const r = chamCau(q, d.chon), can = canLamLai((docKienThuc()[madot + '|' + cauId] || {}).md, soLamLai());
+  if (XEM_GV) return {ok: true, dung: r.dung, so: (((docLamLai(ma)[madot] || {})[cauId]) || 0), can: can, xemgv: true};   // GV xem thu: cham nhung khong ghi
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const ss = SpreadsheetApp.getActive(); let sh = ss.getSheetByName(TAB_LL);
@@ -1105,7 +1111,13 @@ function bmGhi(loai, muc, dt, ct) {
 function bmDem(k, phut) { const c = CacheService.getScriptCache(), n = (Number(c.get(k)) || 0) + 1; c.put(k, String(n), phut * 60); return n; }
 function bmKhoa(k) { return !!CacheService.getScriptCache().get(k); }
 function bmDatKhoa(k, phut) { CacheService.getScriptCache().put(k, '1', phut * 60); }
+var XEM_GV = false;
 function dungMaXem(hs, d) {
+  if (d.gvxem !== undefined) {   // GV xem nhu HS: dung ma quan ly (va may GV da dang nhap) thay mat khau cua em
+    XEM_GV = !!(hs && !hs.gv && kiemGV({ma: d.gvxem, tb: d.tb}));
+    if (!XEM_GV && !BM_MSG) BM_MSG = 'Mã quản lý không đúng hoặc SBD không có trong lớp.';
+    return XEM_GV;
+  }
   const nhap = String(d.maxem || '').trim();
   let ok = !!(hs && hs.maxem && nhap === hs.maxem);
   if (ok && hs.gv && mayTin().indexOf(String(d.tb || '').trim()) < 0) {

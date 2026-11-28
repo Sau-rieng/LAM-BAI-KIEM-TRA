@@ -660,6 +660,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .lienKet{background:none;border:0;color:var(--pri);font:inherit;text-decoration:underline;cursor:pointer;margin-top:10px;padding:4px 0}#qmBox{margin-top:10px;display:grid;gap:6px}#qmBox input{font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px}
 .kqTo{display:inline-block;font-size:12px;font-weight:800;color:#b3261e;border:1.5px solid #b3261e;border-radius:999px;padding:0 7px;margin-left:4px;background:#fde7e7}
 .bmNgan{margin:6px 0 0;padding-left:18px;font-size:14px}.bmDaOK{color:#1e7d32;font-weight:700}
+.xhLuoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin-top:8px}.xhEm{text-align:left;font:inherit;padding:8px 10px;border:1.5px solid #d6dbe6;border-radius:10px;background:#fff;cursor:pointer}.xhEm:hover{border-color:#5b2bb5;background:#f5f0ff}.xhEm small{display:block;color:#6b7280;font-size:12px}
 .giayHang{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;background:#fff;border:1.5px solid #d6dbe6;border-left:4px solid #555;border-radius:12px;padding:10px 14px;margin:0 0 8px;cursor:pointer;color:inherit}.giayHang:hover{border-color:#7a8599}.giayHang.mo{background:#f3f6fb;margin-bottom:4px}.giayHang.xong{opacity:.8}.gNgay{flex:0 0 auto;font-weight:700;font-size:14px;color:#1b4f9c;min-width:132px}.gTen{flex:1 1 auto;min-width:0}.gTen small{display:block;color:#6b7280;font-size:13px}.gTT{flex:0 0 auto;font-size:13px;color:#6b7280;font-style:italic}.gMui{flex:0 0 auto;font-size:16px}@media (max-width:560px){.giayHang{flex-wrap:wrap}.gNgay{min-width:0}.gTT{order:3}}
 .locGiay{margin:4px 0 10px}.ktLop{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}.ktC{display:inline-flex;align-items:center;gap:5px;font-size:14px;padding:3px 10px 3px 4px;border-radius:999px;border:1.5px solid #c7ccd6;background:#f3f4f7;color:#555}.ktC.do{border-color:#d4a600;background:#fff4cc;color:#5c4700}.ktC.du{border-color:#1e7d32;background:#e3f4e5;color:#1b5e20}.ktC.da b{text-decoration:none}.ktTich{font:inherit;font-size:18px;line-height:1;border:0;background:none;cursor:pointer;padding:0 2px;color:inherit}.card.dot.giay.xongKT{opacity:.72}.card.dot.giay.xongKT:hover{opacity:1}
 #bmBan,#tlBan{grid-column:1/-1}
@@ -1952,8 +1953,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           var muc = !x.n ? 'chua' : x.siso && x.n >= x.siso ? 'du' : 'do';
           return '<span class="ktC ' + muc + (x.da ? ' da' : '') + '"><button class="ktTich" data-l="' + esc(x.lop) + '" aria-pressed="' + x.da + '" title="' + (x.da ? 'Bỏ tích đã kiểm tra' : 'Tích đã kiểm tra') + '">' + (x.da ? '☑' : '☐') + '</button><b>' + esc(x.lop) + '</b> ' + (DATHI ? '📷 ' + x.n + (x.siso ? '/' + x.siso : '') : '…') + (DATHI && x.n && (x.moXem || x.xem) ? ' <span class="ktXem" title="Số em đã mở xem lại bài">👁 ' + x.xem + '/' + x.n + '</span>' : '') + (x.tay ? ' <small>(tay)</small>' : '') + '</span>';
         }).join('') + '</div>' +
-        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 dcG">📄 Đề chuẩn + đáp án</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button>' + (Number(d.phut) >= 45 ? '<button class="btn2 tlG">✍ Chấm tự luận</button>' : '') + '<button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button><button class="btn2 llG' + (d.lamlai ? ' on' : '') + '" title="HS làm lại câu sai: Biết ' + SO_LL.biet + ' · Hiểu ' + SO_LL.hieu + ' · khác ' + SO_LL.khac + ' lần">' + (d.lamlai ? '🔁 Làm lại câu sai: BẬT' : '🔁 Làm lại câu sai: tắt') + '</button></div>' +
-        '<div class="lopO"></div><div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
+        '<div class="hangNut" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn2 diemG">🎯 Điểm từng phần</button><button class="btn2 quetG">📷 Quét chấm phiếu</button><button class="btn2 lopG">🏫 Lớp làm bài</button><button class="btn2 kqG">📋 Kết quả</button><button class="btn2 xhG" title="Mở trang Xem lại bài đúng như một em đang thấy (chỉ xem, không ghi)">👁 Xem như HS</button><button class="btn2 dcG">📄 Đề chuẩn + đáp án</button><button class="btn2 mtG">📐 Ma trận – Đặc tả</button>' + (Number(d.phut) >= 45 ? '<button class="btn2 tlG">✍ Chấm tự luận</button>' : '') + '<button class="btn2 xlG' + (d.xemlai ? ' on' : '') + '">' + (d.xemlai ? '● Cho HS xem lại' : '○ Chưa cho HS xem lại') + '</button><button class="btn2 llG' + (d.lamlai ? ' on' : '') + '" title="HS làm lại câu sai: Biết ' + SO_LL.biet + ' · Hiểu ' + SO_LL.hieu + ' · khác ' + SO_LL.khac + ' lần">' + (d.lamlai ? '🔁 Làm lại câu sai: BẬT' : '🔁 Làm lại câu sai: tắt') + '</button></div>' +
+        '<div class="xhO"></div><div class="lopO"></div><div class="dauDeO"></div><div class="diemO"></div><div class="giayKQ"></div>';
       var o = el.querySelector('.dauDeO'), kq = el.querySelector('.giayKQ');
       [].forEach.call(el.querySelectorAll('.ktTich'), function (b) {
         b.onclick = function () {
@@ -2016,6 +2017,34 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       el.querySelector('.kqG').onclick = function () { DOT_CUON = window.scrollY; moQuet(k, 'ketqua', null, 'dot'); };
       if (el.querySelector('.tlG')) el.querySelector('.tlG').onclick = function () { moChamTL(k, d); };
       el.querySelector('.mtG').onclick = function () { var l = lopCuaDot(d)[0] || DS[0]; moMaTran({ ten: d.ten, madots: g.map(function (x) { return x.madot; }), url: l.url }); };
+      el.querySelector('.xhG').onclick = function () {
+        var xo = el.querySelector('.xhO');
+        if (xo.innerHTML) { xo.innerHTML = ''; return; }
+        var lops = tt[k].ds.map(function (x) { return DS.filter(function (l) { return l.ten === x.lop; })[0]; }).filter(Boolean);
+        xo.innerHTML = '<div class="chinhKhung"><div class="nhan">👁 Xem như học sinh: chọn lớp rồi chọn em (mở trang Xem lại bài đúng như em thấy: câu sai tô màu, bấm câu xem lời giải, làm lại câu sai…)</div>' +
+          '<div class="loc xhLopC">' + lops.map(function (l, i) { return '<button type="button" data-i="' + i + '">' + esc(l.ten) + '</button>'; }).join('') + '</div><div class="xhDs"></div>' +
+          '<p class="chuthich">Chỉ xem: trang mở bằng mã quản lý của thầy/cô, không ghi “đã xem”, làm lại câu sai được chấm thử nhưng không cộng lần cho em.</p></div>';
+        [].forEach.call(xo.querySelectorAll('.xhLopC button'), function (b) {
+          b.onclick = function () {
+            [].forEach.call(xo.querySelectorAll('.xhLopC button'), function (x) { x.classList.toggle('on', x === b); });
+            var l = lops[+b.getAttribute('data-i')], dsx = xo.querySelector('.xhDs');
+            dsx.innerHTML = '<div class="sub">Đang tải danh sách lớp ' + esc(l.ten) + '…</div>';
+            goi(l.url, { action: 'gv_giay_lop', ma: MA, ca: k }).then(function (j) {
+              if (!j.ok) throw new Error(j.msg || 'lỗi');
+              var co = j.hs.filter(function (h) { return j.da[h.mahs]; });
+              if (!co.length) { dsx.innerHTML = '<div class="sub">Lớp này chưa có bài nào được chấm.</div>'; return; }
+              dsx.innerHTML = '<div class="xhLuoi">' + co.map(function (h) { var x = j.da[h.mahs]; return '<button type="button" class="xhEm" data-m="' + esc(h.mahs) + '" data-t="' + esc(h.hoten) + '"><b>' + esc(h.hoten) + '</b><small>' + esc(h.mahs.slice(-2)) + ' · ' + (x.diem === '' || x.diem == null ? '–' : esc(String(x.diem).replace(',', '.'))) + 'đ' + (x.xem ? ' · 👁' : '') + '</small></button>'; }).join('') + '</div>';
+              [].forEach.call(dsx.querySelectorAll('.xhEm'), function (eb) {
+                eb.onclick = function () {
+                  try { localStorage.setItem('gv_xemhs', JSON.stringify({ gv: MA, tt: l.tiento, sbd: eb.getAttribute('data-m'), ten: eb.getAttribute('data-t'), t: Date.now() })); } catch (e) { alert('Máy không cho lưu tạm.'); return; }
+                  var u = 'XEM-LAI.html' + (window.LAM_DEMO ? '?demo' : ''), w = window.open(u, '_blank'); if (!w) location.href = u;
+                };
+              });
+            }).catch(function (e) { dsx.innerHTML = '<div class="xdBox xau">Chưa tải được: ' + esc(e.message) + '</div>'; });
+          };
+        });
+        if (lops.length === 1) xo.querySelector('.xhLopC button').click();
+      };
       el.querySelector('.llG').onclick = function () {
         var bt = this, moi = !d.lamlai;
         if (moi && !confirm('Bật làm lại câu sai cho đề này?\nKhi xem lại bài, mỗi câu sai HS phải làm lại đúng: Biết ' + SO_LL.biet + ' lần · Hiểu ' + SO_LL.hieu + ' lần · mức khác ' + SO_LL.khac + ' lần, và chép vở đủ số lần.')) return;
