@@ -3389,6 +3389,8 @@ function tcVao(d) {
   if (!t.mo) return {ok: false, loi: 'dong', msg: 'Trò chơi đang đóng. Em chờ giáo viên mở nhé.'};
   if (!hopLop(t)) return {ok: false, loi: 'lop', msg: 'Trò chơi này chưa mở cho lớp ' + lopNay() + '.'};
   if (String(d.ma || '').trim() !== docMaNhanh().tcvao) return {ok: false, loi: 'ma', msg: 'Mã vào chơi không đúng.'};
+  const sbdV = String(d.mahs || '').trim();   // tro ca nhan: SBD phai co trong danh sach lop, neu khong ket qua se khong ghi duoc
+  if (/^\d{8}$/.test(sbdV) && !timHS(sbdV)) return {ok: false, loi: 'sbd', msg: 'SBD ' + sbdV + ' không có trong danh sách lớp ' + lopNay() + '. Em nhập đúng SBD của mình (SBD lớp chính, vd 2612xxxx).'};
   const k = thongTinKhung(t);
   let bo = null;
   if (t.khung) {
