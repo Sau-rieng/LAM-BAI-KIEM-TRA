@@ -457,7 +457,7 @@ body.rong main{max-width:1200px}
 .tt3 button.on.mo{background:var(--ok)}
 .tt3 button.on.cho{background:#a06b00}
 .tt3 button:disabled{opacity:.6}
-.cvC{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}.cvSom{background:#fde2e1;color:#a11a12}.cvMuon{background:#fff1cc;color:#7a5200}.cvTuDo{background:#e8eaf0;color:#444}.cvDung{background:#e2f4e6;color:#1d6b33}.cvG{display:block;font-size:11px;color:#777}
+.cvLai{background:#efe6ff;color:#5b2bb5}.cvC{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}.cvSom{background:#fde2e1;color:#a11a12}.cvMuon{background:#fff1cc;color:#7a5200}.cvTuDo{background:#e8eaf0;color:#444}.cvDung{background:#e2f4e6;color:#1d6b33}.cvG{display:block;font-size:11px;color:#777}
 .canhMo{margin:8px 0 0;padding:8px 10px;border-left:4px solid #e0a100;background:rgba(224,161,0,.12);font-size:14px;line-height:1.45}
 .xpKhung{margin-top:12px;padding:12px 14px;border:2px solid #a06b00;border-radius:12px;background:#fff8e6;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .xpKhung p{margin:0;flex:1 1 240px;font-size:15px;line-height:1.45;color:#5c3d00}
@@ -6404,9 +6404,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function gioGiay(ms) { var d = new Date(ms); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
   function chipVao(cv) {
     if (!cv || !cv[3]) return '';
-    var c = cv[3], lop = /trước/.test(c) ? 'cvSom' : /muộn/.test(c) ? 'cvMuon' : /tự do/.test(c) ? 'cvTuDo' : 'cvDung';
+    var c = cv[3], k2 = /^Lần (\d+) – ([^·]+?)(?:\s*·\s*|$)/.exec(c), them = '';
+    if (k2) { them = '<span class="cvC ' + (/GV cho phép/.test(k2[2]) ? 'cvLai' : 'cvSom') + '" title="Em chơi lần ' + k2[1] + ' trong ngày">🔑 Lần ' + k2[1] + ' – ' + esc(k2[2].trim()) + '</span>'; c = c.slice(k2[0].length); if (!c) return them; } var lop = /trước/.test(c) ? 'cvSom' : /muộn/.test(c) ? 'cvMuon' : /tự do/.test(c) ? 'cvTuDo' : 'cvDung';
     var tip = 'Vào lúc ' + (cv[0] ? gioGiay(cv[0]) : '?') + ' · bắt đầu chơi ' + (cv[1] ? gioGiay(cv[1]) : '?') + (cv[2] ? ' · đèn xanh Xuất phát ' + gioGiay(cv[2]) : ' · chưa có lần bấm Xuất phát nào trước đó');
-    return '<span class="cvC ' + lop + '" title="' + esc(tip) + '">' + (lop === 'cvSom' ? '⚠ ' : lop === 'cvDung' ? '🏁 ' : '') + esc(c) + '</span><small class="cvG">vào ' + (cv[0] ? gioGiay(cv[0]) : '?') + ' · chơi ' + (cv[1] ? gioGiay(cv[1]) : '?') + '</small>';
+    return them + '<span class="cvC ' + lop + '" title="' + esc(tip) + '">' + (lop === 'cvSom' ? '⚠ ' : lop === 'cvDung' ? '🏁 ' : '') + esc(c) + '</span>' + (cv[0] ? '<small class="cvG">vào ' + gioGiay(cv[0]) + ' · chơi ' + (cv[1] ? gioGiay(cv[1]) : '?') + '</small>' : '');
   }
   function dongKQ(t, lops) {
     // gop cac dong cua tro t tu cac lop da tai
@@ -6548,7 +6549,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var dms = r.filter(function (x) { return x.diem !== null && x.diem !== undefined; }).map(function (x) { return Number(x.diem) || 0; });
     var dTB = dms.length ? Math.round(dms.reduce(function (a, b) { return a + b; }, 0) / dms.length * 100) / 100 : null, dCao = dms.length ? Math.max.apply(null, dms) : null;
     var soEm = {}, siSo = 0, ganNhat = {};
-    r.forEach(function (x) { var k = x.lop + '|' + (x.ma || x.ten); soEm[k] = 1; if (!ganNhat[k] || x.t > ganNhat[k].t) ganNhat[k] = x; });
+    // điểm của mỗi em = lượt ĐẦU TIÊN trong ngày gần nhất em chơi (lần 2 trở đi do GV cho phép chỉ để luyện, không tính)
+    r.forEach(function (x) { var k = x.lop + '|' + (x.ma || x.ten), g = ganNhat[k]; soEm[k] = 1;
+      if (!g || ngayKey(x.t) > ngayKey(g.t) || (ngayKey(x.t) === ngayKey(g.t) && x.t < g.t)) ganNhat[k] = x; });
+    if (!nhom) { dms = Object.keys(ganNhat).map(function (k) { return ganNhat[k].diem; }).filter(function (v) { return v !== null && v !== undefined; }).map(Number);
+      dTB = dms.length ? Math.round(dms.reduce(function (a, b) { return a + b; }, 0) / dms.length * 100) / 100 : null; dCao = dms.length ? Math.max.apply(null, dms) : null; }
     chon.forEach(function (l) { var j = KQ.data[l.ten]; if (j && j.ok) siSo += j.siSo || 0; });
     h += '<div class="card"><div class="dh2"><div><h2>' + esc(t.ten) + '</h2><div class="ma">' + (nhom ? 'Trò nhóm' : 'Trò cá nhân') + ' · ' + (KQ.lop === 'tat' ? 'tất cả lớp' : 'lớp ' + esc(KQ.lop)) + '</div></div>' +
       (r.length ? '<button class="btnTai kqTai">⬇ Tải Excel</button>' : '') + '</div>' +
@@ -6556,7 +6561,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       '<div class="tk tk4"><div><b>' + r.length + '</b><span>Lượt chơi</span></div><div><b>' + Object.keys(soEm).length + (nhom || !siSo ? '' : '<small>/' + siSo + '</small>') + '</b><span>' + (nhom ? 'Nhóm đã chơi' : 'Học sinh đã chơi') + '</span></div>' +
       (coDiem ? '<div><b>' + (dTB === null ? '–' : diem(dTB)) + '</b><span>Điểm trung bình</span></div><div><b>' + (dCao === null ? '–' : diem(dCao)) + '</b><span>Cao nhất</span></div></div>' +
         phanBo(Object.keys(ganNhat).map(function (k) { var x = ganNhat[k]; return x.diem === null || x.diem === undefined ? null : { tt: 'danop', diem: x.diem }; }).filter(Boolean)).replace(/ em<\/i>/g, (nhom ? ' nhóm' : ' em') + '</i>') +
-        '<p class="chuthich">Mức điểm tính theo lượt chơi gần nhất của mỗi ' + (nhom ? 'nhóm' : 'em') + '.</p>'
+        '<p class="chuthich">Mức điểm tính theo lượt chơi <b>đầu tiên</b> trong ngày gần nhất của mỗi ' + (nhom ? 'nhóm' : 'em') + ' (lần 2 GV cho chơi thêm không tính).</p>'
         : '<div><b>' + (tb === null ? '–' : tb + '%') + '</b><span>Đúng trung bình</span></div><div><b>' + (cao === null ? '–' : cao + '%') + '</b><span>Cao nhất</span></div></div>') +
       (TK_CU[t.matro] ? '<p class="chuthich">Kết quả trước khi gom (Sheet riêng cũ của trò này): <a href="' + GOC_TRO + TK_CU[t.matro] + '" target="_blank" rel="noopener">mở trang thống kê cũ ↗</a></p>' : '') + '</div>';
     if (KQ.lop !== 'tat' && !nhom) h += '<div class="card"><button class="btn2 kqChep" type="button">📥 Lấy lượt chơi của HS lớp ' + esc(KQ.lop) + ' đang ghi ở sổ lớp khác (em học nhiều lớp)</button><div class="kqChepO"></div></div>';

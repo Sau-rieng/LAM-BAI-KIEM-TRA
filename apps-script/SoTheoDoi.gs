@@ -957,7 +957,15 @@ function ghiKQTro(d, kieu, ma, ten, nhom, tv) {
   });
   const diem = Math.round((Number(d.diem) || 0) * 100) / 100;
   let cv = ['', '', '', ''];
-  try { cv = cachVaoTro(String(d.matro || d.mahoatdong || '').split(':')[0], d.vao); } catch (e) {}
+  const mtG = String(d.matro || d.mahoatdong || '').split(':')[0];
+  try { cv = cachVaoTro(mtG, d.vao); } catch (e) {}
+  if (kieu !== 'NHOM' && /^\d{8}$/.test(String(ma))) try {   // lan 2 tro di trong ngay: ghi co / khong co ma GV
+    const ngay = ngayKhoa(Date.now()), n = soLuotHomNay(mtG, String(ma), ngay) + 1;
+    if (n > 1) {
+      const xn = (Number(CacheService.getScriptCache().get('tcxn_' + mtG + '|' + ma + '|' + ngay)) || 0) >= n - 1 || !!(d.vao && d.vao.xngv);
+      cv[3] = 'Lần ' + n + (xn ? ' – GV cho phép' : ' – chưa có mã GV') + (cv[3] ? ' · ' + cv[3] : '');
+    }
+  } catch (e) {}
   layTab(TAB_KQ, HEAD_KQ).appendRow([new Date(), String(d.matro || d.mahoatdong || ''), String(d.tentro || d.cauhoi || ''), kieu, ma, ten, nhom, tv,
     diem, chuDS(d.dungsai), Number(d.thoigian) || '', String(d.maluot || ''), String(d.bo || ''), JSON.stringify(ct), String(d.lydo || '').slice(0, 40)].concat(cv));
 }
@@ -3493,9 +3501,29 @@ function tcVao(d) {
     bo = docBoCau(k.bo);
     if (!bo) return {ok: false, loi: 'bo', msg: 'Không đọc được bộ câu ' + k.bo + '.'};
   }
+  // Choi lan 2 trong ngay (tro ca nhan): phai co ma mo khoa cua GV; luot do ghi "GV cho phep"
+  let lan = 1;
+  if (/^\d{8}$/.test(sbdV)) {
+    const ngay = ngayKhoa(Date.now()), may = String(d.may || '').trim(), kc = CacheService.getScriptCache(), kv = 'tcv_' + t.matro + '|' + sbdV + '|' + ngay;
+    let dsMay = []; try { dsMay = JSON.parse(kc.get(kv) || '[]'); } catch (e) {}
+    const daNop = soLuotHomNay(t.matro, sbdV, ngay);
+    const daVao = daNop > 0 || dsMay.some(function (m) { return m !== may; });
+    if (daVao) {
+      const ml = String(d.malai || '').trim();
+      if (!ml) return {ok: false, loi: 'lan2', msg: 'Hôm nay em đã chơi trò này rồi. Muốn chơi lần nữa, nhờ giáo viên nhập mã mở khóa.'};
+      if (ml !== docMaNhanh().tcmokhoa) { bmSaiMoKhoa({ma: ml}, 'trò chơi (chơi lần 2)'); return {ok: false, loi: 'malai', msg: 'Mã mở khóa chưa đúng.'}; }
+      lan = Math.max(daNop, 1) + 1;
+      const kx = 'tcxn_' + t.matro + '|' + sbdV + '|' + ngay; kc.put(kx, String((Number(kc.get(kx)) || 0) + 1), 21600);
+    }
+    if (dsMay.indexOf(may) < 0) { dsMay.push(may); kc.put(kv, JSON.stringify(dsMay.slice(-10)), 21600); }
+  }
   if (t.tt === 'CHO' && !t.xp) ghiVach(t.matro, d);
   ghiCaNhan(t.matro, d.mahs, {vao: Date.now()});
-  return Object.assign({ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now(), boCau: bo}, k);
+  return Object.assign({ok: true, phut: t.phut, ten: t.ten, tt: t.tt, xp: t.xp, bayGio: Date.now(), boCau: bo, lan: lan}, k);
+}
+// So luot ca nhan em da nop hom nay cua tro (tab KQ TRO CHOI cua so nay)
+function soLuotHomNay(matro, mahs, ngay) {
+  return docKQTro().filter(function (x) { return x.mahs === mahs && x.kieu !== 'NHOM' && String(x.matro).split(':')[0] === matro && x.t && ngayKhoa(x.t) === ngay; }).length;
 }
 // =====================================================================
 // BO CAU tro choi (khung): tab BO CAU = danh sach; moi bo 1 tab ten = ma bo (TC-H10-...)
