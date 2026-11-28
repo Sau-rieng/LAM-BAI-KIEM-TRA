@@ -166,6 +166,8 @@ function doPost(e) {
       case 'gv_tckq':
       case 'gv_giay_lop':
       case 'gv_ds_lop':
+      case 'gv_kq_lay':
+      case 'gv_kq_chep':
       case 'gv_giay_nop':
       case 'gv_giay_anh':
       case 'gv_giay_dsanh':
@@ -292,6 +294,8 @@ function doPost(e) {
         if (d.action === 'gv_bocau_xoa') return json(gvBoCauXoa(d));
         if (d.action === 'gv_tc_themkhung') return json(gvTcThemKhung(d));
         if (d.action === 'gv_ds_lop') return json(gvDsLop());
+        if (d.action === 'gv_kq_lay') return json(gvKqLay(d));
+        if (d.action === 'gv_kq_chep') return json(gvKqChep(d));
         if (d.action === 'gv_tc_xoakhung') return json(gvTcXoaKhung(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
         if (d.action === 'gv_degiay') return json(gvDeGiay(d));
@@ -988,6 +992,41 @@ function docLuotTro(matro) {
   return sh.getRange(dau, 1, n, HEAD_LTC.length).getValues().filter(function (r) { return String(r[1]).trim() === matro; }).map(function (r) {
     return {t: r[0] instanceof Date ? r[0].getTime() : 0, loai: String(r[2]).trim(), xanh: r[3] instanceof Date ? r[3].getTime() : 0};
   });
+}
+// Chep luot tro choi giua cac so (em hoc nhieu lop: luot choi o 12AFTER nhung truoc day ghi vao so lop chinh)
+// gv_kq_lay: cac dong KQ TRO CHOI ca nhan cua tro (matro), trong khoang [tu, den], cua cac SBD trong mahs
+function gvKqLay(d) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_KQ), mt = String(d.matro || '').trim();
+  const tu = Number(d.tu) || 0, den = Number(d.den) || 9e15, can = {};
+  (Array.isArray(d.mahs) ? d.mahs : []).forEach(function (m) { can[String(m).trim()] = 1; });
+  if (!sh || sh.getLastRow() < 2 || !mt) return {ok: true, lop: lopNay(), rows: []};
+  const rows = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_KQ.length).getValues().filter(function (r) {
+    const t = r[0] instanceof Date ? r[0].getTime() : 0, m = String(r[1]).trim();
+    return t >= tu && t <= den && (m === mt || m.indexOf(mt + ':') === 0) && String(r[3]).trim() !== 'NHOM' && can[String(r[4]).trim()] && String(r[11]).trim();
+  }).map(function (r) { return r.map(function (x) { return x instanceof Date ? {d: x.getTime()} : x; }); });
+  return {ok: true, lop: lopNay(), rows: rows};
+}
+function gvKqChep(d) {
+  const rows = Array.isArray(d.rows) ? d.rows.slice(0, 500) : [];
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  let n = 0, bo = 0;
+  try {
+    const sh = layTab(TAB_KQ, HEAD_KQ);
+    const co = {}; if (sh.getLastRow() > 1) sh.getRange(2, 12, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { co[String(r[0]).trim()] = 1; });
+    const them = [];
+    rows.forEach(function (r) {
+      if (!Array.isArray(r) || r.length < 15) { bo++; return; }
+      const v = r.slice(0, HEAD_KQ.length).map(function (x) { return x && typeof x === 'object' && x.d ? new Date(x.d) : x; });
+      while (v.length < HEAD_KQ.length) v.push('');
+      const ml = String(v[11]).trim();
+      if (!ml || co[ml] || !timHS(String(v[4]).trim())) { bo++; return; }
+      co[ml] = 1; them.push(v.map(function (x) { return typeof x === 'string' && /^\d+\/\d+$/.test(x) ? "'" + x : x; }));
+    });
+    if (them.length) sh.getRange(sh.getLastRow() + 1, 1, them.length, HEAD_KQ.length).setValues(them);
+    n = them.length;
+  } finally { lock.releaseLock(); }
+  try { if (MEMO) delete MEMO.kqtro; } catch (e) {}
+  return {ok: true, them: n, bo: bo};
 }
 function coLuotKQ(ml) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_KQ);
