@@ -3622,7 +3622,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     function veRB() {
       var box = $('ctRB');
       if (!CT.cau.length) { box.innerHTML = '<p class="sub">Đề này không có câu tự luận (tab TU LUAN của kho).</p>'; return; }
-      var sua = CT.nhap, h = '<details class="ctRBhop"' + (sua || !rbDu() ? ' open' : '') + '><summary><b>📏 Hướng dẫn chấm (rubric)</b> ' + (rbDu() ? '· đủ ' + CT.cau.length + ' câu ✓' : '· <span class="ptDo">chưa đủ – soạn trước khi chấm</span>') + '</summary>';
+      var nTrung = 0; CT.cau.forEach(function (q) { var seen = {}; ((CT.rb[q.cau] || {}).buoc || []).forEach(function (b) { var k = String(b.nd).trim().toLowerCase() + '|' + Number(b.diem); if (seen[k]) nTrung++; seen[k] = 1; }); });
+      var canhT = nTrung && !CT.nhap ? '<div class="xdBox xau" style="margin-bottom:10px">⚠ Hướng dẫn chấm có <b>' + nTrung + ' bước bị lặp</b> (nạp trùng). <button class="btn2 nho" id="ctGopRB" type="button">🧹 Gộp bước trùng</button><div class="sub">Máy gộp ở tất cả lớp làm đề này, giữ nguyên các ý thầy/cô đã tích và điểm đã chấm.</div></div>' : '';
+      var sua = CT.nhap, h = canhT + '<details class="ctRBhop"' + (sua || !rbDu() ? ' open' : '') + '><summary><b>📏 Hướng dẫn chấm (rubric)</b> ' + (rbDu() ? '· đủ ' + CT.cau.length + ' câu ✓' : '· <span class="ptDo">chưa đủ – soạn trước khi chấm</span>') + '</summary>';
       CT.cau.forEach(function (q) {
         var ds = sua ? (sua[q.cau] || []) : ((CT.rb[q.cau] || {}).buoc || []), tong = ds.reduce(function (s, b) { return s + (Number(b.diem) || 0); }, 0);
         h += '<div class="ctCau"><div class="ctCauDau"><b>Câu ' + esc(q.cau) + '</b> · ' + soMT(q.diem) + ' điểm' + (Math.abs(tong - q.diem) > 0.001 && ds.length ? ' · <span class="ptDo">tổng bước ' + soMT(tong) + ' ≠ ' + soMT(q.diem) + '</span>' : '') + '</div>';
@@ -3633,6 +3635,13 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       h += '<div class="ptNut">' + (sua ? '<button class="btn" id="ctLuuRB">💾 Lưu hướng dẫn chấm</button><button class="btn2" id="ctHuyRB">Hủy</button>' : '<button class="btn2" id="ctSuaRB">✎ Sửa</button>') + '<button class="btn2" id="ctAIRB">✨ AI soạn từ lời giải</button></div><p class="sub" id="ctRBtt"></p></details>';
       box.innerHTML = h;
       var docForm = function () { var o = {}; CT.cau.forEach(function (q) { o[q.cau] = [].map.call(box.querySelectorAll('.ctBuocSua[data-c="' + q.cau + '"]'), function (r) { return { nd: r.querySelector('.nd').value.trim(), diem: Number(r.querySelector('.dm').value) || 0 }; }); }); return o; };
+      if ($('ctGopRB')) $('ctGopRB').onclick = function () {
+        var bt = this, dsL = lops && lops.length ? lops : [CT.lop], ketQ = null; bt.disabled = true; bt.textContent = 'Đang gộp…';
+        dsL.reduce(function (p, l) { return p.then(function () { return goi(l.url, { action: 'gv_rb_gop', ma: MA, ca: ca }).then(function (j) { if (!j.ok) throw j; ketQ = j.rubric; }); }); }, Promise.resolve())
+          .then(function () { return goi(CT.lop.url, { action: 'gv_rubric_luu', ma: MA, ca: ca, rubric: ketQ }); })
+          .then(function (j) { if (!j.ok) throw j; CT.rb = j.rubric; veRB(); taiDs(); })
+          .catch(function (e) { bt.disabled = false; bt.textContent = '🧹 Gộp bước trùng'; alert('Chưa gộp được: ' + loiSo(e)); });
+      };
       if ($('ctSuaRB')) $('ctSuaRB').onclick = function () { CT.nhap = {}; CT.cau.forEach(function (q) { CT.nhap[q.cau] = ((CT.rb[q.cau] || {}).buoc || []).map(function (b) { return { nd: b.nd, diem: b.diem }; }); if (!CT.nhap[q.cau].length) CT.nhap[q.cau] = [{ nd: '', diem: q.diem }]; }); veRB(); };
       if ($('ctHuyRB')) $('ctHuyRB').onclick = function () { CT.nhap = null; veRB(); };
       [].forEach.call(box.querySelectorAll('.themB'), function (b) { b.onclick = function () { CT.nhap = docForm(); CT.nhap[b.getAttribute('data-c')].push({ nd: '', diem: 0.25 }); veRB(); }; });

@@ -133,6 +133,7 @@ function doPost(e) {
       case 'gv_matrande':
       case 'gv_rubric':
       case 'gv_rubric_luu':
+      case 'gv_rb_gop':
       case 'gv_rubric_ai':
       case 'gv_tl_ds':
       case 'gv_tl_luu':
@@ -236,6 +237,7 @@ function doPost(e) {
         if (d.action === 'gv_cau') return json(gvCau(d));
         if (d.action === 'gv_matrande') return json(gvMaTranDe(d));
         if (d.action === 'gv_rubric') return json(gvRubric(d));
+        if (d.action === 'gv_rb_gop') return json(gvRbGop(d));
         if (d.action === 'gv_rubric_luu') return json(gvRubricLuu(d));
         if (d.action === 'gv_rubric_ai') return json(gvRubricAI(d));
         if (d.action === 'gv_tl_ds') return json(gvTLDs(d));
@@ -1491,6 +1493,34 @@ function rbGhi(sh, ca, rb, tt, nguon) {
   Object.keys(rb).forEach(function (c) { (rb[c] || []).forEach(function (b, i) { if (String(b.nd || '').trim()) giu.push([ca, c, i + 1, String(b.nd).trim(), Number(String(b.diem).replace(',', '.')) || 0, tt, nguon, ngay]); }); });
   if (v.length) sh.getRange(2, 1, v.length, HEAD_RB.length).clearContent();
   if (giu.length) sh.getRange(2, 1, giu.length, HEAD_RB.length).setValues(giu.map(function (r) { return r.map(function (x, j) { return j === 4 ? x : String(x); }); }));
+}
+// Rubric bi trung buoc (nap 2 lan / file co dong lap): gop buoc trung trong so lop nay, doi chi so buoc da cham (Dat, diem tung buoc, ly do) sang rubric da gop
+function rbKhoa(b) { return khongDau(b.nd).replace(/\s+/g, ' ').trim() + '|' + Number(b.diem); }
+function rbGopMap(buoc) {   // [chi so moi cho tung buoc cu], ds buoc moi
+  const moi = [], k = {}, map = buoc.map(function (b) { const x = rbKhoa(b); if (!(x in k)) { k[x] = moi.length; moi.push({nd: b.nd, diem: b.diem}); } return k[x]; });
+  return {map: map, moi: moi};
+}
+function gvRbGop(d) {
+  const ca = String(d.ca || '').trim(), rb = docRubric(ca), gop = {}, ra = {};
+  Object.keys(rb).forEach(function (c) { const g = rbGopMap(rb[c].buoc); ra[c] = g.moi; if (g.moi.length < rb[c].buoc.length) gop[c] = g; });
+  if (!Object.keys(gop).length) return {ok: true, doi: 0, rubric: ra, trung: 0};
+  const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TLD); let doi = 0;
+  if (sh && sh.getLastRow() > 1) {
+    const lock = LockService.getScriptLock(); lock.waitLock(20000);
+    try {
+      const rg = sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_TLD.length), v = rg.getValues();
+      v.forEach(function (r) {
+        const g = gop[String(r[2]).trim()]; if (String(r[0]).trim() !== ca || !g) return;
+        let dat = [], ly = {}; try { dat = JSON.parse(r[3] || '[]'); } catch (e) {} try { ly = JSON.parse(r[8] || '{}'); } catch (e) {}
+        const n = g.moi.length, dat2 = []; dat.forEach(function (i) { const j = g.map[i]; if (j !== undefined && dat2.indexOf(j) < 0) dat2.push(j); }); dat2.sort(function (a, b) { return a - b; });
+        if (Array.isArray(ly.d)) { const d2 = new Array(n).fill(null); ly.d.forEach(function (x, i) { const j = g.map[i]; if (j === undefined || x === null || x === '' || x === undefined) return; d2[j] = d2[j] === null ? Number(x) : Math.max(d2[j], Number(x)); }); ly.d = d2; }
+        if (Array.isArray(ly.b)) { const b2 = new Array(n).fill(''); ly.b.forEach(function (x, i) { const j = g.map[i]; if (j !== undefined && x && !b2[j]) b2[j] = x; }); ly.b = b2; }
+        r[3] = JSON.stringify(dat2); r[8] = JSON.stringify(ly); doi++;
+      });
+      if (doi) rg.setValues(v);
+    } finally { lock.releaseLock(); }
+  }
+  return {ok: true, doi: doi, rubric: ra, trung: Object.keys(gop).reduce(function (s, c) { return s + rb[c].buoc.length - gop[c].moi.length; }, 0)};
 }
 // AI soan rubric tu loi giai + diem cau (chua luu; GV xem, sua roi bam Luu)
 function gvRubricAI(d) {
