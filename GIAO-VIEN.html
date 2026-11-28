@@ -660,6 +660,7 @@ select.chon{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px 
 .lienKet{background:none;border:0;color:var(--pri);font:inherit;text-decoration:underline;cursor:pointer;margin-top:10px;padding:4px 0}#qmBox{margin-top:10px;display:grid;gap:6px}#qmBox input{font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px}
 .kqTo{display:inline-block;font-size:12px;font-weight:800;color:#b3261e;border:1.5px solid #b3261e;border-radius:999px;padding:0 7px;margin-left:4px;background:#fde7e7}
 .bmNgan{margin:6px 0 0;padding-left:18px;font-size:14px}.bmDaOK{color:#1e7d32;font-weight:700}
+.giayHang{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;background:#fff;border:1.5px solid #d6dbe6;border-left:4px solid #555;border-radius:12px;padding:10px 14px;margin:0 0 8px;cursor:pointer;color:inherit}.giayHang:hover{border-color:#7a8599}.giayHang.mo{background:#f3f6fb;margin-bottom:4px}.giayHang.xong{opacity:.8}.gNgay{flex:0 0 auto;font-weight:700;font-size:14px;color:#1b4f9c;min-width:132px}.gTen{flex:1 1 auto;min-width:0}.gTen small{display:block;color:#6b7280;font-size:13px}.gTT{flex:0 0 auto;font-size:13px;color:#6b7280;font-style:italic}.gMui{flex:0 0 auto;font-size:16px}@media (max-width:560px){.giayHang{flex-wrap:wrap}.gNgay{min-width:0}.gTT{order:3}}
 .locGiay{margin:4px 0 10px}.ktLop{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}.ktC{display:inline-flex;align-items:center;gap:5px;font-size:14px;padding:3px 10px 3px 4px;border-radius:999px;border:1.5px solid #c7ccd6;background:#f3f4f7;color:#555}.ktC.do{border-color:#d4a600;background:#fff4cc;color:#5c4700}.ktC.du{border-color:#1e7d32;background:#e3f4e5;color:#1b5e20}.ktC.da b{text-decoration:none}.ktTich{font:inherit;font-size:18px;line-height:1;border:0;background:none;cursor:pointer;padding:0 2px;color:inherit}.card.dot.giay.xongKT{opacity:.72}.card.dot.giay.xongKT:hover{opacity:1}
 #bmBan,#tlBan{grid-column:1/-1}
 .bmBan{display:block;margin:0 0 12px;padding:12px 14px;border-radius:12px;background:#fff4cc;border:2px solid #d4a600;color:#3a2c00}.bmBan.do{background:#fde7e7;border-color:#c5221f;color:#5c0d0a}.bmBan[hidden]{display:none}.bmTT{margin:6px 0;padding-left:4px;list-style:none}.bmTT li{margin:6px 0}.bmDs{display:grid;gap:8px;max-height:460px;overflow:auto}.bmSu{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff}.bmSu.moi{border-left:5px solid #d4a600}.bmSu.cao.moi{border-left-color:#c5221f}.bmMuc{font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px;border:1px solid #889}.bmSu.cao .bmMuc{border-color:#c5221f;color:#c5221f}.bmNKB td,.bmNKB th{font-size:13px}
@@ -1901,7 +1902,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   // ---------- ĐỀ GIẤY: in đề (PDF trên trình duyệt, 2 cột, đen trắng) + in đáp án ----------
   var DAU_DE = { so: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO ĐỒNG NAI', truong: 'TRƯỜNG ', ky: 'KIỂM TRA', nam: '' };
   try { Object.assign(DAU_DE, JSON.parse(localStorage.getItem('gv_daude') || '{}')); } catch (e) {}
-  var GIAY_MO = {}, LOC_GIAY = (function () { try { return localStorage.getItem('gv_locgiay') || 'tat'; } catch (e) { return 'tat'; } })();
+  var GIAY_MO = {}, LOC_GIAY = '', GIAY_TO = {}, GIAY_MAY = 0;   // LOC_GIAY '' = chua chon tab nao -> gon, chi hien 3 tab
   // Tình trạng kiểm tra từng lớp của 1 đề giấy: số bài đã quét / sĩ số; "đã kiểm tra" tự tích khi có bài, GV tích/bỏ tay
   function ktGiay(k, g) {
     var d = g[0], lops = chuan(d.lop) === 'TATCA' || !d.lop ? DS.map(function (l) { return l.ten; }) : String(d.lop).split(',').map(function (x) { return x.trim(); }).filter(String);
@@ -1924,12 +1925,25 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var loc = document.createElement('div'); loc.className = 'ksLoc locGiay';
     [['tat', 'Tất cả ' + thu.length], ['chua', 'Chưa kiểm tra xong ' + (thu.length - nXong)], ['da', '✓ Đã kiểm tra ' + nXong]].forEach(function (x) {
       var b = document.createElement('button'); b.textContent = x[1]; if (LOC_GIAY === x[0]) b.className = 'on';
-      b.onclick = function () { LOC_GIAY = x[0]; try { localStorage.setItem('gv_locgiay', x[0]); } catch (e) {} veDot(); }; loc.appendChild(b);
+      b.onclick = function () { LOC_GIAY = LOC_GIAY === x[0] ? '' : x[0]; veDot(); }; loc.appendChild(b);
     });
     box.appendChild(loc);
+    if (!LOC_GIAY) { var gq = document.createElement('div'); gq.className = 'sub'; gq.textContent = 'Chọn một mục ở trên để xem danh sách đợt kiểm tra.'; box.appendChild(gq); return; }
     if (!DATHI) { var cho = document.createElement('div'); cho.className = 'sub'; cho.textContent = 'Đang đếm số bài đã quét của từng lớp…'; box.appendChild(cho); }
-    thu.sort().reverse().sort(function (a, b) { return (tt[a].xong ? 1 : 0) - (tt[b].xong ? 1 : 0); }).forEach(function (k) {
-      if (LOC_GIAY === 'chua' && tt[k].xong || LOC_GIAY === 'da' && !tt[k].xong) return;
+    // ngay quet gan nhat cua dot (may chu + phieu luu tren may nay)
+    if (!GIAY_MAY && typeof KM !== 'undefined' && KM && KM.tatCa) { GIAY_MAY = 1; KM.tatCa().then(function (v) { var co = 0; v.forEach(function (z) { if (!MAYLUC[z.ca] || z.luc > MAYLUC[z.ca]) { MAYLUC[z.ca] = z.luc; co = 1; } }); if (co) veDot(); }).catch(function () {}); }
+    var lucQ = function (k) { var t = QUETLUC['@' + k] || ''; ca[k].forEach(function (x) { if (QUETLUC[x.madot] && QUETLUC[x.madot] > t) t = QUETLUC[x.madot]; }); if (MAYLUC[k] && new Date(MAYLUC[k]).toISOString() > t) t = new Date(MAYLUC[k]).toISOString(); return t; };
+    var ngQ = function (t) { if (!t) return 'chưa quét'; var d = new Date(t); return 'quét ' + ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); };
+    var dsK = thu.filter(function (k) { return !(LOC_GIAY === 'chua' && tt[k].xong || LOC_GIAY === 'da' && !tt[k].xong); });
+    if (!dsK.length) { var rg = document.createElement('div'); rg.className = 'sub'; rg.textContent = 'Không có đợt nào.'; box.appendChild(rg); }
+    dsK.sort(function (a, b) { var x = lucQ(a), y = lucQ(b); return x === y ? (a < b ? 1 : -1) : (x < y ? 1 : -1); }).forEach(function (k) {
+      var d0 = ca[k][0], hang = document.createElement('button'); hang.type = 'button';
+      hang.className = 'giayHang' + (GIAY_TO[k] ? ' mo' : '') + (tt[k].xong ? ' xong' : ''); hang.setAttribute('aria-expanded', !!GIAY_TO[k]);
+      hang.innerHTML = '<span class="gNgay">📅 ' + ngQ(lucQ(k)) + '</span><span class="gTen"><b>' + esc(d0.ten) + '</b> <small>' + esc(k.replace(/-2\d\d$/, '')) + ' · ' + d0.phut + ' phút · ' + esc(d0.lop) + '</small></span>' +
+        '<span class="gTT">' + (tt[k].xong ? '✓ đã kiểm tra' : 'chưa xong') + '</span><span class="gMui">' + (GIAY_TO[k] ? '▾' : '▸') + '</span>';
+      hang.onclick = function () { GIAY_TO[k] = !GIAY_TO[k]; veDot(); };
+      box.appendChild(hang);
+      if (!GIAY_TO[k]) return;
       var g = ca[k].sort(function (a, b) { return a.madot < b.madot ? -1 : 1; }), d = g[0];
       var el = document.createElement('div'); el.className = 'card dot giay' + (tt[k].xong ? ' xongKT' : '');
       el.innerHTML = '<div class="dh"><div><h2>' + esc(d.ten) + '</h2><div class="ma">' + esc(k.replace(/-2\d\d$/, '')) + ' · mã đề ' + esc(g.map(function (x) { return x.madot.slice(-3); }).join(', ')) +
