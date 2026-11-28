@@ -165,6 +165,7 @@ function doPost(e) {
       case 'gv_tcdat':
       case 'gv_tckq':
       case 'gv_giay_lop':
+      case 'gv_ds_lop':
       case 'gv_giay_nop':
       case 'gv_giay_anh':
       case 'gv_giay_dsanh':
@@ -290,6 +291,7 @@ function doPost(e) {
         if (d.action === 'gv_bocau_ds') return json({ok: true, ds: docDsBo()});
         if (d.action === 'gv_bocau_xoa') return json(gvBoCauXoa(d));
         if (d.action === 'gv_tc_themkhung') return json(gvTcThemKhung(d));
+        if (d.action === 'gv_ds_lop') return json(gvDsLop());
         if (d.action === 'gv_tc_xoakhung') return json(gvTcXoaKhung(d));
         if (d.action === 'gv_xemde') return json(gvXemDe(d));
         if (d.action === 'gv_degiay') return json(gvDeGiay(d));
@@ -557,7 +559,7 @@ function baiTroHS(ma) {
   return luotCuaHS(ma).map(function (x) {
     const ct = chamLuot(x, layBo); if (!ct) return null;
     const mo = !!choXem[String(x.matro).split(':')[0]];
-    return {buoi: tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + '|' + Utilities.formatDate(new Date(x.t), tz, 'yyyy-MM-dd'), madot: 'TC#' + x.ml, tro: true, ten: '🎮 ' + tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + ' · ' + Utilities.formatDate(new Date(x.t), tz, 'dd/MM HH:mm'),
+    return {buoi: tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + '|' + Utilities.formatDate(new Date(x.t), tz, 'yyyy-MM-dd'), madot: 'TC#' + x.ml, tro: true, matro: String(x.matro).split(':')[0], ten: '🎮 ' + tenTroGon(x) + (x.kieu === 'NHOM' ? ' · ' + x.nhom : '') + ' · ' + Utilities.formatDate(new Date(x.t), tz, 'dd/MM HH:mm'),
       diem: x.diem, luc: x.t ? new Date(x.t).toISOString() : '', socaudung: ct.filter(function (c) { return c.dung; }).length, tongsocau: ct.length,
       dot: x.bo && x.t && x.kieu !== 'NHOM' ? 'TC:' + x.bo + ':' + ngayKhoa(x.t) : '',
       khoa: !mo,
@@ -1481,6 +1483,12 @@ function gvXemDe(d) {
 // ---- Cham phieu giay (quet bang dien thoai tren trang GV): chay o SO LOP ----
 function maCa(ca) { return docCauHinh().filter(function (c) { return c.giay && (c.ca || c.madot) === ca; }).map(function (c) { return c.madot; }); }
 // Danh sach HS + em nao da co bai cua dot (ca) nay
+// Danh sach lop (SBD, ho ten) cho nut "Xem nhu HS"
+function gvDsLop() {
+  const dsh = SpreadsheetApp.getActive().getSheetByName(TAB_DS), hs = [];
+  if (dsh && dsh.getLastRow() > 1) dsh.getRange(2, 1, dsh.getLastRow() - 1, 2).getValues().forEach(function (r) { const m = String(r[0]).trim(); if (m && !laGV(m)) hs.push({mahs: m, hoten: String(r[1]).trim()}); });
+  return {ok: true, lop: lopNay(), hs: hs};
+}
 function gvGiayLop(d) {
   const ca = String(d.ca || '').trim(), mas = maCa(ca);
   if (!mas.length) return {ok: false, msg: 'Khong tim thay de giay ' + ca};
@@ -2585,7 +2593,8 @@ function chuyenDong(tu, den, head, loc, them) {
   v.forEach(function (r, i) { if (loc(r)) dong.push(i + 2); });
   if (!dong.length) return 0;
   const b = layTab(den, them ? head.concat(['ThoiGianAn']) : head);
-  dong.forEach(function (i) { const r = v[i - 2].slice(0, head.length); if (them) r.push(new Date()); b.appendRow(r.map(function (x, k) { return typeof x === 'string' && /^\d+\/\d+$/.test(x) ? "'" + x : x; })); });
+  dong.forEach(function (i) { const r = v[i - 2].slice(0, head.length); if (them) r.push(new Date());
+    if (!them && head === HEAD_KQ && !r[18]) { r[15] = ''; r[16] = ''; r[17] = ''; }   /* dong an kieu cu: cot 16 la ThoiGianAn, khong phai VaoLuc */ b.appendRow(r.map(function (x, k) { return typeof x === 'string' && /^\d+\/\d+$/.test(x) ? "'" + x : x; })); });
   for (let k = dong.length - 1; k >= 0; k--) a.deleteRow(dong[k]);
   return dong.length;
 }
@@ -2836,7 +2845,7 @@ function docBaiAn() {
   const b = ss.getSheetByName(TAB_KQ_AN);
   if (b && b.getLastRow() > 1) b.getRange(2, 1, b.getLastRow() - 1, HEAD_KQ.length + 1).getValues().forEach(function (r) {
     if (!(r[0] instanceof Date)) return;
-    ra.push({mahs: String(r[4]).trim(), madot: 'TC:' + String(r[12]).trim() + ':' + ngayKhoa(r[0]), diem: Number(r[8]) || 0, luc: r[0].toISOString(), an: r[HEAD_KQ.length] instanceof Date ? r[HEAD_KQ.length].toISOString() : '', tro: true, ml: String(r[11]).trim(), ten: String(r[2]).trim()});
+    ra.push({mahs: String(r[4]).trim(), madot: 'TC:' + String(r[12]).trim() + ':' + ngayKhoa(r[0]), diem: Number(r[8]) || 0, luc: r[0].toISOString(), an: r[HEAD_KQ.length] instanceof Date ? r[HEAD_KQ.length].toISOString() : r[15] instanceof Date && !r[18] ? r[15].toISOString() : '', tro: true, ml: String(r[11]).trim(), ten: String(r[2]).trim()});
   });
   return ra;
 }

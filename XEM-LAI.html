@@ -456,7 +456,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           $('btnXem').disabled = false;
           duLieu = j; duLieu.mahs = du.mahs; duLieu.maxem = du.maxem; KT = null; KT_SEL = 'tat'; $('maxem').value = ''; $('msg').textContent = '';
           LOP_CHINH = lopChon; TAT = [{ l: lopChon, j: j }]; ganLop(j, lopChon);
-          veHome(); taiLopKhac(j.cacLop || []);
+          veHome(); taiLopKhac(j.cacLop || []); moMucGV();
         })
         .catch(function () {
           if (lan < 5) {
@@ -468,6 +468,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     thu();
   };
 
+  // Trang GV "Xem như HS" chỉ định mục (đề / trò chơi): mở thẳng bài đó (lần đầu); không có thì mở danh sách bài
+  function moMucGV() {
+    var x = window.__XEMHS; if (!x || !x.muc || x.daMo) return; x.daMo = true;
+    var m = x.muc, ds = (duLieu.bai || []).filter(function (b) {
+      return m.tro ? b.tro && b.matro === m.tro : !b.tro && (m.madot || []).indexOf(b.madot) >= 0;
+    }).sort(function (a, b) { return String(a.luc) < String(b.luc) ? 1 : -1; });
+    var b = ds.filter(function (z) { return !z.khoa; })[0];
+    if (b) { dungLop(b); baiDangXem = b; veBai(); return; }
+    veDanhSach();
+    var bx = document.createElement('div'); bx.className = 'msg err'; bx.style.margin = '8px 0';
+    bx.textContent = ds.length ? 'Bài này thầy/cô chưa bật “Cho HS xem lại” nên em chỉ thấy điểm, chưa mở được.' : (m.tro ? 'Em chưa có lượt chơi nào của trò này (hoặc trò chưa gửi chi tiết từng câu).' : 'Em chưa có bài của đề này, hoặc thầy/cô chưa bật “Cho HS xem lại”.');
+    var sc = document.getElementById('scrDS'); if (sc) sc.insertBefore(bx, sc.children[1] || null);
+  }
   // ---- Tài khoản chung: em học nhiều lớp (cùng SBD + mật khẩu) → tải các lớp còn lại rồi gộp bài, điểm, TX, khảo sát ----
   function ganLop(j, l) {
     (j.bai || []).forEach(function (b) { b._l = l; });
