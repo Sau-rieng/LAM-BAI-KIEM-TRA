@@ -1490,7 +1490,7 @@ function rbGhi(sh, ca, rb, tt, nguon) {
   const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_RB.length).getValues() : [];
   const giu = v.filter(function (r) { return !(String(r[0]).trim() === ca && (String(r[1]).trim() in rb)); });
   const ngay = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
-  Object.keys(rb).forEach(function (c) { (rb[c] || []).forEach(function (b, i) { if (String(b.nd || '').trim()) giu.push([ca, c, i + 1, String(b.nd).trim(), Number(String(b.diem).replace(',', '.')) || 0, tt, nguon, ngay]); }); });
+  Object.keys(rb).forEach(function (c) { const daCo = {}; (rb[c] || []).filter(function (b) { if (!String(b.nd || '').trim()) return false; const k = rbKhoa(b); if (daCo[k]) return false; daCo[k] = 1; return true; }).forEach(function (b, i) { if (String(b.nd || '').trim()) giu.push([ca, c, i + 1, String(b.nd).trim(), Number(String(b.diem).replace(',', '.')) || 0, tt, nguon, ngay]); }); });
   if (v.length) sh.getRange(2, 1, v.length, HEAD_RB.length).clearContent();
   if (giu.length) sh.getRange(2, 1, giu.length, HEAD_RB.length).setValues(giu.map(function (r) { return r.map(function (x, j) { return j === 4 ? x : String(x); }); }));
 }
