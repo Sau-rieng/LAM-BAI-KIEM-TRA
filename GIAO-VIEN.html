@@ -457,6 +457,7 @@ body.rong main{max-width:1200px}
 .tt3 button.on.mo{background:var(--ok)}
 .tt3 button.on.cho{background:#a06b00}
 .tt3 button:disabled{opacity:.6}
+.canhMo{margin:8px 0 0;padding:8px 10px;border-left:4px solid #e0a100;background:rgba(224,161,0,.12);font-size:14px;line-height:1.45}
 .xpKhung{margin-top:12px;padding:12px 14px;border:2px solid #a06b00;border-radius:12px;background:#fff8e6;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .xpKhung p{margin:0;flex:1 1 240px;font-size:15px;line-height:1.45;color:#5c3d00}
 .xpKhung b.dem{font:800 22px ui-monospace,Menlo,monospace;color:var(--ink)}
@@ -5922,7 +5923,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
           return '<button type="button" data-g="' + x[0] + '" class="' + x[2] + (tt === x[0] ? ' on' : '') + '" aria-pressed="' + (tt === x[0]) + '"' + (soCu && x[0] === 'CHO' ? ' disabled title="Sổ theo dõi chưa cập nhật"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>'
       : '<button class="cong' + (t.mo ? ' bat' : '') + '" role="switch" aria-checked="' + t.mo + '"><i></i><span>' + (t.mo ? 'Đang mở' : 'Đang đóng') + '</span></button>';
     el.innerHTML = '<div class="troDau"><div class="troTen"><h2>' + esc(t.ten) + '</h2><div class="ma">' + (t.kieu === 'NHOM' ? 'Nhóm' : 'Cá nhân') + ' · <b>' + t.phut + ' phút</b> · ' + esc(tenLopTro(t)) + '</div></div>' +
-      dk + '</div>' + (t.khung ? khungBo(t) : '') +
+      dk + '</div>' + (coXP && tt === 'MO' ? '<div class="canhMo">⚠ <b>Mở tự do</b>: học sinh đăng nhập là chơi ngay, không chờ Xuất phát. Muốn cả lớp chạy cùng lúc, chọn <b>🏁 Mở – chờ ở vạch</b>.</div>' : '') + (t.khung ? khungBo(t) : '') +
       (coXP && tt === 'CHO' ? (t.xp
         ? '<div class="xpKhung"><p><b class="dem" data-xp="' + t.xp + '" data-ph="' + t.phut + '">…</b><br>Nhóm nào đăng nhập lúc này vẫn vào đua, kết thúc cùng giờ với cả lớp.</p><button class="xpNut phu xpMoi" type="button">Lượt đua mới</button></div>'
         : '<div class="xpKhung"><p>Học sinh đăng nhập xong sẽ dừng ở <b>vạch xuất phát</b>. Khi thấy đủ các nhóm bên dưới, bấm Xuất phát: mọi máy sáng 5 đèn đỏ rồi chạy cùng lúc.</p><button class="xpNut xpDi" type="button">🏁 XUẤT PHÁT</button>' +
@@ -5937,6 +5938,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     el.querySelectorAll('.tt3 button').forEach(function (b) {
       b.onclick = function () {
         if (b.dataset.g === tt && tt !== 'CHO') return;
+        if (b.dataset.g === 'MO' && !b.dataset.xn) {   // mo tu do = HS vao la choi ngay, khong cho Xuat phat: bam 2 lan cho chac
+          var cu = b.innerHTML; b.dataset.xn = '1'; b.innerHTML = 'Bấm lần nữa: HS vào là chơi ngay';
+          setTimeout(function () { delete b.dataset.xn; b.innerHTML = cu; }, 4000); return;
+        }
         el.querySelectorAll('.tt3 button').forEach(function (x) { x.disabled = true; });
         datTro(t, 'tt', b.dataset.g, el).catch(function () { el.querySelectorAll('.tt3 button').forEach(function (x) { x.disabled = false; }); });
       };
