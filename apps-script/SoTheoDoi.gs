@@ -35,7 +35,7 @@ const HEAD_NH = ['Nhom','MaHS','HoTen','CapNhat'];
 // Luot choi tro khung (co chi tiet tung cau): ca nhan va nhom. ThanhVien = SBD cac em trong nhom luc choi.
 // ChiTiet: JSON [[ma cau trong bo, lua chon, diem], ...] theo thu tu 11 cau cua luot.
 const TAB_KQ = 'KQ TRO CHOI';
-const HEAD_KQ = ['ThoiGian','MaTro','TenTro','Kieu','MaHS','HoTen','Nhom','ThanhVien','Diem','DungSai','ThoiGian_giay','MaLuot','MaBo','ChiTiet','LyDo'];
+const HEAD_KQ = ['ThoiGian','MaTro','TenTro','Kieu','MaHS','HoTen','Nhom','ThanhVien','Diem','DungSai','ThoiGian_giay','MaLuot','MaBo','ChiTiet','LyDo','VaoLuc','BatDau','XuatPhat','CachVao'];
 // Anh phieu giay "chup truoc – cham sau": moi anh 1 dong; TrangThai CHO (chua cham) / DA (da cham, MaHS) / BO (bo qua)
 const TAB_AG = 'ANH GIAY';
 const HEAD_AG = ['ThoiGian','Ca','FileId','Url','SBD_doc','MaDe_doc','TrangThai','MaHS','GhiChu'];
@@ -944,8 +944,42 @@ function ghiKQTro(d, kieu, ma, ten, nhom, tv) {
     return [String(x[0] || '').slice(0, 20), String(x[1] == null ? '' : x[1]).slice(0, 20), x[2] === '' || x[2] == null ? '' : Number(x[2]) || 0];
   });
   const diem = Math.round((Number(d.diem) || 0) * 100) / 100;
+  let cv = ['', '', '', ''];
+  try { cv = cachVaoTro(String(d.matro || d.mahoatdong || '').split(':')[0], d.vao); } catch (e) {}
   layTab(TAB_KQ, HEAD_KQ).appendRow([new Date(), String(d.matro || d.mahoatdong || ''), String(d.tentro || d.cauhoi || ''), kieu, ma, ten, nhom, tv,
-    diem, chuDS(d.dungsai), Number(d.thoigian) || '', String(d.maluot || ''), String(d.bo || ''), JSON.stringify(ct), String(d.lydo || '').slice(0, 40)]);
+    diem, chuDS(d.dungsai), Number(d.thoigian) || '', String(d.maluot || ''), String(d.bo || ''), JSON.stringify(ct), String(d.lydo || '').slice(0, 40)].concat(cv));
+}
+// So gio vao / bat dau cua lan choi (may HS gui, da doi sang gio may chu) voi nhat ky Xuat phat cua GV -> nhan cach vao
+// Tra ve [VaoLuc, BatDau, XuatPhat, CachVao]
+function cachVaoTro(matro, v) {
+  v = v || {};
+  const vao = Number(v.vao) || 0, bd = Number(v.bd) || 0;
+  if (!vao || !bd) return ['', '', '', ''];
+  const ngay = function (t) { return t ? new Date(t) : ''; };
+  if (v.tt === 'MO') return [ngay(vao), ngay(bd), '', 'Mở tự do'];
+  const nk = docNhanh('ltc_' + matro, 20, function () { return docLuotTro(matro); });
+  // lan Xuat phat gan nhat co den xanh truoc luc em bat dau (+5 giay sai so)
+  const xps = nk.filter(function (x) { return x.loai === 'XUATPHAT' && x.xanh && x.xanh <= bd + 5000 && x.xanh >= vao - 3 * 3600000; });
+  const xp = xps.length ? xps[xps.length - 1].xanh : 0;
+  if (!xp) return [ngay(vao), ngay(bd), '', 'Vào trước Xuất phát'];
+  // sau lan Xuat phat do GV da doi trang thai (luot moi / dong) truoc khi em bat dau -> em choi luot cu da het
+  const doi = nk.some(function (x) { return x.loai !== 'XUATPHAT' && x.t > xp - XP_TRE && x.t < bd - 2000; });
+  if (doi) return [ngay(vao), ngay(bd), ngay(xp), 'Vào trước Xuất phát'];
+  if (bd < xp - 3000) return [ngay(vao), ngay(bd), ngay(xp), 'Vào trước Xuất phát'];
+  if (vao > xp + 3000) return [ngay(vao), ngay(bd), ngay(xp), 'Vào muộn ' + Math.round((vao - xp) / 1000) + ' giây'];
+  return [ngay(vao), ngay(bd), ngay(xp), 'Đúng giờ'];
+}
+const TAB_LTC = 'NHAT KY TRO CHOI', HEAD_LTC = ['ThoiGian', 'MaTro', 'ThaoTac', 'DenXanh', 'TuSo'];
+function ghiLuotTro(matro, loai, xanh) {
+  try { tabKho(TAB_LTC, HEAD_LTC).appendRow([new Date(), matro, loai, xanh ? new Date(xanh) : '', lopNay()]); } catch (e) {}
+}
+function docLuotTro(matro) {
+  const sh = kho().getSheetByName(TAB_LTC);
+  if (!sh || sh.getLastRow() < 2) return [];
+  const n = Math.min(sh.getLastRow() - 1, 400), dau = sh.getLastRow() - n + 1;
+  return sh.getRange(dau, 1, n, HEAD_LTC.length).getValues().filter(function (r) { return String(r[1]).trim() === matro; }).map(function (r) {
+    return {t: r[0] instanceof Date ? r[0].getTime() : 0, loai: String(r[2]).trim(), xanh: r[3] instanceof Date ? r[3].getTime() : 0};
+  });
 }
 function coLuotKQ(ml) {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_KQ);
@@ -961,7 +995,8 @@ function docKQTroGoc() {
     try { ct = JSON.parse(String(r[13] || '[]')); } catch (e) {}
     return {t: r[0] instanceof Date ? r[0].getTime() : 0, matro: String(r[1]).trim(), ten: String(r[2]).trim(), kieu: String(r[3]).trim(),
       mahs: String(r[4]).trim(), hoten: String(r[5]).trim(), nhom: String(r[6]).trim(), tv: String(r[7] || '').split(',').filter(String),
-      diem: Number(r[8]) || 0, ds: docDS(r[9]), giay: Number(r[10]) || 0, ml: String(r[11]).trim(), bo: String(r[12]).trim(), ct: ct, lydo: String(r[14] || '')};
+      diem: Number(r[8]) || 0, ds: docDS(r[9]), giay: Number(r[10]) || 0, ml: String(r[11]).trim(), bo: String(r[12]).trim(), ct: ct, lydo: String(r[14] || ''),
+      vao: [r[15] instanceof Date ? r[15].getTime() : 0, r[16] instanceof Date ? r[16].getTime() : 0, r[17] instanceof Date ? r[17].getTime() : 0, String(r[18] || '')]};
   }).filter(function (x) { return x.matro && !(AN_GV && laGV(x.mahs)); });
 }
 // ---- Tro khung: doi cau trong bo sang dang cau de (de dung chung cham diem, xem lai, danh gia kien thuc) ----
@@ -3661,10 +3696,13 @@ function gvTcDat(d) {
     sh.getRange(t.dong, 6).setValue(g);
     sh.getRange(t.dong, 9).setValue('');            // doi trang thai = bat dau luot moi, xoa gio xuat phat cu
     xoaVach(t.matro);
+    ghiLuotTro(t.matro, g, 0);
   } else if (d.truong === 'xuatphat') {
     if (t.tt !== 'CHO') return {ok: false, msg: 'Chuyen tro sang Cho xuat phat truoc'};
     if (t.xp) return {ok: false, msg: 'Cuoc dua dang dien ra'};
-    sh.getRange(t.dong, 9).setValue(Date.now() + XP_TRE);
+    const xanh = Date.now() + XP_TRE;
+    sh.getRange(t.dong, 9).setValue(xanh);
+    ghiLuotTro(t.matro, 'XUATPHAT', xanh);
   } else if (d.truong === 'phut') {
     const ph = Math.round(Number(d.giatri));
     if (!(ph >= 1 && ph <= 60)) return {ok: false, msg: 'Thoi gian phai tu 1 den 60 phut'};
@@ -3701,11 +3739,12 @@ function gvTcKetQua(d) {
     canhan.push([tg(r[0]), mt, String(r[2]).trim(), String(r[3]).trim(), docDS(r[6]), Number(r[7]) || 0, mt.indexOf(':') > 0 && r[5] !== '' ? Number(String(r[5]).replace(',', '.')) : null, '']);
   });
   // Luot tro khung co chi tiet (tab KQ TRO CHOI): ca nhan them vao canhan; nhom da co o TRO CHOI NHOM, chi gui chi tiet
-  const luot = {}, boCan = {};
+  const luot = {}, boCan = {}, cachVao = {};
   docKQTro().forEach(function (x) {
     if (loc && x.matro !== loc && x.matro.indexOf(loc + ':') !== 0) return;
     if (x.kieu !== 'NHOM') canhan.push([x.t, x.matro, x.mahs, x.hoten, x.ds, x.giay, x.diem, x.ml]);
     if (x.ml) luot[x.ml] = {ct: x.ct, tv: x.tv, bo: x.bo, lydo: x.lydo};
+    if (x.ml && x.vao[3]) cachVao[x.ml] = x.vao;
     if (x.bo) boCan[x.bo] = 1;
   });
   const cn = ss.getSheetByName(TAB_CN);
@@ -3724,7 +3763,7 @@ function gvTcKetQua(d) {
   Object.keys(m).forEach(function (ma) { (tv[m[ma]] = tv[m[ma]] || []).push(ten[ma] || ma); });
   const bo = {};
   if (d.chitiet) Object.keys(boCan).forEach(function (m) { try { const b = docBoCau(m); if (b) bo[m] = b; } catch (e) {} });
-  return {ok: true, lop: lopNay(), siSo: siSo, canhan: canhan, nhom: nhom, thanhvien: tv, luot: d.chitiet ? luot : {}, bo: bo, ten: ten};
+  return {ok: true, lop: lopNay(), siSo: siSo, canhan: canhan, nhom: nhom, thanhvien: tv, luot: d.chitiet ? luot : {}, vao: cachVao, bo: bo, ten: ten};
 }
 // Cac ma trong tab MA (chi giao vien da dang nhap bang ma quan ly moi doc / doi duoc)
 const MA_TEN = ['MaGV', 'MaMoKhoa', 'MaLamLai', 'MaQuanLy', 'MaTroChoi', 'MaMoKhoaTroChoi', 'MaXemGV'];

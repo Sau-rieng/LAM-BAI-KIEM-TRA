@@ -457,6 +457,7 @@ body.rong main{max-width:1200px}
 .tt3 button.on.mo{background:var(--ok)}
 .tt3 button.on.cho{background:#a06b00}
 .tt3 button:disabled{opacity:.6}
+.cvC{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}.cvSom{background:#fde2e1;color:#a11a12}.cvMuon{background:#fff1cc;color:#7a5200}.cvTuDo{background:#e8eaf0;color:#444}.cvDung{background:#e2f4e6;color:#1d6b33}.cvG{display:block;font-size:11px;color:#777}
 .canhMo{margin:8px 0 0;padding:8px 10px;border-left:4px solid #e0a100;background:rgba(224,161,0,.12);font-size:14px;line-height:1.45}
 .xpKhung{margin-top:12px;padding:12px 14px;border:2px solid #a06b00;border-radius:12px;background:#fff8e6;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .xpKhung p{margin:0;flex:1 1 240px;font-size:15px;line-height:1.45;color:#5c3d00}
@@ -6301,6 +6302,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
   function ngayKey(t) { var d = new Date(t); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function ngayChu(k) { var p = k.split('-'), d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); return ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'][d.getDay()] + ', ' + p[2] + '/' + p[1] + '/' + p[0]; }
   function giayChu(g) { g = Number(g) || 0; return g ? Math.floor(g / 60) + ':' + ('0' + g % 60).slice(-2) : ''; }
+  // Nhan cach vao choi (so ghi khi nhan ket qua): [vaoLuc, batDau, xuatPhat, cach]
+  function gioGiay(ms) { var d = new Date(ms); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
+  function chipVao(cv) {
+    if (!cv || !cv[3]) return '';
+    var c = cv[3], lop = /trước/.test(c) ? 'cvSom' : /muộn/.test(c) ? 'cvMuon' : /tự do/.test(c) ? 'cvTuDo' : 'cvDung';
+    var tip = 'Vào lúc ' + (cv[0] ? gioGiay(cv[0]) : '?') + ' · bắt đầu chơi ' + (cv[1] ? gioGiay(cv[1]) : '?') + (cv[2] ? ' · đèn xanh Xuất phát ' + gioGiay(cv[2]) : ' · chưa có lần bấm Xuất phát nào trước đó');
+    return '<span class="cvC ' + lop + '" title="' + esc(tip) + '">' + (lop === 'cvSom' ? '⚠ ' : lop === 'cvDung' ? '🏁 ' : '') + esc(c) + '</span><small class="cvG">vào ' + (cv[0] ? gioGiay(cv[0]) : '?') + ' · chơi ' + (cv[1] ? gioGiay(cv[1]) : '?') + '</small>';
+  }
   function dongKQ(t, lops) {
     // gop cac dong cua tro t tu cac lop da tai
     var r = [];
@@ -6310,12 +6319,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
       if (t.kieu === 'NHOM') j.nhom.forEach(function (x) {
         if (!khopTro(x[1], t)) return;
         var L = x[6] && lu[x[6]], tv = L && L.tv && L.tv.length ? L.tv.map(function (m) { return (j.ten || {})[m] || m; }) : (j.thanhvien || {})[x[2]] || [];
-        r.push({ t: x[0], lop: l.ten, ten: x[2], ds: chuanDS(x[3]), g: x[4], tv: tv, diem: String(x[1]).indexOf(':') > 0 ? x[5] : null, ml: x[6] || '', L: L || null, bo: j.bo || {} });
+        r.push({ t: x[0], lop: l.ten, ten: x[2], ds: chuanDS(x[3]), g: x[4], tv: tv, diem: String(x[1]).indexOf(':') > 0 ? x[5] : null, ml: x[6] || '', L: L || null, bo: j.bo || {}, cv: x[6] && j.vao ? j.vao[x[6]] || null : null });
       });
       else j.canhan.forEach(function (x) {
         if (!khopTro(x[1], t)) return;
         var L = x[7] && lu[x[7]];
-        r.push({ t: x[0], lop: l.ten, ma: x[2], ten: x[3], ds: chuanDS(x[4]), g: x[5], diem: x[6] == null ? null : Number(x[6]), ml: x[7] || '', L: L || null, bo: j.bo || {} });
+        r.push({ t: x[0], lop: l.ten, ma: x[2], ten: x[3], ds: chuanDS(x[4]), g: x[5], diem: x[6] == null ? null : Number(x[6]), ml: x[7] || '', L: L || null, bo: j.bo || {}, cv: x[7] && j.vao ? j.vao[x[7]] || null : null });
       });
     });
     return r.sort(function (a, b) { return b.t - a.t; });
@@ -6468,6 +6477,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
     var ngay = {}, thuTu = [];
     r.forEach(function (x) { var k = ngayKey(x.t); if (!ngay[k]) { ngay[k] = []; thuTu.push(k); } ngay[k].push(x); });
     var soCot = 6 + (nhieuLop ? 1 : 0) + (nhom ? 1 : 0) + (coDiem ? 1 : 0);
+    var som = r.filter(function (x) { return x.cv && /trước/.test(x.cv[3]); });
+    if (som.length) h += '<div class="card canhCard"><b>⚠ ' + som.length + ' lượt vào chơi trước khi bấm Xuất phát:</b> ' + som.map(function (x) { return esc(x.ten) + (nhieuLop ? ' (' + esc(x.lop) + ')' : '') + ' – chơi lúc ' + gioGiay(x.cv[1]); }).join('; ') + '.<br><small>Rê/chạm vào nhãn ở cột Lúc để xem giờ vào, giờ bắt đầu và giờ đèn xanh.</small></div>';
     thuTu.forEach(function (k) {
       var dd = ngay[k].slice().sort(function (a, b) { return a.lop < b.lop ? -1 : a.lop > b.lop ? 1 : (a.ten || '').localeCompare(b.ten || '', 'vi') || a.t - b.t; });
       var lan = {}, cuoiKey = {}, chuLan = {};
@@ -6482,7 +6493,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;background:url(hinh/gia
         h += '<tr class="' + (coX ? 'kqCo' : '') + (mo ? ' mo' : '') + '"' + (coX ? ' data-ml="' + esc(x.ml) + '"' : '') + '><td>' + (i + 1) + '</td>' + (nhieuLop ? '<td>' + esc(x.lop) + '</td>' : '') + '<td class="tenC">' + (coX ? (mo ? '▾ ' : '▸ ') : '') + esc(x.ten) + (lan[key] > 1 ? '<span class="lan" title="' + (chuLan[key] === 'máy' ? 'Máy khác cùng vào tên này, chơi cùng lúc' : 'Chơi lại lượt mới') + '">' + chuLan[key] + ' ' + lan[key] + '</span>' : '') + '</td>' +
           (nhom ? '<td class="tvC">' + (x.tv.length ? esc(x.tv.join(', ')) : '<span class="sub">chưa ghi thành viên</span>') + '</td>' : '') +
           (coDiem ? '<td class="' + (x.diem !== null && x.diem < 5 ? 'thapC' : '') + '"><b>' + (x.diem === null || x.diem === undefined ? '' : diem(x.diem)) + '</b></td>' : '') +
-          '<td>' + (coDiem ? '' : '<b>') + esc(x.ds) + (coDiem ? '' : '</b>') + '</td><td class="' + (!coDiem && p !== null && p < 0.5 ? 'thapC' : '') + '">' + (p === null ? '' : Math.round(p * 100) + '%') + '</td><td>' + giayChu(x.g) + '</td><td>' + gio(new Date(x.t).toISOString()) + '</td>' +
+          '<td>' + (coDiem ? '' : '<b>') + esc(x.ds) + (coDiem ? '' : '</b>') + '</td><td class="' + (!coDiem && p !== null && p < 0.5 ? 'thapC' : '') + '">' + (p === null ? '' : Math.round(p * 100) + '%') + '</td><td>' + giayChu(x.g) + '</td><td>' + gio(new Date(x.t).toISOString()) + chipVao(x.cv) + '</td>' +
           (nhom ? '' : '<td>' + (x.ml && x.ma ? '<button class="bdXoa kqXoa" title="Ẩn lượt này (máy lỗi, chấm nhầm)" data-ml="' + esc(x.ml) + '" data-ma="' + esc(x.ma) + '" data-lop="' + esc(x.lop) + '">🗑</button>' : '') + '</td>') + '</tr>';
         if (mo) h += '<tr class="kqXem"><td colspan="' + (soCot + (nhom ? 0 : 1)) + '">' + xemLuot(x) + '</td></tr>';
       });
